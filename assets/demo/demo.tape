@@ -1,6 +1,6 @@
-# LoopGEPA demo GIF — reproducible: `vhs assets/demo/demo.tape` (run from repo root).
-# Requires uv + ttyd + ffmpeg. Output is committed at docs/assets/loopgepa-demo.gif.
-Output docs/assets/loopgepa-demo.gif
+# WhyStuck demo GIF — reproducible: `vhs assets/demo/demo.tape` (run from repo root).
+# Requires uv + ttyd + ffmpeg. Output is committed at docs/assets/whystuck-demo.gif.
+Output docs/assets/whystuck-demo.gif
 
 Require uv
 
@@ -17,7 +17,7 @@ Enter
 Show
 
 Sleep 600ms
-Type "# LoopGEPA — why does my bugfix loop keep failing? (local, no API key)"
+Type "# WhyStuck — why does my bugfix loop keep failing? (local, no API key)"
 Sleep 900ms
 Enter
 Type "uv run python examples/bugfix-loop/demo.py"

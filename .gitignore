@@ -1,7 +1,7 @@
-# LoopGEPA local state — NEVER commit captured traces/variants (may contain
+# WhyStuck local state — NEVER commit captured traces/variants (may contain
 # session data even after redaction). Default store is outside the repo, but if
 # a user opts into a repo-local store this keeps it out of git.
-.loopgepa/
+.whystuck/
 
 # Python
 __pycache__/

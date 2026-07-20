@@ -12,7 +12,7 @@ from __future__ import annotations
 import subprocess
 from collections.abc import Callable
 
-from loopgepa.core.models import (
+from whystuck.core.models import (
     LoopMetrics,
     LoopStepTrace,
     LoopTrace,

@@ -21,9 +21,9 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
-from loopgepa.core.diff import render_gene_diff
-from loopgepa.core.models import LoopVariant, PromotionRecord
-from loopgepa.core.storage import _fsync_dir, _write_all
+from whystuck.core.diff import render_gene_diff
+from whystuck.core.models import LoopVariant, PromotionRecord
+from whystuck.core.storage import _fsync_dir, _write_all
 
 
 class FileChange(BaseModel):

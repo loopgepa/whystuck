@@ -1,4 +1,4 @@
-"""MCP tool layer — thin handlers over loopgepa.core, plus the FastMCP server.
+"""MCP tool layer — thin handlers over whystuck.core, plus the FastMCP server.
 
 Handlers are plain functions taking a store so they are unit-testable without a
 running server; `build_server` wraps them as FastMCP tools. No business logic
@@ -16,8 +16,8 @@ from typing import Any
 
 from fastmcp import FastMCP
 
-from loopgepa.core.diagnosis import infer_failure_modes, summarize_traces
-from loopgepa.core.models import (
+from whystuck.core.diagnosis import infer_failure_modes, summarize_traces
+from whystuck.core.models import (
     Confidence,
     ConfidenceBand,
     LoopGenome,
@@ -26,11 +26,11 @@ from loopgepa.core.models import (
     MutationProposal,
     assess_confidence,
 )
-from loopgepa.core.mutation import apply_mutation
-from loopgepa.core.promote import apply_promotion, plan_promotion
-from loopgepa.core.runner import Executor, run_command_loop
-from loopgepa.core.safety import assert_safe, check_mutation_set
-from loopgepa.core.storage import LoopGEPAStore
+from whystuck.core.mutation import apply_mutation
+from whystuck.core.promote import apply_promotion, plan_promotion
+from whystuck.core.runner import Executor, run_command_loop
+from whystuck.core.safety import assert_safe, check_mutation_set
+from whystuck.core.storage import WhyStuckStore
 
 
 def _now() -> str:
@@ -41,7 +41,7 @@ def _new_id(prefix: str) -> str:
     return f"{prefix}-{uuid.uuid4().hex[:8]}"
 
 
-def record_trace(store: LoopGEPAStore, trace: dict[str, Any]) -> dict[str, Any]:
+def record_trace(store: WhyStuckStore, trace: dict[str, Any]) -> dict[str, Any]:
     parsed = LoopTrace.model_validate(trace)
     store.append_trace(parsed)
     return {
@@ -52,7 +52,7 @@ def record_trace(store: LoopGEPAStore, trace: dict[str, Any]) -> dict[str, Any]:
 
 
 def run_loop(
-    store: LoopGEPAStore,
+    store: WhyStuckStore,
     *,
     loop_id: str,
     worker: list[str],
@@ -81,17 +81,19 @@ def run_loop(
     }
 
 
-def summarize(store: LoopGEPAStore, loop_id: str, limit: int = 20) -> dict[str, Any]:
-    return summarize_traces(loop_id, store.list_traces(loop_id, limit=limit)).model_dump()
+def diagnose(store: WhyStuckStore, loop_id: str, limit: int = 20) -> dict[str, Any]:
+    """One-shot diagnosis: trace summary + ranked failure modes with confidence.
 
-
-def infer(store: LoopGEPAStore, loop_id: str, limit: int = 20) -> dict[str, Any]:
-    modes = infer_failure_modes(store.list_traces(loop_id, limit=limit))
-    return {"failure_modes": [m.model_dump() for m in modes]}
+    Merges the former summarize/infer tools so the agent picks one obvious tool
+    (smaller surface → higher tool-selection accuracy)."""
+    traces = store.list_traces(loop_id, limit=limit)
+    result = summarize_traces(loop_id, traces).model_dump()
+    result["failure_modes"] = [m.model_dump() for m in infer_failure_modes(traces)]
+    return result
 
 
 def _confidence_for_evidence(
-    store: LoopGEPAStore, loop_id: str, evidence_ids: list[str]
+    store: WhyStuckStore, loop_id: str, evidence_ids: list[str]
 ) -> Confidence:
     """Deterministic, server-computed confidence (ADR-005). Never trust a
     client-supplied value; empty evidence is always LOW."""
@@ -107,7 +109,7 @@ def _confidence_for_evidence(
 
 
 def propose_mutations(
-    store: LoopGEPAStore, loop_id: str, proposals: list[dict[str, Any]]
+    store: WhyStuckStore, loop_id: str, proposals: list[dict[str, Any]]
 ) -> dict[str, Any]:
     genome = store.load_loop(loop_id)
     parsed = [MutationProposal.model_validate(p) for p in proposals]
@@ -129,17 +131,8 @@ def propose_mutations(
     return {"variant_id": variant.id, "diff_summary": [p.title for p in parsed]}
 
 
-def list_variants(store: LoopGEPAStore, loop_id: str) -> dict[str, Any]:
-    return {
-        "variants": [
-            {"variant_id": v.id, "promoted": v.promoted, "tags": v.tags}
-            for v in store.list_variants(loop_id)
-        ]
-    }
-
-
 def promote_variant(
-    store: LoopGEPAStore,
+    store: WhyStuckStore,
     loop_id: str,
     variant_id: str,
     *,
@@ -181,22 +174,17 @@ def promote_variant(
     }
 
 
-def save_loop(store: LoopGEPAStore, genome: dict[str, Any]) -> dict[str, Any]:
+def save_loop(store: WhyStuckStore, genome: dict[str, Any]) -> dict[str, Any]:
     parsed = LoopGenome.model_validate(genome)
     store.save_loop(parsed)
     return {"loop_id": parsed.id, "genes": len(parsed.genes)}
 
 
-def build_server(store: LoopGEPAStore) -> FastMCP:
-    mcp: FastMCP = FastMCP("LoopGEPA")
+def build_server(store: WhyStuckStore) -> FastMCP:
+    mcp: FastMCP = FastMCP("WhyStuck")
 
     @mcp.tool
-    def loopgepa_record_trace(trace: dict[str, Any]) -> dict[str, Any]:
-        """Record one loop-execution trace locally; returns the loop's trace count."""
-        return record_trace(store, trace)
-
-    @mcp.tool
-    def loopgepa_run_loop(
+    def whystuck_run_loop(
         loop_id: str,
         worker: list[str],
         verifier: list[str],
@@ -214,34 +202,27 @@ def build_server(store: LoopGEPAStore) -> FastMCP:
         )
 
     @mcp.tool
-    def loopgepa_summarize_traces(loop_id: str, limit: int = 20) -> dict[str, Any]:
-        """Summarize recent traces: success rate, common failures, avg retries."""
-        return summarize(store, loop_id, limit)
+    def whystuck_diagnose(loop_id: str, limit: int = 20) -> dict[str, Any]:
+        """Diagnose why a loop keeps failing: success rate + ranked failure modes
+        with evidence trace ids and a deterministic confidence. Start here."""
+        return diagnose(store, loop_id, limit)
 
     @mcp.tool
-    def loopgepa_infer_failure_modes(loop_id: str, limit: int = 20) -> dict[str, Any]:
-        """Infer recurring failure modes with evidence trace ids and confidence."""
-        return infer(store, loop_id, limit)
-
-    @mcp.tool
-    def loopgepa_propose_mutations(loop_id: str, proposals: list[dict[str, Any]]) -> dict[str, Any]:
-        """Save a draft variant from mutation proposals (≤3 genes, safety-checked)."""
+    def whystuck_propose_fix(loop_id: str, proposals: list[dict[str, Any]]) -> dict[str, Any]:
+        """Draft a reversible fix from mutation proposals (≤3 genes, safety-checked).
+        Confidence is recomputed server-side from the cited evidence."""
         return propose_mutations(store, loop_id, proposals)
 
     @mcp.tool
-    def loopgepa_list_variants(loop_id: str) -> dict[str, Any]:
-        """List stored variants for a loop and whether each is promoted."""
-        return list_variants(store, loop_id)
-
-    @mcp.tool
-    def loopgepa_promote_variant(
+    def whystuck_promote(
         loop_id: str,
         variant_id: str,
         base_dir: str = ".",
         approved_by: str = "human",
         dry_run: bool = True,
     ) -> dict[str, Any]:
-        """Promote a variant. Dry-run by default: returns diffs without writing."""
+        """Apply a fix. Dry-run by default: returns diffs without writing. A real
+        write needs dry_run=false and is reversible via a rollback record."""
         return promote_variant(
             store,
             loop_id,
@@ -252,8 +233,14 @@ def build_server(store: LoopGEPAStore) -> FastMCP:
         )
 
     @mcp.tool
-    def loopgepa_save_loop(genome: dict[str, Any]) -> dict[str, Any]:
-        """Register or update a loop genome."""
+    def whystuck_save_loop(genome: dict[str, Any]) -> dict[str, Any]:
+        """Declare or update a loop (its genome) so it can be run and diagnosed."""
         return save_loop(store, genome)
+
+    @mcp.tool
+    def whystuck_record_trace(trace: dict[str, Any]) -> dict[str, Any]:
+        """(internal) Record one loop-execution trace; usually called by run_loop
+        or a session hook, not directly by the agent."""
+        return record_trace(store, trace)
 
     return mcp

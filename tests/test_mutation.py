@@ -1,16 +1,16 @@
-"""Tests for loopgepa.core.mutation — applying proposals to a genome."""
+"""Tests for whystuck.core.mutation — applying proposals to a genome."""
 
 import pytest
 
-from loopgepa.core.errors import GeneNotFoundError, SafetyLockError
-from loopgepa.core.models import (
+from whystuck.core.errors import GeneNotFoundError, SafetyLockError
+from whystuck.core.models import (
     GeneType,
     LoopGene,
     LoopGenome,
     MutationProposal,
     MutationType,
 )
-from loopgepa.core.mutation import apply_mutation
+from whystuck.core.mutation import apply_mutation
 
 
 def _genome() -> LoopGenome:

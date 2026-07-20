@@ -47,7 +47,7 @@ jobs:
       - name: SBOM (SPDX)
         uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
         with:
-          artifact-name: loopgepa-sbom.spdx.json
+          artifact-name: whystuck-sbom.spdx.json
 
       - name: Attest build provenance
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
@@ -59,8 +59,8 @@ jobs:
           UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
         run: |
           version=$(grep -oP '(?<=^version = ")[^"]+' pyproject.toml | head -1)
-          if curl -fsS "https://pypi.org/pypi/loopgepa/${version}/json" >/dev/null 2>&1; then
-            echo "loopgepa ${version} already on PyPI — skipping (idempotent)."
+          if curl -fsS "https://pypi.org/pypi/whystuck/${version}/json" >/dev/null 2>&1; then
+            echo "whystuck ${version} already on PyPI — skipping (idempotent)."
           else
             uv publish
           fi

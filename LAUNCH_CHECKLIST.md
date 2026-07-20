@@ -1,4 +1,4 @@
-# LoopGEPA — Pre-Public Launch Gate
+# WhyStuck — Pre-Public Launch Gate
 
 **Policy:** the repo stays 100% local until every box in "MVP" and "Launch
 hardening" is checked. Goal: one strong first impression for a viral OSS launch,
@@ -13,7 +13,7 @@ and the SysKnife reference repo (`/home/user/Desktop/lacs`).
 - [x] `diagnosis.py` deterministic failure-mode clustering + confidence (M4a)
 - [x] `runner.py` command+verifier ingest emits clean traces + tests (M4)
 - [x] FastMCP server wraps core over stdio + in-memory Client smoke tests (M5)
-- [x] `uvx loopgepa` / console script serves MCP over stdio (scripts/verify_stdio.py)
+- [x] `uvx whystuck` / console script serves MCP over stdio (scripts/verify_stdio.py)
 - [x] promote dry-run + real promote + rollback record + tests (M7)
 - [x] `examples/bugfix-loop` runnable offline demo works (M8)
 - [x] thin plugin: explain-loop-failure / optimize-loop / design-loop skills (M6)
@@ -51,8 +51,8 @@ _80 tests, ruff + mypy strict, docs build --strict, demo + stdio verified green.
 
 ## Gate 3 — Publish day (in order)
 
-- [ ] register PyPI name `loopgepa`; `uv publish`
-- [ ] switch `gh` to **vladimirrott**; create `loopgepa/loopgepa` repo; push
+- [ ] register PyPI name `whystuck`; `uv publish`
+- [ ] switch `gh` to **vladimirrott**; create `whystuck/whystuck` repo; push
 - [ ] enable branch protection on `main` — `scripts/setup_branch_protection.sh`
       (PR + 1 review + CI "test" required, admins enforced, no force-push/delete)
 - [ ] enable GitHub Pages, Discussions, Dependabot, code scanning

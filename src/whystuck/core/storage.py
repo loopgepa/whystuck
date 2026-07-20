@@ -1,4 +1,4 @@
-"""LoopGEPA local file store (ADR-004).
+"""WhyStuck local file store (ADR-004).
 
 Layout under the store root (default outside the repo — see `resolve_store_root`):
 
@@ -21,8 +21,8 @@ from pathlib import Path
 
 from ruamel.yaml import YAML
 
-from loopgepa.core.errors import NotFoundError
-from loopgepa.core.models import (
+from whystuck.core.errors import NotFoundError
+from whystuck.core.models import (
     LoopGenome,
     LoopTrace,
     LoopVariant,
@@ -34,15 +34,15 @@ _yaml.default_flow_style = False
 
 
 def resolve_store_root(env: Mapping[str, str]) -> Path:
-    """Resolve the store root: LOOPGEPA_HOME > $XDG_DATA_HOME/loopgepa >
-    ~/.local/share/loopgepa. Never the current working directory (ADR-004.2)."""
-    if home := env.get("LOOPGEPA_HOME"):
+    """Resolve the store root: WHYSTUCK_HOME > $XDG_DATA_HOME/whystuck >
+    ~/.local/share/whystuck. Never the current working directory (ADR-004.2)."""
+    if home := env.get("WHYSTUCK_HOME"):
         return Path(home)
     if xdg := env.get("XDG_DATA_HOME"):
-        return Path(xdg) / "loopgepa"
+        return Path(xdg) / "whystuck"
     home = env.get("HOME")
     root = Path(home) if home else Path("~").expanduser()
-    return root / ".local" / "share" / "loopgepa"
+    return root / ".local" / "share" / "whystuck"
 
 
 def _dump_yaml(data: object) -> str:
@@ -112,12 +112,12 @@ def _append_line(path: Path, text: str) -> None:
         os.close(fd)
 
 
-class LoopGEPAStore:
+class WhyStuckStore:
     def __init__(self, root: Path) -> None:
         self.root = root
 
     @classmethod
-    def from_env(cls, env: Mapping[str, str] | None = None) -> LoopGEPAStore:
+    def from_env(cls, env: Mapping[str, str] | None = None) -> WhyStuckStore:
         return cls(resolve_store_root(env if env is not None else os.environ))
 
     # --- paths ---

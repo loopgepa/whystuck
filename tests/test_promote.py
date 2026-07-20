@@ -1,4 +1,4 @@
-"""Tests for loopgepa.core.promote — dry-run + reversible file promotion (M7).
+"""Tests for whystuck.core.promote — dry-run + reversible file promotion (M7).
 
 Diffs are computed against the LIVE file, never a stored snapshot (ADR-004.5).
 Dry-run must never touch disk.
@@ -6,8 +6,8 @@ Dry-run must never touch disk.
 
 from pathlib import Path
 
-from loopgepa.core.models import GeneType, LoopGene, LoopGenome, LoopVariant
-from loopgepa.core.promote import apply_promotion, plan_promotion
+from whystuck.core.models import GeneType, LoopGene, LoopGenome, LoopVariant
+from whystuck.core.promote import apply_promotion, plan_promotion
 
 
 def _variant(*genes: LoopGene, variant_id: str = "v1") -> LoopVariant:

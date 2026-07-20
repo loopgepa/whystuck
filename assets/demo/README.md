@@ -1,6 +1,6 @@
 # Demo asset
 
-`docs/assets/loopgepa-demo.gif` is a **live recording** of the real demo — not a
+`docs/assets/whystuck-demo.gif` is a **live recording** of the real demo — not a
 mock. It runs `examples/bugfix-loop/demo.py`, which exercises the actual pipeline
 (record traces → diagnose → propose → dry-run promote) against throwaway temp
 dirs, offline, with no API key.

@@ -4,6 +4,6 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 uv run ruff check .
 uv run ruff format --check .
-uv run mypy src/loopgepa
+uv run mypy src/whystuck
 uv run pytest
 echo "dev_check: all green"

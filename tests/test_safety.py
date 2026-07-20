@@ -1,4 +1,4 @@
-"""Tests for loopgepa.core.safety — the non-negotiable mutation guards.
+"""Tests for whystuck.core.safety — the non-negotiable mutation guards.
 
 These are exactly the properties a launch-day security reviewer will attack:
 the ≤3-gene cap and the "never silently weaken a budget" rule (SECURITY.md,
@@ -7,15 +7,15 @@ IMPLEMENTATION §13).
 
 import pytest
 
-from loopgepa.core.errors import BudgetIncreaseError, TooManyGenesError
-from loopgepa.core.models import (
+from whystuck.core.errors import BudgetIncreaseError, TooManyGenesError
+from whystuck.core.models import (
     GeneType,
     LoopGene,
     LoopGenome,
     MutationProposal,
     MutationType,
 )
-from loopgepa.core.safety import MAX_GENES_PER_MUTATION, assert_safe, check_mutation_set
+from whystuck.core.safety import MAX_GENES_PER_MUTATION, assert_safe, check_mutation_set
 
 
 def _edit(target: str, after, mid: str) -> MutationProposal:

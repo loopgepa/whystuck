@@ -1,8 +1,8 @@
-"""Prove the console script serves MCP over stdio — the `uvx loopgepa` contract.
+"""Prove the console script serves MCP over stdio — the `uvx whystuck` contract.
 
-Spawns the real `loopgepa` entry point as a subprocess and speaks the MCP stdio
+Spawns the real `whystuck` entry point as a subprocess and speaks the MCP stdio
 handshake through FastMCP's client. If this lists the tools, then
-`claude mcp add loopgepa -- uvx loopgepa` works identically.
+`claude mcp add whystuck -- uvx whystuck` works identically.
 
 Run:  uv run python scripts/verify_stdio.py
 """
@@ -16,7 +16,7 @@ from fastmcp import Client
 
 
 async def main() -> None:
-    client = Client({"mcpServers": {"loopgepa": {"command": "uv", "args": ["run", "loopgepa"]}}})
+    client = Client({"mcpServers": {"whystuck": {"command": "uv", "args": ["run", "whystuck"]}}})
     async with client:
         names = sorted(t.name for t in await client.list_tools())
     if not names:

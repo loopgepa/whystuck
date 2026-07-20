@@ -1,4 +1,4 @@
-"""LoopGEPA core: vendor-neutral pure logic.
+"""WhyStuck core: vendor-neutral pure logic.
 
 No network, no side effects at import time. Modules: models, storage, diagnosis,
 runner, mutation, diff, safety, promote, errors. Kept free of Claude/MCP-specific

@@ -1,5 +1,5 @@
-# LoopGEPA promote GIF — reproducible: `vhs assets/demo/demo-promote.tape` (from repo root).
-Output docs/assets/loopgepa-promote.gif
+# WhyStuck promote GIF — reproducible: `vhs assets/demo/demo-promote.tape` (from repo root).
+Output docs/assets/whystuck-promote.gif
 
 Require uv
 
@@ -16,7 +16,7 @@ Enter
 Show
 
 Sleep 600ms
-Type "# approve a fix → LoopGEPA edits the file, atomically & reversibly"
+Type "# approve a fix → WhyStuck edits the file, atomically & reversibly"
 Sleep 900ms
 Enter
 Type "uv run python examples/bugfix-loop/demo_full.py"

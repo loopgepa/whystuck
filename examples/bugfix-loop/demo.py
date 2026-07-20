@@ -1,4 +1,4 @@
-"""End-to-end LoopGEPA demo — fully local, offline, no API key.
+"""End-to-end WhyStuck demo — fully local, offline, no API key.
 
 Run:  uv run python examples/bugfix-loop/demo.py
 
@@ -12,9 +12,9 @@ from __future__ import annotations
 import tempfile
 from pathlib import Path
 
-from loopgepa.core.storage import LoopGEPAStore
-from loopgepa.tools import (
-    infer,
+from whystuck.core.storage import WhyStuckStore
+from whystuck.tools import (
+    diagnose,
     promote_variant,
     propose_mutations,
     record_trace,
@@ -37,7 +37,7 @@ def _failing_trace(i: int) -> dict:
 
 def main() -> None:
     with tempfile.TemporaryDirectory() as store_dir, tempfile.TemporaryDirectory() as proj_dir:
-        store = LoopGEPAStore(Path(store_dir))
+        store = WhyStuckStore(Path(store_dir))
 
         # 0. Register the loop and seed some failing runs (as a real session would).
         save_loop(
@@ -59,7 +59,7 @@ def main() -> None:
             record_trace(store, _failing_trace(i))
 
         # 1. Diagnose.
-        modes = infer(store, LOOP)["failure_modes"]
+        modes = diagnose(store, LOOP)["failure_modes"]
         top = modes[0]
         print("Diagnosis")
         print(f"  failure mode : {top['title']}")

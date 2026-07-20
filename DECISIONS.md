@@ -1,4 +1,4 @@
-# LoopGEPA — Architecture Decision Record
+# WhyStuck — Architecture Decision Record
 
 This file records the decisions that shaped v0. It is the answer to
 "why is it built this way." New decisions append; superseded ones are marked,
@@ -6,33 +6,34 @@ not deleted.
 
 ---
 
-## ADR-001 — Name: `loopgepa`
+## ADR-001 — Name: `whystuck`
 
-**Status:** accepted (2026-07-20)
+**Status:** accepted (2026-07-20). Supersedes the earlier working name "LoopGEPA"
+(itself a rename of "LoopForge").
 
-**Context.** The working title was "LoopForge." `loopforge` is taken on PyPI,
-npm, and GitHub. It also collides with existing audio-loop and gamedev tools.
+**Context.** "LoopGEPA" was renamed after competitive/viral research found it
+violates the strongest naming law for dev tools — *name = command = function*:
+it is hard to type, say, and spell, and "GEPA" is opaque to anyone who hasn't
+read the paper. That throttles word-of-mouth and search, the #1 amplifier for
+CLI/MCP tools. Two independent estimates put naming among the top viral drags.
 
-**Decision.** Name the project **LoopGEPA** (package/handle `loopgepa`).
+**Decision.** Name it **WhyStuck** (package/command/handle `whystuck`). It is the
+literal question the user asks — *why is my agent stuck?* — self-describing,
+memeable, honest (diagnosis, not autonomy), and short.
 
-**Evidence.** `loopgepa` is free on PyPI, npm, and as a GitHub handle
-(all 404 on 2026-07-20). Web search returns no project by that name.
+**Evidence.** `whystuck` is free on PyPI, npm, and as a GitHub handle (all 404 on
+2026-07-20); no project by that name. Chosen over `loopdoc`/`unstick` (GitHub
+handle taken) and `loopdoctor` (longer, less punchy).
 
-**Why GEPA in the name is honest, not hype.** GEPA (Genetic-Pareto) is a real,
-current method — ICLR 2026 Oral, arXiv 2507.19457, official package
-`gepa-ai/gepa`, integrated in DSPy. Naming the project after its research
-lineage signals *direction*, not a shipped capability. The discipline rule
-("do not call v0 output 'optimized', do not lead marketing with self-improvement")
-is enforced in the README copy and the plugin UI, **not** by avoiding the word
-in the project name.
-
-**Consequence.** v0.2's evaluation/Pareto layer should **wrap `gepa-ai/gepa`**
-(map a loop genome onto GEPA's candidate/evaluation interface) rather than
-reimplement evolutionary search. This makes the name literal over time.
+**On GEPA.** GEPA (Genetic-Pareto; ICLR 2026 Oral; `gepa-ai/gepa`) is the research
+lineage WhyStuck's reflective mutation builds on, and what v0.2 will wrap
+(ADR-011). It is cited as *pedigree* in the README — **not carried in the name**,
+which was the earlier mistake. Never claim "optimized"/"self-improving" before
+v0.2's measured evaluation lands.
 
 ---
 
-## ADR-002 — Product shape: LoopGEPA owns the loop runner (option b)
+## ADR-002 — Product shape: WhyStuck owns the loop runner (option b)
 
 **Status:** accepted (2026-07-20). Supersedes the original spec's implicit
 "optimize any Claude Code session."
@@ -48,12 +49,12 @@ Two candidate products:
 
 - **(a)** Optimize arbitrary Claude Code sessions. → non-file genes are not
   editable → the core value claim is a lie for 7 of 11 gene types.
-- **(b)** Optimize **LoopGEPA-declared loops** that LoopGEPA itself executes via
+- **(b)** Optimize **WhyStuck-declared loops** that WhyStuck itself executes via
   a runner. → every gene is a real knob, because the runner reads and enforces
   it.
 
 **Decision.** Adopt **(b)**. A "loop" is a declared, versioned genome
-(`loop.yaml`) executed by the LoopGEPA runner. The runner:
+(`loop.yaml`) executed by the WhyStuck runner. The runner:
 
 - feeds `skill`/`agent`/`prompt` genes into each step,
 - enforces `retry_policy`/`stop_condition`/`context_policy`/`budget_policy` in
@@ -65,7 +66,7 @@ Two candidate products:
 
 **Honest scope of the two surfaces.**
 
-1. **Managed loops (the real product).** Declared + run by LoopGEPA → all genes
+1. **Managed loops (the real product).** Declared + run by WhyStuck → all genes
    real, traces clean, promotion effective.
 2. **Session import (lite, opportunistic).** A hook may capture raw Claude Code
    session data, but mutation/promotion is restricted to **file-backed genes
@@ -74,7 +75,7 @@ Two candidate products:
    the runner.
 
 **Rule.** A gene not backed by a file is only mutatable/effective for loops run
-through the LoopGEPA runner. The UI must never offer to "promote" a non-file
+through the WhyStuck runner. The UI must never offer to "promote" a non-file
 gene for an imported session.
 
 ---
@@ -120,9 +121,9 @@ anticipate is stored in cleartext.
    tool names, exit codes, file paths, metric counts). Never store raw tool
    input/output or file contents unless the user explicitly opts a loop into
    `capture: raw`. Redaction is a second line of defense, not the first.
-2. **Store location.** Default `LOOPGEPA_HOME=$XDG_DATA_HOME/loopgepa`
-   (fallback `~/.local/share/loopgepa`), **not** the project's cwd. A repo-local
-   `.loopgepa/` is opt-in and, if chosen, LoopGEPA writes a `.gitignore` entry
+2. **Store location.** Default `WHYSTUCK_HOME=$XDG_DATA_HOME/whystuck`
+   (fallback `~/.local/share/whystuck`), **not** the project's cwd. A repo-local
+   `.whystuck/` is opt-in and, if chosen, WhyStuck writes a `.gitignore` entry
    for it. This removes the "traces committed to git with secrets" footgun.
 3. **Concurrency.** Trace writes use `O_APPEND` single-line JSONL writes;
    concurrent sessions each write their own line atomically. No shared mutable
@@ -156,7 +157,7 @@ where `cluster` = share of failing traces attributed to the same failure mode.
 
 ---
 
-## ADR-006 — One PyPI package; `uvx loopgepa` is the entire setup story
+## ADR-006 — One PyPI package; `uvx whystuck` is the entire setup story
 
 **Status:** accepted (2026-07-20). Supersedes the 3-package uv workspace in the
 original scaffold.
@@ -164,18 +165,18 @@ original scaffold.
 **Context.** The lowest-friction way to install an MCP server in 2026 is a single
 zero-install command:
 
-    claude mcp add loopgepa -- uvx loopgepa      # Claude Code
-    codex  mcp add loopgepa -- uvx loopgepa      # Codex CLI
+    claude mcp add whystuck -- uvx whystuck      # Claude Code
+    codex  mcp add whystuck -- uvx whystuck      # Codex CLI
 
 `uvx` runs a console entry point straight from PyPI in an ephemeral cached env —
 no `pip install`, no venv. That requires **one** importable package named
-`loopgepa` exposing `[project.scripts] loopgepa = "loopgepa.server:main"`. A
-3-package workspace (`loopgepa_core` / `loopgepa_mcp` / `loopgepa_plugin`) fights
+`whystuck` exposing `[project.scripts] whystuck = "whystuck.server:main"`. A
+3-package workspace (`whystuck_core` / `whystuck_mcp` / `whystuck_plugin`) fights
 this and triples release complexity for zero user benefit.
 
-**Decision.** Ship a **single `loopgepa` package**. Internal structure:
+**Decision.** Ship a **single `whystuck` package**. Internal structure:
 
-    src/loopgepa/
+    src/whystuck/
       server.py        # FastMCP app + main() stdio entrypoint
       tools.py         # thin MCP tool handlers over core
       core/            # vendor-neutral pure logic (models, storage, runner, ...)
@@ -213,7 +214,7 @@ capture belongs to the **runner inside the MCP server**, not to session hooks.
 **Decision.** The **MCP server is the primary, sufficient artifact** — it does
 diagnosis, mutation, promotion, and (via the runner) trace capture. The plugin
 under `plugin/` is an **optional thin layer** adding slash-command ergonomics
-(`/loopgepa:explain-loop-failure`) that call MCP tools. Build and validate the
+(`/whystuck:explain-loop-failure`) that call MCP tools. Build and validate the
 server first; the plugin is polish, not a dependency of the core value.
 
 ---
@@ -247,8 +248,8 @@ security/release/docs infrastructure at the pre-public launch gate (see
   `blank_issues_enabled: false`, PR template with a trust-boundary checkbox,
   `dependabot.yml`, `docs/local/` for internal notes.
 
-**Not adopted:** SysKnife's heavy `npx` binary-installer wizard — LoopGEPA is pure
-Python via `uvx`, so the one-liner *is* the installer. An optional `uvx loopgepa
+**Not adopted:** SysKnife's heavy `npx` binary-installer wizard — WhyStuck is pure
+Python via `uvx`, so the one-liner *is* the installer. An optional `uvx whystuck
 init` helper may come later.
 
 ---
@@ -260,7 +261,7 @@ init` helper may come later.
 **Context.** 2026 sentiment is sharply anti-hype (the "agent reliability gap");
 every named competitor — Latitude (which markets its own "GEPA algorithm"),
 Braintrust, LangSmith, Langfuse — is **cloud SaaS for production LLM apps**.
-LoopGEPA's whitespace is *local, zero-telemetry, coding-agent-session loop
+WhyStuck's whitespace is *local, zero-telemetry, coding-agent-session loop
 diagnosis*.
 
 **Decision.**
@@ -277,7 +278,7 @@ diagnosis*.
 4. A **"works with Claude Code · Codex · Cursor"** signal sits directly under the
    title (highest-value 5-second trust cue observed across viral MCP servers).
 5. In comparison content, name **Latitude's "GEPA algorithm"** explicitly and
-   contrast: they close issue→PR for *production* traces in the cloud; LoopGEPA
+   contrast: they close issue→PR for *production* traces in the cloud; WhyStuck
    closes loop→fix for *local coding-agent sessions* with nothing leaving the
    machine.
 
@@ -295,7 +296,7 @@ keep a Pareto frontier — is exactly what the official GEPA optimizer already d
 **Decision.** v0.2 **wraps `gepa-ai/gepa`** via a custom `GEPAAdapter`
 (`LoopGenomeAdapter`) instead of writing our own search/Pareto. Mapping: the loop's
 evolvable text genes → GEPA's `candidate: dict[str,str]`; a benchmark task set →
-GEPA's `trainset`; `adapter.evaluate` runs the LoopGEPA runner per task and scores
+GEPA's `trainset`; `adapter.evaluate` runs the WhyStuck runner per task and scores
 it; `adapter.make_reflective_dataset` turns failing traces into GEPA's reflection
 dataset; the reflection LM proposes mutations; **GEPA owns the Pareto frontier** —
 so the `pareto.py` deferred in ADR-003 is provided, not rebuilt. Full design:
@@ -321,11 +322,11 @@ so the `pareto.py` deferred in ADR-003 is provided, not rebuilt. Full design:
 Osmani; Anthropic *Getting Started With Loops*; OpenAI *Unrolling the Codex Agent
 Loop*; Cobus Greyling's `loop-engineering` repo). It is the layer above prompt/
 context/harness engineering: designing the act→verify→retry→stop cycle. This is
-LoopGEPA's exact home and a live, searched-for term.
+WhyStuck's exact home and a live, searched-for term.
 
-**Decision.** Lead all positioning with loop engineering: LoopGEPA is *the
+**Decision.** Lead all positioning with loop engineering: WhyStuck is *the
 diagnosis-and-repair layer for agent loops*. Loop-scaffolding tools (e.g.
-`loop-engineering`) help you **build** a loop; LoopGEPA tells you **why a loop
+`loop-engineering`) help you **build** a loop; WhyStuck tells you **why a loop
 keeps failing and proposes the smallest reversible fix**. The loop **genome**
 (genes = skill/verifier/retry/stop/context/budget) is framed as the concrete,
 inspectable object loop engineering already manages. Docs and README lead with
@@ -343,7 +344,7 @@ fewer repeated failures, not "genome management."
 **Status:** accepted (2026-07-20). Source: two independent research passes on why
 LLM-observability/agent tools lose users, and what makes dev tools go viral.
 
-**Context.** Independent estimates put LoopGEPA at ~58/100 usefulness and ~48/100
+**Context.** Independent estimates put WhyStuck at ~58/100 usefulness and ~48/100
 viral capacity (rising to ~70 if the levers below land). The design already
 sidesteps ~8 of the 10 top competitor failure patterns (cloud lock-in, telemetry
 default, pricing cliffs, silent failure, prod-scale scope, hot-path tax,
@@ -370,10 +371,10 @@ surface cost, and naming.
    metric-backed; the everyday product is *evidence-based diagnosis*, not blind
    optimization. Never say "self-improving"/"autonomous."
 6. **Beat the free baseline.** The reflex fix is "new chat + restate the goal"
-   (~10s, free). LoopGEPA must clearly beat that — via persistent cross-session
+   (~10s, free). WhyStuck must clearly beat that — via persistent cross-session
    memory of loops and a diagnosis better than a human's guess — or it is friction.
 
-**Open decisions (owner: maintainer):** *(a)* naming — "LoopGEPA" violates
+**Open decisions (owner: maintainer):** *(a)* naming — "WhyStuck" violates
 name=command=function (hard to type/say/spell; opaque acronym); consider a short
 self-describing invocation phrase/tool alias while keeping GEPA as pedigree.
 *(b)* auto-trigger on detected thrash so the value appears without the user

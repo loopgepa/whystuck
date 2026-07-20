@@ -6,10 +6,10 @@ This is the flow the bugfix-loop example and the demo GIF walk through.
 
 from pathlib import Path
 
-from loopgepa.core.models import ConfidenceBand
-from loopgepa.core.storage import LoopGEPAStore
-from loopgepa.tools import (
-    infer,
+from whystuck.core.models import ConfidenceBand
+from whystuck.core.storage import WhyStuckStore
+from whystuck.tools import (
+    diagnose,
     promote_variant,
     propose_mutations,
     record_trace,
@@ -31,7 +31,7 @@ def _failing_trace(i: int) -> dict:
 
 
 def test_full_diagnose_propose_promote_flow(tmp_path: Path):
-    store = LoopGEPAStore(tmp_path / "store")
+    store = WhyStuckStore(tmp_path / "store")
     proj = tmp_path / "proj"
     (proj / "skills" / "bugfix").mkdir(parents=True)
     (proj / "skills" / "bugfix" / "SKILL.md").write_text("Fix the bug.")
@@ -57,7 +57,7 @@ def test_full_diagnose_propose_promote_flow(tmp_path: Path):
     # 15 failing runs, all the same mode → HIGH confidence, verifier implicated.
     for i in range(15):
         record_trace(store, _failing_trace(i))
-    top = infer(store, LOOP)["failure_modes"][0]
+    top = diagnose(store, LOOP)["failure_modes"][0]
     assert top["confidence"]["band"] == ConfidenceBand.HIGH
     assert len(top["evidence_trace_ids"]) == 15
     assert "verifier_rubric" in top["likely_genes"]

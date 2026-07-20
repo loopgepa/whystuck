@@ -1,15 +1,15 @@
 # Changelog
 
-All notable changes to LoopGEPA are documented here.
+All notable changes to WhyStuck are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning:
 [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
 ### Added
-- **MVP complete (local).** Single `loopgepa` package installable via
-  `uvx loopgepa`; FastMCP stdio server for Claude Code / Codex / Cursor.
-- Core (`loopgepa.core`): models, XDG-scoped file store, deterministic diagnosis
+- **MVP complete (local).** Single `whystuck` package installable via
+  `uvx whystuck`; FastMCP stdio server for Claude Code / Codex / Cursor.
+- Core (`whystuck.core`): models, XDG-scoped file store, deterministic diagnosis
   (failure-mode clustering + confidence), command+verifier runner, mutation +
   diff, safety guards (≤3-gene cap, no silent budget increase), reversible
   promotion with dry-run + rollback records.

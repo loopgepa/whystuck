@@ -9,12 +9,12 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from loopgepa.core.errors import (
+from whystuck.core.errors import (
     BudgetIncreaseError,
     NotFoundError,
     SafetyLockError,
 )
-from loopgepa.core.models import (
+from whystuck.core.models import (
     Confidence,
     ConfidenceBand,
     GeneType,
@@ -24,9 +24,9 @@ from loopgepa.core.models import (
     MutationProposal,
     MutationType,
 )
-from loopgepa.core.runner import run_command_loop
-from loopgepa.core.storage import LoopGEPAStore
-from loopgepa.tools import promote_variant, propose_mutations, record_trace, save_loop
+from whystuck.core.runner import run_command_loop
+from whystuck.core.storage import WhyStuckStore
+from whystuck.tools import promote_variant, propose_mutations, record_trace, save_loop
 
 # ---------------------------------------------------------------- storage bugs
 
@@ -42,26 +42,26 @@ def _trace(tid: str, outcome: str = "failure", summary: str | None = "boom") -> 
 
 
 def test_list_traces_limit_zero_returns_none(tmp_path: Path):
-    store = LoopGEPAStore(tmp_path)
+    store = WhyStuckStore(tmp_path)
     for i in range(3):
         record_trace(store, _trace(f"t{i}"))
     assert store.list_traces("bugfix", limit=0) == []
 
 
 def test_load_variant_missing_raises_notfound(tmp_path: Path):
-    store = LoopGEPAStore(tmp_path)
+    store = WhyStuckStore(tmp_path)
     with pytest.raises(NotFoundError):
         store.load_variant("bugfix", "nope")
 
 
 def test_load_loop_missing_raises_notfound(tmp_path: Path):
-    store = LoopGEPAStore(tmp_path)
+    store = WhyStuckStore(tmp_path)
     with pytest.raises(NotFoundError):
         store.load_loop("nope")
 
 
 def test_unicode_trace_round_trips(tmp_path: Path):
-    store = LoopGEPAStore(tmp_path)
+    store = WhyStuckStore(tmp_path)
     record_trace(store, _trace("t1", summary="café ☕ 上手 — naïve"))
     assert store.list_traces("bugfix")[0].failure_summary == "café ☕ 上手 — naïve"
 
@@ -147,7 +147,7 @@ def _edit(target: str, after, mid: str = "m1") -> MutationProposal:
 
 
 def test_budget_guard_rejects_dropping_the_cap_key():
-    from loopgepa.core.safety import assert_safe
+    from whystuck.core.safety import assert_safe
 
     genome = _budget_genome({"max_usd": 1.0})
     with pytest.raises(BudgetIncreaseError):
@@ -155,7 +155,7 @@ def test_budget_guard_rejects_dropping_the_cap_key():
 
 
 def test_budget_guard_rejects_removing_the_budget_gene():
-    from loopgepa.core.safety import assert_safe
+    from whystuck.core.safety import assert_safe
 
     genome = _budget_genome({"max_usd": 1.0})
     remove = MutationProposal(
@@ -175,7 +175,7 @@ def test_budget_guard_rejects_removing_the_budget_gene():
 
 
 def test_add_gene_rejects_duplicate_id():
-    from loopgepa.core.mutation import apply_mutation
+    from whystuck.core.mutation import apply_mutation
 
     genome = LoopGenome(
         id="bugfix",
@@ -245,7 +245,7 @@ def _rubric_genome() -> LoopGenome:
 
 
 def test_propose_recomputes_confidence_and_ignores_client_value(tmp_path: Path):
-    store = LoopGEPAStore(tmp_path)
+    store = WhyStuckStore(tmp_path)
     store.save_loop(_rubric_genome())
     proposal = {
         "id": "m1",
@@ -265,7 +265,7 @@ def test_propose_recomputes_confidence_and_ignores_client_value(tmp_path: Path):
 
 
 def test_propose_on_missing_loop_raises_notfound(tmp_path: Path):
-    store = LoopGEPAStore(tmp_path)
+    store = WhyStuckStore(tmp_path)
     with pytest.raises(NotFoundError):
         propose_mutations(store, "ghost", [])
 
@@ -292,7 +292,7 @@ def _skill_variant(vid: str, content: str) -> LoopVariant:
 
 
 def test_promotion_lineage_uses_most_recent_not_alphabetical(tmp_path: Path):
-    store = LoopGEPAStore(tmp_path / "store")
+    store = WhyStuckStore(tmp_path / "store")
     proj = tmp_path / "proj"
     proj.mkdir()
     store.save_loop(_rubric_genome())
@@ -309,7 +309,7 @@ def test_promotion_lineage_uses_most_recent_not_alphabetical(tmp_path: Path):
 
 
 def test_promote_rejects_path_traversal(tmp_path: Path):
-    store = LoopGEPAStore(tmp_path / "store")
+    store = WhyStuckStore(tmp_path / "store")
     proj = tmp_path / "proj"
     proj.mkdir()
     store.save_loop(_rubric_genome())
@@ -338,7 +338,7 @@ def test_promote_rejects_path_traversal(tmp_path: Path):
 
 
 def test_promote_absolute_path_rejected(tmp_path: Path):
-    store = LoopGEPAStore(tmp_path / "store")
+    store = WhyStuckStore(tmp_path / "store")
     proj = tmp_path / "proj"
     proj.mkdir()
     store.save_loop(_rubric_genome())
@@ -367,7 +367,7 @@ def test_promote_absolute_path_rejected(tmp_path: Path):
 
 
 def test_lock_then_edit_in_one_set_is_refused(tmp_path: Path):
-    store = LoopGEPAStore(tmp_path)
+    store = WhyStuckStore(tmp_path)
     store.save_loop(_rubric_genome())
     lock = {
         "id": "m1",
@@ -393,6 +393,6 @@ def test_lock_then_edit_in_one_set_is_refused(tmp_path: Path):
 
 
 def test_save_loop_smoke(tmp_path: Path):
-    store = LoopGEPAStore(tmp_path)
+    store = WhyStuckStore(tmp_path)
     save_loop(store, _rubric_genome().model_dump(mode="json"))
     assert store.load_loop("bugfix").id == "bugfix"

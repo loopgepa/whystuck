@@ -1,14 +1,14 @@
 <div align="center">
 
-# LoopGEPA
+# WhyStuck
 
 *Diagnose the loop. Propose the fix. You approve.*
 
-[![CI](https://github.com/loopgepa/loopgepa/actions/workflows/ci.yml/badge.svg)](https://github.com/loopgepa/loopgepa/actions/workflows/ci.yml)
+[![CI](https://github.com/whystuck/whystuck/actions/workflows/ci.yml/badge.svg)](https://github.com/whystuck/whystuck/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/loopgepa?style=flat-square)](https://pypi.org/project/loopgepa/)
-[![Stars](https://img.shields.io/github/stars/loopgepa/loopgepa?style=flat-square)](https://github.com/loopgepa/loopgepa/stargazers)
-[![Discussions](https://img.shields.io/github/discussions/loopgepa/loopgepa?style=flat-square)](https://github.com/loopgepa/loopgepa/discussions)
+[![PyPI](https://img.shields.io/pypi/v/whystuck?style=flat-square)](https://pypi.org/project/whystuck/)
+[![Stars](https://img.shields.io/github/stars/whystuck/whystuck?style=flat-square)](https://github.com/whystuck/whystuck/stargazers)
+[![Discussions](https://img.shields.io/github/discussions/whystuck/whystuck?style=flat-square)](https://github.com/whystuck/whystuck/discussions)
 
 **Works with** &nbsp;
 ![Claude Code](https://img.shields.io/badge/Claude_Code-supported-2f855a?style=flat-square) &nbsp;
@@ -16,32 +16,33 @@
 ![Cursor](https://img.shields.io/badge/Cursor-supported-2f855a?style=flat-square) &nbsp;
 `Local-only` · `No telemetry`
 
-[Install](#install) · [How it works](#how-it-works) · [Why not X?](#why-not-just-x) · [Status](#status) · [Roadmap](#roadmap) · [Docs](#documentation) · [Discuss](https://github.com/loopgepa/loopgepa/discussions)
+[Install](#install) · [How it works](#how-it-works) · [Why not X?](#why-not-just-x) · [Status](#status) · [Roadmap](#roadmap) · [Docs](#documentation) · [Discuss](https://github.com/whystuck/whystuck/discussions)
 
 </div>
 
 <p align="center">
-  <img src="docs/assets/loopgepa-demo.gif" alt="LoopGEPA diagnosing a repeatedly failing bugfix loop from local traces and proposing a reversible, approval-gated fix" width="840">
+  <img src="docs/assets/whystuck-demo.gif" alt="WhyStuck diagnosing a repeatedly failing bugfix loop from local traces and proposing a reversible, approval-gated fix" width="840">
 </p>
 
 <p align="center"><em>Live recording of <code>examples/bugfix-loop/demo.py</code> — reproducible via <code>vhs assets/demo/demo.tape</code>. No API key, nothing leaves the machine.</em></p>
 
 > **Your coding agent re-ran `npm install` 40 times and you didn't notice.**
-> LoopGEPA records why a repeated agent loop keeps failing, shows you the failure
+> WhyStuck records why a repeated agent loop keeps failing, shows you the failure
 > mode with a confidence level, and proposes a small, reversible patch — to the
 > verifier, retry policy, stop condition, or skill — that you approve before
 > anything is written.
 
-**LoopGEPA is the diagnosis-and-repair layer for [loop engineering](docs/how-it-works.md).**
+**WhyStuck is the diagnosis-and-repair layer for [loop engineering](docs/how-it-works.md).**
 2026's agent-dev stack goes prompt → context → harness → *loop* engineering: you
 stop prompting the agent turn-by-turn and design the act→verify→retry→stop cycle
 that drives it ([ADTmag](https://adtmag.com/articles/2026/07/01/loop-engineering-emerges-as-developers-put-ai-coding-agents-on-repeat.aspx)).
-Loop scaffolders help you *build* a loop; LoopGEPA tells you *why it keeps failing
+Loop scaffolders help you *build* a loop; WhyStuck tells you *why it keeps failing
 and what to change*. Every named alternative — Latitude, LangSmith, Braintrust,
 Langfuse — is cloud SaaS for production apps; **none does local, zero-telemetry,
-coding-agent-session loop diagnosis.** The name nods to
-[GEPA](https://arxiv.org/abs/2507.19457) (Genetic-Pareto, ICLR 2026 Oral), whose
-measured optimization arrives in [v0.2](docs/v0.2-eval-benchmark.md).
+coding-agent-session loop diagnosis.** WhyStuck's reflective-mutation approach
+builds on [GEPA](https://arxiv.org/abs/2507.19457) (Genetic-Pareto, ICLR 2026
+Oral); the measured GEPA optimization itself arrives in
+[v0.2](docs/v0.2-eval-benchmark.md), which wraps `gepa-ai/gepa`.
 
 **The diagnosis is deterministic — it spends ~0 model tokens; only the proposed
 fix uses your agent's own model.** No API key to diagnose, nothing uploaded, and
@@ -55,32 +56,32 @@ it stays out of your request hot path.
 > `curl -LsSf https://astral.sh/uv/install.sh | sh`
 
 ```bash
-claude mcp add loopgepa -- uvx loopgepa      # Claude Code
-codex  mcp add loopgepa -- uvx loopgepa      # Codex CLI
+claude mcp add whystuck -- uvx whystuck      # Claude Code
+codex  mcp add whystuck -- uvx whystuck      # Codex CLI
 ```
 
 What this does:
 
-1. Registers LoopGEPA as a local stdio MCP server (no `pip install`, no venv).
-2. Exposes 8 tools + 3 slash-command skills to your agent.
-3. Stores traces under `$XDG_DATA_HOME/loopgepa` — **outside your repo**, never
+1. Registers WhyStuck as a local stdio MCP server (no `pip install`, no venv).
+2. Exposes 6 focused MCP tools + 3 slash-command skills to your agent.
+3. Stores traces under `$XDG_DATA_HOME/whystuck` — **outside your repo**, never
    committed by accident.
 
 **Cursor / any MCP client** — add to your `mcp.json`:
 
 ```json
-{ "mcpServers": { "loopgepa": { "command": "uvx", "args": ["loopgepa"] } } }
+{ "mcpServers": { "whystuck": { "command": "uvx", "args": ["whystuck"] } } }
 ```
 
 > **Tip — make your agent reach for it automatically.** Paste one line into your
 > `AGENTS.md` / `CLAUDE.md` / `.cursor/rules`:
 > *"When a loop keeps failing (repeated edits, retries that don't help), ask
-> loopgepa why before changing code."* See [AGENTS.md](AGENTS.md).
+> whystuck why before changing code."* See [AGENTS.md](AGENTS.md).
 
 <details><summary>Try it offline first — no API key, nothing written</summary>
 
 ```bash
-git clone https://github.com/loopgepa/loopgepa && cd loopgepa
+git clone https://github.com/whystuck/whystuck && cd whystuck
 uv run python examples/bugfix-loop/demo.py
 ```
 
@@ -108,12 +109,12 @@ declare loop ─▶ run it (worker + verifier) ─▶ clean local trace (JSONL)
 5. **Preview** the exact diffs (dry-run writes nothing), then **approve** — the
    write is atomic and reversible, with a rollback record.
 
-**LoopGEPA runs the loop, so every knob it tunes is real, and every trace is
+**WhyStuck runs the loop, so every knob it tunes is real, and every trace is
 clean by construction — and it never writes without your approval.**
 
 ## Why not just X?
 
-| | LoopGEPA | Latitude / LangSmith / Braintrust / Langfuse |
+| | WhyStuck | Latitude / LangSmith / Braintrust / Langfuse |
 |---|---|---|
 | Runs | **On your machine** | Cloud SaaS |
 | Data | **Never leaves it, no telemetry** | Uploaded to a backend |
@@ -135,7 +136,7 @@ and tested.
 | Deterministic diagnosis + confidence | ✅ |
 | Reflective mutation (≤3 genes, safety-guarded) | ✅ |
 | Dry-run + reversible promotion + rollback | ✅ |
-| FastMCP stdio server (8 tools) | ✅ |
+| FastMCP stdio server (6 tools) | ✅ |
 | Claude Code plugin (3 skills, 3 agents) | ✅ |
 | Evaluation + benchmark (wraps `gepa-ai/gepa`) | 📋 v0.2 |
 | Pareto frontier over variants | 📋 v0.2 |
@@ -147,20 +148,19 @@ and tested.
 The server is zero-config. Point any MCP client at it:
 
 ```json
-{ "mcpServers": { "loopgepa": { "command": "uvx", "args": ["loopgepa"] } } }
+{ "mcpServers": { "whystuck": { "command": "uvx", "args": ["whystuck"] } } }
 ```
 
-Storage location is overridable with `LOOPGEPA_HOME` (default
-`$XDG_DATA_HOME/loopgepa`). No API keys — the v0.1 runner is fully offline.
+Storage location is overridable with `WHYSTUCK_HOME` (default
+`$XDG_DATA_HOME/whystuck`). No API keys — the v0.1 runner is fully offline.
 
 ## MCP tools & safety boundary
 
-Eight approval-gated tools: `record_trace`, `run_loop`, `summarize_traces`,
-`infer_failure_modes`, `propose_mutations`, `list_variants`, `promote_variant`,
-`save_loop`. The boundary is mechanical: **`promote_variant` is dry-run by
-default and only writes on an explicit approval flag; proposals are capped at 3
-genes; budget caps can't be weakened; promotion paths can't escape the project
-directory.** Full threat model: [SECURITY.md](SECURITY.md).
+Six focused tools: `diagnose`, `run_loop`, `propose_fix`, `promote`, `save_loop`,
+and the internal `record_trace`. The boundary is mechanical: **`promote` is
+dry-run by default and only writes on an explicit approval flag; proposals are
+capped at 3 genes; budget caps can't be weakened; promotion paths can't escape
+the project directory.** Full threat model: [SECURITY.md](SECURITY.md).
 
 ## Roadmap
 
@@ -179,11 +179,11 @@ See [ROADMAP.md](ROADMAP.md).
 - [Comparison](docs/comparison.md) · [Competitive & launch notes](docs/COMPETITIVE-AND-LAUNCH.md)
 - [Design records (ADRs)](DECISIONS.md) · [Implementation spec](IMPLEMENTATION.md)
 
-## Where to find LoopGEPA
+## Where to find WhyStuck
 
 | Channel | Install | Notes |
 |---|---|---|
-| PyPI | `uvx loopgepa` | primary; zero-install via `uv` |
+| PyPI | `uvx whystuck` | primary; zero-install via `uv` |
 | MCP registry | auto-discovered | via `server.json` (feeds mcp.directory, Glama) |
 | GitHub | `git clone` | source + examples |
 
@@ -191,7 +191,7 @@ See [ROADMAP.md](ROADMAP.md).
 
 Highest-impact area right now: **real loop examples** beyond the bugfix loop
 (an orchestrator/triage loop). See [CONTRIBUTING.md](CONTRIBUTING.md) and the
-[`good first issue`](https://github.com/loopgepa/loopgepa/labels/good%20first%20issue) label.
+[`good first issue`](https://github.com/whystuck/whystuck/labels/good%20first%20issue) label.
 
 ## License
 
@@ -200,5 +200,5 @@ Apache-2.0 — see [LICENSE](LICENSE).
 ---
 
 <div align="center">
-Built by <a href="https://github.com/vladimirrott">Vladimir Rotariu</a>. · Ideas, war stories — <a href="https://github.com/loopgepa/loopgepa/discussions">come say hi</a>.
+Built by <a href="https://github.com/vladimirrott">Vladimir Rotariu</a>. · Ideas, war stories — <a href="https://github.com/whystuck/whystuck/discussions">come say hi</a>.
 </div>

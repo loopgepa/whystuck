@@ -10,7 +10,7 @@
 
 - [ ] `uv run pytest` passes
 - [ ] `uv run ruff check .` and `uv run ruff format --check .` pass
-- [ ] `uv run mypy src/loopgepa` passes
+- [ ] `uv run mypy src/whystuck` passes
 - [ ] Behavior change is covered by a test written **before** the implementation (TDD)
 
 ## Safety

@@ -1,7 +1,7 @@
-"""Tests for loopgepa.core.diagnosis — deterministic trace analysis (ADR-005)."""
+"""Tests for whystuck.core.diagnosis — deterministic trace analysis (ADR-005)."""
 
-from loopgepa.core.diagnosis import infer_failure_modes, summarize_traces
-from loopgepa.core.models import (
+from whystuck.core.diagnosis import infer_failure_modes, summarize_traces
+from whystuck.core.models import (
     ConfidenceBand,
     LoopMetrics,
     LoopStepTrace,

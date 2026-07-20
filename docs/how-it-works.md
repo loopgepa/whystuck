@@ -1,6 +1,6 @@
 # How it works
 
-## Where LoopGEPA sits: loop engineering
+## Where WhyStuck sits: loop engineering
 
 In mid-2026 the AI-dev skill ladder gained a new rung:
 
@@ -16,8 +16,8 @@ discovers work, hands tasks to (sub-)agents, verifies results, keeps state, and
 decides the next action until a goal is met. Claude Code, Codex, and Devin are
 themselves loops.
 
-**LoopGEPA is the diagnosis-and-repair layer for loop engineering.** Where a loop
-scaffolder helps you *build* a loop, LoopGEPA answers the next question: *this
+**WhyStuck is the diagnosis-and-repair layer for loop engineering.** Where a loop
+scaffolder helps you *build* a loop, WhyStuck answers the next question: *this
 loop keeps failing — why, and what is the smallest reversible change that helps?*
 
 ## The loop genome
@@ -30,14 +30,14 @@ skill · verifier_rubric · retry_policy · stop_condition · context_policy · 
 
 Genes are either **file-backed** (`skill`/`agent`/`prompt`/`hook` — they live in
 files your agent reads) or **runner-backed** (`retry`/`stop`/`context`/`budget` —
-enforced by the LoopGEPA runner and persisted in the genome). This is what makes
-every knob real: LoopGEPA runs the loop, so it can both observe and change it.
+enforced by the WhyStuck runner and persisted in the genome). This is what makes
+every knob real: WhyStuck runs the loop, so it can both observe and change it.
 
 ## The pipeline
 
 ```text
 1. run / record   run a declared loop (worker + verifier), or ingest a session
-                  ──▶ a clean local trace (JSONL, in $XDG_DATA_HOME/loopgepa)
+                  ──▶ a clean local trace (JSONL, in $XDG_DATA_HOME/whystuck)
 2. diagnose       cluster failures, rank them, attach DETERMINISTIC confidence
 3. propose        the agent reflects on the diagnosis and proposes a ≤3-gene fix,
                   each carrying evidence trace ids

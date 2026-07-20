@@ -9,12 +9,12 @@ The honest, defensible core. No evaluation, no Pareto (ADR-003).
 - Deterministic failure-mode aggregation + confidence (ADR-005).
 - Reflective mutation (≤3 genes) with evidence trace IDs.
 - Diff preview → explicit approval → reversible promote + rollback record.
-- FastMCP stdio server; `uvx loopgepa`; one bugfix-loop example.
+- FastMCP stdio server; `uvx whystuck`; one bugfix-loop example.
 
 ## v0.2 — Evaluate (earn the GEPA claim) — [design](docs/v0.2-eval-benchmark.md)
 
 Wrap the official `gepa-ai/gepa` optimizer via a `LoopGenomeAdapter`; GEPA owns
-the Pareto frontier, LoopGEPA owns the loop-genome mapping (ADR-011).
+the Pareto frontier, WhyStuck owns the loop-genome mapping (ADR-011).
 
 - 📋 `eval/objectives.py` — multi-objective metric vector + scalarizer
 - 📋 `eval/benchmark.py` — task set from recorded traces (replay) or a `tasks/` dir

@@ -11,7 +11,7 @@ from collections import Counter, OrderedDict
 
 from pydantic import BaseModel, Field
 
-from loopgepa.core.models import Confidence, LoopTrace, StepStatus, assess_confidence
+from whystuck.core.models import Confidence, LoopTrace, StepStatus, assess_confidence
 
 # Map a failing step's role to the loop genes most likely responsible. Used to
 # point diagnosis at the right knob; deliberately small and conservative.

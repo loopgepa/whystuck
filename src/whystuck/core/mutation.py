@@ -7,8 +7,8 @@ or removing a `safety_locked` gene is refused unless the user first unlocks it
 
 from __future__ import annotations
 
-from loopgepa.core.errors import GeneNotFoundError, SafetyLockError
-from loopgepa.core.models import LoopGene, LoopGenome, MutationProposal, MutationType
+from whystuck.core.errors import GeneNotFoundError, SafetyLockError
+from whystuck.core.models import LoopGene, LoopGenome, MutationProposal, MutationType
 
 
 def apply_mutation(genome: LoopGenome, proposal: MutationProposal) -> LoopGenome:

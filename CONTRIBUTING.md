@@ -1,6 +1,6 @@
-# Contributing to LoopGEPA
+# Contributing to WhyStuck
 
-Thanks for your interest. LoopGEPA is pre-alpha; the shape is still moving, so
+Thanks for your interest. WhyStuck is pre-alpha; the shape is still moving, so
 open an issue to discuss anything non-trivial before a large PR.
 
 ## Ground rules
@@ -22,7 +22,7 @@ open an issue to discuss anything non-trivial before a large PR.
 uv sync
 uv run pytest
 uv run ruff check .
-uv run mypy src/loopgepa
+uv run mypy src/whystuck
 ```
 
 ## Pre-PR gate

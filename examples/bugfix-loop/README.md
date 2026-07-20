@@ -1,6 +1,6 @@
 # Example: bugfix-loop
 
-The flagship LoopGEPA walkthrough — fully local, offline, no API key.
+The flagship WhyStuck walkthrough — fully local, offline, no API key.
 
 ## Run the demo
 
@@ -25,15 +25,15 @@ Dry-run promotion (dry_run=True, promoted=False)
 
 ## The same flow from inside Claude Code / Codex
 
-Once the MCP server is installed (`claude mcp add loopgepa -- uvx loopgepa`):
+Once the MCP server is installed (`claude mcp add whystuck -- uvx whystuck`):
 
 ```text
-You:    /loopgepa:explain-loop-failure bugfix-loop
+You:    /whystuck:explain-loop-failure bugfix-loop
 Claude: 8 traces, 0% success. Dominant failure (confidence: medium): the repair
         step repeats the original patch after tests fail. Likely gene:
         verifier_rubric.
 
-You:    /loopgepa:optimize-loop bugfix-loop
+You:    /whystuck:optimize-loop bugfix-loop
 Claude: Proposing 1 change to verifier_rubric (evidence: 8 traces). Here is the
         dry-run diff. Approve to apply?
 

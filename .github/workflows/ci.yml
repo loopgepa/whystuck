@@ -36,7 +36,7 @@ jobs:
         run: uv run ruff format --check .
 
       - name: Type check
-        run: uv run mypy src/loopgepa
+        run: uv run mypy src/whystuck
 
       - name: Test
         run: uv run pytest

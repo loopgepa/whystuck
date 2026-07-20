@@ -1,9 +1,9 @@
-"""Tests for loopgepa.core.models — behavior, not pydantic plumbing."""
+"""Tests for whystuck.core.models — behavior, not pydantic plumbing."""
 
 import pytest
 from pydantic import ValidationError
 
-from loopgepa.core.models import (
+from whystuck.core.models import (
     SCHEMA_VERSION,
     ConfidenceBand,
     GeneType,
@@ -45,7 +45,7 @@ class TestAssessConfidence:
 
 class TestLoopGene:
     """ADR-002: only file-backed genes are promotable for imported sessions;
-    runner-backed genes are only real inside the LoopGEPA runner."""
+    runner-backed genes are only real inside the WhyStuck runner."""
 
     @pytest.mark.parametrize(
         "gene_type",

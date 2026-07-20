@@ -1,6 +1,6 @@
-"""Tests for loopgepa.core.diff — human-readable gene diffs."""
+"""Tests for whystuck.core.diff — human-readable gene diffs."""
 
-from loopgepa.core.diff import render_gene_diff
+from whystuck.core.diff import render_gene_diff
 
 
 class TestRenderGeneDiff:

@@ -1,4 +1,4 @@
-# LoopGEPA — Implementation Spec (v0.1)
+# WhyStuck — Implementation Spec (v0.1)
 
 **Supersedes** the original `IMPLEMENTATION(2)(1).md` LoopForge draft.
 Read `DECISIONS.md` first — it records *why* the shape below differs from that
@@ -7,7 +7,7 @@ draft (name, runner-owned loops, scope cut, trust model).
 **Audience:** autonomous coding agents (Codex / Claude Code) and human
 contributors.
 
-**One sentence.** LoopGEPA is a Claude Code plugin + local MCP server that
+**One sentence.** WhyStuck is a Claude Code plugin + local MCP server that
 executes *declared* agent loops, captures clean execution traces, diagnoses
 recurring failure modes with trace evidence, and proposes small, reversible,
 human-approved mutations to the loop's genes.
@@ -35,7 +35,7 @@ Do not implement Levels 5–6 before Levels 1–4 are reliable and tested.
 - **Gene** — one evolvable unit. File-backed (`skill`/`agent`/`prompt`/`hook`)
   or runner-enforced (`verifier_rubric`/`retry_policy`/`stop_condition`/
   `context_policy`/`budget_policy`).
-- **Runner** — LoopGEPA executes a genome step-by-step and enforces the
+- **Runner** — WhyStuck executes a genome step-by-step and enforces the
   runner-backed genes. Because it owns execution, every gene is a real knob and
   every trace is clean by construction (ADR-002).
 - **Trace** — one recorded run of a genome; stamped with `loop_id`,
@@ -48,14 +48,14 @@ Do not implement Levels 5–6 before Levels 1–4 are reliable and tested.
 
 ## 3. Repository layout
 
-Single distributable package so `uvx loopgepa` works (ADR-006).
+Single distributable package so `uvx whystuck` works (ADR-006).
 
-    loopgepa/
+    whystuck/
       README.md  LICENSE  SECURITY.md  CONTRIBUTING.md  CODE_OF_CONDUCT.md
       IMPLEMENTATION.md  DECISIONS.md  LAUNCH_CHECKLIST.md  ROADMAP.md  CHANGELOG.md
       pyproject.toml  .mcp.json.example
       .github/workflows/ci.yml  .github/{dependabot.yml,ISSUE_TEMPLATE/,PULL_REQUEST_TEMPLATE.md}
-      src/loopgepa/
+      src/whystuck/
         __init__.py
         server.py        # FastMCP app + main() stdio entrypoint (the console script)
         tools.py         # thin MCP tool handlers over core
@@ -71,14 +71,14 @@ Single distributable package so `uvx loopgepa` works (ADR-006).
 
 - Python 3.12+, **uv** (single package, `uv.lock` committed).
 - **FastMCP v3**, **stdio transport only** for v1 (ADR-007).
-- Console entry point `loopgepa = "loopgepa.server:main"` → `uvx loopgepa`.
+- Console entry point `whystuck = "whystuck.server:main"` → `uvx whystuck`.
 - **Pydantic v2** at every boundary.
 - File store: YAML genomes/variants, JSONL traces, JSON indexes, under
-  `$XDG_DATA_HOME/loopgepa` (ADR-004).
+  `$XDG_DATA_HOME/whystuck` (ADR-004).
 - Tests: pytest + pytest-cov; ruff; mypy strict. No network in tests.
 - Distribution: PyPI (`uv build` + `uv publish`). No `.mcpb` bundle in v1.
 
-## 5. Data models (`loopgepa_core/models.py`)
+## 5. Data models (`whystuck_core/models.py`)
 
 Keep the original draft's `LoopGene`, `LoopGenome`, `ToolCall`, `LoopStepTrace`,
 `LoopMetrics`, `LoopTrace`, `MutationProposal`, `LoopVariant` — with these
@@ -96,8 +96,8 @@ Keep the original draft's `LoopGene`, `LoopGenome`, `ToolCall`, `LoopStepTrace`,
 
 ## 6. Storage (`storage.py`)
 
-- Root: `LOOPGEPA_HOME`, default `$XDG_DATA_HOME/loopgepa`
-  (fallback `~/.local/share/loopgepa`). **Not** cwd (ADR-004.2).
+- Root: `WHYSTUCK_HOME`, default `$XDG_DATA_HOME/whystuck`
+  (fallback `~/.local/share/whystuck`). **Not** cwd (ADR-004.2).
 - Layout: `loops/ traces/ variants/ promotions/ config.json`.
   (`frontiers/` is v0.2.)
 - Traces: `O_APPEND` one-JSON-object-per-line; concurrent-safe (ADR-004.3).
@@ -136,19 +136,19 @@ and makes network calls; it is disclosed in SECURITY.md, never the default.
 
 ## 8. MCP tools (v0.1 only)
 
-`loopgepa_run_loop`, `loopgepa_record_trace`, `loopgepa_summarize_traces`,
-`loopgepa_infer_failure_modes` (deterministic; no LLM inside the server),
-`loopgepa_propose_mutations` (accepts Claude's structured proposal, validates
+`whystuck_run_loop`, `whystuck_record_trace`, `whystuck_summarize_traces`,
+`whystuck_infer_failure_modes` (deterministic; no LLM inside the server),
+`whystuck_propose_mutations` (accepts Claude's structured proposal, validates
 target genes, saves draft variant, returns diff summary),
-`loopgepa_list_variants`, `loopgepa_promote_variant` (dry-run default; writes
+`whystuck_list_variants`, `whystuck_promote_variant` (dry-run default; writes
 only on explicit approval; reconciles against live files per ADR-004.5; records
 promotion history).
 
-Deferred to v0.2: `loopgepa_score_variant`, `loopgepa_get_pareto_frontier`.
+Deferred to v0.2: `whystuck_score_variant`, `whystuck_get_pareto_frontier`.
 
 ## 9. Claude Code plugin
 
-- `.claude-plugin/plugin.json`, `.mcp.json` → `loopgepa-mcp`.
+- `.claude-plugin/plugin.json`, `.mcp.json` → `whystuck-mcp`.
 - Skills: `explain-loop-failure` (first-class, diagnose-only),
   `optimize-loop` (propose + diff + ask; never auto-promote),
   `design-loop` (declare a new genome).
@@ -187,7 +187,7 @@ v0.2 (separate track): eval harness wrapping `gepa-ai/gepa`, then Pareto.
 5. MCP saves a draft variant and shows a diff.
 6. Promotion is dry-run by default; real promote requires explicit approval and
    writes a rollback record; it reconciles against live files.
-7. All LoopGEPA state stays local (XDG dir); LoopGEPA opens no network sockets.
+7. All WhyStuck state stays local (XDG dir); WhyStuck opens no network sockets.
    The v0.1 command+verifier runner is fully offline; only an opt-in `claude -p`
    worker step makes (disclosed) network calls (§7.2, SECURITY.md).
 8. Nothing is ever labeled "optimized" without evaluation.

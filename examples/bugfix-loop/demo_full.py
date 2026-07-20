@@ -1,4 +1,4 @@
-"""Full LoopGEPA flow for the demo GIF — diagnose → propose → APPROVE → promote.
+"""Full WhyStuck flow for the demo GIF — diagnose → propose → APPROVE → promote.
 
 Run:  uv run python examples/bugfix-loop/demo_full.py
 
@@ -11,8 +11,8 @@ from __future__ import annotations
 import tempfile
 from pathlib import Path
 
-from loopgepa.core.storage import LoopGEPAStore
-from loopgepa.tools import infer, promote_variant, propose_mutations, record_trace, save_loop
+from whystuck.core.storage import WhyStuckStore
+from whystuck.tools import diagnose, promote_variant, propose_mutations, record_trace, save_loop
 
 LOOP = "bugfix-loop"
 SKILL_REL = "skills/bugfix/SKILL.md"
@@ -31,7 +31,7 @@ def _failing(i: int) -> dict:
 
 def main() -> None:
     with tempfile.TemporaryDirectory() as store_dir, tempfile.TemporaryDirectory() as proj:
-        store = LoopGEPAStore(Path(store_dir))
+        store = WhyStuckStore(Path(store_dir))
         skill = Path(proj) / SKILL_REL
         skill.parent.mkdir(parents=True)
         skill.write_text("Fix the bug.")
@@ -55,7 +55,7 @@ def main() -> None:
         for i in range(12):
             record_trace(store, _failing(i))
 
-        top = infer(store, LOOP)["failure_modes"][0]
+        top = diagnose(store, LOOP)["failure_modes"][0]
         print(f"Diagnosis: {top['title']}")
         print(f"  {len(top['evidence_trace_ids'])} traces · confidence {top['confidence']['band']}")
 

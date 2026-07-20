@@ -1,4 +1,4 @@
-"""LoopGEPA core data models.
+"""WhyStuck core data models.
 
 Pydantic v2 models at every boundary, plus the deterministic confidence
 assessment mandated by ADR-005 (confidence is computed, never guessed by an LLM).
@@ -94,7 +94,7 @@ class GeneType(StrEnum):
 
 
 # Genes backed by a file on disk (skill/agent/prompt/hook) can be promoted for
-# imported sessions; the rest are only real inside the LoopGEPA runner (ADR-002).
+# imported sessions; the rest are only real inside the WhyStuck runner (ADR-002).
 _FILE_BACKED_GENE_TYPES = frozenset(
     {GeneType.SKILL, GeneType.AGENT, GeneType.PROMPT, GeneType.HOOK}
 )

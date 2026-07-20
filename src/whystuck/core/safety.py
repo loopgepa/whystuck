@@ -8,8 +8,8 @@ Two properties enforced here, deliberately conservative and load-bearing:
 
 from __future__ import annotations
 
-from loopgepa.core.errors import BudgetIncreaseError, TooManyGenesError
-from loopgepa.core.models import GeneType, LoopGenome, MutationProposal, MutationType
+from whystuck.core.errors import BudgetIncreaseError, TooManyGenesError
+from whystuck.core.models import GeneType, LoopGenome, MutationProposal, MutationType
 
 # v0 caps mutations to 3 genes so a result stays attributable to a specific change.
 MAX_GENES_PER_MUTATION = 3

@@ -13,19 +13,19 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 === "Claude Code"
 
     ```bash
-    claude mcp add loopgepa -- uvx loopgepa
+    claude mcp add whystuck -- uvx whystuck
     ```
 
 === "Codex CLI"
 
     ```bash
-    codex mcp add loopgepa -- uvx loopgepa
+    codex mcp add whystuck -- uvx whystuck
     ```
 
 === "Cursor / any MCP client"
 
     ```json
-    { "mcpServers": { "loopgepa": { "command": "uvx", "args": ["loopgepa"] } } }
+    { "mcpServers": { "whystuck": { "command": "uvx", "args": ["whystuck"] } } }
     ```
 
 No `pip install`, no virtualenv — `uvx` runs it from PyPI in a cached ephemeral
@@ -44,7 +44,7 @@ only, nothing written).
 ## Inside your agent
 
 ```text
-/loopgepa:explain-loop-failure bugfix-loop     # diagnose only
-/loopgepa:optimize-loop bugfix-loop            # propose → dry-run → approve → promote
-/loopgepa:design-loop                          # declare a new loop
+/whystuck:explain-loop-failure bugfix-loop     # diagnose only
+/whystuck:optimize-loop bugfix-loop            # propose → dry-run → approve → promote
+/whystuck:design-loop                          # declare a new loop
 ```

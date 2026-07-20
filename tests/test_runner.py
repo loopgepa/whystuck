@@ -1,4 +1,4 @@
-"""Tests for loopgepa.core.runner — the offline command+verifier ingest runner.
+"""Tests for whystuck.core.runner — the offline command+verifier ingest runner.
 
 Command execution is injected so these are deterministic and never touch the
 real shell or network (IMPLEMENTATION §7).
@@ -6,8 +6,8 @@ real shell or network (IMPLEMENTATION §7).
 
 from collections.abc import Callable
 
-from loopgepa.core.models import StepStatus
-from loopgepa.core.runner import run_command_loop
+from whystuck.core.models import StepStatus
+from whystuck.core.runner import run_command_loop
 
 WORKER = ["run-worker"]
 VERIFIER = ["run-verifier"]
