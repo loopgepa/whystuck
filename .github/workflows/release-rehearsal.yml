@@ -1,0 +1,27 @@
+name: Release Rehearsal
+
+# Actions are SHA-pinned (`# vX` marks the version). Dry-runs the release pipeline
+# (build + SBOM) WITHOUT publishing, so a real tag never surprises us.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rehearse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
+      - name: Version consistency
+        run: bash scripts/check_versions.sh
+      - name: Build
+        run: uv build
+      - name: SBOM (SPDX)
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
+        with:
+          artifact-name: whystuck-sbom.spdx.json
+      - name: List artifacts (no publish)
+        run: ls -la dist/

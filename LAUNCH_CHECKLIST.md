@@ -52,7 +52,7 @@ _80 tests, ruff + mypy strict, docs build --strict, demo + stdio verified green.
 ## Gate 3 — Publish day (in order)
 
 - [ ] register PyPI name `whystuck`; `uv publish`
-- [ ] switch `gh` to **vladimirrott**; create `loopgepa/whystuck` repo; push
+- [x] create `loopgepa/whystuck` repo (as vladimirrott) + push — done (private)
 - [ ] enable branch protection on `main` — `scripts/setup_branch_protection.sh`
       (PR + 1 review + CI "test" required, admins enforced, no force-push/delete)
 - [ ] enable GitHub Pages, Discussions, Dependabot, code scanning

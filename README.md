@@ -140,10 +140,10 @@ and tested.
 | Claude Code plugin (3 skills, 3 agents) | ✅ |
 | Auto-trigger hook (thrash detection + session capture) | ✅ |
 | Evaluation library + GEPA wrapper (`whystuck[eval]`) | 🟡 v0.2-alpha |
+| LLM worker + output→apply→verify wiring (real-repo scoring) | 🟡 v0.2-alpha |
 | Optimize + frontier MCP tools (gated on the extra) | 🟡 v0.2-alpha |
-| LLM-backed worker (text genes move the score) | 🟡 v0.2-alpha |
 
-**131 tests**, all local and offline; `ruff` + `mypy --strict` + docs `--strict` clean.
+**135 tests**, all local and offline; `ruff` + `mypy --strict` + docs `--strict` clean.
 
 ## Configure
 

@@ -26,7 +26,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning:
   auto-detects repeated edits, captures a session trace, and nudges the agent to
   diagnose — no need to remember to invoke WhyStuck.
 - Claude Code marketplace manifest (`.claude-plugin/marketplace.json`).
-- 131 tests (TDD, offline); ruff + mypy strict; CI, CodeQL, Scorecard, secret
+- 135 tests (TDD, offline); repo_worker (output→apply→verify), dependency-review + release-rehearsal workflows, ADR index; ruff + mypy strict; CI, CodeQL, Scorecard, secret
   scan, and mkdocs-material docs site. Locked architecture in `DECISIONS.md`
   (ADR-001…010); threat model in `SECURITY.md`.
 

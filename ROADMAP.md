@@ -23,9 +23,10 @@ the Pareto frontier, WhyStuck owns the loop-genome mapping (ADR-011).
 - ✅ `eval/optimize.py` — `gepa.optimize` wrapper → winner variant + frontier
 - ✅ MCP tools `optimize_loop` + `get_frontier`, gated on the `eval` extra
 - ✅ `eval/llm_worker.py` — LLM-backed worker so text genes move the score
-  (`make_run_task(complete, score)`; litellm-backed default)
-- 🟡 the output→apply→verify wiring so LLM optimization runs against real repos
+- ✅ `eval/repo_worker.py` — output→apply→verify: LLM patches an isolated repo
+  copy, a real verifier runs, the score reflects it (end-to-end, offline-tested)
 - 📋 Only call output "optimized" after evaluation; report cost/latency/variance
+- 📋 A real-repo optimize example + the A/B/C/D benchmark writeup
 - 📋 The A/B/C/D writeup: prompt-only GEPA vs loop-level GEPA (IMPLEMENTATION §16)
 
 ## v0.3+ — Reach & polish
