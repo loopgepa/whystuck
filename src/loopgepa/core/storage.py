@@ -47,7 +47,7 @@ def _dump_yaml(data: object) -> str:
     return buf.getvalue()
 
 
-def _atomic_write(path: Path, text: str) -> None:
+def atomic_write_text(path: Path, text: str) -> None:
     """Write via temp file (same dir → same filesystem) + fsync + os.replace so a
     reader never sees a partial file and the data survives a crash. Cleans up the
     temp file on any error. Mode 0o600 — stored data may be sensitive."""
@@ -102,7 +102,7 @@ class LoopGEPAStore:
 
     # --- loops ---
     def save_loop(self, genome: LoopGenome) -> None:
-        _atomic_write(self._loop_path(genome.id), _dump_yaml(genome.model_dump(mode="json")))
+        atomic_write_text(self._loop_path(genome.id), _dump_yaml(genome.model_dump(mode="json")))
 
     def load_loop(self, loop_id: str) -> LoopGenome:
         path = self._loop_path(loop_id)
@@ -131,7 +131,7 @@ class LoopGEPAStore:
 
     # --- variants ---
     def save_variant(self, variant: LoopVariant) -> None:
-        _atomic_write(
+        atomic_write_text(
             self._variant_path(variant.loop_id, variant.id),
             _dump_yaml(variant.model_dump(mode="json")),
         )
