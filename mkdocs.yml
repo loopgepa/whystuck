@@ -1,0 +1,27 @@
+site_name: LoopGEPA
+site_description: Local, zero-telemetry diagnosis and reversible repair of coding-agent loops.
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Light mode
+  features:
+    - navigation.sections
+    - content.code.copy
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - Trust & safety: safety.md
+  - Competitive & launch notes: COMPETITIVE-AND-LAUNCH.md
+markdown_extensions:
+  - admonition
+  - pymdownx.superfences
+  - pymdownx.highlight

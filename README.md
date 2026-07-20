@@ -8,6 +8,10 @@ LoopGEPA sees *why* an agent loop keeps failing and proposes a reversible fix yo
 `Works with` **Claude Code** · **Codex CLI** · **Cursor**
 &nbsp;·&nbsp; `Local-only` · `No telemetry` · `Apache-2.0`
 
+[![CI](https://github.com/loopgepa/loopgepa/actions/workflows/ci.yml/badge.svg)](https://github.com/loopgepa/loopgepa/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/loopgepa)](https://pypi.org/project/loopgepa/)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+
 </div>
 
 > [!NOTE]
@@ -97,11 +101,12 @@ Full threat model: `SECURITY.md`.
 
 ## Development
 
+**80 tests**, all local and offline. Full gate mirrors CI:
+
 ```bash
 uv sync
-uv run pytest
-uv run ruff check .
-uv run mypy src/loopgepa
+bash scripts/dev_check.sh     # ruff + format + mypy strict + pytest
+uv run python scripts/verify_stdio.py   # prove `uvx loopgepa` serves MCP over stdio
 ```
 
 Contributing: `CONTRIBUTING.md` · Decisions: `DECISIONS.md` · Roadmap: `ROADMAP.md`
