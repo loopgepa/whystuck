@@ -13,3 +13,9 @@ updates:
       interval: "weekly"
     open-pull-requests-limit: 5
     labels: ["dependencies", "ci"]
+    # Keep codeql-action/init and /analyze in one PR — they must move together
+    # (a mismatched init/analyze version fails with a config-version error).
+    groups:
+      codeql-action:
+        patterns:
+          - "github/codeql-action*"
