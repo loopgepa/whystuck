@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pytest
+from conftest import FIXED_TS
 
 from whystuck.core.errors import NotFoundError
 from whystuck.core.models import (
@@ -26,13 +27,13 @@ def _genome(loop_id: str = "bugfix") -> LoopGenome:
 
 def _trace(trace_id: str, loop_id: str = "bugfix", outcome: str = "failure") -> LoopTrace:
     return LoopTrace(
-        id=trace_id, loop_id=loop_id, created_at="2026-07-20T00:00:00Z", final_outcome=outcome
+        id=trace_id, loop_id=loop_id, created_at=FIXED_TS, final_outcome=outcome
     )
 
 
 def _variant(variant_id: str, loop_id: str = "bugfix") -> LoopVariant:
     return LoopVariant(
-        id=variant_id, loop_id=loop_id, genome=_genome(loop_id), created_at="2026-07-20T00:00:00Z"
+        id=variant_id, loop_id=loop_id, genome=_genome(loop_id), created_at=FIXED_TS
     )
 
 
@@ -121,7 +122,7 @@ class TestPromotions:
     def test_record_and_list_promotion(self, tmp_path: Path):
         store = WhyStuckStore(tmp_path)
         rec = PromotionRecord(
-            timestamp="2026-07-20T00:00:00Z",
+            timestamp=FIXED_TS,
             loop_id="bugfix",
             from_variant_id="baseline",
             to_variant_id="v1",

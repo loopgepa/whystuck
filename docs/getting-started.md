@@ -31,6 +31,25 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 No `pip install`, no virtualenv — `uvx` runs it from PyPI in a cached ephemeral
 environment.
 
+### Before the PyPI release — run from a local clone
+
+`uvx whystuck` needs the package on PyPI. Until it's published, register the
+server from a git clone instead:
+
+```bash
+git clone https://github.com/loopgepa/whystuck && cd whystuck
+claude mcp add whystuck -- uv run --directory "$PWD" whystuck   # Claude Code
+codex  mcp add whystuck -- uv run --directory "$PWD" whystuck   # Codex CLI
+```
+
+For Cursor / any MCP client, the equivalent `mcp.json` entry is:
+
+```json
+{ "mcpServers": { "whystuck": { "command": "uv", "args": ["run", "--directory", "/abs/path/to/whystuck", "whystuck"] } } }
+```
+
+Switch to the `uvx whystuck` commands above once the package is on PyPI.
+
 ## Try it (offline, no API key)
 
 ```bash

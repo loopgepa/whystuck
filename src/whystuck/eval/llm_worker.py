@@ -6,18 +6,26 @@ text genes, calls an LLM, and scores the output — so changing a skill/verifier
 rubric changes the result, and GEPA has a gradient to climb.
 
 `complete` (the LLM call) and `score` (the task's success check) are injected, so
-this is fully offline-testable. The production `complete` is litellm-backed and
-lives behind the `eval` extra (network).
+this is fully offline-testable. The production `complete` is litellm-backed
+(network); litellm is not a base dependency — install it separately.
 """
 
 from __future__ import annotations
 
 from collections.abc import Callable
-from datetime import UTC, datetime
 
-from whystuck.core.models import LoopGenome, LoopMetrics, LoopStepTrace, LoopTrace, StepStatus
+from whystuck.core.models import (
+    LoopGenome,
+    LoopMetrics,
+    LoopStepTrace,
+    LoopTrace,
+    outcome_for,
+    step_status_for,
+)
+from whystuck.core.util import utc_now_iso
 from whystuck.eval.adapter import RunTask
 from whystuck.eval.benchmark import BenchmarkTask
+from whystuck.eval.prompts import render_text_genes
 
 Complete = Callable[[str], str]
 Score = Callable[[str, BenchmarkTask], bool]
@@ -26,11 +34,7 @@ BuildPrompt = Callable[[LoopGenome, BenchmarkTask], str]
 
 def default_build_prompt(genome: LoopGenome, task: BenchmarkTask) -> str:
     """Assemble a prompt from the genome's text genes + the task goal."""
-    parts = [
-        f"# {gene.type}: {gene.name}\n{gene.content}"
-        for gene in genome.genes
-        if isinstance(gene.content, str)
-    ]
+    parts = render_text_genes(genome)
     payload = task.payload or {}
     goal = payload.get("goal") or payload.get("task_summary") or task.id
     parts.append(f"# Task\n{goal}")
@@ -46,14 +50,13 @@ def make_run_task(
         prompt = build_prompt(genome, task)
         output = complete(prompt)
         ok = bool(score(output, task))
-        status = StepStatus.SUCCESS if ok else StepStatus.FAILURE
         return LoopTrace(
             id=f"llm-{task.id}",
             loop_id=genome.id,
-            created_at=datetime.now(UTC).isoformat(),
-            final_outcome="success" if ok else "failure",
+            created_at=utc_now_iso(),
+            final_outcome=outcome_for(ok),
             failure_summary=None if ok else "verifier rejected the LLM worker output",
-            steps=[LoopStepTrace(step_id="worker", role="worker", status=status)],
+            steps=[LoopStepTrace(step_id="worker", role="worker", status=step_status_for(ok))],
             metrics=LoopMetrics(success=ok),
         )
 
@@ -61,15 +64,13 @@ def make_run_task(
 
 
 def litellm_complete(model: str) -> Complete:
-    """Production `complete` backed by litellm (network; needs the eval extra)."""
+    """Production `complete` backed by litellm (network; install litellm separately)."""
 
     def complete(prompt: str) -> str:
         try:
             import litellm  # type: ignore[import-not-found]
         except ImportError as exc:
-            raise RuntimeError(
-                "the LLM worker needs the eval extra: pip install whystuck[eval]"
-            ) from exc
+            raise RuntimeError("the LLM worker needs litellm: pip install litellm") from exc
         resp = litellm.completion(model=model, messages=[{"role": "user", "content": prompt}])
         return resp.choices[0].message.content or ""
 

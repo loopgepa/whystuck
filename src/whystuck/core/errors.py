@@ -24,3 +24,10 @@ class TooManyGenesError(WhyStuckError):
 
 class BudgetIncreaseError(WhyStuckError):
     """A mutation tried to raise a budget cap on its own (SECURITY.md §5)."""
+
+
+class PathEscapeError(WhyStuckError, ValueError):
+    """A promotion gene path would escape base_dir (absolute or `..` traversal).
+
+    Subclasses ValueError as well as WhyStuckError so existing callers that catch
+    ValueError keep working while it joins the WhyStuck error hierarchy."""

@@ -40,7 +40,9 @@ def test_prompt_includes_text_genes_and_goal():
     assert "fix login" in prompt
 
 
-def test_litellm_complete_without_extra_is_actionable():
+def test_litellm_complete_without_litellm_is_actionable():
     complete = litellm_complete("openai/gpt-4o-mini")
-    with pytest.raises(RuntimeError, match="whystuck\\[eval\\]"):
+    # The error must name the real fix — `pip install litellm`, not the eval extra,
+    # which never included litellm (review finding #5).
+    with pytest.raises(RuntimeError, match="pip install litellm"):
         complete("hi")

@@ -1,8 +1,11 @@
 """Tests for whystuck.core.diagnosis — deterministic trace analysis (ADR-005)."""
 
+from conftest import FIXED_TS
+
 from whystuck.core.diagnosis import infer_failure_modes, summarize_traces
 from whystuck.core.models import (
     ConfidenceBand,
+    FinalOutcome,
     LoopMetrics,
     LoopStepTrace,
     LoopTrace,
@@ -12,7 +15,7 @@ from whystuck.core.models import (
 
 def _trace(
     tid: str,
-    outcome: str,
+    outcome: FinalOutcome,
     failure_summary: str | None = None,
     failed_role: str | None = None,
     retry_count: int = 0,
@@ -23,8 +26,8 @@ def _trace(
     return LoopTrace(
         id=tid,
         loop_id="bugfix",
-        created_at="2026-07-20T00:00:00Z",
-        final_outcome=outcome,  # type: ignore[arg-type]
+        created_at=FIXED_TS,
+        final_outcome=outcome,
         failure_summary=failure_summary,
         steps=steps,
         metrics=LoopMetrics(retry_count=retry_count),

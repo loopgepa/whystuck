@@ -1,6 +1,7 @@
 """Tests for whystuck.core.models — behavior, not pydantic plumbing."""
 
 import pytest
+from conftest import FIXED_TS
 from pydantic import ValidationError
 
 from whystuck.core.models import (
@@ -74,11 +75,11 @@ class TestLoopGene:
 class TestLoopTrace:
     def test_trace_stamps_current_schema_version(self):
         # ADR-004.4: every persisted record carries a schema version.
-        trace = LoopTrace(id="t1", loop_id="bugfix", created_at="2026-07-20T00:00:00Z")
+        trace = LoopTrace(id="t1", loop_id="bugfix", created_at=FIXED_TS)
         assert trace.schema_version == SCHEMA_VERSION
 
     def test_trace_defaults_outcome_to_unknown(self):
-        trace = LoopTrace(id="t1", loop_id="bugfix", created_at="2026-07-20T00:00:00Z")
+        trace = LoopTrace(id="t1", loop_id="bugfix", created_at=FIXED_TS)
         assert trace.final_outcome == "unknown"
 
 

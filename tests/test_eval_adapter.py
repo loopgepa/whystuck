@@ -4,6 +4,8 @@ A fake run_task (outcome depends on the candidate text) keeps this offline and
 lets us prove a better candidate actually scores higher.
 """
 
+from conftest import FIXED_TS
+
 from whystuck.core.models import GeneType, LoopGene, LoopGenome, LoopMetrics, LoopTrace
 from whystuck.eval.adapter import (
     LoopGenomeAdapter,
@@ -31,7 +33,7 @@ def _run_task(genome: LoopGenome, task: BenchmarkTask) -> LoopTrace:
     return LoopTrace(
         id=f"run-{task.id}",
         loop_id="bugfix",
-        created_at="2026-07-20T00:00:00Z",
+        created_at=FIXED_TS,
         final_outcome="success" if ok else "failure",
         failure_summary=None if ok else "patch was not minimal",
         metrics=LoopMetrics(success=ok),

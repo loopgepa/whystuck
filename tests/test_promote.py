@@ -6,6 +6,8 @@ Dry-run must never touch disk.
 
 from pathlib import Path
 
+from conftest import FIXED_TS
+
 from whystuck.core.models import GeneType, LoopGene, LoopGenome, LoopVariant
 from whystuck.core.promote import apply_promotion, plan_promotion
 
@@ -15,7 +17,7 @@ def _variant(*genes: LoopGene, variant_id: str = "v1") -> LoopVariant:
         id=variant_id,
         loop_id="bugfix",
         genome=LoopGenome(id="bugfix", name="Bugfix", genes=list(genes)),
-        created_at="2026-07-20T00:00:00Z",
+        created_at=FIXED_TS,
     )
 
 
@@ -64,7 +66,7 @@ class TestApplyPromotion:
             tmp_path,
             approved_by="human",
             from_variant_id="baseline",
-            timestamp="2026-07-20T00:00:00Z",
+            timestamp=FIXED_TS,
         )
         written = tmp_path / "skills" / "bugfix" / "SKILL.md"
         assert written.read_text() == "promoted content"
@@ -75,7 +77,7 @@ class TestApplyPromotion:
             tmp_path,
             approved_by="human",
             from_variant_id="baseline",
-            timestamp="2026-07-20T00:00:00Z",
+            timestamp=FIXED_TS,
         )
         assert record.to_variant_id == "v1"
         assert record.from_variant_id == "baseline"

@@ -10,11 +10,11 @@ from __future__ import annotations
 
 import uuid
 from collections.abc import Callable
-from datetime import UTC, datetime
 from typing import Any
 
 from whystuck.core.models import LoopVariant, ParetoCandidate
 from whystuck.core.storage import WhyStuckStore
+from whystuck.core.util import mean, utc_now_iso
 from whystuck.eval.adapter import (
     LoopGenomeAdapter,
     RunTask,
@@ -25,14 +25,6 @@ from whystuck.eval.benchmark import BenchmarkTask
 from whystuck.eval.objectives import objective_vector
 
 OptimizeFn = Callable[..., dict[str, Any]]
-
-
-def _now() -> str:
-    return datetime.now(UTC).isoformat()
-
-
-def _mean(xs: list[float]) -> float:
-    return sum(xs) / len(xs) if xs else 0.0
 
 
 def optimize_loop(
@@ -60,7 +52,7 @@ def optimize_loop(
 
     # Score the winner ourselves — deterministic, GEPA-internals-independent.
     scored = adapter.evaluate(tasks, best_candidate, capture_traces=True)
-    best_score = round(_mean(scored.scores), 4)
+    best_score = round(mean(scored.scores), 4)
     traj = scored.trajectories or []
     objectives = _average_objectives([objective_vector(t.metrics) for t in traj])
 
@@ -68,7 +60,7 @@ def optimize_loop(
         id=f"variant-{uuid.uuid4().hex[:8]}",
         loop_id=loop_id,
         genome=genome_from_candidate(base, best_candidate),
-        created_at=_now(),
+        created_at=utc_now_iso(),
         tags=["optimized"],
     )
     store.save_variant(variant)
@@ -85,7 +77,7 @@ def _average_objectives(vectors: list[dict[str, float]]) -> dict[str, float]:
     if not vectors:
         return {}
     keys = vectors[0].keys()
-    return {k: round(_mean([v[k] for v in vectors]), 4) for k in keys}
+    return {k: round(mean([v[k] for v in vectors]), 4) for k in keys}
 
 
 def _gepa_optimize(**kwargs: Any) -> dict[str, Any]:

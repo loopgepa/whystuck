@@ -7,48 +7,41 @@ Everything happens in the temp dir — the user's real working tree is never tou
 
 `complete` (the LLM) and `execute` (the verifier runner) are injected, so this is
 testable with a fake LLM + a real local verifier. Production `complete` is
-`whystuck.eval.llm_worker.litellm_complete` (network, `eval` extra).
+`whystuck.eval.llm_worker.litellm_complete` (network).
 """
 
 from __future__ import annotations
 
-import subprocess
 import tempfile
 from collections.abc import Callable
-from datetime import UTC, datetime
 from pathlib import Path
 
-from whystuck.core.models import LoopGenome, LoopMetrics, LoopStepTrace, LoopTrace, StepStatus
+from whystuck.core.models import (
+    LoopGenome,
+    LoopMetrics,
+    LoopStepTrace,
+    LoopTrace,
+    StepStatus,
+    outcome_for,
+    step_status_for,
+)
+from whystuck.core.subproc import run_capture, summarize
+from whystuck.core.util import utc_now_iso
 from whystuck.eval.adapter import RunTask
 from whystuck.eval.benchmark import BenchmarkTask
 from whystuck.eval.llm_worker import Complete
+from whystuck.eval.prompts import render_text_genes
 
 # (command, cwd) -> (exit_code, combined_output)
 Execute = Callable[[list[str], Path], tuple[int, str]]
 
-_OUTPUT_CAP = 500
-_TIMEOUT_S = 300
-
 
 def _default_execute(cmd: list[str], cwd: Path) -> tuple[int, str]:
-    proc = subprocess.run(  # noqa: S603
-        cmd,
-        cwd=cwd,
-        capture_output=True,
-        text=True,
-        errors="replace",
-        timeout=_TIMEOUT_S,
-        check=False,
-    )
-    return proc.returncode, (proc.stderr + proc.stdout)
+    return run_capture(cmd, cwd=cwd)
 
 
 def _default_build_prompt(genome: LoopGenome, goal: str, target: str, before: str) -> str:
-    parts = [
-        f"# {gene.type}: {gene.name}\n{gene.content}"
-        for gene in genome.genes
-        if isinstance(gene.content, str)
-    ]
+    parts = render_text_genes(genome)
     parts.append(f"# Goal\n{goal}")
     if target:
         parts.append(f"# File to rewrite: {target}\nCurrent content:\n{before}")
@@ -97,16 +90,15 @@ def make_repo_run_task(
 
         ok = code == 0
         diff_lines = abs(new_content.count("\n") - before.count("\n"))
-        status = StepStatus.SUCCESS if ok else StepStatus.FAILURE
         return LoopTrace(
             id=f"repo-{task.id}",
             loop_id=genome.id,
-            created_at=datetime.now(UTC).isoformat(),
-            final_outcome="success" if ok else "failure",
-            failure_summary=None if ok else output[:_OUTPUT_CAP],
+            created_at=utc_now_iso(),
+            final_outcome=outcome_for(ok),
+            failure_summary=None if ok else summarize(output),
             steps=[
                 LoopStepTrace(step_id="worker", role="worker", status=StepStatus.SUCCESS),
-                LoopStepTrace(step_id="verify", role="verify", status=status),
+                LoopStepTrace(step_id="verify", role="verify", status=step_status_for(ok)),
             ],
             metrics=LoopMetrics(success=ok, diff_size_lines=diff_lines),
         )

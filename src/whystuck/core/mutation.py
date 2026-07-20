@@ -39,5 +39,10 @@ def apply_mutation(genome: LoopGenome, proposal: MutationProposal) -> LoopGenome
         del new.genes[idx]
     elif proposal.mutation_type is MutationType.LOCK_GENE:
         gene.safety_locked = True
+    elif proposal.mutation_type is MutationType.UNLOCK_GENE:
+        # The explicit "unlock to allow" action the safety refusals point users to;
+        # it clears the lock only — a subsequent budget-weakening edit is still
+        # refused by the budget guard, so unlocking never bypasses a cap.
+        gene.safety_locked = False
 
     return new

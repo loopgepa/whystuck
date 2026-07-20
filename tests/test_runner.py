@@ -6,6 +6,8 @@ real shell or network (IMPLEMENTATION §7).
 
 from collections.abc import Callable
 
+from conftest import FIXED_TS
+
 from whystuck.core.models import StepStatus
 from whystuck.core.runner import run_command_loop
 
@@ -30,7 +32,7 @@ def _run(verify_codes: list[int], max_retries: int = 1, **kw):
     return run_command_loop(
         loop_id="bugfix",
         trace_id="t1",
-        created_at="2026-07-20T00:00:00Z",
+        created_at=FIXED_TS,
         worker=WORKER,
         verifier=VERIFIER,
         max_retries=max_retries,
@@ -78,4 +80,4 @@ class TestStamping:
         assert trace.id == "t1"
         assert trace.loop_id == "bugfix"
         assert trace.variant_id == "v1"
-        assert trace.created_at == "2026-07-20T00:00:00Z"
+        assert trace.created_at == FIXED_TS

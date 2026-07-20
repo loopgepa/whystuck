@@ -15,15 +15,15 @@ loop (the caller does that via the store).
 from __future__ import annotations
 
 import os
-import tempfile
 from collections.abc import Iterator
 from pathlib import Path
 
 from pydantic import BaseModel, Field
 
 from whystuck.core.diff import render_gene_diff
+from whystuck.core.errors import PathEscapeError
 from whystuck.core.models import LoopVariant, PromotionRecord
-from whystuck.core.storage import _fsync_dir, _write_all
+from whystuck.core.storage import _fsync_dir, _stage_temp
 
 
 class FileChange(BaseModel):
@@ -51,14 +51,14 @@ def _safe_target(base_root: Path, rel: str) -> Path:
     """Resolve `rel` under `base_root`, refusing absolute paths or `..` escapes."""
     dest = (base_root / rel).resolve()
     if not dest.is_relative_to(base_root):
-        raise ValueError(f"gene path escapes base_dir: {rel!r}")
+        raise PathEscapeError(f"gene path escapes base_dir: {rel!r}")
     return dest
 
 
 def plan_promotion(variant: LoopVariant, base_dir: Path) -> PromotionPlan:
     """Dry run: diff each file-backed gene against the live file. No writes.
 
-    Raises ValueError if any gene path would escape base_dir."""
+    Raises PathEscapeError if any gene path would escape base_dir."""
     base_root = base_dir.resolve()
     changes: list[FileChange] = []
     for rel, after in _promotable_files(variant):
@@ -89,14 +89,7 @@ def apply_promotion(
     try:
         for change in plan.changes:
             dest = _safe_target(base_root, change.path)
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            fd, tmp_name = tempfile.mkstemp(dir=dest.parent, prefix=f".{dest.name}.", suffix=".tmp")
-            try:
-                _write_all(fd, change.after.encode("utf-8"))
-                os.fsync(fd)
-            finally:
-                os.close(fd)
-            staged.append((dest, Path(tmp_name)))
+            staged.append((dest, _stage_temp(dest, change.after.encode("utf-8"))))
     except BaseException:
         for _, tmp in staged:
             tmp.unlink(missing_ok=True)

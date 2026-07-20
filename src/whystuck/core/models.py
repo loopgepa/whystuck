@@ -156,6 +156,21 @@ class StepStatus(StrEnum):
     UNKNOWN = "unknown"
 
 
+# A whole loop run resolves to exactly one of these — deliberately narrower than
+# StepStatus (a run is never "skipped"), so the type states the invariant.
+FinalOutcome = Literal["success", "failure", "unknown"]
+
+
+def step_status_for(ok: bool) -> StepStatus:
+    """Map a pass/fail flag to a step status."""
+    return StepStatus.SUCCESS if ok else StepStatus.FAILURE
+
+
+def outcome_for(ok: bool) -> FinalOutcome:
+    """Map a pass/fail flag to a loop's final outcome."""
+    return "success" if ok else "failure"
+
+
 class ToolCall(BaseModel):
     name: str
     input_summary: str | None = None
@@ -199,7 +214,7 @@ class LoopTrace(BaseModel):
     task_summary: str | None = None
     steps: list[LoopStepTrace] = Field(default_factory=list)
     metrics: LoopMetrics = Field(default_factory=LoopMetrics)
-    final_outcome: Literal["success", "failure", "unknown"] = "unknown"
+    final_outcome: FinalOutcome = "unknown"
     failure_summary: str | None = None
     human_feedback: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -213,6 +228,7 @@ class MutationType(StrEnum):
     ADD_GENE = "add_gene"
     REMOVE_GENE = "remove_gene"
     LOCK_GENE = "lock_gene"
+    UNLOCK_GENE = "unlock_gene"
 
 
 class MutationProposal(BaseModel):
@@ -223,7 +239,7 @@ class MutationProposal(BaseModel):
     rationale: str
     # Required (never omitted) so a proposal always names its evidence. An empty
     # list is allowed; the server recomputes confidence from the evidence and
-    # forces LOW when it is empty (see tools.propose_mutations) — this field does
+    # forces LOW when it is empty (see tools.propose_fix) — this field does
     # not enforce that itself (IMPLEMENTATION §13, ADR-005).
     evidence_trace_ids: list[str]
     target_gene_id: str | None = None

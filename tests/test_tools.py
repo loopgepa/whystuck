@@ -9,6 +9,7 @@ import asyncio
 from pathlib import Path
 
 import pytest
+from conftest import FIXED_TS, rubric_genome, trace_dict
 from fastmcp import Client
 
 from whystuck.core.errors import TooManyGenesError
@@ -17,8 +18,8 @@ from whystuck.core.storage import WhyStuckStore
 from whystuck.tools import (
     build_server,
     diagnose,
-    promote_variant,
-    propose_mutations,
+    promote,
+    propose_fix,
     record_trace,
     run_loop,
     save_loop,
@@ -32,24 +33,6 @@ EXPECTED_TOOLS = {
     "whystuck_save_loop",
     "whystuck_record_trace",
 }
-
-
-def _trace(tid: str, outcome: str, summary: str | None = None) -> dict:
-    return {
-        "id": tid,
-        "loop_id": "bugfix",
-        "created_at": "2026-07-20T00:00:00Z",
-        "final_outcome": outcome,
-        "failure_summary": summary,
-    }
-
-
-def _rubric_genome() -> LoopGenome:
-    return LoopGenome(
-        id="bugfix",
-        name="Bugfix",
-        genes=[LoopGene(id="rubric", type=GeneType.VERIFIER_RUBRIC, name="R", content="check")],
-    )
 
 
 def _edit_proposal(target: str, after: str, mid: str) -> dict:
@@ -68,7 +51,7 @@ def _edit_proposal(target: str, after: str, mid: str) -> dict:
 class TestTraceTools:
     def test_record_increments_count(self, tmp_path: Path):
         store = WhyStuckStore(tmp_path)
-        out = record_trace(store, _trace("t1", "failure", "boom"))
+        out = record_trace(store, trace_dict("t1", "failure", "boom"))
         assert out["trace_count"] == 1
 
     def test_run_loop_records_and_reports_outcome(self, tmp_path: Path):
@@ -87,7 +70,7 @@ class TestTraceTools:
     def test_summarize_and_infer(self, tmp_path: Path):
         store = WhyStuckStore(tmp_path)
         for i in range(6):
-            record_trace(store, _trace(f"t{i}", "failure", "repair repeats mistake"))
+            record_trace(store, trace_dict(f"t{i}", "failure", "repair repeats mistake"))
         assert diagnose(store, "bugfix")["trace_count"] == 6
         modes = diagnose(store, "bugfix")["failure_modes"]
         assert modes[0]["title"] == "repair repeats mistake"
@@ -96,19 +79,32 @@ class TestTraceTools:
 class TestMutationTools:
     def test_propose_saves_unpromoted_draft(self, tmp_path: Path):
         store = WhyStuckStore(tmp_path)
-        store.save_loop(_rubric_genome())
-        out = propose_mutations(store, "bugfix", [_edit_proposal("rubric", "check harder", "m1")])
+        store.save_loop(rubric_genome())
+        out = propose_fix(store, "bugfix", [_edit_proposal("rubric", "check harder", "m1")])
         assert out["variant_id"]
         variants = store.list_variants("bugfix")
         assert len(variants) == 1
         assert variants[0].promoted is False
 
+    def test_propose_returns_server_computed_confidence(self, tmp_path: Path):
+        # The recomputed confidence must be reachable by the caller, not just
+        # persisted on the variant (review finding #4).
+        store = WhyStuckStore(tmp_path)
+        store.save_loop(rubric_genome())
+        for i in range(6):
+            record_trace(store, trace_dict(f"t{i}", "failure", "boom"))
+        proposal = _edit_proposal("rubric", "check harder", "m1")
+        proposal["evidence_trace_ids"] = ["t0", "t1", "t2"]
+        out = propose_fix(store, "bugfix", [proposal])
+        assert out["proposals"][0]["confidence"] is not None
+        assert out["proposals"][0]["confidence"]["band"] in {"low", "medium", "high"}
+
     def test_propose_over_gene_cap_is_rejected(self, tmp_path: Path):
         store = WhyStuckStore(tmp_path)
-        store.save_loop(_rubric_genome())
+        store.save_loop(rubric_genome())
         proposals = [_edit_proposal(f"g{i}", "x", f"m{i}") for i in range(4)]
         with pytest.raises(TooManyGenesError):
-            propose_mutations(store, "bugfix", proposals)
+            propose_fix(store, "bugfix", proposals)
 
 
 class TestPromoteTool:
@@ -120,13 +116,13 @@ class TestPromoteTool:
             path="skills/bugfix/SKILL.md",
             content="new content",
         )
-        store.save_loop(_rubric_genome())
+        store.save_loop(rubric_genome())
         store.save_variant(
             LoopVariant(
                 id="v1",
                 loop_id="bugfix",
                 genome=LoopGenome(id="bugfix", name="Bugfix", genes=[skill]),
-                created_at="2026-07-20T00:00:00Z",
+                created_at=FIXED_TS,
             )
         )
 
@@ -137,7 +133,7 @@ class TestPromoteTool:
         (proj / "skills" / "bugfix").mkdir(parents=True)
         (proj / "skills" / "bugfix" / "SKILL.md").write_text("old content")
 
-        out = promote_variant(store, "bugfix", "v1", base_dir=str(proj), dry_run=True)
+        out = promote(store, "bugfix", "v1", base_dir=str(proj), dry_run=True)
         assert out["dry_run"] is True
         assert out["files_to_change"] == ["skills/bugfix/SKILL.md"]
         assert (proj / "skills" / "bugfix" / "SKILL.md").read_text() == "old content"
@@ -149,7 +145,7 @@ class TestPromoteTool:
         (proj / "skills" / "bugfix").mkdir(parents=True)
         (proj / "skills" / "bugfix" / "SKILL.md").write_text("old content")
 
-        out = promote_variant(
+        out = promote(
             store, "bugfix", "v1", base_dir=str(proj), approved_by="human", dry_run=False
         )
         assert out["promoted"] is True
@@ -160,7 +156,7 @@ class TestPromoteTool:
 class TestSaveLoop:
     def test_save_loop(self, tmp_path: Path):
         store = WhyStuckStore(tmp_path)
-        out = save_loop(store, _rubric_genome().model_dump(mode="json"))
+        out = save_loop(store, rubric_genome().model_dump(mode="json"))
         assert out["loop_id"] == "bugfix"
         assert store.load_loop("bugfix").id == "bugfix"
 

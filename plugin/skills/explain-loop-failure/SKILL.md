@@ -13,7 +13,7 @@ Procedure:
    - the top failure modes with their evidence trace ids,
    - the deterministic confidence level (`low` / `medium` / `high`),
    - which loop genes are likely implicated.
-5. If the trace count is low, say so plainly and recommend collecting more runs
+4. If the trace count is low, say so plainly and recommend collecting more runs
    before trusting the diagnosis. "No clear failure mode yet" is a valid answer.
 
 Never overstate. A diagnosis is a likely cause supported by traces, not proof.

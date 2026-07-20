@@ -26,9 +26,31 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning:
   auto-detects repeated edits, captures a session trace, and nudges the agent to
   diagnose — no need to remember to invoke WhyStuck.
 - Claude Code marketplace manifest (`.claude-plugin/marketplace.json`).
-- 135 tests (TDD, offline); repo_worker (output→apply→verify), dependency-review + release-rehearsal workflows, ADR index; ruff + mypy strict; CI, CodeQL, Scorecard, secret
+- 142 tests (TDD, offline); repo_worker (output→apply→verify), dependency-review + release-rehearsal workflows, ADR index; ruff + mypy strict; CI, CodeQL, Scorecard, secret
   scan, and mkdocs-material docs site. Locked architecture in `DECISIONS.md`
   (ADR-001…010); threat model in `SECURITY.md`.
+
+### Changed
+- `propose_fix` returns the server-computed confidence per proposal (was only
+  persisted on the variant, unreachable by any tool).
+- Path-escape refusals raise `PathEscapeError` (a `WhyStuckError`) instead of a
+  bare `ValueError`; a malformed benchmark task file names the offending file.
+- Shared helpers deduped across the tree (`utc_now_iso`, `mean`, subprocess
+  capture, text-gene prompt rendering, temp-file staging); tests share factories
+  and a fixed timestamp via `tests/conftest.py`.
+
+### Fixed
+- **First-promotion rollback.** The first promotion snapshots a genesis variant,
+  so its rollback has a real prior state to re-promote (previously impossible).
+- **`unlock_gene` mutation.** The explicit unlock every safety refusal points to
+  is now a real mutation type — no more hand-editing YAML to clear a lock.
+- **Honest confidence.** Citing only unknown/fabricated trace ids now forces LOW;
+  raw trace volume alone no longer grants MEDIUM/HIGH.
+- **Actionable errors.** The LLM worker's missing-dependency error names the real
+  fix (`pip install litellm`); `list_traces` rejects a negative `limit`.
+- Docs corrected: the diagnosis confidence example (15 traces → genuinely HIGH),
+  the already-shipped LLM/repo workers (no longer "remaining"), the optimize
+  story label, a skipped skill step, and a from-source install path pre-launch.
 
 _Nothing is released yet — the repo stays local until the launch gate
 (`LAUNCH_CHECKLIST.md`) is fully green._

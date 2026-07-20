@@ -1,6 +1,7 @@
 """Tests for whystuck.eval.optimize — GEPA wrapper (real gepa injected/faked)."""
 
 import pytest
+from conftest import FIXED_TS
 
 from whystuck.core.models import GeneType, LoopGene, LoopGenome, LoopMetrics, LoopTrace
 from whystuck.core.storage import WhyStuckStore
@@ -24,7 +25,7 @@ def _run_task(genome: LoopGenome, task: BenchmarkTask) -> LoopTrace:
     return LoopTrace(
         id=f"run-{task.id}",
         loop_id="bugfix",
-        created_at="2026-07-20T00:00:00Z",
+        created_at=FIXED_TS,
         final_outcome="success" if ok else "failure",
         metrics=LoopMetrics(success=ok),
     )

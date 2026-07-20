@@ -60,6 +60,13 @@ claude mcp add whystuck -- uvx whystuck      # Claude Code
 codex  mcp add whystuck -- uvx whystuck      # Codex CLI
 ```
 
+> **Pre-launch:** `whystuck` isn't on PyPI yet, so `uvx whystuck` won't resolve.
+> Until the first release, run the real server from a clone:
+> ```bash
+> git clone https://github.com/loopgepa/whystuck && cd whystuck
+> claude mcp add whystuck -- uv run --directory "$PWD" whystuck
+> ```
+
 What this does:
 
 1. Registers WhyStuck as a local stdio MCP server (no `pip install`, no venv).
@@ -143,7 +150,7 @@ and tested.
 | LLM worker + output→apply→verify wiring (real-repo scoring) | 🟡 v0.2-alpha |
 | Optimize + frontier MCP tools (gated on the extra) | 🟡 v0.2-alpha |
 
-**135 tests**, all local and offline; `ruff` + `mypy --strict` + docs `--strict` clean.
+**142 tests**, all local and offline; `ruff` + `mypy --strict` (on `src/`) + docs `--strict` clean.
 
 ## Configure
 

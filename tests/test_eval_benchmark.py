@@ -2,6 +2,9 @@
 
 from pathlib import Path
 
+import pytest
+from conftest import FIXED_TS
+
 from whystuck.core.models import LoopTrace
 from whystuck.eval.benchmark import benchmark_from_dir, benchmark_from_traces
 
@@ -10,7 +13,7 @@ def _trace(tid: str, task_id: str | None, summary: str) -> LoopTrace:
     return LoopTrace(
         id=tid,
         loop_id="bugfix",
-        created_at="2026-07-20T00:00:00Z",
+        created_at=FIXED_TS,
         task_id=task_id,
         task_summary=summary,
     )
@@ -42,3 +45,12 @@ def test_from_dir_loads_yaml_tasks(tmp_path: Path):
 
 def test_from_dir_empty_when_missing(tmp_path: Path):
     assert benchmark_from_dir(tmp_path / "nope") == []
+
+
+def test_from_dir_names_the_malformed_file(tmp_path: Path):
+    # A malformed task among many must name the culprit, not raise a bare pydantic
+    # error with no filename (review finding #10).
+    (tmp_path / "good.yaml").write_text("id: good\npayload:\n  goal: ok\n")
+    (tmp_path / "bad.yaml").write_text("payload:\n  goal: missing an id\n")  # no `id`
+    with pytest.raises(ValueError, match="bad.yaml"):
+        benchmark_from_dir(tmp_path)

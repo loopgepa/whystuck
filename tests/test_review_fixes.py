@@ -1,17 +1,19 @@
-"""Regression tests for issues found in the multi-agent code review.
+"""Regression tests for issues found across the multi-agent code reviews.
 
-Each test pins a specific finding (path traversal, limit=0, promotion lineage,
-server-side confidence, budget-guard bypass, runner robustness, validators).
-"""
+Each test pins a specific finding (path traversal, limit handling, promotion
+lineage + first-promotion rollback, server-side confidence, budget-guard bypass,
+runner robustness, validators)."""
 
 from pathlib import Path
 
 import pytest
+from conftest import FIXED_TS, edit_proposal, rubric_genome, trace_dict
 from pydantic import ValidationError
 
 from whystuck.core.errors import (
     BudgetIncreaseError,
     NotFoundError,
+    PathEscapeError,
     SafetyLockError,
 )
 from whystuck.core.models import (
@@ -26,26 +28,24 @@ from whystuck.core.models import (
 )
 from whystuck.core.runner import run_command_loop
 from whystuck.core.storage import WhyStuckStore
-from whystuck.tools import promote_variant, propose_mutations, record_trace, save_loop
+from whystuck.tools import promote, propose_fix, record_trace, save_loop
 
 # ---------------------------------------------------------------- storage bugs
-
-
-def _trace(tid: str, outcome: str = "failure", summary: str | None = "boom") -> dict:
-    return {
-        "id": tid,
-        "loop_id": "bugfix",
-        "created_at": "2026-07-20T00:00:00Z",
-        "final_outcome": outcome,
-        "failure_summary": summary,
-    }
 
 
 def test_list_traces_limit_zero_returns_none(tmp_path: Path):
     store = WhyStuckStore(tmp_path)
     for i in range(3):
-        record_trace(store, _trace(f"t{i}"))
+        record_trace(store, trace_dict(f"t{i}"))
     assert store.list_traces("bugfix", limit=0) == []
+
+
+def test_list_traces_negative_limit_raises(tmp_path: Path):
+    # A negative limit is a caller bug, not "all" and not "none" — fail loud.
+    store = WhyStuckStore(tmp_path)
+    record_trace(store, trace_dict("t0"))
+    with pytest.raises(ValueError):
+        store.list_traces("bugfix", limit=-1)
 
 
 def test_load_variant_missing_raises_notfound(tmp_path: Path):
@@ -62,7 +62,7 @@ def test_load_loop_missing_raises_notfound(tmp_path: Path):
 
 def test_unicode_trace_round_trips(tmp_path: Path):
     store = WhyStuckStore(tmp_path)
-    record_trace(store, _trace("t1", summary="café ☕ 上手 — naïve"))
+    record_trace(store, trace_dict("t1", summary="café ☕ 上手 — naïve"))
     assert store.list_traces("bugfix")[0].failure_summary == "café ☕ 上手 — naïve"
 
 
@@ -133,25 +133,12 @@ def _budget_genome(budget: dict) -> LoopGenome:
     )
 
 
-def _edit(target: str, after, mid: str = "m1") -> MutationProposal:
-    return MutationProposal(
-        id=mid,
-        loop_id="bugfix",
-        mutation_type=MutationType.EDIT_GENE,
-        target_gene_id=target,
-        title="edit",
-        rationale="r",
-        evidence_trace_ids=["t1"],
-        after=after,
-    )
-
-
 def test_budget_guard_rejects_dropping_the_cap_key():
     from whystuck.core.safety import assert_safe
 
     genome = _budget_genome({"max_usd": 1.0})
     with pytest.raises(BudgetIncreaseError):
-        assert_safe(genome, _edit("budget", {}))  # drops max_usd entirely
+        assert_safe(genome, edit_proposal("budget", {}))  # drops max_usd entirely
 
 
 def test_budget_guard_rejects_removing_the_budget_gene():
@@ -177,11 +164,7 @@ def test_budget_guard_rejects_removing_the_budget_gene():
 def test_add_gene_rejects_duplicate_id():
     from whystuck.core.mutation import apply_mutation
 
-    genome = LoopGenome(
-        id="bugfix",
-        name="B",
-        genes=[LoopGene(id="rubric", type=GeneType.VERIFIER_RUBRIC, name="R", content="check")],
-    )
+    genome = rubric_genome()
     dup = MutationProposal(
         id="m",
         loop_id="bugfix",
@@ -205,7 +188,7 @@ def test_worker_failure_but_verifier_pass_is_success():
     trace = run_command_loop(
         loop_id="l",
         trace_id="t",
-        created_at="2026-07-20T00:00:00Z",
+        created_at=FIXED_TS,
         worker=["work"],
         verifier=["check"],
         max_retries=0,
@@ -223,7 +206,7 @@ def test_missing_command_becomes_failure_trace_not_crash():
     trace = run_command_loop(
         loop_id="l",
         trace_id="t",
-        created_at="2026-07-20T00:00:00Z",
+        created_at=FIXED_TS,
         worker=["does-not-exist"],
         verifier=["check"],
         max_retries=0,
@@ -236,17 +219,9 @@ def test_missing_command_becomes_failure_trace_not_crash():
 # -------------------------------------------------- tools: confidence + lineage + traversal
 
 
-def _rubric_genome() -> LoopGenome:
-    return LoopGenome(
-        id="bugfix",
-        name="B",
-        genes=[LoopGene(id="rubric", type=GeneType.VERIFIER_RUBRIC, name="R", content="check")],
-    )
-
-
 def test_propose_recomputes_confidence_and_ignores_client_value(tmp_path: Path):
     store = WhyStuckStore(tmp_path)
-    store.save_loop(_rubric_genome())
+    store.save_loop(rubric_genome())
     proposal = {
         "id": "m1",
         "loop_id": "bugfix",
@@ -258,16 +233,39 @@ def test_propose_recomputes_confidence_and_ignores_client_value(tmp_path: Path):
         "after": "check harder",
         "confidence": {"band": "high", "score": 0.99},  # ...client lies
     }
-    out = propose_mutations(store, "bugfix", [proposal])
+    out = propose_fix(store, "bugfix", [proposal])
     variant = store.load_variant("bugfix", out["variant_id"])
     # Empty evidence must force LOW confidence, not the client's HIGH.
+    assert variant.mutations[0].confidence.band is ConfidenceBand.LOW
+
+
+def test_confidence_low_when_evidence_cites_no_real_trace(tmp_path: Path):
+    # Fabricated trace ids are no evidence — force LOW even when raw trace volume
+    # alone would qualify for MEDIUM/HIGH (review finding #8).
+    store = WhyStuckStore(tmp_path)
+    store.save_loop(rubric_genome())
+    for i in range(20):
+        record_trace(store, trace_dict(f"t{i}", "failure", "boom"))
+    proposal = {
+        "id": "m1",
+        "loop_id": "bugfix",
+        "mutation_type": "edit_gene",
+        "target_gene_id": "rubric",
+        "title": "edit",
+        "rationale": "r",
+        "evidence_trace_ids": ["ghost-1", "ghost-2", "ghost-3"],  # none exist
+        "after": "check harder",
+    }
+    out = propose_fix(store, "bugfix", [proposal])
+    assert out["proposals"][0]["confidence"]["band"] == "low"
+    variant = store.load_variant("bugfix", out["variant_id"])
     assert variant.mutations[0].confidence.band is ConfidenceBand.LOW
 
 
 def test_propose_on_missing_loop_raises_notfound(tmp_path: Path):
     store = WhyStuckStore(tmp_path)
     with pytest.raises(NotFoundError):
-        propose_mutations(store, "ghost", [])
+        propose_fix(store, "ghost", [])
 
 
 def _skill_variant(vid: str, content: str) -> LoopVariant:
@@ -287,32 +285,78 @@ def _skill_variant(vid: str, content: str) -> LoopVariant:
                 )
             ],
         ),
-        created_at="2026-07-20T00:00:00Z",
+        created_at=FIXED_TS,
     )
+
+
+def _skill_loop(content: str) -> dict:
+    return {
+        "id": "bugfix",
+        "name": "B",
+        "genes": [
+            {"id": "s", "type": "skill", "name": "S", "path": "skills/x.md", "content": content}
+        ],
+    }
 
 
 def test_promotion_lineage_uses_most_recent_not_alphabetical(tmp_path: Path):
     store = WhyStuckStore(tmp_path / "store")
     proj = tmp_path / "proj"
     proj.mkdir()
-    store.save_loop(_rubric_genome())
+    store.save_loop(rubric_genome())
     # ids chosen so alphabetical != chronological
     store.save_variant(_skill_variant("variant-zzz", "first"))
     store.save_variant(_skill_variant("variant-aaa", "second"))
 
-    promote_variant(store, "bugfix", "variant-zzz", base_dir=str(proj), dry_run=False)
-    out = promote_variant(store, "bugfix", "variant-aaa", base_dir=str(proj), dry_run=False)
+    promote(store, "bugfix", "variant-zzz", base_dir=str(proj), dry_run=False)
+    out = promote(store, "bugfix", "variant-aaa", base_dir=str(proj), dry_run=False)
 
     assert out["from_variant_id"] == "variant-zzz"
     promoted = [v.id for v in store.list_variants("bugfix") if v.promoted]
     assert promoted == ["variant-aaa"]  # exactly one live variant
 
 
+def test_first_promotion_is_rollbackable_via_genesis(tmp_path: Path):
+    # The first promotion must name a real prior state so it can be rolled back
+    # by re-promoting it (review finding #3).
+    store = WhyStuckStore(tmp_path / "store")
+    proj = tmp_path / "proj"
+    (proj / "skills").mkdir(parents=True)
+    (proj / "skills" / "x.md").write_text("original")
+
+    save_loop(store, _skill_loop("original"))
+    variant_id = propose_fix(
+        store,
+        "bugfix",
+        [
+            {
+                "id": "m1",
+                "loop_id": "bugfix",
+                "mutation_type": "edit_gene",
+                "target_gene_id": "s",
+                "title": "edit skill",
+                "rationale": "r",
+                "evidence_trace_ids": [],
+                "after": "improved",
+            }
+        ],
+    )["variant_id"]
+
+    out = promote(store, "bugfix", variant_id, base_dir=str(proj), dry_run=False)
+    assert (proj / "skills" / "x.md").read_text() == "improved"
+    genesis_id = out["from_variant_id"]
+    assert genesis_id is not None  # first promotion now names a real prior state
+
+    # Roll back = re-promote the genesis variant → original content restored.
+    promote(store, "bugfix", genesis_id, base_dir=str(proj), dry_run=False)
+    assert (proj / "skills" / "x.md").read_text() == "original"
+
+
 def test_promote_rejects_path_traversal(tmp_path: Path):
     store = WhyStuckStore(tmp_path / "store")
     proj = tmp_path / "proj"
     proj.mkdir()
-    store.save_loop(_rubric_genome())
+    store.save_loop(rubric_genome())
     store.save_variant(
         LoopVariant(
             id="evil",
@@ -330,18 +374,18 @@ def test_promote_rejects_path_traversal(tmp_path: Path):
                     )
                 ],
             ),
-            created_at="2026-07-20T00:00:00Z",
+            created_at=FIXED_TS,
         )
     )
-    with pytest.raises(ValueError):
-        promote_variant(store, "bugfix", "evil", base_dir=str(proj), dry_run=True)
+    with pytest.raises(PathEscapeError):
+        promote(store, "bugfix", "evil", base_dir=str(proj), dry_run=True)
 
 
 def test_promote_absolute_path_rejected(tmp_path: Path):
     store = WhyStuckStore(tmp_path / "store")
     proj = tmp_path / "proj"
     proj.mkdir()
-    store.save_loop(_rubric_genome())
+    store.save_loop(rubric_genome())
     store.save_variant(
         LoopVariant(
             id="abs",
@@ -359,16 +403,16 @@ def test_promote_absolute_path_rejected(tmp_path: Path):
                     )
                 ],
             ),
-            created_at="2026-07-20T00:00:00Z",
+            created_at=FIXED_TS,
         )
     )
-    with pytest.raises(ValueError):
-        promote_variant(store, "bugfix", "abs", base_dir=str(proj), dry_run=True)
+    with pytest.raises(PathEscapeError):
+        promote(store, "bugfix", "abs", base_dir=str(proj), dry_run=True)
 
 
 def test_lock_then_edit_in_one_set_is_refused(tmp_path: Path):
     store = WhyStuckStore(tmp_path)
-    store.save_loop(_rubric_genome())
+    store.save_loop(rubric_genome())
     lock = {
         "id": "m1",
         "loop_id": "bugfix",
@@ -389,10 +433,10 @@ def test_lock_then_edit_in_one_set_is_refused(tmp_path: Path):
         "after": "sneaky",
     }
     with pytest.raises(SafetyLockError):
-        propose_mutations(store, "bugfix", [lock, edit])
+        propose_fix(store, "bugfix", [lock, edit])
 
 
 def test_save_loop_smoke(tmp_path: Path):
     store = WhyStuckStore(tmp_path)
-    save_loop(store, _rubric_genome().model_dump(mode="json"))
+    save_loop(store, rubric_genome().model_dump(mode="json"))
     assert store.load_loop("bugfix").id == "bugfix"

@@ -12,13 +12,13 @@ from __future__ import annotations
 
 import importlib.util
 import uuid
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 from fastmcp import FastMCP
 
 from whystuck.core.diagnosis import infer_failure_modes, summarize_traces
+from whystuck.core.errors import NotFoundError
 from whystuck.core.models import (
     Confidence,
     ConfidenceBand,
@@ -33,10 +33,7 @@ from whystuck.core.promote import apply_promotion, plan_promotion
 from whystuck.core.runner import Executor, run_command_loop
 from whystuck.core.safety import assert_safe, check_mutation_set
 from whystuck.core.storage import WhyStuckStore
-
-
-def _now() -> str:
-    return datetime.now(UTC).isoformat()
+from whystuck.core.util import utc_now_iso
 
 
 def _new_id(prefix: str) -> str:
@@ -63,16 +60,15 @@ def run_loop(
     variant_id: str | None = None,
     execute: Executor | None = None,
 ) -> dict[str, Any]:
-    extra = {"execute": execute} if execute is not None else {}
     trace = run_command_loop(
         loop_id=loop_id,
         trace_id=_new_id("trace"),
-        created_at=_now(),
+        created_at=utc_now_iso(),
         worker=worker,
         verifier=verifier,
         max_retries=max_retries,
         variant_id=variant_id,
-        **extra,
+        execute=execute,
     )
     store.append_trace(trace)
     return {
@@ -98,19 +94,23 @@ def _confidence_for_evidence(
     store: WhyStuckStore, loop_id: str, evidence_ids: list[str]
 ) -> Confidence:
     """Deterministic, server-computed confidence (ADR-005). Never trust a
-    client-supplied value; empty evidence is always LOW."""
+    client-supplied value; evidence that names no real trace is always LOW."""
     if not evidence_ids:
         return Confidence(band=ConfidenceBand.LOW, score=0.0)
     traces = store.list_traces(loop_id)
     known = {t.id for t in traces}
     matched = [e for e in evidence_ids if e in known]
+    if not matched:
+        # Citing only unknown/fabricated trace ids is no evidence at all — force
+        # LOW, not the MEDIUM/HIGH that raw trace volume alone would grant.
+        return Confidence(band=ConfidenceBand.LOW, score=0.0)
     failing = [t for t in traces if t.final_outcome == "failure"]
     denom = len(failing) if failing else len(traces)
     cluster_share = min(1.0, len(matched) / denom) if denom else 0.0
     return assess_confidence(n_traces=len(traces), cluster_share=cluster_share)
 
 
-def propose_mutations(
+def propose_fix(
     store: WhyStuckStore, loop_id: str, proposals: list[dict[str, Any]]
 ) -> dict[str, Any]:
     genome = store.load_loop(loop_id)
@@ -126,14 +126,48 @@ def propose_mutations(
         id=_new_id("variant"),
         loop_id=loop_id,
         genome=new_genome,
-        created_at=_now(),
+        created_at=utc_now_iso(),
         mutations=parsed,
     )
     store.save_variant(variant)
-    return {"variant_id": variant.id, "diff_summary": [p.title for p in parsed]}
+    return {
+        "variant_id": variant.id,
+        "diff_summary": [p.title for p in parsed],
+        # Surface the server-computed confidence so the caller can act on it — it
+        # is otherwise only persisted on the variant and unreachable by any tool.
+        "proposals": [
+            {
+                "title": p.title,
+                "mutation_type": p.mutation_type.value,
+                "confidence": p.confidence.model_dump() if p.confidence else None,
+            }
+            for p in parsed
+        ],
+    }
 
 
-def promote_variant(
+def _snapshot_genesis(store: WhyStuckStore, loop_id: str) -> str | None:
+    """Save the current live loop genome as a 'genesis' variant and return its id.
+
+    A loop's first promotion otherwise has no prior variant to name, so it could
+    never be rolled back. Snapshotting the pre-promotion state gives rollback a
+    real, re-promotable target. Returns None if the loop was never saved."""
+    try:
+        genome = store.load_loop(loop_id)
+    except NotFoundError:
+        return None
+    genesis = LoopVariant(
+        id=_new_id("genesis"),
+        loop_id=loop_id,
+        genome=genome,
+        created_at=utc_now_iso(),
+        tags=["genesis"],
+    )
+    store.save_variant(genesis)
+    return genesis.id
+
+
+def promote(
     store: WhyStuckStore,
     loop_id: str,
     variant_id: str,
@@ -153,11 +187,13 @@ def promote_variant(
             "diffs": [c.diff for c in plan.changes],
         }
     # The current live variant is the target of the last promotion (ordered log),
-    # not the alphabetically-first flagged variant.
+    # not the alphabetically-first flagged variant. On the first promotion there is
+    # none, so snapshot the pre-promotion loop as a genesis fallback — that makes
+    # even the first promotion reversible (rollback = re-promote the genesis variant).
     promotions = store.list_promotions(loop_id)
-    prev = promotions[-1].to_variant_id if promotions else None
+    prev = promotions[-1].to_variant_id if promotions else _snapshot_genesis(store, loop_id)
     record = apply_promotion(
-        variant, base, approved_by=approved_by, from_variant_id=prev, timestamp=_now()
+        variant, base, approved_by=approved_by, from_variant_id=prev, timestamp=utc_now_iso()
     )
     store.save_loop(variant.genome)  # runner-backed gene changes take effect next run
     store.record_promotion(record)
@@ -209,11 +245,14 @@ def optimize_loop_via_commands(
         else benchmark_from_traces(store.list_traces(loop_id))
     )
 
-    def run_task(genome: LoopGenome, task: Any) -> LoopTrace:
+    # The command runner ignores the candidate genome (the worker/verifier are
+    # fixed), so `_genome` is intentionally unused — text-gene search only bites
+    # with the LLM-backed worker (eval/llm_worker.py).
+    def run_task(_genome: LoopGenome, task: Any) -> LoopTrace:
         return run_command_loop(
             loop_id=loop_id,
             trace_id=f"opt-{task.id}",
-            created_at=_now(),
+            created_at=utc_now_iso(),
             worker=worker,
             verifier=verifier,
             max_retries=max_retries,
@@ -263,8 +302,9 @@ def build_server(store: WhyStuckStore, *, with_eval: bool | None = None) -> Fast
     @mcp.tool
     def whystuck_propose_fix(loop_id: str, proposals: list[dict[str, Any]]) -> dict[str, Any]:
         """Draft a reversible fix from mutation proposals (≤3 genes, safety-checked).
-        Confidence is recomputed server-side from the cited evidence."""
-        return propose_mutations(store, loop_id, proposals)
+        Confidence is recomputed server-side from the cited evidence and returned
+        per proposal."""
+        return propose_fix(store, loop_id, proposals)
 
     @mcp.tool
     def whystuck_promote(
@@ -276,7 +316,7 @@ def build_server(store: WhyStuckStore, *, with_eval: bool | None = None) -> Fast
     ) -> dict[str, Any]:
         """Apply a fix. Dry-run by default: returns diffs without writing. A real
         write needs dry_run=false and is reversible via a rollback record."""
-        return promote_variant(
+        return promote(
             store,
             loop_id,
             variant_id,

@@ -20,7 +20,7 @@ Zero config, stdio, local. Traces land in `$XDG_DATA_HOME/whystuck`, outside you
 ```
 You: /whystuck:explain-loop-failure bugfix-loop
 → diagnose
-WhyStuck: 14 traces, 36% success. HIGH confidence (12/14): repair repeats the
+WhyStuck: 15 traces, 13% success. HIGH confidence (13/15): repair repeats the
           original patch after tests fail. Likely gene: verifier_rubric.
 ```
 Diagnosis only — no change. Confidence is server-computed, so it can't be inflated.
@@ -123,10 +123,11 @@ Codex: retry-heavy failures dominate; the stop condition never triggers. Fix the
        stop_condition before it burns more budget.
 ```
 
-### 16 · v0.2 preview — measured optimization · any client *(roadmap)*
+### 16 · v0.2 preview — measured optimization · any client *(v0.2-alpha)*
 ```
 You: "Optimize bugfix against my tasks/ benchmark."
-→ build_benchmark → optimize_loop (wraps gepa.optimize) → get_frontier
+→ whystuck_optimize_loop (builds the benchmark from tasks_dir or recorded
+  traces, wraps gepa.optimize) → whystuck_get_frontier
 WhyStuck: Pareto set — variant-fast / variant-robust / variant-cheap, with scores.
 ```
 Only here is anything called **optimized** — because it's measured. See

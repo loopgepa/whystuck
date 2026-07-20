@@ -35,8 +35,9 @@ security bug — report it (see bottom).
    reversible rollback record.
 5. **Safety-locked genes.** A gene marked `safety_locked: true` (e.g. a
    `tool_policy`, `escalation_policy`, or `budget_policy` gene) can be commented
-   on but never edited or removed without an explicit user unlock. Mutations may
-   never weaken safety, remove approval gates, or raise budget caps on their own.
+   on but never edited or removed until the lock is cleared with an explicit
+   `unlock_gene` mutation. Even after an unlock, mutations may never weaken
+   safety, remove approval gates, or raise budget caps on their own.
 6. **Fail-open capture.** If trace recording fails, it must not break the user's
    Claude Code session.
 

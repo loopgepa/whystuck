@@ -75,23 +75,30 @@ def _fsync_dir(directory: Path) -> None:
         os.close(dfd)
 
 
+def _stage_temp(dest: Path, data: bytes) -> Path:
+    """Write `data` to a unique temp file beside `dest` (mode 0o600), fsynced and
+    closed, and return its path; the caller os.replace()s it into place. A unique
+    name (mkstemp) means concurrent writers to the same target never clobber each
+    other's temp; the temp is removed if the write itself fails."""
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp_name = tempfile.mkstemp(dir=dest.parent, prefix=f".{dest.name}.", suffix=".tmp")
+    try:
+        _write_all(fd, data)
+        os.fsync(fd)
+    except BaseException:
+        os.close(fd)
+        Path(tmp_name).unlink(missing_ok=True)
+        raise
+    else:
+        os.close(fd)
+    return Path(tmp_name)
+
+
 def atomic_write_text(path: Path, text: str) -> None:
     """Write via a unique temp file (same dir → same filesystem) + fsync +
     os.replace so a reader never sees a partial file. The file bytes and the
-    rename are both fsynced, so a completed write survives a crash. A unique temp
-    name (mkstemp, mode 0o600) means concurrent writers to the same path never
-    clobber each other's temp; the temp is removed on any error."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp_name = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
-    tmp = Path(tmp_name)
-    try:
-        _write_all(fd, text.encode("utf-8"))
-        os.fsync(fd)
-        os.close(fd)
-    except BaseException:
-        os.close(fd)
-        tmp.unlink(missing_ok=True)
-        raise
+    rename are both fsynced, so a completed write survives a crash."""
+    tmp = _stage_temp(path, text.encode("utf-8"))
     try:
         os.replace(tmp, path)
         _fsync_dir(path.parent)
@@ -161,6 +168,10 @@ class WhyStuckStore:
             return []
         lines = [ln for ln in path.read_text(encoding="utf-8").splitlines() if ln.strip()]
         if limit is not None:
+            # A negative limit is a caller bug, not "all" — fail loud rather than
+            # silently returning nothing (which `lines[-limit:]` would also botch).
+            if limit < 0:
+                raise ValueError(f"limit must be >= 0, got {limit}")
             # limit=0 means "none"; `lines[-0:]` would wrongly return everything.
             lines = lines[-limit:] if limit > 0 else []
         return [LoopTrace.model_validate_json(ln) for ln in lines]

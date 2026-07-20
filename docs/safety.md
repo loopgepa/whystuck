@@ -15,8 +15,9 @@ model lives in [`SECURITY.md`](https://github.com/loopgepa/whystuck/blob/main/SE
 - **You approve every write.** Promotion is dry-run by default and always
   reversible; each promotion writes a rollback record.
 - **Safety-locked genes** (tool/escalation/budget policy) are never edited or
-  removed without an explicit unlock. Mutations can't raise a budget cap on
-  their own, and a single proposal may touch at most three genes.
+  removed until you clear the lock with an explicit `unlock_gene` mutation.
+  Mutations can't raise a budget cap on their own (even after an unlock), and a
+  single proposal may touch at most three genes.
 
 ## Disclosure
 

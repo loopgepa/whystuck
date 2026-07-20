@@ -10,7 +10,7 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 from ruamel.yaml import YAML
 
 from whystuck.core.models import LoopTrace
@@ -39,5 +39,10 @@ def benchmark_from_dir(path: Path) -> list[BenchmarkTask]:
         return []
     tasks: list[BenchmarkTask] = []
     for f in sorted([*path.glob("*.yaml"), *path.glob("*.yml"), *path.glob("*.json")]):
-        tasks.append(BenchmarkTask.model_validate(_yaml.load(f.read_text(encoding="utf-8"))))
+        try:
+            tasks.append(BenchmarkTask.model_validate(_yaml.load(f.read_text(encoding="utf-8"))))
+        except ValidationError as exc:
+            # Name the culprit — a bare pydantic error over a whole tasks/ dir is
+            # unsearchable when one file among many is malformed.
+            raise ValueError(f"invalid benchmark task file {f.name}: {exc}") from exc
     return tasks

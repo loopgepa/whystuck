@@ -6,12 +6,14 @@ This is the flow the bugfix-loop example and the demo GIF walk through.
 
 from pathlib import Path
 
+from conftest import FIXED_TS
+
 from whystuck.core.models import ConfidenceBand
 from whystuck.core.storage import WhyStuckStore
 from whystuck.tools import (
     diagnose,
-    promote_variant,
-    propose_mutations,
+    promote,
+    propose_fix,
     record_trace,
     save_loop,
 )
@@ -23,7 +25,7 @@ def _failing_trace(i: int) -> dict:
     return {
         "id": f"trace-{i}",
         "loop_id": LOOP,
-        "created_at": "2026-07-20T00:00:00Z",
+        "created_at": FIXED_TS,
         "final_outcome": "failure",
         "failure_summary": "repair repeats the original patch after tests fail",
         "steps": [{"step_id": "verify", "role": "verify", "status": "failure"}],
@@ -63,7 +65,7 @@ def test_full_diagnose_propose_promote_flow(tmp_path: Path):
     assert "verifier_rubric" in top["likely_genes"]
 
     # Propose a patch to the skill gene, backed by the evidence.
-    variant_id = propose_mutations(
+    variant_id = propose_fix(
         store,
         LOOP,
         [
@@ -81,12 +83,12 @@ def test_full_diagnose_propose_promote_flow(tmp_path: Path):
     )["variant_id"]
 
     # Dry-run writes nothing.
-    dry = promote_variant(store, LOOP, variant_id, base_dir=str(proj), dry_run=True)
+    dry = promote(store, LOOP, variant_id, base_dir=str(proj), dry_run=True)
     assert dry["dry_run"] is True
     assert (proj / "skills" / "bugfix" / "SKILL.md").read_text() == "Fix the bug."
 
     # Approved promotion writes the file and records it reversibly.
-    live = promote_variant(store, LOOP, variant_id, base_dir=str(proj), dry_run=False)
+    live = promote(store, LOOP, variant_id, base_dir=str(proj), dry_run=False)
     assert live["promoted"] is True
     assert "smallest patch" in (proj / "skills" / "bugfix" / "SKILL.md").read_text()
     assert len(store.list_promotions(LOOP)) == 1

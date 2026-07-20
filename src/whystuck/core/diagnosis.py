@@ -12,6 +12,7 @@ from collections import Counter, OrderedDict
 from pydantic import BaseModel, Field
 
 from whystuck.core.models import Confidence, LoopTrace, StepStatus, assess_confidence
+from whystuck.core.util import mean
 
 # Map a failing step's role to the loop genes most likely responsible. Used to
 # point diagnosis at the right knob; deliberately small and conservative.
@@ -43,10 +44,6 @@ class FailureMode(BaseModel):
     confidence: Confidence
 
 
-def _mean(values: list[float]) -> float:
-    return sum(values) / len(values) if values else 0.0
-
-
 def summarize_traces(loop_id: str, traces: list[LoopTrace]) -> TraceSummary:
     n = len(traces)
     successes = sum(1 for t in traces if t.final_outcome == "success")
@@ -64,8 +61,8 @@ def summarize_traces(loop_id: str, traces: list[LoopTrace]) -> TraceSummary:
         success_rate=round(successes / n, 4) if n else 0.0,
         common_failure_summaries=[s for s, _ in summaries.most_common()],
         common_failed_steps=[s for s, _ in failed_steps.most_common()],
-        avg_retry_count=round(_mean([float(t.metrics.retry_count) for t in traces]), 4),
-        avg_latency_seconds=round(_mean(latencies), 4) if latencies else None,
+        avg_retry_count=round(mean([float(t.metrics.retry_count) for t in traces]), 4),
+        avg_latency_seconds=round(mean(latencies), 4) if latencies else None,
     )
 
 

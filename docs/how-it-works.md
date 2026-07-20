@@ -81,8 +81,11 @@ The v0.1 core **diagnoses and proposes** — it never claims a fix "works." The
 measured-evaluation loop that earns the word "optimized" lives in
 [v0.2](v0.2-eval-benchmark.md): an opt-in `pip install whystuck[eval]` layer that
 wraps the official GEPA optimizer to score variants over a benchmark and keep a
-Pareto frontier. It's built and offline-tested; the remaining piece is an
-LLM-backed worker so text-gene changes actually move the score.
+Pareto frontier. The LLM-backed worker (`eval/llm_worker.py`) and the
+output→apply→verify repo worker (`eval/repo_worker.py`) are both built and
+offline-tested (🟡 v0.2-alpha), so text-gene changes actually move the score.
+What's left: a packaged real-repo optimize example and the A/B/C/D benchmark
+writeup.
 
 ## Sources
 
