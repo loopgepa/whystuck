@@ -335,3 +335,46 @@ the discipline and the concrete pain, per ADR-010's anti-hype rule.
 examples cover real loop shapes (bugfix loop now; an orchestrator/triage loop
 later) rather than abstract "genomes." Keep vocabulary concrete: developers want
 fewer repeated failures, not "genome management."
+
+---
+
+## ADR-013 — Design principles distilled from competitor failure analysis
+
+**Status:** accepted (2026-07-20). Source: two independent research passes on why
+LLM-observability/agent tools lose users, and what makes dev tools go viral.
+
+**Context.** Independent estimates put LoopGEPA at ~58/100 usefulness and ~48/100
+viral capacity (rising to ~70 if the levers below land). The design already
+sidesteps ~8 of the 10 top competitor failure patterns (cloud lock-in, telemetry
+default, pricing cliffs, silent failure, prod-scale scope, hot-path tax,
+over-automation, vendor death). The gaps are demonstrability, precision, tool-
+surface cost, and naming.
+
+**Principles (binding).**
+
+1. **Precision over coverage.** ~40% of AI-review alerts get ignored; false
+   positives are the #1 abandonment cause. Surface a fix only with a diagnosed
+   root cause + evidence; stay silent otherwise. Low confidence → *no fix*.
+2. **Zero-telemetry is a structural invariant, not a toggle.** No network call to
+   opt out of, no account, auditable in source. A future "optional cloud sync"
+   would forfeit the main moat — do not add it.
+3. **Fail loud, never a silent no-op.** (Already enforced post-review.) A monitor
+   that fails silently manufactures false confidence — worse than nothing.
+4. **Out of band, cheap by default.** The analysis is deterministic and spends
+   ~0 model tokens; only the *proposal* uses the agent's own model. Keep the tool
+   surface minimal — a 4-tool MCP server selects ~95% accurately vs ~71% for a
+   46-tool one. **Open item:** consolidate v0.1's 8 tools toward ~5.
+5. **Never over-automate the GEPA mechanism.** GEPA needs a held-out metric,
+   enough samples, and a frontier reflection model; it overfits without them, and
+   agents lack the "locality" it assumes. v0.2 evaluation is opt-in and
+   metric-backed; the everyday product is *evidence-based diagnosis*, not blind
+   optimization. Never say "self-improving"/"autonomous."
+6. **Beat the free baseline.** The reflex fix is "new chat + restate the goal"
+   (~10s, free). LoopGEPA must clearly beat that — via persistent cross-session
+   memory of loops and a diagnosis better than a human's guess — or it is friction.
+
+**Open decisions (owner: maintainer):** *(a)* naming — "LoopGEPA" violates
+name=command=function (hard to type/say/spell; opaque acronym); consider a short
+self-describing invocation phrase/tool alias while keeping GEPA as pedigree.
+*(b)* auto-trigger on detected thrash so the value appears without the user
+remembering. *(c)* tool-surface consolidation (principle 4).

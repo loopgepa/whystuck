@@ -7,8 +7,9 @@ reach for LoopGEPA when a loop keeps failing.
 <!-- ── copy from here ─────────────────────────────────────────────── -->
 ## Using LoopGEPA
 
-When a repeated workflow/loop keeps failing (same error, retries that don't help,
-a fix that gets re-applied), use the `loopgepa` MCP tools **before** changing code:
+**Trigger — don't wait to be asked.** The moment you notice *thrash* — the same
+edit twice, oscillating changes, or 2+ failed test cycles on one goal — stop and
+diagnose with the `loopgepa` MCP tools **before** changing more code:
 
 1. **Diagnose first** — `loopgepa_summarize_traces` + `loopgepa_infer_failure_modes`.
    Report the dominant failure mode, the evidence trace ids, and the confidence.

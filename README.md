@@ -43,6 +43,10 @@ coding-agent-session loop diagnosis.** The name nods to
 [GEPA](https://arxiv.org/abs/2507.19457) (Genetic-Pareto, ICLR 2026 Oral), whose
 measured optimization arrives in [v0.2](docs/v0.2-eval-benchmark.md).
 
+**The diagnosis is deterministic — it spends ~0 model tokens; only the proposed
+fix uses your agent's own model.** No API key to diagnose, nothing uploaded, and
+it stays out of your request hot path.
+
 ---
 
 ## Install
@@ -67,6 +71,11 @@ What this does:
 ```json
 { "mcpServers": { "loopgepa": { "command": "uvx", "args": ["loopgepa"] } } }
 ```
+
+> **Tip — make your agent reach for it automatically.** Paste one line into your
+> `AGENTS.md` / `CLAUDE.md` / `.cursor/rules`:
+> *"When a loop keeps failing (repeated edits, retries that don't help), ask
+> loopgepa why before changing code."* See [AGENTS.md](AGENTS.md).
 
 <details><summary>Try it offline first — no API key, nothing written</summary>
 
