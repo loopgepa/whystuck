@@ -265,6 +265,14 @@ class LoopVariant(BaseModel):
     promoted: bool = False
 
 
+class ParetoCandidate(BaseModel):
+    """A point on the v0.2 optimization frontier (one evaluated variant)."""
+
+    variant_id: str
+    score: float
+    objectives: dict[str, float] = Field(default_factory=dict)
+
+
 class PromotionRecord(BaseModel):
     timestamp: str
     loop_id: str

@@ -16,12 +16,14 @@ The honest, defensible core. No evaluation, no Pareto (ADR-003).
 Wrap the official `gepa-ai/gepa` optimizer via a `LoopGenomeAdapter`; GEPA owns
 the Pareto frontier, WhyStuck owns the loop-genome mapping (ADR-011).
 
-- 📋 `eval/objectives.py` — multi-objective metric vector + scalarizer
-- 📋 `eval/benchmark.py` — task set from recorded traces (replay) or a `tasks/` dir
-- 📋 `eval/adapter.py` — `LoopGenomeAdapter(GEPAAdapter)` over the core runner
-- 📋 `eval/optimize.py` — thin `gepa.optimize` wrapper returning the frontier
-- 📋 MCP tools: `build_benchmark`, `evaluate_variant`, `optimize_loop`, `get_frontier`
-- 📋 Only now may output be called "optimized"; runs report cost/latency/variance.
+- ✅ `eval/objectives.py` — multi-objective vector + success-dominant scalarizer
+- ✅ `eval/benchmark.py` — task set from recorded traces (replay) or a `tasks/` dir
+- ✅ `eval/adapter.py` — `LoopGenomeAdapter` (genome↔candidate, offline-testable)
+- ✅ `eval/optimize.py` — `gepa.optimize` wrapper → winner variant + frontier
+- ✅ MCP tools `optimize_loop` + `get_frontier`, gated on the `eval` extra
+- 🟡 LLM-backed worker so text-gene changes actually move the score (the piece
+  that makes optimization meaningful beyond command+verifier loops)
+- 📋 Only call output "optimized" after evaluation; report cost/latency/variance
 - 📋 The A/B/C/D writeup: prompt-only GEPA vs loop-level GEPA (IMPLEMENTATION §16)
 
 ## v0.3+ — Reach & polish

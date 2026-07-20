@@ -12,7 +12,7 @@ from plain English). See [Getting started](getting-started.md) to install.
 ### 1 · First run — install & verify · Claude Code
 ```
 $ claude mcp add whystuck -- uvx whystuck
-$ /whystuck   → 8 tools + 3 skills available
+$ /whystuck   → 6 tools + 3 skills available
 ```
 Zero config, stdio, local. Traces land in `$XDG_DATA_HOME/whystuck`, outside your repo.
 

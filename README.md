@@ -138,10 +138,11 @@ and tested.
 | Dry-run + reversible promotion + rollback | ✅ |
 | FastMCP stdio server (6 tools) | ✅ |
 | Claude Code plugin (3 skills, 3 agents) | ✅ |
-| Evaluation + benchmark (wraps `gepa-ai/gepa`) | 📋 v0.2 |
-| Pareto frontier over variants | 📋 v0.2 |
+| Evaluation library + GEPA wrapper (`whystuck[eval]`) | 🟡 v0.2-alpha |
+| Optimize + frontier MCP tools (gated on the extra) | 🟡 v0.2-alpha |
+| LLM-backed worker for text-gene optimization | 📋 v0.2 |
 
-**102 tests**, all local and offline; `ruff` + `mypy --strict` + docs `--strict` clean.
+**122 tests**, all local and offline; `ruff` + `mypy --strict` + docs `--strict` clean.
 
 ## Configure
 
@@ -167,8 +168,9 @@ the project directory.** Full threat model: [SECURITY.md](SECURITY.md).
 See [ROADMAP.md](ROADMAP.md).
 
 - ✅ **v0.1** — diagnose recurring loop failures, propose reversible fixes
-- 📋 **v0.2** — measured evaluation + benchmark + Pareto, wrapping `gepa-ai/gepa`
-- 📋 **v0.3** — plugin marketplace listing, mkdocs site, benchmark writeup
+- 🟡 **v0.2-alpha** — eval library + GEPA wrapper built (`whystuck[eval]`, gated
+  MCP tools); LLM-backed worker for text-gene optimization is next
+- 📋 **v0.3** — plugin marketplace listing, benchmark writeup
 
 ## Documentation
 

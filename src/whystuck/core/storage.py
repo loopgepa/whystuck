@@ -14,6 +14,7 @@ concurrent runs can append a single line atomically (POSIX O_APPEND).
 from __future__ import annotations
 
 import io
+import json
 import os
 import tempfile
 from collections.abc import Mapping
@@ -26,6 +27,7 @@ from whystuck.core.models import (
     LoopGenome,
     LoopTrace,
     LoopVariant,
+    ParetoCandidate,
     PromotionRecord,
 )
 
@@ -192,3 +194,18 @@ class WhyStuckStore:
             return []
         lines = [ln for ln in path.read_text(encoding="utf-8").splitlines() if ln.strip()]
         return [PromotionRecord.model_validate_json(ln) for ln in lines]
+
+    # --- frontier (v0.2) ---
+    def _frontier_path(self, loop_id: str) -> Path:
+        return self.root / "frontiers" / f"{loop_id}.json"
+
+    def save_frontier(self, loop_id: str, candidates: list[ParetoCandidate]) -> None:
+        payload = json.dumps([c.model_dump() for c in candidates], indent=2)
+        atomic_write_text(self._frontier_path(loop_id), payload)
+
+    def load_frontier(self, loop_id: str) -> list[ParetoCandidate]:
+        path = self._frontier_path(loop_id)
+        if not path.exists():
+            return []
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return [ParetoCandidate.model_validate(x) for x in data]

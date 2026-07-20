@@ -1,14 +1,16 @@
 """MCP tool layer — thin handlers over whystuck.core, plus the FastMCP server.
 
 Handlers are plain functions taking a store so they are unit-testable without a
-running server; `build_server` wraps them as FastMCP tools. No business logic
-lives here (that is in core) and nothing here calls an LLM (ADR: reflection is
-the client's job). Nothing is ever described as "optimized" — v0.1 does not
-evaluate (ADR-003).
+running server; `build_server` wraps them as FastMCP tools. The core diagnosis/
+mutation tools call no LLM (ADR: reflection is the client's job). The v0.2 eval
+tools are registered only when the optional `eval` extra is installed, so the
+default surface stays minimal (6 tools) — only they may use the word "optimized",
+and only after measured evaluation (ADR-003, ADR-011).
 """
 
 from __future__ import annotations
 
+import importlib.util
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
@@ -180,7 +182,58 @@ def save_loop(store: WhyStuckStore, genome: dict[str, Any]) -> dict[str, Any]:
     return {"loop_id": parsed.id, "genes": len(parsed.genes)}
 
 
-def build_server(store: WhyStuckStore) -> FastMCP:
+def get_frontier(store: WhyStuckStore, loop_id: str) -> dict[str, Any]:
+    return {"frontier": [c.model_dump() for c in store.load_frontier(loop_id)]}
+
+
+def optimize_loop_via_commands(
+    store: WhyStuckStore,
+    loop_id: str,
+    *,
+    reflection_lm: str,
+    worker: list[str],
+    verifier: list[str],
+    max_retries: int = 1,
+    tasks_dir: str | None = None,
+    max_metric_calls: int = 50,
+) -> dict[str, Any]:
+    """Run GEPA over the loop's text genes, scoring each candidate by executing a
+    worker+verifier per benchmark task. Requires `whystuck[eval]` + a network
+    reflection LM. Alpha: most meaningful once the worker is LLM-backed (§7.2)."""
+    from whystuck.eval.benchmark import benchmark_from_dir, benchmark_from_traces
+    from whystuck.eval.optimize import optimize_loop
+
+    tasks = (
+        benchmark_from_dir(Path(tasks_dir))
+        if tasks_dir
+        else benchmark_from_traces(store.list_traces(loop_id))
+    )
+
+    def run_task(genome: LoopGenome, task: Any) -> LoopTrace:
+        return run_command_loop(
+            loop_id=loop_id,
+            trace_id=f"opt-{task.id}",
+            created_at=_now(),
+            worker=worker,
+            verifier=verifier,
+            max_retries=max_retries,
+        )
+
+    return optimize_loop(
+        store,
+        loop_id,
+        tasks,
+        run_task,
+        reflection_lm=reflection_lm,
+        max_metric_calls=max_metric_calls,
+    )
+
+
+def _eval_available() -> bool:
+    return importlib.util.find_spec("gepa") is not None
+
+
+def build_server(store: WhyStuckStore, *, with_eval: bool | None = None) -> FastMCP:
     mcp: FastMCP = FastMCP("WhyStuck")
 
     @mcp.tool
@@ -242,5 +295,37 @@ def build_server(store: WhyStuckStore) -> FastMCP:
         """(internal) Record one loop-execution trace; usually called by run_loop
         or a session hook, not directly by the agent."""
         return record_trace(store, trace)
+
+    # v0.2 eval tools — registered only when the `eval` extra is installed, so the
+    # default surface stays a minimal 6 (ADR-013 principle 4).
+    if with_eval if with_eval is not None else _eval_available():
+
+        @mcp.tool
+        def whystuck_optimize_loop(
+            loop_id: str,
+            reflection_lm: str,
+            worker: list[str],
+            verifier: list[str],
+            max_retries: int = 1,
+            tasks_dir: str | None = None,
+            max_metric_calls: int = 50,
+        ) -> dict[str, Any]:
+            """Optimize a loop's text genes with GEPA over a benchmark, saving the
+            winner as a variant + Pareto frontier. Runs real GEPA (network)."""
+            return optimize_loop_via_commands(
+                store,
+                loop_id,
+                reflection_lm=reflection_lm,
+                worker=worker,
+                verifier=verifier,
+                max_retries=max_retries,
+                tasks_dir=tasks_dir,
+                max_metric_calls=max_metric_calls,
+            )
+
+        @mcp.tool
+        def whystuck_get_frontier(loop_id: str) -> dict[str, Any]:
+            """Return the stored optimization frontier (evaluated variants)."""
+            return get_frontier(store, loop_id)
 
     return mcp

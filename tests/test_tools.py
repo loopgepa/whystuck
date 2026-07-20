@@ -180,6 +180,30 @@ class TestServerRegistration:
         assert names >= EXPECTED_TOOLS
 
     def test_no_tool_claims_optimized(self, tmp_path: Path):
-        # S9: v0.1 must never claim "optimized" (that word is earned in v0.2).
+        # S9: core tools must never claim "optimized".
         for tool in self._tools(WhyStuckStore(tmp_path)):
             assert "optimized" not in (tool.description or "").lower()
+
+
+class TestEvalGating:
+    def _names(self, store: WhyStuckStore, with_eval: bool) -> set[str]:
+        server = build_server(store, with_eval=with_eval)
+
+        async def go():
+            async with Client(server) as client:
+                return {t.name for t in await client.list_tools()}
+
+        return asyncio.run(go())
+
+    def test_eval_tools_absent_by_default(self, tmp_path: Path):
+        assert self._names(WhyStuckStore(tmp_path), with_eval=False) == EXPECTED_TOOLS
+
+    def test_eval_tools_registered_when_enabled(self, tmp_path: Path):
+        names = self._names(WhyStuckStore(tmp_path), with_eval=True)
+        assert {"whystuck_optimize_loop", "whystuck_get_frontier"} <= names
+        assert len(names) == len(EXPECTED_TOOLS) + 2
+
+    def test_get_frontier_empty(self, tmp_path: Path):
+        from whystuck.tools import get_frontier
+
+        assert get_frontier(WhyStuckStore(tmp_path), "bugfix") == {"frontier": []}

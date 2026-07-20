@@ -364,7 +364,8 @@ surface cost, and naming.
 4. **Out of band, cheap by default.** The analysis is deterministic and spends
    ~0 model tokens; only the *proposal* uses the agent's own model. Keep the tool
    surface minimal — a 4-tool MCP server selects ~95% accurately vs ~71% for a
-   46-tool one. **Open item:** consolidate v0.1's 8 tools toward ~5.
+   46-tool one. **Done:** v0.1's 8 tools consolidated to 6 (diagnose merges
+   summarize+infer; list_variants dropped; record_trace internal).
 5. **Never over-automate the GEPA mechanism.** GEPA needs a held-out metric,
    enough samples, and a frontier reflection model; it overfits without them, and
    agents lack the "locality" it assumes. v0.2 evaluation is opt-in and
@@ -374,8 +375,7 @@ surface cost, and naming.
    (~10s, free). WhyStuck must clearly beat that — via persistent cross-session
    memory of loops and a diagnosis better than a human's guess — or it is friction.
 
-**Open decisions (owner: maintainer):** *(a)* naming — "WhyStuck" violates
-name=command=function (hard to type/say/spell; opaque acronym); consider a short
-self-describing invocation phrase/tool alias while keeping GEPA as pedigree.
-*(b)* auto-trigger on detected thrash so the value appears without the user
-remembering. *(c)* tool-surface consolidation (principle 4).
+**Resolved:** *(a)* naming — renamed LoopGEPA → **WhyStuck** (ADR-001);
+*(c)* tool surface consolidated 8 → 6 (principle 4). **Still open:** *(b)* a
+code-level auto-trigger (a Claude Code hook that detects thrash and invokes
+diagnosis) — the AGENTS.md trigger covers v0.1; the hook is a later increment.

@@ -134,15 +134,17 @@ with `--bare` and explicit `--agents` / `--append-system-prompt` /
 trace reflects only declared genes (resolves B5). This path requires an API key
 and makes network calls; it is disclosed in SECURITY.md, never the default.
 
-## 8. MCP tools (v0.1 only)
+## 8. MCP tools (v0.1) — 6, consolidated
 
-`whystuck_run_loop`, `whystuck_record_trace`, `whystuck_summarize_traces`,
-`whystuck_infer_failure_modes` (deterministic; no LLM inside the server),
-`whystuck_propose_mutations` (accepts Claude's structured proposal, validates
-target genes, saves draft variant, returns diff summary),
-`whystuck_list_variants`, `whystuck_promote_variant` (dry-run default; writes
-only on explicit approval; reconciles against live files per ADR-004.5; records
-promotion history).
+`whystuck_diagnose` (merges summarize + infer; deterministic, no LLM in the
+server), `whystuck_run_loop`, `whystuck_propose_fix` (validates target genes,
+recomputes confidence server-side, saves a draft variant + diff summary),
+`whystuck_promote` (dry-run default; writes only on explicit approval; reconciles
+against live files per ADR-004.5; records promotion history), `whystuck_save_loop`,
+and the internal `whystuck_record_trace`.
+
+v0.2 adds eval tools (`build_benchmark`, `evaluate_variant`, `optimize_loop`,
+`get_frontier`), registered only when the `eval` extra is installed.
 
 Deferred to v0.2: `whystuck_score_variant`, `whystuck_get_pareto_frontier`.
 

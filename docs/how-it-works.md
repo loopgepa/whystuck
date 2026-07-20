@@ -75,12 +75,14 @@ The split is deliberate:
 - dry-run by default; every promotion is reversible via the promotions log
 - local-only, no telemetry, stdio transport, stored outside your repo
 
-## What it does *not* do yet (v0.1)
+## Measured optimization (v0.2, opt-in)
 
-v0.1 **diagnoses and proposes**. It does **not** run experiments, measure that a
-fix works, or build benchmarks — so nothing is ever called "optimized." That
-measured-evaluation loop is [v0.2](v0.2-eval-benchmark.md), which wraps the
-official GEPA optimizer.
+The v0.1 core **diagnoses and proposes** — it never claims a fix "works." The
+measured-evaluation loop that earns the word "optimized" lives in
+[v0.2](v0.2-eval-benchmark.md): an opt-in `pip install whystuck[eval]` layer that
+wraps the official GEPA optimizer to score variants over a benchmark and keep a
+Pareto frontier. It's built and offline-tested; the remaining piece is an
+LLM-backed worker so text-gene changes actually move the score.
 
 ## Sources
 
