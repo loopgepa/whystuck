@@ -1,0 +1,29 @@
+# LoopGEPA local state — NEVER commit captured traces/variants (may contain
+# session data even after redaction). Default store is outside the repo, but if
+# a user opts into a repo-local store this keeps it out of git.
+.loopgepa/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# uv
+.uv/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store

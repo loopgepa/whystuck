@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Launch the LoopGEPA MCP stdio server. Prefers the installed console script;
+# falls back to module execution for local dev.
+if command -v loopgepa-mcp >/dev/null 2>&1; then
+  exec loopgepa-mcp "$@"
+fi
+exec python -m loopgepa_mcp.main "$@"
