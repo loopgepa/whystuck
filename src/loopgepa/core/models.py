@@ -198,3 +198,29 @@ class MutationProposal(BaseModel):
     risks: list[str] = Field(default_factory=list)
     confidence: Confidence | None = None
     requires_human_approval: bool = True
+
+
+# --- Variant & promotion ------------------------------------------------------
+
+
+class LoopVariant(BaseModel):
+    id: str
+    loop_id: str
+    genome: LoopGenome
+    created_at: str
+    schema_version: str = SCHEMA_VERSION
+    parent_variant_id: str | None = None
+    mutations: list[MutationProposal] = Field(default_factory=list)
+    metrics: LoopMetrics | None = None
+    tags: list[str] = Field(default_factory=list)
+    promoted: bool = False
+
+
+class PromotionRecord(BaseModel):
+    timestamp: str
+    loop_id: str
+    to_variant_id: str
+    schema_version: str = SCHEMA_VERSION
+    from_variant_id: str | None = None
+    files_changed: list[str] = Field(default_factory=list)
+    approved_by: str | None = None
