@@ -14,6 +14,10 @@ LoopGEPA sees *why* an agent loop keeps failing and proposes a reversible fix yo
 
 </div>
 
+<p align="center">
+  <img src="docs/assets/loopgepa-demo.gif" alt="LoopGEPA diagnosing a repeatedly failing bugfix loop from local traces and proposing a reversible, approval-gated fix" width="840">
+</p>
+
 > [!NOTE]
 > **Pre-alpha, developed in the open once it's solid.** The spec, safety model,
 > and architecture are locked (`IMPLEMENTATION.md`, `DECISIONS.md`); the core is

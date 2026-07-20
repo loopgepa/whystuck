@@ -6,6 +6,8 @@ approve — locally, with no telemetry.
 
 An MCP server for **Claude Code**, **Codex CLI**, and **Cursor**.
 
+![LoopGEPA diagnosing a failing bugfix loop and proposing a reversible fix](assets/loopgepa-demo.gif)
+
 - **Diagnoses** recurring failures from real, local traces.
 - **Proposes** a small, reversible patch (verifier rubric, retry policy, stop
   condition, worker skill) with a diff and a confidence level.

@@ -27,7 +27,7 @@ _80 tests, ruff + mypy strict, docs build --strict, demo + stdio verified green.
 - [x] `codeql.yml` (python), `scorecard.yml`, `secret-scan.yml` (TruffleHog
       `--results=verified`)
 - [x] `scripts/check_public_claims.sh` verifies README test count vs reality
-- [ ] SHA-pin every GitHub Action with `# vX` comment (NOTE left in each workflow)
+- [x] SHA-pin every GitHub Action with `# vX` comment (all 11 pinned)
 - [ ] split fast gate vs `workflow_dispatch` LLM-behavior tests (add when LLM
       tests exist)
 - [ ] dependency-review on PRs
@@ -38,16 +38,16 @@ _80 tests, ruff + mypy strict, docs build --strict, demo + stdio verified green.
 - [ ] mirror ADRs from `DECISIONS.md` into `docs/adr/` (optional)
 
 **Release**
-- [ ] `release.yml`: tag-triggered, `preflight` requires PyPI token, idempotent
+- [x] `release.yml`: tag-triggered, preflight (token + version drift), idempotent
       (check-then-skip if version exists), SBOM + provenance attestation
-- [ ] version-drift check (pyproject vs plugin.json vs CHANGELOG)
+- [x] version-drift check (`scripts/check_versions.sh`: pyproject vs plugin.json)
 - [ ] `release-rehearsal.yml` (dispatch, builds + packages without publishing)
 
 **Virality assets**
 - [x] README badge row wired (CI, license, PyPI version)
 - [x] concrete test-count line in README (verified by check_public_claims)
-- [ ] hero GIF (≤30s, ≤5MB) from a checked-in VHS `.tape`: diagnose → propose →
-      approve → promote (base it on `examples/bugfix-loop/demo.py`)
+- [x] hero GIF (108 KB) from checked-in VHS tape (`assets/demo/demo.tape`):
+      diagnose → propose → dry-run; embedded top of README + docs home
 
 ## Gate 3 — Publish day (in order)
 

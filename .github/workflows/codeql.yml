@@ -1,6 +1,6 @@
 name: CodeQL
 
-# NOTE (launch gate): SHA-pin actions with a `# vX` comment before going public.
+# Actions are SHA-pinned; the trailing `# vX` marks the human-readable version.
 
 on:
   push:
@@ -17,9 +17,9 @@ jobs:
       security-events: write
       contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: github/codeql-action/init@v3
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+      - uses: github/codeql-action/init@b7351df727350dca84cb9d725d57dcf5bc82ba26  # v3
         with:
           languages: python
           build-mode: none
-      - uses: github/codeql-action/analyze@v3
+      - uses: github/codeql-action/analyze@b7351df727350dca84cb9d725d57dcf5bc82ba26  # v3

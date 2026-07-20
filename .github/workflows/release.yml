@@ -1,0 +1,74 @@
+name: Release
+
+# Actions are SHA-pinned (`# vX` marks the version). Tag-triggered; never cancels
+# mid-flight; publish is idempotent (skips if the version is already on PyPI).
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+.dev[0-9]+"
+  workflow_dispatch:
+
+permissions:
+  contents: write # create the GitHub release
+  id-token: write # build-provenance attestation
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: pypi
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
+        with:
+          enable-cache: true
+
+      - name: Preflight — version consistency
+        run: bash scripts/check_versions.sh
+
+      - name: Preflight — publish token present
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          if [ -z "${UV_PUBLISH_TOKEN:-}" ]; then
+            echo "PYPI_TOKEN secret is not set" >&2
+            exit 1
+          fi
+
+      - name: Build
+        run: uv build
+
+      - name: SBOM (SPDX)
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
+        with:
+          artifact-name: loopgepa-sbom.spdx.json
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
+        with:
+          subject-path: "dist/*"
+
+      - name: Publish to PyPI (idempotent)
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          version=$(grep -oP '(?<=^version = ")[^"]+' pyproject.toml | head -1)
+          if curl -fsS "https://pypi.org/pypi/loopgepa/${version}/json" >/dev/null 2>&1; then
+            echo "loopgepa ${version} already on PyPI — skipping (idempotent)."
+          else
+            uv publish
+          fi
+
+      - name: GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" dist/* --generate-notes --verify-tag \
+            || gh release upload "$TAG" dist/* --clobber
