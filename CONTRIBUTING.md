@@ -22,7 +22,7 @@ open an issue to discuss anything non-trivial before a large PR.
 uv sync
 uv run pytest
 uv run ruff check .
-uv run mypy packages/loopgepa_core packages/loopgepa_mcp
+uv run mypy src/loopgepa
 ```
 
 ## Pre-PR gate

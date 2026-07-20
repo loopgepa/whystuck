@@ -1,0 +1,9 @@
+{
+  "//": "Project-scoped MCP config. Copy to .mcp.json and commit to share LoopGEPA with your team. Requires `uv` (https://astral.sh/uv).",
+  "mcpServers": {
+    "loopgepa": {
+      "command": "uvx",
+      "args": ["loopgepa"]
+    }
+  }
+}

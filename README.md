@@ -1,62 +1,99 @@
+<div align="center">
+
 # LoopGEPA
 
-**Trace-driven diagnosis and reversible improvement of Claude Code agent loops.**
+**Your coding agent re-ran `npm install` 40 times and you didn't notice.**
+LoopGEPA sees *why* an agent loop keeps failing and proposes a reversible fix you approve.
 
-Prompt optimization treats the *prompt* as the unit of improvement. LoopGEPA
-treats the whole **agent loop** as the unit: skills, agents, verifier rubrics,
-retry policies, context policies, and stop conditions — the machinery around the
-model, not just the model's instructions.
+`Works with` **Claude Code** · **Codex CLI** · **Cursor**
+&nbsp;·&nbsp; `Local-only` · `No telemetry` · `Apache-2.0`
 
-LoopGEPA runs your declared loops, records clean execution traces, tells you
-*why* a loop keeps failing, and proposes small, reversible patches you approve
-before anything is written.
+</div>
 
-```text
-Before:  bugfix-loop  success 8/20
-         common failure: repair repeats the original mistake after tests fail
+> [!NOTE]
+> **Pre-alpha, developed in the open once it's solid.** The spec, safety model,
+> and architecture are locked (`IMPLEMENTATION.md`, `DECISIONS.md`); the core is
+> being implemented milestone by milestone. Not yet published.
 
-Proposed patch (you approve before it applies):
-  + stronger verifier rubric
-  + failure-summary-before-repair rule
-  + retry policy 1 -> 2
+---
+
+## What it does
+
+Coding agents fail the *same way* over and over — repairs that repeat the
+original mistake, verifiers that pass broken patches, retries that never help.
+LoopGEPA runs your repeatable agent loops, records **clean local traces**, and:
+
+- **Diagnoses** the recurring failure mode from real trace evidence.
+- **Proposes** a small, reversible patch to the loop's skills, verifier rubric,
+  retry policy, or stop condition — with a diff and a confidence level.
+- **Never writes without your approval.** Promotion is dry-run by default and
+  always reversible.
+
+It is an MCP server first — you drive it from inside Claude Code, Codex, or
+Cursor.
+
+## Why LoopGEPA (vs the others)
+
+| | LoopGEPA | Latitude / LangSmith / Braintrust / Langfuse |
+|---|---|---|
+| Runs | **On your machine** | Cloud SaaS |
+| Data | **Never leaves your machine, no telemetry** | Uploaded to a backend |
+| Scope | **Your local coding-agent sessions** (Claude Code / Codex) | Production LLM apps |
+| Output | **Reversible patch you approve** | Dashboards / issue→PR in the cloud |
+
+The name nods to **GEPA** (Genetic-Pareto reflective evolution — ICLR 2026 Oral,
+`gepa-ai/gepa`): the research *direction*. v0.1 does the trace-driven diagnosis
+and reflective mutation; measured GEPA-style optimization arrives in v0.2 by
+wrapping the official GEPA package. We do not call anything "optimized" before
+it's evaluated. See `DECISIONS.md`.
+
+## Install
+
+> Requires [`uv`](https://astral.sh/uv). If `uvx` isn't found:
+> `curl -LsSf https://astral.sh/uv/install.sh | sh`
+
+**Claude Code**
+```bash
+claude mcp add loopgepa -- uvx loopgepa
 ```
 
-## What this is — and is not
+**Codex CLI**
+```bash
+codex mcp add loopgepa -- uvx loopgepa
+```
 
-LoopGEPA is **not** a magic self-improving agent. v0.1 is deliberately
-conservative: it **diagnoses** recurring failures from real traces, **proposes**
-reversible patches, and **asks before promoting** them. Nothing is auto-applied.
-Nothing leaves your machine.
+**Cursor / any MCP client** — add to your `mcp.json`:
+```json
+{ "mcpServers": { "loopgepa": { "command": "uvx", "args": ["loopgepa"] } } }
+```
 
-The name nods to **GEPA** (Genetic-Pareto reflective evolution — ICLR 2026;
-`gepa-ai/gepa`). That is the research *direction*. v0.1 does not yet run the
-measured evaluation that would earn the word "optimized"; that lands in v0.2,
-built by wrapping the official GEPA package. See `DECISIONS.md`.
+No `pip install`, no virtualenv — `uvx` runs it from PyPI in a cached ephemeral
+environment.
 
-## Trust model (why you can run this)
-
-- **Local-only.** No telemetry, no cloud, no network by default.
-- **Summaries, not secrets.** Allowlist capture: step roles, statuses, tool
-  names, exit codes, paths, counts — never raw tool I/O unless you opt in.
-- **Stored outside your repo** (`$XDG_DATA_HOME/loopgepa`), so traces never get
-  committed to git by accident.
-- **You approve every write.** Promotion is dry-run by default and always
-  reversible. See `SECURITY.md` for the full threat model.
-
-## Status
-
-**Pre-alpha, scaffolding.** The monorepo layout, specs, and safety model are in
-place; the core library is being implemented milestone by milestone
-(see `IMPLEMENTATION.md` §11).
-
-## Layout
+## How it works
 
 ```text
-packages/loopgepa_core/    pure logic: models, storage, runner, mutation, diff, safety
-packages/loopgepa_mcp/     thin MCP stdio server over core
-packages/loopgepa_plugin/  Claude Code plugin: skills, agents, hooks, .mcp.json
-examples/bugfix-loop/      flagship worked example
+declare loop ──▶ LoopGEPA runner executes it ──▶ clean trace (local)
+                                                      │
+             failure diagnosis ◀── aggregate traces ◀─┘
+                     │
+             reflective mutation (≤3 genes) ──▶ diff preview ──▶ you approve ──▶ reversible promote
 ```
+
+Because LoopGEPA *runs* the loop, every knob it tunes — skill, verifier, retry
+policy, stop condition — is real, and every trace is clean by construction
+(no fragile session-hook guessing). See `IMPLEMENTATION.md` §7.
+
+## Trust model
+
+- **Local-only.** stdio MCP server; no sockets, no cloud, no telemetry.
+- **Summaries, not secrets.** Allowlist capture — step roles, statuses, tool
+  names, exit codes, paths, counts. Raw I/O is opt-in per loop.
+- **Outside your repo.** Traces live in `$XDG_DATA_HOME/loopgepa`, never
+  committed by accident.
+- **You approve every write.** Dry-run by default; every promotion is reversible.
+
+Full threat model: `SECURITY.md`.
 
 ## Development
 
@@ -64,8 +101,10 @@ examples/bugfix-loop/      flagship worked example
 uv sync
 uv run pytest
 uv run ruff check .
-uv run mypy packages/loopgepa_core packages/loopgepa_mcp
+uv run mypy src/loopgepa
 ```
+
+Contributing: `CONTRIBUTING.md` · Decisions: `DECISIONS.md` · Roadmap: `ROADMAP.md`
 
 ## License
 

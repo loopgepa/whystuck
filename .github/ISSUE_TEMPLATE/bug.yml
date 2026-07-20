@@ -1,0 +1,41 @@
+name: Bug report
+description: Something in LoopGEPA behaves incorrectly.
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. claude mcp add loopgepa -- uvx loopgepa
+        2. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: client
+    attributes:
+      label: MCP client
+      options: [Claude Code, Codex CLI, Cursor, Other]
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: LoopGEPA version
+      placeholder: "output of `uvx loopgepa --version`"
+    validations:
+      required: true
+  - type: checkboxes
+    id: local
+    attributes:
+      label: Confirmation
+      options:
+        - label: This report contains no secrets or private trace data.
+          required: true

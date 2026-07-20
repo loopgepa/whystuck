@@ -153,3 +153,130 @@ text*; it does not invent the confidence number. Bands:
     n_traces >= 15 AND cluster >= 0.5     -> high
 
 where `cluster` = share of failing traces attributed to the same failure mode.
+
+---
+
+## ADR-006 — One PyPI package; `uvx loopgepa` is the entire setup story
+
+**Status:** accepted (2026-07-20). Supersedes the 3-package uv workspace in the
+original scaffold.
+
+**Context.** The lowest-friction way to install an MCP server in 2026 is a single
+zero-install command:
+
+    claude mcp add loopgepa -- uvx loopgepa      # Claude Code
+    codex  mcp add loopgepa -- uvx loopgepa      # Codex CLI
+
+`uvx` runs a console entry point straight from PyPI in an ephemeral cached env —
+no `pip install`, no venv. That requires **one** importable package named
+`loopgepa` exposing `[project.scripts] loopgepa = "loopgepa.server:main"`. A
+3-package workspace (`loopgepa_core` / `loopgepa_mcp` / `loopgepa_plugin`) fights
+this and triples release complexity for zero user benefit.
+
+**Decision.** Ship a **single `loopgepa` package**. Internal structure:
+
+    src/loopgepa/
+      server.py        # FastMCP app + main() stdio entrypoint
+      tools.py         # thin MCP tool handlers over core
+      core/            # vendor-neutral pure logic (models, storage, runner, ...)
+
+The `core/` subpackage preserves the ADR-002 hedge (keep the defensible logic
+vendor-neutral) without a separate distribution.
+
+**Consequence.** README's first code block is the one-liner above. Prerequisite
+callout: if `uvx` is missing, `curl -LsSf https://astral.sh/uv/install.sh | sh`
+(the #1 reported MCP setup failure). `.mcpb` desktop bundle is deferred — our
+audience is CLI-agent users whose shells already expose `uvx`.
+
+---
+
+## ADR-007 — FastMCP v3, stdio only
+
+**Status:** accepted (2026-07-20). Refines original spec §4.5.
+
+**Decision.** Build on **FastMCP v3** (de-facto standard, ~¼ the code of the raw
+`mcp` SDK, stdio + streamable-HTTP built in). v1 uses **stdio only** — the
+correct transport for local Claude Code / Codex / Cursor, which spawn the server
+as a subprocess. Do not add HTTP/SSE until a user needs it.
+
+---
+
+## ADR-008 — The MCP server is the product; the plugin is a thin ergonomics layer
+
+**Status:** accepted (2026-07-20). Refines original spec §1.1.
+
+**Context.** Two possible surfaces: the MCP server (tools) and a Claude Code
+plugin (slash commands, agents, hooks). A plugin needs a marketplace install; the
+MCP server installs with one line. Under ADR-002 (runner-owned loops), trace
+capture belongs to the **runner inside the MCP server**, not to session hooks.
+
+**Decision.** The **MCP server is the primary, sufficient artifact** — it does
+diagnosis, mutation, promotion, and (via the runner) trace capture. The plugin
+under `plugin/` is an **optional thin layer** adding slash-command ergonomics
+(`/loopgepa:explain-loop-failure`) that call MCP tools. Build and validate the
+server first; the plugin is polish, not a dependency of the core value.
+
+---
+
+## ADR-009 — OSS-quality standards adopted from SysKnife (deferred to launch gate)
+
+**Status:** accepted (2026-07-20)
+
+**Context.** SysKnife (`/home/user/Desktop/lacs`) is the reference for OSS
+polish. Its hardening is valuable but must not slow local MVP development.
+
+**Decision.** Adopt these, but **stage them**: cheap community files now; heavy
+security/release/docs infrastructure at the pre-public launch gate (see
+`LAUNCH_CHECKLIST.md`). The standards:
+
+- SHA-pin every GitHub Action with a `# vX` comment; commit `uv.lock`; run CI
+  with `uv sync --frozen`.
+- Split a **fast, always-on CI gate** (lint/type/test) from **probabilistic
+  LLM-behavior tests** (`workflow_dispatch` only, documented as "guidance, not
+  merge criteria").
+- Separate lightweight security workflows: CodeQL (python), OpenSSF Scorecard,
+  TruffleHog `--results=verified`, dependency-review.
+- `mkdocs-material` docs site (Python-idiomatic; SysKnife uses mdBook) deployed
+  to GitHub Pages on a paths-filtered trigger; ADRs mirrored from this file.
+- Idempotent, resumable PyPI publish (check-then-skip if the version exists).
+- A `check_public_claims` script that verifies README claims (test counts, "works
+  with X") against reality.
+- Demo GIF generated from a checked-in VHS `.tape` (reproducible, not a binary
+  blob).
+- Keep-a-Changelog `CHANGELOG.md`, structured YAML issue templates,
+  `blank_issues_enabled: false`, PR template with a trust-boundary checkbox,
+  `dependabot.yml`, `docs/local/` for internal notes.
+
+**Not adopted:** SysKnife's heavy `npx` binary-installer wizard — LoopGEPA is pure
+Python via `uvx`, so the one-liner *is* the installer. An optional `uvx loopgepa
+init` helper may come later.
+
+---
+
+## ADR-010 — Positioning: name the pain, promise reversible repair, headline "local"
+
+**Status:** accepted (2026-07-20)
+
+**Context.** 2026 sentiment is sharply anti-hype (the "agent reliability gap");
+every named competitor — Latitude (which markets its own "GEPA algorithm"),
+Braintrust, LangSmith, Langfuse — is **cloud SaaS for production LLM apps**.
+LoopGEPA's whitespace is *local, zero-telemetry, coding-agent-session loop
+diagnosis*.
+
+**Decision.**
+
+1. Lead with the **concrete failure**, not the abstraction: "your agent re-ran
+   `npm install` 40 times and you didn't notice" before any word like
+   "observability."
+2. Headline verbs are **"diagnoses"** and **"proposes a reversible fix you
+   approve"** — never "self-improving" / "auto-fix" as a headline (allowed only
+   in the literal, approval-gated sense).
+3. **"Local-only, no telemetry, traces never leave your machine"** is a top-two
+   README bullet — the sharpest differentiator vs the cloud incumbents, stated as
+   a trust claim.
+4. A **"works with Claude Code · Codex · Cursor"** signal sits directly under the
+   title (highest-value 5-second trust cue observed across viral MCP servers).
+5. In comparison content, name **Latitude's "GEPA algorithm"** explicitly and
+   contrast: they close issue→PR for *production* traces in the cloud; LoopGEPA
+   closes loop→fix for *local coding-agent sessions* with nothing leaving the
+   machine.

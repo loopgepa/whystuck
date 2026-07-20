@@ -48,25 +48,35 @@ Do not implement Levels 5–6 before Levels 1–4 are reliable and tested.
 
 ## 3. Repository layout
 
+Single distributable package so `uvx loopgepa` works (ADR-006).
+
     loopgepa/
       README.md  LICENSE  SECURITY.md  CONTRIBUTING.md  CODE_OF_CONDUCT.md
-      IMPLEMENTATION.md  DECISIONS.md  pyproject.toml
-      .github/workflows/ci.yml
-      packages/
-        loopgepa_core/    # pure logic: models, storage, runner, mutation, diff, safety
-        loopgepa_mcp/     # thin MCP stdio server wrapping core
-        loopgepa_plugin/  # Claude Code plugin: skills, agents, hooks, .mcp.json, bin
+      IMPLEMENTATION.md  DECISIONS.md  LAUNCH_CHECKLIST.md  ROADMAP.md  CHANGELOG.md
+      pyproject.toml  .mcp.json.example
+      .github/workflows/ci.yml  .github/{dependabot.yml,ISSUE_TEMPLATE/,PULL_REQUEST_TEMPLATE.md}
+      src/loopgepa/
+        __init__.py
+        server.py        # FastMCP app + main() stdio entrypoint (the console script)
+        tools.py         # thin MCP tool handlers over core
+        core/            # vendor-neutral pure logic
+          models.py storage.py runner.py mutation.py diff.py safety.py
+      tests/             # unit + integration; no network
+      plugin/            # optional Claude Code plugin (thin): skills, agents, hooks, .mcp.json
       examples/bugfix-loop/
-      docs/
+      docs/              # mkdocs-material site (built at launch gate)
       scripts/
 
 ## 4. Tech stack
 
-- Python 3.12+, **uv** workspace.
+- Python 3.12+, **uv** (single package, `uv.lock` committed).
+- **FastMCP v3**, **stdio transport only** for v1 (ADR-007).
+- Console entry point `loopgepa = "loopgepa.server:main"` → `uvx loopgepa`.
 - **Pydantic v2** at every boundary.
-- Official **`mcp` / FastMCP** for the stdio server (pin the version).
-- File store: YAML genomes/variants, JSONL traces, JSON indexes.
-- Tests: pytest + pytest-cov; ruff; mypy. No network in tests.
+- File store: YAML genomes/variants, JSONL traces, JSON indexes, under
+  `$XDG_DATA_HOME/loopgepa` (ADR-004).
+- Tests: pytest + pytest-cov; ruff; mypy strict. No network in tests.
+- Distribution: PyPI (`uv build` + `uv publish`). No `.mcpb` bundle in v1.
 
 ## 5. Data models (`loopgepa_core/models.py`)
 

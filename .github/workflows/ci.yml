@@ -1,13 +1,16 @@
 name: CI
 
+# NOTE (launch gate): SHA-pin every action with a `# vX` comment and switch to
+# `uv sync --frozen` once uv.lock is committed. See LAUNCH_CHECKLIST.md.
+
 on:
   push:
     branches: [main]
   pull_request:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   test:
@@ -24,7 +27,7 @@ jobs:
         run: uv python install 3.12
 
       - name: Sync
-        run: uv sync --all-extras --dev
+        run: uv sync --dev
 
       - name: Lint
         run: uv run ruff check .
@@ -33,7 +36,7 @@ jobs:
         run: uv run ruff format --check .
 
       - name: Type check
-        run: uv run mypy packages/loopgepa_core packages/loopgepa_mcp
+        run: uv run mypy src/loopgepa
 
       - name: Test
         run: uv run pytest
