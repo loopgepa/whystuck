@@ -376,6 +376,7 @@ surface cost, and naming.
    memory of loops and a diagnosis better than a human's guess — or it is friction.
 
 **Resolved:** *(a)* naming — renamed LoopGEPA → **WhyStuck** (ADR-001);
-*(c)* tool surface consolidated 8 → 6 (principle 4). **Still open:** *(b)* a
-code-level auto-trigger (a Claude Code hook that detects thrash and invokes
-diagnosis) — the AGENTS.md trigger covers v0.1; the hook is a later increment.
+*(b)* auto-trigger — shipped a PostToolUse thrash hook
+(`plugin/hooks/thrash_watch.py`) that detects repeated edits, captures a session
+trace, and nudges the agent to diagnose; *(c)* tool surface consolidated 8 → 6
+(principle 4). All three open items are now closed.

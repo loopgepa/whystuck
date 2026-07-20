@@ -18,10 +18,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning:
 - Claude Code plugin (thin): explain-loop-failure / optimize-loop / design-loop
   skills + 3 agents. Flagship `examples/bugfix-loop` with a runnable offline demo.
 - v0.2-alpha eval layer (opt-in `whystuck[eval]`): objectives scalarizer, benchmark
-  from traces/dir, loop-genome↔GEPA adapter, and a GEPA-wrapping optimizer that
-  saves the winner as a variant + Pareto frontier. Optimize/frontier MCP tools are
-  registered only when the extra is installed (default surface stays 6).
-- 122 tests (TDD, offline); ruff + mypy strict; CI, CodeQL, Scorecard, secret
+  from traces/dir, loop-genome↔GEPA adapter, a GEPA-wrapping optimizer that saves
+  the winner as a variant + Pareto frontier, and an LLM-backed worker so text-gene
+  changes actually move the score. Optimize/frontier MCP tools register only when
+  the extra is installed (default surface stays 6).
+- PostToolUse thrash hook (`plugin/hooks/thrash_watch.py`, zero-dep, fail-open):
+  auto-detects repeated edits, captures a session trace, and nudges the agent to
+  diagnose — no need to remember to invoke WhyStuck.
+- Claude Code marketplace manifest (`.claude-plugin/marketplace.json`).
+- 131 tests (TDD, offline); ruff + mypy strict; CI, CodeQL, Scorecard, secret
   scan, and mkdocs-material docs site. Locked architecture in `DECISIONS.md`
   (ADR-001…010); threat model in `SECURITY.md`.
 

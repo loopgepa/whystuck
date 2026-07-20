@@ -59,6 +59,11 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
+[tool.ruff.lint.per-file-ignores]
+# The plugin hook is a standalone zero-dep script that must run under any python3
+# (including <3.11), so keep pre-3.11 idioms like timezone.utc.
+"plugin/hooks/*" = ["UP", "SIM105"]
+
 [tool.pytest.ini_options]
 addopts = "-q"
 testpaths = ["tests"]

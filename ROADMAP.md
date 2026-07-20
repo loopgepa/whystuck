@@ -10,6 +10,7 @@ The honest, defensible core. No evaluation, no Pareto (ADR-003).
 - Reflective mutation (≤3 genes) with evidence trace IDs.
 - Diff preview → explicit approval → reversible promote + rollback record.
 - FastMCP stdio server; `uvx whystuck`; one bugfix-loop example.
+- PostToolUse thrash hook: auto-detects repeated edits and captures session traces.
 
 ## v0.2 — Evaluate (earn the GEPA claim) — [design](docs/v0.2-eval-benchmark.md)
 
@@ -21,8 +22,9 @@ the Pareto frontier, WhyStuck owns the loop-genome mapping (ADR-011).
 - ✅ `eval/adapter.py` — `LoopGenomeAdapter` (genome↔candidate, offline-testable)
 - ✅ `eval/optimize.py` — `gepa.optimize` wrapper → winner variant + frontier
 - ✅ MCP tools `optimize_loop` + `get_frontier`, gated on the `eval` extra
-- 🟡 LLM-backed worker so text-gene changes actually move the score (the piece
-  that makes optimization meaningful beyond command+verifier loops)
+- ✅ `eval/llm_worker.py` — LLM-backed worker so text genes move the score
+  (`make_run_task(complete, score)`; litellm-backed default)
+- 🟡 the output→apply→verify wiring so LLM optimization runs against real repos
 - 📋 Only call output "optimized" after evaluation; report cost/latency/variance
 - 📋 The A/B/C/D writeup: prompt-only GEPA vs loop-level GEPA (IMPLEMENTATION §16)
 

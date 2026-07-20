@@ -138,11 +138,12 @@ and tested.
 | Dry-run + reversible promotion + rollback | ✅ |
 | FastMCP stdio server (6 tools) | ✅ |
 | Claude Code plugin (3 skills, 3 agents) | ✅ |
+| Auto-trigger hook (thrash detection + session capture) | ✅ |
 | Evaluation library + GEPA wrapper (`whystuck[eval]`) | 🟡 v0.2-alpha |
 | Optimize + frontier MCP tools (gated on the extra) | 🟡 v0.2-alpha |
-| LLM-backed worker for text-gene optimization | 📋 v0.2 |
+| LLM-backed worker (text genes move the score) | 🟡 v0.2-alpha |
 
-**122 tests**, all local and offline; `ruff` + `mypy --strict` + docs `--strict` clean.
+**131 tests**, all local and offline; `ruff` + `mypy --strict` + docs `--strict` clean.
 
 ## Configure
 
@@ -167,10 +168,12 @@ the project directory.** Full threat model: [SECURITY.md](SECURITY.md).
 
 See [ROADMAP.md](ROADMAP.md).
 
-- ✅ **v0.1** — diagnose recurring loop failures, propose reversible fixes
-- 🟡 **v0.2-alpha** — eval library + GEPA wrapper built (`whystuck[eval]`, gated
-  MCP tools); LLM-backed worker for text-gene optimization is next
-- 📋 **v0.3** — plugin marketplace listing, benchmark writeup
+- ✅ **v0.1** — diagnose recurring loop failures, propose reversible fixes; a
+  PostToolUse hook auto-detects thrash and captures session traces
+- 🟡 **v0.2-alpha** — eval library + GEPA wrapper + LLM-backed worker built
+  (`whystuck[eval]`, gated MCP tools); remaining: the output→apply→verify wiring
+  for real repos + the benchmark writeup
+- 📋 **v0.3** — plugin marketplace listing (manifest ready), MCP-registry submission
 
 ## Documentation
 

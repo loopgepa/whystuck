@@ -101,10 +101,12 @@ Codex: variant-a (edits verifier_rubric, low-risk) vs variant-b (also retry_poli
        Recommend a — least invasive, addresses the dominant mode.
 ```
 
-### 13 · Capture traces from a live session · Claude Code
+### 13 · Auto-detect thrash mid-session · Claude Code
 ```
-A Stop hook calls whystuck_record_trace with the session outcome (summaries only,
-no secrets). Over a week your real loops become diagnosable — nothing uploaded.
+You keep editing the same file; on the 4th edit the WhyStuck PostToolUse hook fires:
+"app.py edited 4× this session without sticking — run whystuck_diagnose on the
+'session' loop before editing again." It also records the trace (summaries only,
+no secrets), so your real sessions become diagnosable over time. Nothing uploaded.
 ```
 
 ### 14 · Team playbook · Cursor
