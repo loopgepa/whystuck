@@ -17,7 +17,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning:
   propose_mutations, list_variants, promote_variant, save_loop.
 - Claude Code plugin (thin): explain-loop-failure / optimize-loop / design-loop
   skills + 3 agents. Flagship `examples/bugfix-loop` with a runnable offline demo.
-- 80 tests (TDD, offline); ruff + mypy strict; CI, CodeQL, Scorecard, secret
+- 102 tests (TDD, offline); ruff + mypy strict; CI, CodeQL, Scorecard, secret
   scan, and mkdocs-material docs site. Locked architecture in `DECISIONS.md`
   (ADR-001…010); threat model in `SECURITY.md`.
 

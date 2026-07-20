@@ -105,7 +105,7 @@ Full threat model: `SECURITY.md`.
 
 ## Development
 
-**80 tests**, all local and offline. Full gate mirrors CI:
+**102 tests**, all local and offline. Full gate mirrors CI:
 
 ```bash
 uv sync

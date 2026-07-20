@@ -2,7 +2,7 @@
 
 stdio transport (ADR-007). `main()` calls `mcp.run()` unconditionally — the
 console-script entry point imports this module and calls `main()` directly, so a
-`if __name__ == "__main__"` guard would never fire for `uvx loopgepa` (S1).
+lone `if __name__ == "__main__"` guard would never fire for `uvx loopgepa`.
 """
 
 from __future__ import annotations

@@ -17,7 +17,15 @@ from typing import Any
 from fastmcp import FastMCP
 
 from loopgepa.core.diagnosis import infer_failure_modes, summarize_traces
-from loopgepa.core.models import LoopGenome, LoopTrace, LoopVariant, MutationProposal
+from loopgepa.core.models import (
+    Confidence,
+    ConfidenceBand,
+    LoopGenome,
+    LoopTrace,
+    LoopVariant,
+    MutationProposal,
+    assess_confidence,
+)
 from loopgepa.core.mutation import apply_mutation
 from loopgepa.core.promote import apply_promotion, plan_promotion
 from loopgepa.core.runner import Executor, run_command_loop
@@ -82,6 +90,22 @@ def infer(store: LoopGEPAStore, loop_id: str, limit: int = 20) -> dict[str, Any]
     return {"failure_modes": [m.model_dump() for m in modes]}
 
 
+def _confidence_for_evidence(
+    store: LoopGEPAStore, loop_id: str, evidence_ids: list[str]
+) -> Confidence:
+    """Deterministic, server-computed confidence (ADR-005). Never trust a
+    client-supplied value; empty evidence is always LOW."""
+    if not evidence_ids:
+        return Confidence(band=ConfidenceBand.LOW, score=0.0)
+    traces = store.list_traces(loop_id)
+    known = {t.id for t in traces}
+    matched = [e for e in evidence_ids if e in known]
+    failing = [t for t in traces if t.final_outcome == "failure"]
+    denom = len(failing) if failing else len(traces)
+    cluster_share = min(1.0, len(matched) / denom) if denom else 0.0
+    return assess_confidence(n_traces=len(traces), cluster_share=cluster_share)
+
+
 def propose_mutations(
     store: LoopGEPAStore, loop_id: str, proposals: list[dict[str, Any]]
 ) -> dict[str, Any]:
@@ -91,6 +115,8 @@ def propose_mutations(
     new_genome = genome
     for proposal in parsed:
         assert_safe(new_genome, proposal)  # no silent budget increase
+        # Overwrite any client-supplied confidence with the server-computed value.
+        proposal.confidence = _confidence_for_evidence(store, loop_id, proposal.evidence_trace_ids)
         new_genome = apply_mutation(new_genome, proposal)
     variant = LoopVariant(
         id=_new_id("variant"),
@@ -131,12 +157,20 @@ def promote_variant(
             "files_to_change": [c.path for c in plan.changes],
             "diffs": [c.diff for c in plan.changes],
         }
-    prev = next((v.id for v in store.list_variants(loop_id) if v.promoted), None)
+    # The current live variant is the target of the last promotion (ordered log),
+    # not the alphabetically-first flagged variant.
+    promotions = store.list_promotions(loop_id)
+    prev = promotions[-1].to_variant_id if promotions else None
     record = apply_promotion(
         variant, base, approved_by=approved_by, from_variant_id=prev, timestamp=_now()
     )
     store.save_loop(variant.genome)  # runner-backed gene changes take effect next run
     store.record_promotion(record)
+    # Keep exactly one promoted variant: clear the previous one, flag this one.
+    if prev is not None and prev != variant.id:
+        prev_variant = store.load_variant(loop_id, prev)
+        prev_variant.promoted = False
+        store.save_variant(prev_variant)
     variant.promoted = True
     store.save_variant(variant)
     return {

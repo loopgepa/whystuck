@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from loopgepa.core.errors import NotFoundError
 from loopgepa.core.models import (
     GeneType,
     LoopGene,
@@ -61,7 +62,7 @@ class TestLoopRoundTrip:
 
     def test_load_missing_loop_raises(self, tmp_path: Path):
         store = LoopGEPAStore(tmp_path)
-        with pytest.raises(KeyError):
+        with pytest.raises(NotFoundError):
             store.load_loop("nope")
 
     def test_list_loops(self, tmp_path: Path):

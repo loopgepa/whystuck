@@ -11,8 +11,11 @@ if [ -z "${claimed:-}" ]; then
 fi
 
 # Sum the per-file counts from `pytest --collect-only -q` (e.g. "tests/x.py: 6").
-actual=$(uv run pytest --collect-only -q 2>&1 | grep -oE ': [0-9]+$' \
-  | grep -oE '[0-9]+' | awk '{s+=$1} END{print s+0}')
+# stdout only — folding in stderr would let a warning ending in ": <n>" inflate
+# the tally and hide a real shortfall. A collect error aborts loudly via set -e.
+collected=$(uv run pytest --collect-only -q 2>/dev/null)
+actual=$(printf '%s\n' "$collected" | grep -oE ': [0-9]+$' | grep -oE '[0-9]+' \
+  | awk '{s+=$1} END{print s+0}')
 actual=${actual:-0}
 echo "check_public_claims: README claims ${claimed} tests; actual ${actual}"
 if [ "${actual}" -lt "${claimed}" ]; then

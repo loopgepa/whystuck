@@ -15,11 +15,13 @@ from __future__ import annotations
 
 import io
 import os
+import tempfile
 from collections.abc import Mapping
 from pathlib import Path
 
 from ruamel.yaml import YAML
 
+from loopgepa.core.errors import NotFoundError
 from loopgepa.core.models import (
     LoopGenome,
     LoopTrace,
@@ -38,7 +40,9 @@ def resolve_store_root(env: Mapping[str, str]) -> Path:
         return Path(home)
     if xdg := env.get("XDG_DATA_HOME"):
         return Path(xdg) / "loopgepa"
-    return Path(env.get("HOME", "~")) / ".local" / "share" / "loopgepa"
+    home = env.get("HOME")
+    root = Path(home) if home else Path("~").expanduser()
+    return root / ".local" / "share" / "loopgepa"
 
 
 def _dump_yaml(data: object) -> str:
@@ -47,34 +51,63 @@ def _dump_yaml(data: object) -> str:
     return buf.getvalue()
 
 
-def atomic_write_text(path: Path, text: str) -> None:
-    """Write via temp file (same dir → same filesystem) + fsync + os.replace so a
-    reader never sees a partial file and the data survives a crash. Cleans up the
-    temp file on any error. Mode 0o600 — stored data may be sensitive."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(path.suffix + ".tmp")
+def _write_all(fd: int, data: bytes) -> None:
+    """Write every byte — os.write may return a short count."""
+    view = memoryview(data)
+    written = 0
+    while written < len(view):
+        written += os.write(fd, view[written:])
+
+
+def _fsync_dir(directory: Path) -> None:
+    """Best-effort fsync of a directory so a rename is durable across a crash."""
     try:
-        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-        try:
-            os.write(fd, text.encode("utf-8"))
-            os.fsync(fd)
-        finally:
-            os.close(fd)
+        dfd = os.open(directory, os.O_RDONLY)
+    except OSError:
+        return
+    try:
+        os.fsync(dfd)
+    except OSError:
+        pass
+    finally:
+        os.close(dfd)
+
+
+def atomic_write_text(path: Path, text: str) -> None:
+    """Write via a unique temp file (same dir → same filesystem) + fsync +
+    os.replace so a reader never sees a partial file. The file bytes and the
+    rename are both fsynced, so a completed write survives a crash. A unique temp
+    name (mkstemp, mode 0o600) means concurrent writers to the same path never
+    clobber each other's temp; the temp is removed on any error."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp_name = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
+    tmp = Path(tmp_name)
+    try:
+        _write_all(fd, text.encode("utf-8"))
+        os.fsync(fd)
+        os.close(fd)
+    except BaseException:
+        os.close(fd)
+        tmp.unlink(missing_ok=True)
+        raise
+    try:
         os.replace(tmp, path)
+        _fsync_dir(path.parent)
     except BaseException:
         tmp.unlink(missing_ok=True)
         raise
 
 
 def _append_line(path: Path, text: str) -> None:
-    """Append one line with a single O_APPEND write(2) so concurrent runs never
-    interleave (POSIX guarantees atomicity per syscall for regular files). Uses
-    raw os.write, not buffered text I/O, to keep it one syscall."""
+    """Append one line under O_APPEND. POSIX positions each write atomically at
+    EOF (no lost appends); lines are small (output is capped) so the bytes are
+    not interleaved on Linux. Raw os.write (looped for short counts), not buffered
+    text I/O, keeps the append a single positioned write."""
     path.parent.mkdir(parents=True, exist_ok=True)
     line = (text + "\n").encode("utf-8")
     fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
     try:
-        os.write(fd, line)
+        _write_all(fd, line)
     finally:
         os.close(fd)
 
@@ -107,7 +140,7 @@ class LoopGEPAStore:
     def load_loop(self, loop_id: str) -> LoopGenome:
         path = self._loop_path(loop_id)
         if not path.exists():
-            raise KeyError(f"loop not found: {loop_id}")
+            raise NotFoundError(f"loop not found: {loop_id}")
         return LoopGenome.model_validate(_yaml.load(path.read_text(encoding="utf-8")))
 
     def list_loops(self) -> list[LoopGenome]:
@@ -126,7 +159,8 @@ class LoopGEPAStore:
             return []
         lines = [ln for ln in path.read_text(encoding="utf-8").splitlines() if ln.strip()]
         if limit is not None:
-            lines = lines[-limit:]
+            # limit=0 means "none"; `lines[-0:]` would wrongly return everything.
+            lines = lines[-limit:] if limit > 0 else []
         return [LoopTrace.model_validate_json(ln) for ln in lines]
 
     # --- variants ---
@@ -139,7 +173,7 @@ class LoopGEPAStore:
     def load_variant(self, loop_id: str, variant_id: str) -> LoopVariant:
         path = self._variant_path(loop_id, variant_id)
         if not path.exists():
-            raise KeyError(f"variant not found: {loop_id}/{variant_id}")
+            raise NotFoundError(f"variant not found: {loop_id}/{variant_id}")
         return LoopVariant.model_validate(_yaml.load(path.read_text(encoding="utf-8")))
 
     def list_variants(self, loop_id: str) -> list[LoopVariant]:

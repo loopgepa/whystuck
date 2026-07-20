@@ -9,10 +9,10 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator
 
 # Bump when any persisted record's shape changes (ADR-004.4). Stored on every
-# trace/genome/variant so migration is always possible.
+# persisted record (trace, genome, variant, promotion) so migration is possible.
 SCHEMA_VERSION = "0.1"
 
 # --- Confidence thresholds (ADR-005) ------------------------------------------
@@ -38,9 +38,23 @@ class ConfidenceBand(StrEnum):
     HIGH = "high"
 
 
+_BAND_CAP: dict[ConfidenceBand, float] = {
+    ConfidenceBand.LOW: _LOW_SCORE_CAP,
+    ConfidenceBand.MEDIUM: _MEDIUM_SCORE_CAP,
+    ConfidenceBand.HIGH: _HIGH_SCORE_CAP,
+}
+
+
 class Confidence(BaseModel):
     band: ConfidenceBand
-    score: float
+    score: float = Field(ge=0.0, le=1.0)
+
+    @model_validator(mode="after")
+    def _score_within_band_cap(self) -> Confidence:
+        cap = _BAND_CAP[self.band]
+        if self.score > cap:
+            raise ValueError(f"score {self.score} exceeds {self.band} cap {cap}")
+        return self
 
 
 def assess_confidence(n_traces: int, cluster_share: float) -> Confidence:
@@ -87,6 +101,9 @@ _FILE_BACKED_GENE_TYPES = frozenset(
 
 
 class LoopGene(BaseModel):
+    # validate_assignment so apply-time content changes re-check the invariant below.
+    model_config = ConfigDict(validate_assignment=True)
+
     id: str
     type: GeneType
     name: str
@@ -101,6 +118,14 @@ class LoopGene(BaseModel):
     def file_backed(self) -> bool:
         return self.type in _FILE_BACKED_GENE_TYPES
 
+    @model_validator(mode="after")
+    def _budget_content_is_dict(self) -> LoopGene:
+        # A budget_policy gene must carry structured (dict) content so the budget
+        # guard can compare caps; a str would let the guard silently no-op (H1).
+        if self.type is GeneType.BUDGET_POLICY and not isinstance(self.content, dict):
+            raise ValueError("budget_policy gene content must be a dict")
+        return self
+
 
 class LoopGenome(BaseModel):
     id: str
@@ -110,6 +135,15 @@ class LoopGenome(BaseModel):
     description: str | None = None
     genes: list[LoopGene] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _unique_gene_ids(self) -> LoopGenome:
+        # Duplicate ids would make later mutations resolve first-match silently and
+        # break attribution/lineage (ADR-002).
+        ids = [g.id for g in self.genes]
+        if len(ids) != len(set(ids)):
+            raise ValueError("duplicate gene ids in genome")
+        return self
 
 
 # --- Trace --------------------------------------------------------------------
@@ -187,8 +221,10 @@ class MutationProposal(BaseModel):
     mutation_type: MutationType
     title: str
     rationale: str
-    # Required (never omitted) so a proposal always names its evidence — an empty
-    # list is allowed but forces low confidence (ADR-002 / risk-register 17.2).
+    # Required (never omitted) so a proposal always names its evidence. An empty
+    # list is allowed; the server recomputes confidence from the evidence and
+    # forces LOW when it is empty (see tools.propose_mutations) — this field does
+    # not enforce that itself (IMPLEMENTATION §13, ADR-005).
     evidence_trace_ids: list[str]
     target_gene_id: str | None = None
     parent_variant_id: str | None = None
@@ -198,6 +234,19 @@ class MutationProposal(BaseModel):
     risks: list[str] = Field(default_factory=list)
     confidence: Confidence | None = None
     requires_human_approval: bool = True
+
+    @model_validator(mode="after")
+    def _validate_shape(self) -> MutationProposal:
+        # Field validity depends on mutation_type; fail at construction, not apply.
+        if self.mutation_type is MutationType.ADD_GENE:
+            if not isinstance(self.after, dict):
+                raise ValueError("ADD_GENE requires `after` to be a gene definition dict")
+        else:
+            if self.target_gene_id is None:
+                raise ValueError(f"{self.mutation_type} requires target_gene_id")
+            if self.mutation_type is MutationType.EDIT_GENE and self.after is None:
+                raise ValueError("EDIT_GENE requires `after`")
+        return self
 
 
 # --- Variant & promotion ------------------------------------------------------

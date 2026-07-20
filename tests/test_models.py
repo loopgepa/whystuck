@@ -66,7 +66,8 @@ class TestLoopGene:
         ],
     )
     def test_runner_backed_gene_types_are_not_file_backed(self, gene_type):
-        gene = LoopGene(id="g1", type=gene_type, name="x", content="y")
+        # content={} is valid for all these types (budget_policy requires a dict).
+        gene = LoopGene(id="g1", type=gene_type, name="x", content={})
         assert gene.file_backed is False
 
 
@@ -92,6 +93,7 @@ class TestMutationProposal:
             target_gene_id="verifier_rubric",
             title="Strengthen rubric",
             rationale="Repairs repeat the original mistake.",
+            after="check harder",
         )
         base.update(overrides)
         return base

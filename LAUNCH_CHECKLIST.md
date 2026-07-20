@@ -53,7 +53,8 @@ _80 tests, ruff + mypy strict, docs build --strict, demo + stdio verified green.
 
 - [ ] register PyPI name `loopgepa`; `uv publish`
 - [ ] switch `gh` to **vladimirrott**; create `loopgepa/loopgepa` repo; push
-- [ ] enable branch protection on `main` (PR + 1 review + CI required)
+- [ ] enable branch protection on `main` — `scripts/setup_branch_protection.sh`
+      (PR + 1 review + CI "test" required, admins enforced, no force-push/delete)
 - [ ] enable GitHub Pages, Discussions, Dependabot, code scanning
 - [ ] submit to MCP.Directory, Anthropic MCP directory, Claude Code plugin
       marketplace
