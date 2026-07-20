@@ -21,8 +21,10 @@ dependencies = [
 ]
 
 # `uvx whystuck` and `claude mcp add whystuck -- uvx whystuck` both resolve to this.
+# `whystuck setup` (or the `whystuck-setup` alias) runs the client-config wizard.
 [project.scripts]
 whystuck = "whystuck.server:main"
+whystuck-setup = "whystuck.setup:main"
 
 [project.urls]
 Homepage = "https://github.com/loopgepa/whystuck"

@@ -15,6 +15,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning:
   promotion with dry-run + rollback records.
 - 6 focused MCP tools: diagnose, run_loop, propose_fix, promote, save_loop, and
   the internal record_trace.
+- **`whystuck setup` wizard** (`whystuck.setup`, also the `whystuck-setup` script):
+  one command configures Claude Code / Codex / Cursor — merges each client's MCP
+  config (never clobbering other servers) and injects a usage-contract rule
+  (`CLAUDE.md` / Cursor `.mdc` / `AGENTS.md`) so the agent auto-diagnoses stuck
+  loops. Idempotent; `--all`/`--global`/`--from-source`/`--yes` aware. No new
+  prerequisite — reuses the `uv` you already have.
 - Claude Code plugin (thin): explain-loop-failure / optimize-loop / design-loop
   skills + 3 agents. Flagship `examples/bugfix-loop` with a runnable offline demo.
 - v0.2-alpha eval layer (opt-in `whystuck[eval]`): objectives scalarizer, benchmark
@@ -26,7 +32,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning:
   auto-detects repeated edits, captures a session trace, and nudges the agent to
   diagnose — no need to remember to invoke WhyStuck.
 - Claude Code marketplace manifest (`.claude-plugin/marketplace.json`).
-- 142 tests (TDD, offline); repo_worker (output→apply→verify), dependency-review + release-rehearsal workflows, ADR index; ruff + mypy strict; CI, CodeQL, Scorecard, secret
+- 161 tests (TDD, offline); repo_worker (output→apply→verify), dependency-review + release-rehearsal workflows, ADR index; ruff + mypy strict; CI, CodeQL, Scorecard, secret
   scan, and mkdocs-material docs site. Locked architecture in `DECISIONS.md`
   (ADR-001…010); threat model in `SECURITY.md`.
 

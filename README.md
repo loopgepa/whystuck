@@ -55,35 +55,44 @@ it stays out of your request hot path.
 > Requires [`uv`](https://astral.sh/uv). If `uvx` isn't found:
 > `curl -LsSf https://astral.sh/uv/install.sh | sh`
 
+**One command — configures Claude Code, Codex, and Cursor:**
+
+```bash
+uvx whystuck setup
+```
+
+The wizard writes each client's MCP config **and** a short usage rule — so your
+agent knows to diagnose a stuck loop *before* it thrashes — merges into any
+existing config, and is safe to re-run. Choose clients/scope with
+`--all` · `--claude` · `--cursor` · `--codex` · `--global` · `--yes`.
+
+It registers WhyStuck as a local stdio MCP server (no `pip install`, no venv) and
+stores traces under `$XDG_DATA_HOME/whystuck` — **outside your repo**, never
+committed by accident.
+
+<details><summary>Prefer to wire a single client up by hand?</summary>
+
 ```bash
 claude mcp add whystuck -- uvx whystuck      # Claude Code
 codex  mcp add whystuck -- uvx whystuck      # Codex CLI
 ```
 
-> **Pre-launch:** `whystuck` isn't on PyPI yet, so `uvx whystuck` won't resolve.
-> Until the first release, run the real server from a clone:
-> ```bash
-> git clone https://github.com/loopgepa/whystuck && cd whystuck
-> claude mcp add whystuck -- uv run --directory "$PWD" whystuck
-> ```
-
-What this does:
-
-1. Registers WhyStuck as a local stdio MCP server (no `pip install`, no venv).
-2. Exposes 6 focused MCP tools + 3 slash-command skills to your agent.
-3. Stores traces under `$XDG_DATA_HOME/whystuck` — **outside your repo**, never
-   committed by accident.
-
-**Cursor / any MCP client** — add to your `mcp.json`:
+Cursor / any MCP client — add to your `mcp.json`:
 
 ```json
 { "mcpServers": { "whystuck": { "command": "uvx", "args": ["whystuck"] } } }
 ```
 
-> **Tip — make your agent reach for it automatically.** Paste one line into your
-> `AGENTS.md` / `CLAUDE.md` / `.cursor/rules`:
-> *"When a loop keeps failing (repeated edits, retries that don't help), ask
-> whystuck why before changing code."* See [AGENTS.md](AGENTS.md).
+Then paste one line into `AGENTS.md` / `CLAUDE.md` / `.cursor/rules` so the agent
+reaches for it automatically (the wizard does this for you). See [AGENTS.md](AGENTS.md).
+</details>
+
+> **Pre-launch:** `whystuck` isn't on PyPI yet, so `uvx …` won't resolve. Run the
+> wizard from a clone instead:
+> ```bash
+> git clone https://github.com/loopgepa/whystuck && cd whystuck
+> uv run whystuck setup --from-source "$PWD"
+> ```
 
 <details><summary>Try it offline first — no API key, nothing written</summary>
 
@@ -150,7 +159,7 @@ and tested.
 | LLM worker + output→apply→verify wiring (real-repo scoring) | 🟡 v0.2-alpha |
 | Optimize + frontier MCP tools (gated on the extra) | 🟡 v0.2-alpha |
 
-**142 tests**, all local and offline; `ruff` + `mypy --strict` (on `src/`) + docs `--strict` clean.
+**161 tests**, all local and offline; `ruff` + `mypy --strict` (on `src/`) + docs `--strict` clean.
 
 ## Configure
 
