@@ -280,3 +280,58 @@ diagnosis*.
    contrast: they close issue→PR for *production* traces in the cloud; LoopGEPA
    closes loop→fix for *local coding-agent sessions* with nothing leaving the
    machine.
+
+---
+
+## ADR-011 — v0.2 evaluation/benchmark wraps `gepa-ai/gepa`; do not reinvent it
+
+**Status:** accepted (2026-07-20). Realizes the deferral in ADR-003.
+
+**Context.** v0.1 diagnoses and proposes but never *measures*, so it cannot
+honestly say "optimized" (ADR-003). The measured loop — run variants, score them,
+keep a Pareto frontier — is exactly what the official GEPA optimizer already does
+(reflective mutation + Genetic-Pareto selection).
+
+**Decision.** v0.2 **wraps `gepa-ai/gepa`** via a custom `GEPAAdapter`
+(`LoopGenomeAdapter`) instead of writing our own search/Pareto. Mapping: the loop's
+evolvable text genes → GEPA's `candidate: dict[str,str]`; a benchmark task set →
+GEPA's `trainset`; `adapter.evaluate` runs the LoopGEPA runner per task and scores
+it; `adapter.make_reflective_dataset` turns failing traces into GEPA's reflection
+dataset; the reflection LM proposes mutations; **GEPA owns the Pareto frontier** —
+so the `pareto.py` deferred in ADR-003 is provided, not rebuilt. Full design:
+`docs/v0.2-eval-benchmark.md`.
+
+**Consequences.**
+- The `gepa` dependency is added **only** in v0.2, keeping the v0.1 core
+  network-free and light.
+- "Auto-benchmark" means *replaying recorded traces* or *running a declared task
+  set* — never fabricating a synthetic suite. Objectives stay multi-objective
+  (success/cost/latency/diff-size/safety); the scalar GEPA needs is derived, the
+  vector is preserved for the frontier and reporting.
+- Only after `evaluate` runs may a variant be called "optimized"; runs report
+  cost, latency, and cross-seed variance.
+
+---
+
+## ADR-012 — Position as the diagnosis/repair layer for *loop engineering*
+
+**Status:** accepted (2026-07-20)
+
+**Context.** "Loop engineering" became a named discipline in June 2026 (Addy
+Osmani; Anthropic *Getting Started With Loops*; OpenAI *Unrolling the Codex Agent
+Loop*; Cobus Greyling's `loop-engineering` repo). It is the layer above prompt/
+context/harness engineering: designing the act→verify→retry→stop cycle. This is
+LoopGEPA's exact home and a live, searched-for term.
+
+**Decision.** Lead all positioning with loop engineering: LoopGEPA is *the
+diagnosis-and-repair layer for agent loops*. Loop-scaffolding tools (e.g.
+`loop-engineering`) help you **build** a loop; LoopGEPA tells you **why a loop
+keeps failing and proposes the smallest reversible fix**. The loop **genome**
+(genes = skill/verifier/retry/stop/context/budget) is framed as the concrete,
+inspectable object loop engineering already manages. Docs and README lead with
+the discipline and the concrete pain, per ADR-010's anti-hype rule.
+
+**Consequences.** README hero + `docs/how-it-works.md` open on loop engineering;
+examples cover real loop shapes (bugfix loop now; an orchestrator/triage loop
+later) rather than abstract "genomes." Keep vocabulary concrete: developers want
+fewer repeated failures, not "genome management."
