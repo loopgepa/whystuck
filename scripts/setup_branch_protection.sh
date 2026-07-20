@@ -8,7 +8,7 @@
 # Enforces: PR + 1 approving review, CI "test" must pass (strict/up-to-date),
 # admins included, no force-push, no branch deletion.
 set -euo pipefail
-REPO="${1:-whystuck/whystuck}"
+REPO="${1:-loopgepa/whystuck}"
 
 gh api -X PUT "repos/${REPO}/branches/main/protection" \
   -H "Accept: application/vnd.github+json" \

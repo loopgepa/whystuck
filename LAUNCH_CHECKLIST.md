@@ -52,13 +52,13 @@ _80 tests, ruff + mypy strict, docs build --strict, demo + stdio verified green.
 ## Gate 3 — Publish day (in order)
 
 - [ ] register PyPI name `whystuck`; `uv publish`
-- [ ] switch `gh` to **vladimirrott**; create `whystuck/whystuck` repo; push
+- [ ] switch `gh` to **vladimirrott**; create `loopgepa/whystuck` repo; push
 - [ ] enable branch protection on `main` — `scripts/setup_branch_protection.sh`
       (PR + 1 review + CI "test" required, admins enforced, no force-push/delete)
 - [ ] enable GitHub Pages, Discussions, Dependabot, code scanning
 - [x] manifests ready: `server.json` (MCP registry) + `.claude-plugin/marketplace.json`
 - [ ] submit (publish-day, needs public repo + PyPI): official MCP registry →
       auto-feeds mcp.directory/Glama; Anthropic directory; Claude Code marketplace
-      (`/plugin marketplace add whystuck/whystuck`); awesome-mcp-servers
+      (`/plugin marketplace add loopgepa/whystuck`); awesome-mcp-servers
 - [ ] launch post naming the whitespace vs Latitude's "GEPA algorithm" (local +
       zero-telemetry + coding-agent-session scope)

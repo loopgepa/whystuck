@@ -4,11 +4,11 @@
 
 *Diagnose the loop. Propose the fix. You approve.*
 
-[![CI](https://github.com/whystuck/whystuck/actions/workflows/ci.yml/badge.svg)](https://github.com/whystuck/whystuck/actions/workflows/ci.yml)
+[![CI](https://github.com/loopgepa/whystuck/actions/workflows/ci.yml/badge.svg)](https://github.com/loopgepa/whystuck/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square)](LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/whystuck?style=flat-square)](https://pypi.org/project/whystuck/)
-[![Stars](https://img.shields.io/github/stars/whystuck/whystuck?style=flat-square)](https://github.com/whystuck/whystuck/stargazers)
-[![Discussions](https://img.shields.io/github/discussions/whystuck/whystuck?style=flat-square)](https://github.com/whystuck/whystuck/discussions)
+[![Stars](https://img.shields.io/github/stars/loopgepa/whystuck?style=flat-square)](https://github.com/loopgepa/whystuck/stargazers)
+[![Discussions](https://img.shields.io/github/discussions/loopgepa/whystuck?style=flat-square)](https://github.com/loopgepa/whystuck/discussions)
 
 **Works with** &nbsp;
 ![Claude Code](https://img.shields.io/badge/Claude_Code-supported-2f855a?style=flat-square) &nbsp;
@@ -16,7 +16,7 @@
 ![Cursor](https://img.shields.io/badge/Cursor-supported-2f855a?style=flat-square) &nbsp;
 `Local-only` · `No telemetry`
 
-[Install](#install) · [How it works](#how-it-works) · [Why not X?](#why-not-just-x) · [Status](#status) · [Roadmap](#roadmap) · [Docs](#documentation) · [Discuss](https://github.com/whystuck/whystuck/discussions)
+[Install](#install) · [How it works](#how-it-works) · [Why not X?](#why-not-just-x) · [Status](#status) · [Roadmap](#roadmap) · [Docs](#documentation) · [Discuss](https://github.com/loopgepa/whystuck/discussions)
 
 </div>
 
@@ -81,7 +81,7 @@ What this does:
 <details><summary>Try it offline first — no API key, nothing written</summary>
 
 ```bash
-git clone https://github.com/whystuck/whystuck && cd whystuck
+git clone https://github.com/loopgepa/whystuck && cd whystuck
 uv run python examples/bugfix-loop/demo.py
 ```
 
@@ -196,7 +196,7 @@ See [ROADMAP.md](ROADMAP.md).
 
 Highest-impact area right now: **real loop examples** beyond the bugfix loop
 (an orchestrator/triage loop). See [CONTRIBUTING.md](CONTRIBUTING.md) and the
-[`good first issue`](https://github.com/whystuck/whystuck/labels/good%20first%20issue) label.
+[`good first issue`](https://github.com/loopgepa/whystuck/labels/good%20first%20issue) label.
 
 ## License
 
@@ -205,5 +205,5 @@ Apache-2.0 — see [LICENSE](LICENSE).
 ---
 
 <div align="center">
-Built by <a href="https://github.com/vladimirrott">Vladimir Rotariu</a>. · Ideas, war stories — <a href="https://github.com/whystuck/whystuck/discussions">come say hi</a>.
+Built by <a href="https://github.com/vladimirrott">Vladimir Rotariu</a>. · Ideas, war stories — <a href="https://github.com/loopgepa/whystuck/discussions">come say hi</a>.
 </div>

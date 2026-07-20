@@ -2,7 +2,7 @@
 
 Trust is the product: WhyStuck records what your agent loops do and can edit
 workflow files. Here is exactly what it does and never does. The full threat
-model lives in [`SECURITY.md`](https://github.com/whystuck/whystuck/blob/main/SECURITY.md).
+model lives in [`SECURITY.md`](https://github.com/loopgepa/whystuck/blob/main/SECURITY.md).
 
 ## Guarantees
 
@@ -29,4 +29,4 @@ is fully offline.
 
 v0.1 diagnoses and proposes; it does not yet run measured evaluation, so it never
 calls a proposal "optimized." That word is earned in v0.2. See the
-[design records](https://github.com/whystuck/whystuck/blob/main/DECISIONS.md).
+[design records](https://github.com/loopgepa/whystuck/blob/main/DECISIONS.md).
