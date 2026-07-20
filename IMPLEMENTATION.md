@@ -60,7 +60,7 @@ Single distributable package so `uvx loopgepa` works (ADR-006).
         server.py        # FastMCP app + main() stdio entrypoint (the console script)
         tools.py         # thin MCP tool handlers over core
         core/            # vendor-neutral pure logic
-          models.py storage.py runner.py mutation.py diff.py safety.py
+          models.py storage.py diagnosis.py runner.py mutation.py diff.py safety.py
       tests/             # unit + integration; no network
       plugin/            # optional Claude Code plugin (thin): skills, agents, hooks, .mcp.json
       examples/bugfix-loop/
@@ -106,18 +106,33 @@ Keep the original draft's `LoopGene`, `LoopGenome`, `ToolCall`, `LoopStepTrace`,
 
 ## 7. Runner (`runner.py`) — the piece that makes genes real
 
-Minimal v0.1 runner:
+**v0.1 default = command+verifier ingest runner (offline, free, deterministic).**
+This is the honest MVP; the `claude -p` worker is a labeled stretch (§7.2).
 
-1. Load genome + selected variant.
-2. Execute steps in order. A worker step invokes Claude Code (headless
-   `claude -p` or a subagent) with the step's `skill`/`agent`/`prompt` genes.
-3. Enforce runner-backed genes: retry up to `retry_policy.max_retries` on the
-   declared conditions; stop when `stop_condition` is met; prune context per
-   `context_policy`; abort on `budget_policy`.
-4. Run `verifier_rubric` as a verification step; derive `final_outcome`
-   (`success` if stop condition + verifier pass; `failure` if budget/retries
-   exhausted; else `unknown`).
-5. Emit a `LoopTrace` via `loopgepa_record_trace`.
+`run_command_loop(...)`:
+
+1. Run the declared **worker command** (e.g. a repair script), capturing exit
+   code + a summarized stdout/stderr.
+2. Run the declared **verifier command** (deterministic; exit 0 = pass). This is
+   free and needs no API key — matching ADR-005's "confidence is deterministic."
+3. On verifier failure, retry up to `retry_policy.max_retries`; stop when the
+   `stop_condition` is met or retries exhaust.
+4. Derive `final_outcome`: `success` if the verifier passed within retries,
+   `failure` if retries exhausted, else `unknown`.
+5. Return a `LoopTrace`. The caller (or the MCP `record_trace` handler) persists
+   it via `core.storage.append_trace` — the runner does **not** call its own MCP
+   tool (S8).
+
+Command execution is injected (`execute: Callable[[list[str]], tuple[int, str]]`)
+so tests are deterministic and offline.
+
+### 7.2 `claude -p` worker (stretch, opt-in, network)
+
+An optional worker step may shell out to an LLM CLI. When it does, it MUST run
+with `--bare` and explicit `--agents` / `--append-system-prompt` /
+`--mcp-config` built from the genome's genes — never ambient discovery — so the
+trace reflects only declared genes (resolves B5). This path requires an API key
+and makes network calls; it is disclosed in SECURITY.md, never the default.
 
 ## 8. MCP tools (v0.1 only)
 
@@ -152,7 +167,7 @@ changes only; every promotion writes a rollback record.
     M0  Skeleton: monorepo imports, pytest+ruff green.        (scaffolded)
     M1  models.py + tests (TDD).
     M2  storage.py (XDG root, JSONL append, schema_version) + tests.
-    M3  mutation.py + diff.py (apply to genome, render diff) + tests.
+    M3  mutation.py + diff.py + safety.py (apply, diff, guard) + adversarial tests.
     M4  runner.py (minimal) + trace emission + tests.
     M5  MCP server wrapping core (stdio) + smoke tests.
     M6  plugin (skills/agents/hooks/.mcp.json/bin) + README install.
@@ -172,7 +187,9 @@ v0.2 (separate track): eval harness wrapping `gepa-ai/gepa`, then Pareto.
 5. MCP saves a draft variant and shows a diff.
 6. Promotion is dry-run by default; real promote requires explicit approval and
    writes a rollback record; it reconciles against live files.
-7. All data stays local (XDG dir); works offline after install.
+7. All LoopGEPA state stays local (XDG dir); LoopGEPA opens no network sockets.
+   The v0.1 command+verifier runner is fully offline; only an opt-in `claude -p`
+   worker step makes (disclosed) network calls (§7.2, SECURITY.md).
 8. Nothing is ever labeled "optimized" without evaluation.
 
 ## 13. Non-negotiables

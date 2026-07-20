@@ -13,8 +13,13 @@ security bug — report it (see bottom).
 
 ## Design guarantees
 
-1. **Local-only by default.** No telemetry, no cloud sync, no outbound network.
-   The MCP server is stdio-only and does not open sockets.
+1. **LoopGEPA itself is local-only.** No telemetry, no cloud sync. The MCP
+   server is stdio-only and does not open network sockets; all state is on your
+   disk. **Disclosure:** a loop *you declare* can include a worker step that
+   shells out to an LLM CLI (e.g. `claude -p`) — that CLI makes its own network
+   calls to whatever provider you configured. LoopGEPA neither hides nor
+   performs those calls; the command+verifier runner (the v0.1 default) is fully
+   offline.
 2. **Allowlist capture, not denylist redaction.** By default LoopGEPA stores
    *structured summaries* (step roles, statuses, tool names, exit codes, file
    paths, metric counts) — **not** raw tool input/output or file contents.
@@ -28,10 +33,10 @@ security bug — report it (see bottom).
 4. **No silent writes.** Promotion is dry-run by default and requires an
    explicit approval flag to touch a file. Every real promotion writes a
    reversible rollback record.
-5. **Safety-locked genes.** A gene marked `safety_locked: true` (permission,
-   approval, budget, or safety policy) can be commented on but never edited
-   without an explicit user unlock. Mutations may never weaken safety, remove
-   approval gates, or raise budget caps on their own.
+5. **Safety-locked genes.** A gene marked `safety_locked: true` (e.g. a
+   `tool_policy`, `escalation_policy`, or `budget_policy` gene) can be commented
+   on but never edited or removed without an explicit user unlock. Mutations may
+   never weaken safety, remove approval gates, or raise budget caps on their own.
 6. **Fail-open capture.** If trace recording fails, it must not break the user's
    Claude Code session.
 

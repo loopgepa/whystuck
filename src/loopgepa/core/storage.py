@@ -48,17 +48,35 @@ def _dump_yaml(data: object) -> str:
 
 
 def _atomic_write(path: Path, text: str) -> None:
-    """Write via temp file + os.replace so a reader never sees a partial file."""
+    """Write via temp file (same dir → same filesystem) + fsync + os.replace so a
+    reader never sees a partial file and the data survives a crash. Cleans up the
+    temp file on any error. Mode 0o600 — stored data may be sensitive."""
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(text, encoding="utf-8")
-    os.replace(tmp, path)
+    try:
+        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        try:
+            os.write(fd, text.encode("utf-8"))
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+        os.replace(tmp, path)
+    except BaseException:
+        tmp.unlink(missing_ok=True)
+        raise
 
 
 def _append_line(path: Path, text: str) -> None:
+    """Append one line with a single O_APPEND write(2) so concurrent runs never
+    interleave (POSIX guarantees atomicity per syscall for regular files). Uses
+    raw os.write, not buffered text I/O, to keep it one syscall."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "a", encoding="utf-8") as fh:
-        fh.write(text + "\n")
+    line = (text + "\n").encode("utf-8")
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+    try:
+        os.write(fd, line)
+    finally:
+        os.close(fd)
 
 
 class LoopGEPAStore:

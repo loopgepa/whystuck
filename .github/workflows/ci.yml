@@ -1,7 +1,7 @@
 name: CI
 
-# NOTE (launch gate): SHA-pin every action with a `# vX` comment and switch to
-# `uv sync --frozen` once uv.lock is committed. See LAUNCH_CHECKLIST.md.
+# NOTE (launch gate): SHA-pin every action with a `# vX` comment. uv.lock is
+# committed, so CI runs with --frozen (never `uv sync -U`). See LAUNCH_CHECKLIST.md.
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
         run: uv python install 3.12
 
       - name: Sync
-        run: uv sync --dev
+        run: uv sync --dev --frozen
 
       - name: Lint
         run: uv run ruff check .
