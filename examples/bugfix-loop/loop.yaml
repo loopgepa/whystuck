@@ -1,0 +1,31 @@
+id: bugfix-loop
+name: Bugfix Loop
+schema_version: "0.1"
+version: 0.1.0
+description: Fix a reported bug with minimal changes and verification.
+genes:
+  - id: bugfix_skill
+    type: skill
+    name: Bugfix Skill
+    path: skills/bugfix/SKILL.md
+    evolvable: true
+    content: |
+      Fix the bug. Prefer simple changes. Run tests when possible.
+  - id: verifier_rubric
+    type: verifier_rubric
+    name: Verifier Rubric
+    evolvable: true
+    content: |
+      Check whether the bug is fixed.
+  - id: retry_policy
+    type: retry_policy
+    name: Retry Policy
+    evolvable: true
+    content:
+      max_retries: 1
+  - id: stop_condition
+    type: stop_condition
+    name: Stop Condition
+    evolvable: true
+    content:
+      require_tests_pass: true
