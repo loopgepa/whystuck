@@ -94,18 +94,26 @@ def _confidence_for_evidence(
     store: WhyStuckStore, loop_id: str, evidence_ids: list[str]
 ) -> Confidence:
     """Deterministic, server-computed confidence (ADR-005). Never trust a
-    client-supplied value; evidence that names no real trace is always LOW."""
+    client-supplied value; evidence that names no real trace is always LOW.
+
+    A client must not be able to inflate confidence by (a) repeating one real
+    trace id many times, or (b) citing real-but-non-failing trace ids. So we
+    dedupe the cited ids AND match/count them against the set of FAILING trace
+    ids (falling back to all trace ids only when there are zero failing
+    traces) — that same set is also the denominator, so cluster_share stays a
+    faithful fraction of distinct failing traces actually cited."""
     if not evidence_ids:
         return Confidence(band=ConfidenceBand.LOW, score=0.0)
     traces = store.list_traces(loop_id)
-    known = {t.id for t in traces}
-    matched = [e for e in evidence_ids if e in known]
+    failing_ids = {t.id for t in traces if t.final_outcome == "failure"}
+    reference_ids = failing_ids or {t.id for t in traces}
+    matched = {e for e in evidence_ids if e in reference_ids}
     if not matched:
-        # Citing only unknown/fabricated trace ids is no evidence at all — force
-        # LOW, not the MEDIUM/HIGH that raw trace volume alone would grant.
+        # Citing only unknown/fabricated/non-failing trace ids is no evidence
+        # at all — force LOW, not the MEDIUM/HIGH that raw trace volume alone
+        # would grant.
         return Confidence(band=ConfidenceBand.LOW, score=0.0)
-    failing = [t for t in traces if t.final_outcome == "failure"]
-    denom = len(failing) if failing else len(traces)
+    denom = len(reference_ids)
     cluster_share = min(1.0, len(matched) / denom) if denom else 0.0
     return assess_confidence(n_traces=len(traces), cluster_share=cluster_share)
 
@@ -301,7 +309,8 @@ def build_server(store: WhyStuckStore, *, with_eval: bool | None = None) -> Fast
 
     @mcp.tool
     def whystuck_propose_fix(loop_id: str, proposals: list[dict[str, Any]]) -> dict[str, Any]:
-        """Draft a reversible fix from mutation proposals (≤3 genes, safety-checked).
+        """Draft a reversible fix from mutation proposals (≤3 genes; budget caps
+        can't be weakened, and safety-locked genes can't be edited while locked).
         Confidence is recomputed server-side from the cited evidence and returned
         per proposal."""
         return propose_fix(store, loop_id, proposals)

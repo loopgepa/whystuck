@@ -41,9 +41,7 @@ def rubric_genome() -> LoopGenome:
     )
 
 
-def edit_proposal(
-    target: str, after: str | dict[str, Any], mid: str = "m1"
-) -> MutationProposal:
+def edit_proposal(target: str, after: str | dict[str, Any], mid: str = "m1") -> MutationProposal:
     """An edit_gene MutationProposal citing one trace."""
     return MutationProposal(
         id=mid,

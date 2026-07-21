@@ -32,6 +32,10 @@ def _default_execute(cmd: list[str]) -> tuple[int, str]:
 def _safe_execute(execute: Executor, cmd: list[str]) -> tuple[int, str]:
     """Run a command, converting failure-to-launch into a recorded failure step
     instead of an exception that discards the whole trace."""
+    if not cmd:
+        # subprocess.Popen([]) raises an uncaught IndexError (not caught below)
+        # — an empty declared command is a config error, not a crash.
+        return (127, "empty command")
     try:
         return execute(cmd)
     except FileNotFoundError as exc:
@@ -47,7 +51,9 @@ def _step(attempt: int, role: str, cmd: list[str], code: int, output: str) -> Lo
         step_id=f"{role}-{attempt}",
         role=role,
         status=step_status_for(code == 0),
-        tool_calls=[ToolCall(name=cmd[0], exit_code=code, output_summary=summarize(output))],
+        tool_calls=[
+            ToolCall(name=cmd[0] if cmd else "", exit_code=code, output_summary=summarize(output))
+        ],
     )
 
 

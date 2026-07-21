@@ -2,10 +2,16 @@
 
 Dry-run (`plan_promotion`) computes diffs against the LIVE files (ADR-004.5) and
 touches nothing. `apply_promotion` writes the file-backed genes in two phases —
-stage every file to a temp, then swap them all — so a mid-way failure leaves the
-working tree unchanged (no half-applied promotion). Every target path is checked
-to stay inside `base_dir` (no traversal / absolute escape). Rollback is
-variant-based: re-promote the previous variant, so no file bodies are stored.
+stage every file to a temp, then swap them all into place. Phase 1 (staging) is
+all-or-nothing: a failure there touches no live file. Each swap in phase 2
+(`os.replace`) is atomic *per file*, but true atomicity across several files is
+not possible on POSIX — a failure mid-swap can leave a partial promotion (some
+dests swapped, some not). On that failure the not-yet-swapped staged temps are
+unlinked and the error names exactly which dests were swapped vs not, so the
+caller can reason about (and correct, e.g. by re-promoting) the partial state.
+Every target path is checked to stay inside `base_dir` (no traversal / absolute
+escape). Rollback is variant-based: re-promote the previous variant, so no file
+bodies are stored.
 
 Only file-backed, evolvable genes with a path are written here; runner-backed
 genes (retry/stop/etc.) take effect by persisting the variant's genome as the
@@ -21,7 +27,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 
 from whystuck.core.diff import render_gene_diff
-from whystuck.core.errors import PathEscapeError
+from whystuck.core.errors import PathEscapeError, PromotionSwapError, UnpromotableGeneError
 from whystuck.core.models import LoopVariant, PromotionRecord
 from whystuck.core.storage import _fsync_dir, _stage_temp
 
@@ -43,7 +49,15 @@ def _promotable_files(variant: LoopVariant) -> Iterator[tuple[str, str]]:
         if not (gene.file_backed and gene.evolvable):
             continue
         if gene.path is None or not isinstance(gene.content, str):
-            continue
+            # A file-backed, evolvable gene is meant to be written to disk; one
+            # with no path or non-str content can never actually be promoted.
+            # Silently skipping it would let `promote` report success while
+            # never writing the intended change — raise instead.
+            raise UnpromotableGeneError(
+                f"gene {gene.id!r} is file-backed and evolvable but has "
+                f"path={gene.path!r} content_type={type(gene.content).__name__}; "
+                "it cannot be promoted"
+            )
         yield gene.path, gene.content
 
 
@@ -95,9 +109,26 @@ def apply_promotion(
             tmp.unlink(missing_ok=True)
         raise
 
-    # Phase 2 — swap them all into place.
-    for dest, tmp in staged:
-        os.replace(tmp, dest)
+    # Phase 2 — swap them all into place. Each os.replace is atomic on its own,
+    # but the loop across files is not (see module docstring); on failure,
+    # unlink the temps that never got swapped (they'd otherwise leak) and name
+    # exactly which dests were swapped vs not so the caller can reason about
+    # the partial state.
+    swapped: list[Path] = []
+    try:
+        for dest, tmp in staged:
+            os.replace(tmp, dest)
+            swapped.append(dest)
+    except OSError as exc:
+        not_swapped = [dest for dest, tmp in staged if dest not in swapped]
+        for dest, tmp in staged:
+            if dest not in swapped:
+                tmp.unlink(missing_ok=True)
+        raise PromotionSwapError(
+            f"promotion swap failed after {len(swapped)}/{len(staged)} files — "
+            f"swapped={[str(d) for d in swapped]!r} "
+            f"not_swapped={[str(d) for d in not_swapped]!r}: {exc}"
+        ) from exc
     for dest, _ in staged:
         _fsync_dir(dest.parent)
 

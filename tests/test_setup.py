@@ -8,13 +8,17 @@ client installs. The thin interactive shell in main() is not unit-tested.
 import json
 from pathlib import Path
 
+import pytest
+
 from whystuck.setup import (
+    CURSOR_MDC_SENTINEL,
     MARKER_BEGIN,
     append_marked_block,
     codex_toml_block,
     configure_claude_code,
     configure_codex,
     configure_cursor,
+    configure_cursor_global,
     cursor_mdc,
     from_source_entry,
     markdown_block,
@@ -118,6 +122,11 @@ class TestCursorMdc:
         assert "alwaysApply: true" in mdc
         assert "whystuck_diagnose" in mdc
 
+    def test_mdc_self_identifies_as_managed(self):
+        # Without a stable sentinel, configure_cursor cannot tell a hand-edited
+        # .mdc apart from one it wrote itself, and would clobber user edits.
+        assert CURSOR_MDC_SENTINEL in cursor_mdc()
+
 
 class TestConfigureClients:
     def test_configure_claude_code_writes_mcp_and_rules(self, tmp_path: Path):
@@ -138,6 +147,25 @@ class TestConfigureClients:
         assert (tmp_path / ".cursor" / "rules" / "whystuck.mdc").exists()
         assert len(changed) == 2
 
+    def test_configure_cursor_leaves_unsentineled_mdc_untouched_and_warns(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ):
+        mdc_path = tmp_path / ".cursor" / "rules" / "whystuck.mdc"
+        mdc_path.parent.mkdir(parents=True)
+        mdc_path.write_text("my own hand-edited rule, no sentinel here")
+        changed = configure_cursor(tmp_path / ".cursor" / "mcp.json", mdc_path, server_entry())
+        assert mdc_path.read_text() == "my own hand-edited rule, no sentinel here"
+        assert str(mdc_path) not in changed
+        assert "whystuck.mdc" in capsys.readouterr().out
+
+    def test_configure_cursor_updates_sentineled_mdc(self, tmp_path: Path):
+        mdc_path = tmp_path / ".cursor" / "rules" / "whystuck.mdc"
+        mdc_path.parent.mkdir(parents=True)
+        mdc_path.write_text(f"stale content\n{CURSOR_MDC_SENTINEL}\n")
+        changed = configure_cursor(tmp_path / ".cursor" / "mcp.json", mdc_path, server_entry())
+        assert mdc_path.read_text() == cursor_mdc()
+        assert str(mdc_path) in changed
+
     def test_configure_codex_writes_toml_and_agents(self, tmp_path: Path):
         changed = configure_codex(
             tmp_path / ".codex" / "config.toml", tmp_path / "AGENTS.md", server_entry()
@@ -145,6 +173,23 @@ class TestConfigureClients:
         assert (tmp_path / ".codex" / "config.toml").exists()
         assert (tmp_path / "AGENTS.md").exists()
         assert len(changed) == 2
+
+
+class TestConfigureCursorGlobal:
+    # Cursor has no global rules file — global/User Rules are UI-managed in
+    # Settings → Rules; only PROJECT rules live in .cursor/rules/*.mdc. So the
+    # global path must write the (valid) global mcp.json but must NOT write an
+    # inert .mdc, and must tell the user how to add the rule manually.
+    def test_writes_mcp_but_not_mdc_and_prints_instructions(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ):
+        mcp_path = tmp_path / ".cursor" / "mcp.json"
+        changed = configure_cursor_global(mcp_path, server_entry())
+        assert mcp_path.exists()
+        assert not (tmp_path / ".cursor" / "rules").exists()
+        assert changed == [str(mcp_path)]
+        out = capsys.readouterr().out
+        assert "Settings" in out and "Rules" in out
 
 
 class TestRun:
@@ -173,12 +218,19 @@ class TestRun:
         assert (home / ".cursor" / "mcp.json").exists()
         assert not (proj / ".mcp.json").exists()
 
+    def test_run_global_scope_does_not_write_inert_cursor_mdc(self, tmp_path: Path):
+        # Cursor has no global rules file; writing ~/.cursor/rules/whystuck.mdc
+        # under --global would report success while being entirely inert.
+        home = tmp_path / "home"
+        proj = tmp_path / "proj"
+        run({"cursor"}, server_entry(), project_root=proj, home=home, scope="global")
+        assert (home / ".cursor" / "mcp.json").exists()
+        assert not (home / ".cursor" / "rules").exists()
+
     def test_run_is_idempotent(self, tmp_path: Path):
         home = tmp_path / "home"
         proj = tmp_path / "proj"
         run({"claude", "cursor", "codex"}, server_entry(), project_root=proj, home=home)
-        second = run(
-            {"claude", "cursor", "codex"}, server_entry(), project_root=proj, home=home
-        )
+        second = run({"claude", "cursor", "codex"}, server_entry(), project_root=proj, home=home)
         # nothing changed on the second run
         assert all(files == [] for files in second.values())

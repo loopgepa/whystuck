@@ -145,9 +145,7 @@ class TestPromoteTool:
         (proj / "skills" / "bugfix").mkdir(parents=True)
         (proj / "skills" / "bugfix" / "SKILL.md").write_text("old content")
 
-        out = promote(
-            store, "bugfix", "v1", base_dir=str(proj), approved_by="human", dry_run=False
-        )
+        out = promote(store, "bugfix", "v1", base_dir=str(proj), approved_by="human", dry_run=False)
         assert out["promoted"] is True
         assert (proj / "skills" / "bugfix" / "SKILL.md").read_text() == "new content"
         assert len(store.list_promotions("bugfix")) == 1

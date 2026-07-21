@@ -81,3 +81,44 @@ class TestStamping:
         assert trace.loop_id == "bugfix"
         assert trace.variant_id == "v1"
         assert trace.created_at == FIXED_TS
+
+
+class TestEmptyCommand:
+    def test_empty_worker_records_failure_instead_of_crashing(self):
+        # subprocess.Popen([]) raises an uncaught IndexError; an empty command
+        # list must become a recorded failure step, like the missing-binary
+        # path, not crash the whole run. (The worker's own exit code never
+        # decides final_outcome — only the verifier does — so we assert on
+        # the recorded step, not the trace-level outcome.)
+        def execute(cmd: list[str]) -> tuple[int, str]:
+            return (0, "should never be called for an empty command")
+
+        trace = run_command_loop(
+            loop_id="bugfix",
+            trace_id="t1",
+            created_at=FIXED_TS,
+            worker=[],
+            verifier=VERIFIER,
+            max_retries=0,
+            execute=execute,
+        )
+        worker_step = next(s for s in trace.steps if s.role == "worker")
+        assert worker_step.status.value == "failure"
+        assert worker_step.tool_calls[0].exit_code == 127
+
+    def test_empty_verifier_records_failure_instead_of_crashing(self):
+        def execute(cmd: list[str]) -> tuple[int, str]:
+            return (0, "worker ran fine")
+
+        trace = run_command_loop(
+            loop_id="bugfix",
+            trace_id="t1",
+            created_at=FIXED_TS,
+            worker=WORKER,
+            verifier=[],
+            max_retries=0,
+            execute=execute,
+        )
+        assert trace.final_outcome == "failure"
+        verify_step = next(s for s in trace.steps if s.role == "verify")
+        assert verify_step.tool_calls[0].exit_code == 127

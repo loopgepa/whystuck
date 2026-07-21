@@ -111,14 +111,18 @@ def _append_line(path: Path, text: str) -> None:
     """Append one line under O_APPEND. POSIX positions each write atomically at
     EOF (no lost appends); lines are small (output is capped) so the bytes are
     not interleaved on Linux. Raw os.write (looped for short counts), not buffered
-    text I/O, keeps the append a single positioned write."""
+    text I/O, keeps the append a single positioned write. Fsynced (file + dir),
+    same as _stage_temp/atomic_write_text, so a completed append_trace/
+    record_promotion survives a crash instead of silently losing the line."""
     path.parent.mkdir(parents=True, exist_ok=True)
     line = (text + "\n").encode("utf-8")
     fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
     try:
         _write_all(fd, line)
+        os.fsync(fd)
     finally:
         os.close(fd)
+    _fsync_dir(path.parent)
 
 
 class WhyStuckStore:

@@ -26,15 +26,11 @@ def _genome(loop_id: str = "bugfix") -> LoopGenome:
 
 
 def _trace(trace_id: str, loop_id: str = "bugfix", outcome: str = "failure") -> LoopTrace:
-    return LoopTrace(
-        id=trace_id, loop_id=loop_id, created_at=FIXED_TS, final_outcome=outcome
-    )
+    return LoopTrace(id=trace_id, loop_id=loop_id, created_at=FIXED_TS, final_outcome=outcome)
 
 
 def _variant(variant_id: str, loop_id: str = "bugfix") -> LoopVariant:
-    return LoopVariant(
-        id=variant_id, loop_id=loop_id, genome=_genome(loop_id), created_at=FIXED_TS
-    )
+    return LoopVariant(id=variant_id, loop_id=loop_id, genome=_genome(loop_id), created_at=FIXED_TS)
 
 
 class TestResolveStoreRoot:
@@ -90,6 +86,26 @@ class TestTraces:
         ids = [t.id for t in store.list_traces("bugfix")]
         assert ids == ["t1", "t2"]
 
+    def test_append_trace_fsyncs_file_and_dir(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ):
+        # A crash right after append_trace() returns must not lose the trace —
+        # the append (and the directory entry) must be fsynced, like _stage_temp.
+        import os
+
+        calls: list[int] = []
+        real_fsync = os.fsync
+
+        def spy_fsync(fd: int) -> None:
+            calls.append(fd)
+            real_fsync(fd)
+
+        monkeypatch.setattr("whystuck.core.storage.os.fsync", spy_fsync)
+        store = WhyStuckStore(tmp_path)
+        store.append_trace(_trace("t1"))
+        # One fsync for the appended file, one for the containing directory.
+        assert len(calls) == 2
+
     def test_traces_are_jsonl_one_line_each(self, tmp_path: Path):
         store = WhyStuckStore(tmp_path)
         store.append_trace(_trace("t1"))
@@ -133,3 +149,31 @@ class TestPromotions:
         listed = store.list_promotions("bugfix")
         assert len(listed) == 1
         assert listed[0].to_variant_id == "v1"
+
+    def test_record_promotion_fsyncs_file_and_dir(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ):
+        # A crash right after record_promotion() returns must not lose the
+        # rollback record — same durability requirement as append_trace.
+        import os
+
+        calls: list[int] = []
+        real_fsync = os.fsync
+
+        def spy_fsync(fd: int) -> None:
+            calls.append(fd)
+            real_fsync(fd)
+
+        monkeypatch.setattr("whystuck.core.storage.os.fsync", spy_fsync)
+        store = WhyStuckStore(tmp_path)
+        store.record_promotion(
+            PromotionRecord(
+                timestamp=FIXED_TS,
+                loop_id="bugfix",
+                from_variant_id="baseline",
+                to_variant_id="v1",
+                files_changed=[],
+                approved_by="human",
+            )
+        )
+        assert len(calls) == 2

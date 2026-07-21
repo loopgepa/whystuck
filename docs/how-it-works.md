@@ -25,13 +25,16 @@ loop keeps failing — why, and what is the smallest reversible change that help
 A loop is a declared **genome** — a set of evolvable *genes*:
 
 ```text
-skill · verifier_rubric · retry_policy · stop_condition · context_policy · budget_policy · hook
+skill · agent · prompt · hook · verifier_rubric · retry_policy · context_policy ·
+tool_policy · stop_condition · escalation_policy · budget_policy
 ```
 
 Genes are either **file-backed** (`skill`/`agent`/`prompt`/`hook` — they live in
-files your agent reads) or **runner-backed** (`retry`/`stop`/`context`/`budget` —
-enforced by the WhyStuck runner and persisted in the genome). This is what makes
-every knob real: WhyStuck runs the loop, so it can both observe and change it.
+files your agent reads) or **runner-backed** (`verifier_rubric`/`retry_policy`/
+`context_policy`/`tool_policy`/`stop_condition`/`escalation_policy`/
+`budget_policy` — enforced by the WhyStuck runner and persisted in the genome).
+This is what makes every knob real: WhyStuck runs the loop, so it can both
+observe and change it.
 
 ## The pipeline
 

@@ -33,8 +33,8 @@ Do not implement Levels 5–6 before Levels 1–4 are reliable and tested.
 
 - **Loop genome** — a declared, versioned workflow (`loop.yaml`): its genes.
 - **Gene** — one evolvable unit. File-backed (`skill`/`agent`/`prompt`/`hook`)
-  or runner-enforced (`verifier_rubric`/`retry_policy`/`stop_condition`/
-  `context_policy`/`budget_policy`).
+  or runner-enforced (`verifier_rubric`/`retry_policy`/`context_policy`/
+  `tool_policy`/`stop_condition`/`escalation_policy`/`budget_policy`).
 - **Runner** — WhyStuck executes a genome step-by-step and enforces the
   runner-backed genes. Because it owns execution, every gene is a real knob and
   every trace is clean by construction (ADR-002).
@@ -143,8 +143,9 @@ recomputes confidence server-side, saves a draft variant + diff summary),
 against live files per ADR-004.5; records promotion history), `whystuck_save_loop`,
 and the internal `whystuck_record_trace`.
 
-v0.2 adds eval tools (`build_benchmark`, `evaluate_variant`, `optimize_loop`,
-`get_frontier`), registered only when the `eval` extra is installed.
+v0.2 adds two eval-gated tools — `whystuck_optimize_loop` (runs `gepa.optimize`,
+returns the frontier) and `whystuck_get_frontier` — registered only when the
+`eval` extra is installed.
 
 Deferred to v0.2: `whystuck_score_variant`, `whystuck_get_pareto_frontier`.
 
@@ -196,7 +197,8 @@ v0.2 (separate track): eval harness wrapping `gepa-ai/gepa`, then Pareto.
 
 ## 13. Non-negotiables
 
-Local-only default · no telemetry · no silent promotion · no silent safety
-weakening · reversible only · explicit approval before writes · ≤3 genes per
-proposal · show diffs first · low trace count → low confidence · diagnosis
-before suggestion · never call a proposal "optimized" until evaluated (v0.2).
+Local-only default · no telemetry · no silent promotion · no silent budget-cap
+increase (the one enforced-in-code safety guard — see `core/safety.py`) ·
+reversible only · explicit approval before writes · ≤3 genes per proposal ·
+show diffs first · low trace count → low confidence · diagnosis before
+suggestion · never call a proposal "optimized" until evaluated (v0.2).

@@ -24,6 +24,12 @@ from typing import Any
 MARKER_BEGIN = "<!-- whystuck:begin -->"
 MARKER_END = "<!-- whystuck:end -->"
 
+# Written into every whystuck-managed .mdc so a re-run can tell "we wrote this"
+# apart from "the user hand-edited/replaced this" — the latter must never be
+# clobbered (unlike CLAUDE.md/AGENTS.md, the .mdc is a whole-file overwrite,
+# so without a sentinel a hand-edit would be silently destroyed).
+CURSOR_MDC_SENTINEL = "<!-- whystuck:managed -->"
+
 # The usage contract, injected verbatim into every client's rule file. Plain prose
 # (no headings) so it embeds cleanly in Markdown and Cursor `.mdc` alike.
 CONTRACT = (
@@ -67,13 +73,18 @@ def markdown_block() -> str:
 
 
 def cursor_mdc() -> str:
-    """A Cursor project rule (`.mdc`) carrying the same contract, always applied."""
+    """A Cursor project rule (`.mdc`) carrying the same contract, always applied.
+
+    Includes CURSOR_MDC_SENTINEL so a re-run can tell this file was written by
+    whystuck (safe to overwrite) apart from a user's hand-edited/replaced one
+    (must not be clobbered)."""
     return (
         "---\n"
         "description: Diagnose repeatedly failing agent loops with WhyStuck\n"
         "alwaysApply: true\n"
         "---\n\n"
-        f"{CONTRACT}\n"
+        f"{CONTRACT}\n\n"
+        f"{CURSOR_MDC_SENTINEL}\n"
     )
 
 
@@ -165,11 +176,47 @@ def configure_claude_code(mcp_path: Path, rules_path: Path, entry: dict[str, Any
 
 
 def configure_cursor(mcp_path: Path, mdc_path: Path, entry: dict[str, Any]) -> list[str]:
+    """Configure Cursor for a project: MCP config + the project rule `.mdc`.
+
+    The `.mdc` is a whole-file overwrite (no marker), so re-running must never
+    clobber a user's hand-edited rule. If a pre-existing `.mdc` lacks
+    CURSOR_MDC_SENTINEL, it is left untouched and a warning is printed instead
+    of silently overwriting it."""
     changed = []
     if upsert_json_config(mcp_path, "whystuck", entry):
         changed.append(str(mcp_path))
-    if write_if_changed(mdc_path, cursor_mdc()):
+    if mdc_path.exists() and CURSOR_MDC_SENTINEL not in mdc_path.read_text(encoding="utf-8"):
+        print(
+            _warn(
+                f"{mdc_path} already exists and was not written by whystuck "
+                "(no managed marker) — leaving it untouched. Merge the rule "
+                "content manually if you want it: `whystuck setup` prints the "
+                "contract, or see cursor_mdc() in whystuck.setup."
+            )
+        )
+    elif write_if_changed(mdc_path, cursor_mdc()):
         changed.append(str(mdc_path))
+    return changed
+
+
+def configure_cursor_global(mcp_path: Path, entry: dict[str, Any]) -> list[str]:
+    """Configure Cursor at the global/user scope.
+
+    Cursor has no global rules file — global/User Rules are UI-managed in
+    Settings → Rules; only PROJECT rules live in `.cursor/rules/*.mdc`. So,
+    unlike `configure_cursor`, this never writes a `.mdc` (it would be inert);
+    it writes the (valid) global `mcp.json` and prints the rule so the user can
+    add it themselves."""
+    changed = []
+    if upsert_json_config(mcp_path, "whystuck", entry):
+        changed.append(str(mcp_path))
+    print(
+        _arrow(
+            "Cursor has no global rules file — add the WhyStuck rule yourself via "
+            "Cursor Settings → Rules (User Rules), using this content:"
+        )
+    )
+    print(cursor_mdc())
     return changed
 
 
@@ -193,7 +240,9 @@ def run(
     """Configure the selected clients. Returns {client: [files changed]} — an empty
     list means that client was already configured. `scope` is "project" (write into
     project_root) or "global" (write user-level config). Codex's MCP config is
-    always global (~/.codex/config.toml); its AGENTS.md rule stays project-local."""
+    always global (~/.codex/config.toml); its AGENTS.md rule stays project-local.
+    Cursor's rule `.mdc` is project-only (Cursor has no global rules file — see
+    configure_cursor_global); at global scope only its mcp.json is written."""
     summary: dict[str, list[str]] = {}
     if "claude" in clients:
         if scope == "global":
@@ -203,11 +252,11 @@ def run(
         summary["claude"] = configure_claude_code(mcp, rules, entry)
     if "cursor" in clients:
         if scope == "global":
-            mcp, mdc = home / ".cursor" / "mcp.json", home / ".cursor" / "rules" / "whystuck.mdc"
+            summary["cursor"] = configure_cursor_global(home / ".cursor" / "mcp.json", entry)
         else:
             mcp = project_root / ".cursor" / "mcp.json"
             mdc = project_root / ".cursor" / "rules" / "whystuck.mdc"
-        summary["cursor"] = configure_cursor(mcp, mdc, entry)
+            summary["cursor"] = configure_cursor(mcp, mdc, entry)
     if "codex" in clients:
         summary["codex"] = configure_codex(
             home / ".codex" / "config.toml", project_root / "AGENTS.md", entry
@@ -325,9 +374,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     entry = (
-        from_source_entry(str(Path(ns.from_source).resolve()))
-        if ns.from_source
-        else server_entry()
+        from_source_entry(str(Path(ns.from_source).resolve())) if ns.from_source else server_entry()
     )
     scope = "global" if ns.global_scope else "project"
     project_root = Path(ns.project_dir).resolve()

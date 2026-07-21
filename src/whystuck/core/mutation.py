@@ -44,5 +44,11 @@ def apply_mutation(genome: LoopGenome, proposal: MutationProposal) -> LoopGenome
         # it clears the lock only — a subsequent budget-weakening edit is still
         # refused by the budget guard, so unlocking never bypasses a cap.
         gene.safety_locked = False
+    else:
+        # Unreachable today (MutationType.ADD_GENE returns early above and every
+        # other member is handled), but a future MutationType must fail loud
+        # here rather than silently no-op while propose_fix still reports
+        # success.
+        raise ValueError(f"unhandled mutation_type: {proposal.mutation_type!r}")
 
     return new

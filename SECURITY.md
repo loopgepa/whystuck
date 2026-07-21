@@ -20,24 +20,29 @@ security bug — report it (see bottom).
    calls to whatever provider you configured. WhyStuck neither hides nor
    performs those calls; the command+verifier runner (the v0.1 default) is fully
    offline.
-2. **Allowlist capture, not denylist redaction.** By default WhyStuck stores
-   *structured summaries* (step roles, statuses, tool names, exit codes, file
-   paths, metric counts) — **not** raw tool input/output or file contents.
-   Raw capture is opt-in per loop (`capture: raw`). Denylist secret-scrubbing
-   exists only as a second line of defense on opt-in raw data, and we do not
-   claim it is perfect.
-3. **Storage lives outside your repo.** Default `$XDG_DATA_HOME/whystuck`
-   (fallback `~/.local/share/whystuck`). A repo-local `.whystuck/` is opt-in;
-   choosing it makes WhyStuck add a `.gitignore` entry so traces are never
-   committed.
+2. **Allowlist capture, not denylist redaction.** WhyStuck stores *structured
+   summaries* (step roles, statuses, tool names, exit codes, file paths, output
+   summaries capped at `OUTPUT_SUMMARY_CAP`) — **not** raw, unbounded tool
+   input/output or file contents. *(Planned, not yet implemented: a per-loop
+   `capture: raw` opt-in and denylist secret-scrubbing as a second line of
+   defense on that opt-in raw data. Neither exists in code today — there is no
+   `capture` field on any model.)*
+3. **Storage lives outside your repo.** WhyStuck always resolves its store root
+   to `$WHYSTUCK_HOME` > `$XDG_DATA_HOME/whystuck` > `~/.local/share/whystuck`
+   (`core/storage.py:resolve_store_root`) — never your project's working
+   directory — so traces are never inside the repo to accidentally commit.
+   *(Planned, not yet implemented: an opt-in repo-local `.whystuck/` store with
+   an auto-added `.gitignore` entry. This does not exist in code today.)*
 4. **No silent writes.** Promotion is dry-run by default and requires an
    explicit approval flag to touch a file. Every real promotion writes a
    reversible rollback record.
 5. **Safety-locked genes.** A gene marked `safety_locked: true` (e.g. a
    `tool_policy`, `escalation_policy`, or `budget_policy` gene) can be commented
    on but never edited or removed until the lock is cleared with an explicit
-   `unlock_gene` mutation. Even after an unlock, mutations may never weaken
-   safety, remove approval gates, or raise budget caps on their own.
+   `unlock_gene` mutation. Mutations can't raise a budget cap on their own, even
+   after an unlock (`core/safety.py`'s guard enforces this specifically for
+   `budget_policy` genes; it is the one enforced-in-code guarantee here — it is
+   not a general "no safety weakening" check).
 6. **Fail-open capture.** If trace recording fails, it must not break the user's
    Claude Code session.
 

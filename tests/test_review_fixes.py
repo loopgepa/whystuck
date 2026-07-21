@@ -262,6 +262,73 @@ def test_confidence_low_when_evidence_cites_no_real_trace(tmp_path: Path):
     assert variant.mutations[0].confidence.band is ConfidenceBand.LOW
 
 
+def test_confidence_duplicate_evidence_id_does_not_inflate_to_high():
+    # Citing the SAME real trace id 15 times must not count as 15 distinct
+    # pieces of evidence — dedupe before computing cluster_share, or a client
+    # can manufacture HIGH confidence out of a single failing trace.
+    from whystuck.tools import _confidence_for_evidence
+
+    store_traces = [f"t{i}" for i in range(15)]
+
+    class _FakeStore:
+        def list_traces(self, loop_id: str) -> list:
+            from whystuck.core.models import LoopTrace
+
+            return [
+                LoopTrace(id=tid, loop_id="bugfix", created_at=FIXED_TS, final_outcome="failure")
+                for tid in store_traces
+            ]
+
+    confidence = _confidence_for_evidence(_FakeStore(), "bugfix", ["t0"] * 15)
+    assert confidence.band is not ConfidenceBand.HIGH
+
+
+def test_confidence_evidence_citing_only_successful_traces_is_low(tmp_path: Path):
+    # Citing real trace ids that never failed is not evidence of the failure
+    # mode — it must still force LOW, not raw-volume-driven MEDIUM/HIGH.
+    store = WhyStuckStore(tmp_path)
+    store.save_loop(rubric_genome())
+    success_ids = []
+    for i in range(10):
+        record_trace(store, trace_dict(f"fail-{i}", "failure", "boom"))
+    for i in range(10):
+        tid = f"ok-{i}"
+        record_trace(store, trace_dict(tid, "success", None))
+        success_ids.append(tid)
+    proposal = {
+        "id": "m1",
+        "loop_id": "bugfix",
+        "mutation_type": "edit_gene",
+        "target_gene_id": "rubric",
+        "title": "edit",
+        "rationale": "r",
+        "evidence_trace_ids": success_ids,  # real ids, but none failing
+        "after": "check harder",
+    }
+    out = propose_fix(store, "bugfix", [proposal])
+    assert out["proposals"][0]["confidence"]["band"] == "low"
+
+
+def test_confidence_cluster_share_is_distinct_failing_ids_over_all_failing():
+    # K distinct cited failing ids of N failing traces → cluster_share = K/N.
+    from whystuck.tools import _confidence_for_evidence
+
+    class _FakeStore:
+        def list_traces(self, loop_id: str) -> list:
+            from whystuck.core.models import LoopTrace
+
+            return [
+                LoopTrace(
+                    id=f"t{i}", loop_id="bugfix", created_at=FIXED_TS, final_outcome="failure"
+                )
+                for i in range(16)
+            ]
+
+    confidence = _confidence_for_evidence(_FakeStore(), "bugfix", [f"t{i}" for i in range(8)])
+    assert confidence.score == 0.5  # 8 distinct / 16 failing
+    assert confidence.band is ConfidenceBand.HIGH
+
+
 def test_propose_on_missing_loop_raises_notfound(tmp_path: Path):
     store = WhyStuckStore(tmp_path)
     with pytest.raises(NotFoundError):

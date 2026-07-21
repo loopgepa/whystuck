@@ -121,10 +121,16 @@ anticipate is stored in cleartext.
    tool names, exit codes, file paths, metric counts). Never store raw tool
    input/output or file contents unless the user explicitly opts a loop into
    `capture: raw`. Redaction is a second line of defense, not the first.
+   **Status: not yet implemented (planned)** — no `capture` field exists on any
+   model today; every trace is an allowlisted structured summary and there is
+   no raw-capture opt-in yet.
 2. **Store location.** Default `WHYSTUCK_HOME=$XDG_DATA_HOME/whystuck`
    (fallback `~/.local/share/whystuck`), **not** the project's cwd. A repo-local
    `.whystuck/` is opt-in and, if chosen, WhyStuck writes a `.gitignore` entry
    for it. This removes the "traces committed to git with secrets" footgun.
+   **Status: `WHYSTUCK_HOME`/XDG/`~/.local/share` resolution is implemented
+   (`core/storage.py:resolve_store_root`); the repo-local `.whystuck/` opt-in
+   and its `.gitignore` auto-entry are not yet implemented (planned).**
 3. **Concurrency.** Trace writes use `O_APPEND` single-line JSONL writes;
    concurrent sessions each write their own line atomically. No shared mutable
    file handles.
