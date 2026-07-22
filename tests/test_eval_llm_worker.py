@@ -69,3 +69,43 @@ def test_litellm_complete_without_litellm_is_actionable():
     # extra IS the fix — superseding the earlier state where litellm was separate.
     with pytest.raises(RuntimeError, match=r"whystuck\[eval\]"):
         complete("hi")
+
+
+# --- reflective-signal capture (fixes GEPA reflection starvation) -------------
+
+
+def test_run_task_captures_task_input_and_worker_output():
+    # The trace must carry the task instruction and the worker's real output so
+    # the adapter can build a GEPA reflective dataset with actual content.
+    run_task = make_run_task(lambda p: "solid", lambda o, t: 1.0)
+    trace = run_task(_genome("skill"), BenchmarkTask(id="t1", payload={"goal": "do the thing"}))
+    assert trace.task_summary == "do the thing"
+    assert trace.task_id == "t1"
+    step = next(s for s in trace.steps if s.role == "worker")
+    assert step.output_summary == "solid"
+    assert step.input_summary == "do the thing"
+
+
+def test_run_task_stores_fractional_eval_score_and_partial_is_not_success():
+    # A fractional scorer (0.5) must be stored verbatim in metadata['eval_score'],
+    # and a partial result is NOT a full success.
+    run_task = make_run_task(lambda p: "out", lambda o, t: 0.5)
+    trace = run_task(_genome("skill"), BenchmarkTask(id="t"))
+    assert trace.metadata["eval_score"] == 0.5
+    assert trace.metrics.success is False
+    assert trace.final_outcome == "failure"
+
+
+def test_run_task_full_score_is_success():
+    run_task = make_run_task(lambda p: "out", lambda o, t: 1.0)
+    trace = run_task(_genome("skill"), BenchmarkTask(id="t"))
+    assert trace.metrics.success is True
+    assert trace.metadata["eval_score"] == 1.0
+
+
+def test_run_task_feedback_hook_lands_in_metadata():
+    run_task = make_run_task(
+        lambda p: "out", lambda o, t: 0.0, feedback=lambda o, t: "constraint X failed"
+    )
+    trace = run_task(_genome("skill"), BenchmarkTask(id="t"))
+    assert trace.metadata["feedback"] == "constraint X failed"

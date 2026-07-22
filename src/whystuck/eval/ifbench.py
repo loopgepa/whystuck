@@ -11,11 +11,15 @@ parameter-free, nltk-free, package-free subset is ported (11 of 58 constraints),
 so the whole path runs offline with no per-row kwargs. The vendored data slice
 (data/ifbench_supported.jsonl) holds exactly the rows those constraints cover.
 
-Two scores are exposed, both standard IFEval conventions:
+Scores/feedback exposed:
 - `ifbench_pass` — prompt-level: every constraint on the row satisfied (bool).
 - `ifbench_score` — instruction-level: fraction of the row's constraints satisfied.
-The study feeds `ifbench_pass` to the worker (a clean binary GEPA signal) and
-reports both on the held-out split.
+  (`ifbench_pass` and `ifbench_score` are standard IFEval conventions.)
+- `ifbench_feedback` — a WhyStuck addition: per-constraint prose (which passed and
+  which failed), the actionable signal GEPA's reflection LM needs (not IFEval).
+The study trains and reports on `ifbench_score` (one fractional objective, so the
+gradient GEPA climbs is the metric we grade) with `ifbench_feedback` driving
+reflection.
 """
 
 from __future__ import annotations
@@ -198,6 +202,29 @@ def ifbench_pass(output: str, task: BenchmarkTask) -> bool:
     """
     ids = _constraints(task)
     return bool(ids) and all(VERIFIERS[iid](output) for iid in ids)
+
+
+def ifbench_feedback(output: str, task: BenchmarkTask) -> str:
+    """Per-constraint result as prose, for GEPA's reflective dataset.
+
+    Names which constraints the output satisfied and which it failed, so the
+    reflection LM gets an actionable signal (which requirement to fix) rather
+    than a bare scalar. Unknown ids raise ``KeyError`` — same contract as
+    ``ifbench_score``/``ifbench_pass`` (an id outside the supported set is a
+    caller bug that must fail loud, not be silently skipped).
+    """
+    ids = _constraints(task)
+    if not ids:
+        return "no verifiable constraints on this task"
+    checked = [(iid, VERIFIERS[iid](output)) for iid in ids]
+    failed = [iid for iid, ok in checked if not ok]
+    passed = [iid for iid, ok in checked if ok]
+    if not failed:
+        return f"All {len(passed)} constraint(s) satisfied: {', '.join(passed)}."
+    return (
+        f"Failed {len(failed)} of {len(checked)} constraint(s): {', '.join(failed)}. "
+        f"Satisfied: {', '.join(passed) if passed else 'none'}."
+    )
 
 
 # --- loader -------------------------------------------------------------------

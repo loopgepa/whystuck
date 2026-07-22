@@ -17,9 +17,27 @@ from typing import Any
 
 from whystuck.core.models import LoopGenome, LoopTrace
 from whystuck.eval.benchmark import BenchmarkTask
-from whystuck.eval.objectives import objective_vector, scalarize
+from whystuck.eval.objectives import scalarize
 
 RunTask = Callable[[LoopGenome, BenchmarkTask], LoopTrace]
+
+
+def _score_of(trace: LoopTrace) -> float:
+    """The score GEPA maximizes. Prefer a fractional ``metadata['eval_score']``
+    (the LLM worker records constraint-satisfaction fraction there); fall back to
+    the success-dominant ``scalarize`` for command-loop traces that don't set it,
+    so v0.1 scoring is unchanged."""
+    raw = trace.metadata.get("eval_score")
+    return float(raw) if raw is not None else scalarize(trace.metrics)
+
+
+def _worker_output(trace: LoopTrace) -> str:
+    """The worker's actual output text (from the worker step), for reflection.
+    Falls back to the outcome string when no step captured output text."""
+    for step in trace.steps:
+        if step.output_summary is not None:
+            return step.output_summary
+    return trace.final_outcome
 
 
 @dataclass
@@ -57,8 +75,8 @@ class LoopGenomeAdapter:
         traces: list[LoopTrace] = []
         for task in batch:
             trace = self.run_task(genome, task)
-            outputs.append(trace.final_outcome)
-            scores.append(scalarize(trace.metrics))
+            outputs.append(_worker_output(trace))
+            scores.append(_score_of(trace))
             traces.append(trace)
         return EvalBatch(
             outputs=outputs, scores=scores, trajectories=traces if capture_traces else None
@@ -67,16 +85,24 @@ class LoopGenomeAdapter:
     def make_reflective_dataset(
         self, candidate: dict[str, str], eval_batch: EvalBatch, components_to_update: list[str]
     ) -> dict[str, list[dict[str, Any]]]:
-        """Turn each task's outcome into GEPA reflection records, per component."""
+        """Build GEPA reflection records with the real task signal.
+
+        Each record surfaces what the reflector needs to propose a better prompt:
+        the task instruction (Inputs), the worker's actual output (Generated
+        Outputs), and per-task Feedback (which requirements passed/failed). GEPA cannot
+        improve a component it can't see the effect of, so these must be the real
+        task/output, not internal status codes."""
         records: list[dict[str, Any]] = []
-        for i, trace in enumerate(eval_batch.trajectories or []):
-            feedback = f"score={eval_batch.scores[i]:.2f}; " + (
-                trace.failure_summary or "succeeded"
+        traj = eval_batch.trajectories or []
+        for i, trace in enumerate(traj):
+            score = eval_batch.scores[i] if i < len(eval_batch.scores) else _score_of(trace)
+            feedback = trace.metadata.get("feedback") or (
+                f"score={score:.2f}; " + (trace.failure_summary or "succeeded")
             )
             records.append(
                 {
-                    "Inputs": {"outcome": trace.final_outcome},
-                    "Generated Outputs": objective_vector(trace.metrics),
+                    "Inputs": trace.task_summary or trace.task_id or "",
+                    "Generated Outputs": _worker_output(trace),
                     "Feedback": feedback,
                 }
             )

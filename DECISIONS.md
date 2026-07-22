@@ -303,8 +303,9 @@ keep a Pareto frontier — is exactly what the official GEPA optimizer already d
 (`LoopGenomeAdapter`) instead of writing our own search/Pareto. Mapping: the loop's
 evolvable text genes → GEPA's `candidate: dict[str,str]`; a benchmark task set →
 GEPA's `trainset`; `adapter.evaluate` runs the WhyStuck runner per task and scores
-it; `adapter.make_reflective_dataset` turns failing traces into GEPA's reflection
-dataset; the reflection LM proposes mutations; **GEPA owns the Pareto frontier** —
+it; `adapter.make_reflective_dataset` turns each evaluated trace (task input,
+worker output, per-task feedback) into GEPA's reflection dataset; the reflection
+LM proposes mutations; **GEPA owns the Pareto frontier** —
 so the `pareto.py` deferred in ADR-003 is provided, not rebuilt. Full design:
 `docs/v0.2-eval-benchmark.md`.
 

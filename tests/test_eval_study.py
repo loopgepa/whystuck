@@ -180,6 +180,40 @@ def test_run_study_forwards_proposal_cap_to_optimizer(tmp_path, tasks):
     assert seen == [15, 15]
 
 
+def test_study_arms_bd_use_fractional_ifbench_signal_not_binary(tmp_path):
+    # Guards the exact production wiring at study.py's make_run_task call: arms
+    # B/D must train on fractional `ifbench_score` + `ifbench_feedback`, NOT the
+    # old binary `ifbench_pass`. The fake `_optimize` never calls run_task, so we
+    # capture the adapter GEPA is handed and exercise its run_task directly with a
+    # partial-satisfaction output ("a\nb" passes format:newline but fails
+    # format:no_whitespace → score 0.5). A revert to `ifbench_pass` would collapse
+    # this to 0.0 and drop the constraint-naming feedback, failing here.
+    store = WhyStuckStore(tmp_path / "store")
+    task = BenchmarkTask(
+        id="mix",
+        payload={"goal": "g", "instruction_id_list": ["format:no_whitespace", "format:newline"]},
+    )
+    captured: dict = {}
+
+    def capturing_optimize(**kw):
+        captured["adapter"] = kw["adapter"]
+        return _fake_optimize(**kw)
+
+    run_study(
+        store,
+        complete=lambda prompt: "a\nb",
+        reflection_lm="fake",
+        train=[task],
+        heldout=[task],
+        arms=("B",),
+        _optimize=capturing_optimize,
+    )
+    adapter = captured["adapter"]
+    trace = adapter.run_task(seed_genome("study-B", evolvable={GENERATE_GENE}), task)
+    assert trace.metadata["eval_score"] == 0.5  # fractional, not binary 0/1
+    assert "format:no_whitespace" in trace.metadata["feedback"]  # names the failed constraint
+
+
 def test_delta_is_fractional_on_mixed_constraints(tmp_path):
     # Explicit held-out (not a split) so the fraction is shuffle-independent:
     # "x x x" fails no_whitespace but trivially passes sub-bullets (no '*'),

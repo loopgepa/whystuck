@@ -178,3 +178,61 @@ def test_path_override_filters_unsupported_rows(tmp_path):
 # NOTE: every row in the vendored slice is single-constraint, so ifbench_score's
 # multi-constraint fraction path is covered via the synthetic _task() helper
 # above rather than a loaded row — this is deliberate, not an oversight.
+
+
+# --- ifbench_feedback: per-constraint reflective signal for GEPA --------------
+
+
+def _fb_task(*ids):
+    return BenchmarkTask(id="t", payload={"goal": "g", "instruction_id_list": list(ids)})
+
+
+def test_ifbench_feedback_names_failed_constraint():
+    from whystuck.eval.ifbench import ifbench_feedback
+
+    fb = ifbench_feedback("x x", _fb_task("format:no_whitespace"))  # whitespace → fails
+    assert "format:no_whitespace" in fb
+    assert "Failed" in fb
+
+
+def test_ifbench_feedback_reports_all_satisfied():
+    from whystuck.eval.ifbench import ifbench_feedback
+
+    fb = ifbench_feedback("solid", _fb_task("format:no_whitespace"))  # no whitespace → passes
+    # "Failed ... Satisfied: none." also contains "satisfied", so assert on the
+    # all-pass branch specifically: it starts with "All" and never says "Failed".
+    assert fb.startswith("All ")
+    assert "Failed" not in fb
+
+
+def test_ifbench_feedback_multi_constraint_partial():
+    from whystuck.eval.ifbench import ifbench_feedback
+
+    # "a\nb": passes format:newline (each word on its own line) but fails
+    # format:no_whitespace → names exactly the failed one, keeps the passed one.
+    fb = ifbench_feedback("a\nb", _fb_task("format:no_whitespace", "format:newline"))
+    assert "Failed 1 of 2" in fb
+    assert "format:no_whitespace" in fb
+    assert "format:newline" in fb  # reported as satisfied
+
+
+def test_ifbench_feedback_empty_constraints_is_explicit():
+    from whystuck.eval.ifbench import ifbench_feedback
+
+    fb = ifbench_feedback("anything", BenchmarkTask(id="t", payload={"goal": "g"}))
+    assert "no verifiable constraints" in fb
+
+
+def test_ifbench_feedback_unknown_id_raises():
+    from whystuck.eval.ifbench import ifbench_feedback
+
+    with pytest.raises(KeyError):
+        ifbench_feedback("x", _fb_task("does:not-exist"))
+
+
+def test_ifbench_score_multi_constraint_full_pass_is_exactly_one():
+    # 2/2 must be exactly 1.0 (n/n is exact in IEEE-754) so make_run_task's
+    # `ok = eval_score >= 1.0` never mis-reads a full pass as a partial one.
+    # "solid" is one whitespace-free token on one line == one word.
+    s = ifbench_score("solid", _fb_task("format:no_whitespace", "format:newline"))
+    assert s == 1.0

@@ -15,9 +15,11 @@ componentized optimization from a "more prompt text" confound:
 - **D** — evolves the whole genome with the LLM worker (loop-level GEPA).
 
 Each arm's winning genome is scored on the held-out split with `ifbench_score`
-(graded fraction) via the LLM worker — for *every* arm, including C. The GEPA
-*training* signal differs by arm: B/D use `ifbench_pass` (binary, LLM worker);
-arm C's is the command exit status (genome-blind), independent of IFBench.
+(graded fraction) via the LLM worker — for *every* arm, including C. B/D train on
+that *same* fractional `ifbench_score` (aligning the training objective with the
+reported metric) plus `ifbench_feedback` (per-constraint prose GEPA reflects on);
+arm C's training signal is the command exit status (genome-blind), independent of
+IFBench.
 
 The study drives the low-level `optimize_loop` seam directly (not the MCP
 wrappers) so it can pass explicit train tasks and inject `_optimize` for offline
@@ -36,7 +38,7 @@ from whystuck.core.runner import run_command_loop
 from whystuck.core.storage import WhyStuckStore
 from whystuck.core.util import mean, utc_now_iso
 from whystuck.eval.benchmark import BenchmarkTask
-from whystuck.eval.ifbench import ifbench_pass, ifbench_score
+from whystuck.eval.ifbench import ifbench_feedback, ifbench_score
 from whystuck.eval.llm_worker import Complete, default_build_prompt, make_run_task
 from whystuck.eval.optimize import optimize_loop
 
@@ -161,7 +163,7 @@ def run_study(
         run_task = (
             _command_run_task(genome.id, worker_cmd, verifier_cmd, max_retries)
             if arm == "C"
-            else make_run_task(complete, ifbench_pass)
+            else make_run_task(complete, ifbench_score, feedback=ifbench_feedback)
         )
         out = optimize_loop(
             store,

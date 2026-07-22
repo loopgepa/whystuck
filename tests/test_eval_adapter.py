@@ -68,3 +68,74 @@ def test_make_reflective_dataset_uses_failing_feedback():
     ds = adapter.make_reflective_dataset({"skill": "Fix the bug."}, batch, ["skill"])
     assert "skill" in ds
     assert "minimal" in ds["skill"][0]["Feedback"] or "not minimal" in ds["skill"][0]["Feedback"]
+
+
+# --- fractional scoring + real reflective content (GEPA reflection fix) -------
+
+from whystuck.core.models import LoopStepTrace, StepStatus  # noqa: E402
+
+
+def _trace_with(eval_score, *, task_summary=None, output=None, feedback=None):
+    md = {"eval_score": eval_score}
+    if feedback is not None:
+        md["feedback"] = feedback
+    steps = []
+    if output is not None:
+        steps = [
+            LoopStepTrace(
+                step_id="worker", role="worker", status=StepStatus.FAILURE, output_summary=output
+            )
+        ]
+    return LoopTrace(
+        id="r",
+        loop_id="x",
+        created_at=FIXED_TS,
+        task_summary=task_summary,
+        final_outcome="failure",
+        steps=steps,
+        metrics=LoopMetrics(success=False),
+        metadata=md,
+    )
+
+
+def test_evaluate_prefers_fractional_eval_score_over_binary_scalarize():
+    # metadata['eval_score']=0.5 must surface as 0.5, NOT 0.0 from scalarize(success=False).
+    def rt(genome, task):
+        return _trace_with(0.5)
+
+    adapter = LoopGenomeAdapter(base_genome=_genome(), run_task=rt)
+    b = adapter.evaluate([BenchmarkTask(id="t")], {"skill": "x"})
+    assert b.scores == [0.5]
+
+
+def test_evaluate_falls_back_to_scalarize_without_eval_score():
+    # command-loop traces (no eval_score) keep the v0.1 success-dominant scoring.
+    adapter = LoopGenomeAdapter(base_genome=_genome(), run_task=_run_task)
+    good = adapter.evaluate([BenchmarkTask(id="t")], {"skill": "the minimal fix"})
+    # exact value, not just >0: scalarize(success=True, no retry/diff) == 1.0. A
+    # fallback that silently returned some other positive constant must not pass.
+    assert good.scores == [1.0]
+
+
+def test_evaluate_zero_eval_score_is_preserved_not_dropped():
+    # eval_score == 0.0 is a real score, not "unset": it must survive as 0.0 and
+    # NOT fall through to scalarize (the `is not None` check, not truthiness).
+    def rt(genome, task):
+        return _trace_with(0.0)
+
+    adapter = LoopGenomeAdapter(base_genome=_genome(), run_task=rt)
+    assert adapter.evaluate([BenchmarkTask(id="t")], {"skill": "x"}).scores == [0.0]
+
+
+def test_reflective_dataset_surfaces_task_output_and_feedback():
+    def rt(genome, task):
+        return _trace_with(
+            0.0, task_summary="FOLLOW THIS", output="WORKER SAID", feedback="Failed: X"
+        )
+
+    adapter = LoopGenomeAdapter(base_genome=_genome(), run_task=rt)
+    b = adapter.evaluate([BenchmarkTask(id="t")], {"skill": "x"}, capture_traces=True)
+    rec = adapter.make_reflective_dataset({"skill": "x"}, b, ["skill"])["skill"][0]
+    assert "FOLLOW THIS" in str(rec["Inputs"])
+    assert rec["Generated Outputs"] == "WORKER SAID"
+    assert "Failed: X" in rec["Feedback"]
