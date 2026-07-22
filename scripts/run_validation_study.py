@@ -12,7 +12,9 @@ omitted) so the numbers and cassettes are reproducible offline afterwards.
     # dry run — safe, offline, no key:
     python scripts/run_validation_study.py
 
-    # the real run (spends ≈$1.72 with Terra, ≈$2.69 with Sol):
+    # the real run — default is Terra × 2 seeds ≈ $3.43 (needs ≥2 seeds for a
+    # verdict; a single seed is always INCONCLUSIVE). Sol × 2 seeds ≈ $5.38
+    # exceeds the default $5 cap — raise --max-usd or lower --max-metric-calls.
     OPENAI_API_KEY=sk-... python scripts/run_validation_study.py --yes \
         --record tests/fixtures/cassettes/study.json --out docs/validation-study.json
 """
@@ -45,11 +47,22 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--reflection-calls", type=int, default=15, help="est. reflection calls/arm")
     p.add_argument("--worker-model", default="openai/gpt-4.1-mini")
     p.add_argument("--reflection-model", default="openai/gpt-5.6-terra")
-    p.add_argument("--seed", type=int, default=0)
+    p.add_argument(
+        "--seeds", default="0,1", help="comma-separated seeds for mean±std (default 0,1)"
+    )
     p.add_argument("--record", default=None, help="cassette JSON path to record calls into")
     p.add_argument("--out", default=None, help="where to write the results JSON")
+    p.add_argument(
+        "--report",
+        default="docs/validation-study.md",
+        help="where to write the Markdown report (default docs/validation-study.md)",
+    )
     p.add_argument("--yes", action="store_true", help="actually spend and run live")
     return p.parse_args(argv)
+
+
+def _seeds(args: argparse.Namespace) -> list[int]:
+    return [int(s) for s in args.seeds.split(",") if s.strip() != ""]
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -78,6 +91,11 @@ def main(argv: list[str] | None = None) -> int:
             )
             return 2
 
+    seeds = _seeds(args)
+    if not seeds:
+        print("ERROR: --seeds must list at least one integer.", file=sys.stderr)
+        return 2
+
     groups = plan_study_calls(
         arms=arms,
         n_train=args.n_train,
@@ -86,9 +104,13 @@ def main(argv: list[str] | None = None) -> int:
         reflection_calls=args.reflection_calls,
         worker_model=args.worker_model,
         reflection_model=args.reflection_model,
+        n_seeds=len(seeds),
     )
 
-    print(f"Planned study: arms={''.join(arms)}  max_metric_calls={args.max_metric_calls}")
+    print(
+        f"Planned study: arms={''.join(arms)}  seeds={seeds}  "
+        f"max_metric_calls={args.max_metric_calls}"
+    )
     for g in groups:
         print(f"  {g.model:24} {g.calls:5d} calls  ≈ ${g.usd():.4f}")
     estimate = estimate_usd(groups)
@@ -108,43 +130,63 @@ def main(argv: list[str] | None = None) -> int:
         print("ERROR: --yes given but OPENAI_API_KEY is not set.", file=sys.stderr)
         return 3
 
-    return _run_live(args, arms)
+    return _run_live(args, arms, seeds, estimate)
 
 
-def _run_live(args: argparse.Namespace, arms: tuple[str, ...]) -> int:
+def _run_live(
+    args: argparse.Namespace, arms: tuple[str, ...], seeds: list[int], estimate: float
+) -> int:
     """The live run (reached only with --yes + a key). Not exercised offline."""
     import tempfile
     from pathlib import Path
 
     from whystuck.core.storage import WhyStuckStore
+    from whystuck.core.util import utc_now_iso
     from whystuck.eval.cassette import Cassette
     from whystuck.eval.ifbench import load_ifbench
     from whystuck.eval.llm_worker import litellm_complete
+    from whystuck.eval.report import render_report
     from whystuck.eval.study import run_study
 
-    train = load_ifbench(split="train", seed=args.seed, n=args.n_train)
-    heldout = load_ifbench(split="heldout", seed=args.seed, n=args.n_heldout)
-
     record_path = args.record or "study-cassette.json"
+    runs: list[dict[str, dict]] = []
     with Cassette(record_path, mode="record") as cassette:
         complete = cassette.wrap(litellm_complete(args.worker_model), name="worker")
         reflection = cassette.wrap(litellm_complete(args.reflection_model), name="reflection")
-        with tempfile.TemporaryDirectory() as d:
-            store = WhyStuckStore(Path(d))
-            results = run_study(
-                store,
-                complete=complete,
-                reflection_lm=reflection,
-                train=train,
-                heldout=heldout,
-                arms=arms,
-                max_metric_calls=args.max_metric_calls,
-            )
+        for seed in seeds:
+            train = load_ifbench(split="train", seed=seed, n=args.n_train)
+            heldout = load_ifbench(split="heldout", seed=seed, n=args.n_heldout)
+            with tempfile.TemporaryDirectory() as d:
+                store = WhyStuckStore(Path(d))
+                results = run_study(
+                    store,
+                    complete=complete,
+                    reflection_lm=reflection,
+                    train=train,
+                    heldout=heldout,
+                    arms=arms,
+                    max_metric_calls=args.max_metric_calls,
+                )
+            runs.append({name: vars(r) for name, r in results.items()})
 
-    payload = {name: vars(r) for name, r in results.items()}
+    meta = {
+        "dataset": "IFBench",
+        "n_train": args.n_train,
+        "n_heldout": args.n_heldout,
+        "worker_model": args.worker_model,
+        "reflection_model": args.reflection_model,
+        "max_metric_calls": args.max_metric_calls,
+        "seeds": seeds,
+        "estimated_usd": estimate,
+        "generated": utc_now_iso(),
+    }
     if args.out:
-        Path(args.out).write_text(json.dumps(payload, indent=2), encoding="utf-8")
-    print(json.dumps(payload, indent=2))
+        Path(args.out).write_text(
+            json.dumps({"meta": meta, "runs": runs}, indent=2), encoding="utf-8"
+        )
+    if args.report:
+        Path(args.report).write_text(render_report(runs, meta=meta), encoding="utf-8")
+        print(f"Wrote report to {args.report}")
     return 0
 
 

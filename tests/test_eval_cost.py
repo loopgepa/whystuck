@@ -125,6 +125,39 @@ def test_plan_study_calls_ignores_unknown_arm_letters():
     )
 
 
+def test_n_seeds_scales_the_whole_plan():
+    one = _plan(("A", "B", "C", "D"), n_train=31, n_heldout=31, mmc=150, refl=15)
+    two = plan_study_calls(
+        arms=("A", "B", "C", "D"),
+        n_train=31,
+        n_heldout=31,
+        max_metric_calls=150,
+        reflection_calls=15,
+        worker_model="openai/gpt-4.1-mini",
+        reflection_model="openai/gpt-5.6-terra",
+        n_seeds=2,
+    )
+    assert estimate_usd(two) == pytest.approx(2 * estimate_usd(one))
+
+
+def test_two_seed_sol_run_exceeds_cap_but_terra_fits():
+    # The guard must force a choice: Sol + 2 seeds is over $5; Terra + 2 seeds fits.
+    def plan(reflection):
+        return plan_study_calls(
+            arms=("A", "B", "C", "D"),
+            n_train=31,
+            n_heldout=31,
+            max_metric_calls=150,
+            reflection_calls=15,
+            worker_model="openai/gpt-4.1-mini",
+            reflection_model=reflection,
+            n_seeds=2,
+        )
+
+    assert estimate_usd(plan("openai/gpt-5.6-terra")) < 5.0
+    assert estimate_usd(plan("openai/gpt-5.6-sol")) > 5.0
+
+
 def test_full_study_estimate_is_within_five_dollars():
     # The real planned run (31/31 split, 150 metric calls) must sit under the $5
     # cap for BOTH reflection models — the spec's headline budget claim.

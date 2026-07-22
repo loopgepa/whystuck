@@ -91,8 +91,11 @@ The GEPA `_optimize` seam and `Cassette`-wrapped models keep every arm runnable 
 
 - `eval/cost.py` — the budget rail (pure, unit-tested): a `MODEL_PRICES` table, `plan_study_calls(...)` (conservative per-call plan for a study config), `estimate_usd`, and `CostGuard.check` (raises `BudgetExceeded` over the ceiling). Kept out of the script so the pricing math is testable offline.
 - `scripts/run_validation_study.py` — the one paid, live entrypoint, a thin CLI over `eval/cost.py`. **Defaults to a dry run** (prints the per-call breakdown + estimate, checks the ceiling, exits — no API key needed); spends only with explicit `--yes`, which additionally requires `OPENAI_API_KEY` and records every call to `--record`, and validates `--arms`/model names up front (a typo can't silently plan to $0). Worker-call counting is a genuine upper bound (it includes `optimize_loop`'s post-search train re-scoring); `reflection_calls` is a caller estimate. Real config estimate: ≈ $1.72 (Terra) / $2.69 (Sol), both under the $5 cap.
-- `docs/validation-study.md` — the report: the 4-arm numbers table (held-out score mean ± std, full objective vector, cost, latency, wall-clock), method, and verdict. Regenerated from the study's JSON output.
+- `eval/report.py` — `render_report(runs, *, meta)` (pure, unit-tested): renders the Markdown report from a list of per-seed run dicts. Aggregates held-out **mean ± std across seeds**, and emits an honest verdict — **SUPPORTED** only if D beats B by more than the pooled seed noise, else **INCONCLUSIVE** / **NOT SUPPORTED**. With no runs it renders a *pending* report (full method, "Pending" results) so the doc exists before the paid run.
+- `docs/validation-study.md` — the report, in nav and built by mkdocs. Committed now in its *pending* state; the step-7 live run overwrites it with real numbers + verdict. (Multi-seed is why the cost plan scales by `n_seeds`; the default 2-seed Terra run ≈ $3.43, and Sol × 2 exceeds the $5 cap — the guard forces the choice.)
 - `tests/fixtures/cassettes/*.json` — committed recordings from the live run.
+
+The internal design spec under `docs/superpowers/` is `exclude_docs`-ed from the mkdocs build (it has no nav entry by design), keeping `mkdocs build --strict` green.
 
 ## 5. Metrics
 

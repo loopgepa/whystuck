@@ -23,10 +23,18 @@ nav:
   - User stories: user-stories.md
   - Trust & safety: safety.md
   - Comparison: comparison.md
+  - Validation study: validation-study.md
   - Design records:
       - ADR index: design-records.md
       - v0.2 — eval & benchmark: v0.2-eval-benchmark.md
       - Competitive & launch notes: COMPETITIVE-AND-LAUNCH.md
+# Internal design specs live under docs/ for co-location but are not part of the
+# published site. Without this, mkdocs builds them as unlinked, URL-reachable
+# orphan pages (it does NOT fail --strict — an unlinked page is only an INFO-level
+# notice at this mkdocs version). Excluding them keeps the spec out of site/.
+exclude_docs: |
+  superpowers/
+
 markdown_extensions:
   - admonition
   - pymdownx.superfences

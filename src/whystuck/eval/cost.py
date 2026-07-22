@@ -91,6 +91,7 @@ def plan_study_calls(
     reflection_calls: int,
     worker_model: str,
     reflection_model: str,
+    n_seeds: int = 1,
 ) -> list[CallGroup]:
     """Conservative per-call plan for a study configuration.
 
@@ -106,7 +107,9 @@ def plan_study_calls(
       the LLM worker → `2 * n_heldout`.
 
     `n_train` is explicit (not assumed equal to `n_heldout`) so the train-set
-    re-scoring term stays correct if the two splits diverge. Reflection: a
+    re-scoring term stays correct if the two splits diverge. `n_seeds` scales the
+    whole plan — the study runs every arm once per seed for the mean ± std, and
+    the guard MUST account for all of them or it under-counts. Reflection: a
     caller estimate of `reflection_calls` per LLM-optimizing arm — see the module
     docstring on why that term is an estimate, not a proven bound.
     """
@@ -120,7 +123,9 @@ def plan_study_calls(
         elif arm == "C":
             worker_calls += n_heldout  # winner held-out eval (command opt is free)
 
-    reflection_total = reflection_calls * sum(1 for a in arms if a in _LLM_OPTIMIZING_ARMS)
+    reflection_per_seed = reflection_calls * sum(1 for a in arms if a in _LLM_OPTIMIZING_ARMS)
+    worker_calls *= n_seeds
+    reflection_total = reflection_per_seed * n_seeds
 
     return [
         CallGroup(worker_model, worker_calls, *WORKER_TOKENS),

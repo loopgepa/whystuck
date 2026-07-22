@@ -80,6 +80,33 @@ def test_unknown_model_rejected_with_friendly_error():
     assert "MODEL_PRICES" in err or "no price" in err
 
 
+def test_default_is_two_seeds():
+    code, out, _ = _run([])
+    assert code == 0
+    assert "seeds=[0, 1]" in out
+
+
+def test_seeds_flag_parses_multiple_values():
+    # 3 seeds × ABCD × Terra ≈ $5.15 > the default $5 cap, so raise --max-usd to
+    # reach the dry-run and exercise the parse (the refusal itself is tested below).
+    code, out, _ = _run(["--seeds", "0,1,2", "--max-usd", "10"])
+    assert code == 0
+    assert "seeds=[0, 1, 2]" in out
+
+
+def test_three_seeds_default_cap_is_refused():
+    # Documents that 3 seeds over all arms exceeds the $5 default — the guard's job.
+    code, _, err = _run(["--seeds", "0,1,2"])
+    assert code == 2
+    assert "REFUSED" in err
+
+
+def test_empty_seeds_is_refused():
+    code, _, err = _run(["--seeds", ""])
+    assert code == 2
+    assert "at least one" in err
+
+
 def test_cli_estimate_matches_independent_computation():
     # The figure the CLI prints must equal what the guard/estimator computes.
     from whystuck.eval.cost import estimate_usd, plan_study_calls
@@ -88,6 +115,8 @@ def test_cli_estimate_matches_independent_computation():
         [
             "--arms",
             "AB",
+            "--seeds",
+            "0",
             "--n-train",
             "5",
             "--n-heldout",
