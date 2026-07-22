@@ -89,7 +89,8 @@ The GEPA `_optimize` seam and `Cassette`-wrapped models keep every arm runnable 
 
 ### 4.4 entrypoint + outputs
 
-- `scripts/run_validation_study.py` — the one paid, live entrypoint. Guarded: prints an estimated cost and requires an explicit `--yes` (or env confirm) before spending; refuses to exceed a `--max-usd` ceiling by pre-counting planned calls.
+- `eval/cost.py` — the budget rail (pure, unit-tested): a `MODEL_PRICES` table, `plan_study_calls(...)` (conservative per-call plan for a study config), `estimate_usd`, and `CostGuard.check` (raises `BudgetExceeded` over the ceiling). Kept out of the script so the pricing math is testable offline.
+- `scripts/run_validation_study.py` — the one paid, live entrypoint, a thin CLI over `eval/cost.py`. **Defaults to a dry run** (prints the per-call breakdown + estimate, checks the ceiling, exits — no API key needed); spends only with explicit `--yes`, which additionally requires `OPENAI_API_KEY` and records every call to `--record`, and validates `--arms`/model names up front (a typo can't silently plan to $0). Worker-call counting is a genuine upper bound (it includes `optimize_loop`'s post-search train re-scoring); `reflection_calls` is a caller estimate. Real config estimate: ≈ $1.72 (Terra) / $2.69 (Sol), both under the $5 cap.
 - `docs/validation-study.md` — the report: the 4-arm numbers table (held-out score mean ± std, full objective vector, cost, latency, wall-clock), method, and verdict. Regenerated from the study's JSON output.
 - `tests/fixtures/cassettes/*.json` — committed recordings from the live run.
 
