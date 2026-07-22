@@ -11,6 +11,11 @@ replay survives reordering of arms or seeds between record and replay runs.
 `record` mode dedups: an identical call is served from the cache instead of
 re-hitting the model, which also lowers the cost of the one paid run.
 
+Only the hash key and the output are persisted — the raw input (prompt/messages)
+is folded into the sha256 key and is *not* stored verbatim, so committed cassette
+files are not human-readable transcripts of the prompts. That is a deliberate
+size/robustness tradeoff, not an oversight.
+
 Depends only on the standard library, so it imports and tests without the
 `whystuck[eval]` extra (no gepa, no litellm).
 """

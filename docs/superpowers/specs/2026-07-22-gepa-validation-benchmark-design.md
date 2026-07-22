@@ -31,15 +31,34 @@ Expected ordering on held-out score: A < B < D, with C ≈ A (flat — the contr
 
 ## 3. Dataset
 
-**IFBench** (`allenai/IFBench_test`, Hugging Face) — instruction-following with 58 programmatic constraint verifiers, from GEPA's own paper (arXiv 2507.19457). Chosen because:
+**IFBench** (`allenai/IFBench_test`, Hugging Face) — instruction-following with 58 programmatic constraint verifiers (Pyatkin et al., arXiv 2507.02833, NeurIPS 2025 D&B). GEPA's paper (Agrawal et al., arXiv 2507.19457) is a *separate* paper that evaluates on IFBench; that's precisely why B-vs-D on this dataset is a faithful test against the "prompt-only GEPA" baseline. Chosen because:
 
 - It makes B-vs-D an apples-to-apples test against the exact "prompt-only GEPA" baseline the thesis names, on a dataset the method's authors published on.
 - Verification is code, not an LLM judge → deterministic scoring, no judge cost, no judge variance.
 - Short completions → cheap; the score is fraction-of-constraints-satisfied ∈ [0, 1].
 
-Split (subset of GEPA's 150 train / 300 val / 294 test): **50 train / 50 held-out** for the paid run, held out strictly for the reported number (GEPA's held-out-split recommendation). A **tier-0 authored micro-task suite** (~8–12 tasks, `{goal, expect}` with substring/regex verifiers) exists first, purely to build and prove the harness at $0 before any IFBench spend.
+Only the **parameter-free, nltk-free, package-free** subset of IFBench's 58
+constraints is ported (11 constraints — `format:parentheses`, `format:quotes`,
+`count:punctuation`, `words:palindrome`, `format:no_whitespace`,
+`custom:multiples`, `words:vowel`, `words:consonants`, `format:newline`,
+`format:quote_unquote`, `format:sub-bullets`), so scoring is fully deterministic
+and offline with no per-row kwargs. The vendored slice
+(`src/whystuck/eval/data/ifbench_supported.jsonl`) is exactly the rows those
+constraints fully cover: **62 rows**, split deterministically per seed into
+**31 train / 31 held-out** (the reported number comes from held-out). This is
+smaller than GEPA's 150/300/294 protocol; the study claims a *relative* result
+(loop-level > prompt-only) under matched budget, not a leaderboard number, and
+the report states the split size honestly. Constraints needing `nltk`, an
+`emoji` package, or per-row kwargs were excluded by design.
 
-IFBench licensing (AllenAI) is verified permissive-for-research before we vendor any slice; if not, we fall back to the authored suite for the public number and note the limitation.
+A **tier-0 authored micro-task suite** (~8–12 tasks, `{goal, expect}` with
+substring/regex verifiers, scored by the existing `keyword_score`) exists first,
+purely to build and prove the harness at $0 before any IFBench spend.
+
+**IFBench license (verified, split):** the ported verifier *logic* is **Apache-2.0**
+(codebase license); the vendored data *rows* are **ODC-BY-1.0** (data license).
+Both permit this redistribution with attribution
+(`src/whystuck/eval/data/ATTRIBUTION.md`).
 
 ## 4. Architecture
 
@@ -52,15 +71,15 @@ Both LLM surfaces are pure `input → str` callables, so both are wrappable:
 - worker: `complete(prompt) -> str` (already `litellm_complete(model)`)
 - gepa reflection: `reflection_lm(messages, **kwargs) -> str` (gepa accepts a callable — confirmed in gepa FAQ)
 
-`CassetteLM` wraps either, keyed by a stable hash of the input. Mode `record` calls through to the live model and appends `{key, input, output}` to a JSON file; mode `replay` returns the stored output and raises on a miss. One live run records; CI and every re-run replay from committed JSON — no HTTP-level VCR needed, no tokens burned in CI. IFBench verifiers are already deterministic.
+`Cassette.wrap(fn, name=...)` wraps either, keyed by a stable sha256 of `(name, args, kwargs)`. Mode `record` calls through to the live model and stores `{name, output}` per key in a JSON file (the input is folded into the hash key, not stored verbatim); mode `replay` returns the stored output and raises `CassetteMiss` on a miss. One live run records; CI and every re-run replay from committed JSON — no HTTP-level VCR needed, no tokens burned in CI. IFBench verifiers are already deterministic. *(Implemented in `eval/cassette.py`, PR #14.)*
 
 ### 4.2 `ifbench.py` — loader + programmatic scorer
 
-`load_ifbench(split, n, seed) -> list[BenchmarkTask]` (payload carries the constraint spec) and `ifbench_score(output, task) -> float` running the constraint verifiers. This is the `Score` for `make_run_task` on the IFBench arms; the authored suite uses the existing `keyword_score`.
+`load_ifbench(split, n, seed) -> list[BenchmarkTask]` (payload carries `goal` = the IFBench prompt, and `instruction_id_list` = the constraints) plus two scorers over the verbatim-ported verifiers: `ifbench_pass(output, task) -> bool` (prompt-level: every constraint met) and `ifbench_score(output, task) -> float` (instruction-level: fraction met). The study feeds **`ifbench_pass`** to `make_run_task` as the `Score` (a clean binary GEPA signal that plugs into the existing genome→trace→scalarize path unchanged) and **reports both** on held-out. The authored suite uses the existing `keyword_score`.
 
 ### 4.3 `study.py` — arm orchestration
 
-Defines the seed genome (IFBench: a `generate` skill gene + an `ensure_correct` verifier-rubric gene, mirroring GEPA's 2-module IFBench agent), the four arm configs, and `run_study(...)` returning per-arm `{variant_id, heldout_score, objective_vector, cost, latency}`. Arms B/D call `optimize_loop_via_llm`; C calls `optimize_loop_via_commands`; A evaluates the seed directly. The GEPA `_optimize` seam and the `CassetteLM`-wrapped models keep the whole thing runnable offline in tests.
+Defines the seed genome (IFBench: a `generate` skill gene + an `ensure_correct` verifier-rubric gene, mirroring GEPA's 2-module IFBench agent), the four arm configs, and `run_study(...)` returning per-arm `{variant_id, heldout_score, objective_vector, cost, latency}`. Arms B/D call `optimize_loop_via_llm`; C calls `optimize_loop_via_commands`; A evaluates the seed directly. The GEPA `_optimize` seam and the `Cassette`-wrapped models keep the whole thing runnable offline in tests.
 
 ### 4.4 entrypoint + outputs
 
@@ -82,13 +101,13 @@ All OpenAI, via litellm + the user's `OPENAI_API_KEY` (WhyStuck stays provider-a
 
 ## 7. Determinism & CI
 
-CI never calls a live model. The E2E integration test runs the whole study through `CassetteLM` in replay mode against committed cassettes and asserts: (a) `optimize_loop_via_llm` runs end-to-end and its winner beats the seed, (b) arm D's landscape is non-flat while arm C's is flat, (c) replay is byte-deterministic. Same-input replay → 100% hit.
+CI never calls a live model. The E2E integration test runs the whole study through `Cassette` (replay mode against committed cassettes and asserts: (a) `optimize_loop_via_llm` runs end-to-end and its winner beats the seed, (b) arm D's landscape is non-flat while arm C's is flat, (c) replay is byte-deterministic. Same-input replay → 100% hit.
 
 ## 8. Build order (each increment TDD, own PR)
 
 1. `cassette.py` record/replay + tests (fakes only).
 2. `ifbench.py` loader + `ifbench_score` + tests (fixture constraints, no network).
-3. `study.py` seed genome + arm configs + `run_study`, tested offline via injected `_optimize` + `CassetteLM` fakes (authored micro-tasks).
+3. `study.py` seed genome + arm configs + `run_study`, tested offline via injected `_optimize` + `Cassette`-replay fakes (authored micro-tasks).
 4. `scripts/run_validation_study.py` with the cost guard + dry-run estimator; unit-test the estimator and the ceiling refusal.
 5. Report generator (`docs/validation-study.md` from JSON) + a smoke test.
 6. E2E replay test (§7) — the coverage-gap closer.
