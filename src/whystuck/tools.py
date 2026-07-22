@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import importlib.util
 import uuid
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -276,6 +277,44 @@ def optimize_loop_via_commands(
     )
 
 
+def optimize_loop_via_llm(
+    store: WhyStuckStore,
+    loop_id: str,
+    *,
+    complete: Callable[[str], str],
+    reflection_lm: str,
+    score: Callable[[str, Any], bool] | None = None,
+    tasks_dir: str | None = None,
+    max_metric_calls: int = 50,
+    _optimize: Any | None = None,
+) -> dict[str, Any]:
+    """Run GEPA over the loop's text genes, scoring each candidate by running an
+    LLM-backed worker whose prompt is built *from* the candidate genome. Unlike
+    the command path, the score depends on the genome, so GEPA has a real
+    gradient to climb (§7.2). `complete` is the (network) LLM call; `score`
+    decides task success (defaults to `keyword_score` over each task's declared
+    `expect`). Requires `whystuck[eval]` + a network reflection LM."""
+    from whystuck.eval.benchmark import benchmark_from_dir, benchmark_from_traces
+    from whystuck.eval.llm_worker import keyword_score, make_run_task
+    from whystuck.eval.optimize import optimize_loop
+
+    tasks = (
+        benchmark_from_dir(Path(tasks_dir))
+        if tasks_dir
+        else benchmark_from_traces(store.list_traces(loop_id))
+    )
+    run_task = make_run_task(complete, score or keyword_score)
+    return optimize_loop(
+        store,
+        loop_id,
+        tasks,
+        run_task,
+        reflection_lm=reflection_lm,
+        max_metric_calls=max_metric_calls,
+        _optimize=_optimize,
+    )
+
+
 def _eval_available() -> bool:
     return importlib.util.find_spec("gepa") is not None
 
@@ -359,8 +398,10 @@ def build_server(store: WhyStuckStore, *, with_eval: bool | None = None) -> Fast
             tasks_dir: str | None = None,
             max_metric_calls: int = 50,
         ) -> dict[str, Any]:
-            """Optimize a loop's text genes with GEPA over a benchmark, saving the
-            winner as a variant + Pareto frontier. Runs real GEPA (network)."""
+            """Run GEPA using fixed worker+verifier commands to score candidates.
+            The command outcome does not depend on the candidate's text genes, so
+            this path cannot improve prose genes — use whystuck_optimize_loop_llm
+            for that. Kept for scoring command-driven loops. Real GEPA (network)."""
             return optimize_loop_via_commands(
                 store,
                 loop_id,
@@ -368,6 +409,30 @@ def build_server(store: WhyStuckStore, *, with_eval: bool | None = None) -> Fast
                 worker=worker,
                 verifier=verifier,
                 max_retries=max_retries,
+                tasks_dir=tasks_dir,
+                max_metric_calls=max_metric_calls,
+            )
+
+        @mcp.tool
+        def whystuck_optimize_loop_llm(
+            loop_id: str,
+            model: str,
+            reflection_lm: str,
+            tasks_dir: str | None = None,
+            max_metric_calls: int = 50,
+        ) -> dict[str, Any]:
+            """Optimize a loop's text genes with GEPA, scoring each candidate by
+            running an LLM-backed worker (via `model`) whose prompt is built from
+            the candidate genome — so the genes actually move the score, unlike
+            the command path. Declare tasks with an `expect` substring in
+            tasks_dir. Runs real GEPA + LLM calls (network)."""
+            from whystuck.eval.llm_worker import litellm_complete
+
+            return optimize_loop_via_llm(
+                store,
+                loop_id,
+                complete=litellm_complete(model),
+                reflection_lm=reflection_lm,
                 tasks_dir=tasks_dir,
                 max_metric_calls=max_metric_calls,
             )

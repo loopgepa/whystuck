@@ -55,6 +55,46 @@ def test_optimize_saves_best_variant_and_frontier(tmp_path):
     assert frontier and frontier[0].variant_id == out["variant_id"]
 
 
+def test_llm_optimize_landscape_responds_to_genome(tmp_path):
+    # BUG 2 guard: the LLM-backed optimize path must score each candidate by
+    # running a worker whose prompt is built *from* the genome — so the winning
+    # genes actually move the score. (The command path ignored the genome, so
+    # every candidate scored identically and GEPA had no gradient.)
+    from whystuck.tools import optimize_loop_via_llm
+
+    store = WhyStuckStore(tmp_path)
+    _seed_loop(store)
+    tasks_dir = tmp_path / "tasks"
+    tasks_dir.mkdir()
+    (tasks_dir / "t1.yaml").write_text("id: t1\npayload:\n  goal: fix the bug\n")
+
+    # Fake LLM: writes a "minimal" patch only when the genome asked for one.
+    def complete(prompt):
+        return "a minimal patch" if "minimal" in prompt.lower() else "a sprawling patch"
+
+    def score(output, task):
+        return "minimal" in output.lower()
+
+    def pick(candidate):
+        return lambda **kw: {"best_candidate": candidate}
+
+    def optimize(winning_skill):
+        return optimize_loop_via_llm(
+            store,
+            "bugfix",
+            complete=complete,
+            score=score,
+            reflection_lm="fake",
+            tasks_dir=str(tasks_dir),
+            _optimize=pick({"skill": winning_skill}),
+        )
+
+    good = optimize("Fix with the minimal patch.")
+    bad = optimize("Fix the bug.")
+    assert good["best_score"] == 1.0  # genome asked for minimal → worker succeeds
+    assert bad["best_score"] == 0.0  # genome did not → same tasks now fail (not flat)
+
+
 def test_real_optimize_without_gepa_gives_actionable_error():
     # gepa is not in the base install; the real path must fail with guidance.
     with pytest.raises(RuntimeError, match="whystuck\\[eval\\]"):

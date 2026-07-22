@@ -41,6 +41,20 @@ def default_build_prompt(genome: LoopGenome, task: BenchmarkTask) -> str:
     return "\n\n".join(parts)
 
 
+def keyword_score(output: str, task: BenchmarkTask) -> bool:
+    """Default ``Score``: the output must contain the task's declared expectation.
+
+    ``payload.expect`` is a substring, or ``payload.expect_any`` a list of them;
+    matching is case-insensitive. With no expectation declared nothing can be
+    verified, so the task scores ``False`` — an unscored task must not count as a
+    free win, or it would flatten GEPA's gradient for that task."""
+    payload = task.payload or {}
+    expect = payload.get("expect")
+    candidates = payload.get("expect_any") or ([expect] if expect else [])
+    low = output.lower()
+    return any(isinstance(e, str) and e.lower() in low for e in candidates)
+
+
 def make_run_task(
     complete: Complete, score: Score, *, build_prompt: BuildPrompt = default_build_prompt
 ) -> RunTask:

@@ -194,8 +194,12 @@ class TestEvalGating:
 
     def test_eval_tools_registered_when_enabled(self, tmp_path: Path):
         names = self._names(WhyStuckStore(tmp_path), with_eval=True)
-        assert {"whystuck_optimize_loop", "whystuck_get_frontier"} <= names
-        assert len(names) == len(EXPECTED_TOOLS) + 2
+        assert {
+            "whystuck_optimize_loop",
+            "whystuck_optimize_loop_llm",
+            "whystuck_get_frontier",
+        } <= names
+        assert len(names) == len(EXPECTED_TOOLS) + 3
 
     def test_get_frontier_empty(self, tmp_path: Path):
         from whystuck.tools import get_frontier

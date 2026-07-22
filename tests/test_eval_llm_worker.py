@@ -4,7 +4,12 @@ import pytest
 
 from whystuck.core.models import GeneType, LoopGene, LoopGenome
 from whystuck.eval.benchmark import BenchmarkTask
-from whystuck.eval.llm_worker import default_build_prompt, litellm_complete, make_run_task
+from whystuck.eval.llm_worker import (
+    default_build_prompt,
+    keyword_score,
+    litellm_complete,
+    make_run_task,
+)
 
 
 def _genome(skill: str) -> LoopGenome:
@@ -38,6 +43,23 @@ def test_prompt_includes_text_genes_and_goal():
     )
     assert "Prefer minimal diffs." in prompt
     assert "fix login" in prompt
+
+
+def test_keyword_score_matches_declared_expectation():
+    task = BenchmarkTask(id="t1", payload={"expect": "Minimal"})
+    assert keyword_score("here is a minimal patch", task) is True  # case-insensitive
+    assert keyword_score("here is a sprawling patch", task) is False
+
+
+def test_keyword_score_accepts_any_of_a_list():
+    task = BenchmarkTask(id="t1", payload={"expect_any": ["fixed", "resolved"]})
+    assert keyword_score("the bug is resolved", task) is True
+    assert keyword_score("the bug remains", task) is False
+
+
+def test_keyword_score_without_expectation_is_not_a_free_win():
+    # No declared criterion means nothing was verified — it must not score as a pass.
+    assert keyword_score("anything at all", BenchmarkTask(id="t1")) is False
 
 
 def test_litellm_complete_without_litellm_is_actionable():
