@@ -12,7 +12,7 @@ import tempfile
 from pathlib import Path
 
 from whystuck.core.storage import WhyStuckStore
-from whystuck.tools import diagnose, promote_variant, propose_mutations, record_trace, save_loop
+from whystuck.tools import diagnose, promote, propose_fix, record_trace, save_loop
 
 LOOP = "bugfix-loop"
 SKILL_REL = "skills/bugfix/SKILL.md"
@@ -59,7 +59,7 @@ def main() -> None:
         print(f"Diagnosis: {top['title']}")
         print(f"  {len(top['evidence_trace_ids'])} traces · confidence {top['confidence']['band']}")
 
-        vid = propose_mutations(
+        vid = propose_fix(
             store,
             LOOP,
             [
@@ -76,12 +76,12 @@ def main() -> None:
             ],
         )["variant_id"]
         print(f"\nProposed {vid} — dry-run diff:")
-        dry = promote_variant(store, LOOP, vid, base_dir=proj, dry_run=True)
+        dry = promote(store, LOOP, vid, base_dir=proj, dry_run=True)
         for line in dry["diffs"][0].splitlines()[2:6]:
             print(f"  {line}")
 
         print(f"\nBEFORE:  {skill.read_text()!r}")
-        promote_variant(store, LOOP, vid, base_dir=proj, approved_by="human", dry_run=False)
+        promote(store, LOOP, vid, base_dir=proj, approved_by="human", dry_run=False)
         print(f"AFTER :  {skill.read_text()!r}")
         rec = store.list_promotions(LOOP)[-1]
         print(

@@ -15,8 +15,8 @@ from pathlib import Path
 from whystuck.core.storage import WhyStuckStore
 from whystuck.tools import (
     diagnose,
-    promote_variant,
-    propose_mutations,
+    promote,
+    propose_fix,
     record_trace,
     save_loop,
 )
@@ -81,11 +81,11 @@ def main() -> None:
                 "test evidence directly supports the fix."
             ),
         }
-        variant_id = propose_mutations(store, LOOP, [proposal])["variant_id"]
+        variant_id = propose_fix(store, LOOP, [proposal])["variant_id"]
         print(f"\nProposed variant: {variant_id}")
 
         # 3. Dry-run promote — show the diff, write nothing.
-        dry = promote_variant(store, LOOP, variant_id, base_dir=proj_dir, dry_run=True)
+        dry = promote(store, LOOP, variant_id, base_dir=proj_dir, dry_run=True)
         print(f"\nDry-run promotion (dry_run={dry['dry_run']}, promoted={dry['promoted']})")
         print("  Approve in your agent to apply. Nothing has been written.")
 
