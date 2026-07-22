@@ -79,7 +79,13 @@ Both LLM surfaces are pure `input → str` callables, so both are wrappable:
 
 ### 4.3 `study.py` — arm orchestration
 
-Defines the seed genome (IFBench: a `generate` skill gene + an `ensure_correct` verifier-rubric gene, mirroring GEPA's 2-module IFBench agent), the four arm configs, and `run_study(...)` returning per-arm `{variant_id, heldout_score, objective_vector, cost, latency}`. Arms B/D call `optimize_loop_via_llm`; C calls `optimize_loop_via_commands`; A evaluates the seed directly. The GEPA `_optimize` seam and the `Cassette`-wrapped models keep the whole thing runnable offline in tests.
+Defines the seed genome — a `generate` skill gene + an `ensure_correct` verifier-rubric gene (mirroring GEPA's 2-module IFBench agent) — the four arm configs, and `run_study(...)`.
+
+**Fair-parity design:** all arms share the *identical* 2-gene seed content; arms differ only in each gene's `evolvable` flag (A evolves none, B evolves `generate` only, C and D evolve both). Since `render_text_genes` renders every text gene regardless of `evolvable`, the seed worker-prompt — and thus the seed held-out score — is identical across arms. That isolates "componentized loop-level optimization" (D) from "prompt-only" (B) without a "more prompt text" confound.
+
+`run_study` returns per-arm `ArmResult{name, evolvable_genes, seed_heldout, opt_heldout, delta, variant_id}`. It drives the low-level `optimize_loop` directly (not the MCP wrappers `optimize_loop_via_llm`/`_via_commands`, which derive tasks from a dir/store rather than accepting explicit train/held-out splits; `_via_commands` also doesn't forward `_optimize`): A evaluates the seed with no optimization; B/D build `make_run_task(complete, ifbench_pass)`; C builds a genome-blind command run_task. The winning genome of each optimizing arm is scored on held-out with `ifbench_score` (graded). Cost/latency and the full objective vector are added by the step-4 runner / step-5 report, not here.
+
+The GEPA `_optimize` seam and `Cassette`-wrapped models keep every arm runnable offline in tests. **Caveat:** arm C's *flatness* (genome-blind → GEPA finds no gradient → winner ≈ seed) is a real-GEPA behavior that an injected fake `_optimize` cannot reproduce, so the offline test covers C's *wiring* only; C's flatness is established by the live/E2E run and the existing BUG-2 landscape unit test.
 
 ### 4.4 entrypoint + outputs
 
@@ -107,7 +113,7 @@ CI never calls a live model. The E2E integration test runs the whole study throu
 
 1. `cassette.py` record/replay + tests (fakes only).
 2. `ifbench.py` loader + `ifbench_score` + tests (fixture constraints, no network).
-3. `study.py` seed genome + arm configs + `run_study`, tested offline via injected `_optimize` + `Cassette`-replay fakes (authored micro-tasks).
+3. `study.py` seed genome + arm configs + `run_study`, tested offline via injected `_optimize` + a fake `complete` over a deterministic single-constraint IFBench fixture (`format:no_whitespace`).
 4. `scripts/run_validation_study.py` with the cost guard + dry-run estimator; unit-test the estimator and the ceiling refusal.
 5. Report generator (`docs/validation-study.md` from JSON) + a smoke test.
 6. E2E replay test (§7) — the coverage-gap closer.
