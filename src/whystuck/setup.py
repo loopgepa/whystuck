@@ -121,17 +121,23 @@ def upsert_json_config(path: Path, name: str, entry: dict[str, Any]) -> bool:
     return True
 
 
+def _ensure_trailing_blank_line(text: str) -> str:
+    """Normalize `text` so appending after it leaves exactly one blank line
+    (no-op on empty text: nothing to separate from)."""
+    if text and not text.endswith("\n"):
+        text += "\n"
+    if text:
+        text += "\n"
+    return text
+
+
 def append_marked_block(path: Path, block: str, begin: str = MARKER_BEGIN) -> bool:
     """Append a marker-delimited block once. Returns False (no-op) if the marker is
     already present. Creates the file (and parents) if missing."""
     existing = path.read_text(encoding="utf-8") if path.exists() else ""
     if begin in existing:
         return False
-    prefix = existing
-    if prefix and not prefix.endswith("\n"):
-        prefix += "\n"
-    if prefix:
-        prefix += "\n"
+    prefix = _ensure_trailing_blank_line(existing)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(prefix + block + "\n", encoding="utf-8")
     return True
@@ -144,11 +150,7 @@ def upsert_codex_toml(path: Path, name: str, entry: dict[str, Any]) -> bool:
     existing = path.read_text(encoding="utf-8") if path.exists() else ""
     if marker in existing:
         return False
-    prefix = existing
-    if prefix and not prefix.endswith("\n"):
-        prefix += "\n"
-    if prefix:
-        prefix += "\n"
+    prefix = _ensure_trailing_blank_line(existing)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(prefix + codex_toml_block(name, entry), encoding="utf-8")
     return True

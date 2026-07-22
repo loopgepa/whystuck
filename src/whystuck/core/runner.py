@@ -39,11 +39,12 @@ def _safe_execute(execute: Executor, cmd: list[str]) -> tuple[int, str]:
     try:
         return execute(cmd)
     except FileNotFoundError as exc:
-        return (127, f"command not found: {cmd[0] if cmd else ''} ({exc})")
+        # cmd is non-empty here: the `if not cmd` guard above already returned.
+        return (127, f"command not found: {cmd[0]} ({exc})")
     except subprocess.TimeoutExpired as exc:
         return (124, f"timed out: {' '.join(cmd)} ({exc})")
     except OSError as exc:
-        return (1, f"failed to run {cmd[0] if cmd else ''}: {exc}")
+        return (1, f"failed to run {cmd[0]}: {exc}")
 
 
 def _step(attempt: int, role: str, cmd: list[str], code: int, output: str) -> LoopStepTrace:
