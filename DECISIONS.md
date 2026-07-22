@@ -229,7 +229,7 @@ server first; the plugin is polish, not a dependency of the core value.
 
 **Status:** accepted (2026-07-20)
 
-**Context.** SysKnife (`/home/user/Desktop/lacs`) is the reference for OSS
+**Context.** SysKnife (a sibling local-first tool) is the reference for OSS
 polish. Its hardening is valuable but must not slow local MVP development.
 
 **Decision.** Adopt these, but **stage them**: cheap community files now; heavy

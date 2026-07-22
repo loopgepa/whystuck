@@ -3,7 +3,7 @@
 **Policy:** the repo stays 100% local until every box in "MVP" and "Launch
 hardening" is checked. Goal: one strong first impression for a viral OSS launch,
 not a public pre-alpha. Rationale and sources: `DECISIONS.md` (ADR-009, ADR-010)
-and the SysKnife reference repo (`/home/user/Desktop/lacs`).
+and the SysKnife reference repo (a sibling local-first tool).
 
 ## Gate 1 — MVP (Definition of Done, IMPLEMENTATION.md §12) — ✅ COMPLETE
 
