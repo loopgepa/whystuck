@@ -140,8 +140,9 @@ def render_report(runs: list[Run], *, meta: dict[str, Any]) -> str:
         "because the command worker ignores the genome.\n"
         f"- The split is small ({meta.get('n_heldout', '?')} held-out); this claims a *relative* "
         "result (loop-level vs prompt-only) under a matched budget, not a leaderboard number.\n"
-        "- Reflection-call cost is a conservative estimate, not a proven bound (GEPA exposes no "
-        "hard per-arm reflection budget).\n"
+        "- Reflection spend is a hard cap: GEPA is told to stop after `reflection_calls` "
+        "proposals per arm (one reflection LM call each), so the estimated cost is a genuine "
+        "ceiling, not just a guess.\n"
     )
 
     return (

@@ -101,3 +101,134 @@ def test_real_optimize_without_gepa_gives_actionable_error():
         _gepa_optimize(
             seed_candidate={}, trainset=[], adapter=None, reflection_lm="x", max_metric_calls=1
         )
+
+
+def test_optimize_loop_forwards_max_candidate_proposals(tmp_path):
+    # The reflection-call count is only a *hard* budget bound if GEPA is told to
+    # stop after N proposals (one reflection LM call each). optimize_loop must
+    # forward that cap to the optimizer so the cost guard's reflection term is
+    # enforced, not merely estimated.
+    store = WhyStuckStore(tmp_path)
+    _seed_loop(store)
+    captured: dict = {}
+
+    def fake_optimize(**kw):
+        captured.update(kw)
+        return {"best_candidate": {"skill": "Fix with the minimal patch."}}
+
+    optimize_loop(
+        store,
+        "bugfix",
+        [BenchmarkTask(id="t1")],
+        _run_task,
+        reflection_lm="fake",
+        max_metric_calls=50,
+        max_candidate_proposals=15,
+        _optimize=fake_optimize,
+    )
+    assert captured["max_candidate_proposals"] == 15
+
+
+def test_optimize_loop_omits_proposal_cap_when_none(tmp_path):
+    # Default (None) must not smuggle a spurious cap into the optimizer kwargs.
+    store = WhyStuckStore(tmp_path)
+    _seed_loop(store)
+    captured: dict = {}
+
+    def fake_optimize(**kw):
+        captured.update(kw)
+        return {"best_candidate": {"skill": "Fix with the minimal patch."}}
+
+    optimize_loop(
+        store,
+        "bugfix",
+        [BenchmarkTask(id="t1")],
+        _run_task,
+        reflection_lm="fake",
+        _optimize=fake_optimize,
+    )
+    assert "max_candidate_proposals" not in captured
+
+
+def _fake_gepa(monkeypatch):
+    """Install a minimal fake `gepa` (+ the submodules `_gepa_optimize` imports)
+    into sys.modules so the REAL `_gepa_optimize` runs with gepa absent from the
+    venv. Returns the dict that the fake `gepa.optimize` records its kwargs into,
+    so a test can assert on how the proposal cap was wired.
+    """
+    import sys
+    import types
+
+    recorded: dict = {}
+
+    class _Result:
+        best_candidate = {"skill": "x"}
+
+    def _optimize(**kw):
+        recorded.update(kw)
+        return _Result()
+
+    class GEPAAdapter:  # subclassed by _gepa_optimize's _Bridge
+        pass
+
+    class EvaluationBatch:
+        def __init__(self, outputs=None, scores=None, trajectories=None):
+            self.outputs, self.scores, self.trajectories = outputs, scores, trajectories
+
+    class MaxCandidateProposalsStopper:
+        def __init__(self, cap):
+            self.cap = cap
+
+    gepa = types.ModuleType("gepa")
+    gepa.optimize = _optimize  # type: ignore[attr-defined]
+    adapter_mod = types.ModuleType("gepa.core.adapter")
+    adapter_mod.GEPAAdapter = GEPAAdapter  # type: ignore[attr-defined]
+    adapter_mod.EvaluationBatch = EvaluationBatch  # type: ignore[attr-defined]
+    stop_mod = types.ModuleType("gepa.utils.stop_condition")
+    stop_mod.MaxCandidateProposalsStopper = MaxCandidateProposalsStopper  # type: ignore[attr-defined]
+
+    for name, mod in [
+        ("gepa", gepa),
+        ("gepa.core", types.ModuleType("gepa.core")),
+        ("gepa.core.adapter", adapter_mod),
+        ("gepa.utils", types.ModuleType("gepa.utils")),
+        ("gepa.utils.stop_condition", stop_mod),
+    ]:
+        monkeypatch.setitem(sys.modules, name, mod)
+    return recorded
+
+
+class _NullAdapter:
+    def evaluate(self, *a, **k): ...
+    def make_reflective_dataset(self, *a, **k): ...
+
+
+def test_gepa_optimize_wires_proposal_cap_as_stopper(monkeypatch):
+    # The PR's whole point: an int cap must become a MaxCandidateProposalsStopper
+    # under gepa.optimize(stop_callbacks=[...]). Exercise the REAL _gepa_optimize
+    # against a faked gepa so a kwarg typo / wrong wrapping / gepa rename fails CI.
+    recorded = _fake_gepa(monkeypatch)
+    _gepa_optimize(
+        seed_candidate={"skill": "s"},
+        trainset=[],
+        adapter=_NullAdapter(),
+        reflection_lm="fake",
+        max_metric_calls=5,
+        max_candidate_proposals=7,
+    )
+    stoppers = recorded["stop_callbacks"]
+    assert len(stoppers) == 1
+    assert stoppers[0].cap == 7  # the cap reached the stopper intact
+
+
+def test_gepa_optimize_omits_stopper_when_no_cap(monkeypatch):
+    # No cap → no stop_callbacks kwarg, so GEPA's own default stopping applies.
+    recorded = _fake_gepa(monkeypatch)
+    _gepa_optimize(
+        seed_candidate={"skill": "s"},
+        trainset=[],
+        adapter=_NullAdapter(),
+        reflection_lm="fake",
+        max_metric_calls=5,
+    )
+    assert "stop_callbacks" not in recorded

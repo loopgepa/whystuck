@@ -64,7 +64,8 @@ def test_keyword_score_without_expectation_is_not_a_free_win():
 
 def test_litellm_complete_without_litellm_is_actionable():
     complete = litellm_complete("openai/gpt-4o-mini")
-    # The error must name the real fix — `pip install litellm`, not the eval extra,
-    # which never included litellm (review finding #5).
-    with pytest.raises(RuntimeError, match="pip install litellm"):
+    # The error must name the real fix. litellm is now part of the `whystuck[eval]`
+    # extra (added so the one paid run reproduces from a single install), so the
+    # extra IS the fix — superseding the earlier state where litellm was separate.
+    with pytest.raises(RuntimeError, match=r"whystuck\[eval\]"):
         complete("hi")

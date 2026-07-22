@@ -154,6 +154,32 @@ def test_arm_c_runs_command_path_and_returns_result(tmp_path, tasks):
     assert c.delta == 1.0
 
 
+def test_run_study_forwards_proposal_cap_to_optimizer(tmp_path, tasks):
+    # The study must pass the reflection-call cap down to GEPA (as
+    # max_candidate_proposals) so the cost guard's reflection budget is enforced,
+    # not just estimated. Capture what the optimizer actually receives.
+    train, heldout = tasks
+    store = WhyStuckStore(tmp_path / "store")
+    seen: list = []
+
+    def capturing_optimize(**kw):
+        seen.append(kw.get("max_candidate_proposals"))
+        return _fake_optimize(**kw)
+
+    run_study(
+        store,
+        complete=_fake_complete,
+        reflection_lm="fake",
+        train=train,
+        heldout=heldout,
+        arms=("B", "D"),
+        max_candidate_proposals=15,
+        _optimize=capturing_optimize,
+    )
+    # One optimize call per LLM-optimizing arm, each told the same hard cap.
+    assert seen == [15, 15]
+
+
 def test_delta_is_fractional_on_mixed_constraints(tmp_path):
     # Explicit held-out (not a split) so the fraction is shuffle-independent:
     # "x x x" fails no_whitespace but trivially passes sub-bullets (no '*'),

@@ -7,7 +7,7 @@ rubric changes the result, and GEPA has a gradient to climb.
 
 `complete` (the LLM call) and `score` (the task's success check) are injected, so
 this is fully offline-testable. The production `complete` is litellm-backed
-(network); litellm is not a base dependency — install it separately.
+(network); litellm ships with the `whystuck[eval]` extra, not the base install.
 """
 
 from __future__ import annotations
@@ -78,13 +78,15 @@ def make_run_task(
 
 
 def litellm_complete(model: str) -> Complete:
-    """Production `complete` backed by litellm (network; install litellm separately)."""
+    """Production `complete` backed by litellm (network; ships with `whystuck[eval]`)."""
 
     def complete(prompt: str) -> str:
         try:
             import litellm  # type: ignore[import-not-found]
         except ImportError as exc:
-            raise RuntimeError("the LLM worker needs litellm: pip install litellm") from exc
+            raise RuntimeError(
+                "the LLM worker needs litellm: pip install 'whystuck[eval]'"
+            ) from exc
         resp = litellm.completion(model=model, messages=[{"role": "user", "content": prompt}])
         return resp.choices[0].message.content or ""
 

@@ -44,7 +44,12 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--n-train", type=int, default=31, help="train task count (default 31)")
     p.add_argument("--n-heldout", type=int, default=31, help="held-out task count (default 31)")
     p.add_argument("--max-metric-calls", type=int, default=150, help="GEPA budget per arm")
-    p.add_argument("--reflection-calls", type=int, default=15, help="est. reflection calls/arm")
+    p.add_argument(
+        "--reflection-calls",
+        type=int,
+        default=15,
+        help="hard cap on GEPA proposals per arm (= max reflection LM calls/arm)",
+    )
     p.add_argument("--worker-model", default="openai/gpt-4.1-mini")
     p.add_argument("--reflection-model", default="openai/gpt-5.6-terra")
     p.add_argument(
@@ -166,6 +171,7 @@ def _run_live(
                     heldout=heldout,
                     arms=arms,
                     max_metric_calls=args.max_metric_calls,
+                    max_candidate_proposals=args.reflection_calls,
                 )
             runs.append({name: vars(r) for name, r in results.items()})
 

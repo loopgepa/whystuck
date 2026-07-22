@@ -135,13 +135,16 @@ def run_study(
     verifier_cmd: tuple[str, ...] = ("true",),
     max_retries: int = 1,
     max_metric_calls: int = 150,
+    max_candidate_proposals: int | None = None,
     _optimize: Any | None = None,
 ) -> dict[str, ArmResult]:
     """Run the requested arms and return per-arm held-out results.
 
     `complete` is the (cassette-wrapped, for the live run) LLM worker;
     `reflection_lm` is passed through to GEPA. `worker_cmd`/`verifier_cmd` are the
-    genome-blind commands for arm C. Inject `_optimize` to bypass GEPA offline.
+    genome-blind commands for arm C. `max_candidate_proposals` caps GEPA proposals
+    per arm (one reflection LM call each), making the reflection budget a hard
+    bound rather than an estimate. Inject `_optimize` to bypass GEPA offline.
     """
     results: dict[str, ArmResult] = {}
     for arm in arms:
@@ -167,6 +170,7 @@ def run_study(
             run_task,
             reflection_lm=reflection_lm,
             max_metric_calls=max_metric_calls,
+            max_candidate_proposals=max_candidate_proposals,
             _optimize=_optimize,
         )
         winner = store.load_variant(genome.id, out["variant_id"])

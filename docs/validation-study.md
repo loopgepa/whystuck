@@ -28,4 +28,4 @@ Pending the live run.
 
 - Arm C's flatness is the genome-blind control; its optimization can't move the score because the command worker ignores the genome.
 - The split is small (31 held-out); this claims a *relative* result (loop-level vs prompt-only) under a matched budget, not a leaderboard number.
-- Reflection-call cost is a conservative estimate, not a proven bound (GEPA exposes no hard per-arm reflection budget).
+- Reflection spend is a hard cap: GEPA is told to stop after `reflection_calls` proposals per arm (one reflection LM call each), so the estimated cost is a genuine ceiling, not just a guess.

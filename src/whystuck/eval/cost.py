@@ -7,9 +7,14 @@ arithmetic, no network — the guard runs *before* any live call.
 
 Conservatism scope: the *worker*-call count is a genuine upper bound (it accounts
 for GEPA's search, both held-out evals, AND `optimize_loop`'s post-search
-train-set re-scoring). The *reflection*-call count is a caller-supplied estimate
-(`reflection_calls`), not a proven bound — GEPA exposes no hard per-arm reflection
-budget — so set it with margin and keep `--max-usd` comfortably above the estimate.
+train-set re-scoring). The *reflection*-call count (`reflection_calls`) is a hard
+bound too, but only because the live run passes it to GEPA as
+`max_candidate_proposals` (one reflection LM call per proposal); this module is
+pure arithmetic and cannot enforce that itself, so the bound holds iff the caller
+wires the cap through — `run_validation_study.py` does. Note GEPA's own
+`max_reflection_cost` stopper is inert here (it reports $0 for a callable
+reflection_lm, which the cassette wrapper always supplies), so the *proposal*
+cap, not a cost stopper, is what keeps reflection bounded.
 
 Prices are USD per 1M tokens (input, output), July 2026 OpenAI list prices.
 Update the table when prices move; the estimator reads only from it, so a stale
@@ -109,9 +114,9 @@ def plan_study_calls(
     `n_train` is explicit (not assumed equal to `n_heldout`) so the train-set
     re-scoring term stays correct if the two splits diverge. `n_seeds` scales the
     whole plan — the study runs every arm once per seed for the mean ± std, and
-    the guard MUST account for all of them or it under-counts. Reflection: a
-    caller estimate of `reflection_calls` per LLM-optimizing arm — see the module
-    docstring on why that term is an estimate, not a proven bound.
+    the guard MUST account for all of them or it under-counts. Reflection:
+    `reflection_calls` per LLM-optimizing arm — a hard bound, because the caller
+    wires it through as `max_candidate_proposals` (see the module docstring).
     """
     worker_calls = 0
     for arm in arms:

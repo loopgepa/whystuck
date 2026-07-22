@@ -33,21 +33,33 @@ def optimize_loop(
     tasks: list[BenchmarkTask],
     run_task: RunTask,
     *,
-    reflection_lm: str,
+    reflection_lm: str | Callable[[str], str],
     max_metric_calls: int = 50,
+    max_candidate_proposals: int | None = None,
     _optimize: OptimizeFn | None = None,
 ) -> dict[str, Any]:
-    """Run GEPA over a loop's text genes; save the winner as a variant + frontier."""
+    """Run GEPA over a loop's text genes; save the winner as a variant + frontier.
+
+    `max_metric_calls` bounds worker (task LM) calls; `max_candidate_proposals`,
+    when set, bounds the number of GEPA proposals — one reflection LM call each —
+    so the reflection spend is a *hard* cap, not an estimate (GEPA's
+    `max_reflection_cost` stopper is inert for a callable reflection_lm, which is
+    what the cassette wrapper always supplies). Left `None`, GEPA stops on
+    `max_metric_calls` alone.
+    """
     base = store.load_loop(loop_id)
     adapter = LoopGenomeAdapter(base, run_task)
     optimizer = _optimize or _gepa_optimize
-    result = optimizer(
-        seed_candidate=candidate_from_genome(base),
-        trainset=tasks,
-        adapter=adapter,
-        reflection_lm=reflection_lm,
-        max_metric_calls=max_metric_calls,
-    )
+    optimizer_kwargs: dict[str, Any] = {
+        "seed_candidate": candidate_from_genome(base),
+        "trainset": tasks,
+        "adapter": adapter,
+        "reflection_lm": reflection_lm,
+        "max_metric_calls": max_metric_calls,
+    }
+    if max_candidate_proposals is not None:
+        optimizer_kwargs["max_candidate_proposals"] = max_candidate_proposals
+    result = optimizer(**optimizer_kwargs)
     best_candidate = result["best_candidate"]
 
     # Score the winner ourselves — deterministic, GEPA-internals-independent.
@@ -86,6 +98,9 @@ def _gepa_optimize(**kwargs: Any) -> dict[str, Any]:
     try:
         import gepa  # type: ignore[import-not-found]
         from gepa.core.adapter import EvaluationBatch, GEPAAdapter  # type: ignore[import-not-found]
+        from gepa.utils.stop_condition import (  # type: ignore[import-not-found]
+            MaxCandidateProposalsStopper,
+        )
     except ImportError as exc:  # pragma: no cover - exercised only without the extra
         raise RuntimeError(
             "loop optimization requires the eval extra: pip install whystuck[eval]"
@@ -101,11 +116,23 @@ def _gepa_optimize(**kwargs: Any) -> dict[str, Any]:
         def make_reflective_dataset(self, candidate, eval_batch, components_to_update):  # type: ignore[no-untyped-def]
             return our.make_reflective_dataset(candidate, eval_batch, components_to_update)
 
+    # Bound reflection LM calls to a HARD cap. GEPA makes one reflection call per
+    # candidate proposal, so a MaxCandidateProposalsStopper caps reflection spend.
+    # (GEPA's max_reflection_cost stopper is inert for a callable reflection_lm —
+    # it reports $0 cost — and gepa.optimize has no max_candidate_proposals kwarg,
+    # so the stopper is the only reliable lever.) GEPA ORs this with its own
+    # max_metric_calls stopper (CompositeStopper mode="any"), so whichever bound
+    # fires first stops the run — both remain genuine ceilings.
+    optional: dict[str, Any] = {}
+    if kwargs.get("max_candidate_proposals") is not None:
+        cap = kwargs["max_candidate_proposals"]
+        optional["stop_callbacks"] = [MaxCandidateProposalsStopper(cap)]
     result = gepa.optimize(
         seed_candidate=kwargs["seed_candidate"],
         trainset=kwargs["trainset"],
         adapter=_Bridge(),
         reflection_lm=kwargs["reflection_lm"],
         max_metric_calls=kwargs["max_metric_calls"],
+        **optional,
     )
     return {"best_candidate": result.best_candidate}
