@@ -1,0 +1,103 @@
+# WhyStuck GEPA validation benchmark — design
+
+**Date:** 2026-07-22
+**Status:** design, pending implementation-plan
+**Scope:** one self-contained validation study that earns WhyStuck's central claim with empirical data, plus the reusable, deterministic harness that produces it.
+
+## 1. Goal
+
+Produce the first empirical evidence that WhyStuck's optimize path actually improves loops — specifically the headline research claim:
+
+> **loop-level GEPA (optimizing the whole loop genome) beats prompt-only GEPA (optimizing a single instruction) under a matched budget.**
+
+Everything currently green in the repo is plumbing proven with fakes; the optimize path has never run against a real LLM. This study closes both gaps at once: it runs the marquee feature live for the first time, and it reports a numbers table that earns the word "optimized" (the honesty gate in `docs/v0.2-eval-benchmark.md`).
+
+Secondary outcome, free from the same harness: a live end-to-end integration test of `optimize_loop_via_llm` (cassette-backed), closing the "only fakes" coverage gap.
+
+## 2. The claim, made falsifiable
+
+Four arms, identical worker / reflection model / budget / task set, differing only in what GEPA is allowed to evolve:
+
+| Arm | What GEPA evolves | Path | LLM cost |
+|-----|-------------------|------|----------|
+| **A** | nothing (seed genome, no optimization) | direct eval | worker only |
+| **B** | **one** instruction gene (prompt-only GEPA) | `optimize_loop_via_llm`, single-gene genome | worker + reflection |
+| **C** | whole genome, **command** worker (genome-blind) | `optimize_loop_via_commands` | **$0** (no LLM) |
+| **D** | whole **multi-gene** genome, LLM worker (loop-level GEPA) | `optimize_loop_via_llm`, full genome | worker + reflection |
+
+Expected ordering on held-out score: A < B < D, with C ≈ A (flat — the control that empirically demonstrates BUG 2's premise: a genome-blind worker can't move text genes).
+
+**Thesis verdict** = D's held-out score − B's held-out score, reported as mean ± std across seeds. The claim holds iff that gap exceeds seed noise. A null or negative result is a legitimate, publishable outcome — the study is designed to be able to refute the thesis, not just confirm it.
+
+## 3. Dataset
+
+**IFBench** (`allenai/IFBench_test`, Hugging Face) — instruction-following with 58 programmatic constraint verifiers, from GEPA's own paper (arXiv 2507.19457). Chosen because:
+
+- It makes B-vs-D an apples-to-apples test against the exact "prompt-only GEPA" baseline the thesis names, on a dataset the method's authors published on.
+- Verification is code, not an LLM judge → deterministic scoring, no judge cost, no judge variance.
+- Short completions → cheap; the score is fraction-of-constraints-satisfied ∈ [0, 1].
+
+Split (subset of GEPA's 150 train / 300 val / 294 test): **50 train / 50 held-out** for the paid run, held out strictly for the reported number (GEPA's held-out-split recommendation). A **tier-0 authored micro-task suite** (~8–12 tasks, `{goal, expect}` with substring/regex verifiers) exists first, purely to build and prove the harness at $0 before any IFBench spend.
+
+IFBench licensing (AllenAI) is verified permissive-for-research before we vendor any slice; if not, we fall back to the authored suite for the public number and note the limitation.
+
+## 4. Architecture
+
+New code under `src/whystuck/eval/` (opt-in `whystuck[eval]`), three units with clean seams:
+
+### 4.1 `cassette.py` — deterministic record/replay
+
+Both LLM surfaces are pure `input → str` callables, so both are wrappable:
+
+- worker: `complete(prompt) -> str` (already `litellm_complete(model)`)
+- gepa reflection: `reflection_lm(messages, **kwargs) -> str` (gepa accepts a callable — confirmed in gepa FAQ)
+
+`CassetteLM` wraps either, keyed by a stable hash of the input. Mode `record` calls through to the live model and appends `{key, input, output}` to a JSON file; mode `replay` returns the stored output and raises on a miss. One live run records; CI and every re-run replay from committed JSON — no HTTP-level VCR needed, no tokens burned in CI. IFBench verifiers are already deterministic.
+
+### 4.2 `ifbench.py` — loader + programmatic scorer
+
+`load_ifbench(split, n, seed) -> list[BenchmarkTask]` (payload carries the constraint spec) and `ifbench_score(output, task) -> float` running the constraint verifiers. This is the `Score` for `make_run_task` on the IFBench arms; the authored suite uses the existing `keyword_score`.
+
+### 4.3 `study.py` — arm orchestration
+
+Defines the seed genome (IFBench: a `generate` skill gene + an `ensure_correct` verifier-rubric gene, mirroring GEPA's 2-module IFBench agent), the four arm configs, and `run_study(...)` returning per-arm `{variant_id, heldout_score, objective_vector, cost, latency}`. Arms B/D call `optimize_loop_via_llm`; C calls `optimize_loop_via_commands`; A evaluates the seed directly. The GEPA `_optimize` seam and the `CassetteLM`-wrapped models keep the whole thing runnable offline in tests.
+
+### 4.4 entrypoint + outputs
+
+- `scripts/run_validation_study.py` — the one paid, live entrypoint. Guarded: prints an estimated cost and requires an explicit `--yes` (or env confirm) before spending; refuses to exceed a `--max-usd` ceiling by pre-counting planned calls.
+- `docs/validation-study.md` — the report: the 4-arm numbers table (held-out score mean ± std, full objective vector, cost, latency, wall-clock), method, and verdict. Regenerated from the study's JSON output.
+- `tests/fixtures/cassettes/*.json` — committed recordings from the live run.
+
+## 5. Metrics
+
+Report the full objective vector already emitted by `eval/objectives.py` (success/retry/diff efficiency), with IFBench held-out constraint-satisfaction as the primary. Every reported "optimized" variant carries the whole vector, never a single number (honesty gate). Also report per-arm cost (USD), latency, and wall-clock, and seed variance (≥ 2 seeds).
+
+## 6. Models & budget
+
+All OpenAI, via litellm + the user's `OPENAI_API_KEY` (WhyStuck stays provider-agnostic — only the model string changes):
+
+- **worker / task LM:** `openai/gpt-4.1-mini` — GEPA's exact IFBench task LM. Small on purpose: leaves headroom for optimization to show a delta.
+- **reflection LM:** GPT-5.6 family — **Terra ($2.50/$15)** default, **Sol ($5/$30)** for the final published run. Exact API id pinned at build time against OpenAI's live model list (`openai/gpt-5` may still alias).
+- **budget:** hard cap **$5**. GEPA runs at `max_metric_calls = 150` (its default) per optimizing arm; costing uses a conservative R ≈ 300 worker calls/arm (the 150 optimization rollouts + held-out + baseline evals) and K ≈ 15 reflection calls/arm. With worker c_w ≈ $0.0013/call and reflection c_r ≈ $0.033/call (Terra): per optimizing arm ≈ 300·0.0013 + 15·0.033 ≈ $0.88 ⇒ B + D ≈ $1.76; extra baselines/held-out via OpenAI Batch API (−50%) ≈ $0.13; 2 seeds ≈ $0.9 ⇒ **≈ $2.8 total** (≈ $3.9 with Sol). The cost guard (§4.4), not this estimate, enforces the ceiling — it pre-counts planned calls and refuses over `--max-usd`.
+
+## 7. Determinism & CI
+
+CI never calls a live model. The E2E integration test runs the whole study through `CassetteLM` in replay mode against committed cassettes and asserts: (a) `optimize_loop_via_llm` runs end-to-end and its winner beats the seed, (b) arm D's landscape is non-flat while arm C's is flat, (c) replay is byte-deterministic. Same-input replay → 100% hit.
+
+## 8. Build order (each increment TDD, own PR)
+
+1. `cassette.py` record/replay + tests (fakes only).
+2. `ifbench.py` loader + `ifbench_score` + tests (fixture constraints, no network).
+3. `study.py` seed genome + arm configs + `run_study`, tested offline via injected `_optimize` + `CassetteLM` fakes (authored micro-tasks).
+4. `scripts/run_validation_study.py` with the cost guard + dry-run estimator; unit-test the estimator and the ceiling refusal.
+5. Report generator (`docs/validation-study.md` from JSON) + a smoke test.
+6. E2E replay test (§7) — the coverage-gap closer.
+7. **The one live run** (manual, gated): records cassettes, fills the report with real numbers. Not part of CI.
+
+Steps 1–6 are $0 and land before any spend. Step 7 is the single paid action, run only on explicit go.
+
+## 9. Non-goals & risks
+
+**Non-goals:** SWE-bench (blows $5, needs Docker, doesn't isolate the thesis); a real-LLM CI; a SOTA claim — we claim the *relative* result (loop-level > prompt-only) under matched budget, not a leaderboard number.
+
+**Risks:** (a) exact GPT-5.6 id — pin at build. (b) gepa `reflection_lm` callable signature (`messages` vs `prompt`) — verify against the installed gepa before wiring. (c) IFBench licensing — verify before vendoring; authored-suite fallback. (d) token overrun — the cost guard pre-counts planned calls and refuses over `--max-usd`. (e) null result — treated as a valid finding, reported honestly.
