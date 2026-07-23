@@ -40,7 +40,7 @@ from whystuck.core.util import mean, utc_now_iso
 from whystuck.eval.adapter import RunTask
 from whystuck.eval.benchmark import BenchmarkTask
 from whystuck.eval.ifbench import ifbench_feedback, ifbench_score
-from whystuck.eval.llm_worker import Complete, make_self_refine_run_task
+from whystuck.eval.llm_worker import Complete, Feedback, Score, make_self_refine_run_task
 from whystuck.eval.optimize import optimize_loop
 
 GENERATE_GENE = "generate"
@@ -106,11 +106,16 @@ def _heldout_score(genome: LoopGenome, tasks: list[BenchmarkTask], run_task: Run
     used for training — so held-out and training measure the identical thing (the
     loop's final programmatic score), with no single-shot/loop mismatch.
 
-    Raises if a trace lacks ``metadata['eval_score']``: a silent 0.0 default would
-    report a misconfigured run_task as a catastrophic genome and bury it in the
-    report, rather than surfacing the wiring bug."""
+    Raises if a trace lacks ``metadata['eval_score']`` OR if ``tasks`` is empty: a
+    silent 0.0 in either case would report a misconfigured run (e.g. n_heldout=0, or
+    a run_task that doesn't record the score) as a catastrophic all-fail genome and
+    bury it in the paid report, rather than surfacing the misconfiguration."""
     if not tasks:
-        return 0.0
+        raise ValueError(
+            f"_heldout_score called with an empty task list for genome {genome.id!r}; "
+            "returning 0.0 would masquerade as a genuine all-fail — check n_heldout / "
+            "pool sizing upstream"
+        )
     scores: list[float] = []
     for t in tasks:
         trace = run_task(genome, t)
@@ -156,6 +161,8 @@ def run_study(
     loop_max_retries: int = 2,
     max_metric_calls: int = 150,
     max_candidate_proposals: int | None = None,
+    score_fn: Score = ifbench_score,
+    feedback_fn: Feedback = ifbench_feedback,
     _optimize: Any | None = None,
 ) -> dict[str, ArmResult]:
     """Run the requested arms and return per-arm held-out results.
@@ -165,13 +172,15 @@ def run_study(
     passed through to GEPA. `worker_cmd`/`verifier_cmd` are the genome-blind
     commands for arm C. `max_candidate_proposals` caps GEPA proposals per arm (one
     reflection LM call each), making the reflection budget a hard bound rather than
-    an estimate. Inject `_optimize` to bypass GEPA offline.
+    an estimate. `score_fn`/`feedback_fn` select the task set's scorer/feedback
+    (ifbench single-constraint by default; pass the multi_constraint pair for the
+    composable multi-constraint study). Inject `_optimize` to bypass GEPA offline.
     """
     # One loop worker for BOTH training (B/D) and held-out scoring (all arms), so
     # the two measure the identical thing. The critique step is driven by the
     # evolvable verify gene, which is what lets arm D differ from arm B.
     worker_run_task = make_self_refine_run_task(
-        complete, ifbench_score, feedback=ifbench_feedback, max_retries=loop_max_retries
+        complete, score_fn, feedback=feedback_fn, max_retries=loop_max_retries
     )
     results: dict[str, ArmResult] = {}
     for arm in arms:

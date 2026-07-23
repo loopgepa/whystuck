@@ -46,6 +46,13 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Run/dry-run the GEPA validation study.")
     p.add_argument("--max-usd", type=float, default=5.0, help="hard spend ceiling (default 5.0)")
     p.add_argument("--arms", default="ABCD", help="which arms to run (default ABCD)")
+    p.add_argument(
+        "--task-set",
+        choices=("ifbench", "multi"),
+        default="ifbench",
+        help="ifbench = vendored single-constraint slice; multi = composable "
+        "multi-constraint tasks (the fair loop-level test)",
+    )
     p.add_argument("--n-train", type=int, default=16, help="train task count (default 16)")
     p.add_argument("--n-heldout", type=int, default=16, help="held-out task count (default 16)")
     p.add_argument(
@@ -162,10 +169,29 @@ def _run_live(
     from whystuck.core.storage import WhyStuckStore
     from whystuck.core.util import utc_now_iso
     from whystuck.eval.cassette import Cassette
-    from whystuck.eval.ifbench import load_ifbench
+    from whystuck.eval.ifbench import ifbench_feedback, ifbench_score, load_ifbench
     from whystuck.eval.llm_worker import litellm_complete
+    from whystuck.eval.multi_constraint import load_multi_constraint, mc_feedback, mc_score
     from whystuck.eval.report import render_report
     from whystuck.eval.study import run_study
+
+    # Task set selects the loader + the scorer/feedback the worker loop grades with.
+    if args.task_set == "multi":
+        # Size the generated pool so each disjoint half comfortably covers the larger
+        # of n_train/n_heldout — otherwise load_multi_constraint raises rather than
+        # silently truncating below the requested (and cost-priced) sample size.
+        mc_pool = max(64, 2 * max(args.n_train, args.n_heldout) + 2)
+
+        def load_split(split: str, seed: int, n: int):
+            return load_multi_constraint(split, seed=seed, n=n, pool=mc_pool)  # type: ignore[arg-type]
+
+        score_fn, feedback_fn, dataset = mc_score, mc_feedback, "multi-constraint (IFEval-style)"
+    else:
+
+        def load_split(split: str, seed: int, n: int):
+            return load_ifbench(split=split, seed=seed, n=n)  # type: ignore[arg-type]
+
+        score_fn, feedback_fn, dataset = ifbench_score, ifbench_feedback, "IFBench"
 
     record_path = args.record or "study-cassette.json"
     runs: list[dict[str, dict]] = []
@@ -180,8 +206,8 @@ def _run_live(
             name="reflection",
         )
         for seed in seeds:
-            train = load_ifbench(split="train", seed=seed, n=args.n_train)
-            heldout = load_ifbench(split="heldout", seed=seed, n=args.n_heldout)
+            train = load_split("train", seed, args.n_train)
+            heldout = load_split("heldout", seed, args.n_heldout)
             with tempfile.TemporaryDirectory() as d:
                 store = WhyStuckStore(Path(d))
                 results = run_study(
@@ -194,11 +220,13 @@ def _run_live(
                     max_metric_calls=args.max_metric_calls,
                     max_candidate_proposals=args.reflection_calls,
                     loop_max_retries=args.loop_max_retries,
+                    score_fn=score_fn,
+                    feedback_fn=feedback_fn,
                 )
             runs.append({name: vars(r) for name, r in results.items()})
 
     meta = {
-        "dataset": "IFBench",
+        "dataset": dataset,
         "n_train": args.n_train,
         "n_heldout": args.n_heldout,
         "worker_model": args.worker_model,

@@ -240,9 +240,12 @@ def test_delta_is_fractional_on_mixed_constraints(tmp_path):
     assert b.delta == 0.5
 
 
-def test_heldout_score_of_empty_tasks_is_zero():
-    # Empty held-out must return 0.0, never a vacuous 1.0 or a ZeroDivisionError.
-    assert _heldout_score(seed_genome("x", evolvable=set()), [], lambda p: "anything") == 0.0
+def test_heldout_score_of_empty_tasks_raises_not_silent_zero():
+    # An empty held-out list is a misconfiguration (e.g. n_heldout=0): returning a
+    # silent 0.0 would report every arm as catastrophic in the paid report,
+    # indistinguishable from a genuine all-fail. Fail loud instead.
+    with pytest.raises(ValueError, match="empty"):
+        _heldout_score(seed_genome("x", evolvable=set()), [], lambda g, t: "anything")
 
 
 def test_heldout_score_raises_when_trace_lacks_eval_score():
@@ -318,3 +321,33 @@ def test_all_four_arms_run_together(tmp_path, tasks):
     assert res["A"].opt_heldout == 0.0
     assert res["B"].opt_heldout == 1.0
     assert res["D"].opt_heldout == 1.0
+
+
+def test_run_study_wires_multi_constraint_scorer(tmp_path):
+    # The multi-constraint task set must flow through run_study via score_fn/
+    # feedback_fn: all 4 arms run, seed parity holds, and the injected scorer
+    # produces fractional held-out scores (the mc path is wired, not just ifbench).
+    from whystuck.eval.multi_constraint import generate_multi_tasks, mc_feedback, mc_score
+
+    pool = generate_multi_tasks(8, seed=0)
+    train, heldout = pool[:4], pool[4:]
+
+    def mc_worker(prompt: str) -> str:
+        # genome-blind, generic answer satisfying ~half the constraints
+        return "- idea system\n- result signal that is all."
+
+    res = run_study(
+        WhyStuckStore(tmp_path / "store"),
+        complete=mc_worker,
+        reflection_lm="fake",
+        train=train,
+        heldout=heldout,
+        _optimize=_fake_optimize,
+        score_fn=mc_score,
+        feedback_fn=mc_feedback,
+    )
+    assert set(res) == {"A", "B", "C", "D"}
+    assert res["A"].seed_heldout == res["B"].seed_heldout == res["D"].seed_heldout
+    # fractional signal from mc_score (not the ifbench no_whitespace 0/1 pattern)
+    assert all(0.0 <= res[a].opt_heldout <= 1.0 for a in ("A", "B", "C", "D"))
+    assert 0.0 < res["A"].seed_heldout < 1.0
