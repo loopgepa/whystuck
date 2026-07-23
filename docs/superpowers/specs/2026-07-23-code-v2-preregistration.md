@@ -41,15 +41,20 @@ saturates or the result is close.
 
 - **In-loop verification = the BASE tests (visible).** The critique/refine step may run
   the base tests and see which failed + the traceback. This is reliable, executable
-  verification — exactly what v1's intrinsic critique lacked.
-- **Scoring = the PLUS tests (hidden).** The reported held-out score runs the plus tests,
-  which the loop never sees. So the loop optimizes against visible tests and we measure
-  *generalization* on hidden ones — the loop cannot game the metric, and this is not
-  oracle contamination (the scorer is never consulted in-loop).
+  verification — exactly what v1's intrinsic critique lacked. (HF `mbppplus` schema: the
+  base suite is the `test_list` field.)
+- **Scoring = the PLUS tests (hidden).** The reported held-out score runs the augmented
+  plus suite (the `test` field's generated `check()`), which the loop never sees.
 
-This mirrors real coding agents (run the given tests, held out on hidden tests) and is the
-setting where evolving *how the critique reads a failing test* (arm D) could finally beat
-prompt-only (arm B).
+**Precise claim (plus ⊇ base):** EvalPlus's plus suite is the base tests *plus* extra
+generated edge-case assertions, not a wholly disjoint set. So the loop cannot see or
+optimize against the **plus-only edge cases** — those are the hidden signal, and passing
+the visible base tests does NOT guarantee passing them (that gap is the headroom EvalPlus
+was built to expose). The programmatic scorer is never consulted in-loop, so this is not
+oracle contamination; but we do not overclaim full base/plus disjointness. This mirrors
+real coding agents (optimize against the given tests, held out on stricter hidden ones) and
+is the setting where evolving *how the critique reads a failing test* (arm D) could finally
+beat prompt-only (arm B).
 
 ## Arms (unchanged from v1)
 

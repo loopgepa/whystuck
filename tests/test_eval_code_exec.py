@@ -7,6 +7,10 @@ mis-score a paid run or hang it. All cases are hand-written (no dataset needed).
 
 from __future__ import annotations
 
+import contextlib
+import os
+import tempfile
+
 from whystuck.eval.code_exec import run_tests
 
 _GOOD = "def add(a, b):\n    return a + b\n"
@@ -32,7 +36,9 @@ def test_timeout_is_a_failure_not_a_hang():
     import time
 
     start = time.monotonic()
-    r = run_tests("def f():\n    pass\n", "while True:\n    pass\n", timeout=2.0)
+    # loop lives in the SOLUTION (the test block must carry a real assert, else it is
+    # short-circuited as "no assertions" before anything runs).
+    r = run_tests("while True:\n    pass\n", "assert True\n", timeout=2.0)
     elapsed = time.monotonic() - start
     assert r.passed is False
     assert "timeout" in r.detail.lower()
@@ -68,3 +74,82 @@ def test_solution_and_tests_share_namespace():
     sol = "def is_even(n):\n    return n % 2 == 0\n"
     tests = "assert is_even(4)\nassert not is_even(3)\n"
     assert run_tests(sol, tests, timeout=5.0).passed is True
+
+
+# --- false-PASS defenses (a solution under optimization pressure must not reward-hack) ---
+
+
+def test_sys_exit_zero_before_tests_is_not_a_pass():
+    # A stub that exits 0 before the (failing) tests run must NOT score as passed.
+    r = run_tests("import sys\nsys.exit(0)\n", "assert False\n", timeout=5.0)
+    assert r.passed is False
+
+
+def test_os_exit_zero_before_tests_is_not_a_pass():
+    r = run_tests("import os\nos._exit(0)\n", "assert 1 == 2\n", timeout=5.0)
+    assert r.passed is False
+
+
+def test_raise_systemexit_zero_is_not_a_pass():
+    r = run_tests("raise SystemExit(0)\n", "assert 1 == 2\n", timeout=5.0)
+    assert r.passed is False
+
+
+def test_unterminated_string_cannot_swallow_the_test_block():
+    # Solution opens a triple-quoted string; because tests are a SEPARATE compiled unit,
+    # they still run (and here fail), rather than being swallowed as a string literal.
+    sol = 'def add(a, b):\n    return a - b\n\n_x = """\n'
+    tests = "assert add(2, 3) == 5\n"
+    assert run_tests(sol, tests, timeout=5.0).passed is False
+
+
+def test_empty_test_block_is_not_a_vacuous_pass():
+    r = run_tests("def add(a, b):\n    return a - b\n", "", timeout=5.0)
+    assert r.passed is False
+    assert "assert" in r.detail.lower()
+
+
+def test_comment_only_test_block_is_not_a_vacuous_pass():
+    r = run_tests("def add(a, b):\n    return a - b\n", "# TODO real tests\n", timeout=5.0)
+    assert r.passed is False
+
+
+def test_timeout_kills_spawned_descendants_no_leak():
+    # A solution that spawns a detached grandchild then hangs: after the timeout, the
+    # grandchild's process group must be killed (not leaked). We verify by PID liveness.
+    import time
+
+    marker = os.path.join(tempfile.gettempdir(), f"ws_orphan_{os.getpid()}.pid")
+    if os.path.exists(marker):
+        os.remove(marker)
+    # Build the grandchild source via %r reprs (no manual quote nesting): it records its
+    # PID to `marker`, then sleeps well past the timeout.
+    grandchild = f"import os, time\nopen({marker!r}, 'w').write(str(os.getpid()))\ntime.sleep(30)\n"
+    sol = (
+        f"import subprocess, sys, time\n"
+        f"subprocess.Popen([sys.executable, '-c', {grandchild!r}])\n"
+        f"while True:\n    time.sleep(0.1)\n"
+    )
+    r = run_tests(sol, "assert True\n", timeout=2.0)
+    assert r.passed is False and "timeout" in r.detail.lower()
+    # give the kill a moment, then confirm the grandchild is gone
+    deadline = time.monotonic() + 4.0
+    child_pid = None
+    while time.monotonic() < deadline:
+        if os.path.exists(marker):
+            with open(marker) as fh:
+                child_pid = int(fh.read() or "0")
+            break
+        time.sleep(0.05)
+    if child_pid:
+        alive = True
+        for _ in range(40):
+            try:
+                os.kill(child_pid, 0)
+                time.sleep(0.1)
+            except ProcessLookupError:
+                alive = False
+                break
+        with contextlib.suppress(OSError):
+            os.remove(marker)
+        assert not alive, f"grandchild {child_pid} leaked past the timeout"
