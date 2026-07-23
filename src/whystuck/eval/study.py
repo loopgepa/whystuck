@@ -186,6 +186,8 @@ def run_study(
     feedback_fn: Feedback = ifbench_feedback,
     use_plan_gene: bool = False,
     stats_fn: Callable[[str], str] | None = None,
+    critique_complete: Complete | None = None,
+    oracle_critique: bool = False,
     _optimize: Any | None = None,
 ) -> dict[str, ArmResult]:
     """Run the requested arms and return per-arm held-out results.
@@ -209,6 +211,8 @@ def run_study(
         max_retries=loop_max_retries,
         plan_gene=PLAN_GENE if use_plan_gene else None,
         stats_fn=stats_fn,
+        critique_complete=critique_complete,
+        oracle_critique=oracle_critique,
     )
     results: dict[str, ArmResult] = {}
     for arm in arms:

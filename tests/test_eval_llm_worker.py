@@ -357,3 +357,63 @@ def test_plan_gene_missing_raises_not_silent():
     )
     with pytest.raises(KeyError, match="plan"):
         run_task(_two_gene("write it", "CHECK_WHITESPACE"), _nw_task())  # no plan gene
+
+
+# --- cross-family critic lever (run 6): critique runs on a different model -------
+
+
+def test_critique_uses_the_separate_critic_model_when_given():
+    # The verify/critique step must route to `critique_complete`, while generation
+    # and refinement stay on the worker `complete` — this is what makes the critic
+    # a different model than the generator (self-preference-bias mitigation).
+    worker_calls, crit_calls = [], []
+
+    def worker(p):
+        worker_calls.append(p)
+        return "x x"  # generate + refine (both fail no_whitespace)
+
+    def critic(p):
+        crit_calls.append(p)
+        return "FAIL: remove whitespace" if "# Draft answer" in p else "?"
+
+    make_self_refine_run_task(worker, ifbench_score, max_retries=1, critique_complete=critic)(
+        _two_gene("write it", "CHECK_WHITESPACE"), _nw_task()
+    )
+    assert crit_calls and all("# Draft answer" in c for c in crit_calls)  # critique -> critic
+    assert not any("# Draft answer" in c for c in worker_calls)  # never on the worker
+    assert any("# Problems to fix" in c for c in worker_calls)  # refine -> worker
+
+
+# --- oracle-critique lever (run 7): the ceiling arm; critique = the true metric --
+
+
+@pytest.mark.parametrize("retries", [1, 2])
+def test_oracle_critique_makes_no_critique_llm_call(retries):
+    # With the oracle critique the gate uses the programmatic score directly, so
+    # there is NO critique LLM call: the loop makes 1 + retries calls (generate +
+    # one refine per unmet round), and the verify gene is never sent to any model.
+    calls = []
+
+    def spy(p):
+        calls.append(p)
+        return "x x"  # every draft keeps whitespace -> score < 1 -> never passes
+
+    make_self_refine_run_task(spy, ifbench_score, max_retries=retries, oracle_critique=True)(
+        _two_gene("write it", "SECRET_VERIFY_GENE"), _nw_task()
+    )
+    assert len(calls) == 1 + retries
+    assert not any("SECRET_VERIFY_GENE" in c for c in calls)  # verify gene inert under oracle
+
+
+def test_oracle_critique_passes_immediately_on_a_correct_draft():
+    calls = []
+
+    def spy(p):
+        calls.append(p)
+        return "solid"  # no whitespace -> score 1.0 -> oracle passes at once
+
+    trace = make_self_refine_run_task(spy, ifbench_score, max_retries=2, oracle_critique=True)(
+        _two_gene("write it", "V"), _nw_task()
+    )
+    assert len(calls) == 1  # generate only; no refine, no critique
+    assert trace.metadata["eval_score"] == 1.0

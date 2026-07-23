@@ -42,6 +42,11 @@ MODEL_PRICES: dict[str, tuple[float, float]] = {
     "openai/gpt-5.6-luna": (1.00, 6.00),  # extra reflection option beyond the spec
     "openai/gpt-5.6-terra": (2.50, 15.00),  # reflection default (spec §6)
     "openai/gpt-5.6-sol": (5.00, 30.00),  # reflection for the final published run (spec §6)
+    # Cross-family critic options for run 6 (D1). gpt-5.6-luna is the OpenAI-only
+    # cross-LINEAGE critic we run now; the other two are true cross-PROVIDER critics
+    # for the stronger follow-up (each needs that provider's API key).
+    "gemini/gemini-2.5-flash-lite": (0.10, 0.40),  # cheapest true cross-family critic
+    "anthropic/claude-haiku-4-5": (1.00, 5.00),  # cross-family critic (Anthropic)
 }
 
 

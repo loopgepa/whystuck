@@ -412,3 +412,51 @@ def test_run_study_feeds_stats_into_the_critique(tmp_path, tasks):
     )
     critiques = [p for p in seen if "# Draft answer" in p]
     assert critiques and all("STATSMARK words=3" in p for p in critiques)
+
+
+def test_run_study_routes_critique_to_a_separate_critic_model(tmp_path, tasks):
+    train, heldout = tasks
+    worker_seen, critic_seen = [], []
+
+    def worker(p: str) -> str:
+        worker_seen.append(p)
+        return _fake_complete(p)
+
+    def critic(p: str) -> str:
+        critic_seen.append(p)
+        return "FAIL: fix it"
+
+    run_study(
+        WhyStuckStore(tmp_path / "store"),
+        complete=worker,
+        reflection_lm="fake",
+        train=train,
+        heldout=heldout,
+        arms=("A",),
+        _optimize=_fake_optimize,
+        critique_complete=critic,
+    )
+    assert critic_seen and all("# Draft answer" in p for p in critic_seen)  # critique -> critic
+    assert not any("# Draft answer" in p for p in worker_seen)  # never on the worker
+
+
+def test_run_study_oracle_critique_makes_no_critique_llm_call(tmp_path, tasks):
+    train, heldout = tasks
+    seen = []
+
+    def spy(p: str) -> str:
+        seen.append(p)
+        return _fake_complete(p)
+
+    run_study(
+        WhyStuckStore(tmp_path / "store"),
+        complete=spy,
+        reflection_lm="fake",
+        train=train,
+        heldout=heldout,
+        arms=("A",),
+        _optimize=_fake_optimize,
+        oracle_critique=True,
+    )
+    assert seen  # the loop still generated
+    assert not any("# Draft answer" in p for p in seen)  # oracle gate: no critique LLM call

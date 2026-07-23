@@ -179,3 +179,38 @@ def test_feedback_stats_flag_parses_and_dry_runs():
     code, out, _ = _run(["--arms", "A", "--seeds", "0", "--feedback-stats"])
     assert code == 0
     assert "Estimated total" in out
+
+
+_BASE = ["--arms", "AB", "--seeds", "0", "--n-train", "5", "--n-heldout", "5",
+         "--max-metric-calls", "20", "--reflection-calls", "3"]  # fmt: skip
+
+
+def _estimate_from(out: str) -> float:
+    for line in out.splitlines():
+        if line.startswith("Estimated total"):
+            return float(line.split("$")[1].split()[0])
+    raise AssertionError("no estimate printed")
+
+
+def test_oracle_critique_prices_fewer_calls():
+    # The oracle gate makes NO critique LLM call, so 1 + retries calls/eval instead
+    # of 1 + 2*retries — the estimate must drop, or the ceiling arm is mispriced.
+    common = _BASE + ["--loop-max-retries", "2"]
+    _, plain, _ = _run(common)
+    _, oracle, _ = _run([*common, "--oracle-critique"])
+    assert _estimate_from(oracle) < _estimate_from(plain)
+
+
+def test_critique_model_priced_conservatively_at_the_pricier_model():
+    # A pricier cross-family critic must raise the estimate (worker-side calls priced
+    # at the more expensive model), never silently keep the cheaper worker price.
+    common = _BASE + ["--loop-max-retries", "1"]
+    _, plain, _ = _run(common)
+    _, crit, _ = _run([*common, "--critique-model", "openai/gpt-5.6-luna"])
+    assert _estimate_from(crit) > _estimate_from(plain)
+
+
+def test_unknown_critique_model_rejected():
+    code, _, err = _run(["--arms", "A", "--seeds", "0", "--critique-model", "openai/nope"])
+    assert code == 2
+    assert "MODEL_PRICES" in err

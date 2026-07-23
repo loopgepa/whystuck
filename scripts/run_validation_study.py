@@ -33,7 +33,9 @@ from whystuck.eval.cost import (
     MODEL_PRICES,
     REFLECTION_MAX_OUTPUT_TOKENS,
     WORKER_MAX_OUTPUT_TOKENS,
+    WORKER_TOKENS,
     BudgetExceeded,
+    CallGroup,
     CostGuard,
     estimate_usd,
     plan_study_calls,
@@ -78,6 +80,19 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         "critique step; no extra LLM calls (stats computed locally)",
     )
     p.add_argument(
+        "--critique-model",
+        default=None,
+        help="cross-family critic (run 6): route the critique LLM call to this model "
+        "instead of the worker. Cross-lineage (e.g. gpt-5.6 over a gpt-4.1 worker) if "
+        "same provider; a true cross-provider critic needs that provider's key",
+    )
+    p.add_argument(
+        "--oracle-critique",
+        action="store_true",
+        help="ceiling lever (run 7): the critique gate uses the true metric, not an LLM "
+        "self-check; no critique LLM call (1+N calls/eval). Deliberate oracle condition",
+    )
+    p.add_argument(
         "--reflection-calls",
         type=int,
         default=10,
@@ -117,10 +132,13 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 2
-    for label, model in (
+    model_args = [
         ("--worker-model", args.worker_model),
         ("--reflection-model", args.reflection_model),
-    ):
+    ]
+    if args.critique_model:
+        model_args.append(("--critique-model", args.critique_model))
+    for label, model in model_args:
         if model not in MODEL_PRICES:
             print(
                 f"ERROR: {label} {model!r} has no price in MODEL_PRICES; "
@@ -134,16 +152,33 @@ def main(argv: list[str] | None = None) -> int:
         print("ERROR: --seeds must list at least one integer.", file=sys.stderr)
         return 2
 
+    # Call count per eval: generate (+plan) + per retry a refine, plus a critique
+    # UNLESS the oracle gate replaces it (no critique LLM call then).
+    per_retry_calls = 1 if args.oracle_critique else 2
+    worker_calls_per_task = (2 if args.plan_gene else 1) + per_retry_calls * args.loop_max_retries
+    # Conservative pricing: a cross-family critic runs some worker-side calls on a
+    # different (often pricier) model. We price ALL worker-side calls at the pricier
+    # of {worker, critic} so the guard's estimate stays an upper bound (the true
+    # split is cheaper). Irrelevant under --oracle-critique (no critique call).
+    pricing_worker_model = args.worker_model
+    if args.critique_model and not args.oracle_critique:
+        # Pick the pricier model by TRUE cost at the real worker call shape (input-heavy),
+        # not by unweighted sum(in,out) — a future entry with an unusual in/out ratio
+        # could flip a sum-based comparison and silently under-price the guard.
+        cost_at_shape = lambda m: CallGroup(m, 1, *WORKER_TOKENS).usd()  # noqa: E731
+        if cost_at_shape(args.critique_model) > cost_at_shape(args.worker_model):
+            pricing_worker_model = args.critique_model
+
     groups = plan_study_calls(
         arms=arms,
         n_train=args.n_train,
         n_heldout=args.n_heldout,
         max_metric_calls=args.max_metric_calls,
         reflection_calls=args.reflection_calls,
-        worker_model=args.worker_model,
+        worker_model=pricing_worker_model,
         reflection_model=args.reflection_model,
         n_seeds=len(seeds),
-        worker_calls_per_task=(2 if args.plan_gene else 1) + 2 * args.loop_max_retries,
+        worker_calls_per_task=worker_calls_per_task,
     )
 
     print(
@@ -221,6 +256,14 @@ def _run_live(
             litellm_complete(args.reflection_model, max_tokens=REFLECTION_MAX_OUTPUT_TOKENS),
             name="reflection",
         )
+        # Cross-family critic (run 6): a separate model for the critique step only.
+        # Skipped under --oracle-critique (the gate makes no critique LLM call).
+        critique_complete = None
+        if args.critique_model and not args.oracle_critique:
+            critique_complete = cassette.wrap(
+                litellm_complete(args.critique_model, max_tokens=WORKER_MAX_OUTPUT_TOKENS),
+                name="critic",
+            )
         for seed in seeds:
             train = load_split("train", seed, args.n_train)
             heldout = load_split("heldout", seed, args.n_heldout)
@@ -240,6 +283,8 @@ def _run_live(
                     feedback_fn=feedback_fn,
                     use_plan_gene=args.plan_gene,
                     stats_fn=text_stats if args.feedback_stats else None,
+                    critique_complete=critique_complete,
+                    oracle_critique=args.oracle_critique,
                 )
             runs.append({name: vars(r) for name, r in results.items()})
 
@@ -253,6 +298,8 @@ def _run_live(
         "loop_max_retries": args.loop_max_retries,
         "plan_gene": args.plan_gene,
         "feedback_stats": args.feedback_stats,
+        "critique_model": args.critique_model if not args.oracle_critique else None,
+        "oracle_critique": args.oracle_critique,
         "worker_max_output_tokens": WORKER_MAX_OUTPUT_TOKENS,
         "seeds": seeds,
         "estimated_usd": estimate,

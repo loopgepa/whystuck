@@ -144,6 +144,8 @@ def make_self_refine_run_task(
     verify_gene: str = "ensure_correct",
     plan_gene: str | None = None,
     stats_fn: Callable[[str], str] | None = None,
+    critique_complete: Complete | None = None,
+    oracle_critique: bool = False,
     max_retries: int = 2,
 ) -> RunTask:
     """A real generate -> critique -> refine loop (not single-shot).
@@ -157,7 +159,7 @@ def make_self_refine_run_task(
       rubric catches more failures and steers better refinements, which is exactly
       why arm D (evolves both genes) can beat arm B (evolves only `generate`).
 
-    Two optional levers, each gated off by default (so existing runs are unchanged):
+    Optional levers, each gated off by default (so existing runs are unchanged):
     - **plan_gene** (complexity / DSPy lever): when set, a `plan` step runs FIRST and
       its output is threaded into the generate prompt, giving the loop a third
       interacting module for whole-genome optimization to co-tune. Adds one LLM call
@@ -167,6 +169,21 @@ def make_self_refine_run_task(
       readout — the external-verification signal Huang et al. 2023 found necessary for
       self-correction to help. It measures the text only; the programmatic scorer is
       still never consulted in the loop, so this is a tool, not oracle contamination.
+    - **critique_complete** (cross-family critic lever, run 6): when set, the critique
+      LLM call routes to this model instead of the worker `complete`, so the verifier
+      is a DIFFERENT model than the generator. Motivated by the finding that a judge
+      from the same family inflates agreement and carries a self-preference bias
+      (Valmeekam et al. 2023; LLM-as-judge 2026 surveys). NOTE: within one provider
+      (e.g. gpt-5.6 critic over a gpt-4.1 worker) this is cross-*lineage*, which breaks
+      self-grading but is not a true cross-*provider* family test — that remains future
+      work needing a second provider's key.
+    - **oracle_critique** (ceiling lever, run 7): when set, the critique gate uses the
+      true programmatic metric (`score`/`feedback`) instead of an LLM self-check — the
+      deliberate oracle condition (Huang et al.'s "with oracle" setting). It makes NO
+      critique LLM call (1 + max_retries calls/eval) and leaves the verify gene inert;
+      it exists to establish the loop's performance CEILING given a perfect detector,
+      isolating whether the null is about signal quality vs loop mechanics. Not a
+      D-vs-B test (the verify gene cannot matter under a perfect oracle).
 
     The final answer is scored by `score` (the ground-truth programmatic metric),
     so the loop cannot game it. `max_retries` bounds the critique/refine rounds and
@@ -201,15 +218,31 @@ def make_self_refine_run_task(
                 step_id="generate-0", role="worker", input_summary=task_text, output_summary=draft
             )
         )
+        critic = critique_complete or complete
         for i in range(max_retries):
-            # Feedback lever: a measured (non-oracle) stats readout for the critique.
-            stats_block = f"\n\n# Measured text statistics\n{stats_fn(draft)}" if stats_fn else ""
-            critique = complete(
-                f"{ver}\n\n# Task\n{task_text}\n\n# Draft answer\n{draft}{stats_block}\n\n"
-                "Reply exactly PASS if every requirement is satisfied; "
-                "otherwise list what to fix."
-            )
-            passed = critique.strip().upper().startswith("PASS")
+            if oracle_critique:
+                # Ceiling lever: the gate is the true metric, not an LLM self-check.
+                passed = score(draft, task) >= 1.0
+                critique = (
+                    "PASS"
+                    if passed
+                    else (
+                        feedback(draft, task)
+                        if feedback is not None
+                        else "not all requirements are satisfied; revise"
+                    )
+                )
+            else:
+                # Feedback lever: a measured (non-oracle) stats readout for the critique.
+                stats_block = (
+                    f"\n\n# Measured text statistics\n{stats_fn(draft)}" if stats_fn else ""
+                )
+                critique = critic(
+                    f"{ver}\n\n# Task\n{task_text}\n\n# Draft answer\n{draft}{stats_block}\n\n"
+                    "Reply exactly PASS if every requirement is satisfied; "
+                    "otherwise list what to fix."
+                )
+                passed = critique.strip().upper().startswith("PASS")
             steps.append(
                 LoopStepTrace(
                     step_id=f"critique-{i}",
