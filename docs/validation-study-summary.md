@@ -110,17 +110,28 @@ Both are lower-powered exploratory runs (n = 3 seeds); a clear D > B in either w
 warranted a 5-seed confirmation — neither produced one. Full reference list in
 `docs/references.bib`.
 
-## Final verdict across five runs
+### Runs 6 & 7 (cross-lineage critic, oracle ceiling)
+
+- **Run 6 — cross-lineage critic** (`validation-study-crossfamily.md`, `.../specs/2026-07-23-cross-family-critic-preregistration.md`): critique on `gpt-5.6-luna`, generation on `gpt-4.1-mini`. **INCONCLUSIVE**: D 0.825 vs B 0.817, Δ = +0.01 — the first run where D didn't lose, but within n=3 noise. The different-model critic also lifted the seed (0.765 → 0.825). *Cross-lineage, not cross-provider* (shared vendor/lineage) — a true cross-family test (Gemini/Claude) is the follow-up. ~$0.36.
+- **Run 7 — oracle ceiling** (`validation-study-oracle.md`, `.../specs/2026-07-23-oracle-ceiling-preregistration.md`): the critique gate = the true metric (perfect detector). **Surprise: it did NOT lift the ceiling** — oracle seed 0.748, level with intrinsic (0.765) and *below* the tool (0.837). So detector quality vs performance is **non-monotonic** (F₁ 0.11→0.83→1.0 maps to seed 0.765→0.837→**0.748**). The bottleneck is not detection but the **fix step**: even told exactly what's wrong, `gpt-4.1-mini` can't repair hard constraints in one refine round. ~$0.22.
+
+## Final verdict across seven runs
 
 The thesis "loop-level GEPA beats prompt-only GEPA" is **NOT SUPPORTED** on IFEval-style
 instruction-following at this budget/model — in every regime we could test: single- and
-multi-constraint, with genuine headroom (run 3), with a real external feedback tool (run 4),
-and with an extra interacting module (run 5). Δ(D − B) = 0.00 in all three fair tests. The
-one thing that *did* move the score was feedback richness helping the **baseline** (run 4),
-exactly as Huang et al. predict — but it helped B and D equally, so it is not evidence for
-the loop-level lever. On current evidence, evolving the critique/plan components of a
-self-refine loop is not worth its cost over evolving the generation prompt alone; the
-burden is on future work to show a regime where it is.
+multi-constraint, with genuine headroom (run 3), a real external feedback tool (run 4), an
+extra interacting module (run 5), a different-model critic (run 6), and an oracle detector
+(run 7). Δ(D − B) ≤ 0.01 (within noise) in every fair test. Things that moved the *baseline*
+(the feedback tool, the different-model critic) helped B and D equally, so they are not
+evidence for the loop-level lever.
+
+**The sharpened conclusion (from run 7):** the bottleneck is **not detection** — a perfect
+in-loop detector (oracle) did not lift the ceiling (0.748, below the tool's 0.837), so
+detector-quality vs performance is *non-monotonic*. The binding constraint is the **fix
+step**: even told exactly what's wrong, the worker can't repair hard constraints in a
+bounded refine budget. So the actionable reframe for making a self-refine loop worth
+optimizing componentwise is **improve the fixer (and feedback actionability), not the
+detector** — that is where future work should point.
 
 ### Mechanism (measured, zero cost)
 
@@ -135,7 +146,7 @@ Huang et al.'s self-verification-unreliability result, inside our harness.
 
 ### Toward publication
 
-A pre-print draft consolidating all five runs, the method, the oracle taxonomy, this
-mechanism, threats to validity, and a boundary-mapping agenda (cross-family verifier,
+A pre-print draft consolidating all seven runs, the method, the oracle taxonomy, this
+mechanism, threats to validity, and a boundary-mapping agenda (fix-side interventions,
 budget/worker sweeps, cross-domain replication, an oracle ceiling arm) lives in
 `docs/paper/main.tex` (references in `docs/references.bib`).

@@ -1,0 +1,1193 @@
+{
+  "entries": {
+    "critic:0101bf784f07a2d40c5df674dbe8ad952b8dffb7aa82399f17588630a9666eb8": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:031a804eadc6c6545da9204691eb4a9d2c1977f4cc39e43b23c803f2dce35293": {
+      "name": "critic",
+      "output": "add one word; all other rules pass."
+    },
+    "critic:03d5a06342543d3639c515cebdfa06aab2f30a0d16b055595f9b8424ff41c6fc": {
+      "name": "critic",
+      "output": "Fix: \u201cScientists\u201d is 9 letters; replace it with a word of 6 letters or fewer."
+    },
+    "critic:061248d69eb9872dd5902b82be24fa56821c58859ff0d218f6cf14ad24c987a7": {
+      "name": "critic",
+      "output": "Word count is 27; reduce it to exactly 25 words."
+    },
+    "critic:065a78b701c806d90dd6ef7d305f72c3a68b1c4bdcf398f362f5ef03103dd960": {
+      "name": "critic",
+      "output": "Fix the word count: the draft has 30 words but must have exactly 25."
+    },
+    "critic:0c1cbbfa48aaf8572bbeda0f16e0c5ca847ef81cd9c453a624e156f87f8c72a3": {
+      "name": "critic",
+      "output": "PASS"
+    },
+    "critic:0f03c0fd0ed62d43f4ef81c35b8a370a6f1a1bdcff1dee3f44a9c329dd461163": {
+      "name": "critic",
+      "output": "PASS"
+    },
+    "critic:12689315dac138f516c8d88949a14408a949618e6cb99632cf124eba6fcb98d1": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:155bf8e2bd911aa88a2106b3cd36eac4dee00403f4174a8b19d0e8e4757ca391": {
+      "name": "critic",
+      "output": "Fix: Remove one word; draft has 26 words, not 25. All words are 7 letters or less, \u201cthe\u201d is absent, and it ends correctly."
+    },
+    "critic:19a686621e8b19e7bdd9bde4b13c5272f074225e1b12bb16384133e76f01d8de": {
+      "name": "critic",
+      "output": "Fix: reduce the draft from 28 words to exactly 25 words."
+    },
+    "critic:1c42842acda6e66592d180bb1574199c9c5f036fe0d2298a465035ddaeaee43a": {
+      "name": "critic",
+      "output": "Fix the word count: the draft has 29 words but must have exactly 20 words."
+    },
+    "critic:1d400fad6cefb929e5fcf90477201a229b82235a7d4b15983822572c9ae430ab": {
+      "name": "critic",
+      "output": "- has 27 words instead of 25\n- \u201callowing\u201d has 8 letters and must be replaced with a word of 7 letters or fewer"
+    },
+    "critic:1f314c7537ba24eb2d93c901211b683cf985eef2890c753942c4b971da3ed11e": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:2702714d494301f089c727262303a8a5bc0a2dc62bf2edf7e39f05b908886dab": {
+      "name": "critic",
+      "output": "- Add one word to reach 15 words.\n- Replace \u201cthrough\u201d (7 letters).\n- Replace \u201cchanging\u201d (8 letters)."
+    },
+    "critic:27e77de03ed8cfbbe6315072c1f6eeaaf0a0cf8662fe09c80604f0939dd1ac66": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:289eb577f07d7ebf139191a7473a023fb27e4dcf11fa9bc14371bf3e5f1f87f8": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:2b0608425b2537267e1bb9b8a66935e04a60f51d91bff86bde384b3f92e8e98a": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:2cd3d2d194d073c54a07e235632d18d42601f8bbf1c248b63523bd68144102e1": {
+      "name": "critic",
+      "output": "word count is 38; reduce it to 25 words"
+    },
+    "critic:2dec791ebce9ebe7fee0a6e0a3007cb77277f674caed1f63e05f00aa501f5455": {
+      "name": "critic",
+      "output": "16 words; remove the word \u201cto\u201d and reduce the count to exactly 15 words."
+    },
+    "critic:2faea82e38ac5ce3f7edfbbc0923569133bcbef4dc07622d01eb1bc08eda2d79": {
+      "name": "critic",
+      "output": "remove the forbidden word \u201cand\u201d."
+    },
+    "critic:301255c379a44c9f0e1927bd1c8febac8532043c55fe0b1b32a74a2179a01b4c": {
+      "name": "critic",
+      "output": "- reduce the total from 33 words to exactly 25 words"
+    },
+    "critic:3039895bc66c9359e471c62d8ed8d2b2f674bdd3a257a215b2921a23ab26d41d": {
+      "name": "critic",
+      "output": "PASS"
+    },
+    "critic:3080bd695f0927dc5728b1386a0f0f1141ab60f5c4270ba882b6953337ab57ae": {
+      "name": "critic",
+      "output": "use exactly 25 words instead of 22 words"
+    },
+    "critic:310c4614773a2a297e4733abe5ad959b4371c7e0d63335c2fe98feec73c69e45": {
+      "name": "critic",
+      "output": "- reduce the count from 27 words to exactly 20\n- replace \u201cteachers\u201d and \u201cstudying,\u201d which exceed 7 letters"
+    },
+    "critic:321f872a32b4e4a7cf95f6596998db23378be88c6a208566f5205f9b3e07c0c8": {
+      "name": "critic",
+      "output": "Fix the word count: the draft contains 34 words instead of exactly 20."
+    },
+    "critic:33f6a1ddd99a2a844c3e2f445cc40115de222e88439b1fc722a98e4f7d602b4c": {
+      "name": "critic",
+      "output": "Fix: Reduce the draft from 38 words to exactly 25 words."
+    },
+    "critic:34a9dd49d23a64653489c558ae628968cb79e7d31ac8fe267218b844db450238": {
+      "name": "critic",
+      "output": "Fix: reduce the draft from 32 words to exactly 15 words."
+    },
+    "critic:34f66a068f9023ce99fba5d09a86d078ab7e609b077ea232f739710c37eef304": {
+      "name": "critic",
+      "output": "word count must increase from 20 to 25 words."
+    },
+    "critic:3646ac223706a9df99ce767f2eaa15a385b3f85e78017e6426a17b463d1fdb97": {
+      "name": "critic",
+      "output": "Use exactly 15 words; the draft has 16 words."
+    },
+    "critic:37b89da9e314fa07c0e85c16d69cfc97d641f5d747e15fb486eeb3244b63b0e7": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:399985ea1b588b44f70f65052a80a7c85a2885e610cb255aa5bf0d2030cfcbd1": {
+      "name": "critic",
+      "output": "Word count is 19 not 15.  \n\u201cphotosynthesis\u201d exceeds six letters."
+    },
+    "critic:3b14a87ee2f212d542e7b4fb1b9d684cf6ea7e7352825a2e39ce6c19e8150d34": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:3d71bcd3460036ed49531eae615905b3c50535b0e4d512cdddeeff74c1756fb0": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:40e3530d24ff0724b6e85f0f14640d5d7dc3794bc8112dbeae865d701ddf8a8d": {
+      "name": "critic",
+      "output": "- Use exactly 20 words; the draft has 18.\n- End with the exact lowercase phrase \u201cwe are done.\u201d\n"
+    },
+    "critic:4a0518d3cd2873d2cd28b618bf7f363c07a541c4b8e41cbf97c1df1b326bdfd2": {
+      "name": "critic",
+      "output": "PASS"
+    },
+    "critic:4c4bc55156061b2df48934767e3f8639644d3cf6e2f9dadd2b14ca86cf30d31a": {
+      "name": "critic",
+      "output": "add one word; the draft has 14 words, not 15."
+    },
+    "critic:4e3a19e3c7434978b2cb2e9c7ac66ef02fd7468f609abc568bd6c7eb0fa55941": {
+      "name": "critic",
+      "output": "PASS"
+    },
+    "critic:5001f8e70b4c1e69da21291fc6f0afe7ae807605d91557c6d56394eacd57f410": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:51599f66a004da07a288e5c052a07a679860725fc0a2f18e411901084d93aca0": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:52df69a939780a7220193a93023838c47d25b9afac844648503d1b574c92551e": {
+      "name": "critic",
+      "output": "word count is 32; remove 7 words to reach exactly 25."
+    },
+    "critic:55e76b54c6f96288d45ec13d68ffb8fe878f8e69e0dee82cd4fa9e2085b6f649": {
+      "name": "critic",
+      "output": "Fix: Remove one word; change \u201cHere we go.\u201d to the exact lowercase phrase \u201chere we go.\u201d"
+    },
+    "critic:5bb8fe4e41ed3ce1cec364d62b30edfd54fd89d774283a4626bdcefe6d15e792": {
+      "name": "critic",
+      "output": "use 25 words, not 26."
+    },
+    "critic:6236741218abec54f0268417cc902d7ce6e430c896bd372ea4476c189daeebdd": {
+      "name": "critic",
+      "output": "PASS"
+    },
+    "critic:626ab6bd8a8fb66b8c41f3f3dd667f1aab77e325681a74a47e1998ab5cd2bf94": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:62b889c8f7fb61e4b8d4a7911428a5c729818cc953d64827e5febda93b633775": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:63d58566191c0100fd5887c65450186e1bd06ed446c3b4dd3f689592d3d321c4": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:661fbdb7e3337f2c9d8db9fb00c4879f583ce7fadf89207ad0d0a82fd5377ca6": {
+      "name": "critic",
+      "output": "Fix:\n- Reduce the total from 31 words to exactly 15.\n- Replace \u201cScientists\u201d and \u201cdiscovery,\u201d each longer than 7 letters."
+    },
+    "critic:66b009b875efd68b861a0efafc711fe1826efcee2bfd679b8508429ad804280b": {
+      "name": "critic",
+      "output": "- Add one word to reach 20 words.\n- Replace \u201cenabling\u201d (8 letters) and \u201cconnected\u201d (9 letters) with words of 7 letters or fewer."
+    },
+    "critic:6b5de9bcda7c28b75195fdd083718c73d7933eddd172abf258da05e3b412a0e0": {
+      "name": "critic",
+      "output": "fix: reduce draft from 18 words to exactly 15 words."
+    },
+    "critic:6cbfa494cf641d8e71466cb86c1e7ed24cee9cc58fc8c77d433d59f50477942d": {
+      "name": "critic",
+      "output": "PASS"
+    },
+    "critic:6ccadbf7bc8eae7fef1d575ab7e1ca3e15a77f78c4091fff9b8877343358cf79": {
+      "name": "critic",
+      "output": "- Reduce the word count from 30 to exactly 15 words."
+    },
+    "critic:70700a417aaf2c8561d8a59bf0cf500471bf3c01ef4046f34cdfefdc391f7e5e": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:723f53caae86351ea6d38d01be1fc2c2055bc3de2c6f76f298422ee80fb7487b": {
+      "name": "critic",
+      "output": "Use exactly 15 words; the draft has 17. Remove two words."
+    },
+    "critic:7400a14b71c38a4c1b8e23c79dd17b595b9dc4e231dd1297ac7c3f0c0c639fe9": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:7581038d2a6d651b4b59af32b1980abd3b14ea9705fb4c18b974ab4728b944be": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:75bc2e7730be97973132aff7411ddeb8195b5bb64bcda7d58aa6906ed4dd5908": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:75c9e0fda09159bb5b1c65deab27cdc49b3cfb3ec5f165919a1f3406f5f972ee": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:75cf74cb89167af770540d2c90e0bb37537f98014d4451f336a65f154f26b763": {
+      "name": "critic",
+      "output": "exactly 15 words; add one word."
+    },
+    "critic:7a1df438e2e1e87e65e0d43c1fbc9c4e4af3eae4d4911b6dbb1f798d5be6b1fa": {
+      "name": "critic",
+      "output": "- Reduce the word count from 35 to exactly 25 words.\n- Keep exactly five bullet points.\n- Ensure every word has seven or fewer letters.\n- Keep commas out.\n- Make all lines describe one clear natural process."
+    },
+    "critic:7a2dd4eacbcfd83495fc73995b390510bc293e57a4deff292c41cf998a4dbeea": {
+      "name": "critic",
+      "output": "PASS"
+    },
+    "critic:7b02c3b6d88ea04aacaf01271584a0f959cac0f91b2f45f00a14f84a5bda675f": {
+      "name": "critic",
+      "output": "It has 17 words instead of 15. Remove two words."
+    },
+    "critic:7f0254def84c6d7b7bb93263a22450d518d42d26614040cfdccf2102c6dc713a": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:822b5bc0d3ec669551640a39e2807f89c21afe4c2f54e2f25d2a7885a3e4bd98": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:8658285ce498dbb8ad68c3a256dcde407de802ef9885baaf56993a8a1826f4e3": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:87cabd5b6dc3ac00715036b92f3371880a7b30c59229b19387a2cbf63cdd5ac8": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:89fd6dbec410bb4d5070c84cb1540fb418dabf85c417a276e1928af5d2c360ef": {
+      "name": "critic",
+      "output": "Fix the word count: the draft has 26 words, but exactly 20 are required."
+    },
+    "critic:8a46efbc8f547b28ea41cf7e19d68832a8fea5ef80f5b65059fa922744dec08b": {
+      "name": "critic",
+      "output": "- reduce the draft from 29 words to exactly 15 words"
+    },
+    "critic:8ac1ebec64f4f216d5da38808025c461bcd990dffca549e543d8bc73084a35ff": {
+      "name": "critic",
+      "output": "Use exactly 25 words; the draft has 26."
+    },
+    "critic:8f74fd7ed5ccfbb58efb842c91beb80cfca827664696e28ac3f8b1b86582e310": {
+      "name": "critic",
+      "output": "Fix: remove one word; draft has 26 words, but needs 25."
+    },
+    "critic:9042b9b92f926c744afc964081ac0e71251a31347b44814c720da4c284882c51": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:91e3b8485620bd72c9d50c39602a85070ba1c119380b0657b511bdd5ab760f7e": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:92410f33198e9ebe4403ce8fca26173329436ec2ad121aeadb38be0fff541cc7": {
+      "name": "critic",
+      "output": "exactly 15 words; current draft contains 14 words."
+    },
+    "critic:93b9bfd80788ea3b0320d3d9a56329b6c027c40d63b70a558f61b8ec1d56cacb": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:93dc486b17530342a4c34fd0bcf1b4c43a69dfdd558bead73092ba113ecc9e08": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:9600c2f61727395cbc9dfe7a7f1f8bfab823d7e9458cdb213699cc7836ca595d": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:9635c8fc8e669405d1f068e2bb555f8d7c051c6994fe1d7a217ed78d12ae7775": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:96398732f380ce8150e5dbfa03547f010a37868698c17cb97d0674e4cd7b1828": {
+      "name": "critic",
+      "output": "- Remove one word to reach exactly 20 words.\n- Replace \u201cpractice\u201d because it has 8 letters."
+    },
+    "critic:a0ec20f74174d326c4c311e88496b1bea2738d3c425e1a016b2610332e6839ae": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:a1ed3fd25e7e02c38d82ec9e80aad4e1f1913f7b4c86a0cbf8f4a6d7cd7339b3": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:a1f49e7c93f09936729fb4fe5d93155b4e47bc73c57f985767ff1146c1fa38f1": {
+      "name": "critic",
+      "output": "Fix:\n- Remove one word to reach exactly 25 words.\n- Replace \u201cnutrients\u201d because it has 9 letters."
+    },
+    "critic:a3bfcc2e9c576ee9d4797d0e41929ab942eb3a485947e6120bff67764bad298a": {
+      "name": "critic",
+      "output": "add one word; the draft contains 19 words, not exactly 20."
+    },
+    "critic:a4937816f1476c319df7f859e64756c8157566f8cdcdecb6f6f1ee72d796ae05": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:a7e98e5b33b77bf578da9abbd6f7b674d108d41899b71d14bd2a57dd46a225a0": {
+      "name": "critic",
+      "output": "- Use exactly 20 words instead of 25\n- Keep all other requirements unchanged"
+    },
+    "critic:a89e21b8d09ec19e4ddc1e46a5e0b8336085288efc9169bbb665e88c201be9f0": {
+      "name": "critic",
+      "output": "Fix word count: draft contains 16 words instead of exactly 15."
+    },
+    "critic:a910089bded202edaf1d181e1d616418ac8e0dd64a4ad269abf678d5d88f49f7": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:ad5567c7c11bcb82445e1bd3d0ea3b6e0cd48b30f9493cac60b34c5e1549e1a1": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:adcfd17dd328cd53f7eabd70c2be69666e64d7e84bda5ccd23986ffc3363aa25": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:ae8b81a959a9687f2da2b2cc22c3c0b1e0b3fe718e348f36f31599d015bedfce": {
+      "name": "critic",
+      "output": "PASS"
+    },
+    "critic:b2d284e486608f5ebb41f952060c8e4ee313fcdf55f29875bfd6b11566342fbf": {
+      "name": "critic",
+      "output": "- It has 13 words instead of exactly 15\n- It uses \u201ccells\u201d but must include the word \u201ccell\u201d"
+    },
+    "critic:b3719d5612d16bf5516245eeeda6b2f1036980c6ce6d016599d1833a0293a9dd": {
+      "name": "critic",
+      "output": "fix word count: 21 words instead of 20; \u201cpractice\u201d has 8 letters; \u201call is set.\u201d must be included within exactly 3 bullet points."
+    },
+    "critic:bd27582c61f7a02124fe06b5360520e0cfdafe4d559902db3f7f15c82faefccf": {
+      "name": "critic",
+      "output": "add five words to reach exactly 25 words."
+    },
+    "critic:bd7382e48b4ccdf74a2164e643557e98d8871ca86476f8b4f2a5ff1abb50732a": {
+      "name": "critic",
+      "output": "Change \u201cAtom\u201d to lowercase \u201catom\u201d to include the required word exactly."
+    },
+    "critic:bfb7398f6d3b374746cd827ba70ecdc69e9fdb44efddc4a1a467ac2aa9e1a81b": {
+      "name": "critic",
+      "output": "PASS"
+    },
+    "critic:c0d81c48f6ef416300b8788e01929f077304128bbdf856b6b4c398e8f28972ba": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:c2e5463c6a85392ba0011230c6e61b3e8915aa59220b1ee6630f62dc8d5ed59e": {
+      "name": "critic",
+      "output": "- Reduce the response from 53 words to exactly 20 words.\n- Include the exact word \u201catom\u201d rather than \u201cAtoms.\u201d\n- Replace \u201csnowflakes\u201d because it has 10 letters; all words must have 7 letters or fewer."
+    },
+    "critic:c2fc725a7e337cfeaecb26f291e48080b4bbc0f915fef3910b598b8403b52b15": {
+      "name": "critic",
+      "output": "Remove the word \u201cand\u201d; replace it with another conjunction while retaining exactly 20 words and the required ending."
+    },
+    "critic:cf7e8b0bbeddf2a10aae1c14b397d198debf411ed6445998fc13b0fc59074a7b": {
+      "name": "critic",
+      "output": "PASS"
+    },
+    "critic:d14b1afbdea1d51121a124590b33355229c605934cfb4d4a44df760c5a072911": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:d2c098695c02c4d53584977e420460d9fd1b5ce2da1743754d78cc9d39b8b06c": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:de1c7285b3eb220517a16e9de10f49971787022e5b09be411d81af255dd14b1e": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:e0ce1d9b67cf62705b82c715cc61878f3208bc84fe3b09e3178f99f3ea5161fa": {
+      "name": "critic",
+      "output": "PASS"
+    },
+    "critic:e1bef4953fa4cbe9f491f19bb89778b3161b4fcca2d16f5b0ea8e4abfca26052": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:e23fdb6129e260f2d0a6c08258f36f712cce43fc4547054a80264c018a2cdbe7": {
+      "name": "critic",
+      "output": "fix word count: 31 words instead of 25."
+    },
+    "critic:e3869241f8c8932ecc142f5c1b161a9ab1daefde8c478ccff295b8fa6266e11b": {
+      "name": "critic",
+      "output": "PASS"
+    },
+    "critic:e39f2a1e8abaa3ed08321808290047f87f64084c113cf48170e3f48dec166b19": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:e660c98ed084ce49248d2064d552523080f8321d505ba374e70369ce1fef3541": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:e9fb831a45c4e825dfb532287eddf52a43048a7a42bd21491c632b21fc90372c": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:ec767ddfdf57c7aed54611eb2f378823eb08e51a1a1d3eaf1475e0a7cd0835bb": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:efa6e71e66ddba9c9c5b4a2989274b1ce96d09b96bf5b51049405730b1200217": {
+      "name": "critic",
+      "output": ""
+    },
+    "critic:f59a1acee47c05a176dd43b8bdce36fc857c341fc47d72d1f0d6b5013f940f42": {
+      "name": "critic",
+      "output": ""
+    },
+    "reflection:15a265944263e793eda1cd6dbc74ec9b24cf61b06338d0421e47fb5a231206a8": {
+      "name": "reflection",
+      "output": "```text\nGenerate the requested content while satisfying every stated constraint exactly. Treat formatting, word counts, capitalization, forbidden words, maximum word lengths, and required ending phrases as hard requirements.\n\nUse this process:\n1. Extract every requirement into a checklist before drafting.\n2. Draft content that addresses the requested topic.\n3. Audit the final text against every requirement before replying.\n4. Revise until every check passes.\n5. Return only the requested response, with no explanations, labels, or compliance notes unless explicitly requested.\n\nFor exact-word-count requirements:\n- Count every whitespace-separated word, including words in required final phrases.\n- Do not count bullet symbols such as \"- \" as words.\n- Count contractions or hyphenated forms cautiously as a single whitespace-separated item unless the prompt specifies another method.\n- Punctuation does not create extra words.\n- Recount after every edit; exact word count is mandatory.\n\nFor lowercase requirements:\n- Use no capital letters anywhere, including at the beginning, in proper names, or in required phrases unless a conflicting instruction explicitly requires capitals.\n\nFor forbidden-word requirements:\n- Do not use the prohibited word anywhere, including in headings, explanations, or accidental repetitions.\n- Check the entire final response for it.\n\nFor word-length requirements:\n- Ensure every word is at or below the stated character limit, ignoring surrounding punctuation.\n- Replace any longer word with a shorter valid alternative.\n\nFor required-ending requirements:\n- End with the specified phrase exactly, including its punctuation and lowercase or uppercase form.\n- Include the words in that phrase in the total word count.\n\nFor formatting requirements:\n- If an exact number of bullets is required, produce exactly that many lines.\n- Begin each bullet exactly as requested, such as \"- \".\n- Do not add titles, blank commentary, or extra lines unless allowed.\n\nExamples of past failure to avoid:\n- A five-bullet lowercase response without \u201cof\u201d and without words longer than six letters still failed because it had 25 words rather than exactly 15.\n- A lowercase comma-free response ending in \u201call is set.\u201d and avoiding \u201cthe\u201d still failed because it had 21 words rather than exactly 25.\n- A response satisfying a seven-character word limit, avoiding \u201cthe,\u201d and ending in \u201cwe are done.\u201d still failed because it had 24 words rather than exactly 25.\n\nTherefore, give special final attention to exact word counts: this is the most common source of failure.\n```"
+    },
+    "reflection:56a4fa59ab791550a73ff24918867b4c8ce7ebbc2172d2135acf12e8b8f4547b": {
+      "name": "reflection",
+      "output": "```text\nFor every user task, first identify the requested content and then extract every explicit output constraint into a checklist. Treat all constraints as mandatory, including constraints about word count, capitalization, forbidden words, punctuation, exact ending phrases, bullet formatting, line count, and maximum word length.\n\nDraft the requested answer, then validate it before sending. Do not send the answer until every checklist item passes. If any item fails, revise and validate again.\n\nUse these validation rules:\n\n- Count words carefully. A word is a whitespace-separated token; punctuation attached to a word does not create another word.\n- \u201cExactly N words\u201d means the complete response, including required ending phrases, must contain exactly N words.\n- For required ending text, include the exact phrase verbatim at the very end. Count its words toward any total.\n- If lowercase is required, use no capital letters anywhere, including at the beginning of lines or sentences.\n- If a word is forbidden, check the full response for that exact word, including the required ending phrase.\n- If commas are forbidden, ensure there are no comma characters anywhere.\n- For maximum word length, check every word after removing surrounding punctuation. Ensure no word exceeds the stated limit.\n- For exact bullet requirements, output exactly the specified number of lines, with each line beginning exactly as required (for example, \u201c- \u201d). Do not add headings, explanations, blank lines, or closing remarks.\n- Preserve all requested formatting while satisfying content requirements.\n\nKnown failure pattern to avoid: responses may satisfy formatting, lowercase, forbidden-word, punctuation, word-length, and ending requirements while still failing because the total word count is wrong. Always perform a final explicit word count.\n\nWhen constraints conflict, prioritize strict compliance where possible. If they are genuinely impossible to satisfy together, briefly state the conflict rather than pretending to comply. Otherwise, return only the requested final answer, with no validation notes or explanation.\n```"
+    },
+    "reflection:7963316704b6feb2e7069b45a161e246d0029c784b47147cb39e88d0bbb83805": {
+      "name": "reflection",
+      "output": "```text\nYou will receive a content request followed by explicit response requirements. Produce only the requested response, satisfying every requirement simultaneously.\n\nTreat all listed requirements as hard constraints. Before replying, systematically verify:\n1. Required structure: exact number of lines, bullets, headings, or other formatting. If bullets are required, every required line must begin exactly with \"- \" and do not add titles, blank lines, explanations, or extra bullets.\n2. Required inclusions: include every specified keyword, phrase, or ending exactly as requested.\n3. Prohibitions: do not use forbidden words, punctuation, or constructions anywhere in the response. For forbidden words, avoid case variants and avoid accidental use in added commentary.\n4. Exact word counts: count the actual response text carefully, excluding formatting markers such as a leading bullet hyphen. Punctuation attached to a word does not create an additional word. Revise wording until the requested total is exact.\n5. Word-length limits: check every word after removing surrounding punctuation; no word may exceed the stated maximum length.\n6. Exact ending requirements: ensure the response\u2019s final characters match the required final phrase exactly, including its punctuation and capitalization if specified.\n\nUse concise, simple wording so all constraints can fit together. Do not discuss your reasoning, constraints, counting, or validation; output only the final answer to the user\u2019s content request.\n```"
+    },
+    "reflection:a5758c4ae9559f6dce0713cffaaeb575453eb37d1f834639e51936f60093f773": {
+      "name": "reflection",
+      "output": "```text\nSolve the user\u2019s task exactly, treating every stated requirement as a hard constraint.\n\nBefore responding:\n1. Extract all constraints from the prompt, including content, formatting, capitalization, forbidden/required words, maximum word length, exact word count, bullet count, line prefixes, and any other limits.\n2. Draft an answer that addresses the requested topic while satisfying every constraint.\n3. Validate the final draft mechanically before sending it:\n   - Count words carefully. Punctuation does not create extra words; contractions and hyphenated forms should be avoided unless their counting is unambiguous.\n   - If an exact word count is required, ensure the total is exactly that number, not approximately that number.\n   - If a maximum word length is required, check every word, including topic words and required keywords.\n   - If lowercase is required, use no capital letters anywhere. This includes the first word, names, acronyms, headings, and required keywords.\n   - If a word is forbidden, ensure it does not appear as a standalone word or in a form that could be interpreted as using it.\n   - If bullets are required, provide exactly the specified number of bullet lines and ensure each begins with the exact required prefix, such as \"- \".\n   - If a keyword is required, include it in a form compatible with all other constraints, including capitalization requirements.\n4. Output only the requested answer, with no explanations, validation notes, headings, or extra text unless the task explicitly requests them.\n\nUse simple wording when constraints limit word length. Plan the exact word count across lines before finalizing; for example, five bullets with exactly 20 total words should average four words per bullet, not six. Do not assume a response is compliant merely because its meaning is good: every formal requirement must be checked.\n```"
+    },
+    "reflection:a62aea2c9687eae8ae2c912010a3f8a840a2960168a904ff8d4e3e49773e4b7a": {
+      "name": "reflection",
+      "output": "```text\nAnswer the user\u2019s requested content while obeying every listed requirement exactly. Treat all formatting, wording, casing, punctuation, forbidden-word, keyword, ending, maximum-word-length, bullet-count, and exact-word-count rules as hard constraints.\n\nUse this process:\n1. Extract every requirement before writing.\n2. Draft a simple, factually suitable response that satisfies the requested topic.\n3. Verify the final text against every constraint individually.\n4. Count words carefully using whitespace-separated words; punctuation attached to a word does not create an additional word, and bullet markers such as \"- \" do not count as words.\n5. If an exact phrase must end the response, include that phrase exactly, including its required punctuation, and include its words in the total word count.\n6. For maximum word length, check every word after removing surrounding punctuation. Replace any word that exceeds the limit.\n7. For forbidden words, ensure they do not appear anywhere as standalone words.\n8. For lowercase requirements, use no capital letters anywhere.\n9. For bullet requirements, provide exactly the requested number of lines and ensure every bullet line begins exactly with \"- \".\n10. Do not add titles, explanations, notes, counting labels, or any text outside the requested response, since such text can violate the constraints.\n\nNever estimate an exact word count. Recount the completed final response and revise it until all requirements are simultaneously satisfied.\n```"
+    },
+    "reflection:b192da604b37bc458d656bb0f56397ea832abfb3c08ed2705acb660d1e8d7305": {
+      "name": "reflection",
+      "output": "```text\nYou are a constrained-writing assistant. Each task input will contain a content request followed by explicit response requirements. Produce only the requested response, with no explanations, labels, planning, or constraint checklist unless the requirements explicitly request them.\n\nTreat every stated requirement as mandatory. Before answering, identify and verify all of the following when applicable:\n- exact word count;\n- required words or exact phrases;\n- forbidden words;\n- capitalization or lowercase-only rules;\n- maximum word length;\n- required ending text;\n- formatting requirements such as an exact number of bullet points, line prefixes, or punctuation restrictions.\n\nUse a deliberate draft-and-audit process:\n1. Draft content that addresses the requested topic.\n2. Check every word in sequence and count the actual response words, not estimated words.\n3. Recheck formatting, capitalization, required/forbidden terms, word lengths, punctuation, and ending phrase.\n4. Revise until every constraint is simultaneously satisfied.\n\nFor exact word-count tasks, count all ordinary written words, including words in required ending phrases. Do not assume a sentence is long enough: explicitly count it. Bullet markers such as \"- \" are formatting, not words. Punctuation attached to a word does not create an additional word.\n\nFor lowercase-only tasks, ensure every alphabetic character is lowercase, including the first word of every bullet. For maximum-length rules, avoid ambiguous long terms and ensure every individual word meets the limit. For forbidden-word rules, do not use the prohibited word anywhere, including in otherwise natural phrases such as \u201cwork to help.\u201d For exact ending phrases, place that phrase at the absolute end and include it in all other checks, especially word count.\n\nPast failures to avoid:\n- A response ending in \u201cso it goes.\u201d can still fail if its total word count is not exactly 15.\n- Four bullet points do not guarantee compliance when the total number of words exceeds the required count.\n- Meeting topical requirements, such as mentioning \u201ccode\u201d or \u201ccell,\u201d does not compensate for missing an exact count or formatting constraint.\n\nWhen constraints conflict or cannot all be satisfied, prioritize explicit hard requirements and make the shortest possible compliant response.```"
+    },
+    "reflection:d28fb8e9cdac281e68f7257eb6dee6f53a9be7a6179628cc6599265b69fa2ec4": {
+      "name": "reflection",
+      "output": "```text\nWhen responding to a user task, treat every stated requirement as mandatory. Do not answer until you have completed a final, explicit constraint audit.\n\nThe input may contain a normal writing request followed by a section such as \u201cYour response MUST satisfy ALL of the following requirements.\u201d Extract every requirement, including content, formatting, capitalization, forbidden words, required words, exact word counts, maximum word lengths, bullet counts, and line-prefix rules.\n\nUse this workflow:\n\n1. Parse the task into a checklist of atomic constraints.\n2. Draft an answer that fulfills the requested topic while leaving room for all mechanical constraints.\n3. Validate the draft against every checklist item.\n4. Revise and revalidate repeatedly until every item passes.\n5. Output only the final answer, with no explanation of the checking process unless the user asks for one.\n\nFor constrained writing, apply these rules carefully:\n\n- Exact word count: count every word in the final response, including words on every bullet line. Do not count bullet markers such as \u201c- \u201d as words. Avoid titles, notes, or extra commentary, because they add words.\n- Bullet requirements: if exactly N bullets are required, produce exactly N nonempty bullet lines and no other lines. Each required bullet must begin exactly with \u201c- \u201d.\n- Lowercase requirement: ensure every alphabetic character in the final response is lowercase. This includes required keywords, names, and the first word of each bullet.\n- Required keyword: include the required word exactly as needed, while still obeying capitalization and word-length constraints. If lowercase is required, use the lowercase form unless the task explicitly requires a different case.\n- Forbidden word: check the final response for that word and avoid it entirely. Prefer rewriting rather than risking accidental use.\n- Maximum word length: inspect every word individually. Ignore surrounding punctuation when measuring length. Use simple words, avoid contractions and hyphenated forms, and avoid potentially ambiguous tokens. Ensure no word exceeds the stated character limit.\n- If multiple requirements conflict, try to satisfy all of them through careful wording. Do not silently ignore a requirement.\n\nPay special attention to exact-count failures: a response can have correct bullets, a required keyword, and acceptable word lengths yet still fail because it has too many or too few words. Likewise, a response can have the correct topic and word count but fail because even one word exceeds the maximum length.\n\nFor example-style constraints, verify facts only insofar as needed for the requested content, but prioritize the explicit output constraints. In a discovery note about the 1928 mold discovery associated with alex fleming, do not use \u201cfleming\u201d if the maximum word length is six, because it has seven letters. In natural-process writing, words such as \u201cstreams\u201d exceed a six-letter limit. In five-bullet responses with an exact total of twenty words, plan approximately four words per bullet, then count the complete final output rather than estimating.\n\nBefore sending the answer, re-read the original task and perform a final checklist audit:\n- requested topic addressed\n- exact word count correct, if specified\n- exact number and format of bullets/lines correct, if specified\n- required words present\n- forbidden words absent\n- capitalization requirement satisfied\n- every word meets any maximum-length limit\n- no extra text added\n\nIf any item fails, revise the answer and audit again before responding.\n```"
+    },
+    "worker:00017d124df2d548eac32c71ba8f5ade57e4b6215066254f2be53b674ebf45fc": {
+      "name": "worker",
+      "output": "in 1928, alex fleming found a strong drug that stops bad germs. this drug, called penic, helped save many lives and changed health care for good."
+    },
+    "worker:03abea66d7e3d83913703d7396f3263ca1b031af290c7bb564dd50c02be12e71": {
+      "name": "worker",
+      "output": "rain forms when water evaporates, cools in clouds, then falls as droplets; this natural code sustains earth\u2019s water cycle."
+    },
+    "worker:0453b72d5557f70348cda4b19869937646f1fb9faf60fe2755de73c7db05adda": {
+      "name": "worker",
+      "output": "- think of ways  \n- that help you  \n- learn fast  \n- with small steps  \n- keep notes clear"
+    },
+    "worker:04748af19088634452e12a53f7b5c18f49a8d353b32c76b34e283717f7100fed": {
+      "name": "worker",
+      "output": "- New flux shows strange moves in dark space  \n- This flux hints at wild new waves  \n- Tools track this odd flux with care  \n- Such news will change how we think"
+    },
+    "worker:04a3fc3aca07a9ec96fff77bf0dab64ca5568c9b2d775ba4861e8ff74de87e50": {
+      "name": "worker",
+      "output": "- Cloud lets users save data on net  \n- It gives quick access from each place  \n- Cloud cuts need for local drives  \n- Data stays safe with strong checks  \nwe are done."
+    },
+    "worker:05155b058fccfd056b5652c41469af91e3d92ecbb73e46703b3343d2e9649ea3": {
+      "name": "worker",
+      "output": "DNA holds the code for life, guiding how cells grow and work, so it goes."
+    },
+    "worker:05b30d2321429e5c60321d595769da3dec4c736225cedf91d8fb561d09c7a587": {
+      "name": "worker",
+      "output": "- Snow melts when warm sun shines down  \n- Water flows in streams to lakes  \n- Heat makes water turn to steam  \n- Steam cools and forms small drops  \n- Drops join to make new clouds"
+    },
+    "worker:08b27b8a595b1b4b2b6e423770042dbb5f76b86fde8e9078cf56d49e03e53cab": {
+      "name": "worker",
+      "output": "An atom is a small part that makes up all things. It has protons, neutrons, and small electrons. all is set."
+    },
+    "worker:0a8e7d30b38e7544da170a0e2e427e0b10e6e4bfb64cd4b2342e1cb0e4fceeb4": {
+      "name": "worker",
+      "output": "- Learn small bits each day  \n- Ask friends or teachers when stuck  \n- Write notes and review often  \n- Use apps or games for fun  \n- Take short breaks while studying"
+    },
+    "worker:0b00196fc5a21a39237fbb3b3ab105893f70d8393901ecf1a07d9e4729b58f40": {
+      "name": "worker",
+      "output": "a small star was found in the sky. it shines with warm light and heat. this fact helps us learn much about stars and space here."
+    },
+    "worker:0b1e7bd52d1258fe4155c0fc5a4b578834cf2de58e887bf93b51354b236d30dd": {
+      "name": "worker",
+      "output": "Atoms are small bits that make up all stuff. They have parts called protons neutrons and electrons that move and hold things in place."
+    },
+    "worker:0e2b63e3a906e5b4338bb98058f440f3bec35d7753c6125a47efe5248bbf32bf": {
+      "name": "worker",
+      "output": "- Artificial intelligence enables machines to learn  \n- It uses data and algorithms  \n- Applications include speech and vision  \n- AI impacts many industries worldwide  \nall is set."
+    },
+    "worker:1033aadaa335af9f96cb14c1beb144a634ac57395a5ade3c0bd20f58a06474dd": {
+      "name": "worker",
+      "output": "dna holds the genetic code that guides cellular functions, ensuring life\u2019s continuity through replication cycles."
+    },
+    "worker:1107c736fb32ab18eaea2f85c387852953d89f35e31373e56a4555273bc600d4": {
+      "name": "worker",
+      "output": "Plan each day well, set small goals, and keep notes clear. Stay calm, ask for help if stuck. Learn lots, try hard, and we are done."
+    },
+    "worker:1275d46e7b8fe0328db005ebbd8d698e2881a90f3964409266444e61d351f4f5": {
+      "name": "worker",
+      "output": "- math is fun  \n- it helps find facts  \n- you count add and play  \n- it builds your sharp mind"
+    },
+    "worker:133902138c8dbb62d817dfca5d20ef4ae19c1a3ab761416fc58bcf28f7b04ccc": {
+      "name": "worker",
+      "output": "- read small books each day  \n- write notes with short words  \n- speak aloud to build skill  \n- learn new terms in class  \n- ask peers for help soon"
+    },
+    "worker:172b4f995ab4a9d5cc51f64a3357b7a3e2f7cdff040714a122bb38809a73c28d": {
+      "name": "worker",
+      "output": "A gene is a small part in cells that holds code. This code tells how traits grow and change. It\u2019s key to life, so it goes."
+    },
+    "worker:18f66272411d7dc99f761f88f38e87b0988bb05fd22769b7ab2eb8f7562c7ffe": {
+      "name": "worker",
+      "output": "cells read genetic code enabling growth, repair, and reproduction, sustaining life\u2019s natural ongoing process."
+    },
+    "worker:19013cfcc2d5005b67a180f4af6d20c0df9c992e588a453cdfa658657fdb882e": {
+      "name": "worker",
+      "output": "Experts found a small cell that helps plants drink and carry water inside roots fast."
+    },
+    "worker:1a7558d9411e6cca3527fcb90c7490a9041e4cfc09671a3dfe07585dac166971": {
+      "name": "worker",
+      "output": "- AI helps with tasks by using data and math  \n- It learns from patterns found in info sets  \n- AI works in many fields now  \n- Makes work fast and aids in smart plans  \nwe are done."
+    },
+    "worker:1b5ccb56028b2bd80cc1eb119c30269c74956600aaa46c74a274692087486de9": {
+      "name": "worker",
+      "output": "- technology helps people with tasks and work  \n- it uses tools and systems for progress  \n- it changes fast and grows daily  \n- it improves life and connects us all is set."
+    },
+    "worker:1df510415d84fa7a00edc59a231780a7a5fdb819a152288bf01497e48b6c18ff": {
+      "name": "worker",
+      "output": "- learning coding helps create apps and websites  \n- it teaches problem solving skills  \n- many jobs need coding knowledge  \n- starting with easy languages builds good habits"
+    },
+    "worker:1e8a38b3422ec62674e921fb693742e3fe022893b9dbd836ec9498b169def284": {
+      "name": "worker",
+      "output": "- Plan your work in small parts  \n- Focus on one step at a time  \n- Take short breaks to rest mind  \n- Review work to spot and fix bugs"
+    },
+    "worker:21b27e1ac8dc6fff478ed0b560d3e0e4db8ad0f423e381a38a7290b896292038": {
+      "name": "worker",
+      "output": "A gene is a small part of your body that tells it how to grow and work. Genes help make you who you are, so it goes."
+    },
+    "worker:23da24ed9722302a66df548e8c4f854a01e6c58fa51c8c4e844f9b7a841a5a8b": {
+      "name": "worker",
+      "output": "- Cells in all life use DNA to store plans and help grow and heal.  \n- Atoms form bonds to make new stuff by join or split in mix.  \n- Heat makes things move fast, can change state like ice to drop to gas.  \nthat is it."
+    },
+    "worker:23dd1f4d4f9f23cc00783dc075459db7f587ce323de18bb1e0a25d2ae2f00a0c": {
+      "name": "worker",
+      "output": "- Water moves up from soil to leaf  \n- Light hits green leaf and power starts  \n- Air mixes with gas to change  \n- Heat fades away in night  \n- Drops form and fall to ground"
+    },
+    "worker:244454ac960b004d20b0bfa7d1cf0fbff60af29d71e12c8facfc5ed31bd17db5": {
+      "name": "worker",
+      "output": "a new star was found last night in sky. this bright light shows space is full of odd things that still need deep search and close watch."
+    },
+    "worker:25a5316baa439c6b1c544d23a2418dc09813f835d885a78d27961bf5ab983c8a": {
+      "name": "worker",
+      "output": "- cells are small  \n- cells make us  \n- cells help life  \n- cells grow and move"
+    },
+    "worker:25f3c70e3736278216795e825334b78ee352ff4bd63a8a18b62b47ebcedb5c6f": {
+      "name": "worker",
+      "output": "- an atom is the smallest part of matter  \n- atoms make up everything around us  \n- atoms have tiny parts called protons, neutrons, electrons  \n- understanding atoms helps learn science basics"
+    },
+    "worker:26722b05ed552a9a32228b457748d1d9e298443f08abc2f3a5b6ebf64d03fba6": {
+      "name": "worker",
+      "output": "- an atom is the smallest unit of matter  \n- atoms form everything we see or touch  \n- atoms contain protons neutrons plus electrons  \n- learning about atoms opens up science knowledge"
+    },
+    "worker:279ea5fa6da4abc4f4b28c7141a5acabb7feea529c149cab563d95a19c1600f6": {
+      "name": "worker",
+      "output": "- An atom is the smallest unit of ordinary matter.  \n- atoms consist of protons, neutrons, electrons.  \n- They form everything around us.  \n- Understanding atoms explains chemical reactions."
+    },
+    "worker:27c07b1aed953a0214530e9ca820cef7d69ba842555d3a8ce6f3422f7effed88": {
+      "name": "worker",
+      "output": "- Scientists found a new glowing species  \n- It lives deep in ocean caves  \n- Discovery changes views about marine life  \n- Possible uses in medicine appear promising  \n- The world holds mysteries, so it goes."
+    },
+    "worker:28b1a8c646476f01a3e6b135f68b8081b43e697a228663768e2d30a8e7e86c05": {
+      "name": "worker",
+      "output": "- study your notes  \n- ask clear questions  \n- read short texts  \n- write short essays  \n- talk with friends"
+    },
+    "worker:2981d89948cd964926df8472a3214fe0bce76da930a6fadeafe7cd406eebcb45": {
+      "name": "worker",
+      "output": "- Artificial intelligence allows machines to mimic human intelligence  \n- It processes data through complex algorithms  \n- Uses include speech recognition and autonomous vehicles  \n- AI development transforms many fields every day  \nall is set."
+    },
+    "worker:298df76f639db1ea568908335a131634b9b7b601847beaed4be68ab76c69312e": {
+      "name": "worker",
+      "output": "technology helps people solve tasks fast with smart tools and new ideas it changes how work and life flow all is set."
+    },
+    "worker:2ab93ea284b31823e2551a7d22b57981038794e3d202ebcc337c3c0503fe0891": {
+      "name": "worker",
+      "output": "in 1928, alex fleming found a small mold that kills germs. this mold helped make new drugs that save lives and fight bad bugs in the body."
+    },
+    "worker:2c2db9f5254e3cdf1f8c4be2259120e072c43af9a6d42d4e7468d29d46b252ce": {
+      "name": "worker",
+      "output": "- find each node and write notes  \n- pick small keys to know fast  \n- link node with short clear words  \n- try to quiz your notes  \n- share notes with your pals"
+    },
+    "worker:2c903f2d013a41520b07df65e48b0ff8bf54370dd75d5b155474549559d88c99": {
+      "name": "worker",
+      "output": "- Cells are tiny parts in all life forms  \n- Each cell works to keep life going  \n- Cells have parts that do small tasks  \n- You can see some cells with a lens"
+    },
+    "worker:2fa5aa4109da2b843ab688fc42b0eee07703cc25893247f0834ae6e7f07b44bd": {
+      "name": "worker",
+      "output": "- A node connects devices in a network  \n- It transfers data packets  \n- Enables communication across systems  \n- We are done."
+    },
+    "worker:2fccd7251c033cde858e6c9c4a706c839a19f7e73b164cb2672715310e594735": {
+      "name": "worker",
+      "output": "- An atom is the smallest piece of matter we can find  \n- Atoms have parts called protons neutrons and electrons  \n- Molecules are groups of atoms joined to make stuff  \n- Learning about atoms helps you understand the world better"
+    },
+    "worker:302ffd1782fad2e0d206cd3035d0c7cb1145e706e7ceef47425679bbb14be25c": {
+      "name": "worker",
+      "output": "dna holds the genetic code guiding cellular functions, ensuring life\u2019s continuity through replication cycles."
+    },
+    "worker:3119536ddd106055c39dcb81cd3169265d7310b2e161b1a790e993bce94c2887": {
+      "name": "worker",
+      "output": "a gene is a code in cells that helps traits like eye color and hair grow in all living things."
+    },
+    "worker:34b536a1fd8000ff21b2761bc782c0f2ebdf3afc2bbbb82fc5d766a9870edb10": {
+      "name": "worker",
+      "output": "rain falls from dark clouds, moist soil drinks, plants grow, air cools, life then thrives."
+    },
+    "worker:35b4a6947698b79111c60604a718181ddc57ec1c7a7181e641f2d7f67321fc18": {
+      "name": "worker",
+      "output": "Scientists found a mysterious wave carrying signals from deep space, sparking excitement and fresh theories about cosmic phenomena here we go."
+    },
+    "worker:35f91804cfe2ea7ddddc0f8ea59a7061d7156bab16b1b08b267348d6fefca7cf": {
+      "name": "worker",
+      "output": "- set clear goals you can reach with small steps  \n- split tasks to keep work quick and easy  \n- write down notes to help with recall  \n- work in calm spots that aid focus  \n- check your notes each day to build skill and win"
+    },
+    "worker:3741d89798f1b75b8b9392e663c7adfd0a9a665e9548706a4d137ef8488e59da": {
+      "name": "worker",
+      "output": "Plan each day well, set small goals, keep notes clear. Stay calm, ask for help if stuck. Learn lots, try hard, we are done."
+    },
+    "worker:39f8f2efc60cd23319b373b8c71ade3b831829e31dc3ef590bf9c70db7d63ac9": {
+      "name": "worker",
+      "output": "a gene is a small code inside cells that helps build traits, like eye color, and can be passed through kin."
+    },
+    "worker:39fe33293ec1165e64beda53bc6ec6b4a26c4fca0d3f7f35f1fcada57b423356": {
+      "name": "worker",
+      "output": "- blockchain is a chain of blocks with info  \n- it helps keep data safe and clear  \n- no need for a third party trust  \n- used in coins, health, and more fields"
+    },
+    "worker:3b45569a0c9ac5cc5a12d71f14b837dcc49f626d44e23dcd18ceeca5d38fb7eb": {
+      "name": "worker",
+      "output": "- learn new words each day  \n- read short texts with care  \n- write small notes often  \n- speak with friends to grow  \n- watch films made in english"
+    },
+    "worker:3c2b6bceda237c3ccf2a19b6c13bae0d3aa62b25db46d9edf5ba6f350e8749d9": {
+      "name": "worker",
+      "output": "- try to learn by doing  \n- focus on small steps  \n- ask for help when stuck  \n- keep notes clear and brief  \n- practice often for more skill, we are done."
+    },
+    "worker:4117f977f9a59f489b44d2811269cadcbbe3fc28be84882cfe7da2573518847d": {
+      "name": "worker",
+      "output": "Light waves move fast and show color when they hit a prism or drop that is it."
+    },
+    "worker:43265d2e1421cd5767f44e7f235b3fa369819a849856b0bcde06d8ef705a9bba": {
+      "name": "worker",
+      "output": "- Rain falls down to soil and streams  \n- Plants soak rain to grow strong  \n- Roots spread wide to find food  \n- Leaves catch light to make food  \n- Plants give air we all need"
+    },
+    "worker:438a596051dd16b8cfc45d3201d3b3023617fbe1840452139fd2f1403713bbf5": {
+      "name": "worker",
+      "output": "- Scientists found strange flux near a bright star  \n- This flux hints at new forms and waves  \n- Tools helped track this rare flux pattern  \n- This discovery may change how we view space"
+    },
+    "worker:47a01215b62a7518ec37362031e6b3e1cb7201c7a656dcb6acb9b7215955909c": {
+      "name": "worker",
+      "output": "- technology helps people with tasks and work  \n- it uses tools and systems for aid  \n- it grows fast and changes  \n- it improves life and connects all is set."
+    },
+    "worker:4a8077e26d198a7cc5c60caf5579cff73a76a89f401caebd27a1863fce00fcb6": {
+      "name": "worker",
+      "output": "- Plants grow from small seeds under sun and rain  \n- They need soil water and light to live  \n- Roots soak up food and keep plants tight  \n- Leaves help make food with sun's bright glow"
+    },
+    "worker:4b2f27074645fc7faaaa5aede77d526ebcda86e2225a7345caca0a635fd0e16b": {
+      "name": "worker",
+      "output": "- Learn small bits each day  \n- Ask friends when you are stuck  \n- Write notes and review them  \n- Use apps or play for fun  \n- Take short breaks when work feels hard"
+    },
+    "worker:4ba8fab90f92962cd35444f4b3de4774af6e56d1dd24d41d7fbe3b1b2cf9661a": {
+      "name": "worker",
+      "output": "- Rain falls down from the dark clouds above  \n- Water soaks deep into the soft earth  \n- Plants drink water to grow strong  \n- Sun shines bright and warms the land  \n- Air moves clouds to bring fresh rain again"
+    },
+    "worker:548452978ebc4fc5e9347b96bfba585576d5fae966b8f34ab8bad1544bf97299": {
+      "name": "worker",
+      "output": "- Break work into small chunks  \n- Ask mates or tutors for help  \n- Write notes and check them  \n- Use apps or games for fun  \n- Rest well and keep focus"
+    },
+    "worker:54a884d346ba2845e9fddf4504324e587cead963fbb783b75a07d21a0dffa8ef": {
+      "name": "worker",
+      "output": "- artificial intelligence enables machines to learn, analyze, and perform complex tasks autonomously  \n- used in healthcare, finance, transportation, enhancing accuracy and efficiency  \n- continues evolving, driving innovation across many sectors worldwide"
+    },
+    "worker:58943227cb5de591df7f60f4cb2e16379e4287015fd17c7061373d089aab7639": {
+      "name": "worker",
+      "output": "Plan each day well, set small goals, keep notes clear. Stay calm, ask for help if stuck. Learn lots, try hard, we are done."
+    },
+    "worker:5c82325fec651168d022eaeb0f65942353eac769bb7731d97d7c82c3067f187e": {
+      "name": "worker",
+      "output": "- Set clear goals for each day  \n- Work in short, calm bursts  \n- Use notes to track your task  \n- Check all work for small errors"
+    },
+    "worker:5ec7f7415c8a743bc2a2a6f64c288d2598d432a67d9e0855d861962a343b300c": {
+      "name": "worker",
+      "output": "- A cell is a small part  \n- All life has cells  \n- Cells work to help life  \n- See cells with a lens"
+    },
+    "worker:5f7a91c581ab82605d9eb63b46fd8e04b1093ad7db1b70861b3741c0e2e6c29c": {
+      "name": "worker",
+      "output": "- cell is small  \n- cell makes us  \n- cell helps life  \n- cell can grow more"
+    },
+    "worker:62c2414853def7a88b484c537cb7b90d62abf803d0606e9ddb35fa7ae2267959": {
+      "name": "worker",
+      "output": "Scientists found a small cell that helps plants drink and carry water inside roots fast."
+    },
+    "worker:63270a546e40cadc85ff52912cb361d6c4cd85ba7248a24df541e25719e2e2c2": {
+      "name": "worker",
+      "output": "- Star tech links space and earth for fast data flow.  \n- It uses light beams for high speed.  \n- Star nets help global chats and calls.  \n- Star nodes form a wide web above.  \n- Star gear cuts lag in apps and games."
+    },
+    "worker:633d0cdc0869648e4d58a5fa2ddef5028bdd7a205850bab08853439b770230b7": {
+      "name": "worker",
+      "output": "artificial intelligence enables machines to learn adapt and perform tasks that usually require human intelligence revolutionizing industries all is set."
+    },
+    "worker:6388443bbf29b9016e40327c923a9e611cc556ef4d1290f2912f49fb11875d15": {
+      "name": "worker",
+      "output": "- Learn new skills by practice each day  \n- Ask friends for help when stuck  \n- Keep notes clear and short  \nall is set."
+    },
+    "worker:63c03c3e9b7f1a33425da33cf7abbc802cd40f1c01a01d2967de209f80f2b9d7": {
+      "name": "worker",
+      "output": "- Rain forms when moist air cools  \n- Clouds grow large and dark  \n- Wind blows clouds near land  \n- Drops fall from sky to earth  \n- Soil drinks water to grow plants"
+    },
+    "worker:65f31b14eca69068f9c94bd6a6d20f0be577102d90959c84a55bad302421590e": {
+      "name": "worker",
+      "output": "plants read sunlight\u2019s code, turning water and carbon dioxide into fuel and oxygen, enabling growth and life on earth."
+    },
+    "worker:67160257f9563cf79f9e18cb4c849fea2b0fa3a73af51fa7f83a171424f6908b": {
+      "name": "worker",
+      "output": "dna is a code that tells cells how they grow, split, and work, so it goes."
+    },
+    "worker:672ab034c48743003c4d1f5104a2dc310bc9c1fe51ddce4fc08ab1885609246d": {
+      "name": "worker",
+      "output": "- plan your days  \n- read short books  \n- ask for help  \n- write key facts  \n- rest well each night"
+    },
+    "worker:67ba7a30fcef9f1b7c9bd0cf638e8962c9f8b94f279698a245baa245ff491527": {
+      "name": "worker",
+      "output": "- Learn new skills by work each day  \n- Ask friends for help when stuck  \n- Keep notes short and clear all is set."
+    },
+    "worker:67bfcdb5043a2c7fe0a7657871a4c372c3aef6529c64472c4f30f14f28ceeca7": {
+      "name": "worker",
+      "output": "- plan your work step by step to keep things clear and easy  \n- use mind maps or notes to keep all your ideas in one spot  \n- make small goals so you can track your work and stay on task"
+    },
+    "worker:69a69e1d9c0c07ca2b0a77e783c02ce86852808a7084b528c2987d280ecc02b1": {
+      "name": "worker",
+      "output": "a team found a small part lost long ago in deep caves. this find will help us learn more about past life and old earth."
+    },
+    "worker:69e469f4188735a97021a177200b90645b77e17ed58c3eb9b4cb076eaaefcfec": {
+      "name": "worker",
+      "output": "- focus on one task  \n- break work into steps  \n- ask questions when confused  \n- review notes daily  \n- practice problems often"
+    },
+    "worker:6a76618968f567ffcdb11197f3098b85e5ca1b9e5eeae5718a4b387df84cbe46": {
+      "name": "worker",
+      "output": "- Light moves fast, waves or bits called photons spread and show color and heat.  \n- Atoms hold bits of matter, spin and bind with each other to form things.  \n- Energy from heat, light, or fuel can change matter and cause new things.  \nthat is it."
+    },
+    "worker:6ed28052145eee759706aba2384776d7d824ee0ee75788d361ac1e5a594e72a6": {
+      "name": "worker",
+      "output": "- Math is fun to learn and use in life  \n- Numbers can help with tasks like shopping or games  \n- Start with adding and subtracting first  \n- Practice daily to get good fast"
+    },
+    "worker:6f0fd1ab1cd2ba746329871adcfb60551d27649b3df8625c6f3ba53999655c3c": {
+      "name": "worker",
+      "output": "a new star found far away glows bright with heat and light. this small fact helps us learn more about space and how stars form fast."
+    },
+    "worker:7166a4890e27ebe5e8204e51dfdc809dfabf1a6d9500e0a549412a2697b6f1d3": {
+      "name": "worker",
+      "output": "- plan your work with steps to keep it clear  \n- use notes to keep your ideas in one spot  \n- set small goals to work and stay on task"
+    },
+    "worker:72b2730eda7664a99595c2955af66240c9116a667f13fd56a65ad48f07b8e8f5": {
+      "name": "worker",
+      "output": "a wave is a move in air or sea that carries sound, light, or force to you"
+    },
+    "worker:7323fd3b9fe3790213445de40ee435e2b634adccb464a1bf19aea024f8ec4a8e": {
+      "name": "worker",
+      "output": "cells are small units of life that can grow divide and take nutrients to make energy for tasks needed by plants and animals living on earth"
+    },
+    "worker:7844d7840316486e8587a47e9ef822fb6f44cf22f470aed0a22e5d0a7dca82db": {
+      "name": "worker",
+      "output": "coding is a fun way to tell computers what to do using simple steps. beginners start with basics like loops and rules to build small projects fast."
+    },
+    "worker:78b75e3f8ba53cfe0701f73477b149d1e6c4750e89a04a47073f361c3a6cf4b6": {
+      "name": "worker",
+      "output": "- learning code helps build apps and websites  \n- it teaches problem solving skills clearly  \n- many jobs need coding skills today  \n- starting with easy languages helps beginners"
+    },
+    "worker:7baeb1c575bb86045290f20fe40a607e75cdd8314ffcd74d9b660df3988583cc": {
+      "name": "worker",
+      "output": "A gene is a small part of your body that tells it how to grow and work. Genes shape you a lot, so it goes."
+    },
+    "worker:7bd63906d95bef2c5b6fb9ebb85cc817f1accfd6eaf8d194419484d5d0f91755": {
+      "name": "worker",
+      "output": "A flux shift in stars gave new clues about how light flows across vast space."
+    },
+    "worker:7c988c5370bd74f4766d863b19c64a6639d521e0d3bdd5f01d347964cfb31d17": {
+      "name": "worker",
+      "output": "- Help friends by giving small tips  \n- Share books that make ideas clear  \n- Ask good questions to learn more  \n- Keep notes to track what you find"
+    },
+    "worker:7ebe57b215eae9e53fddc29f720c1dca952c8f7fa2cd7f5910b5c0ee13508afb": {
+      "name": "worker",
+      "output": "A node links parts of a system, passing signals or data, enabling work or play among many connected units."
+    },
+    "worker:7f03d2ce409c9ce6a9dc09aa3adaff0707517027a2f153f103754f5ad6a43d55": {
+      "name": "worker",
+      "output": "cells read genetic code enabling growth, repair, and reproduction, sustaining life\u2019s natural ongoing process endlessly"
+    },
+    "worker:8111127bdb026ad0a2190a6ad3f8408125ed13f8a01551895e4f12203c9cbedd": {
+      "name": "worker",
+      "output": "- An atom is the smallest unit of ordinary matter.  \n- Atoms consist of protons, neutrons, electrons.  \n- They form everything around us.  \n- Understanding atoms explains chemical reactions."
+    },
+    "worker:8121b882627e6c0177b0c84374d1610f7e7d734e15f6a2f61b801c5896c8a24c": {
+      "name": "worker",
+      "output": "- tech helps link users near and far with fast and clear sound  \n- apps run on phones and web with smooth tests  \n- tools cut work slow downs and bring smart ways  \n- fast bits move through lines with ease and no gaps  \nwe are done."
+    },
+    "worker:81b0208068e4b1604b39bd2b1644c041c695ebd9b45b042c8e6051dff9053994": {
+      "name": "worker",
+      "output": "books help you gain new skills and facts to grow your mind. reading each day builds strong brain power and helps you learn and think well."
+    },
+    "worker:829d86dbc03a32dc76667b085388a132cf0dedcb0f372f73953fb3ec18c564cc": {
+      "name": "worker",
+      "output": "dna is a code that lets cells grow, split, and work well within life, so it goes."
+    },
+    "worker:82c014599b09c06747ede5a01b8c02e059e543fbafb22e896bb7382c6a680388": {
+      "name": "worker",
+      "output": "A wave is a disturbance that transfers energy through space without moving matter all is set."
+    },
+    "worker:831f6026b66151cc2293abba91c2f4b2e0fdf1f2b68f3c8204e97908a68e00a4": {
+      "name": "worker",
+      "output": "Light is a wave and a tiny part of energy that moves fast in space helping plants grow and allowing us to see things clearly at night."
+    },
+    "worker:84829dcab6fa3d59abd6fd6eb5f9455d0f3e8dae93016f95cb0d847b7fa43cde": {
+      "name": "worker",
+      "output": "- Star links send data fast through air.  \n- Star nets beam info across earth.  \n- Star tech helps phones and cars.  \n- Star gear cuts wait time in apps.  \n- Star nodes form wide, strong web."
+    },
+    "worker:8523c30e0c1cf962edcfe1eb053992a0979db75205e7926fa38a808abc5f7b99": {
+      "name": "worker",
+      "output": "- try to find clear goals for your work  \n- break tasks into small, quick steps  \n- keep focus by setting short, fixed times  \n- rest well to stay sharp and fresh"
+    },
+    "worker:8624d1c2cccf3647f58e9803d261837329df79e6e1af994c2f540854c7c52f10": {
+      "name": "worker",
+      "output": "a gene is a small code found in cells which gives traits like hair, eye, and can be passed from kin."
+    },
+    "worker:865b7fc36bc73700cc384461cd5dc496f14442188a189ee7724860b043e3b018": {
+      "name": "worker",
+      "output": "artificial intelligence enables machines to learn adapt reason and perform complex tasks that usually require human intelligence transforming many industries worldwide all is set."
+    },
+    "worker:874ad08019075f9594eb39e0b51bb77c300620b7286d5f96acfb2ebdbde260e9": {
+      "name": "worker",
+      "output": "- rain falls from clouds high above  \n- drops wet the soil and plants  \n- roots soak the wet earth deep  \n- plants grow tall with sun's help  \n- air cools as rain ends soon"
+    },
+    "worker:883bab85887ccaf337243242229b10f0150a9b766aba4428d9e3d174b8eae710": {
+      "name": "worker",
+      "output": "a small bug was found in a cave near town, it glows in dark, so it goes."
+    },
+    "worker:88d14f0a26a263d1cc880b799bc34d7818693913334da8dd1e7cf6f3dbc67040": {
+      "name": "worker",
+      "output": "An atom is small bits that form all you see. It holds a core and tiny parts around. all is set."
+    },
+    "worker:89ac58b36ed771c4ac10c7550a12736e8bf0c7c23be34e18191d33fd2298e804": {
+      "name": "worker",
+      "output": "- Water falls down from sky in rain drops  \n- Drops soak the soil firm and weak  \n- Roots drink the wet ground to grow  \n- Plants turn sun light into food  \n- Air fills lungs quick with fresh breath"
+    },
+    "worker:92ffda0b07518ab7bef9f21e7b5c8d5edab38bce49e12a1c569497d5357468bf": {
+      "name": "worker",
+      "output": "Energy moves as flux past space, shifts form but not lost, always here we go."
+    },
+    "worker:9624ba29bca425cc8e098cdc706ce2327fc8642e15aa584f22676b7485854da3": {
+      "name": "worker",
+      "output": "- A node in technology is a connection point within networks that sends stores routes or processes data packets we are done."
+    },
+    "worker:97f7841fe3fe86c2950ee533a92fee14d439df7f406f4ee0aaefeea110b54f1e": {
+      "name": "worker",
+      "output": "a small find can change views and spark new hope for all. so it goes."
+    },
+    "worker:9b9e07e64b9acd121b67e256a5c97a747684ba4f4e8a521939439dc2698f075d": {
+      "name": "worker",
+      "output": "- artificial intelligence means machines that can learn and make decisions  \n- it uses data to understand patterns  \n- applied in speech games and healthcare  \n- beginners start with simple programming tasks"
+    },
+    "worker:a058b1e40b4fbe71706c616b7102069df855514d65fa1fad7a7df1d186eff7ba": {
+      "name": "worker",
+      "output": "A blockchain is a distributed ledger where each node validates transactions, ensuring security plus transparency; once confirmed, we are done."
+    },
+    "worker:a088433b872bbf2926126a6b265590ac820c428669c4706ae445b497a5de775f": {
+      "name": "worker",
+      "output": "- artificial intelligence is computer technology designed to perform tasks like humans  \n- it learns patterns from data to make decisions  \n- used in speech games health and more  \n- beginners explore basic programming and algorithms first"
+    },
+    "worker:a119402a57be0c9d1ac19d25ae7637fd1d65b1024c1cbe697cd96aab380cfab7": {
+      "name": "worker",
+      "output": "A flux change in stars led to a new find about how light moves through space."
+    },
+    "worker:a2ddfe111e6e4ffffe5b55118ce8017259ecbe80b492aba5ed4af964c083c7f9": {
+      "name": "worker",
+      "output": "water heats, forms clouds, wind moves them, rain falls, streams flow, earth stays alive."
+    },
+    "worker:a6092fc859fe6f9caa44475737c39bc07a2cfe09017245b229c3bc1cffe58494": {
+      "name": "worker",
+      "output": "Energy moves as flux through space, changing form but not lost, here we go."
+    },
+    "worker:a60cfc66b70a275e5f7a0c03444d29e6b95d42898a70d05d38e1fd1eb6705fd9": {
+      "name": "worker",
+      "output": "- plants use light  \n- mix water and air  \n- make food fast  \n- this is called photo  \n- gives oxygen  \n- that is it."
+    },
+    "worker:a6162f72937ad7299ffd0b919395ecefa8d6f83efa844a6e9133468551b7eca9": {
+      "name": "worker",
+      "output": "- plan your time well and keep notes neat  \n- ask your teacher if you get stuck  \n- keep calm and try your best always all is set."
+    },
+    "worker:a72a5b9e3f52ed9a855decdb2aba128e90a3b372ca19f6c9c1d31fc87b41f301": {
+      "name": "worker",
+      "output": "- learn by doing tasks  \n- break goals into parts  \n- ask peers for aid  \n- keep notes short and clear  \n- practice daily to build skill, we are done."
+    },
+    "worker:a9d21c2b4e1105abda09acbc2b77ffb21f311c263743abce7e88d130a1bfa4ca": {
+      "name": "worker",
+      "output": "- cloud tech stores files on web-based hubs  \n- users can share and save data fast  \n- no need for hard disks or drives  \n- helps teams work from far places"
+    },
+    "worker:aa6c6843eed651ac3375b2744692e1e020dd0cdabf167ec031d11302c3089e43": {
+      "name": "worker",
+      "output": "Energy is the force that moves or changes matter in many forms like heat light sound or motion in space."
+    },
+    "worker:ada3bbd0a6bb4deaf3d24e8ef93a6107f5ef5cb7b087774e463e6090d330812e": {
+      "name": "worker",
+      "output": "cells are small units of life that can grow divide and take foods to make energy for tasks needed by plants and animals living on earth"
+    },
+    "worker:ae1019dcb18cc616dff35c383ab10cb869b14bebefed68b060e72a62c659f28d": {
+      "name": "worker",
+      "output": "- try to find clear goals for your work  \n- break tasks into small, quick steps  \n- keep focus by setting short, fixed times  \n- rest well to keep sharp and fresh"
+    },
+    "worker:ae275010ffc984c54731eb9f6e40d97457645ec4841521f55cc1e948d468abb6": {
+      "name": "worker",
+      "output": "A node links parts of a system, passing signals or data, helping work or play among many linked units or nodes."
+    },
+    "worker:ae366bb63218c0fc57bcb498bebac2bbb5fd5620c9420819e58c40efce3bca8d": {
+      "name": "worker",
+      "output": "A wave is a way energy travels through air, water, or the ground as sound."
+    },
+    "worker:aef171b2f4549d3b563030e2bbb067f2b729284f507258dfb304b262808b0f5b": {
+      "name": "worker",
+      "output": "- Atom shift and slow down when temps drop to form ice with solid bonds and fixed shapes seen in frost.  \n- Water turns to ice as atom stop move and join tight in cold without space to flow free.  \n- This cool change aids life last through frost and gives ice its cold star shapes and charm."
+    },
+    "worker:b1ba91cc3c6df4f899183a4e56a6b6145bea18c8bc9a0eacb7d8c57c795956bb": {
+      "name": "worker",
+      "output": "water falls from sky, soaks soil, helps plants grow, feeds life, and shapes the earth."
+    },
+    "worker:b3ecd61f95eaff0bf08d75ca49431bb56bd00aa949fa9cf2c17e3586ba7d81ad": {
+      "name": "worker",
+      "output": "- genes carry traits  \n- cells read gene code  \n- proteins form from gene  \n- mutations change gene  \n- gene affects life form"
+    },
+    "worker:b6c8dae6261dd09e1c0c986b2962ddd9c88b696c3a8785768c14faf16dd657c2": {
+      "name": "worker",
+      "output": "a wave is a move in air or sea that sends light, sound, or force to you"
+    },
+    "worker:b817d3df373bfbb91281d0d8e28ec9bbd7c31f77bd6f83bce6aa5bc6bb8b1c2c": {
+      "name": "worker",
+      "output": "photosynthesis is nature\u2019s code converting sunlight into energy, plants absorb carbon dioxide and water, producing oxygen essential for all life."
+    },
+    "worker:b962090d4e4c9f90636addb0a85e785dbe35d43f2b829cb8e2ea6dd4a0544a30": {
+      "name": "worker",
+      "output": "- rain falls from grey clouds to earth  \n- soil takes drops that help plants  \n- plants soak sun, water, and air  \n- wind moves clouds to new spots"
+    },
+    "worker:ba7d77713d2feca8350a176a97d18a5c27a5390fb653dbad4fd5e69d43b9728c": {
+      "name": "worker",
+      "output": "books help gain new skills and facts to grow your mind. reading each day builds strong brain power and helps you to learn and think well."
+    },
+    "worker:ba884bb8bfdcdab6f22bf25628a0bcb04fb571212045508302b2eaf3d07f74a9": {
+      "name": "worker",
+      "output": "a small moon was found near mars by a team last week. this new find will help us learn much about space and past events there."
+    },
+    "worker:bad06197867dcf8a723b4e9d6cb4dbcdf8dc8ae78437ea5d217c0b4ad0c31f1c": {
+      "name": "worker",
+      "output": "gene helps pass traits from parents. it plays a key role in how we look and grow every single day."
+    },
+    "worker:bb158b32bee8ef03572299e375be341b4898de35b0a22e6f8e5e7f62b1588216": {
+      "name": "worker",
+      "output": "- star tech sends data fast  \n- it links stars in space  \n- star nets work day and night  \n- star nodes are small parts  \n- star tools help life grow"
+    },
+    "worker:bbc35a20e922395591a0079beda82a284983393efd2ce1ef7a682266428fa26c": {
+      "name": "worker",
+      "output": "try breaking big tasks into small steps this helps manage time and reduces feeling overwhelmed"
+    },
+    "worker:bd20560b1b08adc3084db4fff471ac2631d6fd0a1c28d6e8ac1af22354c5136f": {
+      "name": "worker",
+      "output": "- programming means writing instructions computers follow to perform tasks  \n- languages like python help create software applications easily  \n- learning programming builds problem solving and logical thinking skills  \n- start with simple projects to practice writing and debugging code"
+    },
+    "worker:bd6ab54ae1787820ec757fb3793fd5a8090f6e3d089765513cd164c1a2267d69": {
+      "name": "worker",
+      "output": "- tech links users near and far with clear and fast sound  \n- apps run on phones and web with smooth work  \n- tools cut hard tasks and bring smart ways  \n- fast bits move through lines with no gaps  \nwe are done."
+    },
+    "worker:be0230b36f83e802e5e5104773318a76b63dc0a4f3fac915ec5b1047b8d3cc32": {
+      "name": "worker",
+      "output": "- Atoms move close and stick to form ice when temps drop low in cold places or inside fridges.  \n- Water turns solid as atoms slow down and line up in a fixed shape with no space to move.  \n- This change helps life last through chill times and gives snowflakes their unique cold star forms."
+    },
+    "worker:be8d90b84d3ef4877ba7afadce4c37e629a4a737ebc5a2238871d1341f87104a": {
+      "name": "worker",
+      "output": "- Scientists uncovered a new species deep in the ocean  \n- It glows with bioluminescent colors unseen before  \n- Its discovery changes understanding of marine life  \n- Researchers excited about potential medicinal uses  \n- The world remains full of mysteries, so it goes."
+    },
+    "worker:bf06e6e99213f8c22f54d6db4131a6dc4d8cdf8204e460e3035dd8608e14942e": {
+      "name": "worker",
+      "output": "- plan your time well and keep notes clear  \n- ask your teacher if you get stuck  \n- keep calm try your best always all is set."
+    },
+    "worker:bf89823c9b744fbe42311cf2d080c0d8a316569eca02a6ba6fbda4dd890b8a3b": {
+      "name": "worker",
+      "output": "a node is a key point in a network where data passes through nodes form the system we are done."
+    },
+    "worker:c158cd1adad20422dab024e402f8a2142c04143af588ebb5a421c5f492c20e0b": {
+      "name": "worker",
+      "output": "- Artificial intelligence enables machines to perform tasks requiring human intelligence  \n- It uses algorithms to learn from data  \n- Applications include language translation and image recognition  \n- AI continues evolving impacting many industries globally  \nall is set."
+    },
+    "worker:c2a0368ac110df140e0a4d58c5e3871c13023bc1d693f3f1fe7bafbb1aed0164": {
+      "name": "worker",
+      "output": "A blockchain is a distributed ledger where each node validates transactions, ensuring security and transparency; once confirmed, we are done."
+    },
+    "worker:c3bd4e8de4d52f3725a0807bfea8e0d504f2d30684b81b3c447fdc51a7f2ac17": {
+      "name": "worker",
+      "output": "A blockchain is a distributed ledger where each node validates transactions, ensuring security plus transparency; once confirmed, we are done."
+    },
+    "worker:c7ae46841c10b4cde55e7a40819cf00221d94a00a7d3bc81eb5b2cc3e6410782": {
+      "name": "worker",
+      "output": "- gene is part of dna  \n- it holds code for traits  \n- cells read gene code  \n- gene guides protein build  \n- change in gene means change"
+    },
+    "worker:c937205118bd640112a2c37bc870ed981141a39c96e51bba5ac3f913fef6155d": {
+      "name": "worker",
+      "output": "- Scientists found tools buried beneath ancient soil  \n- Artifacts show early humans crafted devices  \n- Discovery changes understanding about history"
+    },
+    "worker:c9fe8235343160ca73f184961ee982d3014122a3e62fb1ee23390855f268a669": {
+      "name": "worker",
+      "output": "- you can link each node  \n- this builds a chain  \n- helps find paths quick  \n- saves time and space  \n- easy to add more nodes"
+    },
+    "worker:caddaf39f1d27624203507c9d361c85fa1f3c0891d87565faa551f4a931fa828": {
+      "name": "worker",
+      "output": "Light waves move fast and show color when they hit prism or a drop that is it."
+    },
+    "worker:cb3f4da4b9bf5ff214052fbdb23af3978b1065c9196576fb055a2b7beb136f35": {
+      "name": "worker",
+      "output": "- water falls down to earth  \n- sun warms the sea and land  \n- water turns into small drops  \n- drops rise up to the sky  \n- drops drop back as rain"
+    },
+    "worker:cfd7f0aced022781904468dc649f28adffe86401e7d5b653fa94c4ac7e89673c": {
+      "name": "worker",
+      "output": "baking means mixing food items with heat to make tasty treats. beginners start with easy recipes like bread or cake and follow each step carefully."
+    },
+    "worker:d11bdf8740ce0259d5ec5fe3e48347a7ece3bbfeb7724dc4b508a3bdc2dcdecf": {
+      "name": "worker",
+      "output": "photosynthesis converts sunlight carbon dioxide water into oxygen glucose plants fuel life, that is it."
+    },
+    "worker:d1a86fc2d1a253483cea0df95bc3981c9b4a317d942772e6a96c37fbbc06b1c7": {
+      "name": "worker",
+      "output": "- rain falls from clouds above  \n- soil soaks in the drops  \n- seeds start to swell  \n- plants grow toward the sun  \n- life thrives under sky blue"
+    },
+    "worker:d4d0e1947411ad96d9b0073a3da1caceaa66dce85acd28cb43848d16947e4a6c": {
+      "name": "worker",
+      "output": "photosynthesis is nature\u2019s code converting sunlight into energy, plants absorb carbon dioxide and water, producing oxygen essential for life."
+    },
+    "worker:d95eec78924c78d5c8caf9d3591584229e13107e6f57b5d00885c66eb4fdd1e4": {
+      "name": "worker",
+      "output": "- plants use light  \n- water and air  \n- make food  \n- process named photosynthesis  \n- gives oxygen  \n- helps life thrive  \n- that is it."
+    },
+    "worker:da11f3d52cd753496c1d1b81c009b919817f6d122bac1a2cf465e2cf672ef737": {
+      "name": "worker",
+      "output": "- Help friends by giving small tips  \n- Share books that make ideas clear  \n- Ask good questions to learn more  \n- Keep notes to track what you find"
+    },
+    "worker:da6e968e85998540488cdafbfce7ff505bc9e2ee3ccabfedcb4d623508dd7baf": {
+      "name": "worker",
+      "output": "artificial intelligence enables machines to learn adapt and perform complex tasks that usually require human intelligence revolutionizing many industries worldwide all is set."
+    },
+    "worker:dba31c37306677fda044518e1ac460fb8a15e4485f5b8f74c009ee1ffddb2e28": {
+      "name": "worker",
+      "output": "A gene is a small part in cells that holds code. This code tells how traits grow and shift. It\u2019s key to life, so it goes."
+    },
+    "worker:dc4efaec5a95516b178bf185bad839b1561b0f9ea1df3aee8b2a6933cee20487": {
+      "name": "worker",
+      "output": "new stars have been found in deep sky far past earth, so it goes."
+    },
+    "worker:dcfd599bb31ea7dcb0cdac4006fc2e28baaa584927a06e4ceff6e281b6c9e52d": {
+      "name": "worker",
+      "output": "- Rain falls down from dark gray clouds  \n- Soil drinks water to help plants  \n- Plants soak sun to make their food  \n- Warmth helps leaves grow and bloom  \n- Wind blows seeds to new spots"
+    },
+    "worker:dd6329bae504e693190e2d6f0d16731e80728f5b153bcfb89710992eb16ed87f": {
+      "name": "worker",
+      "output": "- water from clouds falls down  \n- soil drinks the fresh drops  \n- seeds swell with new life  \n- shoots reach up for light  \n- growth shapes the earth's form"
+    },
+    "worker:de830b96a26b2eecd53ff501565da65f9034f53ca86c1ed9310d50eb877ec52a": {
+      "name": "worker",
+      "output": "- Scientists found ancient tools buried deep in soil beneath a desert  \n- These artifacts reveal early humans made sophisticated devices long ago  \n- Discoveries like this change understanding about human history and development significantly"
+    },
+    "worker:ded64adcf2c99e3d17caa3a6dd05fc905d8db59518a05fa2a4141347a5ef22be": {
+      "name": "worker",
+      "output": "- study each node to find key facts  \n- make small notes for each part  \n- link each node with clear words  \n- review notes every day  \n- share notes with a friend"
+    },
+    "worker:df3edc6cc3479c574ba36ddf558c5b702cc0612981562b0a175d6995b59c9508": {
+      "name": "worker",
+      "output": "- artificial intelligence enables machines to perform tasks requiring human intelligence  \n- applications include natural language processing, image recognition, decision making  \n- rapidly evolving field impacting industries, improving efficiency, transforming everyday life"
+    },
+    "worker:e162b6c04041e514ab633f1a09bae0f937171e9c8865bdd9212f3cb12f12a478": {
+      "name": "worker",
+      "output": "plants use sunlight's code for photosynthesis, converting light and carbon dioxide into energy and oxygen, sustaining life everywhere."
+    },
+    "worker:e168589b990f9df58bde684d06db13a86455c0a751a7acd071625c4e2703ebcb": {
+      "name": "worker",
+      "output": "- start by setting a clear goal you want to reach  \n- break tasks into small steps to avoid stress  \n- keep notes with key facts to aid recall  \n- find a quiet spot to help you focus  \n- review work daily to boost your skill and win"
+    },
+    "worker:e3838a0257ac73b5195604826056be7116deae92b0c6959c6cfcdb32055ad5f1": {
+      "name": "worker",
+      "output": "Scientists found a mysterious wave carrying signals from deep space, sparking excitement and new theories about cosmic phenomena. Here we go."
+    },
+    "worker:e80c804b0139c69b14c31057859b4397db74e14b9a89e6ba528133fd8f7ac296": {
+      "name": "worker",
+      "output": "An atom is the small part that makes all things. It has protons, neutrons, and electrons. All is set."
+    },
+    "worker:e8230b072d57629a85a8510747e6c430b2e6cbd2fd944aa27f24b8683d4f31b2": {
+      "name": "worker",
+      "output": "rain falls from dark clouds, moist soil drinks, plants grow, air cools, life thrives."
+    },
+    "worker:ea5b2c89872f0e553aaf296ffd7e707dafedb8637fcd391891bfc764daa1665d": {
+      "name": "worker",
+      "output": "- Learn new skills by doing each day  \n- Ask friends for help when stuck  \n- Keep notes clear and short  \nall is set."
+    },
+    "worker:eb162ec5af5f2f68b705b0e1fcd5602320eb78b6809dcbd19f319daa2adc80b7": {
+      "name": "worker",
+      "output": "- each node is a part  \n- link nodes to make a chain  \n- find paths very fast  \n- saves much space too  \n- nodes help with tasks"
+    },
+    "worker:ecf003da303f720986c3c6c892dda78fc338bfc0cda0362e2f73a02b1cc9f2bd": {
+      "name": "worker",
+      "output": "- star tech is fast and new  \n- it helps send data quick  \n- star links reach space routes  \n- it uses small star nodes  \n- star nets make life easy"
+    },
+    "worker:ef31d901a0f4a58aa5979793363935953a9aed4c105a2773b81389836dfc2170": {
+      "name": "worker",
+      "output": "- water falls down to the earth  \n- sun heats the sea and land  \n- water turns into small drops  \n- drops rise up to the sky  \n- drops fall back as rain again"
+    },
+    "worker:f3cb001110675bb0d7b5cdeab0afddb15fec8a7624c112d8f312b533ffdc4552": {
+      "name": "worker",
+      "output": "- rain falls down from grey clouds to earth  \n- soil takes in drops that help plants grow  \n- plants soak sun, water, and air to live  \n- air cools, wind moves clouds to new spots"
+    },
+    "worker:f5475bc0faad11bd6bc4cdf888d5317a4c2389479a2dfa58e71d948c46e3cdbd": {
+      "name": "worker",
+      "output": "A wave transfers energy through space by disturbing particles without transporting matter all is set."
+    },
+    "worker:f5af270e1b9483db6decd2879380f0a08ec7623c45a3007274ab5a58d540c15e": {
+      "name": "worker",
+      "output": "technology uses smart tools and new ideas to help people solve tasks fast it changes how work life and play mix all is set."
+    },
+    "worker:f6a338f5df41fa8f4308235cf84203c989c648a024bb1bdf725d71cb16313bd0": {
+      "name": "worker",
+      "output": "- focus on one task  \n- break work into steps  \n- ask questions when stuck  \n- review notes each day  \n- practice problems often"
+    },
+    "worker:f6b20b74566c9d17fc615625747a3ceec4cdd3f6609b0b6882c7ba8a9dc80dd5": {
+      "name": "worker",
+      "output": "A sudden flux in the data led us near an unknown land buried deep below."
+    },
+    "worker:f6c7dd610c6e9e2fb9d75f19023bf04f697d79768d5e66092a355a6cf2c0676b": {
+      "name": "worker",
+      "output": "- wind blows soft through green trees  \n- leaves shake with light quick gusts  \n- birds sing sweet songs each day  \n- air moves cool from place to place  \n- breeze helps spread seeds far away"
+    },
+    "worker:f798b4bdfaf60e061f2c9d6b9c85521c198c3cd411ae90103c75ffbd48556920": {
+      "name": "worker",
+      "output": "water falls from sky, soaks soil, helps plants grow, feeds life, and shapes earth."
+    },
+    "worker:f87c19d753e56b2e0658d9242d383058924024e9fe6d581a810aa773fce4b181": {
+      "name": "worker",
+      "output": "An atom is a small part that forms all things. It has a core and parts that spin round. all is set."
+    },
+    "worker:faa4ab8076e1099712b93c2f4fb0978552d8167a773952f71de31a5cd938d9b1": {
+      "name": "worker",
+      "output": "- Atoms are tiny pieces that make up everything around us  \n- Each atom has parts called protons neutrons electrons  \n- Atoms join to form molecules which create all matter  \n- Studying atoms helps us understand how things work today"
+    },
+    "worker:fc0a1912b4c3a58c03b7c5b6ee536e360f28b4506ac77b2a78c45573f49c5f31": {
+      "name": "worker",
+      "output": "- learn each day  \n- ask many good questions  \n- read books often  \n- write notes by hand  \n- share ideas with peers"
+    },
+    "worker:fc6371c4505959c2deac9e9d73987e3f32dd7d6e92cfa5c49261b2df63696ee4": {
+      "name": "worker",
+      "output": "- math is fun  \n- it helps solve puzzles  \n- you can count and add  \n- learning it grows your mind"
+    },
+    "worker:fdf118b2b77b17173683ce451adf61ed9b328050270600abbc1cb7a14dbbeac4": {
+      "name": "worker",
+      "output": "Light is a wave and a small part of energy that moves fast in space helps plants grow and lets us see things clear at night."
+    }
+  },
+  "version": 1
+}

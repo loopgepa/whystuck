@@ -34,22 +34,24 @@ Reflective prompt optimizers such as GEPA \citep{agrawal2025gepa} can evolve
 prompt. A natural hypothesis is that optimizing more of the loop --- in
 particular the self-critique / verification component of a generate--critique--refine
 loop --- should beat optimizing the generation prompt alone. We test this
-hypothesis directly and pre-register every run. Across five pre-registered
+hypothesis directly and pre-register every run. Across seven pre-registered
 experiments on verifiable, IFEval-style instruction-following
 \citep{zhou2023ifeval} we find \textbf{no measurable advantage} for loop-level
 optimization over prompt-only optimization: the held-out gap
-$\dd = \mathrm{mean}(D) - \mathrm{mean}(B)$ is $0.00$ in every test with genuine
-headroom, including one where the critique step is given a real
-(non-oracle) measurement tool and one where the loop is given a third
-interacting module. The single effect we do observe is that a measurement tool
-raises the \emph{baseline} loop (seed held-out $0.765 \!\to\! 0.837$), exactly as
-the self-correction literature predicts \citep{huang2023cannot}, but it helps
-the prompt-only and loop-level arms equally and therefore is not evidence for
-the loop-level lever. We connect the null to the documented unreliability of LLM
-self-verification \citep{huang2023cannot} and argue that componentized
-optimization can only help where the added component is a \emph{reliable}
-detector. We release the full harness, cassette-replayable transcripts, and
-pre-registrations for reproduction.
+$\dd = \mathrm{mean}(D) - \mathrm{mean}(B)$ is $\le 0.01$ in every test with genuine
+headroom (and within seed noise), including runs where the critique step is given a
+real (non-oracle) measurement tool, a third interacting module, and a
+different-model critic. To locate the cause we measure the in-loop critique as a
+failure detector (offline, from recorded transcripts) and add an oracle-critique
+control. Two findings sharpen the picture: the intrinsic self-critique is a
+near-random detector ($\mathrm{F}_1\!\approx\!0.11$), consistent with the documented
+unreliability of LLM self-verification \citep{huang2023cannot}; yet a \emph{perfect}
+detector (oracle) does \emph{not} maximize performance --- detector quality vs.\
+held-out score is non-monotonic (F$_1$ $0.11\!\to\!0.83\!\to\!1.0$ maps to seed
+$0.765\!\to\!0.837\!\to\!0.748$). The binding constraint is therefore not detection
+but the \emph{fix} step: even told exactly what is wrong, the worker cannot reliably
+repair hard constraints within a bounded refine budget. We release the full harness,
+cassette-replayable transcripts, and pre-registrations for reproduction.
 \end{abstract}
 
 \section{Introduction}
@@ -80,17 +82,19 @@ contributions are:
     loop-level from prompt-only optimization while holding the seed genome,
     budget, task distribution, and scoring metric fixed, with two flatness
     controls that verify the harness is sound.
-  \item Five pre-registered experiments (Section~\ref{sec:results}) spanning
-    single-constraint, easy multi-constraint, hard multi-constraint (with
-    genuine headroom), a feedback-tool regime, and a three-module regime.
-    \dd\ is $0.00$ in every fair test.
+  \item Seven pre-registered experiments (Section~\ref{sec:results}) spanning
+    single-constraint, easy and hard multi-constraint (with genuine headroom), a
+    feedback-tool regime, a three-module regime, a different-model critic, and an
+    oracle-critique control. \dd\ is $\le 0.01$ (within noise) in every fair test.
   \item A taxonomy separating a legitimate non-oracle \emph{measurement tool}
     from oracle contamination (Section~\ref{sec:method}), a distinction a
     pre-spend design review found essential: two seemingly-innocuous statistics
     were the scoring oracle in disguise.
-  \item A mechanistic account of the null grounded in the unreliability of LLM
-    self-verification \citep{huang2023cannot}, and a map of the conditions under
-    which loop-level optimization could help (Section~\ref{sec:directions}).
+  \item A mechanistic account: the intrinsic critique is a near-random detector,
+    but --- via an oracle-critique control --- we show even a \emph{perfect} detector
+    does not lift performance, so the binding constraint is the fix step, not
+    detection (Section~\ref{sec:analysis}); plus a map of conditions under which
+    loop-level optimization could help (Section~\ref{sec:directions}).
 \end{enumerate}
 
 We report every result as-is, including a run in which optimization
@@ -122,10 +126,10 @@ self-correction (no external feedback) fails to improve and often degrades
 relied on \emph{oracle} stopping signals that ``vanish when oracle labels are
 not available.'' Self-correction helps only with a genuine external verification
 mechanism (a tool, a code executor, unit tests). A parallel line shows LLM
-self-verifiers are unreliable detectors --- high false-positive rates and a
-self-enhancement bias, with cross-family verification outperforming
-self-verification. These results predict our loop-level null and motivate our
-feedback-tool and cross-verifier directions.
+self-verifiers are unreliable detectors --- high false-positive rates
+\citep{valmeekam2023selfcritique} and a self-enhancement bias, with cross-family
+verification outperforming self-verification. These results predict our loop-level
+null and motivate our feedback-tool and cross-verifier directions.
 
 \paragraph{When does optimization help?}
 Recent work explicitly frames the boundary question for multi-agent systems and
@@ -249,14 +253,42 @@ Run & Regime & Seeds & Seed & B (prompt-only) & D (loop-level) & \dd $=D-B$ \\
 3 & hard multi ($k{=}4{-}5$)     & 5 & 0.765 & 0.770 & 0.770 & $\mathbf{0.00}$ \\
 4 & hard multi $+$ feedback tool & 3 & 0.837 & 0.798 & 0.798 & $\mathbf{0.00}$ \\
 5 & hard multi $+$ plan module   & 3 & 0.757 & 0.757 & 0.757 & $\mathbf{0.00}$ \\
+6 & hard multi $+$ cross-lineage critic & 3 & 0.825 & 0.817 & 0.825 & $+0.01$ (INCONCL.) \\
+7 & hard multi $+$ oracle critique & 3 & \textbf{0.748} & 0.74 & 0.74 & $\mathbf{0.00}$ \\
 \bottomrule
 \end{tabular}
-\caption{All five pre-registered runs. Runs 1--2 are uninformative by design
+\caption{All seven pre-registered runs. Runs 1--2 are uninformative by design
 (the verify gene is inert on single-constraint tasks; the seed saturates at
-$0.97$ on easy multi). Runs 3--5 are fair tests with genuine headroom and no
-ceiling/floor flag. In every fair test $\dd = 0.00$: \textbf{NOT SUPPORTED}.}
+$0.97$ on easy multi). Runs 3--7 are fair tests with genuine headroom and no
+ceiling/floor flag. In every one $\dd \le 0.01$; the sole non-negative gap
+(run 6, a different-model critic) is $+0.01$, within seed noise
+(\textbf{INCONCLUSIVE}), and every other fair test is $\dd = 0.00$
+(\textbf{NOT SUPPORTED}). Run 7 is a labeled ceiling control (\S\ref{sec:analysis}):
+the seed is the readout, not \dd.}
 \label{tab:results}
 \end{table}
+
+\paragraph{A different-model critic nudges, but not significantly (run 6).} Giving
+the critique step a different-lineage model (\texttt{gpt-5.6-luna} verifying a
+\texttt{gpt-4.1-mini} worker) --- motivated by the finding that same-family judges
+carry a self-preference bias --- is the first run where D does not lose: $\dd =
++0.01$. But at $n=3$ this is within the pooled seed noise, so the pre-registered
+verdict is INCONCLUSIVE. The critic also raised the seed baseline ($0.765 \to
+0.825$). This is directionally consistent with the reliable-critic hypothesis and
+motivates a properly-powered, \emph{true} cross-family (cross-provider) follow-up;
+we do not claim an effect. \textbf{Caveat:} \texttt{gpt-5.6} and \texttt{gpt-4.1}
+share a vendor and training lineage, so this is cross-\emph{lineage}, not a true
+cross-\emph{family} test --- residual self-preference bias may remain.
+
+\paragraph{A perfect detector does not lift the ceiling (run 7).} The oracle-critique
+control --- where the in-loop gate is the true metric --- was pre-registered to test
+whether the loop \emph{can} convert a perfect detector into higher performance
+(expected seed $\ge 0.85$). It cannot: the oracle seed is $0.748$, level with the
+intrinsic baseline ($0.765$) and \emph{below} the tool baseline ($0.837$). Detection
+quality is therefore \textbf{not} the binding constraint. Even told exactly which
+constraints fail, \texttt{gpt-4.1-mini} cannot reliably fix hard constraints (e.g.
+an exact word count) within the bounded refine budget. This is the crux
+(\S\ref{sec:analysis}).
 
 \paragraph{The fair tests agree.} Run 3 is the decisive baseline: seed held-out
 $0.765$ sits inside the pre-registered band, so the loop had real headroom and
@@ -300,7 +332,7 @@ tool lifts the baseline (Section~\ref{sec:results}); but that reliable detector
 sits in \emph{both} the B and D loops, so it does not open a loop-level gap. This
 matches the documented unreliability of LLM self-verification --- high
 false-positive rates, self-enhancement bias, cross-family verifiers beating
-self-verification \citep{huang2023cannot}.
+self-verification \citep{valmeekam2023selfcritique,huang2023cannot}.
 
 \begin{table}[h]
 \centering
@@ -318,6 +350,42 @@ run 4 (tool-fed critique)    & \textbf{1.00} & 0.71 & \textbf{0.83} & 0.93 & 30 
 from cassettes). Intrinsic self-critique is near-random; a non-oracle measurement
 tool makes it reliable. The tool-fed reliability helps B and D equally.}
 \label{tab:detector}
+\end{table}
+
+\paragraph{(1b) But detection quality is necessary, not sufficient --- the
+non-monotonic ceiling.} If a poor detector were the \emph{only} obstacle, a better
+one should monotonically raise the loop's held-out score. It does not
+(Table~\ref{tab:curve}). The intrinsic critique (F$_1\!=\!0.11$) yields seed
+$0.765$; the tool-fed critique (F$_1\!=\!0.83$) yields $0.837$; but the
+\emph{oracle} critique (F$_1\!=\!1.0$ by construction) yields only $0.748$ --- the
+best detector gives the \emph{worst} of the three. Detection quality is therefore
+necessary but not sufficient. Two non-exclusive mechanisms explain the inversion,
+both pointing past detection: (i) the \emph{fix} step is the true bottleneck ---
+even told exactly which constraints fail, the worker cannot reliably repair a hard
+constraint (an exact word count) in one refine round; and (ii) \emph{feedback
+actionability} matters more than feedback correctness --- the tool-fed LLM critique
+emits natural, instructive fix prose, whereas the oracle emits terse per-constraint
+verdicts, so the tool-fed refine is better guided despite a less-than-perfect
+detector. At $n=3$ the tool$>$oracle inversion is suggestive, not definitive, but
+the oracle failing the pre-registered $\ge 0.85$ ceiling is itself decisive: a
+perfect detector did not rescue the loop.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lccc}
+\toprule
+Critique detector & detector F$_1$ & seed held-out & run \\
+\midrule
+intrinsic self-critique & 0.11 & 0.765 & 3 \\
+non-oracle measurement tool & 0.83 & \textbf{0.837} & 4 \\
+oracle (true metric) & 1.00 & 0.748 & 7 \\
+\bottomrule
+\end{tabular}
+\caption{Detector quality vs.\ loop performance is \textbf{non-monotonic}: the
+perfect (oracle) detector does not maximize held-out score. The bottleneck lies in
+the fix step and feedback actionability, not detection.}
+\label{tab:curve}
 \end{table}
 
 \paragraph{(2) Intrinsic self-correction has a low ceiling.} Consistent with
@@ -338,7 +406,11 @@ We state these plainly. \textbf{Power:} runs 4--5 use $n{=}3$ seeds (runs 2--3
 use 5); these are exploratory, and the informal verdict rule is not a
 significance test. \textbf{Single worker/reflection model:} results may be
 model-dependent; \citet{huang2023cannot} find self-correction effects vary by
-model. \textbf{One task family:} verifiable instruction-following may be a
+model. \textbf{Cross-lineage, not cross-provider:} run 6's critic
+(\texttt{gpt-5.6-luna}) shares a vendor and training lineage with the worker
+(\texttt{gpt-4.1-mini}), so it breaks self-\emph{grading} but may retain
+self-preference bias; a true cross-provider critic (Gemini, Claude) is future work
+(D3). \textbf{One task family:} verifiable instruction-following may be a
 domain where the critique has little leverage; GEPA's own plateaus on
 GPQA/MATH-500 suggest domain dependence. \textbf{Budget:} $\mathrm{mmc}\in[20,64]$
 is small; a larger budget could in principle reveal a crossover. \textbf{Held-out
@@ -355,48 +427,52 @@ component of a self-refine loop is not a productive optimization target when it
 is an unreliable, self-referential detector on shallow-verification tasks.'' The
 following directions test the boundary; each changes one variable.
 
+\emph{Done in this paper:} D2 (critique-as-detector, \S\ref{sec:analysis}), a
+cross-lineage critic (run 6), and the oracle ceiling (run 7). What run 7 changed:
+the priority is no longer ``get a better detector'' --- we now know a perfect one
+does not suffice --- but ``fix the fixer.'' The agenda, re-ordered accordingly:
+
 \begin{description}
-  \item[D1 (cross-family verifier).] Run the critique on a \emph{different-family}
-    model than the generator. Cross-family verification is more reliable than
-    self-verification \citep{huang2023cannot}; the prediction is that loop-level
-    helps iff the verifier is a reliable detector. \emph{The most theory-driven
-    next run.}
-  \item[D2 (critique-as-detector, zero cost).] Compute the in-loop critique's
-    precision/recall/F$_1$ as a failure detector directly from the recorded
-    cassettes of runs 3--5. A near-chance F$_1$ is the mechanistic smoking gun
-    for the null.
-  \item[D3 (budget sweep).] $\mathrm{mmc}\in\{20,40,80,160\}$,
-    proposals $\in\{4,8,16\}$; plot \dd\ vs.\ budget to rule out
-    under-budgeting.
-  \item[D4 (worker-capability sweep).] Worker $\in$ \{nano, mini, a 5-series\}.
-    A weaker worker makes more catchable errors; loop-level may help there.
-  \item[D5 (cross-domain).] Replicate the four-arm design on multi-hop QA (with a
-    factual checker), code (unit-test pass rate), and math (numeric checker) ---
-    domains where the verify step can catch real errors and where GEPA reports
-    gains. Maps the boundary.
-  \item[D6 (oracle ceiling arm).] An arm whose critique sees the true
-    per-constraint pass/fail. Expected to trivially ace the task, proving the
-    loop \emph{can} use a perfect signal, so the null is about signal quality,
-    not loop mechanics --- Huang's dichotomy inside our harness.
-  \item[D7 (statistics).] $\ge 8$ seeds, paired bootstrap confidence intervals on
-    \dd, and a pre-registered power analysis, replacing the informal rule.
+  \item[D1$'$ (\emph{fix}-side interventions).] The binding constraint is repair,
+    not detection. Test: a larger refine budget ($R\!\ge\!3$); a stronger worker on
+    refinement only; and constraint-specific repair tools (e.g. a deterministic
+    word-count trimmer) that let the model \emph{act} on feedback rather than merely
+    receive it. \emph{The most promising direction given run 7.}
+  \item[D2$'$ (feedback actionability).] Run 7 suggests instructive prose beats
+    terse-but-correct verdicts. Ablate: oracle-correct verdict vs.\ oracle-correct
+    \emph{plus} LLM-rewritten actionable prose, holding detection fixed at $\mathrm{F}_1\!=\!1$.
+  \item[D3 (true cross-family critic).] Repeat run 6 with a cross-\emph{provider}
+    critic (\texttt{gemini-2.5-flash-lite} or \texttt{claude-haiku-4-5}; pre-priced,
+    needs a key) at $\ge 8$ seeds, to test whether the $+0.01$ nudge is real.
+  \item[D4 (budget \& worker sweeps).] $\mathrm{mmc}\in\{20,40,80,160\}$ and worker
+    $\in$\{nano, mini, a 5-series\} to rule out under-budgeting and map
+    model-dependence.
+  \item[D5 (cross-domain).] Replicate on multi-hop QA (factual checker), code
+    (unit tests), and math (numeric checker) --- domains where the verify step
+    catches real errors and where GEPA reports gains. Maps the boundary.
+  \item[D7 (statistics).] $\ge 8$ seeds, paired bootstrap CIs on \dd, and a
+    pre-registered power analysis, replacing the informal rule.
   \item[D8 (generalization).] Enlarge the generator's parameter space so
-    train/held-out cannot near-duplicate, and report the train--held-out gap
-    explicitly.
+    train/held-out cannot near-duplicate, and report the train--held-out gap.
 \end{description}
 
 \section{Conclusion}
 \label{sec:conclusion}
 
-Across five pre-registered experiments, optimizing the verification (and plan)
+Across seven pre-registered experiments, optimizing the verification (and plan)
 components of a self-refine loop gave no held-out advantage over optimizing the
 generation prompt alone on verifiable instruction-following, at the budgets and
-models tested. The one positive effect --- a measurement tool lifting the
-baseline --- accrued to prompt-only and loop-level arms equally. The result is
-consistent with, and explained by, the documented unreliability of intrinsic LLM
-self-verification. We frame the open question as one of \emph{where} to point a
-strong optimizer, and provide a boundary-mapping agenda. All code, cassettes, and
-pre-registrations are released for reproduction.
+models tested ($\dd \le 0.01$, within noise). Positive effects --- a measurement
+tool and a different-model critic lifting the baseline --- accrued to prompt-only
+and loop-level arms equally. Probing the cause, we found the intrinsic critique is
+a near-random detector, yet a \emph{perfect} (oracle) detector still failed to lift
+the loop: detector quality and performance are non-monotonic. The binding
+constraint is not detection but repair --- the worker cannot reliably fix hard
+constraints within a bounded refine budget even when told exactly what is wrong.
+The actionable reframe: to make a self-refine loop worth optimizing
+componentwise, improve the \emph{fixer} (and the actionability of feedback), not
+just the detector. All code, cassettes, and pre-registrations are released for
+reproduction.
 
 \bibliographystyle{plainnat}
 \bibliography{references}

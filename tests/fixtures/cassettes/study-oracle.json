@@ -1,0 +1,757 @@
+{
+  "entries": {
+    "reflection:70644f30594937a52e668a4fcf72b19d4345e4474deab590111ca67cb49b09fe": {
+      "name": "reflection",
+      "output": "```text\nYou will receive a short writing task followed by a list of mandatory response constraints. Produce an answer that completes the writing task while satisfying every listed constraint exactly.\n\nInput format:\n- A general content request, such as introducing or summarizing a topic for a specified audience.\n- A section stating that the response MUST satisfy ALL listed requirements.\n- Requirements may constrain wording, word count, punctuation, capitalization, required phrases or keywords, line format, bullet count, and sentence endings.\n\nTreat every requirement as hard and equally important. Do not explain your reasoning or report the checks unless the task explicitly requests that.\n\nBefore responding:\n1. Re-read the full task and extract every constraint into a checklist.\n2. Draft a concise answer that addresses the requested topic and audience.\n3. Audit the draft against every constraint.\n4. If any check fails, revise and re-check until all checks pass.\n\nValidation rules:\n- For an exact word count, count every whitespace-separated word, including words in bullet lines. Hyphen bullets themselves are not words.\n- For a maximum word length, inspect every word, including required keywords and words in any required ending phrase. Ignore surrounding punctuation when measuring word length, but count hyphen-separated parts carefully.\n- For an exact ending phrase, ensure the response\u2019s final characters are precisely that phrase, including any specified punctuation.\n- For \u201cinclude\u201d requirements, use the required word or phrase exactly as specified unless the task clearly permits variation.\n- For lowercase requirements, verify that no uppercase letters appear anywhere, including at the beginning of bullet items.\n- For bullet requirements, produce exactly the requested number of lines, and ensure each bullet line begins exactly with the required marker, such as \"- \".\n- For punctuation bans, check the entire output, including the final line and bullet lines.\n- Do not add titles, introductions, explanations, blank lines, or closing remarks unless they are explicitly requested, because they can violate count, formatting, or ending constraints.\n\nPrioritize exact mechanical compliance over elaborate prose. If constraints make a natural answer difficult, use simple, short wording while still addressing the requested topic.\n```"
+    },
+    "reflection:7466ab220594460cafd2705adfbda9ca66962f9a121f615319487bef4d7d9062": {
+      "name": "reflection",
+      "output": "```text\nYou will receive a writing prompt followed by explicit response requirements, often introduced by wording such as \u201cYour response MUST satisfy ALL of the following requirements.\u201d\n\nYour job is to produce only the requested response while satisfying every listed requirement exactly. Treat all constraints as mandatory, including constraints about content, wording, formatting, capitalization, punctuation, sentence endings, bullet counts, word counts, allowed word lengths, required words, and forbidden words.\n\nUse this process internally before responding:\n1. Identify the underlying writing task (for example, describe a process, write a note, or introduce a topic).\n2. Extract every explicit constraint.\n3. Draft a response that addresses the requested topic.\n4. Validate the draft against every constraint before sending it.\n5. Output only the final response, with no explanations, headings, validation notes, or discussion of the constraints.\n\nPay special attention to these constraint types:\n- Exact word count: count every whitespace-separated word/token, including words followed by punctuation. Do not accidentally exceed or fall short of the required total.\n- Required keyword: include the exact required word, respecting any capitalization requirement.\n- Forbidden word: ensure it does not appear anywhere in the response. When avoiding a word such as \u201cto,\u201d avoid using that standalone word in any line.\n- Lowercase-only requirement: use no capital letters anywhere, including at the start of lines or in required keywords.\n- Maximum word length: ensure every word is no longer than the specified number of letters; punctuation does not make a word longer, but choose simple vocabulary to avoid mistakes.\n- Exact ending phrase: make the full response end with the specified phrase exactly, including its punctuation if shown.\n- Bullet formatting: if an exact number of bullets is required, provide exactly that many lines, and make each line begin exactly with \u201c- \u201d. Do not add blank bullets or non-bullet text.\n- Punctuation bans: remove all prohibited punctuation, such as commas, even if it would normally improve readability.\n\nWhen requirements interact, satisfy all of them simultaneously. For example, if the response must be lowercase, contain exactly 15 words, avoid \u201cto,\u201d use only words of six letters or fewer, end with \u201cso it goes.\u201d, and discuss a discovery, verify all six properties rather than prioritizing only the topic.\n\nDo not assume a response is compliant merely because it sounds natural. Perform a final mechanical check of formatting, word count, required and forbidden terms, capitalization, punctuation, and ending text before answering.\n```"
+    },
+    "reflection:b6a933dbf51d2edf3d9f19be9d9d3d56ded8dff57faa01448fc0a0de8e5f3892": {
+      "name": "reflection",
+      "output": "```text\nWhen responding to a task, follow every stated requirement exactly, including content, formatting, forbidden words, capitalization, punctuation, ending text, bullet structure, maximum word length, and exact word count.\n\nBefore sending the response, perform a strict final compliance check:\n\n1. Identify every constraint in the prompt and treat all as mandatory.\n2. Draft content that answers the requested topic while satisfying the constraints.\n3. Count words carefully. Count each whitespace-separated word as one word; do not count bullet markers such as \"- \" as words. If an exact word count is required, the final answer must contain precisely that number, including required ending phrases.\n4. Check every word for maximum-length rules. Do not overlook ordinary words such as \u201cstreams,\u201d which has 7 letters and violates a 6-letter maximum.\n5. Check forbidden-word rules as exact word restrictions. Do not use the prohibited word anywhere, including in an ending phrase or explanation.\n6. Check lowercase rules character by character: use no capital letters if lowercase is required.\n7. Check punctuation restrictions, such as a ban on commas.\n8. If a required exact ending phrase is specified, place that phrase at the very end and include all of its words in the word count.\n9. If a fixed bullet count is required, output exactly that many lines, each beginning with the required bullet marker, and do not add titles, notes, or extra lines.\n10. Return only the requested response, with no explanations of your reasoning or compliance checks.\n\nDo not prioritize a fluent or detailed answer over hard constraints. Exact compliance is more important than elaboration.\n```"
+    },
+    "reflection:d00e46c9d66ab5f6a196c560cc3c0548b56642f2c21d28864384085473beaf26": {
+      "name": "reflection",
+      "output": "```text\nGiven a writing task followed by a list of mandatory response requirements, produce a response that satisfies every requirement exactly.\n\nCarefully parse all constraints before writing. Typical constraints may include:\n- exact total word count\n- maximum word length\n- required keyword inclusion\n- exact ending phrase\n- punctuation bans, such as no commas\n- exact number of bullet points\n- required bullet syntax, such as each line beginning with \"- \"\n- lowercase-only output\n\nTreat every listed requirement as mandatory and jointly enforce them. Do not explain your work, list checks, or add any text outside the requested response.\n\nBefore finalizing, verify the output mechanically:\n1. Count words accurately. For bullet lists, do not count the bullet marker \"-\" as a word. Count each whitespace-separated textual token as a word.\n2. Check every word\u2019s length against any maximum-length rule. Do not rely on contractions, hyphenation, or punctuation to evade word-length limits.\n3. Confirm all required words or exact phrases appear exactly as required.\n4. If an exact ending phrase is required, ensure the response ends with that phrase, including its specified punctuation and casing.\n5. If bullets are required, use exactly the requested number of nonempty lines and begin every line with the exact required bullet prefix.\n6. If lowercase is required, use no uppercase letters anywhere.\n7. If punctuation is forbidden, ensure none of that punctuation appears anywhere.\n8. Recount after any edit, since changing even one word can violate an exact word-count requirement.\n\nPrefer simple short words and concise sentences when word-length and word-count restrictions apply. If constraints conflict, prioritize satisfying the explicit requirements as closely as possible, but do not omit validation.\n```"
+    },
+    "reflection:dc058712d67916d55d6858e98430304d456755fa57775b54cd7784500fe11087": {
+      "name": "reflection",
+      "output": "```text\nYou will receive a task prompt followed by explicit response requirements, often introduced by language such as \u201cYour response MUST satisfy ALL of the following requirements:\u201d.\n\nYour job is to produce only the requested response while satisfying every listed constraint exactly. Treat all requirements as mandatory, including formatting, word counts, required or forbidden words, punctuation restrictions, line counts, and exact beginning or ending phrases.\n\nBefore responding, carefully validate your draft against every requirement:\n\n1. Identify the requested content and all constraints.\n2. Draft content that answers the request.\n3. Check the exact word count. Count ordinary space-separated words; do not count bullet markers such as \u201c-\u201d as words.\n4. Check formatting exactly, including the required number of lines or bullets and required line prefixes.\n5. Check every forbidden word, including occurrences inside longer phrases where applicable. If a word such as \u201cand\u201d is forbidden, do not use it anywhere.\n6. Check required keywords appear exactly as required.\n7. Check punctuation restrictions, such as prohibitions on commas.\n8. Check exact required opening or closing text, including capitalization and punctuation.\n9. Revise until every constraint is satisfied simultaneously.\n\nDo not add explanations, labels, validation notes, apologies, or any text outside the requested response.\n\nPast errors to avoid:\n- A response with exactly five bullets can still fail if it has 30 words rather than the required 25.\n- A response can satisfy bullet formatting and include \u201catom\u201d yet fail if it exceeds 25 words or uses the forbidden word \u201cand.\u201d\n- A response can include \u201cnode,\u201d avoid \u201cand,\u201d and end exactly with \u201cwe are done.\u201d yet still fail if its word count is not exactly 20.\n\nPrioritize mechanical compliance over stylistic elaboration whenever constraints conflict with a more detailed answer.\n```"
+    },
+    "worker:00017d124df2d548eac32c71ba8f5ade57e4b6215066254f2be53b674ebf45fc": {
+      "name": "worker",
+      "output": "in 1928, alexander found a mold that could kill germs. this small find led to a great change in health and saved many lives worldwide soon after."
+    },
+    "worker:022381d279fdba7ec05978419b0ac8a4b51905c12863a10a54f1cfa3514d5ad5": {
+      "name": "worker",
+      "output": "- a flux shift had vast effects  \n- new data shows new paths  \n- small clues set firms rules  \n- the flux guides next quest end"
+    },
+    "worker:034a68015b2ae125effa7b93101eaae2ab0ebc0ba6bf4e65f0d236427cd7ba43": {
+      "name": "worker",
+      "output": "- sun heats earth water starts to rise in warm air to form clouds  \n- clouds move with air spread rain water returns back to land  \n- plants drink water air cools rains feed life from atom to leaf"
+    },
+    "worker:0453b72d5557f70348cda4b19869937646f1fb9faf60fe2755de73c7db05adda": {
+      "name": "worker",
+      "output": "- plan your work  \n- set small goals  \n- stay calm and focus  \n- ask for help  \n- take short breaks"
+    },
+    "worker:04772a14c2dfa2f1c611103b7cab9a50c19b2c87c7872dd472a70af563a1e4bd": {
+      "name": "worker",
+      "output": "in 1928, a man found a mold that killed germs. this led man much help in fight illness and saved many lives all around earth."
+    },
+    "worker:04dffe1d90f2cafec48025db12c49d42dc49c5b234a86637bf83ab74992bb38e": {
+      "name": "worker",
+      "output": "- Star tech helps ships find points  \n- Uses waves sent from space  \n- A star's spot can guide  \n- Data is sent back fast  \n- Stars lead ships safe paths"
+    },
+    "worker:05155b058fccfd056b5652c41469af91e3d92ecbb73e46703b3343d2e9649ea3": {
+      "name": "worker",
+      "output": "DNA holds the code inside cells, guiding growth through genes and traits, so it goes."
+    },
+    "worker:056e6f885f4bc3491615086d2e003342f1ef944a776539e96428bfcc91f191b5": {
+      "name": "worker",
+      "output": "- gene is small code  \n- it holds traits in cells  \n- gene can move and change  \n- gene helps form all life  \n- genes tell how we look"
+    },
+    "worker:084eda83d0478800d3aff21ed77527c7ddee146d29029598004fa4a741b9d791": {
+      "name": "worker",
+      "output": "- blockchain stores data in blocks linked in safe ways  \n- uses nets where nodes check and share info fast  \n- no need for banks or other third folks  \n- helps with coins, deals, and safe chains of facts"
+    },
+    "worker:09d25f8190cd420e6a338cb5d99cd5d25448e696fa766ef50ee3cbbecb41def2": {
+      "name": "worker",
+      "output": "plants use the code in dna to grow buds bloom and spread seeds across earth lands so it goes."
+    },
+    "worker:0a8e7d30b38e7544da170a0e2e427e0b10e6e4bfb64cd4b2342e1cb0e4fceeb4": {
+      "name": "worker",
+      "output": "- Plan your work well  \n- Break big tasks into parts  \n- Use short breaks often  \n- Ask friends for help  \n- Stay calm and keep focus"
+    },
+    "worker:0aa6b21373c8d67fd2af8c40b49585ab3aca4c4f3981260d25792a08ee352b23": {
+      "name": "worker",
+      "output": "- Plan ahead to make your tasks clear  \n- Work hard to gain new skills  \n- Stay calm when you face stress  \n- Ask peers for help if stuck  \n- we are done."
+    },
+    "worker:0d12cc4da8ab0f7bf57b9bb7d5012f5f72981a0d8f7bf0c31dde27fe2880d02d": {
+      "name": "worker",
+      "output": "- cells build life and they work like small parts  \n- each cell has its own tasks  \n- cells can grow make waste and split  \n- study cells helps learn all things so it goes."
+    },
+    "worker:0e267d9956a0f09a2dc4d9dd3a7714141f506405d2c2556e4ab3e6f5027db1f9": {
+      "name": "worker",
+      "output": "- A bright flux has been found near stars.  \n- This flux shifts light in a strange way.  \n- It helps us learn how stars glow.  \n- New tools will track this flux soon."
+    },
+    "worker:0e7766e6d1cada4357f96339299d8f80cd33b78637fc0bff835be65deaa57e90": {
+      "name": "worker",
+      "output": "gene is a code that lives inside cells it tells them how to grow what form to take and what tasks to do so it goes."
+    },
+    "worker:1107c736fb32ab18eaea2f85c387852953d89f35e31373e56a4555273bc600d4": {
+      "name": "worker",
+      "output": "Plan your work each day with small goals. Stay calm, ask for help if stuck, and keep focus. Practice often to improve skills. We are done."
+    },
+    "worker:115bd1e849585d9c33324e43c3f92dce8ef037f9c44048a2a7edf00996f17c32": {
+      "name": "worker",
+      "output": "- atoms form small parts  \n- bonds join them to make  \n- heat helps shift states  \n- light acts like wave  \n- force pulls or pushes  \n- cells run all life jobs  \n- earth spins near sun  \n- stars burn gas bright  \n- waves shift sound rays  \n- life grows with time"
+    },
+    "worker:139945e173a6ad46a9dc024de60d7c3bbafef027d20d0f2b87fe95fe8bff90de": {
+      "name": "worker",
+      "output": "in 1928, a man found a type of mold that kills bad germs. this new help gave hope and saved many sick men and kids worldwide fast."
+    },
+    "worker:156e58a4832c693ac160ea3acd64219fa873bb42b25f1ffbd9d39ce1c8d5b9e5": {
+      "name": "worker",
+      "output": "- Snow falls soft on cold ground  \n- Ice forms when air is chill  \n- Cold wraps land in a white coat  \n- Sun melts ice into small pools  \n- Water flows down to warm earth"
+    },
+    "worker:15db2c9e3c90916f1a1c9e2d7ef44852e9773b7c65e650f0474c424613ad4337": {
+      "name": "worker",
+      "output": "- a wave was found in the deep sea  \n- it showed signs of life  \n- this changed what we thought  \n- here we go."
+    },
+    "worker:16c9c78aa42b12ab79d8daecf48f9334a59cc6da78ce6b5c7a9ea9aa78128322": {
+      "name": "worker",
+      "output": "- Blockchain stores data securely across many computers  \n- Transactions remain transparent visible for users  \n- It removes middlemen improves trust speed  \n- Useful in finance supply chain voting  \nall is set."
+    },
+    "worker:174ae7d68f162946ed04d5101c6f6a18f7b4355bfb6cc7f1493c7ca8a1c7df22": {
+      "name": "worker",
+      "output": "- smart phones use chips for fast tasks  \n- screens show bright and sharp views  \n- apps let us chat and work  \n- they link us all swift and clear"
+    },
+    "worker:189c97b647113ccfd5654436f718eb79027bd58f6895caa354f54887f53ff2fb": {
+      "name": "worker",
+      "output": "photosynthesis uses sunlight to change water carbon dioxide into food energy oxygen released that is it."
+    },
+    "worker:19dfd58793d72bd28bc0ec2365893a07d9ba620eda123841d1c332e9c9ae5f65": {
+      "name": "worker",
+      "output": "- Learn small bits each day  \n- Use flashcards for quick tests  \n- Take short breaks to rest  \n- Ask peers if stuck or lost"
+    },
+    "worker:1a7558d9411e6cca3527fcb90c7490a9041e4cfc09671a3dfe07585dac166971": {
+      "name": "worker",
+      "output": "- Cloud tech stores data on web servers, not local disks  \n- Users access files from any device or place  \n- Saves costs with less gear needed  \n- Boosts work speed and team sync  \nwe are done."
+    },
+    "worker:1a828f97c557c2e1ffcf32980b95229f3535cae5d6d5e5c68aae3cc586d0fc0f": {
+      "name": "worker",
+      "output": "Scientists found a small cell in old rock, giving new clues about early life forms here."
+    },
+    "worker:1e8a38b3422ec62674e921fb693742e3fe022893b9dbd836ec9498b169def284": {
+      "name": "worker",
+      "output": "- Learn in small bits each day  \n- Use flashcards for quick help  \n- Ask friends when stuck or lost  \n- Rest well to keep a fresh mind"
+    },
+    "worker:20026d803684dae4e40a87615e7d6e4f49d804766b14a69f9fbec231fd726e73": {
+      "name": "worker",
+      "output": "- find calm spot  \n- read small parts daily  \n- take short rests often  \n- ask help when stuck  \n- keep notes neat and clear"
+    },
+    "worker:21b27e1ac8dc6fff478ed0b560d3e0e4db8ad0f423e381a38a7290b896292038": {
+      "name": "worker",
+      "output": "A gene is a small bit inside you that helps to form who you are. It guides growth and traits with code, so it goes."
+    },
+    "worker:23845fb191844e831d91f00afe37044f7be311840dba8446a1ae1fff973181a8": {
+      "name": "worker",
+      "output": "Light moves fast in rays from stars or lamps sky blue bright or dim making vision clear sight sharp for all to see shapes form and life."
+    },
+    "worker:23dd1f4d4f9f23cc00783dc075459db7f587ce323de18bb1e0a25d2ae2f00a0c": {
+      "name": "worker",
+      "output": "- Rain falls from clouds to earth  \n- Soil drinks drops with sun heat  \n- Roots soak up water and food  \n- Plants grow tall and bloom bright  \n- Seeds spread by wind and birds"
+    },
+    "worker:29cb7098f87e7c77b2de73d45c8941cf376fae055f3cccfb37b7f51361046d70": {
+      "name": "worker",
+      "output": "- snow melts fast in warm sun  \n- small streams run down hills  \n- earth drinks pure fresh drops  \n- seeds sprout from soft soil  \n- birds sing bright in trees"
+    },
+    "worker:2c7890bc7ec58185f2aec81d96aba35ece07f25526b96fc3e892ef74bc0ec730": {
+      "name": "worker",
+      "output": "- Cell is a small part that all life has  \n- Each cell works to keep life strong  \n- Cells use food and air to grow  \n- Many cells join to form life forms"
+    },
+    "worker:2c903f2d013a41520b07df65e48b0ff8bf54370dd75d5b155474549559d88c99": {
+      "name": "worker",
+      "output": "- Cells are small parts that make up all living things  \n- Each cell does a job to help life work well  \n- Cells use food and air to grow and stay strong  \n- Many cells join to form plants animals and us"
+    },
+    "worker:2de8a360d7994bdf88ab44a6367468bad9f41f2593d6f13bf8707fd97b266530": {
+      "name": "worker",
+      "output": "reading regularly improves vocabulary skills focus boosts knowledge retention builds confidence for academic success"
+    },
+    "worker:2e5b135f87de16cab6b6000c9251b266b3fdb0f3ce84ce9d765f67821d641fe8": {
+      "name": "worker",
+      "output": "An atom is a small unit that forms all matter. It has parts: protons, neutrons, and electrons that move fast. all is set."
+    },
+    "worker:302ffd1782fad2e0d206cd3035d0c7cb1145e706e7ceef47425679bbb14be25c": {
+      "name": "worker",
+      "output": "dna holds the genetic code, guiding cell division and growth, enabling life\u2019s natural process."
+    },
+    "worker:30648760f3ddec9b71fd7e41e46043a39705911ca29a4cc6c0c25a6ef88fc93d": {
+      "name": "worker",
+      "output": "- Learn by doing small tasks  \n- Focus on main points first  \n- Take breaks after short study  \n- Use clear notes each day  \n- Ask questions when stuck"
+    },
+    "worker:32c19bc49b0878d350403a16e8626aa8967ed1bbd8ff40a6bda10dff1a2f7ba7": {
+      "name": "worker",
+      "output": "cells make food and grow by using light energy from the sun that is it."
+    },
+    "worker:33d18e1581bbe8f542b053d9964de22e5e55cc79b6f9b199aa62cd77a8ad4a15": {
+      "name": "worker",
+      "output": "- gardening is growing plants flowers trees and vegetables  \n- it helps improve air quality mood and physical health  \n- beginners start with simple seeds soil water and sunlight  \n- patience and care lead to beautiful healthy green spaces"
+    },
+    "worker:375d8a566d998eeead2f84a5158d4ab02cd4e7a8c177616191d72331a58b6aa9": {
+      "name": "worker",
+      "output": "- Make clear goals  \n- Study in small bits  \n- Take short breaks  \n- Talk with friends  \n- Keep calm and focus"
+    },
+    "worker:382b8c53b678bd3a9f1119d176dbdbe01cb7e5c1ebcf5599ca6a54647033793f": {
+      "name": "worker",
+      "output": "reading regularly improves vocabulary skills focus boosts knowledge retention builds confidence helps academic performance"
+    },
+    "worker:39f8f2efc60cd23319b373b8c71ade3b831829e31dc3ef590bf9c70db7d63ac9": {
+      "name": "worker",
+      "output": "a gene is a small part of dna that holds info for how cells grow and work in all life forms."
+    },
+    "worker:3b45569a0c9ac5cc5a12d71f14b837dcc49f626d44e23dcd18ceeca5d38fb7eb": {
+      "name": "worker",
+      "output": "- learn step by step  \n- ask for help if stuck  \n- write notes clear  \n- test your skills  \n- rest well and try again"
+    },
+    "worker:3c9a6fe7b8f2e640f364d938b114046925689af3dc97312d9e1361eb8e1417af": {
+      "name": "worker",
+      "output": "cellular respiration breaks down glucose molecules using oxygen as code, releasing carbon dioxide, energy, and water for living organisms."
+    },
+    "worker:3d83c3f0f913ff81a7e36c9e1f17f4c7359d10f778812595a204703342ce569a": {
+      "name": "worker",
+      "output": "- gene is a small code  \n- it holds traits in cells  \n- genes pass traits from old  \n- genes form all living things  \n- gene controls how we look"
+    },
+    "worker:4117f977f9a59f489b44d2811269cadcbbe3fc28be84882cfe7da2573518847d": {
+      "name": "worker",
+      "output": "Atoms are small parts of matter that build all things around us including air water and soil that is it."
+    },
+    "worker:427041cafca2538a1b194ba63fbcc5e8f937b71ab3f8f9545d00db81f0de44df": {
+      "name": "worker",
+      "output": "- AI helps solve tasks fast  \n- It learns from past data  \n- Apps use AI for smart work  \n- AI is key tech now we are done."
+    },
+    "worker:42b1d82220a28a4589e69bba5d199957d962e5e725750a0c84e5aff0558522f8": {
+      "name": "worker",
+      "output": "- find a quiet spot  \n- read small bits each day  \n- take short breaks often  \n- ask for help when stuck  \n- keep notes clear and neat"
+    },
+    "worker:438a596051dd16b8cfc45d3201d3b3023617fbe1840452139fd2f1403713bbf5": {
+      "name": "worker",
+      "output": "- Scientists found a new flux near stars.  \n- This flux affects light waves nearby.  \n- It helps explain how stars shine bright.  \n- New tools will study this strange flux."
+    },
+    "worker:463bf311d49af3c5c6acf7475f649246fff30462856d25a98cd69cb79f1b17c2": {
+      "name": "worker",
+      "output": "Set small steps to reach goals. Stay calm, ask friends, and keep focus. Try new tasks each day to grow skills. We are done."
+    },
+    "worker:465028f8cbcd4c37ee6d0a76790d909411f8f1fe769bace38aac2100058b7e36": {
+      "name": "worker",
+      "output": "Waves are a type of move that transfer energy through space or a solid or a liquid."
+    },
+    "worker:468ab482f31c8f35405acc3ab2bb7abea5eeef9d3258682bcfb1a306ae339df5": {
+      "name": "worker",
+      "output": "genes pass traits from one cell or life form the way plants grow and traits help each life stay strong and grow"
+    },
+    "worker:49f6875f94152dd310b3151577e29426b0d763c3d0395999ead5463e2c746791": {
+      "name": "worker",
+      "output": "gene is a small code in cells that tells them how to grow move and work in many ways this helps life to grow and live so it goes."
+    },
+    "worker:4b15d4a6e9f9c9e3e62b56b94c469cc702010a3e8cdb42a742635b5dc51f65c6": {
+      "name": "worker",
+      "output": "- scientists found new world near bright star  \n- new world shows signs life  \n- discovery shifts views about space life"
+    },
+    "worker:4ba8fab90f92962cd35444f4b3de4774af6e56d1dd24d41d7fbe3b1b2cf9661a": {
+      "name": "worker",
+      "output": "- Rain falls down from dark gray clouds  \n- Soil soaks water deep inside  \n- Plants use rain to grow fast  \n- Roots drink water all day long  \n- Life on Earth stays bright and strong"
+    },
+    "worker:4cc8c5e3edc65afa1dda34145072db8482e13c26aa538df499acd9b482ce4104": {
+      "name": "worker",
+      "output": "- rain falls from gray clouds  \n- soil drinks the cool wet  \n- plants soak up fresh dew  \n- roots grow deep in earth  \n- sun warms new buds bloom  "
+    },
+    "worker:4d5ef8689a24b11318300af3b451648ee61cb64cbd84b902678bb79110ea04e6": {
+      "name": "worker",
+      "output": "Heat moves from warm to cold things by small fast moves called atoms when they bump and pass energy to reach equal calm state over time."
+    },
+    "worker:4deb2458ec531822afc93d2db2d211bd5d5d655bf913130e504c3c406561d7ff": {
+      "name": "worker",
+      "output": "- Researchers uncovered rare minerals beneath desert sands revealing unknown geological processes  \n- The find reshapes knowledge of Earth's early formation phases over millions years  \n- This sparks fresh studies aiming at unraveling planet's ancient environmental history"
+    },
+    "worker:4f509c81c258cc7ca9efd439c58d674d1fb5c66b25440a6a335e88384b443980": {
+      "name": "worker",
+      "output": "- Water falls down from clouds as rain or snow  \n- Sun heats earth causing air to rise  \n- Cold air cools water vapor to form clouds  \n- Clouds burst to drop rain or snow  \n- This cycle helps plants grow and fills lakes"
+    },
+    "worker:51d9899f004a2f6a715161bd531fd1f7e1b882485aa92c74c34544d300859d97": {
+      "name": "worker",
+      "output": "- atoms form small parts  \n- they bond to make things  \n- heat helps change states  \n- light shows wave or ray  \n- force pulls or pushes  \n- cells do all life jobs  \n- earth spins near the sun  \n- stars burn gases bright  \n- waves shift sound or light  \n- life grows with time"
+    },
+    "worker:521a44d728624d1a07da535e1b894a59921e3d918a19ec2826909ae8c13a708e": {
+      "name": "worker",
+      "output": "genes hold small code that helps cells grow and change fast. students must learn how genes form traits and adapt well."
+    },
+    "worker:5242a3e9dc762fdb96e9b5c9ab816e7b0dfc29e41c3be90cb2d45ea5a6d0f9b4": {
+      "name": "worker",
+      "output": "a new small stone found deep in sand shows past life change and hope so it goes."
+    },
+    "worker:53d396ec3603b0dfd8587e5da5741bf73ab4bac7362de84b63861b6507b422c7": {
+      "name": "worker",
+      "output": "- find a node that links small parts  \n- check how each part acts and grows  \n- list the key facts found from work  \n- link each fact to node tight  \n- use this plan to guide your work"
+    },
+    "worker:558bec8bc4f61fb5b6945eeedc22ad986879e7653569c055b3b9f44181d316a2": {
+      "name": "worker",
+      "output": "- Pick a topic you find fun to learn  \n- Write short notes to keep track  \n- Review notes each day for strong recall all is set."
+    },
+    "worker:55d3f5b8bbb71728d4ffff6729e472e0c0982eb19582c17f344d3992e6f819da": {
+      "name": "worker",
+      "output": "- An atom is the basic building block of all matter.  \n- Atoms contain protons, neutrons within the nucleus, electrons orbit around.  \n- Chemical reactions occur when atoms combine or break apart.  \n- Learning about atoms reveals how substances form and change."
+    },
+    "worker:563302b1c3ff0592db771fbc18abc7f3e7d6ea264ba86ab54681ca97839d0789": {
+      "name": "worker",
+      "output": "a new kind found in deep seas shows how life can grow in dark cold spots this fact helps us learn more about strange new worlds nearby"
+    },
+    "worker:611732098ad7acde978ea408a196efe268d128b44a9ca942793350bdbfe09bd7": {
+      "name": "worker",
+      "output": "a new key found in caves near town may change our view on past life here now we seek proof to link it with old tales soon more will show"
+    },
+    "worker:62c2414853def7a88b484c537cb7b90d62abf803d0606e9ddb35fa7ae2267959": {
+      "name": "worker",
+      "output": "A small cell holds clues about life, found in old rocks by keen minds hard at work."
+    },
+    "worker:62c9464ad2e36622c6b30f7b7d4c9393834db822054c9783e6af5fa67e4814f4": {
+      "name": "worker",
+      "output": "- learning chess teaches problem solving skills  \n- pieces have unique moves and roles  \n- players think ahead to capture king  \n- practice builds strategy patience and focus"
+    },
+    "worker:63270a546e40cadc85ff52912cb361d6c4cd85ba7248a24df541e25719e2e2c2": {
+      "name": "worker",
+      "output": "- Light from a star helps guide space ships and show time at night.  \n- Star data aids in maps for pilots.  \n- Star maps help track night paths.  \n- Star tech shows bright dots in sky.  \n- Star tools link space with Earth life."
+    },
+    "worker:633d0cdc0869648e4d58a5fa2ddef5028bdd7a205850bab08853439b770230b7": {
+      "name": "worker",
+      "output": "artificial intelligence enables machines to perform tasks requiring human intelligence such as learning reasoning and problem solving it transforms industries all is set."
+    },
+    "worker:634d2641e610d79c654403486c5900cf4907b2d513822ff44a034a089de4490e": {
+      "name": "worker",
+      "output": "- light moves fast and can pass thin or bounce off hard flat things  \n- atoms form all stuff they join to make new items or mix types  \n- heat and cold cause change and push parts that make air and water shift that is it."
+    },
+    "worker:6388443bbf29b9016e40327c923a9e611cc556ef4d1290f2912f49fb11875d15": {
+      "name": "worker",
+      "output": "- Plan your work to keep it neat and clear  \n- Focus on key facts and main points  \n- Check your work to make sure all is set."
+    },
+    "worker:6477a74915cb78c9333c18011704e29be08ae47d6e1652b698ba56d5bee0c50f": {
+      "name": "worker",
+      "output": "- Star tech helps ships find spots  \n- Waves sent from stars guide  \n- Ships track stars in space  \n- Data shows routes to take  \n- Stars help ships reach goals"
+    },
+    "worker:64b30fa972b2a10483d9d95194b775972d4a4bd4b54c1705d589bbbfb221935a": {
+      "name": "worker",
+      "output": "- study small parts each day  \n- ask peers when stuck  \n- jot notes to aid  \n- rest well to keep  \n- check work twice done"
+    },
+    "worker:67bfcdb5043a2c7fe0a7657871a4c372c3aef6529c64472c4f30f14f28ceeca7": {
+      "name": "worker",
+      "output": "- read small bits each day to help learn fast and keep track  \n- write key notes to make sure you do not miss facts  \n- quiz self to find weak spots and work to fix them all"
+    },
+    "worker:68a4dacf02a01ac90f6435adc3428effde22324259e648234724e120638650d2": {
+      "name": "worker",
+      "output": "- technology aids tasks through tools and techniques  \n- many fields rely on tech for better results  \n- innovation drives constant change in everyday life"
+    },
+    "worker:6a76618968f567ffcdb11197f3098b85e5ca1b9e5eeae5718a4b387df84cbe46": {
+      "name": "worker",
+      "output": "- Stars burn hot gas that glows bright, giving off heat and light in space sky.  \n- They form from dust and gas pulled close by gravity's force, life starts small.  \n- When fuel ends, stars change or burst out, leaving dust that forms new stars\u2014 that is it."
+    },
+    "worker:6a8e2dd04351a8da7fcdfd3a1de419fc196ef6e6f0c939b05812db760aaa3956": {
+      "name": "worker",
+      "output": "new clay pots show old tools used for food and art, so it goes."
+    },
+    "worker:6dd14617e5f968bc438f949768bae602c56a5f7961643283e01eb7ee21836f47": {
+      "name": "worker",
+      "output": "artificial intelligence allows computers to learn from data make decisions and improve over time it impacts various fields including healthcare finance and transportation all is set."
+    },
+    "worker:6ed28052145eee759706aba2384776d7d824ee0ee75788d361ac1e5a594e72a6": {
+      "name": "worker",
+      "output": "- Planets are big balls of rock or gas that move around stars  \n- The sun is a star near Earth  \n- People live on planet Earth  \n- Space is vast and full of stars and planets"
+    },
+    "worker:6f0fd1ab1cd2ba746329871adcfb60551d27649b3df8625c6f3ba53999655c3c": {
+      "name": "worker",
+      "output": "in 1928, a man found a mold that killed bad germs. this led humans much help in fight illness and saved many lives around the world."
+    },
+    "worker:7844d7840316486e8587a47e9ef822fb6f44cf22f470aed0a22e5d0a7dca82db": {
+      "name": "worker",
+      "output": "coding means writing steps computers follow to solve tasks. it helps build apps, games, and sites using simple rules and logic anyone can learn."
+    },
+    "worker:78ce96f1f49fcd0dd8626ce24f5d5e5df740ec5874eeace5523029775000764b": {
+      "name": "worker",
+      "output": "photosynthesis uses sunlight as code allowing plants create energy transforming carbon dioxide oxygen. this natural process sustains life everywhere."
+    },
+    "worker:78fd6e73b334bb43d10d4c1a87c6c0f79d1b366c300cfbe3a3a2e7590c2887e1": {
+      "name": "worker",
+      "output": "- a cell is a small part that helps make up all life  \n- each cell works hard inside your body  \n- cells grow split and help with tasks  \n- learn cells well if you want to know life."
+    },
+    "worker:7ab0d7f4c20cf7aaae9424ab1d4991e49290650cd577da9418b0341d4207237b": {
+      "name": "worker",
+      "output": "- learn small bits each day  \n- ask friends when stuck  \n- write notes to help  \n- rest well to focus  \n- check work twice always"
+    },
+    "worker:7c988c5370bd74f4766d863b19c64a6639d521e0d3bdd5f01d347964cfb31d17": {
+      "name": "worker",
+      "output": "- Learn each day new facts  \n- Read books and write notes  \n- Ask friends to share views  \n- Try to solve small tasks"
+    },
+    "worker:7ebe57b215eae9e53fddc29f720c1dca952c8f7fa2cd7f5910b5c0ee13508afb": {
+      "name": "worker",
+      "output": "A node sends signals through a network, linking cells or parts for fast, clear data flow in living systems."
+    },
+    "worker:7ec99fc608a139c9eac5288bd9b9a5587d881b0527927dd3aec87967b5a5b488": {
+      "name": "worker",
+      "output": "- Read short text to build skill  \n- Write notes to help recall fast  \n- Talk with peers to share ideas  \n- Sleep well to keep sharp mind safe"
+    },
+    "worker:7f965dd2cd93568baa3eed2f601d7cab96ffd1af5e0cba480bb600260280111d": {
+      "name": "worker",
+      "output": "- Choose an idea that feels fun to learn  \n- Write brief facts to help you recall  \n- Study notes each day to keep sharp all is set."
+    },
+    "worker:7fe29c881a5def52d3f6112d73a3e43220a91ae5ced02869b23e43e504ccd279": {
+      "name": "worker",
+      "output": "- Rain falls from clouds to ground  \n- Soil drinks drops with sun glow  \n- Roots soak up water and food  \n- Plants rise tall with green leaves  \n- Seeds spread by wind and birds"
+    },
+    "worker:8111127bdb026ad0a2190a6ad3f8408125ed13f8a01551895e4f12203c9cbedd": {
+      "name": "worker",
+      "output": "- An atom is the smallest unit of matter making up everything around us.  \n- Atoms consist of protons, neutrons, electrons orbiting the nucleus.  \n- Understanding atoms helps explain chemical reactions forming new substances.  \n- Studying atoms is fundamental in physics, chemistry, biology fields."
+    },
+    "worker:811644c05c1b68adf270d320a8505771c65932e127a67f6cea23a965a70c0859": {
+      "name": "worker",
+      "output": "genes hold codes that shape traits which help each life form grow adapt and live in a safe small world"
+    },
+    "worker:82c014599b09c06747ede5a01b8c02e059e543fbafb22e896bb7382c6a680388": {
+      "name": "worker",
+      "output": "A wave carries energy through water showing how forces travel without moving the water itself all is set."
+    },
+    "worker:82fdcbec16e179e9404865fcdc5a95b4fd75f4aa469523a1f9f6d50ff96c1e0e": {
+      "name": "worker",
+      "output": "music is art made with sound and time. it uses beats, notes, and rhythms to express feelings and tell stories through songs and tunes everyone can enjoy."
+    },
+    "worker:831f6026b66151cc2293abba91c2f4b2e0fdf1f2b68f3c8204e97908a68e00a4": {
+      "name": "worker",
+      "output": "Light acts as waves and small bits called photons it moves fast and helps us see colors shapes and brings energy to plants to grow and live."
+    },
+    "worker:84926c2ac3e509cd5c07443a799c94059ddfac3b2acf13e8dc75abeaba339f45": {
+      "name": "worker",
+      "output": "- scientists found new planet  \n- orbit near distant star  \n- discovery changed how we see space"
+    },
+    "worker:8569a50d51f81a052d57d75f75279d746bd5351cc88090d95f27a93bc3fa48c9": {
+      "name": "worker",
+      "output": "- artificial intelligence enables machines to learn, reason, and solve complex problems autonomously  \n- it powers technologies like virtual assistants, image recognition, and autonomous vehicles  \n- ongoing research aims to improve learning efficiency, generalization, and ethical decision-making systems"
+    },
+    "worker:85c5e17193db2bfeb5b61a7b87782c808d858ec06af6107dc1d81a3d9eab9b5d": {
+      "name": "worker",
+      "output": "DNA holds a code that builds life. Its parts pair up for traits, so it goes."
+    },
+    "worker:869d5b6ef651397c3fda1a412c2d7ee580ec3057a5e49270b01ae4ba92fe0583": {
+      "name": "worker",
+      "output": "a gene is a small part of dna that holds info on how cells grow, work, and pass traits in life forms."
+    },
+    "worker:874ad08019075f9594eb39e0b51bb77c300620b7286d5f96acfb2ebdbde260e9": {
+      "name": "worker",
+      "output": "- rain drops fall from gray clouds  \n- earth soaks up fresh wetness  \n- plants grow tall with sun  \n- winds blow soft through leaves  \n- night cools air as stars shine"
+    },
+    "worker:883bab85887ccaf337243242229b10f0150a9b766aba4428d9e3d174b8eae710": {
+      "name": "worker",
+      "output": "a small frog was found deep in caves near the coast, so it goes."
+    },
+    "worker:88d14f0a26a263d1cc880b799bc34d7818693913334da8dd1e7cf6f3dbc67040": {
+      "name": "worker",
+      "output": "An atom is the small part that makes up all things. It has parts called protons, neutrons, and electrons. all is set."
+    },
+    "worker:89ac31684f7be43941882b0c6c91cfb163d1a5678842fe90eb12b1dbe5e44f43": {
+      "name": "worker",
+      "output": "- light waves move fast and can pass thin slips or bounce off hard flat things  \n- atoms build all stuff they join to form elements and mix to make new things  \n- heat and cold cause change and move parts that make air and water shift that is it."
+    },
+    "worker:90be2d57c2794b6589e22f9abd6eebce836ad15de1ba87531b50931acb7f0074": {
+      "name": "worker",
+      "output": "A node forms part of a network system where data moves between devices securely without central control; we are done."
+    },
+    "worker:9271c643806941fb0e258c28164ed4d85b31b9294a95ec1c72e6c22a731e1429": {
+      "name": "worker",
+      "output": "a new kind found in deep seas shows how life may grow in dark cold spots. this fact helps us learn more about worlds not seen yet."
+    },
+    "worker:92fa977f52fd1129874f50f62efb0f03fe38b298d89d6444367236019738e3fe": {
+      "name": "worker",
+      "output": "- find a node that links small parts  \n- check how each part acts  \n- list the key points found  \n- link each point to node  \n- use this to aid your work"
+    },
+    "worker:989536b0e79df30e75eba672a289fe049ce0f12d800b262ebdceb1117f81fa4c": {
+      "name": "worker",
+      "output": "- Study hard and ask why  \n- Read books and take notes  \n- Work with friends to learn  \n- Do small tasks each day"
+    },
+    "worker:9b05a07ac968f7b6a915098d4a284385599389b0d6e786f1f124bbf0990072ae": {
+      "name": "worker",
+      "output": "water falls from clouds then soaks earth roots drink growth starts plants bloom life lives"
+    },
+    "worker:9d4d2dacedf92e26e72ca8ecd7541d77d29e70510ed6d974804d70f508e8936a": {
+      "name": "worker",
+      "output": "- artificial intelligence helps machines learn from data  \n- it improves tasks by finding patterns fast  \n- widely used in apps and tools  \n- drives growth in many fields and sectors  \n- all is set."
+    },
+    "worker:9e0ae3965a787d5710aaae044737cfe730b350e2752759bb1846dd6be5c070db": {
+      "name": "worker",
+      "output": "- Planets are big balls of rock or gas that move in space  \n- The sun is a star close to Earth  \n- People live on Earth planet  \n- Space is wide and full of stars and balls"
+    },
+    "worker:a088433b872bbf2926126a6b265590ac820c428669c4706ae445b497a5de775f": {
+      "name": "worker",
+      "output": "- programming is writing instructions computers understand  \n- people use programming to create websites apps and games  \n- languages like python and javascript help communicate with computers  \n- learning basics allows you to build cool projects easily"
+    },
+    "worker:a0dc188fc058723746072aecbda23a87f9ced635df386ef1a14e394f5ebdc8c3": {
+      "name": "worker",
+      "output": "- Learn small bits every day  \n- Use flashcards for quick tests  \n- Take short rest breaks often  \n- Ask peers when stuck or lost"
+    },
+    "worker:a119402a57be0c9d1ac19d25ae7637fd1d65b1024c1cbe697cd96aab380cfab7": {
+      "name": "worker",
+      "output": "Scientists found a new kind of flux in stars, changing how we see space light."
+    },
+    "worker:a183f8841dae62caba771d4e384da60b98f0e19bba245458a82214b2283d9f12": {
+      "name": "worker",
+      "output": "- Sun heats air and water so atom moves fast and rises up to sky with warm wind flow  \n- Warm air cools down then atom slows and drops to earth as rain drops or soft snow  \n- Plants use sun and rain to grow with help of atom power in each leaf and root"
+    },
+    "worker:a1df962f34413d90dab581cd65a590f34a47c0639d790a7107598c7c84385227": {
+      "name": "worker",
+      "output": "A node is a small part of a system that sends and gets data fast, linking parts for smooth communication."
+    },
+    "worker:a5d0019ef7f948093160a6f9b12720c9dff928c444fbf12947227d3441c0ecb8": {
+      "name": "worker",
+      "output": "Scientists found a rare flux in stars, which alters how we view space light waves."
+    },
+    "worker:a6092fc859fe6f9caa44475737c39bc07a2cfe09017245b229c3bc1cffe58494": {
+      "name": "worker",
+      "output": "Light flux means flow of energy through space, moving fast and bright, here we go."
+    },
+    "worker:a6efed752eeb944b84abbae58b273d46521fe3294651db126ca26a881412842c": {
+      "name": "worker",
+      "output": "a new key found in caves near town may shift our view on past life here now we seek proof to link it with old tales soon more will show"
+    },
+    "worker:a8270e58dee485cfddf0c2d72cbf7842a0ad7f8a371b31a2596b222d1808ef7d": {
+      "name": "worker",
+      "output": "dna carries the genetic code that governs protein creation, cell function, and organism development naturally."
+    },
+    "worker:a9354a3d45550485b7d586e9d5b86158d5b718a9242cd8c92881ad29a30da616": {
+      "name": "worker",
+      "output": "a small seed grew fast and bright in dark soil new life found so it goes."
+    },
+    "worker:a9d21c2b4e1105abda09acbc2b77ffb21f311c263743abce7e88d130a1bfa4ca": {
+      "name": "worker",
+      "output": "- blockchain stores data in chained blocks and keeps info safe  \n- uses a net of nodes that check and share info fast  \n- cuts out need for banks or other middle folks  \n- great for coins, contracts, and secure chains of records"
+    },
+    "worker:aa6c6843eed651ac3375b2744692e1e020dd0cdabf167ec031d11302c3089e43": {
+      "name": "worker",
+      "output": "Light moves fast in waves or small bits called photons through space carrying energy to power life on Earth."
+    },
+    "worker:ad1f48453dfbfdd6be5e52fe9bc76b8a6579bbcdac592c3de3abd592a97cbcaa": {
+      "name": "worker",
+      "output": "cells read the code inside dna which guides growth change and repair in nature\u2019s vast flow so it goes."
+    },
+    "worker:ad21213d8014a04a6acbde1e8b0db42e56f4ffbb20f15cdbe4ace38cd5e75349": {
+      "name": "worker",
+      "output": "- clouds store files safe and sound  \n- webs link nets across wide lands  \n- nodes help share fast data  \n- bits move quick with no pause"
+    },
+    "worker:ae366bb63218c0fc57bcb498bebac2bbb5fd5620c9420819e58c40efce3bca8d": {
+      "name": "worker",
+      "output": "A wave is a moving rise and fall in water or air, showing energy\u2019s path."
+    },
+    "worker:aee1088367906b205ae304575442ad52626c5c0df4b40b2b848f5360cd1a42fd": {
+      "name": "worker",
+      "output": "- rain falls from gray clouds above  \n- soil soaks up the cool wet  \n- plants drink the fresh drops  \n- roots spread deep with life  \n- winds push clouds to new spots"
+    },
+    "worker:b17e0b7dfe304b63c2ccccf9e3823fb8a0589d95420dd63c266896c7e44f0d6b": {
+      "name": "worker",
+      "output": "- sun warms earth water turns to gas and rise high to form clouds from each atom in air  \n- clouds move with wind spread rain falls back earth to feed plants that grow from each atom  \n- rain feeds soil plants breathe air live grow sun helps life bloom from small atom parts"
+    },
+    "worker:b54347b9cf2c7a9f99313cc03b7bbfacf662c73c179ff8e970088128e771bba5": {
+      "name": "worker",
+      "output": "read books each day to grow your mind and gain new skill. write notes and ask friends. use what you learn to solve small tasks well."
+    },
+    "worker:b9d478aca2c144184b99f988d88808d541940f876cf25caeed2d62e7b5e18677": {
+      "name": "worker",
+      "output": "- rain falls from gray clouds up high  \n- drops soak soft earth and green plants  \n- roots drink water deep down below  \n- warm sun makes steam rise up slow"
+    },
+    "worker:ba261b2e8ac10ff77b2392fd72e76ccc9814f959ac5ba289544680355ff87fba": {
+      "name": "worker",
+      "output": "DNA holds a code built from small parts. It makes traits show up, so it goes."
+    },
+    "worker:ba7d77713d2feca8350a176a97d18a5c27a5390fb653dbad4fd5e69d43b9728c": {
+      "name": "worker",
+      "output": "read books each day to build your mind and skill. take notes and ask peers. then use what you learn to solve small real life tasks."
+    },
+    "worker:bad06197867dcf8a723b4e9d6cb4dbcdf8dc8ae78437ea5d217c0b4ad0c31f1c": {
+      "name": "worker",
+      "output": "genes carry code that helps cells grow and change. students can learn how genes shape traits and traits show."
+    },
+    "worker:bb9764b945a9353e5dd13cf8e54b8babea8552c5234cb11c753679df161454b3": {
+      "name": "worker",
+      "output": "- cats are pets  \n- they like to play  \n- they need good food  \n- cats can be friends too"
+    },
+    "worker:bbc35a20e922395591a0079beda82a284983393efd2ce1ef7a682266428fa26c": {
+      "name": "worker",
+      "output": "reading daily improves vocabulary sharpens mind and helps you understand new ideas faster and easier"
+    },
+    "worker:bd24ce6526384baf3012387f7a5eb03846c73252c6617d56ed162e071d9dcd73": {
+      "name": "worker",
+      "output": "- AI helps solve tasks quite fast  \n- It learns from past data sets  \n- Apps use AI for smart work  \n- AI is key tech now we are done."
+    },
+    "worker:be0230b36f83e802e5e5104773318a76b63dc0a4f3fac915ec5b1047b8d3cc32": {
+      "name": "worker",
+      "output": "- Sun heats air and water making atom move and rise up high in sky  \n- Warm air cools off and drops to earth as rain or snow  \n- Plants take water and sun to grow strong using tiny atom power"
+    },
+    "worker:be8d90b84d3ef4877ba7afadce4c37e629a4a737ebc5a2238871d1341f87104a": {
+      "name": "worker",
+      "output": "- Scientists uncovered ancient fossils deep underground  \n- The find reveals unknown species from millions of years ago  \n- This changes our understanding of early life  \n- Researchers continue exploring to gather more evidence  \n- History unfolds slowly, so it goes."
+    },
+    "worker:c015470267761f3ceb6e65177dda3f575e1cf85774fdbc94dffcc15cbe8c489d": {
+      "name": "worker",
+      "output": "- cats are small pets found in homes  \n- they like to play chase and rest  \n- cats need food water and kind care  \n- they can be fun friends to have"
+    },
+    "worker:c158cd1adad20422dab024e402f8a2142c04143af588ebb5a421c5f492c20e0b": {
+      "name": "worker",
+      "output": "- Artificial intelligence mimics human decision-making using complex algorithms  \n- It powers voice assistants image recognition and autonomous vehicles  \n- Machine learning enables systems to improve from data and experience  \n- AI is transforming industries healthcare finance and entertainment rapidly  \nall is set."
+    },
+    "worker:c21232805cee9de3f264110f8319c5bac6add82ccc38b3254f8e40ac7d702b98": {
+      "name": "worker",
+      "output": "- make small goals for each day  \n- study a bit but often  \n- ask help when you need  \n- rest well to feel fresh  \n- work hard to reach dreams  \nwe are done."
+    },
+    "worker:c2a0368ac110df140e0a4d58c5e3871c13023bc1d693f3f1fe7bafbb1aed0164": {
+      "name": "worker",
+      "output": "A node connects devices within a network, enabling communication, data sharing, efficient routing, security, scalability; essential for modern systems. we are done."
+    },
+    "worker:c3f079d113b79ffdf8accbe98d2664459f34d823090dda40b8c6e1aae4c86644": {
+      "name": "worker",
+      "output": "- learning chess helps improve focus  \n- pieces move differently on board  \n- players plan ahead before each move  \n- winning requires strategy patience we are done"
+    },
+    "worker:c4817e228b1132c6ae2170be3d09aba51c140c869e4cd4834ab992048f60617a": {
+      "name": "worker",
+      "output": "a wave was found in deep sea it held signs of life and changed many beliefs held by humans here we go."
+    },
+    "worker:c4f9a0d4a3c21b7ce24149f4caea24686adb2199598f7eb12db94d242fa67ca4": {
+      "name": "worker",
+      "output": "- read small parts  \n- write short notes  \n- test with quick quizzes  \n- ask help fast  \n- rest well each day"
+    },
+    "worker:c5ec31df9530e99125fe5ddf6285285eb225f7375551474ab76e773ee73bdea2": {
+      "name": "worker",
+      "output": "- a flux change led to new finds  \n- old maps hid the key  \n- light helped reveal the path  \n- new truth brings dark flux end"
+    },
+    "worker:c8387a9a0ca4c9e5434a73332383ef6054cf94105cd44bd67214c1cc8e55f0f8": {
+      "name": "worker",
+      "output": "- Cloud tech stores data on web servers, not local disks  \n- Users get files from any device or site  \n- Cuts costs with less gear used  \n- Speeds work flow and team sync  \nwe are done."
+    },
+    "worker:c9eae757649768c0456183e11133fb71f0c5e6f1434fc78df5c32a47e1dc2c76": {
+      "name": "worker",
+      "output": "Flux is flow of waves or heat through a space, moving fast, here we go."
+    },
+    "worker:c9f888a3578aebe90190c5aef2f5cbbeeb7cea69acf8054eb8a0bce20a7479b7": {
+      "name": "worker",
+      "output": "- Light and heat come from stars when gas burns and glows in sky up above.  \n- Dust and gas pull close by force, then small star grows and shines bright.  \n- Stars die when fuel ends, form dust for new stars to be made\u2014 that is it."
+    },
+    "worker:c9fe8235343160ca73f184961ee982d3014122a3e62fb1ee23390855f268a669": {
+      "name": "worker",
+      "output": "- learn code by making small apps  \n- each app acts like a node  \n- node links data and code  \n- work bit by bit  \n- build skills with fun tasks"
+    },
+    "worker:d11bdf8740ce0259d5ec5fe3e48347a7ece3bbfeb7724dc4b508a3bdc2dcdecf": {
+      "name": "worker",
+      "output": "photosynthesis converts sunlight into energy using chlorophyll, producing oxygen as a byproduct; that is it."
+    },
+    "worker:d2ffb1ec5278aafffd002f26060b929190ba355bbbdbcb2629b20ecc6843c579": {
+      "name": "worker",
+      "output": "- An atom is the basic unit of matter  \n- Atoms consist of protons neutrons electrons inside  \n- Many atoms join forming molecules creating substances  \n- Studying atoms reveals how everything in nature works"
+    },
+    "worker:d402040275aa9fdd0fbb8b1af1082c1ce041fa8a626cb304e6f21617fb8bc068": {
+      "name": "worker",
+      "output": "- read short texts each day to help learn and keep focus  \n- write down key points so you do not miss facts  \n- test self with small quizzes to find hard spots fast"
+    },
+    "worker:d4d0e1947411ad96d9b0073a3da1caceaa66dce85acd28cb43848d16947e4a6c": {
+      "name": "worker",
+      "output": "photosynthesis uses sunlight, water, and carbon dioxide as code for plants, converting energy into glucose and oxygen released naturally."
+    },
+    "worker:d4ed3caa88e3c86274fc8903b9b6c57740affbdc1f1507ebd715122cd7c6bc45": {
+      "name": "worker",
+      "output": "A wave is a move that sends energy through air, water, or a solid object nearby."
+    },
+    "worker:d5371e2db6e25fa270c7ed99ecc0395030fc38b34ef86a865e825107ebc9ae5f": {
+      "name": "worker",
+      "output": "A node acts as a connection point within networks enabling data transfer, communication, traffic management, reliability, security, performance; we are done."
+    },
+    "worker:d5ebd0651a3e3f429fff21b55046817ab36f2d5c94e7ad63f613486553e380fa": {
+      "name": "worker",
+      "output": "- Try small steps each day  \n- Use brief notes always  \n- Rest well after work  \n- Ask peers if stuck  \n- Keep focus on goals"
+    },
+    "worker:d6d5b78970df7a2d08f5a7a67be2dc17f71c3d578ade3ceced36eb97999ef335": {
+      "name": "worker",
+      "output": "- Water falls from clouds as rain or snow  \n- Sun heats earth air then air will rise  \n- Cool air chills water to form clouds  \n- Clouds burst then drop rain or snow  \n- This cycle helps plants grow fills lakes"
+    },
+    "worker:d86abd20ca5afafed992786620bccca2e49042d03b108497e86154ebfca944c9": {
+      "name": "worker",
+      "output": "- Atoms are tiny particles forming everything around us  \n- Each atom has protons neutrons plus electrons  \n- Different atoms combine to create various materials  \n- Understanding atoms helps explain how matter works"
+    },
+    "worker:d933f2101aac089629b2f0bc6ca797d90b4c97032e9f3c27fe10e0bebbf57c77": {
+      "name": "worker",
+      "output": "Cells make energy from food using small parts called mitochondria which turn fuel into power for the body to use."
+    },
+    "worker:d95e9014a5516b5695bd2d78366e61dcf51777e832a98849f9e76f814450732d": {
+      "name": "worker",
+      "output": "- a cell is a small node where life works  \n- energy flows through cell parts for tasks  \n- dna holds the code of life  \n- cells split for growth and fix harm"
+    },
+    "worker:d9699dade506ee55403b8f82202b4f8db96501fec95acd69f562050b004114ac": {
+      "name": "worker",
+      "output": "A wave transfers energy through water causing motion while the water itself stays mostly still all is set."
+    },
+    "worker:d97640a1c011298ba825cc9e600862fac0450f5e434a2500639513b8db46f929": {
+      "name": "worker",
+      "output": "- plan your work well  \n- set small goals fast  \n- stay calm and focus  \n- ask friends for help  \n- take short breaks often"
+    },
+    "worker:d988dd8fccc777e4e816594a8230fb9b8c09e3f7fcc1ae97c031bc00649c66df": {
+      "name": "worker",
+      "output": "- learn code with small apps  \n- each app is a node  \n- node links data and code  \n- work step by step  \n- build skill with fun tasks"
+    },
+    "worker:db02fd384c9ac27764b1424e3daa2fe8e0ec4c0e3927e3cacf2609f1fa71b3b5": {
+      "name": "worker",
+      "output": "- Artificial intelligence mimics human decision making using complex algorithms and large amounts of data  \n- It powers voice assistants image recognition and autonomous vehicles actively  \n- Machine learning enables systems to improve performance by learning from experience  \n- AI is transforming industries like healthcare finance and entertainment all is set."
+    },
+    "worker:de830b96a26b2eecd53ff501565da65f9034f53ca86c1ed9310d50eb877ec52a": {
+      "name": "worker",
+      "output": "- Scientists found ancient fossils deep inside caves showing early human life  \n- This discovery changes our understanding about human evolution across many regions  \n- Findings inspire new research exploring origins along with migration patterns across continents"
+    },
+    "worker:df3edc6cc3479c574ba36ddf558c5b702cc0612981562b0a175d6995b59c9508": {
+      "name": "worker",
+      "output": "- blockchain is a decentralized digital ledger that records transactions securely across network nodes  \n- it enables transparent, tamper-proof data sharing without requiring trusted intermediaries or central authorities  \n- applications include cryptocurrencies, supply chain tracking, voting systems, and digital identity verification platforms"
+    },
+    "worker:e01953a29766f51b4aadbb37b4cf83f46ed38e8db97a36e9b27593c66b742047": {
+      "name": "worker",
+      "output": "photosynthesis uses sunlight like a code allowing plants create energy converting carbon dioxide oxygen this natural process sustains life everywhere"
+    },
+    "worker:e2e94e6a8f06545bb6c9eedb94e0b9284129da3a2fbc91af4984e35244549138": {
+      "name": "worker",
+      "output": "Researchers discovered a mysterious wave influencing particle movement, unlocking secrets of energy transfer within matter\u2014revolutionizing physics. Here we go."
+    },
+    "worker:e3838a0257ac73b5195604826056be7116deae92b0c6959c6cfcdb32055ad5f1": {
+      "name": "worker",
+      "output": "Scientists observed a strange wave interacting with particles, revealing new energy behaviors unknown before. This marks progress. Here we go."
+    },
+    "worker:e4b704f8ce3a1f06e4bc2368d785b459288dc9313685a45423684ad8c9c0e1ca": {
+      "name": "worker",
+      "output": "- Make a plan and break tasks down  \n- Use short clear words and good notes  \n- Check your work well all is set."
+    },
+    "worker:e8230b072d57629a85a8510747e6c430b2e6cbd2fd944aa27f24b8683d4f31b2": {
+      "name": "worker",
+      "output": "rain falls from clouds, feeds plants, fills lakes, then water flows back, cycle never ends."
+    },
+    "worker:eae5b2f295e20ae097d2476cf3c124f0858912bf9222206c8f2526e4e495f1c6": {
+      "name": "worker",
+      "output": "- Scientists discovered a new particle inside a powerful collider  \n- This particle challenges previous physics theories significantly  \n- Experiments confirm unexpected behaviors under extreme conditions  \n- Researchers analyze results hoping to unlock cosmic secrets  \n- The universe surprises us often, so it goes."
+    },
+    "worker:ed025895beb57de96e9cc02f0eda070e0cb4dc96b4bfeec9e413e14009c7c000": {
+      "name": "worker",
+      "output": "a node joins parts of a plant or an animal for work cells use energy dna guides life and helps grow cells right"
+    },
+    "worker:ededfea70d30cc0526a8cbab79610b168acfe3e959d03031120de969bd10a246": {
+      "name": "worker",
+      "output": "gravity pulls objects toward earth due to mass attraction causing planets stars to form that is it."
+    },
+    "worker:f0276239b1f07ad5fd78e01c33a3868159abf1e0bee43a6927e795dd7a18c522": {
+      "name": "worker",
+      "output": "- artificial intelligence helps machines learn from data  \n- it improves tasks by finding patterns fast  \n- widely used in apps and tools  \n- drives innovation in many fields  \n- all is set."
+    },
+    "worker:f2e832db3df6433e25db8ae429b1ee95cf90105f26c09b72eea0f09b378f362a": {
+      "name": "worker",
+      "output": "- innovation brings new tools that change daily lives  \n- tools help humans solve problems fast and well  \n- tech is key to progress and growth overall"
+    },
+    "worker:f3cb001110675bb0d7b5cdeab0afddb15fec8a7624c112d8f312b533ffdc4552": {
+      "name": "worker",
+      "output": "- rain falls from gray clouds above  \n- drops soak soft earth and green plants  \n- roots drink water deep down  \n- steam rises as sun warms air"
+    },
+    "worker:f74b9b90e43d10745646e4c9de9d209f85d291ce40d5df58ba57a599f6487f52": {
+      "name": "worker",
+      "output": "Light travels fast in waves or small bits from stars sun or lamps sky blue bright or dim. This lets us see shapes forms and life."
+    },
+    "worker:f78cbdb2e5adab8a739aae54c89ed06cc138c00720675ba776f7ffa2ebfd8764": {
+      "name": "worker",
+      "output": "- Star tech helps find paths at night.  \n- Star maps guide ships and planes well.  \n- Star light shines bright from afar.  \n- Star tools aid teams in space work.  \n- Star data links sky and Earth life."
+    },
+    "worker:fd1d0c4564f7d281995c47e79f64f7bbec51aad26ec77c1fd21df6864ca83e9e": {
+      "name": "worker",
+      "output": "- Blockchain stores data securely across many computers  \n- Transactions remain transparent visible to all users  \n- It removes middlemen improves trust and speed  \n- Useful for finance supply chain voting systems  \nall is set."
+    },
+    "worker:fdde984f236e83357d0ff8241a91168094e5ba0f5a7821ea268d031aa01ec287": {
+      "name": "worker",
+      "output": "Cells are small parts that make up all life forms from plants birds fish and man that is it."
+    }
+  },
+  "version": 1
+}
