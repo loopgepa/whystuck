@@ -1,6 +1,6 @@
 # WhyStuck validation study: loop-level vs prompt-only GEPA
 
-*Generated: pending (offline build; the one paid run fills this in).*
+*Generated: 2026-07-23T05:26:30.500840+00:00.*
 
 ## Method
 
@@ -12,18 +12,16 @@
 
 ## Results
 
-**Pending live run (step 7).** The harness, scoring, and budget guard are built and tested offline; this document fills in once the one paid run records its cassettes.
-
 | Arm | What GEPA evolves | seed held-out | optimized held-out (mean ± std) | Δ |
 |-----|-------------------|---------------|---------------------------------|---|
-| A | seed baseline (no optimization) | — | Pending | — |
-| B | prompt-only GEPA (one gene) | — | Pending | — |
-| C | command control (genome-blind) | — | Pending | — |
-| D | loop-level GEPA (whole genome) | — | Pending | — |
+| A | seed baseline (no optimization) | 0.47 | 0.47 ± 0.03 | +0.00 |
+| B | prompt-only GEPA (one gene) | 0.47 | 0.59 ± 0.03 | +0.12 |
+| C | command control (genome-blind) | 0.47 | 0.47 ± 0.03 | +0.00 |
+| D | loop-level GEPA (whole genome) | 0.47 | 0.50 ± 0.06 | +0.03 |
 
-## Verdict
+## Verdict — NOT SUPPORTED
 
-Pending the live run.
+D (0.50) did not beat B (0.59) (Δ=-0.09). On this benchmark and budget, loop-level GEPA showed no advantage over prompt-only.
 
 ## Caveats
 
