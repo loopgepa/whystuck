@@ -69,30 +69,30 @@ the strongest prior on intrinsic self-correction. The burden now shifts: the int
 question is no longer "does the loop help?" (default: no) but "under what conditions
 *would* it?"
 
-## Next step
+## Next step (as of run 10 + the $0 analyses)
 
-Two honest options, in order of recommendation:
+The mechanism story is **complete and, within its scope, publication-ready**: null (tight
+CIs) → near-random detector → non-monotonic ceiling → fix step → actionability lever
+(CI excludes 0) → residual = a single mechanical skill (exact counting). The cheap
+experiments are exhausted; the two remaining paid ideas are low-value:
 
-1. **Ship the null (recommended).** Three pre-registered runs converging on "no", the
-   third with genuine headroom and aligned with Huang et al., is a complete finding. Publish
-   this note + the three reports; stop spending. Cost to do this: $0.
+- **D7 (more seeds): low value.** The exact-resample CIs are already tight (the paired Δ has
+  near-zero variance), so more seeds would only marginally narrow them. The high-value part
+  of D7 was free and is done.
+- **D1′ (deterministic word-count actuator): low value.** The decomposition already made its
+  point (residual = exact_word_count); a counter fixing counting is unsurprising. Its only
+  residual value is confirming the other constraints don't break when the count is enforced.
 
-2. **One more pre-registered run testing the two literature-implied levers, if the question
-   is worth more money.** Change exactly one thing at a time:
-   - **Feedback richness (Huang lever):** give the critique a *non-oracle* external signal it
-     is allowed to see — e.g. a deterministic partial-credit hint ("your draft has 23 words,
-     the rule wants an exact count") that is not the final metric. This is the single change
-     most likely to flip the result, because it converts intrinsic self-correction (which
-     fails) into feedback-guided correction (which works).
-   - **Pipeline complexity (DSPy lever):** raise loop depth (≥ 2–3 refine rounds) and/or add a
-     third gene, so there is more interacting structure for loop-level evolution to exploit.
+- **D5 (cross-domain): the one genuinely valuable next study.** Replicate the 4-arm design on
+  math (numeric checker) or code (unit tests) — domains where the verify step catches *real*
+  semantic errors and where GEPA reports gains. This moves the contribution from "an
+  IFEval-style observation" to a general finding (or sharpens it to "loop-level helps iff
+  verification is substantive"). It is a separate pre-registered mini-project (new verifier +
+  satisfiability/headroom controls), not a variation of the runs here.
 
-   Do **not** vary budget, model, and task family all at once — that is p-hacking a win.
-   Pre-register the single lever, the expected seed band, and the verdict rule before spending.
-
-*Recommendation: option 1.* The fair test has been run and answered; further spend should
-require a specific hypothesis about *why* this run would differ, and the feedback-richness
-lever is the only one with strong prior support.
+**Recommendation: write this up as the arXiv paper now (`docs/paper/main.tex`) and treat D5
+as the scoped v2 / follow-up.** Don't spend on D7 or D1′. Optional cheap armor: re-run *only*
+run 3 at n=10 (~$1) to preempt the reflexive "n is small" note, though the CI is already tight.
 
 **Update — both levers are being tested (runs 4 and 5).** Rather than stop, both
 literature-implied levers were pre-registered and run, one change each:
@@ -168,6 +168,10 @@ the draft actually satisfies its constraints with F₁ ≈ 0.11 on run 3 (precis
 F₁ 0.83 — which is exactly why the tool lifts the baseline, but that reliable detector sits
 in the B and D loops alike, so it opens no D-vs-B gap. This is the empirical version of
 Huang et al.'s self-verification-unreliability result, inside our harness.
+
+**Where the residual lives (per-constraint decomposition, $0).** `scripts/analyze_residual_by_constraint.py` replays the cassettes, takes the loop's *final* draft per held-out task, and reports per-constraint satisfaction. Under the oracle detector + maximally-actionable feedback (run 10), the residual is almost entirely **one constraint — `exact_word_count`** (satisfied only ≈0.50, up from 0.16 intrinsic / 0.33 with which-constraint feedback), while every "choice" constraint (no_comma, all_lowercase, num_bullets, include_keyword, end_with, forbidden_word) is at 1.0 and word_max_length at 0.90. So the generator-limited residual is a single mechanical skill (LLMs can't hit exact token counts), not a diffuse ceiling — recoverable by a deterministic actuator, not by prompt/critique optimization.
+
+**The null is tight, not underpowered ($0 stats).** Exact-resample 95% intervals on the paired per-seed Δ(D−B): run 3 (n=5) [−0.033, +0.033]; runs 4 & 10 exactly [0, 0] (B and D optimize to byte-identical genomes every seed). The one positive effect, Δ(hi−lo)=+0.063, has interval [+0.025, +0.085] excluding zero at n=3. So more seeds (D7) would only shrink already-tight intervals — low value.
 
 ### Reproducibility (verified)
 

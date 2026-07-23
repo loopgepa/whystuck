@@ -326,7 +326,9 @@ step across three pre-registered levels: \emph{lo} (a bare ``revise'' verdict), 
 \emph{plus} a concrete \emph{measured} edit per failed constraint, e.g.\ ``the draft has 2
 words but needs exactly 20: add 18''). The primary contrast is decisive: $\dd(\text{hi}-
 \text{lo}) = 0.873 - 0.810 = +0.063$ on the seed held-out (arm A, no GEPA), clearing the
-pre-registered $+0.05$ threshold --- the fix step is partly \textbf{feedback-limited}. Two
+pre-registered $+0.05$ threshold --- the fix step is partly \textbf{feedback-limited}.
+All three seeds are positive ($+0.090, +0.025, +0.075$) and an exact-resample $95\%$
+interval $[+0.025, +0.085]$ excludes zero, so the effect survives at $n{=}3$. Two
 sharp qualifications follow. (i) The gain is entirely in the \emph{hi} step: lo $\approx$
 mid ($0.810$ vs.\ $0.813$), so naming \emph{which} constraint failed adds nothing over a
 bare verdict; only the concrete, measured edit moves the needle. (ii) The lever is the
@@ -346,7 +348,11 @@ $0.765$ sits inside the pre-registered band, so the loop had real headroom and
 the verify gene had multiple constraints to decompose --- yet $\dd = 0.00$. The
 tie is not a flat line but a wash: per-seed, D and B trade wins
 (e.g.\ seed 1 $D\!+\!0.05$; seed 4 $B\!+\!0.055$) and net to zero. Control C is
-dead-flat on every seed, confirming the harness.
+dead-flat on every seed, confirming the harness. This null is tight, not merely
+underpowered: an exact-resample (all $n^n$ resamples) $95\%$ interval on the paired
+per-seed $\dd$ is $[-0.033, +0.033]$ for run 3 ($n{=}5$), and \emph{exactly}
+$[0.000, 0.000]$ for runs 4 and 10, where B and D produce byte-identical optimized
+genomes on every seed --- the difference is a consistent zero, not a noisy one.
 
 \paragraph{Feedback helps the baseline, not the gap (run 4).} Adding the
 measurement tool raised the seed loop from $0.765$ (run 3) to $0.837$ --- direct
@@ -436,21 +442,64 @@ Critique detector & refine budget & detector F$_1$ & seed held-out & run \\
 \midrule
 intrinsic self-critique & 1 & 0.11 & 0.765 & 3 \\
 non-oracle measurement tool & 1 & 0.83 & 0.837 & 4 \\
-oracle, terse verdict & 1 & 1.00 & 0.748 & 7 \\
-oracle, terse verdict & 3 & 1.00 & 0.813 & 8 \\
+oracle, which-constraint (mid) & 1 & 1.00 & 0.748 & 7 \\
+oracle, which-constraint (mid) & 3 & 1.00 & 0.813 & 8 \\
 oracle, bare ``revise'' (lo) & 3 & 1.00 & 0.810 & 9 \\
 oracle, concrete measured edits (hi) & 3 & 1.00 & \textbf{0.873} & 10 \\
 \bottomrule
 \end{tabular}
 \caption{Detector quality vs.\ loop performance is \textbf{non-monotonic}: the
-perfect (oracle) detector with terse verdicts (runs 7--8) does not maximize held-out
-score, falling below a good tool at one retry (run 4). Two fix-side levers close the
+perfect (oracle) detector with which-constraint feedback (mid; runs 7--8) does not
+maximize held-out score, falling below a good tool at one retry (run 4). Two fix-side levers close the
 gap: raising the refine budget ($0.748\!\to\!0.813$, run 8) and --- decisively ---
 making the feedback \emph{actionable} (concrete measured edits, run 10: $0.873$, now
 \emph{above} the tool). Detector F$_1$ is fixed at $1.0$ across runs 7--10, so the
 $0.810\!\to\!0.873$ lift is pure feedback \emph{actionability}, not detection. A
 generator-limited residual remains (hi still $<1$).}
 \label{tab:curve}
+\end{table}
+
+\paragraph{(1c) The residual is one constraint, not a diffuse ceiling.} We decompose
+the fix-step residual by constraint: replaying each run's cassette (offline, \$0;
+\texttt{scripts/analyze\_residual\_by\_constraint.py}), we take the loop's \emph{final}
+draft for every held-out task and record the per-constraint satisfaction rate
+(Table~\ref{tab:residual}). The result is stark. Under the oracle detector with
+maximally-actionable feedback (run 10), every ``choice'' constraint --- \texttt{no\_comma},
+\texttt{all\_lowercase}, \texttt{num\_bullets}, \texttt{include\_keyword},
+\texttt{end\_with}, \texttt{forbidden\_word} --- is satisfied at rate $1.0$, and
+\texttt{word\_max\_length} at $0.90$. The residual is almost entirely
+\texttt{exact\_word\_count} (with a small remainder in \texttt{word\_max\_length}):
+even told exactly ``the draft has 2 words but needs exactly 20: add 18,''
+\texttt{gpt-4.1-mini} hits the exact count only $\sim\!0.50$ of the time (up from
+$0.16$ intrinsic, $0.33$ with which-constraint feedback). This is the known
+inability of LLMs to control exact token counts during generation. So the
+generator-limited residual is not a broad capability wall --- it is a single mechanical
+skill, of a kind a deterministic actuator (not prompt/critique optimization) would
+address; the loop-level lever is inert regardless.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lccc}
+\toprule
+Constraint (final-draft satisfaction) & run 3 (intrinsic $R1$) & run 8 (oracle mid $R3$) & run 10 (oracle hi $R3$) \\
+\midrule
+\texttt{exact\_word\_count}  & 0.16 & 0.33 & \textbf{0.50} \\
+\texttt{word\_max\_length}   & 0.85 & 0.80 & 0.90 \\
+\texttt{forbidden\_word}     & 0.92 & 0.96 & 1.00 \\
+\texttt{num\_bullets}        & 1.00 & 1.00 & 1.00 \\
+\texttt{end\_with}           & 0.95 & 1.00 & 1.00 \\
+\texttt{include\_keyword}    & 1.00 & 1.00 & 1.00 \\
+\texttt{all\_lowercase}      & 0.95 & 1.00 & 1.00 \\
+\texttt{no\_comma}           & 0.95 & 1.00 & 1.00 \\
+\bottomrule
+\end{tabular}
+\caption{Per-constraint satisfaction of the loop's final draft (held-out, from
+cassettes). The fix-step residual is concentrated almost entirely in
+\texttt{exact\_word\_count}; actionable feedback lifts it ($0.16\!\to\!0.33\!\to\!0.50$)
+but never solves it, while every choice constraint reaches $1.0$. The generator-limited
+residual is one mechanical skill (exact counting), not a diffuse ceiling.}
+\label{tab:residual}
 \end{table}
 
 \paragraph{(2) Intrinsic self-correction has a low ceiling.} Consistent with
@@ -468,11 +517,14 @@ subsample and lose on held-out; this hurts B and D alike.
 \label{sec:threats}
 
 We state these plainly. \textbf{Power:} runs 4--10 use $n{=}3$ seeds (runs 2--3
-use 5); these are exploratory, and the informal verdict rule is not a
-significance test. The one supra-threshold effect we report --- the
-actionability lift $\dd(\text{hi}-\text{lo})=+0.063$ (runs 9--10) --- clears its
-pre-registered $+0.05$ bar and is directionally consistent across all three seeds,
-but at $n{=}3$ we report it as an effect estimate, not a significance claim. \textbf{Single worker/reflection model:} results may be
+use 5), so we report exact-resample intervals rather than lean on the informal
+verdict rule. These are unusually informative despite small $n$ because the paired
+per-seed $\dd(D{-}B)$ has near-zero variance --- B and D often optimize to
+byte-identical genomes --- giving $[-0.033,+0.033]$ (run 3) and $[0,0]$ (runs 4, 10):
+the null is a \emph{consistent} zero, not an underpowered one. Symmetrically, the one
+positive effect, $\dd(\text{hi}-\text{lo})=+0.063$, has an interval $[+0.025,+0.085]$
+excluding zero at $n{=}3$. We still report these as effect estimates with intervals,
+not formal significance tests, and a larger seed count would tighten them further. \textbf{Single worker/reflection model:} results may be
 model-dependent; \citet{huang2023cannot} find self-correction effects vary by
 model. \textbf{Cross-lineage, not cross-provider:} run 6's critic
 (\texttt{gpt-5.6-luna}) shares a vendor and training lineage with the worker
@@ -524,17 +576,40 @@ generator-limited (the residual). The agenda, re-ordered accordingly:
   \item[D4 (budget \& worker sweeps).] $\mathrm{mmc}\in\{20,40,80,160\}$ and worker
     $\in$\{nano, mini, a 5-series\} to rule out under-budgeting and map
     model-dependence.
-  \item[D5 (cross-domain).] Replicate on multi-hop QA (factual checker), code
-    (unit tests), and math (numeric checker) --- domains where the verify step
-    catches real errors and where GEPA reports gains. Maps the boundary.
-  \item[D7 (statistics).] $\ge 8$ seeds, paired bootstrap CIs on \dd, and a
-    pre-registered power analysis, replacing the informal rule.
+  \item[D5 (cross-domain) --- \emph{the priority next study}.] Replicate the 4-arm
+    design on math (numeric checker) or code (unit tests) --- domains where the verify
+    step catches real \emph{semantic} errors and where GEPA reports gains. This is the
+    one open direction that would move the contribution from ``an instruction-following
+    observation'' to a general finding (or sharpen it to ``loop-level helps iff
+    verification is substantive''). It is a separate pre-registered mini-project (new
+    verifier, satisfiability/headroom controls), not a variation of the runs here.
+  \item[D7 (statistics) --- \emph{largely retired}.] We already report exact-resample
+    intervals ($\S\ref{sec:threats}$); because the paired $\dd$ has near-zero variance
+    they are tight even at $n{\le}5$, so additional seeds would only marginally narrow
+    them. A larger-$n$ pre-registered replication remains nice-to-have, not load-bearing.
+  \item[D1$'$-tools (deterministic actuator).] Table~\ref{tab:residual} localizes the
+    residual to \texttt{exact\_word\_count}; a deterministic count-fixer would likely
+    recover most of it. Lower priority now that the decomposition has made the point
+    (a counter fixes counting); its value is confirming the other constraints do not
+    break when the count is enforced.
   \item[D8 (generalization).] Enlarge the generator's parameter space so
     train/held-out cannot near-duplicate, and report the train--held-out gap.
 \end{description}
 
 \section{Conclusion}
 \label{sec:conclusion}
+
+Three questions are easily conflated; our answers differ. \textbf{(i) Does the
+self-refine loop help?} Only through \emph{external} signal --- a measurement tool
+(seed $0.765\!\to\!0.837$) or more refine attempts ($0.748\!\to\!0.813$) --- never
+through the model grading its own draft (the intrinsic critique is a near-random
+detector, F$_1\!=\!0.11$). \textbf{(ii) Does GEPA lift this task?} No: its optimized
+genomes gave no held-out gain and sometimes \emph{degraded} both arms (train-split
+overfitting), at the budgets tested --- not a verdict on GEPA in general, which
+reports gains elsewhere. \textbf{(iii) Does loop-level optimization beat prompt-only
+(the thesis)?} No, with tight intervals: $\dd(D{-}B)$ is a consistent zero
+($[-0.033,+0.033]$ on the decisive run; exactly $[0,0]$ where the arms converge). The
+rest of this section explains \emph{why}.
 
 Across ten pre-registered experiments, optimizing the verification (and plan)
 components of a self-refine loop gave no held-out advantage over optimizing the
