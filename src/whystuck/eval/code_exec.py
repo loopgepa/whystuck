@@ -35,12 +35,18 @@ limits first; (b) ``RLIMIT_AS`` bounds only the CHILD's memory — captured stdo
 still flow into this process via ``communicate()``, so a runaway ``print`` loop is bounded
 only by the wall-clock timeout window, not by size. Fine for the timeout/task profile here.
 
+The default address-space limit (``mem_mb=2048``) is generous on purpose: MBPP+ plus-test
+harnesses import numpy, whose OpenBLAS reserves a large virtual-memory arena on import.
+The child env pins ``OPENBLAS/OMP/MKL_NUM_THREADS=1``, which shrinks that reservation to
+well under the limit AND makes numpy reductions deterministic; a real memory bomb (e.g. a
+10**10-element list, ~80 GB) still dwarfs the limit and is caught.
+
 Determinism: the verdict is a pure function of the code for tasks that are not sensitive
 to time, cwd path, or locale (MBPP+ pure functions qualify); the timeout is set well above
 true runtime and never arbitrates a correct solution, and hash seed / locale / bytecode
-writing are pinned. This is why held-out scores reproduce bit-for-bit under `--replay`
-even though execution is not cassette-recorded (it is deterministic-local, like the arm-C
-command runner).
+writing / BLAS thread count are pinned. This is why held-out scores reproduce bit-for-bit
+under `--replay` even though execution is not cassette-recorded (it is deterministic-local,
+like the arm-C command runner).
 """
 
 from __future__ import annotations
@@ -109,7 +115,7 @@ def _has_assertion(test_code: str) -> bool:
 
 
 def run_tests(
-    solution: str, test_code: str, *, timeout: float = 10.0, mem_mb: int = 512
+    solution: str, test_code: str, *, timeout: float = 10.0, mem_mb: int = 2048
 ) -> ExecResult:
     """Run ``solution`` then ``test_code`` in one sandboxed subprocess.
 
@@ -129,6 +135,14 @@ def run_tests(
         "PYTHONDONTWRITEBYTECODE": "1",
         "LC_ALL": "C",
         "TZ": "UTC",
+        # Pin BLAS/OpenMP to one thread: MBPP+ plus-test harnesses import numpy, and
+        # multi-threaded OpenBLAS both (a) reserves >0.5 GB of virtual memory on import
+        # — which trips RLIMIT_AS and makes numpy fail to load — and (b) makes reductions
+        # non-deterministic across replays. One thread fixes both, which the determinism
+        # contract (module docstring) and the plus-test scorer depend on.
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1",
     }
     try:
         with tempfile.TemporaryDirectory() as workdir:

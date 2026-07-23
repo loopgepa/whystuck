@@ -144,6 +144,7 @@ def make_self_refine_run_task(
     verify_gene: str = "ensure_correct",
     plan_gene: str | None = None,
     stats_fn: Callable[[str], str] | None = None,
+    exec_feedback: Feedback | None = None,
     critique_complete: Complete | None = None,
     oracle_critique: bool = False,
     oracle_feedback: Feedback | None = None,
@@ -171,6 +172,15 @@ def make_self_refine_run_task(
       readout — the external-verification signal Huang et al. 2023 found necessary for
       self-correction to help. It measures the text only; the programmatic scorer is
       still never consulted in the loop, so this is a tool, not oracle contamination.
+    - **exec_feedback** (task-aware execution signal, v2 code): like `stats_fn` but it
+      receives the *task* too — `exec_feedback(draft, task)` — so it can run the task's
+      VISIBLE tests against the draft and inject the result (pass/fail + traceback) into
+      the non-oracle critique. This is the reliable, executable feedback v1's blind
+      self-critique lacked (the Reflexion regime) and the lever that lets arm D — which
+      evolves how the verify gene *reads* that execution output — beat arm B on code.
+      Non-oracle only (the oracle path gates on the true metric, so no critique tool
+      runs); base tests ≠ the hidden scorer, so it is a tool, not oracle contamination.
+      Additive: unset → no block, so prior cassettes replay byte-identically.
     - **critique_complete** (cross-family critic lever, run 6): when set, the critique
       LLM call routes to this model instead of the worker `complete`, so the verifier
       is a DIFFERENT model than the generator. Motivated by the finding that a judge
@@ -253,8 +263,13 @@ def make_self_refine_run_task(
                 stats_block = (
                     f"\n\n# Measured text statistics\n{stats_fn(draft)}" if stats_fn else ""
                 )
+                # Execution lever (v2 code): the task's VISIBLE test results on this draft.
+                exec_block = (
+                    f"\n\n# Test results\n{exec_feedback(draft, task)}" if exec_feedback else ""
+                )
                 critique = critic(
-                    f"{ver}\n\n# Task\n{task_text}\n\n# Draft answer\n{draft}{stats_block}\n\n"
+                    f"{ver}\n\n# Task\n{task_text}\n\n# Draft answer\n{draft}"
+                    f"{stats_block}{exec_block}\n\n"
                     "Reply exactly PASS if every requirement is satisfied; "
                     "otherwise list what to fix."
                 )

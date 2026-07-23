@@ -525,3 +525,74 @@ def test_oracle_feedback_still_makes_no_critique_llm_call():
     )(_two_gene("write it", "SECRET_VERIFY_GENE"), _nw_task())
     assert len(calls) == 1 + 2  # generate + 2 refines, no critique call
     assert not any("SECRET_VERIFY_GENE" in c for c in calls)
+
+
+# --- exec_feedback: task-aware in-loop execution signal (v2 code) ----------------
+
+
+def test_exec_feedback_is_injected_into_the_non_oracle_critique_prompt():
+    # The code study needs base-test EXECUTION output inside the critique — the signal
+    # v1's blind self-critique lacked. Unlike stats_fn, this is task-aware.
+    calls = []
+
+    def spy(p):
+        calls.append(p)
+        return "PASS" if "# Draft answer" in p else "draft"
+
+    make_self_refine_run_task(
+        spy,
+        ifbench_score,
+        max_retries=1,
+        exec_feedback=lambda draft, task: "EXEC_MARKER: 2/3 base tests failed",
+    )(_two_gene("write it", "verify"), _nw_task())
+    critique_prompts = [c for c in calls if "# Draft answer" in c]
+    assert critique_prompts and all("EXEC_MARKER" in c for c in critique_prompts)
+
+
+def test_exec_feedback_is_task_aware():
+    # It receives the task, so different tasks can yield different readouts (base tests
+    # differ per task) — the whole reason stats_fn(draft) was insufficient for code.
+    seen = []
+
+    def spy(p):
+        return "PASS" if "# Draft answer" in p else "draft"
+
+    make_self_refine_run_task(
+        spy,
+        ifbench_score,
+        max_retries=1,
+        exec_feedback=lambda draft, task: seen.append(task.id) or f"exec for {task.id}",
+    )(_two_gene("g", "v"), BenchmarkTask(id="task-XYZ", payload={"goal": "do"}))
+    assert "task-XYZ" in seen
+
+
+def test_no_exec_feedback_leaves_the_critique_prompt_unchanged():
+    # Additive lever: with exec_feedback unset there is NO test-results block, so prior
+    # cassettes (recorded without it) replay byte-identically.
+    calls = []
+
+    def spy(p):
+        calls.append(p)
+        return "PASS" if "# Draft answer" in p else "draft"
+
+    make_self_refine_run_task(spy, ifbench_score, max_retries=1)(_two_gene("g", "v"), _nw_task())
+    assert not any("# Test results" in c for c in calls)
+
+
+def test_exec_feedback_is_ignored_on_the_oracle_path():
+    # The oracle path gates on the true metric and uses oracle_feedback; exec_feedback is
+    # a non-oracle critique tool and must not enter that path.
+    calls = []
+
+    def spy(p):
+        calls.append(p)
+        return "x x"
+
+    make_self_refine_run_task(
+        spy,
+        ifbench_score,
+        max_retries=2,
+        oracle_critique=True,
+        exec_feedback=lambda draft, task: "EXEC_SHOULD_NOT_APPEAR",
+    )(_two_gene("g", "v"), _nw_task())
+    assert not any("EXEC_SHOULD_NOT_APPEAR" in c for c in calls)

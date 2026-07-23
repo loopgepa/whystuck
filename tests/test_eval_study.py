@@ -353,6 +353,30 @@ def test_run_study_wires_multi_constraint_scorer(tmp_path):
     assert 0.0 < res["A"].seed_heldout < 1.0
 
 
+def test_run_study_forwards_exec_feedback_to_the_worker_loop(tmp_path):
+    # The v2-code execution signal must reach the loop's critique via run_study. Arm A's
+    # held-out scoring runs the same self-refine worker, so a spy over it sees the block.
+    calls = []
+
+    def spy(prompt: str) -> str:
+        calls.append(prompt)
+        return "PASS" if "# Draft answer" in prompt else "draft"
+
+    run_study(
+        WhyStuckStore(tmp_path / "store"),
+        complete=spy,
+        reflection_lm="fake",
+        train=[BenchmarkTask(id="t0", payload={"goal": "g"})],
+        heldout=[BenchmarkTask(id="t1", payload={"goal": "g"})],
+        arms=("A",),
+        _optimize=_fake_optimize,
+        score_fn=lambda o, t: 0.0,
+        exec_feedback=lambda draft, task: f"EXEC[{task.id}]",
+    )
+    critique_prompts = [c for c in calls if "# Draft answer" in c]
+    assert critique_prompts and all("EXEC[t1]" in c for c in critique_prompts)
+
+
 # --- run-4/run-5 levers: feedback stats + a third `plan` gene -------------------
 
 

@@ -41,7 +41,10 @@ packages = ["src/whystuck"]
 [project.optional-dependencies]
 # v0.2 measured evaluation / GEPA-wrapped optimization. Kept optional so the core
 # stays offline and dependency-light (ADR-011).
-eval = ["gepa>=0.1,<0.2", "litellm>=1.83,<2"]
+# numpy is required by the v2 code study's held-out scorer: the vendored MBPP+
+# plus-test harnesses import it (np.allclose float comparisons). Pinned to one BLAS
+# thread at execution time (eval/code_exec.py) for determinism.
+eval = ["gepa>=0.1,<0.2", "litellm>=1.83,<2", "numpy>=1.26"]
 
 [dependency-groups]
 dev = [
@@ -49,6 +52,9 @@ dev = [
     "pytest-cov>=5",
     "ruff>=0.6",
     "mypy>=1.11",
+    # The code-exec / code_bench tests execute vendored MBPP+ plus-test harnesses,
+    # which import numpy in the sandboxed subprocess (== this interpreter under pytest).
+    "numpy>=1.26",
 ]
 docs = [
     "mkdocs-material>=9.5",

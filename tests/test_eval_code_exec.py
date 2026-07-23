@@ -114,6 +114,36 @@ def test_comment_only_test_block_is_not_a_vacuous_pass():
     assert r.passed is False
 
 
+def test_numpy_imports_under_the_sandbox():
+    # The MBPP+ plus-test harness imports numpy unconditionally; the sandbox must let
+    # it load (thread-pinned so OpenBLAS's virtual reservation stays under RLIMIT_AS)
+    # or every plus-test would fail with an import error, not a real verdict.
+    sol = "import numpy as np\n\ndef f():\n    return np.array([1, 2, 3]).sum()\n"
+    tests = "assert f() == 6\n"
+    r = run_tests(sol, tests, timeout=15.0)
+    assert r.passed is True, r.detail
+
+
+def test_blas_threads_are_pinned_to_one_for_determinism():
+    # Single-thread BLAS is what makes numpy reductions bit-for-bit reproducible under
+    # --replay (and keeps its virtual memory small). Assert the pins reach the child.
+    sol = "import os\n"
+    tests = (
+        'assert os.environ.get("OPENBLAS_NUM_THREADS") == "1"\n'
+        'assert os.environ.get("OMP_NUM_THREADS") == "1"\n'
+        'assert os.environ.get("MKL_NUM_THREADS") == "1"\n'
+    )
+    r = run_tests(sol, tests, timeout=5.0)
+    assert r.passed is True, r.detail
+
+
+def test_memory_bomb_still_bounded_with_the_raised_limit():
+    # Raising the default RLIMIT_AS to admit numpy must NOT defang the bomb guard: a
+    # 10**10-element list (~80 GB) still dwarfs any sane limit and must fail, not OOM.
+    r = run_tests("x = [0] * (10**10)\n", "assert True\n", timeout=5.0)
+    assert r.passed is False
+
+
 def test_timeout_kills_spawned_descendants_no_leak():
     # A solution that spawns a detached grandchild then hangs: after the timeout, the
     # grandchild's process group must be killed (not leaked). We verify by PID liveness.

@@ -55,6 +55,10 @@ MODEL_PRICES: dict[str, tuple[float, float]] = {
 # not a hopeful estimate. The live run MUST wire these through (run_validation_study
 # builds its `complete`/`reflection` with exactly these caps) or the bound is void.
 WORKER_MAX_OUTPUT_TOKENS = 320  # ~240 words; ample for IFBench constraint-following
+# The v2 code study needs a larger worker cap: a solution is a whole function (imports +
+# body), and the refine step re-emits it. 512 comfortably fits an MBPP+ function while
+# still hard-capping output. Priced via CODE_WORKER_TOKENS below.
+CODE_WORKER_MAX_OUTPUT_TOKENS = 512
 REFLECTION_MAX_OUTPUT_TOKENS = 1500
 
 # Per-call (in, out) shape for the worker. Output is the enforced hard cap. Input is
@@ -68,6 +72,11 @@ REFLECTION_MAX_OUTPUT_TOKENS = 1500
 # reflection output cap could exceed it. Output stays at the enforced cap; critique
 # output is in practice far below it, so that dimension carries extra slack.
 WORKER_TOKENS = (1200, WORKER_MAX_OUTPUT_TOKENS)  # (in estimate, out hard cap)
+# Code worker input is larger than IFBench's: the prompt carries the task + the VISIBLE
+# base tests, and the refine prompt adds the prior solution (≤512) + the critique (which
+# embeds a base-test traceback, capped at ~300 chars) + an evolved gene. 2200 is a
+# conservative upper bound for that worst-case (refine) shape; output stays hard-capped.
+CODE_WORKER_TOKENS = (2200, CODE_WORKER_MAX_OUTPUT_TOKENS)  # (in estimate, out hard cap)
 # Reflection output is enforced via max_tokens on the reflection LM; the input (GEPA's
 # prompt over sampled traces) is a calibrated estimate — GEPA sizes that prompt itself,
 # so it can't be hard-capped here. The proposal-count cap (max_candidate_proposals) is
@@ -132,6 +141,7 @@ def plan_study_calls(
     reflection_model: str,
     n_seeds: int = 1,
     worker_calls_per_task: int = 1,
+    worker_tokens: tuple[int, int] = WORKER_TOKENS,
 ) -> list[CallGroup]:
     """Conservative per-call plan for a study configuration.
 
@@ -158,6 +168,10 @@ def plan_study_calls(
     the guard MUST account for all of them or it under-counts. Reflection:
     `reflection_calls` per LLM-optimizing arm — a hard bound, because the caller
     wires it through as `max_candidate_proposals` (see the module docstring).
+
+    `worker_tokens` is the per-worker-call (in, out) shape; it defaults to the IFBench
+    `WORKER_TOKENS` and the caller passes `CODE_WORKER_TOKENS` for the (larger) code
+    study, so the guard prices whichever task set actually runs.
     """
     worker_evals = 0
     for arm in arms:
@@ -174,6 +188,6 @@ def plan_study_calls(
     reflection_total = reflection_per_seed * n_seeds
 
     return [
-        CallGroup(worker_model, worker_calls, *WORKER_TOKENS),
+        CallGroup(worker_model, worker_calls, *worker_tokens),
         CallGroup(reflection_model, reflection_total, *REFLECTION_TOKENS),
     ]

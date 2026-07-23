@@ -30,6 +30,8 @@ import os
 import sys
 
 from whystuck.eval.cost import (
+    CODE_WORKER_MAX_OUTPUT_TOKENS,
+    CODE_WORKER_TOKENS,
     MODEL_PRICES,
     REFLECTION_MAX_OUTPUT_TOKENS,
     WORKER_MAX_OUTPUT_TOKENS,
@@ -50,11 +52,13 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--arms", default="ABCD", help="which arms to run (default ABCD)")
     p.add_argument(
         "--task-set",
-        choices=("ifbench", "multi", "multi-hard"),
+        choices=("ifbench", "multi", "multi-hard", "code"),
         default="ifbench",
         help="ifbench = vendored single-constraint slice; multi = composable "
         "multi-constraint tasks (easy, saturated at seed 0.97); multi-hard = harder "
-        "constraints (exact count / forbidden word / max length) with real headroom",
+        "constraints (exact count / forbidden word / max length) with real headroom; "
+        "code = vendored MBPP+ (base tests VISIBLE/in-loop, plus tests HIDDEN/scored) — "
+        "the v2 cross-domain study where in-loop verification is executable",
     )
     p.add_argument("--n-train", type=int, default=16, help="train task count (default 16)")
     p.add_argument("--n-heldout", type=int, default=16, help="held-out task count (default 16)")
@@ -180,6 +184,18 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 2
+    # The code task set's anti-oracle protocol REQUIRES the non-oracle, base-test-gated
+    # critique: --oracle-critique gates on score_fn (= code_score = the HIDDEN plus tests),
+    # which would leak the held-out scorer into the loop. Refuse at the cheap dry-run step.
+    if args.task_set == "code" and args.oracle_critique:
+        print(
+            "ERROR: --oracle-critique is incompatible with --task-set code: it would gate "
+            "the loop on the hidden plus-test scorer (oracle contamination). The code study "
+            "uses executable base-test feedback in a non-oracle critique instead.",
+            file=sys.stderr,
+        )
+        return 2
+
     if args.feedback_level == "hi" and args.task_set not in ("multi", "multi-hard"):
         print(
             "ERROR: --feedback-level hi needs a multi task set (--task-set multi|multi-hard); "
@@ -205,6 +221,10 @@ def main(argv: list[str] | None = None) -> int:
         if cost_at_shape(args.critique_model) > cost_at_shape(args.worker_model):
             pricing_worker_model = args.critique_model
 
+    # Code solutions are longer than IFBench text on both axes, so the guard must price
+    # the code worker with its larger (in, out) shape or it under-counts a paid run.
+    worker_tokens = CODE_WORKER_TOKENS if args.task_set == "code" else WORKER_TOKENS
+
     groups = plan_study_calls(
         arms=arms,
         n_train=args.n_train,
@@ -215,6 +235,7 @@ def main(argv: list[str] | None = None) -> int:
         reflection_model=args.reflection_model,
         n_seeds=len(seeds),
         worker_calls_per_task=worker_calls_per_task,
+        worker_tokens=worker_tokens,
     )
 
     print(
@@ -282,15 +303,28 @@ def _run_live(
     from whystuck.core.storage import WhyStuckStore
     from whystuck.core.util import utc_now_iso
     from whystuck.eval.cassette import Cassette
+    from whystuck.eval.code_bench import code_feedback, code_score, load_code_tasks
     from whystuck.eval.ifbench import ifbench_feedback, ifbench_score, load_ifbench
-    from whystuck.eval.llm_worker import litellm_complete
+    from whystuck.eval.llm_worker import Feedback, litellm_complete
     from whystuck.eval.multi_constraint import load_multi_constraint, mc_feedback, mc_score
     from whystuck.eval.report import render_report
     from whystuck.eval.study import run_study
     from whystuck.eval.text_stats import text_stats
 
     # Task set selects the loader + the scorer/feedback the worker loop grades with.
-    if args.task_set in ("multi", "multi-hard"):
+    # `exec_feedback` is the task-aware, EXECUTABLE in-loop signal (code only); the text
+    # task sets have no executor, so it stays None (their critique is LLM/oracle-gated).
+    exec_feedback: Feedback | None = None
+    if args.task_set == "code":
+        # MBPP+: base tests VISIBLE (shown in-prompt + executed by the in-loop critique
+        # via exec_feedback), plus tests HIDDEN (the held-out scorer). See code_bench.
+        def load_split(split: str, seed: int, n: int):
+            return load_code_tasks(split, seed=seed, n=n)  # type: ignore[arg-type]
+
+        score_fn, feedback_fn = code_score, code_feedback
+        exec_feedback = code_feedback  # base-test execution read into the critique
+        dataset = "MBPP+ (EvalPlus; base=visible/in-loop, plus=hidden/scored)"
+    elif args.task_set in ("multi", "multi-hard"):
         hard = args.task_set == "multi-hard"
         # Size the generated pool so each disjoint half comfortably covers the larger
         # of n_train/n_heldout — otherwise load_multi_constraint raises rather than
@@ -309,6 +343,11 @@ def _run_live(
 
         score_fn, feedback_fn, dataset = ifbench_score, ifbench_feedback, "IFBench"
 
+    # Worker output hard-cap matches what the guard priced for this task set.
+    worker_max_out = (
+        CODE_WORKER_MAX_OUTPUT_TOKENS if args.task_set == "code" else WORKER_MAX_OUTPUT_TOKENS
+    )
+
     # Feedback-actionability lever (D2'): the oracle-path repair-feedback fn for the
     # chosen level. None = "mid" (loop falls back to feedback_fn, byte-identical to
     # run 8). Only consulted under --oracle-critique (lo/hi require it; the CLI guards
@@ -324,7 +363,7 @@ def _run_live(
     # --replay opens the cassette read-only and strict: every call must be cached.
     with Cassette(record_path, mode="replay" if args.replay else "record") as cassette:
         complete = cassette.wrap(
-            litellm_complete(args.worker_model, max_tokens=WORKER_MAX_OUTPUT_TOKENS), name="worker"
+            litellm_complete(args.worker_model, max_tokens=worker_max_out), name="worker"
         )
         reflection = cassette.wrap(
             litellm_complete(args.reflection_model, max_tokens=REFLECTION_MAX_OUTPUT_TOKENS),
@@ -357,6 +396,7 @@ def _run_live(
                     feedback_fn=feedback_fn,
                     use_plan_gene=args.plan_gene,
                     stats_fn=text_stats if args.feedback_stats else None,
+                    exec_feedback=exec_feedback,
                     critique_complete=critique_complete,
                     oracle_critique=args.oracle_critique,
                     oracle_feedback=oracle_feedback,
@@ -378,7 +418,8 @@ def _run_live(
         "critique_model": args.critique_model if not args.oracle_critique else None,
         "oracle_critique": args.oracle_critique,
         "feedback_level": args.feedback_level,
-        "worker_max_output_tokens": WORKER_MAX_OUTPUT_TOKENS,
+        "exec_feedback": exec_feedback is not None,
+        "worker_max_output_tokens": worker_max_out,
         "seeds": seeds,
         "estimated_usd": estimate,
         "generated": utc_now_iso(),
