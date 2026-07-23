@@ -142,6 +142,8 @@ def make_self_refine_run_task(
     feedback: Feedback | None = None,
     generate_gene: str = "generate",
     verify_gene: str = "ensure_correct",
+    plan_gene: str | None = None,
+    stats_fn: Callable[[str], str] | None = None,
     max_retries: int = 2,
 ) -> RunTask:
     """A real generate -> critique -> refine loop (not single-shot).
@@ -154,6 +156,17 @@ def make_self_refine_run_task(
       the programmatic scorer is never consulted inside the loop). A better verify
       rubric catches more failures and steers better refinements, which is exactly
       why arm D (evolves both genes) can beat arm B (evolves only `generate`).
+
+    Two optional levers, each gated off by default (so existing runs are unchanged):
+    - **plan_gene** (complexity / DSPy lever): when set, a `plan` step runs FIRST and
+      its output is threaded into the generate prompt, giving the loop a third
+      interacting module for whole-genome optimization to co-tune. Adds one LLM call
+      per eval (2 + 2*max_retries total). Missing gene id fails loud via `_gene_content`.
+    - **stats_fn** (feedback-richness / Huang lever): when set, `stats_fn(draft)` is
+      injected into every critique (and refine) prompt as a measured, NON-oracle tool
+      readout — the external-verification signal Huang et al. 2023 found necessary for
+      self-correction to help. It measures the text only; the programmatic scorer is
+      still never consulted in the loop, so this is a tool, not oracle contamination.
 
     The final answer is scored by `score` (the ground-truth programmatic metric),
     so the loop cannot game it. `max_retries` bounds the critique/refine rounds and
@@ -171,15 +184,28 @@ def make_self_refine_run_task(
         task_text = _task_text(task)
         steps: list[LoopStepTrace] = []
 
-        draft = complete(f"{gen}\n\n# Task\n{task_text}")
+        # Complexity lever: optional plan step before the first draft.
+        plan_block = ""
+        if plan_gene is not None:
+            plan = complete(f"{_gene_content(genome, plan_gene)}\n\n# Task\n{task_text}")
+            steps.append(
+                LoopStepTrace(
+                    step_id="plan", role="planner", input_summary=task_text, output_summary=plan
+                )
+            )
+            plan_block = f"\n\n# Plan\n{plan}"
+
+        draft = complete(f"{gen}\n\n# Task\n{task_text}{plan_block}")
         steps.append(
             LoopStepTrace(
                 step_id="generate-0", role="worker", input_summary=task_text, output_summary=draft
             )
         )
         for i in range(max_retries):
+            # Feedback lever: a measured (non-oracle) stats readout for the critique.
+            stats_block = f"\n\n# Measured text statistics\n{stats_fn(draft)}" if stats_fn else ""
             critique = complete(
-                f"{ver}\n\n# Task\n{task_text}\n\n# Draft answer\n{draft}\n\n"
+                f"{ver}\n\n# Task\n{task_text}\n\n# Draft answer\n{draft}{stats_block}\n\n"
                 "Reply exactly PASS if every requirement is satisfied; "
                 "otherwise list what to fix."
             )
@@ -196,7 +222,7 @@ def make_self_refine_run_task(
             if passed:
                 break
             draft = complete(
-                f"{gen}\n\n# Task\n{task_text}\n\n# Your previous answer\n{draft}\n\n"
+                f"{gen}\n\n# Task\n{task_text}{plan_block}\n\n# Your previous answer\n{draft}\n\n"
                 f"# Problems to fix\n{critique}\n\nProduce a corrected answer."
             )
             steps.append(

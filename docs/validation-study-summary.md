@@ -36,8 +36,13 @@ confirms the harness is sound — a real signal *could* have shown up and didn't
 - The result is exactly what the self-correction literature predicts. Huang et al.,
   [*LLMs Cannot Self-Correct Reasoning Yet*](https://arxiv.org/abs/2310.01798) (ICLR 2024),
   find that **intrinsic** self-correction — refining with no external feedback signal —
-  fails to reliably improve outputs and can degrade them. Arm D's verify gene is precisely
-  an intrinsic critique (no oracle). A null is the expected outcome, not a surprise.
+  fails to reliably improve outputs and can degrade them (CommonSenseQA 75.8 → 41.8 after
+  one intrinsic round). They show prior "self-correction works" gains relied on **oracle**
+  stopping signals: "the improvements in these studies result from using oracles to guide
+  the self-correction process, and the improvements vanish when oracle labels are not
+  available." Self-correction genuinely helps only with a real external verification
+  mechanism (a tool, a code executor, unit tests). Arm D's verify gene is precisely an
+  intrinsic critique (no oracle). A null is the expected outcome, not a surprise.
 - [Self-Refine](https://proceedings.neurips.cc/paper_files/paper/2023/hash/91edff07232fb1b55a505a9e9f6c0ff3-Abstract-Conference.html)
   (Madaan et al., NeurIPS 2023) reports ~20 % gains from self-feedback, but on open-ended
   generation quality, not on tasks with an *external verifiable* metric where the model
@@ -83,3 +88,16 @@ Two honest options, in order of recommendation:
 *Recommendation: option 1.* The fair test has been run and answered; further spend should
 require a specific hypothesis about *why* this run would differ, and the feedback-richness
 lever is the only one with strong prior support.
+
+**Update — both levers are being tested (runs 4 and 5).** Rather than stop, both
+literature-implied levers were pre-registered and run, one change each:
+
+- **Run 4 — feedback richness** (`.../specs/2026-07-23-feedback-richness-preregistration.md`):
+  the critique step is given a deterministic, non-oracle `text_stats` readout (the
+  tool/executor signal Huang et al. found necessary). Report: `validation-study-feedback.md`.
+- **Run 5 — complexity** (`.../specs/2026-07-23-complexity-preregistration.md`): a third
+  interacting `plan` module (plan→generate→critique→refine), so whole-genome optimization
+  has more to co-tune (the DSPy lever). Report: `validation-study-plan.md`.
+
+Both are lower-powered exploratory runs (n = 3 seeds); a clear D > B in either would warrant
+a 5-seed confirmation. Full reference list in `docs/references.bib`.

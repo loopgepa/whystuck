@@ -351,3 +351,64 @@ def test_run_study_wires_multi_constraint_scorer(tmp_path):
     # fractional signal from mc_score (not the ifbench no_whitespace 0/1 pattern)
     assert all(0.0 <= res[a].opt_heldout <= 1.0 for a in ("A", "B", "C", "D"))
     assert 0.0 < res["A"].seed_heldout < 1.0
+
+
+# --- run-4/run-5 levers: feedback stats + a third `plan` gene -------------------
+
+
+def test_seed_genome_gets_a_plan_gene_when_requested():
+    from whystuck.eval.study import PLAN_GENE
+
+    g = seed_genome("x", evolvable=set(), include_plan=True)
+    assert [gene.id for gene in g.genes] == [GENERATE_GENE, VERIFY_GENE, PLAN_GENE]
+    # default stays two-gene (existing runs unchanged)
+    assert len(seed_genome("x", evolvable=set()).genes) == 2
+
+
+def test_arm_evolvable_extends_bd_to_the_plan_gene():
+    from whystuck.eval.study import PLAN_GENE, arm_evolvable
+
+    assert arm_evolvable("A", include_plan=True) == set()
+    assert arm_evolvable("B", include_plan=True) == {GENERATE_GENE}  # prompt-only stays one gene
+    assert arm_evolvable("D", include_plan=True) == {GENERATE_GENE, VERIFY_GENE, PLAN_GENE}
+    assert PLAN_GENE not in arm_evolvable("D", include_plan=False)  # off by default
+
+
+def test_run_study_with_plan_gene_lets_only_d_evolve_the_plan(tmp_path, tasks):
+    from whystuck.eval.study import PLAN_GENE
+
+    train, heldout = tasks
+    res = run_study(
+        WhyStuckStore(tmp_path / "store"),
+        complete=_fake_complete,
+        reflection_lm="fake",
+        train=train,
+        heldout=heldout,
+        _optimize=_fake_optimize,
+        use_plan_gene=True,
+    )
+    assert PLAN_GENE in res["D"].evolvable_genes
+    assert PLAN_GENE not in res["B"].evolvable_genes
+    assert res["B"].evolvable_genes == (GENERATE_GENE,)
+
+
+def test_run_study_feeds_stats_into_the_critique(tmp_path, tasks):
+    train, heldout = tasks
+    seen = []
+
+    def spy(prompt: str) -> str:
+        seen.append(prompt)
+        return _fake_complete(prompt)
+
+    run_study(
+        WhyStuckStore(tmp_path / "store"),
+        complete=spy,
+        reflection_lm="fake",
+        train=train,
+        heldout=heldout,
+        arms=("A",),  # held-out scoring alone exercises the loop
+        _optimize=_fake_optimize,
+        stats_fn=lambda _out: "STATSMARK words=3",
+    )
+    critiques = [p for p in seen if "# Draft answer" in p]
+    assert critiques and all("STATSMARK words=3" in p for p in critiques)

@@ -1,0 +1,92 @@
+% Bibliography for the WhyStuck GEPA validation study.
+% These are the works the study's design and interpretation rest on: the GEPA
+% optimizer under test, the self-correction literature that predicts the loop-level
+% null (Huang et al.) and bounds when it might not (Liu et al., Madaan et al.), the
+% pipeline-optimization framing (DSPy), and the instruction-following benchmark
+% family the tasks imitate (IFEval).
+
+@inproceedings{agrawal2025gepa,
+  title     = {{GEPA}: Reflective Prompt Evolution Can Outperform Reinforcement Learning},
+  author    = {Agrawal, Lakshya A. and Tan, Shangyin and Soylu, Dilara and Ziems, Noah and
+               Khare, Rishi and Opsahl-Ong, Krista and Singhvi, Arnav and Shandilya, Herumb and
+               Ryan, Michael J. and Jiang, Meng and Potts, Christopher and Sen, Koushik and
+               Dimakis, Alexandros G. and Stoica, Ion and Klein, Dan and Zaharia, Matei and
+               Khattab, Omar},
+  year      = {2025},
+  eprint    = {2507.19457},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  note      = {Accepted at ICLR 2026 (Oral)},
+  url       = {https://arxiv.org/abs/2507.19457}
+}
+
+@inproceedings{huang2023cannot,
+  title     = {Large Language Models Cannot Self-Correct Reasoning Yet},
+  author    = {Huang, Jie and Chen, Xinyun and Mishra, Swaroop and Zheng, Huaixiu Steven and
+               Yu, Adams Wei and Song, Xinying and Zhou, Denny},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2024},
+  eprint    = {2310.01798},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  url       = {https://arxiv.org/abs/2310.01798},
+  note      = {Key result for this study: intrinsic self-correction (no external
+               feedback) fails to improve and often degrades; prior gains relied on
+               oracle stopping signals and vanish without them}
+}
+
+@inproceedings{madaan2023selfrefine,
+  title     = {Self-Refine: Iterative Refinement with Self-Feedback},
+  author    = {Madaan, Aman and Tandon, Niket and Gupta, Prakhar and Hallinan, Skyler and
+               Gao, Luyu and Wiegreffe, Sarah and Alon, Uri and Dziri, Nouha and
+               Prabhumoye, Shrimai and Yang, Yiming and Gupta, Shashank and
+               Majumder, Bodhisattwa Prasad and Hermann, Katherine and Welleck, Sean and
+               Yazdanbakhsh, Amir and Clark, Peter},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2023},
+  eprint    = {2303.17651},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  url       = {https://arxiv.org/abs/2303.17651}
+}
+
+@article{liu2024intrinsic,
+  title     = {Large Language Models have Intrinsic Self-Correction Ability},
+  author    = {Liu, Dancheng and Nassereldine, Amir and Yang, Ziming and Xu, Chenhui and
+               Hu, Yuting and Li, Jiajie and Kumar, Utkarsh and Lee, Changjae and
+               Qin, Ruiyang and Shi, Yiyu and Xiong, Jinjun},
+  year      = {2024},
+  eprint    = {2406.15673},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  url       = {https://arxiv.org/abs/2406.15673},
+  note      = {Counterpoint: intrinsic self-correction can work under specific
+               conditions (zero temperature, unbiased prompts)}
+}
+
+@article{khattab2023dspy,
+  title     = {{DSPy}: Compiling Declarative Language Model Calls into Self-Improving Pipelines},
+  author    = {Khattab, Omar and Singhvi, Arnav and Maheshwari, Paridhi and Zhang, Zhiyuan and
+               Santhanam, Keshav and Vardhamanan, Sri and Haq, Saiful and Sharma, Ashutosh and
+               Joshi, Thomas T. and Moazam, Hanna and Miller, Heather and Zaharia, Matei and
+               Potts, Christopher},
+  year      = {2023},
+  eprint    = {2310.03714},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  url       = {https://arxiv.org/abs/2310.03714},
+  note      = {Pipeline-level prompt optimization; motivates the complexity lever
+               (multi-module optimization pays off as pipeline complexity grows)}
+}
+
+@article{zhou2023ifeval,
+  title     = {Instruction-Following Evaluation for Large Language Models},
+  author    = {Zhou, Jeffrey and Lu, Tianjian and Mishra, Swaroop and Brahma, Siddhartha and
+               Basu, Sujoy and Luan, Yi and Zhou, Denny and Hou, Le},
+  year      = {2023},
+  eprint    = {2311.07911},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  url       = {https://arxiv.org/abs/2311.07911},
+  note      = {The IFEval verifiable-instruction format the multi-constraint tasks imitate}
+}

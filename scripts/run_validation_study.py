@@ -66,6 +66,18 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         help="generate→critique→refine rounds per task (worker makes up to 1+2N calls/eval)",
     )
     p.add_argument(
+        "--plan-gene",
+        action="store_true",
+        help="complexity lever: add a third `plan` gene (plan→generate→critique→refine); "
+        "arm D co-evolves it, adding one worker call/eval (2+2N total)",
+    )
+    p.add_argument(
+        "--feedback-stats",
+        action="store_true",
+        help="feedback lever: inject a measured (non-oracle) text-stats readout into the "
+        "critique step; no extra LLM calls (stats computed locally)",
+    )
+    p.add_argument(
         "--reflection-calls",
         type=int,
         default=10,
@@ -131,7 +143,7 @@ def main(argv: list[str] | None = None) -> int:
         worker_model=args.worker_model,
         reflection_model=args.reflection_model,
         n_seeds=len(seeds),
-        worker_calls_per_task=1 + 2 * args.loop_max_retries,
+        worker_calls_per_task=(2 if args.plan_gene else 1) + 2 * args.loop_max_retries,
     )
 
     print(
@@ -175,6 +187,7 @@ def _run_live(
     from whystuck.eval.multi_constraint import load_multi_constraint, mc_feedback, mc_score
     from whystuck.eval.report import render_report
     from whystuck.eval.study import run_study
+    from whystuck.eval.text_stats import text_stats
 
     # Task set selects the loader + the scorer/feedback the worker loop grades with.
     if args.task_set in ("multi", "multi-hard"):
@@ -225,6 +238,8 @@ def _run_live(
                     loop_max_retries=args.loop_max_retries,
                     score_fn=score_fn,
                     feedback_fn=feedback_fn,
+                    use_plan_gene=args.plan_gene,
+                    stats_fn=text_stats if args.feedback_stats else None,
                 )
             runs.append({name: vars(r) for name, r in results.items()})
 
@@ -236,6 +251,8 @@ def _run_live(
         "reflection_model": args.reflection_model,
         "max_metric_calls": args.max_metric_calls,
         "loop_max_retries": args.loop_max_retries,
+        "plan_gene": args.plan_gene,
+        "feedback_stats": args.feedback_stats,
         "worker_max_output_tokens": WORKER_MAX_OUTPUT_TOKENS,
         "seeds": seeds,
         "estimated_usd": estimate,

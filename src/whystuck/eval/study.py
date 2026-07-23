@@ -45,22 +45,34 @@ from whystuck.eval.optimize import optimize_loop
 
 GENERATE_GENE = "generate"
 VERIFY_GENE = "ensure_correct"
+PLAN_GENE = "plan"  # optional third module (complexity lever); off unless use_plan_gene
 
 SEED_GENERATE = "Follow every instruction in the task exactly."
 SEED_VERIFY = (
     "Before answering, re-read the task and check each stated constraint is "
     "satisfied; if any is not, revise the answer until it is."
 )
-
-# What each arm may evolve. A evolves nothing; B one gene; C and D the whole
-# genome (C via the genome-blind command worker, D via the LLM worker).
-ARM_EVOLVABLE: dict[str, set[str]] = {
-    "A": set(),
-    "B": {GENERATE_GENE},
-    "C": {GENERATE_GENE, VERIFY_GENE},
-    "D": {GENERATE_GENE, VERIFY_GENE},
-}
+SEED_PLAN = (
+    "Before answering, list each explicit constraint in the task as a short "
+    "checklist the answer must satisfy."
+)
 ARMS = ("A", "B", "C", "D")
+
+
+def arm_evolvable(arm: str, *, include_plan: bool = False) -> set[str]:
+    """Which genes GEPA may evolve in each arm.
+
+    A evolves nothing; B one gene (prompt-only — stays `generate` even with a plan
+    gene present, so the B/D contrast still isolates loop-level optimization); C and
+    D evolve the whole genome (C via the genome-blind command worker, D via the LLM
+    worker). `include_plan` widens the "whole genome" to the optional third gene.
+    """
+    whole = {GENERATE_GENE, VERIFY_GENE} | ({PLAN_GENE} if include_plan else set())
+    return {"A": set(), "B": {GENERATE_GENE}, "C": set(whole), "D": set(whole)}[arm]
+
+
+# Back-compat: the two-gene evolvable map (no plan gene), keyed by arm.
+ARM_EVOLVABLE: dict[str, set[str]] = {a: arm_evolvable(a) for a in ARMS}
 
 
 @dataclass
@@ -73,32 +85,41 @@ class ArmResult:
     variant_id: str | None
 
 
-def seed_genome(loop_id: str, *, evolvable: set[str]) -> LoopGenome:
-    """The shared 2-gene seed; `evolvable` marks which genes GEPA may change.
+def seed_genome(loop_id: str, *, evolvable: set[str], include_plan: bool = False) -> LoopGenome:
+    """The shared seed genome; `evolvable` marks which genes GEPA may change.
 
     Content is identical across arms — only the evolvable flags differ — so the
     seed prompt (and thus the seed held-out score) is the same for every arm.
+    Two genes by default; `include_plan` adds the optional third `plan` gene so the
+    loop runs plan→generate→critique→refine (the complexity lever).
     """
-    return LoopGenome(
-        id=loop_id,
-        name="IFBench study loop",
-        genes=[
+    genes = [
+        LoopGene(
+            id=GENERATE_GENE,
+            type=GeneType.SKILL,
+            name="Generate",
+            content=SEED_GENERATE,
+            evolvable=GENERATE_GENE in evolvable,
+        ),
+        LoopGene(
+            id=VERIFY_GENE,
+            type=GeneType.VERIFIER_RUBRIC,
+            name="Ensure correct",
+            content=SEED_VERIFY,
+            evolvable=VERIFY_GENE in evolvable,
+        ),
+    ]
+    if include_plan:
+        genes.append(
             LoopGene(
-                id=GENERATE_GENE,
-                type=GeneType.SKILL,
-                name="Generate",
-                content=SEED_GENERATE,
-                evolvable=GENERATE_GENE in evolvable,
-            ),
-            LoopGene(
-                id=VERIFY_GENE,
-                type=GeneType.VERIFIER_RUBRIC,
-                name="Ensure correct",
-                content=SEED_VERIFY,
-                evolvable=VERIFY_GENE in evolvable,
-            ),
-        ],
-    )
+                id=PLAN_GENE,
+                type=GeneType.PROMPT,
+                name="Plan",
+                content=SEED_PLAN,
+                evolvable=PLAN_GENE in evolvable,
+            )
+        )
+    return LoopGenome(id=loop_id, name="IFBench study loop", genes=genes)
 
 
 def _heldout_score(genome: LoopGenome, tasks: list[BenchmarkTask], run_task: RunTask) -> float:
@@ -163,6 +184,8 @@ def run_study(
     max_candidate_proposals: int | None = None,
     score_fn: Score = ifbench_score,
     feedback_fn: Feedback = ifbench_feedback,
+    use_plan_gene: bool = False,
+    stats_fn: Callable[[str], str] | None = None,
     _optimize: Any | None = None,
 ) -> dict[str, ArmResult]:
     """Run the requested arms and return per-arm held-out results.
@@ -180,12 +203,17 @@ def run_study(
     # the two measure the identical thing. The critique step is driven by the
     # evolvable verify gene, which is what lets arm D differ from arm B.
     worker_run_task = make_self_refine_run_task(
-        complete, score_fn, feedback=feedback_fn, max_retries=loop_max_retries
+        complete,
+        score_fn,
+        feedback=feedback_fn,
+        max_retries=loop_max_retries,
+        plan_gene=PLAN_GENE if use_plan_gene else None,
+        stats_fn=stats_fn,
     )
     results: dict[str, ArmResult] = {}
     for arm in arms:
-        evolvable = ARM_EVOLVABLE[arm]
-        genome = seed_genome(f"study-{arm}", evolvable=evolvable)
+        evolvable = arm_evolvable(arm, include_plan=use_plan_gene)
+        genome = seed_genome(f"study-{arm}", evolvable=evolvable, include_plan=use_plan_gene)
         store.save_loop(genome)
         seed_h = _heldout_score(genome, heldout, worker_run_task)
         evolvable_genes = tuple(g.id for g in genome.genes if g.evolvable)

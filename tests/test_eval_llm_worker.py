@@ -263,3 +263,97 @@ def test_self_refine_final_output_is_scored_programmatically():
     assert final.output_summary == "solid"
     assert trace.metadata["eval_score"] == 1.0
     assert trace.metadata["eval_score"] == 1.0
+
+
+# --- feedback-richness lever: a non-oracle stats tool feeds the critique --------
+
+
+def test_stats_fn_output_is_injected_into_the_critique_prompt():
+    # The measured-stats readout must reach the critique step so the verify gene
+    # can reflect on it (Huang lever: tool-backed correction, not intrinsic).
+    calls = []
+
+    def spy(prompt):
+        calls.append(prompt)
+        return _loop_complete(prompt)
+
+    run_task = make_self_refine_run_task(
+        spy, ifbench_score, max_retries=1, stats_fn=lambda _out: "STATS_MARKER words=2"
+    )
+    run_task(_two_gene("write it", "CHECK_WHITESPACE"), _nw_task())
+    critiques = [c for c in calls if "# Draft answer" in c]
+    assert critiques and all("STATS_MARKER words=2" in c for c in critiques)
+
+
+def test_no_stats_fn_leaves_critique_prompt_free_of_stats():
+    calls = []
+
+    def spy(prompt):
+        calls.append(prompt)
+        return _loop_complete(prompt)
+
+    make_self_refine_run_task(spy, ifbench_score, max_retries=1)(
+        _two_gene("write it", "CHECK_WHITESPACE"), _nw_task()
+    )
+    assert not any("STATS_MARKER" in c for c in calls)
+
+
+# --- complexity lever: an optional third `plan` gene (plan -> generate -> ...) --
+
+
+def _three_gene(generate: str, verify: str, plan: str) -> LoopGenome:
+    return LoopGenome(
+        id="loop3",
+        name="L3",
+        genes=[
+            LoopGene(id="generate", type=GeneType.SKILL, name="Generate", content=generate),
+            LoopGene(id="ensure_correct", type=GeneType.VERIFIER_RUBRIC, name="V", content=verify),
+            LoopGene(id="plan", type=GeneType.PROMPT, name="Plan", content=plan),
+        ],
+    )
+
+
+def _plan_spy(calls):
+    def spy(prompt):
+        calls.append(prompt)
+        if "PLANMARK" in prompt:
+            return "PLAN_OUT"
+        if "# Draft answer" in prompt:
+            return "FAIL: fix it"  # never passes -> full retry budget runs
+        if "# Problems to fix" in prompt:
+            return "solid"
+        return "x x"  # generate
+
+    return spy
+
+
+def test_plan_gene_runs_a_plan_step_that_feeds_generate():
+    calls = []
+    trace = make_self_refine_run_task(
+        _plan_spy(calls), ifbench_score, max_retries=1, plan_gene="plan"
+    )(_three_gene("write it", "CHECK_WHITESPACE", "PLANMARK: outline the constraints"), _nw_task())
+    # the plan gene content reached the LLM as the FIRST call...
+    assert "PLANMARK" in calls[0]
+    # ...a plan step is recorded...
+    assert any(s.step_id == "plan" for s in trace.steps)
+    # ...and its output is threaded into the generate prompt.
+    assert any("# Plan\nPLAN_OUT" in c for c in calls)
+
+
+@pytest.mark.parametrize("retries", [1, 2])
+def test_plan_gene_adds_exactly_one_call(retries):
+    # cost guard: with a plan step the loop makes 2 + 2*retries calls/eval (the
+    # extra +1 is the plan). Mispricing this would void the $5 budget bound.
+    calls = []
+    make_self_refine_run_task(
+        _plan_spy(calls), ifbench_score, max_retries=retries, plan_gene="plan"
+    )(_three_gene("write it", "CHECK_WHITESPACE", "PLANMARK"), _nw_task())
+    assert len(calls) == 2 + 2 * retries
+
+
+def test_plan_gene_missing_raises_not_silent():
+    run_task = make_self_refine_run_task(
+        _loop_complete, ifbench_score, max_retries=1, plan_gene="plan"
+    )
+    with pytest.raises(KeyError, match="plan"):
+        run_task(_two_gene("write it", "CHECK_WHITESPACE"), _nw_task())  # no plan gene

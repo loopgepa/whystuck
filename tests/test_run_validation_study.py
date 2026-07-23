@@ -144,3 +144,38 @@ def test_cli_estimate_matches_independent_computation():
     )
     assert code == 0
     assert f"${expected:.4f}" in out
+
+
+def test_plan_gene_prices_one_extra_worker_call_per_eval():
+    # --plan-gene adds a plan step, so the loop makes 2 + 2*retries calls/eval;
+    # the estimate must reflect the +1 or the $5 guard is priced too low.
+    from whystuck.eval.cost import estimate_usd, plan_study_calls
+
+    common = [
+        "--arms", "AB", "--seeds", "0", "--n-train", "5", "--n-heldout", "5",
+        "--max-metric-calls", "20", "--reflection-calls", "3", "--loop-max-retries", "1",
+    ]  # fmt: skip
+    _, plain, _ = _run(common)
+    _, planned, _ = _run([*common, "--plan-gene"])
+    expected_plan = estimate_usd(
+        plan_study_calls(
+            arms=("A", "B"),
+            n_train=5,
+            n_heldout=5,
+            max_metric_calls=20,
+            reflection_calls=3,
+            worker_model="openai/gpt-4.1-mini",
+            reflection_model="openai/gpt-5.6-terra",
+            worker_calls_per_task=2 + 2 * 1,  # +1 plan step
+        )
+    )
+    assert f"${expected_plan:.4f}" in planned
+    assert planned != plain  # the plan step is priced, not ignored
+
+
+def test_feedback_stats_flag_parses_and_dry_runs():
+    # The feedback lever costs no extra LLM calls (stats computed locally), so it
+    # must dry-run cleanly and not change the estimate.
+    code, out, _ = _run(["--arms", "A", "--seeds", "0", "--feedback-stats"])
+    assert code == 0
+    assert "Estimated total" in out
