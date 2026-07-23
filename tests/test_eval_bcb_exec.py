@@ -152,6 +152,36 @@ def test_skipped_tests_do_not_count_as_a_pass():
     assert r.passed is False
 
 
+def test_solution_cannot_forge_the_sentinel_by_early_exit():
+    # The deepest reward-hack: a solution writes the sentinel bytes and os._exit(0) before
+    # the tests run. It cannot know the per-run nonce, so the forged pass token is rejected.
+    forge = (
+        "import sys, os\n"
+        'sys.stdout.write("<<WS_BCB_COMPLETED_7d1e4c>>")\n'  # the sentinel, no nonce
+        "sys.stdout.flush()\n"
+        "os._exit(0)\n"
+    )
+    r = run_unittest(forge, _TEST, ["test_a"], timeout=40)
+    assert r.passed is False  # forged sentinel without the nonce is not a pass
+
+
+def test_solution_cannot_read_the_nonce_from_env_or_argv():
+    # The nonce must not leak via /proc/self/environ or /proc/self/cmdline. A solution that
+    # echoes everything it can find + a forged sentinel still cannot recover the nonce.
+    snoop = (
+        "import sys, os\n"
+        "leak = os.environ.get('WS_NONCE','') + ' '.join(sys.argv)\n"
+        "try:\n"
+        "    leak += open('/proc/self/environ').read() + open('/proc/self/cmdline').read()\n"
+        "except OSError:\n    pass\n"
+        'sys.stdout.write("<<WS_BCB_COMPLETED_7d1e4c>>" + leak)\n'
+        "sys.stdout.flush()\n"
+        "os._exit(0)\n"
+    )
+    r = run_unittest(snoop, _TEST, ["test_a"], timeout=40)
+    assert r.passed is False
+
+
 def test_daemon_connection_error_is_sandbox_error_not_zero(monkeypatch):
     # A mid-run daemon blip: docker CLI exits 1 with a connection message. That must be a
     # sandbox_error (never scored 0.0), even though a real test failure also exits 1.
