@@ -314,7 +314,9 @@ bar and below the tool baseline ($0.837$) --- a good tool at one retry roughly e
 oracle at three. The residual is the generator's raw capability: perfect, repeated feedback
 cannot push \texttt{gpt-4.1-mini} past $\sim\!0.81$ on hard constraints. The gains a
 self-refine loop can extract (better detection $+$ more attempts) are real but bounded, and
-prompt-only optimization already captures them.
+prompt-only optimization already captures them. This is consistent with contemporaneous
+code-generation findings that the feedback signal and the number of repair attempts --- not
+the loop's structure --- drive self-repair gains \citep{feedbackoverform2026,howmanytries2026}.
 
 \paragraph{Feedback \emph{actionability} is a real fix-side lever --- but it is feedback
 shape, not GEPA (runs 9--10).} Runs 7--8 leave the residual fix-step gap ambiguous: is
@@ -576,13 +578,20 @@ generator-limited (the residual). The agenda, re-ordered accordingly:
   \item[D4 (budget \& worker sweeps).] $\mathrm{mmc}\in\{20,40,80,160\}$ and worker
     $\in$\{nano, mini, a 5-series\} to rule out under-budgeting and map
     model-dependence.
-  \item[D5 (cross-domain) --- \emph{the priority next study}.] Replicate the 4-arm
-    design on math (numeric checker) or code (unit tests) --- domains where the verify
-    step catches real \emph{semantic} errors and where GEPA reports gains. This is the
-    one open direction that would move the contribution from ``an instruction-following
-    observation'' to a general finding (or sharpen it to ``loop-level helps iff
-    verification is substantive''). It is a separate pre-registered mini-project (new
-    verifier, satisfiability/headroom controls), not a variation of the runs here.
+  \item[D5 (cross-domain) --- \emph{the priority next study, in progress}.] Replicate the
+    4-arm design where the verify step catches real \emph{semantic} errors and can be run
+    as an executable tool, the regime \citet{shinn2023reflexion} find self-correction
+    actually works. We start with \textbf{code}: MBPP+ \citep{liu2023evalplus} with its
+    base tests as the in-loop (visible) verifier and its edge-case ``plus'' tests as the
+    hidden scoring set --- a natural anti-oracle split that also restores headroom and
+    softens contamination; \texttt{gpt-4.1-mini} sits mid-band there, and the fast
+    pure-function tasks keep execution deterministic (preserving bit-for-bit replay), which
+    the timing-sensitive contamination-free alternative \citep{jain2024livecodebench} would
+    jeopardize. Math (numeric checker) follows. This tests whether reliable, actionable
+    verification is what the loop-level lever needs --- and would move the contribution from
+    ``an instruction-following observation'' to a general finding (or sharpen it to
+    ``loop-level helps iff verification is reliable and the fix is reachable''). A separate
+    pre-registered mini-project, not a variation of the runs here.
   \item[D7 (statistics) --- \emph{largely retired}.] We already report exact-resample
     intervals ($\S\ref{sec:threats}$); because the paired $\dd$ has near-zero variance
     they are tight even at $n{\le}5$, so additional seeds would only marginally narrow
