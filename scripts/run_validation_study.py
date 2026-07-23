@@ -30,6 +30,8 @@ import os
 import sys
 
 from whystuck.eval.cost import (
+    BCB_WORKER_MAX_OUTPUT_TOKENS,
+    BCB_WORKER_TOKENS,
     CODE_WORKER_MAX_OUTPUT_TOKENS,
     CODE_WORKER_TOKENS,
     MODEL_PRICES,
@@ -52,13 +54,14 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--arms", default="ABCD", help="which arms to run (default ABCD)")
     p.add_argument(
         "--task-set",
-        choices=("ifbench", "multi", "multi-hard", "code"),
+        choices=("ifbench", "multi", "multi-hard", "code", "bcb"),
         default="ifbench",
         help="ifbench = vendored single-constraint slice; multi = composable "
         "multi-constraint tasks (easy, saturated at seed 0.97); multi-hard = harder "
-        "constraints (exact count / forbidden word / max length) with real headroom; "
-        "code = vendored MBPP+ (base tests VISIBLE/in-loop, plus tests HIDDEN/scored) — "
-        "the v2 cross-domain study where in-loop verification is executable",
+        "constraints with real headroom; code = MBPP+ (base VISIBLE / plus HIDDEN) — "
+        "SATURATES a capable worker (see the appendix); bcb = BigCodeBench-Hard in a "
+        "Docker sandbox (visible/hidden unittest-method split), hard even for frontier "
+        "models — the headroom-bearing v2 code study",
     )
     p.add_argument("--n-train", type=int, default=16, help="train task count (default 16)")
     p.add_argument("--n-heldout", type=int, default=16, help="held-out task count (default 16)")
@@ -184,14 +187,14 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 2
-    # The code task set's anti-oracle protocol REQUIRES the non-oracle, base-test-gated
-    # critique: --oracle-critique gates on score_fn (= code_score = the HIDDEN plus tests),
+    # The executable code task sets' anti-oracle protocol REQUIRES the non-oracle,
+    # visible-test-gated critique: --oracle-critique gates on score_fn (= the HIDDEN tests),
     # which would leak the held-out scorer into the loop. Refuse at the cheap dry-run step.
-    if args.task_set == "code" and args.oracle_critique:
+    if args.task_set in ("code", "bcb") and args.oracle_critique:
         print(
-            "ERROR: --oracle-critique is incompatible with --task-set code: it would gate "
-            "the loop on the hidden plus-test scorer (oracle contamination). The code study "
-            "uses executable base-test feedback in a non-oracle critique instead.",
+            f"ERROR: --oracle-critique is incompatible with --task-set {args.task_set}: it "
+            "would gate the loop on the hidden test scorer (oracle contamination). These task "
+            "sets use executable VISIBLE-test feedback in a non-oracle critique instead.",
             file=sys.stderr,
         )
         return 2
@@ -223,7 +226,9 @@ def main(argv: list[str] | None = None) -> int:
 
     # Code solutions are longer than IFBench text on both axes, so the guard must price
     # the code worker with its larger (in, out) shape or it under-counts a paid run.
-    worker_tokens = CODE_WORKER_TOKENS if args.task_set == "code" else WORKER_TOKENS
+    worker_tokens = {"code": CODE_WORKER_TOKENS, "bcb": BCB_WORKER_TOKENS}.get(
+        args.task_set, WORKER_TOKENS
+    )
 
     groups = plan_study_calls(
         arms=arms,
@@ -265,6 +270,13 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Preflighting code sandbox + data ({len(code_tasks)} vendored references)...")
         preflight_code_tasks(code_tasks)
         print("  preflight OK: executor works here and every reference passes both suites.")
+    elif args.task_set == "bcb":
+        from whystuck.eval.bcb_bench import load_bcb_tasks, preflight_bcb_tasks
+
+        bcb_tasks = load_bcb_tasks("all", seed=0)
+        print(f"Preflighting BigCodeBench Docker sandbox + data ({len(bcb_tasks)} references)...")
+        preflight_bcb_tasks(bcb_tasks)
+        print("  preflight OK: Docker executor works here and every reference passes both splits.")
 
     # Replay reproduces a prior run from its cassette: offline, no key, no spend
     # (strict — a cassette miss raises). Takes precedence over --yes.
@@ -315,6 +327,7 @@ def _run_live(
 
     from whystuck.core.storage import WhyStuckStore
     from whystuck.core.util import utc_now_iso
+    from whystuck.eval.bcb_bench import bcb_feedback, bcb_score, load_bcb_tasks
     from whystuck.eval.cassette import Cassette
     from whystuck.eval.code_bench import code_feedback, code_score, load_code_tasks
     from whystuck.eval.ifbench import ifbench_feedback, ifbench_score, load_ifbench
@@ -328,7 +341,16 @@ def _run_live(
     # `exec_feedback` is the task-aware, EXECUTABLE in-loop signal (code only); the text
     # task sets have no executor, so it stays None (their critique is LLM/oracle-gated).
     exec_feedback: Feedback | None = None
-    if args.task_set == "code":
+    if args.task_set == "bcb":
+        # BigCodeBench-Hard in Docker: visible unittest methods run in-loop (exec_feedback),
+        # hidden methods score (held-out). Hard even for frontier models → real gradient.
+        def load_split(split: str, seed: int, n: int):
+            return load_bcb_tasks(split, seed=seed, n=n)  # type: ignore[arg-type]
+
+        score_fn, feedback_fn = bcb_score, bcb_feedback
+        exec_feedback = bcb_feedback  # visible-test execution read into the critique
+        dataset = "BigCodeBench-Hard (Docker; visible methods in-loop, hidden methods scored)"
+    elif args.task_set == "code":
         # MBPP+: base tests VISIBLE (shown in-prompt + executed by the in-loop critique
         # via exec_feedback), plus tests HIDDEN (the held-out scorer). See code_bench.
         def load_split(split: str, seed: int, n: int):
@@ -357,9 +379,10 @@ def _run_live(
         score_fn, feedback_fn, dataset = ifbench_score, ifbench_feedback, "IFBench"
 
     # Worker output hard-cap matches what the guard priced for this task set.
-    worker_max_out = (
-        CODE_WORKER_MAX_OUTPUT_TOKENS if args.task_set == "code" else WORKER_MAX_OUTPUT_TOKENS
-    )
+    worker_max_out = {
+        "code": CODE_WORKER_MAX_OUTPUT_TOKENS,
+        "bcb": BCB_WORKER_MAX_OUTPUT_TOKENS,
+    }.get(args.task_set, WORKER_MAX_OUTPUT_TOKENS)
 
     # Feedback-actionability lever (D2'): the oracle-path repair-feedback fn for the
     # chosen level. None = "mid" (loop falls back to feedback_fn, byte-identical to

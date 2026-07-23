@@ -77,6 +77,12 @@ WORKER_TOKENS = (1200, WORKER_MAX_OUTPUT_TOKENS)  # (in estimate, out hard cap)
 # embeds a base-test traceback, capped at ~300 chars) + an evolved gene. 2200 is a
 # conservative upper bound for that worst-case (refine) shape; output stays hard-capped.
 CODE_WORKER_TOKENS = (2200, CODE_WORKER_MAX_OUTPUT_TOKENS)  # (in estimate, out hard cap)
+# BigCodeBench-Hard is larger on both axes: the prompt carries a full function spec +
+# docstring, and solutions use scientific libraries over several steps. The refine prompt
+# adds the prior solution (<=1024) + a unittest-traceback critique. 3200 in is a
+# conservative upper bound for that worst-case shape; output is hard-capped at 1024.
+BCB_WORKER_MAX_OUTPUT_TOKENS = 1024
+BCB_WORKER_TOKENS = (3200, BCB_WORKER_MAX_OUTPUT_TOKENS)  # (in estimate, out hard cap)
 # Reflection output is enforced via max_tokens on the reflection LM; the input (GEPA's
 # prompt over sampled traces) is a calibrated estimate — GEPA sizes that prompt itself,
 # so it can't be hard-capped here. The proposal-count cap (max_candidate_proposals) is
