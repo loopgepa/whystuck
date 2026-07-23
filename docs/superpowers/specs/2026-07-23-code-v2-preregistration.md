@@ -123,3 +123,39 @@ is approved.**
    worker; a pilot to confirm headroom.
 4. Pre-flight dry-run estimate → show → (approval) → paid run → record cassette → verify
    reproducibility → report → review → merge. Same discipline as v1.
+
+## Implementation status (2026-07-23) — built + verified offline, NO spend yet
+
+Steps 1–3 are done and merged; step 4 awaits approval. Key implementation decisions,
+each pinned by tests:
+
+- **Data.** 64 tasks vendored to `src/whystuck/eval/data/mbpp_plus.json` (ascending
+  `task_id`, lean+fast, every reference verified to pass both suites at vendoring time).
+  Network-free at run time; ships in the wheel.
+- **Sandbox / determinism.** The MBPP+ plus harness imports numpy; `code_exec` pins
+  `OPENBLAS/OMP/MKL_NUM_THREADS=1` (keeps numpy's virtual arena under `RLIMIT_AS` *and*
+  makes reductions deterministic) and raises the default `RLIMIT_AS` to 2 GB (the memory
+  bomb guard still holds). numpy added to the `eval` extra + dev group.
+- **In-loop signal.** An additive `exec_feedback(draft, task)` seam in the self-refine
+  worker injects the VISIBLE base-test results into the *non-oracle* critique (the
+  Reflexion regime v1 lacked); off by default so prior cassettes replay byte-identically.
+- **Anti-oracle enforcement.** `code_score` = hidden plus; `code_feedback`/`exec_feedback`
+  = visible base only; the plus-test text reaches no prompt and no reflection signal. The
+  CLI refuses `--oracle-critique --task-set code` (would gate on the hidden scorer).
+- **Pre-spend correctness review (done, before any spend).** Two adversarial reviewers.
+  The code-reviewer cleared all four e2e priorities (scoring, anti-oracle, determinism,
+  budget) under execution. The silent-failure hunter found and we fixed a real class of
+  bug: infrastructure faults (a `sandbox_error` / `no_assertions` from a broken run host
+  or corrupt data) must NOT be folded into a genuine-looking `0.0` — that would silently
+  zero a paid run and read as a null result. `ExecResult` now carries a structured
+  `verdict`; `code_score`/`code_feedback` **raise** on an infra verdict (a wrong answer /
+  timeout / early-exit still scores `0.0`), and `preflight_code_tasks` runs every vendored
+  reference through the sandbox at the **dry-run step** so a broken host/data crashes
+  before a cent is spent.
+- **Recommended config + estimate.** 6 train / 10 held-out, `max_metric_calls=40`,
+  8 proposals, 1 loop retry, 2 seeds → conservative dry-run ≈ **$4.34** (under the $5 cap;
+  the code worker is priced at the larger `CODE_WORKER_TOKENS = (2200, 512)`). Fewer
+  seeds/tasks than v1's 16/16 to stay under budget with the larger code token shape; a
+  pre-spend pilot will confirm headroom (seed band 0.45–0.80) before the scored run.
+- **Verification.** 458 tests pass (incl. an end-to-end run through `run_study` with real
+  sandboxed execution); ruff/format/mypy/mkdocs-strict green.

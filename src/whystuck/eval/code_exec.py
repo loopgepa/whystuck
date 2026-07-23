@@ -61,9 +61,26 @@ import sys
 import tempfile
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Literal
 
 _MB = 1024 * 1024
 _SENTINEL = "<<WS_TESTS_COMPLETED_9f3a2b>>"
+
+# The six mutually-exclusive outcomes of a run, so a caller can tell WHY it failed
+# instead of string-matching free-text `detail`. The distinction is load-bearing: a
+# scorer must treat a host/data fault differently from a genuine wrong answer (see
+# ``code_bench``), or a broken run host silently produces plausible all-zero scores.
+Verdict = Literal[
+    "pass",  # tests ran to completion, every assert held
+    "failed",  # code ran and produced a non-zero exit (assertion / exception / syntax)
+    "timeout",  # exceeded the wall-clock limit (killed) — a runaway / infinite loop
+    "incomplete",  # clean exit but the sentinel never printed (early exit / swallowed tests)
+    "no_assertions",  # the test block had no `assert` — a vacuous pass is impossible
+    "sandbox_error",  # the sandbox itself failed to run (fork/setrlimit) — a HOST fault
+]
+# Verdicts attributable to the SANDBOX/DATA, not the executed code. A scorer must not
+# fold these into a genuine 0.0 — they mean "we never got a real verdict".
+INFRA_VERDICTS: frozenset[str] = frozenset({"sandbox_error", "no_assertions"})
 
 # Harness: read the two units from disk, exec them in one shared namespace (the MBPP
 # shape: solution defines a function the tests call), then print the sentinel LAST.
@@ -80,10 +97,15 @@ _HARNESS = (
 
 @dataclass(frozen=True)
 class ExecResult:
-    """Verdict of running a solution against a test block."""
+    """Outcome of running a solution against a test block.
+
+    ``passed`` is the convenience boolean (``verdict == "pass"``); ``verdict`` is the
+    structured reason a caller should branch on; ``detail`` is a short human string
+    (never empty) — a traceback tail, ``"ok"``, or an infra message."""
 
     passed: bool
     detail: str  # "ok" on success; a short failure reason otherwise (never empty)
+    verdict: Verdict = "failed"
 
 
 def _limits(cpu_seconds: int, mem_bytes: int) -> Callable[[], None]:
@@ -119,14 +141,15 @@ def run_tests(
 ) -> ExecResult:
     """Run ``solution`` then ``test_code`` in one sandboxed subprocess.
 
-    Returns ``passed=True`` iff the tests provably ran to completion with every assert
-    holding (exit 0 AND the completion sentinel); otherwise ``passed=False`` with a short
-    ``detail`` — an assertion/traceback tail, ``"timeout"``, ``"no assertions in test
-    block"``, ``"tests did not run to completion"`` (early exit / swallowed), or a
-    ``"sandbox error"``. Never raises on ordinary failure or on a transient host error
-    (the latter fails just this item, distinguishably, rather than aborting a batch)."""
+    Returns ``passed=True`` (``verdict="pass"``) iff the tests provably ran to completion
+    with every assert holding (exit 0 AND the completion sentinel); otherwise
+    ``passed=False`` with a structured ``verdict`` (``"failed"`` / ``"timeout"`` /
+    ``"incomplete"`` / ``"no_assertions"`` / ``"sandbox_error"``) and a short human
+    ``detail``. Never raises on ordinary failure or on a transient host error (the latter
+    is reported as ``verdict="sandbox_error"`` so the CALLER can decide to abort rather than
+    score it — see ``code_bench``, which raises on infra verdicts and never scores them)."""
     if not _has_assertion(test_code):
-        return ExecResult(False, "no assertions in test block")
+        return ExecResult(False, "no assertions in test block", verdict="no_assertions")
 
     cpu_seconds = max(1, int(timeout) + 2)  # coarse backstop; wall-clock timeout wins first
     env = {
@@ -168,16 +191,20 @@ def run_tests(
             except subprocess.TimeoutExpired:
                 _kill_group(proc.pid)
                 proc.communicate()  # reap the killed group
-                return ExecResult(False, "timeout")
+                return ExecResult(False, "timeout", verdict="timeout")
     except OSError as exc:  # transient host failure (fork/setrlimit) — fail THIS item, loudly
-        return ExecResult(False, f"sandbox error: {exc}")
+        return ExecResult(False, f"sandbox error: {exc}", verdict="sandbox_error")
 
     if proc.returncode == 0 and out.rstrip().endswith(_SENTINEL):
-        return ExecResult(True, "ok")
+        return ExecResult(True, "ok", verdict="pass")
     if proc.returncode == 0:  # clean exit but no sentinel => tests never completed
-        return ExecResult(False, "tests did not run to completion (early exit or swallowed)")
+        return ExecResult(
+            False,
+            "tests did not run to completion (early exit or swallowed)",
+            verdict="incomplete",
+        )
     detail = _tail(err) or _tail(out.replace(_SENTINEL, "")) or f"exit {proc.returncode}"
-    return ExecResult(False, detail)
+    return ExecResult(False, detail, verdict="failed")
 
 
 def _kill_group(pid: int) -> None:

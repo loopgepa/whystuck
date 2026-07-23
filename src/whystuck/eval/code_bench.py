@@ -31,7 +31,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 from whystuck.eval.benchmark import BenchmarkTask
-from whystuck.eval.code_exec import run_tests
+from whystuck.eval.code_exec import INFRA_VERDICTS, ExecResult, run_tests
 
 _DATA = Path(__file__).parent / "data" / "mbpp_plus.json"
 
@@ -72,13 +72,34 @@ def _base_block(payload: dict[str, Any]) -> str:
     return "\n".join(payload["base_tests"])
 
 
+def _raise_if_infra(result: ExecResult, task: BenchmarkTask, suite: str) -> None:
+    """Abort loudly if the sandbox never produced a real verdict.
+
+    A ``sandbox_error`` (fork/setrlimit fault on the run host) or ``no_assertions`` (a
+    corrupt/truncated test suite — the suites are trusted vendored data) is NOT the model
+    failing: it means we never scored the answer. Folding it into 0.0 would silently lower a
+    paid run's reported score, and a *systematic* fault (numpy not importable on the host,
+    broken data file) would zero every arm and read as a null result. Crash instead — the
+    dry-run preflight catches this before any spend; this is the in-run backstop."""
+    if result.verdict in INFRA_VERDICTS:
+        raise RuntimeError(
+            f"{suite} scoring for task {task.id!r} did not run (verdict={result.verdict}): "
+            f"{result.detail}. This is a host/data fault, not a model failure — refusing to "
+            "record it as 0.0. Fix the executor/data (run the code preflight) and re-run."
+        )
+
+
 def code_score(output: str, task: BenchmarkTask) -> float:
     """Held-out score: 1.0 iff the extracted solution passes the HIDDEN plus suite.
 
     Binary because the plus harness is an all-or-nothing assertion loop. The worker never
-    sees ``plus_test``, so this cannot be gamed from inside the loop."""
+    sees ``plus_test``, so this cannot be gamed from inside the loop. Raises on an
+    infrastructure verdict (``_raise_if_infra``) rather than reporting a fake 0.0; a genuine
+    model failure — wrong answer, timeout (infinite loop), or early exit — scores 0.0."""
     payload = _payload(task)
-    return 1.0 if run_tests(extract_code(output), payload["plus_test"]).passed else 0.0
+    result = run_tests(extract_code(output), payload["plus_test"])
+    _raise_if_infra(result, task, "held-out (plus)")
+    return 1.0 if result.passed else 0.0
 
 
 def code_feedback(output: str, task: BenchmarkTask) -> str:
@@ -86,10 +107,13 @@ def code_feedback(output: str, task: BenchmarkTask) -> str:
 
     Used both as the loop's execution feedback (``exec_feedback``) and as GEPA's reflection
     prose (``feedback_fn``). Reporting base results only keeps the hidden scorer out of both
-    the loop and the optimizer. Honest wording: passing base is necessary, not sufficient —
-    plus-only edge cases can still fail, so we never claim the answer is correct."""
+    the loop and the optimizer. Raises on an infrastructure verdict rather than telling the
+    critique "a base test failed" (a phantom failure would pollute exactly the signal arm D
+    optimizes). Honest wording: passing base is necessary, not sufficient — plus-only edge
+    cases can still fail, so we never claim the answer is correct."""
     payload = _payload(task)
     result = run_tests(extract_code(output), _base_block(payload))
+    _raise_if_infra(result, task, "in-loop (base)")
     n = len(payload["base_tests"])
     if result.passed:
         return f"All {n} visible base test(s) pass (plus-only edge cases may still fail)."
@@ -99,8 +123,9 @@ def code_feedback(output: str, task: BenchmarkTask) -> str:
 def check_satisfiable(task: BenchmarkTask) -> bool:
     """True iff the stored reference solution passes BOTH the base and plus suites.
 
-    A guard against a corrupted/edited data file — the vendoring script enforces this, and
-    a study run can assert it before spending."""
+    A guard against a corrupted/edited data file. NOTE: this returns ``False`` for BOTH a
+    genuinely-wrong reference AND a host/sandbox fault — use ``preflight_code_tasks`` when
+    you need to distinguish them (e.g. before spending)."""
     payload = _payload(task)
     ref = payload.get("reference", "")
     return (
@@ -108,6 +133,36 @@ def check_satisfiable(task: BenchmarkTask) -> bool:
         and run_tests(ref, _base_block(payload)).passed
         and run_tests(ref, payload["plus_test"]).passed
     )
+
+
+def preflight_code_tasks(tasks: list[BenchmarkTask]) -> None:
+    """Pre-spend guard: prove the executor + data are sound on THIS host, or raise.
+
+    Runs every task's REFERENCE through both suites in the sandbox. This (a) exercises the
+    executor on the run host — catching numpy-not-importable, ``setrlimit`` unavailable, a
+    broken data file, etc. — which the plain dry-run never does, and (b) distinguishes a
+    host/sandbox fault from corrupt data from a wrong reference, each with a precise message.
+    Cheap and offline (no API key). Call it at the dry-run step so a broken host or data file
+    becomes a crash BEFORE any spend, not a silent all-zeros paid report."""
+    for task in tasks:
+        payload = _payload(task)
+        ref = payload.get("reference", "")
+        if not ref:
+            raise RuntimeError(f"preflight: task {task.id!r} has no reference solution to verify")
+        for suite, block in (("base", _base_block(payload)), ("plus", payload["plus_test"])):
+            result = run_tests(ref, block)
+            if result.verdict in INFRA_VERDICTS:
+                raise RuntimeError(
+                    f"preflight: the sandbox/data is broken on this host (task {task.id!r}, "
+                    f"{suite} suite, verdict={result.verdict}): {result.detail}. The executor "
+                    "must work here before spending — do not run the paid study."
+                )
+            if not result.passed:
+                raise RuntimeError(
+                    f"preflight: the vendored REFERENCE for task {task.id!r} fails its own "
+                    f"{suite} suite (verdict={result.verdict}): {result.detail}. The data file "
+                    "is corrupt — re-vendor it (scripts/vendor_mbpp_plus.py)."
+                )
 
 
 def _render_goal(prompt: str, entry_point: str, base_tests: list[str]) -> str:

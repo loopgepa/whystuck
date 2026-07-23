@@ -114,6 +114,19 @@ def test_comment_only_test_block_is_not_a_vacuous_pass():
     assert r.passed is False
 
 
+def test_verdicts_classify_each_outcome():
+    # A caller (code_bench) branches on `verdict` to tell a host/data fault from a wrong
+    # answer, so each outcome must carry the right structured label, not just passed=bool.
+    assert run_tests(_GOOD, _TESTS, timeout=5.0).verdict == "pass"
+    assert run_tests(_BAD, _TESTS, timeout=5.0).verdict == "failed"  # assertion failed
+    assert run_tests("def f(:\n bad", "assert True\n", timeout=5.0).verdict == "failed"  # syntax
+    assert run_tests("while True:\n    pass\n", "assert True\n", timeout=2.0).verdict == "timeout"
+    assert run_tests("import sys\nsys.exit(0)\n", "assert False\n", timeout=5.0).verdict == (
+        "incomplete"
+    )
+    assert run_tests(_GOOD, "", timeout=5.0).verdict == "no_assertions"
+
+
 def test_numpy_imports_under_the_sandbox():
     # The MBPP+ plus-test harness imports numpy unconditionally; the sandbox must let
     # it load (thread-pinned so OpenBLAS's virtual reservation stays under RLIMIT_AS)

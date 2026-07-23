@@ -112,3 +112,80 @@ def test_code_feedback_passes_for_the_reference():
     task = _first_task()
     fb = code_feedback(task.payload["reference"], task)
     assert "pass" in fb.lower()
+
+
+# --- infrastructure faults must NOT masquerade as a genuine 0.0 (paid-run safety) ---
+
+
+def _code_task(base_tests, plus_test):
+    return BenchmarkTask(
+        id="synthetic",
+        payload={
+            "goal": "g",
+            "entry_point": "f",
+            "base_tests": base_tests,
+            "plus_test": plus_test,
+            "reference": "def f():\n    return 1\n",
+        },
+    )
+
+
+def test_code_score_raises_on_a_data_fault_not_a_silent_zero():
+    # A held-out (plus) suite with no assertions is CORRUPT DATA, not a wrong answer.
+    # Scoring it 0.0 would silently lower the reported score of a paid run; it must raise.
+    from whystuck.eval.code_bench import code_score as cs
+
+    task = _code_task(["assert f() == 1"], "x = 1\n")  # plus block has no assert
+    with pytest.raises(RuntimeError, match="did not run|no_assertions"):
+        cs("def f():\n    return 1\n", task)
+
+
+def test_code_score_raises_on_a_sandbox_fault(monkeypatch):
+    # A host fault (fork/setrlimit failure) means we never got a real verdict — it must
+    # abort loudly, never be folded into "the model scored 0".
+    import whystuck.eval.code_bench as cb
+    from whystuck.eval.code_exec import ExecResult
+
+    monkeypatch.setattr(
+        cb, "run_tests", lambda *a, **k: ExecResult(False, "sandbox error: boom", "sandbox_error")
+    )
+    with pytest.raises(RuntimeError, match="did not run|sandbox"):
+        cb.code_score("def f(): return 1", _first_task())
+
+
+def test_code_score_still_zero_on_a_genuine_model_failure(monkeypatch):
+    # A model that writes an infinite loop (timeout) or exits early (incomplete) is a real
+    # failing answer → a legitimate 0.0, NOT an infra fault. These must not raise.
+    import whystuck.eval.code_bench as cb
+    from whystuck.eval.code_exec import ExecResult
+
+    for verdict in ("timeout", "incomplete", "failed"):
+        monkeypatch.setattr(cb, "run_tests", lambda *a, v=verdict, **k: ExecResult(False, v, v))
+        assert cb.code_score("def f(): ...", _first_task()) == 0.0
+
+
+def test_code_feedback_raises_on_a_sandbox_fault(monkeypatch):
+    # The in-loop feedback must not tell the critique "a base test failed" when the
+    # sandbox itself broke — that would pollute exactly the signal arm D optimizes.
+    import whystuck.eval.code_bench as cb
+    from whystuck.eval.code_exec import ExecResult
+
+    monkeypatch.setattr(
+        cb, "run_tests", lambda *a, **k: ExecResult(False, "sandbox error: boom", "sandbox_error")
+    )
+    with pytest.raises(RuntimeError, match="did not run|sandbox"):
+        cb.code_feedback("def f(): return 1", _first_task())
+
+
+def test_preflight_passes_on_vendored_data_and_flags_corruption():
+    # The pre-spend guard: every vendored reference must pass BOTH suites through the
+    # sandbox on THIS host, or the paid run would produce all-zeros. Also proves the
+    # executor works here before any spend.
+    from whystuck.eval.code_bench import preflight_code_tasks
+
+    good = load_code_tasks("all", seed=0)
+    preflight_code_tasks(good)  # does not raise
+
+    bad = _code_task(["assert f() == 999"], "assert f() == 999\n")  # ref returns 1, fails
+    with pytest.raises(RuntimeError, match="preflight|reference"):
+        preflight_code_tasks([bad])

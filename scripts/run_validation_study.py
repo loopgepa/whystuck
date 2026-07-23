@@ -253,6 +253,19 @@ def main(argv: list[str] | None = None) -> int:
         print(f"REFUSED: {exc}", file=sys.stderr)
         return 2
 
+    # Pre-spend guard for the code arm: actually EXECUTE the vendored references through
+    # the sandbox on THIS host (the generic dry-run never runs code). Proves numpy imports
+    # under the limits, the executor works here, and the data file is intact — so a broken
+    # host/data crashes NOW (offline, no key) instead of silently producing all-zero
+    # held-out scores after real spend. Runs on the dry-run path too, by design.
+    if args.task_set == "code":
+        from whystuck.eval.code_bench import load_code_tasks, preflight_code_tasks
+
+        code_tasks = load_code_tasks("all", seed=0)
+        print(f"Preflighting code sandbox + data ({len(code_tasks)} vendored references)...")
+        preflight_code_tasks(code_tasks)
+        print("  preflight OK: executor works here and every reference passes both suites.")
+
     # Replay reproduces a prior run from its cassette: offline, no key, no spend
     # (strict — a cassette miss raises). Takes precedence over --yes.
     if args.replay:
