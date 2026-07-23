@@ -48,10 +48,11 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--arms", default="ABCD", help="which arms to run (default ABCD)")
     p.add_argument(
         "--task-set",
-        choices=("ifbench", "multi"),
+        choices=("ifbench", "multi", "multi-hard"),
         default="ifbench",
         help="ifbench = vendored single-constraint slice; multi = composable "
-        "multi-constraint tasks (the fair loop-level test)",
+        "multi-constraint tasks (easy, saturated at seed 0.97); multi-hard = harder "
+        "constraints (exact count / forbidden word / max length) with real headroom",
     )
     p.add_argument("--n-train", type=int, default=16, help="train task count (default 16)")
     p.add_argument("--n-heldout", type=int, default=16, help="held-out task count (default 16)")
@@ -176,16 +177,18 @@ def _run_live(
     from whystuck.eval.study import run_study
 
     # Task set selects the loader + the scorer/feedback the worker loop grades with.
-    if args.task_set == "multi":
+    if args.task_set in ("multi", "multi-hard"):
+        hard = args.task_set == "multi-hard"
         # Size the generated pool so each disjoint half comfortably covers the larger
         # of n_train/n_heldout — otherwise load_multi_constraint raises rather than
         # silently truncating below the requested (and cost-priced) sample size.
         mc_pool = max(64, 2 * max(args.n_train, args.n_heldout) + 2)
 
         def load_split(split: str, seed: int, n: int):
-            return load_multi_constraint(split, seed=seed, n=n, pool=mc_pool)  # type: ignore[arg-type]
+            return load_multi_constraint(split, seed=seed, n=n, pool=mc_pool, hard=hard)  # type: ignore[arg-type]
 
-        score_fn, feedback_fn, dataset = mc_score, mc_feedback, "multi-constraint (IFEval-style)"
+        score_fn, feedback_fn = mc_score, mc_feedback
+        dataset = f"multi-constraint{'-hard' if hard else ''} (IFEval-style)"
     else:
 
         def load_split(split: str, seed: int, n: int):

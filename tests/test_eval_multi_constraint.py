@@ -77,6 +77,29 @@ def test_num_bullets_counts_bullet_lines_exactly():
     assert not v("- only one", {"n": 3})
 
 
+def test_exact_word_count_counts_whitespace_words_not_markers():
+    v = MC_VERIFIERS["exact_word_count"]
+    assert v("- one two\n- three four", {"n": 4})  # bullet markers "-" are not words
+    assert not v("one two three", {"n": 4})
+    assert v("don't stop now", {"n": 3})  # a contraction is ONE word (human sense)
+    assert v("a well-known idea", {"n": 3})  # a hyphenated compound is ONE word
+
+
+def test_forbidden_word_is_whole_word_and_not_tripped_by_hyphens():
+    v = MC_VERIFIERS["forbidden_word"]
+    assert not v("The cat sat", {"word": "the"})  # standalone word (any case) -> fails
+    assert v("theory of forms", {"word": "the"})  # substring inside 'theory' is fine
+    assert v("a state-of-the-art model", {"word": "the"})  # hyphenated idiom is NOT the word
+    assert v("a clean sentence", {"word": "the"})
+
+
+def test_word_max_length_bounds_each_letter_run():
+    v = MC_VERIFIERS["word_max_length"]
+    assert v("all short here", {"m": 5})
+    assert not v("short longword here", {"m": 5})  # 'longword' is 8 letters
+    assert v("state-of-the-art", {"m": 5})  # judged by letter-runs (state/of/the/art)
+
+
 # --- scoring ------------------------------------------------------------------
 
 
@@ -159,14 +182,30 @@ def test_build_witness_satisfies_every_selected_constraint():
         assert mc_score(w, t) == 1.0, f"witness failed for {[i for i, _ in pairs]}: {w!r}"
 
 
-def test_witness_satisfies_all_k3_k4_combos_exhaustively():
-    # The load-bearing guarantee, proven across the ENTIRE space the generator can
-    # sample: every k=3 and k=4 constraint subset, over every parameter value, must
-    # have a witness scoring exactly 1.0. A future edit that adds a conflicting
-    # constraint or breaks build_witness fails HERE, not on a paid run.
+def _exhaustive_check(ids, grid, ks):
     from itertools import combinations, product
 
-    from whystuck.eval.multi_constraint import _KEYWORDS, _MIN_WORDS, _NUM_BULLETS, _PHRASES
+    checked = 0
+    for k in ks:
+        for combo in combinations(ids, k):
+            for params in product(*(grid[c] for c in combo)):
+                pairs = list(zip(combo, params, strict=True))
+                assert mc_score(build_witness(pairs), _task(pairs)) == 1.0, (combo, params)
+                checked += 1
+    return checked
+
+
+def test_easy_witness_satisfies_all_k3_k4_combos_exhaustively():
+    # The load-bearing guarantee for the EASY tier, proven across the ENTIRE space the
+    # generator can sample: every k=3,4 subset over every parameter value must have a
+    # witness scoring exactly 1.0. A future edit that breaks build_witness fails HERE.
+    from whystuck.eval.multi_constraint import (
+        _EASY_IDS,
+        _KEYWORDS,
+        _MIN_WORDS,
+        _NUM_BULLETS,
+        _PHRASES,
+    )
 
     grid = {
         "include_keyword": [{"keyword": k} for k in _KEYWORDS],
@@ -176,15 +215,34 @@ def test_witness_satisfies_all_k3_k4_combos_exhaustively():
         "all_lowercase": [{}],
         "no_comma": [{}],
     }
-    ids = list(MC_VERIFIERS)
-    checked = 0
-    for k in (3, 4):
-        for combo in combinations(ids, k):
-            for params in product(*(grid[c] for c in combo)):
-                pairs = list(zip(combo, params, strict=True))
-                assert mc_score(build_witness(pairs), _task(pairs)) == 1.0, (combo, params)
-                checked += 1
-    assert checked > 3000  # sanity: the whole space really was swept
+    assert _exhaustive_check(_EASY_IDS, grid, (3, 4)) > 3000
+
+
+def test_hard_witness_satisfies_all_k4_k5_combos_exhaustively():
+    # Same guarantee for the HARD tier — the higher-bug-risk one (exact counts,
+    # forbidden word, max length interacting with bullets/phrase). Every k=4,5 subset
+    # over every parameter value must witness to 1.0, or the paid run could floor arms.
+    from whystuck.eval.multi_constraint import (
+        _EXACT_WORDS,
+        _FORBIDDEN,
+        _HARD_IDS,
+        _HARD_KEYWORDS,
+        _HARD_PHRASES,
+        _MAX_LEN,
+        _NUM_BULLETS,
+    )
+
+    grid = {
+        "include_keyword": [{"keyword": k} for k in _HARD_KEYWORDS],
+        "exact_word_count": [{"n": n} for n in _EXACT_WORDS],
+        "end_with": [{"phrase": p} for p in _HARD_PHRASES],
+        "num_bullets": [{"n": n} for n in _NUM_BULLETS],
+        "forbidden_word": [{"word": w} for w in _FORBIDDEN],
+        "word_max_length": [{"m": m} for m in _MAX_LEN],
+        "all_lowercase": [{}],
+        "no_comma": [{}],
+    }
+    assert _exhaustive_check(_HARD_IDS, grid, (4, 5)) > 1000
 
 
 def test_every_generated_task_is_satisfiable():
@@ -197,6 +255,37 @@ def test_every_generated_task_is_satisfiable():
         assert 3 <= len(pairs) <= 4
         w = build_witness(pairs)
         assert mc_score(w, t) == 1.0
+
+
+def test_hard_generated_tasks_are_satisfiable_with_two_plus_brutal():
+    # The hard tier must honor satisfiability AND guarantee real difficulty: every
+    # task carries exact_word_count (the skill-gap anchor) + at least one more brutal
+    # constraint, so the seed can't re-saturate the way run 2's easy tier did.
+    from whystuck.eval.multi_constraint import _BRUTAL
+
+    tasks = generate_multi_tasks(30, seed=0, k_min=4, k_max=5, hard=True)
+    for t in tasks:
+        ids = t.payload["instruction_id_list"]
+        pairs = list(zip(ids, t.payload["kwargs"], strict=True))
+        assert 4 <= len(pairs) <= 5
+        assert mc_score(build_witness(pairs), t) == 1.0
+        assert "exact_word_count" in ids  # the anchor is always present
+        assert len(set(_BRUTAL) & set(ids)) >= 2  # at least two hard constraints
+
+
+def test_hard_tasks_penalize_a_competent_answer_more_than_easy():
+    # Headroom proxy: the SAME fluent answer (has caps, a comma, long words, the word
+    # "the", a natural word count) should satisfy a SMALLER fraction of hard tasks
+    # than easy ones — evidence the hard tier leaves room below 1.0 for optimization.
+    answer = (
+        "The photon and the vector interact within this system, and the gradient "
+        "updates the kernel as entropy evolves throughout the entire process."
+    )
+    easy = [mc_score(answer, t) for t in generate_multi_tasks(40, seed=9)]
+    hard = [
+        mc_score(answer, t) for t in generate_multi_tasks(40, seed=9, k_min=4, k_max=5, hard=True)
+    ]
+    assert sum(hard) / len(hard) < sum(easy) / len(easy)
 
 
 def test_generated_tasks_carry_goal_and_parallel_kwargs():
