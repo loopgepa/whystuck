@@ -27,6 +27,7 @@ early, running zero tests, monkeypatching unittest, or forging the sentinel.
 
 from __future__ import annotations
 
+import ast
 import itertools
 import os
 import subprocess
@@ -36,6 +37,50 @@ from whystuck.eval.code_exec import (
     ExecResult,
     _tail,  # shared traceback-tail formatter
 )
+
+# Frame-introspection names. A legitimate data-processing solution never touches these; the
+# only reason to reach for them is to walk the call stack and steal the harness's per-run
+# nonce (the reviewer's stack-walk forgery). Reject any solution that references them, so the
+# nonce (which defeats os._exit / env / argv / file / stdin forgery) is the only remaining
+# pass path — and stealing it would require frame access this scan forbids. Residual:
+# OBFUSCATED introspection (e.g. getattr(sys, "_"+"getframe")) evades a static scan, but that
+# requires knowing the harness uses a stack-reachable nonce — knowledge the chat-API worker
+# and the reflection LM never have (neither sees this source). The container is the ultimate
+# boundary; this closes every non-obfuscated in-process self-grading vector.
+_FRAME_INTROSPECTION = frozenset(
+    {
+        "_getframe",
+        "_current_frames",
+        "currentframe",
+        "getouterframes",
+        "getframeinfo",
+        "f_locals",
+        "f_globals",
+        "f_back",
+        "f_builtins",
+        "tb_frame",
+        "gi_frame",
+        "cr_frame",
+    }
+)
+
+
+def _uses_frame_introspection(code: str) -> str | None:
+    """Return the offending attribute name if ``code`` references frame internals, else None.
+
+    Scans every attribute access and bare name (``ast.parse`` → ``ast.walk``). On a syntax
+    error returns None — the sandbox will surface the parse failure as an ordinary ``failed``."""
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:
+        return None
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute) and node.attr in _FRAME_INTROSPECTION:
+            return node.attr
+        if isinstance(node, ast.Name) and node.id in _FRAME_INTROSPECTION:
+            return node.id
+    return None
+
 
 _SENTINEL = "<<WS_BCB_COMPLETED_7d1e4c>>"
 _NO_METHODS = "<<WS_BCB_NO_METHODS>>"
@@ -61,9 +106,11 @@ _name_counter = itertools.count()
 #       would NOT help (it re-runs only the package __init__, not those submodules).
 #   (c) RESULT-LIST SUCCESS — pass is computed from failures/errors/SKIPPED lists, never the
 #       patchable wasSuccessful(); a skip / expected-failure counts as NOT a pass.
-# Residual: a solution using ``sys._getframe`` to walk to the harness frame and steal the
-# nonce — much higher effort; the container (--network none, resource caps) is the ultimate
-# boundary, and the worker here is a chat-API model with no repo/file access.
+#   (d) NO FRAME INTROSPECTION — a solution that would ``sys._getframe``-walk to steal the
+#       nonce local is rejected host-side before it runs (see _uses_frame_introspection).
+# Residual: OBFUSCATED frame access that evades the static scan; the container
+# (--network none, resource caps) is the ultimate boundary, and the worker here is a chat-API
+# model with no repo/file access, so it cannot know a stack-reachable nonce exists.
 _HARNESS = r"""
 import sys, io, traceback
 
@@ -195,6 +242,14 @@ def run_unittest(
     exit, no sentinel), ``"no_assertions"`` (no runnable test methods — a corrupt split), or
     ``"sandbox_error"`` (Docker/host fault — the caller must NOT score this as 0.0)."""
     import tempfile
+
+    # Reject frame-introspection up front (host-side, before any container runs): its only
+    # use here is to walk the stack for the nonce and forge a pass. Scored as a real failure.
+    offending = _uses_frame_introspection(solution)
+    if offending is not None:
+        return ExecResult(
+            False, f"solution uses frame introspection ({offending}) — disallowed", "failed"
+        )
 
     name = f"wsbcb_{os.getpid()}_{next(_name_counter)}"
     # Per-run unforgeable pass token: the harness must echo SENTINEL+nonce, and it only

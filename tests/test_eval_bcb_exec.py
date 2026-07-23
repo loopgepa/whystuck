@@ -182,6 +182,33 @@ def test_solution_cannot_read_the_nonce_from_env_or_argv():
     assert r.passed is False
 
 
+def test_stack_walk_nonce_theft_is_rejected():
+    # The reviewer's forgery: walk the call stack to steal the harness's nonce local, then
+    # forge sentinel+nonce and os._exit(0) before the tests run. The frame-introspection scan
+    # rejects it before it ever executes — so it cannot reach the stack to begin with.
+    exploit = (
+        "import sys, os\n"
+        "def _steal():\n"
+        "    fr = sys._getframe()\n"
+        "    while fr is not None:\n"
+        "        if 'nonce' in fr.f_locals:\n            return fr.f_locals['nonce']\n"
+        "        fr = fr.f_back\n"
+        "    return ''\n"
+        "n = _steal()\n"
+        'sys.stdout.write("<<WS_BCB_COMPLETED_7d1e4c>>" + n)\n'
+        "sys.stdout.flush()\n"
+        "os._exit(0)\n"
+    )
+    r = run_unittest(exploit, _TEST, ["test_a"], timeout=40)
+    assert r.passed is False and r.verdict == "failed"
+    assert "frame introspection" in r.detail
+
+
+def test_frame_introspection_scan_allows_ordinary_solutions():
+    # The scan must not reject legitimate code — a normal numpy solution passes cleanly.
+    assert run_unittest(_SOL, _TEST, timeout=40).passed is True
+
+
 def test_daemon_connection_error_is_sandbox_error_not_zero(monkeypatch):
     # A mid-run daemon blip: docker CLI exits 1 with a connection message. That must be a
     # sandbox_error (never scored 0.0), even though a real test failure also exits 1.
