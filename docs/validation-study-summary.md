@@ -121,3 +121,21 @@ exactly as Huang et al. predict — but it helped B and D equally, so it is not 
 the loop-level lever. On current evidence, evolving the critique/plan components of a
 self-refine loop is not worth its cost over evolving the generation prompt alone; the
 burden is on future work to show a regime where it is.
+
+### Mechanism (measured, zero cost)
+
+Why is the loop-level lever inert? Because the thing it evolves — the intrinsic
+self-critique — is a near-random failure detector. Measured offline from the cassettes
+(`scripts/analyze_critique_detector.py`), the seed critique's PASS verdict tracks whether
+the draft actually satisfies its constraints with F₁ ≈ 0.11 on run 3 (precision 0.08) and
+≈ 0 on run 5. The *same* critique fed the measurement tool (run 4) jumps to precision 1.00,
+F₁ 0.83 — which is exactly why the tool lifts the baseline, but that reliable detector sits
+in the B and D loops alike, so it opens no D-vs-B gap. This is the empirical version of
+Huang et al.'s self-verification-unreliability result, inside our harness.
+
+### Toward publication
+
+A pre-print draft consolidating all five runs, the method, the oracle taxonomy, this
+mechanism, threats to validity, and a boundary-mapping agenda (cross-family verifier,
+budget/worker sweeps, cross-domain replication, an oracle ceiling arm) lives in
+`docs/paper/main.tex` (references in `docs/references.bib`).
