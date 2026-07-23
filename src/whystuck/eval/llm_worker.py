@@ -163,7 +163,8 @@ def make_self_refine_run_task(
     - **plan_gene** (complexity / DSPy lever): when set, a `plan` step runs FIRST and
       its output is threaded into the generate prompt, giving the loop a third
       interacting module for whole-genome optimization to co-tune. Adds one LLM call
-      per eval (2 + 2*max_retries total). Missing gene id fails loud via `_gene_content`.
+      per eval (up to 2 + 2*max_retries; fewer if the critique passes early). Missing
+      gene id fails loud via `_gene_content`.
     - **stats_fn** (feedback-richness / Huang lever): when set, `stats_fn(draft)` is
       injected into every critique (and refine) prompt as a measured, NON-oracle tool
       readout — the external-verification signal Huang et al. 2023 found necessary for
@@ -180,7 +181,7 @@ def make_self_refine_run_task(
     - **oracle_critique** (ceiling lever, run 7): when set, the critique gate uses the
       true programmatic metric (`score`/`feedback`) instead of an LLM self-check — the
       deliberate oracle condition (Huang et al.'s "with oracle" setting). It makes NO
-      critique LLM call (1 + max_retries calls/eval) and leaves the verify gene inert;
+      critique LLM call (up to 1 + max_retries calls/eval) and leaves the verify gene inert;
       it exists to establish the loop's performance CEILING given a perfect detector,
       isolating whether the null is about signal quality vs loop mechanics. Not a
       D-vs-B test (the verify gene cannot matter under a perfect oracle).

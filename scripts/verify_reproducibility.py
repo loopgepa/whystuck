@@ -17,11 +17,13 @@ from __future__ import annotations
 import json
 import sys
 import tempfile
+import traceback
 from pathlib import Path
 
 import run_validation_study as cli
 
 CASSETTES = "tests/fixtures/cassettes"
+EXPECTED_RUNS = 8  # every pre-registered run must be verified before declaring success
 
 # (label, committed results JSON, cassette, exact CLI args). reflection_calls and
 # task-set come from each run's pre-registration (not stored in the older metas).
@@ -238,23 +240,29 @@ def verify_one(committed: str, cassette: str, args: list[str]) -> tuple[bool, st
 
 
 def main() -> int:
+    verified = 0
     all_ok = True
     for label, committed, cassette, args in RUNS:
         try:
             ok, detail = verify_one(committed, cassette, args)
-        except Exception as exc:  # a cassette miss (nondeterminism) surfaces here
-            ok, detail = False, f"{type(exc).__name__}: {exc}"
+        except Exception:  # noqa: BLE001 — a cassette miss OR a real code regression
+            # Keep the traceback so a genuine bug is not misread as "just nondeterminism".
+            ok, detail = False, traceback.format_exc().strip().splitlines()[-1]
+        verified += 1
         all_ok &= ok
         print(f"[{'OK ' if ok else 'FAIL'}] {label:22} {detail}")
-    print(
-        "\n"
-        + (
-            "ALL 8 RUNS REPRODUCE FROM CASSETTE ($0, offline)."
-            if all_ok
+    # Guard against a vacuous pass: an empty/truncated RUNS list must NOT print success.
+    # `all_ok` seeds True, so without this a zero-iteration loop would claim reproduction.
+    complete = all_ok and verified >= EXPECTED_RUNS
+    if all_ok and verified < EXPECTED_RUNS:
+        print(f"\nINCOMPLETE: only {verified}/{EXPECTED_RUNS} runs registered — NOT proven.")
+    else:
+        print(
+            f"\nALL {verified} RUNS REPRODUCE FROM CASSETTE ($0, offline)."
+            if complete
             else "REPRODUCTION FAILED."
         )
-    )
-    return 0 if all_ok else 1
+    return 0 if complete else 1
 
 
 if __name__ == "__main__":

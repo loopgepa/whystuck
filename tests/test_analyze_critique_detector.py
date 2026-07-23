@@ -38,6 +38,19 @@ def test_measurement_tool_makes_the_critique_reliable():
     assert s["f1"] > 0.5
 
 
+def test_detector_stats_arithmetic_on_a_known_confusion_matrix():
+    # Pin the precision/recall/F1 math against a hand-built matrix (one of each
+    # cell), independent of any cassette — a swapped fp/fn or precision/recall
+    # would be caught here even if it coincidentally satisfied the loose
+    # real-data bounds in the tests above.
+    stats = detector_stats([(True, True), (True, False), (False, True), (False, False)])
+    assert (stats["tp"], stats["fp"], stats["fn"], stats["tn"]) == (1, 1, 1, 1)
+    assert stats["precision"] == 0.5
+    assert stats["recall"] == 0.5
+    assert stats["f1"] == 0.5
+    assert stats["accuracy"] == 0.5
+
+
 def test_tool_fed_f1_beats_intrinsic_f1():
     intrinsic = detector_stats(
         collect_events(f"{_C}/study-multihard.json", [0, 1, 2, 3, 4], loop_kw={})

@@ -17,10 +17,12 @@ never consulted inside the loop.
 
 Structural non-oracle-ness (no task argument) is necessary but NOT sufficient: a
 field is *informationally* the oracle if the verifier it maps to has no per-task
-parameter, so the measurement alone resolves the verdict. That is why we report ONLY
-quantities the model must still compare against a task-supplied target (n, m, a
-keyword) to judge — words vs an exact/min count, bullet_lines vs a required count,
-longest_word_letters vs a max length. We deliberately DROP measurements of the two
+parameter, so the measurement alone resolves the verdict. So the constraint-mapped
+fields we report are all ones the model must still compare against a task-supplied
+target (n, m, a phrase) to judge — words vs an exact/min count, bullet_lines vs a
+required count, longest_word_letters vs a max length, last_words vs a required ending
+phrase. (characters and sentences map to no current verifier at all — neutral general
+readouts, neither a target-needing signal nor a leak.) We deliberately DROP the two
 zero/boolean constraints (all_lowercase, no_comma): reporting "all_lowercase=yes" or
 "commas=0" would be identical information to those verifiers' pass/fail, i.e. the
 oracle. (Caught in the run-4 pre-spend design review; see the pre-registration.)
@@ -68,9 +70,12 @@ def text_stats(output: str) -> str:
     bullet_lines = sum(1 for line in output.splitlines() if _BULLET.match(line))
     longest = max((len(w) for w in letters), default=0)
     last_words = " ".join(tokens[-6:])
-    # Every field below needs a task-supplied target to become a verdict; we
-    # intentionally omit all_lowercase / comma-count (those verifiers have no
-    # per-task parameter, so the raw measurement would BE the oracle).
+    # No field below is an oracle. The constraint-mapped ones (words, bullet_lines,
+    # longest_word_letters, last_words) each need a task-supplied target (an exact/min
+    # count, a bullet count, a max length, an ending phrase) to become a verdict;
+    # characters and sentences map to NO current verifier at all (general readouts).
+    # We intentionally omit all_lowercase / comma-count: those verifiers have no
+    # per-task parameter, so the raw measurement would BE the oracle.
     return (
         f"words={len(tokens)} characters={len(output)} sentences={len(sentences)} "
         f'bullet_lines={bullet_lines} longest_word_letters={longest} last_words="{last_words}"'

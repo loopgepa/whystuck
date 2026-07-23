@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import math
 
-from whystuck.eval.cassette import Cassette
+from whystuck.eval.cassette import Cassette, CassetteMiss
 from whystuck.eval.llm_worker import make_self_refine_run_task
 from whystuck.eval.multi_constraint import load_multi_constraint, mc_feedback, mc_pass, mc_score
 from whystuck.eval.study import seed_genome
@@ -39,26 +39,35 @@ def collect_events(
     """
     include_plan = "plan_gene" in loop_kw
     events: list[tuple[bool, bool]] = []
+    skipped = 0
     with Cassette(cassette_path, mode="replay") as cas:
 
-        def _miss(_prompt: str) -> str:
-            raise RuntimeError("cassette miss")  # replay must hit; miss => not recorded
+        def _unreachable(_prompt: str) -> str:
+            # Never invoked in replay: Cassette.wrap raises CassetteMiss on a miss
+            # *before* calling this, and returns the cached value on a hit.
+            raise AssertionError("unreachable in replay mode")
 
         run_task = make_self_refine_run_task(
-            cas.wrap(_miss, name="worker"), mc_score, feedback=mc_feedback, max_retries=1, **loop_kw
+            cas.wrap(_unreachable, name="worker"),
+            mc_score,
+            feedback=mc_feedback,
+            max_retries=1,
+            **loop_kw,
         )
         for seed in seeds:
-            try:
-                heldout = load_multi_constraint(
-                    "heldout", seed=seed, n=_N_HELDOUT, pool=_POOL, hard=True
-                )
-            except Exception:
-                continue
+            # load_multi_constraint raises loudly on a pool/seed misconfig — do NOT
+            # catch it: a silently dropped seed would shrink n and misstate the sample.
+            heldout = load_multi_constraint(
+                "heldout", seed=seed, n=_N_HELDOUT, pool=_POOL, hard=True
+            )
             genome = seed_genome("study-A", evolvable=set(), include_plan=include_plan)
             for task in heldout:
                 try:
                     trace = run_task(genome, task)
-                except Exception:
+                except CassetteMiss:
+                    # Only a genuinely un-recorded call is skippable (passing a superset
+                    # of seeds is intended); a real code regression must still propagate.
+                    skipped += 1
                     continue
                 gen0 = next((s for s in trace.steps if s.step_id == "generate-0"), None)
                 crit0 = next((s for s in trace.steps if s.step_id == "critique-0"), None)
@@ -67,6 +76,8 @@ def collect_events(
                 verdict_pass = (crit0.output_summary or "").strip().upper().startswith("PASS")
                 actual_pass = mc_pass(gen0.output_summary or "", task)
                 events.append((verdict_pass, actual_pass))
+    if skipped:
+        print(f"  (skipped {skipped} un-recorded task evals in {cassette_path})")
     return events
 
 

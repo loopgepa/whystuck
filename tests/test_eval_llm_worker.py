@@ -405,6 +405,26 @@ def test_oracle_critique_makes_no_critique_llm_call(retries):
     assert not any("SECRET_VERIFY_GENE" in c for c in calls)  # verify gene inert under oracle
 
 
+def test_oracle_critique_ignores_a_provided_critic_model():
+    # Precedence: under the oracle gate there is NO critique LLM call, so a
+    # critique_complete passed alongside must never be invoked — else a refactor
+    # could silently spend on the critic model under the "no critique call" guarantee.
+    critic_calls = []
+
+    def critic(p):
+        critic_calls.append(p)
+        return "PASS"
+
+    make_self_refine_run_task(
+        lambda p: "x x",
+        ifbench_score,
+        max_retries=2,
+        oracle_critique=True,
+        critique_complete=critic,
+    )(_two_gene("write it", "V"), _nw_task())
+    assert critic_calls == []
+
+
 def test_oracle_critique_passes_immediately_on_a_correct_draft():
     calls = []
 
