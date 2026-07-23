@@ -201,7 +201,12 @@ legitimate tool regime.
 \paragraph{Reproducibility and budget.}
 Every LLM call is recorded to a content-addressed cassette (\texttt{sha256} of
 name$+$args), so runs replay offline at zero cost and partial spend is always
-persisted. Output tokens are hard-capped via enforced \texttt{max\_tokens};
+persisted. Reproduction is a first-class, strict operation: re-running any study
+with \texttt{-{}-replay} re-executes the entire pipeline (loaders, GEPA search,
+scoring) against the cached calls with no API key, and any cassette miss raises.
+GEPA is deterministic under replay, so this is bit-for-bit:
+\texttt{scripts/verify\_reproducibility.py} replays all seven committed runs and
+confirms every per-arm held-out score matches its released JSON exactly. Output tokens are hard-capped via enforced \texttt{max\_tokens};
 a pre-flight guard refuses any run whose (conservative) estimate exceeds a
 US\$5 ceiling. Every experiment was pre-registered --- hypothesis, frozen
 configuration, expected seed band, and verdict rule committed to version control

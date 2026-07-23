@@ -111,6 +111,13 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         help="where to write the Markdown report (default docs/validation-study.md)",
     )
     p.add_argument("--yes", action="store_true", help="actually spend and run live")
+    p.add_argument(
+        "--replay",
+        action="store_true",
+        help="reproduce a prior run OFFLINE from its --record cassette: no API key, no "
+        "spend, and any cassette miss raises (strict). Re-runs the full pipeline (incl. "
+        "GEPA) against cached calls and re-writes --out/--report for bit-for-bit checking",
+    )
     return p.parse_args(argv)
 
 
@@ -196,6 +203,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"REFUSED: {exc}", file=sys.stderr)
         return 2
 
+    # Replay reproduces a prior run from its cassette: offline, no key, no spend
+    # (strict — a cassette miss raises). Takes precedence over --yes.
+    if args.replay:
+        return _run_live(args, arms, seeds, estimate)
+
     if not args.yes:
         print("\nDry run only. Re-run with --yes (and OPENAI_API_KEY set) to spend.")
         return 0
@@ -248,7 +260,8 @@ def _run_live(
     runs: list[dict[str, dict]] = []
     # Enforce the exact output caps the budget guard priced (cost.py), so the live
     # spend cannot exceed the pre-flight estimate on the dominant (output) axis.
-    with Cassette(record_path, mode="record") as cassette:
+    # --replay opens the cassette read-only and strict: every call must be cached.
+    with Cassette(record_path, mode="replay" if args.replay else "record") as cassette:
         complete = cassette.wrap(
             litellm_complete(args.worker_model, max_tokens=WORKER_MAX_OUTPUT_TOKENS), name="worker"
         )
@@ -295,6 +308,8 @@ def _run_live(
         "worker_model": args.worker_model,
         "reflection_model": args.reflection_model,
         "max_metric_calls": args.max_metric_calls,
+        "reflection_calls": args.reflection_calls,
+        "task_set": args.task_set,
         "loop_max_retries": args.loop_max_retries,
         "plan_gene": args.plan_gene,
         "feedback_stats": args.feedback_stats,

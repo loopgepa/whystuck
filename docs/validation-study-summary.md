@@ -144,6 +144,19 @@ F₁ 0.83 — which is exactly why the tool lifts the baseline, but that reliabl
 in the B and D loops alike, so it opens no D-vs-B gap. This is the empirical version of
 Huang et al.'s self-verification-unreliability result, inside our harness.
 
+### Reproducibility (verified)
+
+Every LLM call in every run is recorded to a content-addressed cassette. Any run
+reproduces **offline, $0, bit-for-bit** via `--replay` (strict: no API key, and a cassette
+miss raises). `scripts/verify_reproducibility.py` replays all seven committed runs and
+confirms each per-arm seed/optimized held-out score equals its released JSON exactly —
+GEPA is deterministic under replay. Run it with the eval venv:
+
+```
+scratchpad/evalvenv/bin/python scripts/verify_reproducibility.py
+# → [OK] run1 … [OK] run7 ; ALL 7 RUNS REPRODUCE FROM CASSETTE ($0, offline).
+```
+
 ### Toward publication
 
 A pre-print draft consolidating all seven runs, the method, the oracle taxonomy, this

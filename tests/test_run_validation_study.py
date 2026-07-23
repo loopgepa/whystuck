@@ -214,3 +214,26 @@ def test_unknown_critique_model_rejected():
     code, _, err = _run(["--arms", "A", "--seeds", "0", "--critique-model", "openai/nope"])
     assert code == 2
     assert "MODEL_PRICES" in err
+
+
+def test_replay_bypasses_the_api_key_gate(monkeypatch):
+    # --replay reproduces offline: it must reach the run path WITHOUT an API key
+    # (no spend possible), unlike --yes which errors without one.
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    cli = _load_cli()
+    called = {}
+
+    def _fake_run_live(*a, **k):
+        called["hit"] = True
+        return 0
+
+    monkeypatch.setattr(cli, "_run_live", _fake_run_live)
+    code = cli.main(["--arms", "A", "--seeds", "0", "--replay"])
+    assert code == 0
+    assert called.get("hit"), "replay did not reach the run path"
+
+
+def test_yes_without_key_still_errors_but_replay_does_not(monkeypatch):
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    cli = _load_cli()
+    assert cli.main(["--arms", "A", "--seeds", "0", "--yes"]) == 3  # --yes still needs a key
