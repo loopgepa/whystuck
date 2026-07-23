@@ -37,9 +37,10 @@ from whystuck.core.models import GeneType, LoopGene, LoopGenome, LoopTrace
 from whystuck.core.runner import run_command_loop
 from whystuck.core.storage import WhyStuckStore
 from whystuck.core.util import mean, utc_now_iso
+from whystuck.eval.adapter import RunTask
 from whystuck.eval.benchmark import BenchmarkTask
 from whystuck.eval.ifbench import ifbench_feedback, ifbench_score
-from whystuck.eval.llm_worker import Complete, default_build_prompt, make_run_task
+from whystuck.eval.llm_worker import Complete, make_self_refine_run_task
 from whystuck.eval.optimize import optimize_loop
 
 GENERATE_GENE = "generate"
@@ -100,11 +101,27 @@ def seed_genome(loop_id: str, *, evolvable: set[str]) -> LoopGenome:
     )
 
 
-def _heldout_score(genome: LoopGenome, tasks: list[BenchmarkTask], complete: Complete) -> float:
-    """Mean graded IFBench score of the genome's LLM-worker output on `tasks`."""
+def _heldout_score(genome: LoopGenome, tasks: list[BenchmarkTask], run_task: RunTask) -> float:
+    """Mean graded IFBench score of the genome on `tasks`, via the SAME loop worker
+    used for training — so held-out and training measure the identical thing (the
+    loop's final programmatic score), with no single-shot/loop mismatch.
+
+    Raises if a trace lacks ``metadata['eval_score']``: a silent 0.0 default would
+    report a misconfigured run_task as a catastrophic genome and bury it in the
+    report, rather than surfacing the wiring bug."""
     if not tasks:
         return 0.0
-    return mean([ifbench_score(complete(default_build_prompt(genome, t)), t) for t in tasks])
+    scores: list[float] = []
+    for t in tasks:
+        trace = run_task(genome, t)
+        raw = trace.metadata.get("eval_score")
+        if raw is None:
+            raise ValueError(
+                f"trace {trace.id!r} has no metadata['eval_score']; run_task is misconfigured "
+                "(the self-refine worker must record the programmatic score there)"
+            )
+        scores.append(float(raw))
+    return mean(scores)
 
 
 def _command_run_task(
@@ -136,24 +153,32 @@ def run_study(
     worker_cmd: tuple[str, ...] = ("true",),
     verifier_cmd: tuple[str, ...] = ("true",),
     max_retries: int = 1,
+    loop_max_retries: int = 2,
     max_metric_calls: int = 150,
     max_candidate_proposals: int | None = None,
     _optimize: Any | None = None,
 ) -> dict[str, ArmResult]:
     """Run the requested arms and return per-arm held-out results.
 
-    `complete` is the (cassette-wrapped, for the live run) LLM worker;
-    `reflection_lm` is passed through to GEPA. `worker_cmd`/`verifier_cmd` are the
-    genome-blind commands for arm C. `max_candidate_proposals` caps GEPA proposals
-    per arm (one reflection LM call each), making the reflection budget a hard
-    bound rather than an estimate. Inject `_optimize` to bypass GEPA offline.
+    `complete` is the (cassette-wrapped, for the live run) LLM worker, driven as a
+    generate→critique→refine loop (`loop_max_retries` rounds); `reflection_lm` is
+    passed through to GEPA. `worker_cmd`/`verifier_cmd` are the genome-blind
+    commands for arm C. `max_candidate_proposals` caps GEPA proposals per arm (one
+    reflection LM call each), making the reflection budget a hard bound rather than
+    an estimate. Inject `_optimize` to bypass GEPA offline.
     """
+    # One loop worker for BOTH training (B/D) and held-out scoring (all arms), so
+    # the two measure the identical thing. The critique step is driven by the
+    # evolvable verify gene, which is what lets arm D differ from arm B.
+    worker_run_task = make_self_refine_run_task(
+        complete, ifbench_score, feedback=ifbench_feedback, max_retries=loop_max_retries
+    )
     results: dict[str, ArmResult] = {}
     for arm in arms:
         evolvable = ARM_EVOLVABLE[arm]
         genome = seed_genome(f"study-{arm}", evolvable=evolvable)
         store.save_loop(genome)
-        seed_h = _heldout_score(genome, heldout, complete)
+        seed_h = _heldout_score(genome, heldout, worker_run_task)
         evolvable_genes = tuple(g.id for g in genome.genes if g.evolvable)
 
         if arm == "A":
@@ -163,7 +188,7 @@ def run_study(
         run_task = (
             _command_run_task(genome.id, worker_cmd, verifier_cmd, max_retries)
             if arm == "C"
-            else make_run_task(complete, ifbench_score, feedback=ifbench_feedback)
+            else worker_run_task
         )
         out = optimize_loop(
             store,
@@ -176,7 +201,7 @@ def run_study(
             _optimize=_optimize,
         )
         winner = store.load_variant(genome.id, out["variant_id"])
-        opt_h = _heldout_score(winner.genome, heldout, complete)
+        opt_h = _heldout_score(winner.genome, heldout, worker_run_task)
         results[arm] = ArmResult(
             arm, evolvable_genes, seed_h, opt_h, round(opt_h - seed_h, 4), out["variant_id"]
         )

@@ -139,3 +139,66 @@ def test_reflective_dataset_surfaces_task_output_and_feedback():
     assert "FOLLOW THIS" in str(rec["Inputs"])
     assert rec["Generated Outputs"] == "WORKER SAID"
     assert "Failed: X" in rec["Feedback"]
+
+
+def _self_refine_trace(*, feedback="Failed: whitespace"):
+    # A genuine generate→critique→refine trace: worker draft, verifier critique,
+    # worker FINAL answer. Mirrors what make_self_refine_run_task emits.
+    return LoopTrace(
+        id="r",
+        loop_id="x",
+        created_at=FIXED_TS,
+        task_summary="FOLLOW THIS",
+        final_outcome="success",
+        steps=[
+            LoopStepTrace(step_id="generate-0", role="worker", output_summary="draft v1 (bad)"),
+            LoopStepTrace(step_id="critique-0", role="verifier", output_summary="FAIL: fix it"),
+            LoopStepTrace(step_id="refine-0", role="worker", output_summary="FINAL ANSWER"),
+        ],
+        metrics=LoopMetrics(success=True),
+        metadata={"eval_score": 1.0, "feedback": feedback},
+    )
+
+
+def test_worker_output_preserves_empty_string_not_outcome_string():
+    # A content-filter refusal / empty completion yields output_summary "" — a REAL
+    # (if empty) worker answer. It must survive as "", NOT be silently swapped for the
+    # literal outcome word "failure"/"success" (which would feed GEPA fabricated text).
+    from whystuck.eval.adapter import _worker_output
+
+    trace = LoopTrace(
+        id="r",
+        loop_id="x",
+        created_at=FIXED_TS,
+        final_outcome="failure",
+        steps=[LoopStepTrace(step_id="generate-0", role="worker", output_summary="")],
+        metrics=LoopMetrics(success=False),
+    )
+    assert _worker_output(trace) == ""  # not "failure"
+
+
+def test_reflective_dataset_preserves_explicit_empty_feedback():
+    # If the feedback callable explicitly returns "" it must survive, not be replaced
+    # by the synthesized "score=...; ..." fallback (presence check, not truthiness).
+    def rt(genome, task):
+        return _self_refine_trace(feedback="")
+
+    adapter = LoopGenomeAdapter(base_genome=_genome(), run_task=rt)
+    b = adapter.evaluate([BenchmarkTask(id="t")], {"skill": "x"}, capture_traces=True)
+    rec = adapter.make_reflective_dataset({"skill": "x"}, b, ["skill"])["skill"][0]
+    assert rec["Feedback"] == ""  # explicit empty preserved, not "score=..."
+
+
+def test_reflective_dataset_uses_final_refined_answer_not_draft_or_critique():
+    # THE reflection-signal crux: GEPA's "Generated Outputs" must be the loop's LAST
+    # worker step (the refined answer), NOT the initial failing draft and NOT the
+    # verifier's critique prose. If _worker_output picked steps[0] or a verifier
+    # step, GEPA would reflect on the wrong text and the D-vs-B advantage would be
+    # silently neutered. This is the only place a real multi-step trace is exercised.
+    def rt(genome, task):
+        return _self_refine_trace()
+
+    adapter = LoopGenomeAdapter(base_genome=_genome(), run_task=rt)
+    b = adapter.evaluate([BenchmarkTask(id="t")], {"skill": "x"}, capture_traces=True)
+    rec = adapter.make_reflective_dataset({"skill": "x"}, b, ["skill"])["skill"][0]
+    assert rec["Generated Outputs"] == "FINAL ANSWER"  # not "draft v1 (bad)", not "FAIL: fix it"

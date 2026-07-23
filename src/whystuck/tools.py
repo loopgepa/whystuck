@@ -428,10 +428,13 @@ def build_server(store: WhyStuckStore, *, with_eval: bool | None = None) -> Fast
             tasks_dir. Runs real GEPA + LLM calls (network)."""
             from whystuck.eval.llm_worker import litellm_complete
 
+            # Bound completion length so an MCP optimize run can't rack up unbounded
+            # token spend; 1024 is generous for a loop's worker output while staying a
+            # real ceiling (litellm_complete requires max_tokens — no silent default).
             return optimize_loop_via_llm(
                 store,
                 loop_id,
-                complete=litellm_complete(model),
+                complete=litellm_complete(model, max_tokens=1024),
                 reflection_lm=reflection_lm,
                 tasks_dir=tasks_dir,
                 max_metric_calls=max_metric_calls,

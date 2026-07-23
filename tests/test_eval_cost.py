@@ -10,6 +10,10 @@ import pytest
 
 from whystuck.eval.cost import (
     MODEL_PRICES,
+    REFLECTION_MAX_OUTPUT_TOKENS,
+    REFLECTION_TOKENS,
+    WORKER_MAX_OUTPUT_TOKENS,
+    WORKER_TOKENS,
     BudgetExceeded,
     CallGroup,
     CostGuard,
@@ -141,7 +145,10 @@ def test_n_seeds_scales_the_whole_plan():
 
 
 def test_two_seed_sol_run_exceeds_cap_but_terra_fits():
-    # The guard must force a choice: Sol + 2 seeds is over $5; Terra + 2 seeds fits.
+    # Single-shot-worker costing (worker_calls_per_task=1): the guard must force a
+    # reflection-model choice — Sol + 2 seeds is over $5; Terra + 2 seeds fits. (The
+    # actual paid run is the cheaper loop config in test_default_loop_config_fits_*;
+    # this pins the reflection-price sensitivity in isolation.)
     def plan(reflection):
         return plan_study_calls(
             arms=("A", "B", "C", "D"),
@@ -159,13 +166,72 @@ def test_two_seed_sol_run_exceeds_cap_but_terra_fits():
 
 
 def test_full_study_estimate_is_within_five_dollars():
-    # The real planned run (31/31 split, 150 metric calls) must sit under the $5
-    # cap for BOTH reflection models — the spec's headline budget claim.
+    # Single-shot costing sanity (worker_calls_per_task=1): a 31/31 split at 150
+    # metric calls sits under $5 for BOTH reflection models. This bounds the search
+    # budget; the loop multiplier is priced separately (test_default_loop_config_*).
     for reflection in ("openai/gpt-5.6-terra", "openai/gpt-5.6-sol"):
         groups = _plan(
             ("A", "B", "C", "D"), n_train=31, n_heldout=31, mmc=150, refl=15, reflection=reflection
         )
         assert estimate_usd(groups) < 5.0
+
+
+def test_worker_calls_per_task_scales_only_the_worker_group():
+    # The self-refine loop makes 1+2*retries LLM calls per task-eval. That multiplier
+    # must scale the WORKER call count (and only it) — reflection is per-proposal,
+    # untouched. A regression here would silently under-count the guard once the
+    # worker is a multi-call loop, defeating the whole $5 rail.
+    def plan(wcpt):
+        return plan_study_calls(
+            arms=("A", "B", "C", "D"),
+            n_train=31,
+            n_heldout=31,
+            max_metric_calls=150,
+            reflection_calls=15,
+            worker_model="openai/gpt-4.1-mini",
+            reflection_model="openai/gpt-5.6-terra",
+            worker_calls_per_task=wcpt,
+        )
+
+    one = {g.model: g.calls for g in plan(1)}
+    five = {g.model: g.calls for g in plan(5)}  # loop_max_retries=2 → 1+2*2
+    assert five["openai/gpt-4.1-mini"] == 5 * one["openai/gpt-4.1-mini"]
+    assert five["openai/gpt-5.6-terra"] == one["openai/gpt-5.6-terra"]  # reflection unchanged
+
+
+def test_default_loop_config_fits_five_dollars():
+    # The CLI's default paid config — 2 seeds, 16/16 split, mmc 64, 10 proposals,
+    # loop_max_retries=1 (3 calls/eval) — must sit under the $5 cap with real margin.
+    # Pins the headline budget claim in the script docstring against future drift.
+    groups = plan_study_calls(
+        arms=("A", "B", "C", "D"),
+        n_train=16,
+        n_heldout=16,
+        max_metric_calls=64,
+        reflection_calls=10,
+        worker_model="openai/gpt-4.1-mini",
+        reflection_model="openai/gpt-5.6-terra",
+        n_seeds=2,
+        worker_calls_per_task=1 + 2 * 1,
+    )
+    assert estimate_usd(groups) < 4.75  # ≈ $4.54, ~9% headroom under the $5 ceiling
+
+
+def test_token_shapes_price_output_at_the_enforced_cap():
+    # The (in, out) shapes must use the ENFORCED max_tokens as their output size, so
+    # the priced cost and the live run's hard output cap are the same number. If they
+    # drifted, the guard would price a cheaper/dearer run than actually executes.
+    assert WORKER_TOKENS[1] == WORKER_MAX_OUTPUT_TOKENS
+    assert REFLECTION_TOKENS[1] == REFLECTION_MAX_OUTPUT_TOKENS
+
+
+def test_worker_input_shape_covers_evolved_gene_prompts():
+    # The worker input estimate must cover more than the seed-gene prompts (measured
+    # 545/709/771): GEPA rewrites the genes, and an evolved instruction embeds into
+    # every later worker prompt. The shape must comfortably cover a realistic evolved
+    # gene (~360 tokens) plus the worst-case refine payload (draft + critique, each
+    # ≤ the output cap) — else the estimate under-counts the arms that actually evolve.
+    assert WORKER_TOKENS[0] >= 771 + 360  # seed refine worst-case + a paragraph-scale gene
 
 
 def test_pricing_table_has_the_study_models():

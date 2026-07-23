@@ -245,6 +245,27 @@ def test_heldout_score_of_empty_tasks_is_zero():
     assert _heldout_score(seed_genome("x", evolvable=set()), [], lambda p: "anything") == 0.0
 
 
+def test_heldout_score_raises_when_trace_lacks_eval_score():
+    # A run_task whose trace omits metadata['eval_score'] is misconfigured. Defaulting
+    # to 0.0 would silently report every genome as catastrophic (looks like "GEPA made
+    # it worse") and write that into the report. Fail loudly instead.
+    from whystuck.core.models import LoopMetrics, LoopTrace
+    from whystuck.core.util import utc_now_iso
+
+    def bad_run_task(genome, task):
+        return LoopTrace(
+            id="r",
+            loop_id=genome.id,
+            created_at=utc_now_iso(),
+            final_outcome="failure",
+            metrics=LoopMetrics(success=False),
+            metadata={},  # no eval_score
+        )
+
+    with pytest.raises(ValueError, match="eval_score"):
+        _heldout_score(seed_genome("x", evolvable=set()), [BenchmarkTask(id="t")], bad_run_task)
+
+
 def test_b_leaves_verify_gene_at_seed_while_d_evolves_it(tmp_path, tasks):
     train, heldout = tasks
     store = WhyStuckStore(tmp_path / "store")

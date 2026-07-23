@@ -12,9 +12,12 @@ omitted) so the numbers and cassettes are reproducible offline afterwards.
     # dry run — safe, offline, no key:
     python scripts/run_validation_study.py
 
-    # the real run — default is Terra × 2 seeds ≈ $3.43 (needs ≥2 seeds for a
-    # verdict; a single seed is always INCONCLUSIVE). Sol × 2 seeds ≈ $5.38
-    # exceeds the default $5 cap — raise --max-usd or lower --max-metric-calls.
+    # the real run — the worker is a generate→critique→refine loop, so each task
+    # eval is up to 1 + 2*loop_max_retries LLM calls; the default (2 seeds, mmc 64,
+    # 10 proposals, 16/16 tasks, 1 retry) ≈ $4.5 under the $5 cap. Output tokens are
+    # hard-capped; the input estimate is conservative for typical GEPA instructions
+    # (see eval/cost.py). Needs ≥2 seeds for a verdict (a single seed is always
+    # INCONCLUSIVE). Deeper search costs more — the guard refuses over $5.
     OPENAI_API_KEY=sk-... python scripts/run_validation_study.py --yes \
         --record tests/fixtures/cassettes/study.json --out docs/validation-study.json
 """
@@ -28,6 +31,8 @@ import sys
 
 from whystuck.eval.cost import (
     MODEL_PRICES,
+    REFLECTION_MAX_OUTPUT_TOKENS,
+    WORKER_MAX_OUTPUT_TOKENS,
     BudgetExceeded,
     CostGuard,
     estimate_usd,
@@ -41,13 +46,21 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Run/dry-run the GEPA validation study.")
     p.add_argument("--max-usd", type=float, default=5.0, help="hard spend ceiling (default 5.0)")
     p.add_argument("--arms", default="ABCD", help="which arms to run (default ABCD)")
-    p.add_argument("--n-train", type=int, default=31, help="train task count (default 31)")
-    p.add_argument("--n-heldout", type=int, default=31, help="held-out task count (default 31)")
-    p.add_argument("--max-metric-calls", type=int, default=150, help="GEPA budget per arm")
+    p.add_argument("--n-train", type=int, default=16, help="train task count (default 16)")
+    p.add_argument("--n-heldout", type=int, default=16, help="held-out task count (default 16)")
+    p.add_argument(
+        "--max-metric-calls", type=int, default=64, help="GEPA budget per arm (default 64)"
+    )
+    p.add_argument(
+        "--loop-max-retries",
+        type=int,
+        default=1,
+        help="generate→critique→refine rounds per task (worker makes up to 1+2N calls/eval)",
+    )
     p.add_argument(
         "--reflection-calls",
         type=int,
-        default=15,
+        default=10,
         help="hard cap on GEPA proposals per arm (= max reflection LM calls/arm)",
     )
     p.add_argument("--worker-model", default="openai/gpt-4.1-mini")
@@ -110,6 +123,7 @@ def main(argv: list[str] | None = None) -> int:
         worker_model=args.worker_model,
         reflection_model=args.reflection_model,
         n_seeds=len(seeds),
+        worker_calls_per_task=1 + 2 * args.loop_max_retries,
     )
 
     print(
@@ -155,9 +169,16 @@ def _run_live(
 
     record_path = args.record or "study-cassette.json"
     runs: list[dict[str, dict]] = []
+    # Enforce the exact output caps the budget guard priced (cost.py), so the live
+    # spend cannot exceed the pre-flight estimate on the dominant (output) axis.
     with Cassette(record_path, mode="record") as cassette:
-        complete = cassette.wrap(litellm_complete(args.worker_model), name="worker")
-        reflection = cassette.wrap(litellm_complete(args.reflection_model), name="reflection")
+        complete = cassette.wrap(
+            litellm_complete(args.worker_model, max_tokens=WORKER_MAX_OUTPUT_TOKENS), name="worker"
+        )
+        reflection = cassette.wrap(
+            litellm_complete(args.reflection_model, max_tokens=REFLECTION_MAX_OUTPUT_TOKENS),
+            name="reflection",
+        )
         for seed in seeds:
             train = load_ifbench(split="train", seed=seed, n=args.n_train)
             heldout = load_ifbench(split="heldout", seed=seed, n=args.n_heldout)
@@ -172,6 +193,7 @@ def _run_live(
                     arms=arms,
                     max_metric_calls=args.max_metric_calls,
                     max_candidate_proposals=args.reflection_calls,
+                    loop_max_retries=args.loop_max_retries,
                 )
             runs.append({name: vars(r) for name, r in results.items()})
 
@@ -182,6 +204,8 @@ def _run_live(
         "worker_model": args.worker_model,
         "reflection_model": args.reflection_model,
         "max_metric_calls": args.max_metric_calls,
+        "loop_max_retries": args.loop_max_retries,
+        "worker_max_output_tokens": WORKER_MAX_OUTPUT_TOKENS,
         "seeds": seeds,
         "estimated_usd": estimate,
         "generated": utc_now_iso(),

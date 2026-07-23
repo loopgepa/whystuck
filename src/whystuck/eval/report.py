@@ -113,6 +113,12 @@ def render_report(runs: list[Run], *, meta: dict[str, Any]) -> str:
         "scored by programmatic constraint verifiers (no LLM judge).\n"
         f"- **Worker (task LM):** `{meta.get('worker_model', '?')}`; "
         f"**reflection LM:** `{meta.get('reflection_model', '?')}`.\n"
+        f"- **Worker loop:** each task eval runs a generate→critique→refine self-refine loop "
+        f"(up to {meta.get('loop_max_retries', '?')} refine round(s)). The `generate` gene drives "
+        "the draft; the `ensure_correct` gene drives an *intrinsic* critique (the verifier is "
+        "never consulted mid-loop — it is the scoring metric, so gating on it would be oracle "
+        "contamination). The final answer is scored programmatically. Evolving the verify gene "
+        "changes the critique, hence the loop's output — the lever D has and B does not.\n"
         f"- **Budget:** `max_metric_calls`={meta.get('max_metric_calls', '?')} per arm, "
         f"across {len(seeds)} seed(s) {seeds}; estimated spend "
         f"${meta.get('estimated_usd', 0):.2f}.\n"
@@ -143,6 +149,13 @@ def render_report(runs: list[Run], *, meta: dict[str, Any]) -> str:
         "- Reflection spend is a hard cap: GEPA is told to stop after `reflection_calls` "
         "proposals per arm (one reflection LM call each), so the estimated cost is a genuine "
         "ceiling, not just a guess.\n"
+        f"- Worker completions are hard-capped at {meta.get('worker_max_output_tokens', '?')} "
+        "tokens (output tokens — the dominant cost — are a genuine ceiling the guard prices "
+        "exactly). Input tokens are a conservative estimate sized for GEPA-evolved instructions, "
+        "not an absolute bound, so the $5 guard is enforced pre-flight on that estimate rather "
+        "than metered mid-run. The IFBench subset used here has only short-output constraints, so "
+        "the cap does not truncate answers; if it ever did, that floor would apply to every arm "
+        "equally, not bias the loop.\n"
     )
 
     return (

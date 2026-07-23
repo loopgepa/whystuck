@@ -32,9 +32,23 @@ def _score_of(trace: LoopTrace) -> float:
 
 
 def _worker_output(trace: LoopTrace) -> str:
-    """The worker's actual output text (from the worker step), for reflection.
-    Falls back to the outcome string when no step captured output text."""
-    for step in trace.steps:
+    """The worker's *final* output text, for reflection.
+
+    For a self-refine loop this is the last generate/refine step (role "worker"),
+    NOT the initial draft and NOT a "verifier" critique step; for the single-shot
+    worker there is exactly one such step. Falls back to any last step with output
+    text, then to the outcome string (command-loop traces keep output on ToolCall,
+    not the step, so they land on the outcome).
+
+    An empty string is a *legitimate* worker answer (a content-filter refusal or an
+    empty completion), so we return it as-is rather than masking it with the outcome
+    word — a fabricated "success"/"failure" fed to GEPA's reflector would be worse
+    than an honest empty output. The `is not None` filter (not truthiness) is the
+    same discipline `_score_of` uses to keep a real 0.0 from looking 'unset'."""
+    for step in reversed(trace.steps):
+        if step.role == "worker" and step.output_summary is not None:
+            return step.output_summary  # narrowed to str; "" is kept, not masked
+    for step in reversed(trace.steps):
         if step.output_summary is not None:
             return step.output_summary
     return trace.final_outcome
@@ -96,8 +110,13 @@ class LoopGenomeAdapter:
         traj = eval_batch.trajectories or []
         for i, trace in enumerate(traj):
             score = eval_batch.scores[i] if i < len(eval_batch.scores) else _score_of(trace)
-            feedback = trace.metadata.get("feedback") or (
-                f"score={score:.2f}; " + (trace.failure_summary or "succeeded")
+            # Presence check, not truthiness: an explicit "" feedback from the callable
+            # is a real (if empty) signal and must not be overwritten by the synth string.
+            raw_fb = trace.metadata.get("feedback")
+            feedback = (
+                raw_fb
+                if raw_fb is not None
+                else f"score={score:.2f}; " + (trace.failure_summary or "succeeded")
             )
             records.append(
                 {

@@ -5,16 +5,26 @@ a pricing table + a per-call-group plan + a `CostGuard` that pre-counts the
 planned spend and refuses to proceed if it would breach the ceiling. Pure
 arithmetic, no network — the guard runs *before* any live call.
 
-Conservatism scope: the *worker*-call count is a genuine upper bound (it accounts
-for GEPA's search, both held-out evals, AND `optimize_loop`'s post-search
-train-set re-scoring). The *reflection*-call count (`reflection_calls`) is a hard
-bound too, but only because the live run passes it to GEPA as
-`max_candidate_proposals` (one reflection LM call per proposal); this module is
-pure arithmetic and cannot enforce that itself, so the bound holds iff the caller
-wires the cap through — `run_validation_study.py` does. Note GEPA's own
-`max_reflection_cost` stopper is inert here (it reports $0 for a callable
-reflection_lm, which the cassette wrapper always supplies), so the *proposal*
-cap, not a cost stopper, is what keeps reflection bounded.
+What is a hard bound vs. a calibrated estimate (be precise — the guard is only as
+honest as this distinction):
+- **Call counts** are hard bounds. Worker calls account for GEPA's search, both
+  held-out evals, AND `optimize_loop`'s post-search train-set re-scoring; reflection
+  calls are bounded because the live run passes `reflection_calls` to GEPA as
+  `max_candidate_proposals` (one reflection LM call per proposal). This module is
+  pure arithmetic and can't enforce those itself, so the bounds hold iff the caller
+  wires the caps through — `run_validation_study.py` does. (GEPA's own
+  `max_reflection_cost` stopper is inert for a callable reflection_lm, which the
+  cassette wrapper always supplies, so the *proposal* cap is what bounds reflection.)
+- **Output tokens** are a hard bound: the live run enforces `max_tokens` on both the
+  worker (`WORKER_MAX_OUTPUT_TOKENS`) and reflection (`REFLECTION_MAX_OUTPUT_TOKENS`)
+  completions, so no call emits more than priced.
+- **Input tokens** are a CONSERVATIVE ESTIMATE, not a hard bound. The worker input
+  shape is sized for a realistic GEPA-evolved gene (see `WORKER_TOKENS`), but GEPA
+  can in principle propose a longer instruction (up to `REFLECTION_MAX_OUTPUT_TOKENS`),
+  and its reflection prompt size is GEPA-internal — neither is capped here. So the
+  dollar estimate is conservative for typical runs but a pathological reflection that
+  emits maximal-length instructions every round could exceed it. The guard checks the
+  estimate pre-flight against `--max-usd`; it is not a runtime meter that aborts mid-run.
 
 Prices are USD per 1M tokens (input, output), July 2026 OpenAI list prices.
 Update the table when prices move; the estimator reads only from it, so a stale
@@ -35,10 +45,29 @@ MODEL_PRICES: dict[str, tuple[float, float]] = {
 }
 
 
-# Per-call token shapes, chosen to reproduce the design spec's §6 per-call cost
-# approximations (worker c_w ≈ $0.0013, reflection c_r ≈ $0.033 with Terra).
-WORKER_TOKENS = (600, 250)  # (in, out) — a short IFBench completion
-REFLECTION_TOKENS = (4000, 1500)  # (in, out) — GEPA reflection over traces
+# Enforced hard caps on completion length (passed to litellm as `max_tokens`), so
+# OUTPUT tokens — the dominant cost — are a genuine ceiling the guard can rely on,
+# not a hopeful estimate. The live run MUST wire these through (run_validation_study
+# builds its `complete`/`reflection` with exactly these caps) or the bound is void.
+WORKER_MAX_OUTPUT_TOKENS = 320  # ~240 words; ample for IFBench constraint-following
+REFLECTION_MAX_OUTPUT_TOKENS = 1500
+
+# Per-call (in, out) shape for the worker. Output is the enforced hard cap. Input is
+# a CONSERVATIVE ESTIMATE (see module docstring): the seed-gene loop prompts measured
+# at 545 / 709 / 771 tokens (generate / critique / refine) over the held-out IFBench
+# set, but GEPA rewrites the genes during arms B/D, and an evolved instruction embeds
+# into every later worker prompt. 1200 covers the worst case with a gene of ~360
+# tokens — comfortably above a typical GEPA-evolved instruction (a paragraph or two),
+# and `refine` (the largest shape: one gene + prior draft ≤320 + critique ≤320 + task)
+# stays under it. It is NOT an absolute bound: a pathological gene approaching the
+# reflection output cap could exceed it. Output stays at the enforced cap; critique
+# output is in practice far below it, so that dimension carries extra slack.
+WORKER_TOKENS = (1200, WORKER_MAX_OUTPUT_TOKENS)  # (in estimate, out hard cap)
+# Reflection output is enforced via max_tokens on the reflection LM; the input (GEPA's
+# prompt over sampled traces) is a calibrated estimate — GEPA sizes that prompt itself,
+# so it can't be hard-capped here. The proposal-count cap (max_candidate_proposals) is
+# what makes reflection spend bounded regardless; this shape just prices each proposal.
+REFLECTION_TOKENS = (4000, REFLECTION_MAX_OUTPUT_TOKENS)  # (in, out)
 
 # Which arms invoke the LLM worker / reflection model.
 _LLM_OPTIMIZING_ARMS = frozenset({"B", "D"})  # worker opt + reflection
@@ -97,19 +126,26 @@ def plan_study_calls(
     worker_model: str,
     reflection_model: str,
     n_seeds: int = 1,
+    worker_calls_per_task: int = 1,
 ) -> list[CallGroup]:
     """Conservative per-call plan for a study configuration.
 
-    Worker (LLM task) calls, per arm:
-    - every arm scores the seed genome on held-out → `n_heldout` calls;
+    Worker (LLM task) *task-evaluations*, per arm:
+    - every arm scores the seed genome on held-out → `n_heldout` evals;
     - each LLM-optimizing arm (B, D) additionally spends ~`max_metric_calls`
-      worker calls during GEPA search, `n_train` to re-score the winner on the
+      task-evals during GEPA search, `n_train` to re-score the winner on the
       train set (`optimize_loop`'s post-search objectives/frontier pass, which
-      re-invokes the LLM worker per train task), and `n_heldout` to score the
+      re-invokes the worker per train task), and `n_heldout` to score the
       winner on held-out;
     - arm C's optimization AND its post-search re-scoring use the *command*
       worker (free, not counted); it still scores seed + winner on held-out via
       the LLM worker → `2 * n_heldout`.
+
+    `worker_calls_per_task` converts task-evals to LLM calls: the self-refine loop
+    worker makes up to `1 + 2 * loop_max_retries` calls per eval (generate + each
+    critique/refine round), so a single-shot worker passes 1 and the default loop
+    (2 retries) passes 5. This is the fix that keeps the $5 guard honest once the
+    worker is a multi-call loop rather than one shot.
 
     `n_train` is explicit (not assumed equal to `n_heldout`) so the train-set
     re-scoring term stays correct if the two splits diverge. `n_seeds` scales the
@@ -118,18 +154,18 @@ def plan_study_calls(
     `reflection_calls` per LLM-optimizing arm — a hard bound, because the caller
     wires it through as `max_candidate_proposals` (see the module docstring).
     """
-    worker_calls = 0
+    worker_evals = 0
     for arm in arms:
         if arm in _LLM_WORKER_ARMS:
-            worker_calls += n_heldout  # seed held-out eval
+            worker_evals += n_heldout  # seed held-out eval
         if arm in _LLM_OPTIMIZING_ARMS:
             # GEPA search + post-search train re-scoring + winner held-out eval
-            worker_calls += max_metric_calls + n_train + n_heldout
+            worker_evals += max_metric_calls + n_train + n_heldout
         elif arm == "C":
-            worker_calls += n_heldout  # winner held-out eval (command opt is free)
+            worker_evals += n_heldout  # winner held-out eval (command opt is free)
 
     reflection_per_seed = reflection_calls * sum(1 for a in arms if a in _LLM_OPTIMIZING_ARMS)
-    worker_calls *= n_seeds
+    worker_calls = worker_evals * worker_calls_per_task * n_seeds
     reflection_total = reflection_per_seed * n_seeds
 
     return [

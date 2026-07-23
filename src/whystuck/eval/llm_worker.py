@@ -117,8 +117,130 @@ def make_run_task(
     return run_task
 
 
-def litellm_complete(model: str) -> Complete:
-    """Production `complete` backed by litellm (network; ships with `whystuck[eval]`)."""
+def _gene_content(genome: LoopGenome, gene_id: str) -> str:
+    """The text of one gene by id. Fails loudly on a missing or non-text gene: a
+    silent empty-string fallback would run the loop with a blank instruction and
+    report a plausible low score, hiding a wiring bug (typo'd id, wrong gene type)
+    behind a result that looks like 'the genome performed badly'."""
+    for gene in genome.genes:
+        if gene.id == gene_id:
+            if not isinstance(gene.content, str):
+                raise TypeError(
+                    f"gene {gene_id!r} is not text-typed (got {type(gene.content).__name__}); "
+                    "the self-refine worker needs a string skill/rubric"
+                )
+            return gene.content
+    raise KeyError(
+        f"genome {genome.id!r} has no gene {gene_id!r} (required by the self-refine worker)"
+    )
+
+
+def make_self_refine_run_task(
+    complete: Complete,
+    score: Score,
+    *,
+    feedback: Feedback | None = None,
+    generate_gene: str = "generate",
+    verify_gene: str = "ensure_correct",
+    max_retries: int = 2,
+) -> RunTask:
+    """A real generate -> critique -> refine loop (not single-shot).
+
+    Each role uses a *different* gene, so evolving each gene has a distinct effect
+    (unlike the single-shot worker, where both genes were just concatenated text):
+    - **generate** (`generate_gene`) drafts and later refines the answer;
+    - **critique** (`verify_gene`) drives an LLM self-check that decides whether to
+      retry and what to fix. Its verdict is the retry gate (intrinsic, no oracle:
+      the programmatic scorer is never consulted inside the loop). A better verify
+      rubric catches more failures and steers better refinements, which is exactly
+      why arm D (evolves both genes) can beat arm B (evolves only `generate`).
+
+    The final answer is scored by `score` (the ground-truth programmatic metric),
+    so the loop cannot game it. `max_retries` bounds the critique/refine rounds and
+    MUST be ≥ 1 — at 0 the critique never runs, the verify gene never enters a
+    prompt, and arm D silently collapses into arm B (the exact null this loop fixes).
+    """
+    if max_retries < 1:
+        raise ValueError(
+            f"max_retries must be >= 1 (got {max_retries}); at 0 the critique never runs "
+            "and the verify gene is inert, collapsing loop-level GEPA into prompt-only"
+        )
+
+    def run_task(genome: LoopGenome, task: BenchmarkTask) -> LoopTrace:
+        gen, ver = _gene_content(genome, generate_gene), _gene_content(genome, verify_gene)
+        task_text = _task_text(task)
+        steps: list[LoopStepTrace] = []
+
+        draft = complete(f"{gen}\n\n# Task\n{task_text}")
+        steps.append(
+            LoopStepTrace(
+                step_id="generate-0", role="worker", input_summary=task_text, output_summary=draft
+            )
+        )
+        for i in range(max_retries):
+            critique = complete(
+                f"{ver}\n\n# Task\n{task_text}\n\n# Draft answer\n{draft}\n\n"
+                "Reply exactly PASS if every requirement is satisfied; "
+                "otherwise list what to fix."
+            )
+            passed = critique.strip().upper().startswith("PASS")
+            steps.append(
+                LoopStepTrace(
+                    step_id=f"critique-{i}",
+                    role="verifier",
+                    status=step_status_for(passed),
+                    input_summary=draft,
+                    output_summary=critique,
+                )
+            )
+            if passed:
+                break
+            draft = complete(
+                f"{gen}\n\n# Task\n{task_text}\n\n# Your previous answer\n{draft}\n\n"
+                f"# Problems to fix\n{critique}\n\nProduce a corrected answer."
+            )
+            steps.append(
+                LoopStepTrace(
+                    step_id=f"refine-{i}",
+                    role="worker",
+                    input_summary=critique,
+                    output_summary=draft,
+                )
+            )
+
+        eval_score = float(score(draft, task))
+        ok = eval_score >= 1.0
+        fb = (
+            feedback(draft, task)
+            if feedback is not None
+            else ("all requirements satisfied" if ok else "verifier rejected the worker output")
+        )
+        return LoopTrace(
+            id=f"loop-{task.id}",
+            loop_id=genome.id,
+            created_at=utc_now_iso(),
+            task_id=task.id,
+            task_summary=task_text,
+            final_outcome=outcome_for(ok),
+            failure_summary=None if ok else fb,
+            steps=steps,
+            metrics=LoopMetrics(
+                success=ok, retry_count=sum(1 for s in steps if "refine" in s.step_id)
+            ),
+            metadata={"eval_score": eval_score, "feedback": fb},
+        )
+
+    return run_task
+
+
+def litellm_complete(model: str, *, max_tokens: int) -> Complete:
+    """Production `complete` backed by litellm (network; ships with `whystuck[eval]`).
+
+    `max_tokens` is REQUIRED (no default): it caps the completion length so output
+    tokens — the dominant cost — are a hard ceiling matching what the budget guard
+    priced. Making it required is deliberate fail-loud design — a silent unbounded
+    default would let a future caller void the budget bound with no error (the same
+    footgun the rest of this module's guards exist to prevent)."""
 
     def complete(prompt: str) -> str:
         try:
@@ -127,7 +249,11 @@ def litellm_complete(model: str) -> Complete:
             raise RuntimeError(
                 "the LLM worker needs litellm: pip install 'whystuck[eval]'"
             ) from exc
-        resp = litellm.completion(model=model, messages=[{"role": "user", "content": prompt}])
+        resp = litellm.completion(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=max_tokens,
+        )
         return resp.choices[0].message.content or ""
 
     return complete

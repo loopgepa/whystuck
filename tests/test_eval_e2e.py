@@ -37,14 +37,19 @@ _ARMS = ("A", "B", "C", "D")
 
 
 def _worker(prompt: str) -> str:
-    # Synthetic landscape that models the study thesis: only a fully optimized
-    # loop (BOTH text genes carry the sentinel → count ≥ 2) yields a
-    # whitespace-free, constraint-satisfying output. Optimizing one gene
-    # (prompt-only, arm B → 1 sentinel) or none (seed → 0) does not clear the
-    # bar, so "x x" (has whitespace) fails the no_whitespace verifier. This makes
-    # arm D beat arm B end-to-end, so the verdict test can prove correct B/D
-    # attribution rather than passing on a numeric tie.
-    return "solid" if prompt.count(_SENTINEL) >= 2 else "x x"
+    # Loop-aware synthetic landscape modelling the study thesis under the real
+    # generate→critique→refine worker. The generator always drafts a failing "x x"
+    # (has whitespace); the ONLY way to a passing answer is a critique that catches
+    # the flaw and triggers a refine. The critique catches it only when the verify
+    # gene is optimized (carries the sentinel). So arm D (evolves the verify gene →
+    # critique catches → refine to "solid") beats arm B (verify stays seed →
+    # critique wrongly PASSes → draft stays "x x"). A/C never optimize the loop, so
+    # they stay at the failing draft.
+    if "# Draft answer" in prompt:  # critique step
+        return "FAIL: remove the whitespace" if _SENTINEL in prompt else "PASS"
+    if "# Problems to fix" in prompt:  # refine step
+        return "solid"
+    return "x x"  # initial generate: a failing draft
 
 
 def _optimize(**kw):

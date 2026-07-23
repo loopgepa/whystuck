@@ -87,9 +87,10 @@ def test_default_is_two_seeds():
 
 
 def test_seeds_flag_parses_multiple_values():
-    # 3 seeds × ABCD × Terra ≈ $5.15 > the default $5 cap, so raise --max-usd to
-    # reach the dry-run and exercise the parse (the refusal itself is tested below).
-    code, out, _ = _run(["--seeds", "0,1,2", "--max-usd", "10"])
+    # 3 seeds × ABCD × Terra with the 5-call/eval loop is well over the $5 cap, so
+    # raise --max-usd to reach the dry-run and exercise the parse (the refusal
+    # itself is tested below).
+    code, out, _ = _run(["--seeds", "0,1,2", "--max-usd", "20"])
     assert code == 0
     assert "seeds=[0, 1, 2]" in out
 
@@ -125,6 +126,8 @@ def test_cli_estimate_matches_independent_computation():
             "20",
             "--reflection-calls",
             "3",
+            "--loop-max-retries",
+            "2",
         ]
     )
     expected = estimate_usd(
@@ -136,6 +139,7 @@ def test_cli_estimate_matches_independent_computation():
             reflection_calls=3,
             worker_model="openai/gpt-4.1-mini",
             reflection_model="openai/gpt-5.6-terra",
+            worker_calls_per_task=1 + 2 * 2,  # loop makes 1 + 2*retries calls/eval
         )
     )
     assert code == 0

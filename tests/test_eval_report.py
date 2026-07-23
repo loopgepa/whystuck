@@ -18,6 +18,8 @@ _META = {
     "seeds": [0, 1],
     "estimated_usd": 3.43,
     "generated": "2026-07-22",
+    "loop_max_retries": 1,
+    "worker_max_output_tokens": 320,
 }
 
 
@@ -47,6 +49,23 @@ def _runs_where_d_beats_b():
             "D": _arm(["generate", "ensure_correct"], 0.42, 0.82),
         },
     ]
+
+
+def test_method_describes_the_self_refine_loop():
+    # The report must state HOW B differs from D mechanistically: the worker is a
+    # generate→critique→refine loop whose critique is driven by the verify gene,
+    # which only D evolves. Without this, a reader can't tell why loop-level beats
+    # prompt-only. Pins that the loop (and its retry depth) surfaces in Method.
+    md = render_report([], meta={**_META, "loop_max_retries": 2})
+    low = md.lower()
+    assert "critique" in low and "refine" in low
+    assert "2 refine round" in low  # the configured retry depth is reported
+
+
+def test_method_loop_depth_reflects_meta():
+    # A different loop_max_retries must change the reported depth (no hard-coded 1).
+    md = render_report([], meta={**_META, "loop_max_retries": 3})
+    assert "3 refine round" in md.lower()
 
 
 def test_pending_report_has_method_and_no_verdict():

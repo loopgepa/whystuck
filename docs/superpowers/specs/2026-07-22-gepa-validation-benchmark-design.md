@@ -1,8 +1,38 @@
 # WhyStuck GEPA validation benchmark — design
 
 **Date:** 2026-07-22
-**Status:** design, pending implementation-plan
+**Status:** design, implemented
 **Scope:** one self-contained validation study that earns WhyStuck's central claim with empirical data, plus the reusable, deterministic harness that produces it.
+
+> **Revision — 2026-07-22 (self-refine loop worker).** The worker described below was
+> originally **single-shot** (one LLM call scores each task directly). A first offline
+> validation showed that made the study's thesis untestable: IFBench's vendored rows are
+> all **single-constraint**, and with a single-shot worker the `ensure_correct` verify gene
+> is inert — arm D had no lever arm B lacks, so D and B tied at 0.69 (a null result driven
+> by design, not by GEPA). The worker is now a real **generate→critique→refine loop**
+> (`make_self_refine_run_task`): the `generate` gene drafts, the `ensure_correct` gene drives
+> an *intrinsic* LLM critique (never the IFBench verifier — that is the scoring metric, so
+> gating retries on it would be oracle contamination), and a refine step applies the critique.
+> Evolving the verify gene now changes the critique and therefore the loop's output, which is
+> the lever that separates loop-level (D) from prompt-only (B). Verified twice e2e against the
+> real gepa library offline: controls A/C flat, D beats B by +1.0 on the synthetic landscape.
+>
+> **Superseded figures below.** Because the loop makes `1 + 2·loop_max_retries` LLM calls per
+> task-eval, the cost model gained a `worker_calls_per_task` multiplier (`eval/cost.py`). The
+> §4/§6 numbers assume the old single-shot worker (`31/31` split, `max_metric_calls`=150,
+> ≈ $3.43); the **current default paid config** is `16/16`, `max_metric_calls`=64,
+> `reflection_calls`=10, `loop_max_retries`=1 (3 calls/eval), ≈ **$4.54** over 2 seeds — under
+> the $5 cap, which the guard enforces on the pre-flight estimate.
+>
+> **What the $5 guard does and does not guarantee** (corrected — the earlier draft overclaimed
+> a "true bound"): call counts and *output* tokens are hard bounds — worker completions are
+> capped at `max_tokens`=320 and reflection at 1500, wired through from `eval/cost.py`. *Input*
+> tokens are a **conservative estimate**: the worker shape (1200 in, 320 out) covers the seed
+> loop prompts plus a realistic GEPA-evolved instruction (~360 tokens), but GEPA can in
+> principle propose a longer instruction (up to the reflection output cap) and sizes its own
+> reflection prompt, neither capped here — so a pathological run could exceed the estimate. The
+> guard checks the estimate pre-flight against `--max-usd`; it is not a runtime meter. The
+> reflection-cap mechanism, arm definitions, controls, and honesty gates are unchanged.
 
 ## 1. Goal
 
