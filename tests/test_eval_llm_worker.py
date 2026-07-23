@@ -437,3 +437,91 @@ def test_oracle_critique_passes_immediately_on_a_correct_draft():
     )
     assert len(calls) == 1  # generate only; no refine, no critique
     assert trace.metadata["eval_score"] == 1.0
+
+
+# --- feedback-actionability lever (D2'): oracle_feedback shapes the refine text -
+
+
+def test_oracle_feedback_overrides_the_refine_critique_text():
+    # Under the oracle gate, a provided oracle_feedback supplies the repair text
+    # handed to the refine step — NOT the generic fallback, NOT the `feedback` fn.
+    calls = []
+
+    def spy(p):
+        calls.append(p)
+        return "x x"  # always fails no_whitespace -> oracle gate fails -> refine runs
+
+    run_task = make_self_refine_run_task(
+        spy,
+        ifbench_score,
+        feedback=lambda o, t: "GENERIC_FEEDBACK",
+        max_retries=1,
+        oracle_critique=True,
+        oracle_feedback=lambda o, t: "ACTIONABLE_DIRECTIVE_MARKER",
+    )
+    trace = run_task(_two_gene("write it", "V"), _nw_task())
+    refine = [c for c in calls if "# Problems to fix" in c]
+    assert refine and all("ACTIONABLE_DIRECTIVE_MARKER" in c for c in refine)
+    assert not any("GENERIC_FEEDBACK" in c for c in refine)  # oracle_feedback wins over feedback
+    # oracle_feedback shapes ONLY the in-loop refine text; the final trace feedback
+    # (reflection signal) must still come from `feedback`, not the refine override.
+    assert trace.metadata["feedback"] == "GENERIC_FEEDBACK"
+
+
+def test_oracle_feedback_default_none_preserves_feedback_behaviour():
+    # Default (oracle_feedback=None) => the refine text is `feedback(draft,task)`,
+    # byte-identical to every prior oracle run — the invariant that lets run-8's
+    # cassette replay unchanged when the D2' "mid" level (the default) is selected.
+    calls = []
+
+    def spy(p):
+        calls.append(p)
+        return "x x"
+
+    make_self_refine_run_task(
+        spy,
+        ifbench_score,
+        feedback=lambda o, t: "FEEDBACK_TEXT",
+        max_retries=1,
+        oracle_critique=True,
+    )(_two_gene("write it", "V"), _nw_task())
+    refine = [c for c in calls if "# Problems to fix" in c]
+    assert refine and all("FEEDBACK_TEXT" in c for c in refine)
+
+
+def test_oracle_feedback_is_inert_without_oracle_critique():
+    # Off the oracle path the critique text comes from the LLM; oracle_feedback must
+    # never leak into an intrinsic-critique run (guards against a mis-wired lever).
+    calls = []
+
+    def spy(p):
+        calls.append(p)
+        return _loop_complete(p)
+
+    make_self_refine_run_task(
+        spy,
+        ifbench_score,
+        max_retries=1,
+        oracle_critique=False,
+        oracle_feedback=lambda o, t: "SHOULD_NOT_APPEAR",
+    )(_two_gene("write it", "CHECK_WHITESPACE"), _nw_task())
+    assert not any("SHOULD_NOT_APPEAR" in c for c in calls)
+
+
+def test_oracle_feedback_still_makes_no_critique_llm_call():
+    # The lever must not reintroduce a critique LLM call: oracle stays 1 + retries.
+    calls = []
+
+    def spy(p):
+        calls.append(p)
+        return "x x"
+
+    make_self_refine_run_task(
+        spy,
+        ifbench_score,
+        max_retries=2,
+        oracle_critique=True,
+        oracle_feedback=lambda o, t: "DIRECTIVE",
+    )(_two_gene("write it", "SECRET_VERIFY_GENE"), _nw_task())
+    assert len(calls) == 1 + 2  # generate + 2 refines, no critique call
+    assert not any("SECRET_VERIFY_GENE" in c for c in calls)

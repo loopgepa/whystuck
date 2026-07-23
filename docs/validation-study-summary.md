@@ -1,13 +1,15 @@
-# GEPA validation study — results note (all eight runs)
+# GEPA validation study — results note (all ten runs)
 
 *Question:* does **loop-level** GEPA (evolve the self-refine loop's `generate` **and**
 `ensure_correct` verify genes) beat **prompt-only** GEPA (evolve `generate` alone), on
 instruction-following tasks, under a matched budget?
 
-*Answer across eight pre-registered paid runs:* **no measurable advantage** — and, from the
-oracle controls (runs 7–8), the bottleneck is the *fix step*, not detection. This note grew
-chronologically (runs 1–3, then 4–5, then 6–7, then 8); the "Final verdict across eight
-runs" section below is the current synthesis, and `docs/paper/main.tex` is the clean writeup.
+*Answer across ten pre-registered paid runs:* **no measurable advantage** — and, from the
+oracle controls (runs 7–10), the bottleneck is the *fix step*, not detection (runs 9–10
+show it is partly feedback-limited, partly generator-limited). This note grew
+chronologically (runs 1–3, then 4–5, then 6–7, then 8, then 9–10); the "Final verdict across
+ten runs" section below is the current synthesis, and `docs/paper/main.tex` is the clean
+writeup.
 
 ## The three runs
 
@@ -119,23 +121,42 @@ warranted a 5-seed confirmation — neither produced one. Full reference list in
 - **Run 7 — oracle ceiling** (`validation-study-oracle.md`, `.../specs/2026-07-23-oracle-ceiling-preregistration.md`): the critique gate = the true metric (perfect detector). **Surprise: it did NOT lift the ceiling** — oracle seed 0.748, level with intrinsic (0.765) and *below* the tool (0.837). So detector quality vs performance is **non-monotonic** (F₁ 0.11→0.83→1.0 maps to seed 0.765→0.837→**0.748**). The bottleneck is not detection but the **fix step**: even told exactly what's wrong, `gpt-4.1-mini` can't repair hard constraints in one refine round. ~$0.22.
 - **Run 8 — fix budget under oracle** (`validation-study-fixbudget.md`, `.../specs/2026-07-23-fix-budget-preregistration.md`): oracle + refine budget 1→3. **More attempts help but saturate**: oracle seed 0.748 (R1) → **0.813** (R3), still below the 0.85 bar and below the tool's 0.837 — a good tool at R1 ≈ oracle at R3. The fix step is a real but bounded lever; the residual is generator capability. ~$0.33.
 
-## Final verdict across eight runs
+### Runs 9 & 10 (feedback-actionability ablation, D2′)
+
+Holding detection fixed at the perfect oracle (R=3) and varying ONLY the actionability of the repair feedback fed to the refine step, across three pre-registered levels (mid = run 8):
+
+| level | repair feedback on failure | seed held-out (arm A) |
+|-------|----------------------------|-----------------------|
+| **lo** | bare verdict: "not all requirements are satisfied; revise" | 0.810 ± 0.049 |
+| **mid** | which constraints failed + their targets (= run 8) | 0.813 ± 0.044 |
+| **hi** | mid **+ concrete measured edits** ("draft has 2 words, needs exactly 20: add 18") | **0.873 ± 0.027** |
+
+- **Run 9 — lo** (`validation-study-fbactlo.md`) and **Run 10 — hi** (`validation-study-fbacthi.md`), pre-reg `.../specs/2026-07-23-feedback-actionability-preregistration.md`. ~$0.3–0.5 each (312 / 329 unique calls).
+- **Primary result: Δ(hi − lo) = +0.063 ≥ +0.05 → the fix step is partly FEEDBACK-LIMITED.** Concrete measured edits lift the ceiling +6.3 pts over a bare verdict.
+- **Two sharp sub-findings:** (1) **lo ≈ mid** (0.810 vs 0.813) — naming *which* constraint failed adds ~nothing; only the *concrete measurement* moves it. The actionable content is the measurement, not the diagnosis. (2) The lever is feedback **shape** (a hand-built measurement fn), **not** loop-level GEPA: Δ(D−B) = 0.00 at every level, and optimization again slightly *degrades* both arms (hi seed 0.873 → opt 0.86).
+- **Resolves the run-4 tool>oracle inversion:** hi (0.873) is the first oracle config to *exceed* the tool baseline (0.837). The oracle underperformed at R=1 because its verdicts were terse, not because a perfect detector hurts.
+- **Residual remains generator-limited:** even maximal, exact repair guidance saturates at 0.873 (< 0.9, no ceiling flag). So the fix step is *both* feedback-limited (up to ~+0.06) and, beyond that, generator-limited.
+
+## Final verdict across ten runs
 
 The thesis "loop-level GEPA beats prompt-only GEPA" is **NOT SUPPORTED** on IFEval-style
 instruction-following at this budget/model — in every regime we could test: single- and
 multi-constraint, with genuine headroom (run 3), a real external feedback tool (run 4), an
-extra interacting module (run 5), a different-model critic (run 6), and an oracle detector
-(run 7). Δ(D − B) ≤ 0.01 (within noise) in every fair test. Things that moved the *baseline*
-(the feedback tool, the different-model critic) helped B and D equally, so they are not
+extra interacting module (run 5), a different-model critic (run 6), an oracle detector
+(run 7/8), and an oracle with maximally-actionable feedback (run 10). Δ(D − B) ≤ 0.01
+(within noise) in every fair test. Things that moved the *baseline* (the feedback tool, the
+different-model critic, actionable feedback) helped B and D equally, so they are not
 evidence for the loop-level lever.
 
-**The sharpened conclusion (from run 7):** the bottleneck is **not detection** — a perfect
+**The sharpened conclusion (runs 7–10):** the bottleneck is **not detection** — a perfect
 in-loop detector (oracle) did not lift the ceiling (0.748, below the tool's 0.837), so
 detector-quality vs performance is *non-monotonic*. The binding constraint is the **fix
-step**: even told exactly what's wrong, the worker can't repair hard constraints in a
-bounded refine budget. So the actionable reframe for making a self-refine loop worth
-optimizing componentwise is **improve the fixer (and feedback actionability), not the
-detector** — that is where future work should point.
+step**, which runs 9–10 decompose: it is **partly feedback-limited** (concrete measured
+edits beat a bare verdict by +0.063; merely naming the failed constraint adds nothing) and,
+beyond that, **generator-limited** (even exact edits saturate at 0.873). The actionable
+reframe for making a self-refine loop worth optimizing componentwise is **improve the fixer
+and the actionability of feedback (not just its correctness), not the detector** — but note
+that the actionability win was feedback *shape*, which GEPA did not need to discover.
 
 ### Mechanism (measured, zero cost)
 
@@ -152,18 +173,18 @@ Huang et al.'s self-verification-unreliability result, inside our harness.
 
 Every LLM call in every run is recorded to a content-addressed cassette. Any run
 reproduces **offline, $0, bit-for-bit** via `--replay` (strict: no API key, and a cassette
-miss raises). `scripts/verify_reproducibility.py` replays all eight committed runs and
+miss raises). `scripts/verify_reproducibility.py` replays all ten committed runs and
 confirms each per-arm seed/optimized held-out score equals its released JSON exactly —
 GEPA is deterministic under replay. Run it with the eval venv:
 
 ```
 scratchpad/evalvenv/bin/python scripts/verify_reproducibility.py
-# → [OK] run1 … [OK] run8 ; ALL 8 RUNS REPRODUCE FROM CASSETTE ($0, offline).
+# → [OK] run1 … [OK] run10 ; ALL 10 RUNS REPRODUCE FROM CASSETTE ($0, offline).
 ```
 
 ### Toward publication
 
-A pre-print draft consolidating all eight runs, the method, the oracle taxonomy, this
-mechanism, threats to validity, and a boundary-mapping agenda (fix-side interventions,
-budget/worker sweeps, cross-domain replication, an oracle ceiling arm) lives in
+A pre-print draft consolidating all ten runs, the method, the oracle taxonomy, this
+mechanism, threats to validity, and a boundary-mapping agenda (remaining fix-side
+interventions, budget/worker sweeps, cross-domain replication) lives in
 `docs/paper/main.tex` (references in `docs/references.bib`).

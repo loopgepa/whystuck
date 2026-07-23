@@ -237,3 +237,109 @@ def test_yes_without_key_still_errors_but_replay_does_not(monkeypatch):
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     cli = _load_cli()
     assert cli.main(["--arms", "A", "--seeds", "0", "--yes"]) == 3  # --yes still needs a key
+
+
+# --- feedback-actionability lever (D2'): --feedback-level {lo,mid,hi} -----------
+
+
+def test_feedback_level_defaults_to_mid():
+    # Pin the default directly (the dry-run path never prints the level), so a changed
+    # default or a deleted flag is caught — not a tautology on unrelated dry-run text.
+    cli = _load_cli()
+    assert cli._parse_args(["--arms", "A", "--seeds", "0"]).feedback_level == "mid"
+
+
+def test_feedback_level_lo_is_exempt_from_the_multi_task_set_restriction():
+    # Only `hi` needs a multi task set (its edit directives are mc-specific); `lo` is a
+    # constant string and must run on any task set. Proves lo's oracle-only guard is
+    # independent of the task-set guard — a future merge of the two would break this.
+    code, out, _ = _run(
+        ["--arms", "A", "--seeds", "0", "--oracle-critique", "--feedback-level", "lo",
+         "--task-set", "ifbench"]
+    )  # fmt: skip
+    assert code == 0
+    assert "Estimated total" in out
+
+
+def test_build_oracle_feedback_lo_ignores_feedback_and_emits_bare_verdict():
+    cli = _load_cli()
+
+    def fb(_o, _t):
+        return "WHICH_CONSTRAINT_PROSE"
+
+    fn = cli._build_oracle_feedback("lo", fb)
+    assert fn("any draft", object()) == "not all requirements are satisfied; revise"
+
+
+def test_build_oracle_feedback_hi_appends_measured_edits_after_feedback():
+    # The exact production string for the "hi" level: feedback_fn's text, then the
+    # separator, then mc_edit_directives' output — in that order. Guards the closure a
+    # paid run actually uses (argparse tests never reach it).
+    from whystuck.eval.benchmark import BenchmarkTask
+    from whystuck.eval.multi_constraint import mc_edit_directives, mc_feedback
+
+    cli = _load_cli()
+    task = BenchmarkTask(
+        id="t", payload={"instruction_id_list": ["exact_word_count"], "kwargs": [{"n": 20}]}
+    )
+    draft = "two words"
+    fn = cli._build_oracle_feedback("hi", mc_feedback)
+    got = fn(draft, task)
+    expected = f"{mc_feedback(draft, task)}\n\nConcrete edits:\n{mc_edit_directives(draft, task)}"
+    assert got == expected
+    assert "Concrete edits:" in got and "exactly 20" in got
+
+
+def test_build_oracle_feedback_mid_and_unknown_return_none():
+    cli = _load_cli()
+    assert cli._build_oracle_feedback("mid", lambda o, t: "x") is None
+    assert cli._build_oracle_feedback("anything-else", lambda o, t: "x") is None
+
+
+def test_feedback_level_lo_requires_oracle_critique():
+    # Off the oracle path the level is silently inert (the LLM writes the critique),
+    # so spending on it would waste money on a no-op. Fail loud at the dry-run step.
+    code, _, err = _run(["--arms", "A", "--seeds", "0", "--feedback-level", "lo"])
+    assert code == 2
+    assert "oracle" in err.lower()
+
+
+def test_feedback_level_hi_requires_oracle_critique():
+    code, _, err = _run(["--arms", "A", "--seeds", "0", "--feedback-level", "hi"])
+    assert code == 2
+    assert "oracle" in err.lower()
+
+
+def test_feedback_level_hi_requires_a_multi_task_set():
+    # The "hi" edit directives are multi_constraint-specific; on the single-constraint
+    # ifbench set they don't exist, so hi+ifbench is a misconfig that must fail before
+    # spending, not silently fall back.
+    code, _, err = _run(
+        ["--arms", "A", "--seeds", "0", "--oracle-critique", "--feedback-level", "hi",
+         "--task-set", "ifbench"]
+    )  # fmt: skip
+    assert code == 2
+    assert "multi" in err.lower()
+
+
+def test_feedback_level_lo_and_hi_dry_run_on_multi_hard_with_oracle():
+    for level in ("lo", "hi"):
+        code, out, _ = _run(
+            ["--arms", "A", "--seeds", "0", "--oracle-critique",
+             "--task-set", "multi-hard", "--feedback-level", level]
+        )  # fmt: skip
+        assert code == 0, level
+        assert "Estimated total" in out
+
+
+def test_feedback_level_does_not_change_the_cost_estimate():
+    # The repair feedback is computed locally (no extra LLM calls), so lo/mid/hi must
+    # all price identically — otherwise the guard would be mis-calibrated per level.
+    base = ["--arms", "AB", "--seeds", "0", "--n-train", "5", "--n-heldout", "5",
+            "--max-metric-calls", "20", "--reflection-calls", "3", "--loop-max-retries", "3",
+            "--oracle-critique", "--task-set", "multi-hard"]  # fmt: skip
+    ests = {}
+    for level in ("lo", "mid", "hi"):
+        _, out, _ = _run([*base, "--feedback-level", level])
+        ests[level] = _estimate_from(out)
+    assert ests["lo"] == ests["mid"] == ests["hi"]

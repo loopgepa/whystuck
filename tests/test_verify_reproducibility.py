@@ -18,7 +18,7 @@ import verify_reproducibility as vr  # noqa: E402
 
 
 def test_runs_list_registers_all_expected_runs():
-    assert len(vr.RUNS) == vr.EXPECTED_RUNS == 8
+    assert len(vr.RUNS) == vr.EXPECTED_RUNS == 10
 
 
 def test_main_does_not_vacuously_succeed_on_empty_runs(monkeypatch, capsys):

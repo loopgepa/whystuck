@@ -22,6 +22,7 @@ from whystuck.eval.multi_constraint import (
     build_witness,
     generate_multi_tasks,
     load_multi_constraint,
+    mc_edit_directives,
     mc_feedback,
     mc_pass,
     mc_score,
@@ -346,3 +347,114 @@ def test_tasks_have_headroom_seed_answer_is_not_trivially_perfect():
     tasks = generate_multi_tasks(20, seed=3)
     scores = [mc_score(naive, t) for t in tasks]
     assert max(scores) < 1.0  # no task is trivially aced by the naive answer
+
+
+# --- mc_edit_directives: concrete measured repair guidance (D2' "hi" level) -----
+
+
+def test_directives_only_cover_failed_constraints_passing_are_silent():
+    # A draft that satisfies some constraints and fails others: only the failed ones
+    # get a directive. "atom" is lowercase, comma-free, one short word.
+    pairs = [
+        ("all_lowercase", {}),  # "atom" passes
+        ("exact_word_count", {"n": 5}),  # "atom" is 1 word -> fails
+    ]
+    d = mc_edit_directives("atom", _task(pairs))
+    assert "exactly 5" in d
+    assert "lowercase" not in d.lower()  # the satisfied constraint is not mentioned
+
+
+def test_directive_exact_word_count_states_the_measured_delta():
+    # 3 words, needs exactly 5 -> "add 2". Measured from the SAME tokenizer the
+    # verifier uses, so the directive can't misstate the edit.
+    d = mc_edit_directives("one two three", _task([("exact_word_count", {"n": 5})]))
+    assert "3 word" in d and "exactly 5" in d and "add 2" in d
+
+
+def test_directive_exact_word_count_says_remove_when_too_long():
+    d = mc_edit_directives("one two three four five six", _task([("exact_word_count", {"n": 4})]))
+    assert "remove 2" in d
+
+
+def test_directive_forbidden_word_counts_occurrences():
+    # "the the cat" -> the banned word appears twice (whole-token, case-insensitive).
+    d = mc_edit_directives("the the cat", _task([("forbidden_word", {"word": "the"})]))
+    assert '"the"' in d and "2 time" in d
+
+
+def test_directive_no_comma_reports_the_count():
+    d = mc_edit_directives("a, b, c", _task([("no_comma", {})]))
+    assert "2 comma" in d
+
+
+def test_directive_num_bullets_states_add_or_remove():
+    # zero bullets, needs 3 -> add 3
+    d = mc_edit_directives("plain text no bullets", _task([("num_bullets", {"n": 3})]))
+    assert "3" in d and ("add 3" in d)
+
+
+def test_directive_word_max_length_lists_the_offenders():
+    d = mc_edit_directives("short longlongword tiny", _task([("word_max_length", {"m": 5})]))
+    assert "longlongword" in d and "5 letter" in d
+
+
+def test_directives_measurements_match_the_verifiers_exactly():
+    # The directive's stated current-count must equal what the verifier measures,
+    # for every failing constraint — an off-by-one directive would misguide the fix.
+    from whystuck.eval.multi_constraint import _tokens
+
+    out = "One, two THREE four."
+    pairs = [
+        ("exact_word_count", {"n": 99}),
+        ("no_comma", {}),
+        ("all_lowercase", {}),
+    ]
+    d = mc_edit_directives(out, _task(pairs))
+    assert f"{len(_tokens(out))} word" in d  # exact_word_count current count is truthful
+    assert f"{out.count(',')} comma" in d  # comma count is truthful
+
+
+def test_directives_empty_when_everything_passes():
+    # A perfect draft yields no directives (the loop only invokes this on failure,
+    # but the function must be robust standalone).
+    pairs = [("all_lowercase", {}), ("include_keyword", {"keyword": "atom"})]
+    assert mc_edit_directives("atom", _task(pairs)) == ""
+
+
+def test_directive_min_words_states_the_measured_deficit_via_same_tokenizer():
+    # _dir_min_words must count with the SAME len(output.split()) the verifier uses,
+    # so the stated deficit is truthful. "one two" -> 2 words, needs 5 -> "3".
+    d = mc_edit_directives("one two", _task([("min_words", {"n": 5})]))
+    assert "3" in d and "2" in d and ">= 5" in d
+
+
+def test_directive_end_with_quotes_the_required_phrase_verbatim():
+    d = mc_edit_directives("wrong ending", _task([("end_with", {"phrase": "that is all."})]))
+    assert '"that is all."' in d
+
+
+def test_directive_include_keyword_failing_branch_quotes_the_keyword():
+    # keyword absent -> the directive must name the exact keyword to insert.
+    d = mc_edit_directives("no match here", _task([("include_keyword", {"keyword": "photon"})]))
+    assert '"photon"' in d
+
+
+def test_directive_all_lowercase_lists_the_uppercase_characters():
+    # failing with uppercase present -> the directive lists them, sorted & deduped.
+    d = mc_edit_directives("ABC abc", _task([("all_lowercase", {})]))
+    assert "A B C" in d
+
+
+def test_directive_all_lowercase_no_letters_uses_the_generic_branch():
+    # empty / no-letter output fails all_lowercase (verifier needs a letter) but has no
+    # uppercase to list -> the generic sentence branch must fire, not a crash or a
+    # stray empty "uppercase: " message.
+    d = mc_edit_directives("", _task([("all_lowercase", {})]))
+    assert "lowercase" in d and "uppercase:" not in d
+
+
+def test_directive_num_bullets_remove_branch():
+    # 5 bullet lines, need exactly 3 -> "remove 2" (the untested negative-delta arm).
+    text = "- a\n- b\n- c\n- d\n- e"
+    d = mc_edit_directives(text, _task([("num_bullets", {"n": 3})]))
+    assert "remove 2" in d and "5 bullet" in d

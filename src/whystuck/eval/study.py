@@ -188,6 +188,7 @@ def run_study(
     stats_fn: Callable[[str], str] | None = None,
     critique_complete: Complete | None = None,
     oracle_critique: bool = False,
+    oracle_feedback: Feedback | None = None,
     _optimize: Any | None = None,
 ) -> dict[str, ArmResult]:
     """Run the requested arms and return per-arm held-out results.
@@ -213,6 +214,7 @@ def run_study(
         stats_fn=stats_fn,
         critique_complete=critique_complete,
         oracle_critique=oracle_critique,
+        oracle_feedback=oracle_feedback,
     )
     results: dict[str, ArmResult] = {}
     for arm in arms:

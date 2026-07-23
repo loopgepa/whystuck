@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Prove every paid run reproduces bit-for-bit from its cassette (offline, $0).
 
-For each of the eight pre-registered runs, this re-runs the FULL pipeline (loaders
+For each of the ten pre-registered runs, this re-runs the FULL pipeline (loaders
 + GEPA + scoring) in strict `--replay` mode against the committed cassette — no API
 key, no spend, and any cassette miss raises — then checks the replayed per-arm
 seed/optimized held-out scores equal the committed results JSON exactly. GEPA is
@@ -23,7 +23,7 @@ from pathlib import Path
 import run_validation_study as cli
 
 CASSETTES = "tests/fixtures/cassettes"
-EXPECTED_RUNS = 8  # every pre-registered run must be verified before declaring success
+EXPECTED_RUNS = 10  # every pre-registered run must be verified before declaring success
 
 # (label, committed results JSON, cassette, exact CLI args). reflection_calls and
 # task-set come from each run's pre-registration (not stored in the older metas).
@@ -188,6 +188,54 @@ RUNS = [
             "--task-set",
             "multi-hard",
             "--oracle-critique",
+            "--seeds",
+            "0,1,2",
+            "--n-train",
+            "8",
+            "--n-heldout",
+            "10",
+            "--max-metric-calls",
+            "20",
+            "--reflection-calls",
+            "4",
+            "--loop-max-retries",
+            "3",
+        ],
+    ),
+    (
+        "run9 fb-actionability lo",
+        "docs/validation-study-fbactlo.json",
+        f"{CASSETTES}/study-fbactlo.json",
+        [
+            "--task-set",
+            "multi-hard",
+            "--oracle-critique",
+            "--feedback-level",
+            "lo",
+            "--seeds",
+            "0,1,2",
+            "--n-train",
+            "8",
+            "--n-heldout",
+            "10",
+            "--max-metric-calls",
+            "20",
+            "--reflection-calls",
+            "4",
+            "--loop-max-retries",
+            "3",
+        ],
+    ),
+    (
+        "run10 fb-actionability hi",
+        "docs/validation-study-fbacthi.json",
+        f"{CASSETTES}/study-fbacthi.json",
+        [
+            "--task-set",
+            "multi-hard",
+            "--oracle-critique",
+            "--feedback-level",
+            "hi",
             "--seeds",
             "0,1,2",
             "--n-train",

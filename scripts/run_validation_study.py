@@ -93,6 +93,15 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         "self-check; no critique LLM call (1+N calls/eval). Deliberate oracle condition",
     )
     p.add_argument(
+        "--feedback-level",
+        choices=("lo", "mid", "hi"),
+        default="mid",
+        help="feedback-actionability lever (D2', ONLY with --oracle-critique): shape the "
+        "repair text fed to the refine step. lo=verdict only; mid=which constraints failed "
+        "(default, identical to run 8); hi=concrete measured edits (multi task sets only). "
+        "Same call count as mid, so the cost estimate is unchanged",
+    )
+    p.add_argument(
         "--reflection-calls",
         type=int,
         default=10,
@@ -159,6 +168,26 @@ def main(argv: list[str] | None = None) -> int:
         print("ERROR: --seeds must list at least one integer.", file=sys.stderr)
         return 2
 
+    # Feedback-actionability lever validation, at the cheap dry-run step so a
+    # misconfigured level can never reach a paid run. lo/hi are inert off the oracle
+    # path (there the LLM writes the critique), and hi's edit directives are
+    # multi_constraint-specific — either misconfig would silently waste money.
+    if args.feedback_level != "mid" and not args.oracle_critique:
+        print(
+            f"ERROR: --feedback-level {args.feedback_level} only applies under "
+            "--oracle-critique (off the oracle path the LLM writes the critique, so the "
+            "level is inert). Add --oracle-critique or drop --feedback-level.",
+            file=sys.stderr,
+        )
+        return 2
+    if args.feedback_level == "hi" and args.task_set not in ("multi", "multi-hard"):
+        print(
+            "ERROR: --feedback-level hi needs a multi task set (--task-set multi|multi-hard); "
+            "its concrete edit directives are multi_constraint-specific.",
+            file=sys.stderr,
+        )
+        return 2
+
     # Call count per eval: generate (+plan) + per retry a refine, plus a critique
     # UNLESS the oracle gate replaces it (no critique LLM call then).
     per_retry_calls = 1 if args.oracle_critique else 2
@@ -219,6 +248,30 @@ def main(argv: list[str] | None = None) -> int:
     return _run_live(args, arms, seeds, estimate)
 
 
+def _build_oracle_feedback(level: str, feedback_fn):
+    """Build the oracle-path repair-feedback fn for a --feedback-level (D2' lever).
+
+    Returns None for "mid" (the loop then falls back to `feedback_fn`, byte-identical
+    to run 8). "lo" returns a fn that ignores the draft and emits only a bare verdict;
+    "hi" returns a fn that appends `mc_edit_directives`' concrete measured edits after
+    `feedback_fn`'s which-constraint prose. Hoisted to module scope (not an inline
+    closure) so the exact production strings are unit-testable without a paid run.
+    This function does NOT enforce oracle-critique-only / multi-task-set use — the CLI
+    validation in `main()` does; a mis-level here would otherwise be invisible to tests.
+    """
+
+    def _lo(_output, _task):  # verdict only, no which-constraint
+        return "not all requirements are satisfied; revise"
+
+    def _hi(output, task):  # which-constraint + concrete measured edits
+        from whystuck.eval.multi_constraint import mc_edit_directives
+
+        base = feedback_fn(output, task)
+        return f"{base}\n\nConcrete edits:\n{mc_edit_directives(output, task)}"
+
+    return {"lo": _lo, "hi": _hi}.get(level)  # "mid" (and anything else) -> None
+
+
 def _run_live(
     args: argparse.Namespace, arms: tuple[str, ...], seeds: list[int], estimate: float
 ) -> int:
@@ -255,6 +308,14 @@ def _run_live(
             return load_ifbench(split=split, seed=seed, n=n)  # type: ignore[arg-type]
 
         score_fn, feedback_fn, dataset = ifbench_score, ifbench_feedback, "IFBench"
+
+    # Feedback-actionability lever (D2'): the oracle-path repair-feedback fn for the
+    # chosen level. None = "mid" (loop falls back to feedback_fn, byte-identical to
+    # run 8). Only consulted under --oracle-critique (lo/hi require it; the CLI guards
+    # above enforce that and that hi implies a multi task set).
+    oracle_feedback = (
+        _build_oracle_feedback(args.feedback_level, feedback_fn) if args.oracle_critique else None
+    )
 
     record_path = args.record or "study-cassette.json"
     runs: list[dict[str, dict]] = []
@@ -298,6 +359,7 @@ def _run_live(
                     stats_fn=text_stats if args.feedback_stats else None,
                     critique_complete=critique_complete,
                     oracle_critique=args.oracle_critique,
+                    oracle_feedback=oracle_feedback,
                 )
             runs.append({name: vars(r) for name, r in results.items()})
 
@@ -315,6 +377,7 @@ def _run_live(
         "feedback_stats": args.feedback_stats,
         "critique_model": args.critique_model if not args.oracle_critique else None,
         "oracle_critique": args.oracle_critique,
+        "feedback_level": args.feedback_level,
         "worker_max_output_tokens": WORKER_MAX_OUTPUT_TOKENS,
         "seeds": seeds,
         "estimated_usd": estimate,

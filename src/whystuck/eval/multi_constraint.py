@@ -193,6 +193,99 @@ def mc_feedback(output: str, task: BenchmarkTask) -> str:
     )
 
 
+# Concrete, MEASURED repair directive per constraint — the maximal-actionability
+# ("hi") feedback for the D2' feedback-actionability ablation. Each directive either
+# restates the target verbatim (include_keyword, end_with — nothing computed, so
+# nothing to misstate) or is computed from the SAME quantity its verifier checks
+# (word/char/bullet counts, offending words), so a computed edit is never a
+# misstatement (an off-by-one directive would misguide the refine step).
+# (output, params) -> str.
+def _dir_include_keyword(o: str, p: Params) -> str:
+    return f'insert the word "{p["keyword"]}" somewhere in the response'
+
+
+def _dir_min_words(o: str, p: Params) -> str:
+    cur, n = len(o.split()), int(p["n"])
+    return f"add at least {n - cur} more word(s): the draft has {cur}, needs >= {n}"
+
+
+def _dir_all_lowercase(o: str, p: Params) -> str:
+    ups = sorted({c for c in o if c.isupper()})
+    if ups:
+        return "make everything lowercase; these characters are uppercase: " + " ".join(ups)
+    return "write the response using lowercase letters"
+
+
+def _dir_end_with(o: str, p: Params) -> str:
+    return f'make the response end with the exact phrase "{p["phrase"]}"'
+
+
+def _dir_no_comma(o: str, p: Params) -> str:
+    return f"remove all {o.count(',')} comma(s)"
+
+
+def _dir_num_bullets(o: str, p: Params) -> str:
+    cur = sum(1 for ln in o.splitlines() if _BULLET.match(ln))
+    n = int(p["n"])
+    d = n - cur
+    how = f"add {d} more bullet line(s)" if d > 0 else f"remove {-d} bullet line(s)"
+    return f'you have {cur} bullet line(s) but need exactly {n}: {how} (each starts "- ")'
+
+
+def _dir_exact_word_count(o: str, p: Params) -> str:
+    cur, n = len(_tokens(o)), int(p["n"])
+    d = n - cur
+    how = f"add {d} more word(s)" if d > 0 else f"remove {-d} word(s)"
+    return f"the draft has {cur} word(s) but needs exactly {n}: {how}"
+
+
+def _dir_forbidden_word(o: str, p: Params) -> str:
+    banned = p["word"].lower()
+    c = sum(1 for t in _tokens(o) if t.lower() == banned)
+    return f'the word "{p["word"]}" appears {c} time(s); remove every one'
+
+
+def _dir_word_max_length(o: str, p: Params) -> str:
+    m = int(p["m"])
+    offenders = sorted({w for w in _words(o) if len(w) > m})
+    shown = ", ".join(offenders[:8])
+    return f"these words exceed {m} letter(s); shorten or replace them: {shown}"
+
+
+_EDIT_DIRECTIVE: dict[str, Callable[[str, Params], str]] = {
+    "include_keyword": _dir_include_keyword,
+    "min_words": _dir_min_words,
+    "all_lowercase": _dir_all_lowercase,
+    "end_with": _dir_end_with,
+    "no_comma": _dir_no_comma,
+    "num_bullets": _dir_num_bullets,
+    "exact_word_count": _dir_exact_word_count,
+    "forbidden_word": _dir_forbidden_word,
+    "word_max_length": _dir_word_max_length,
+}
+
+
+def mc_edit_directives(output: str, task: BenchmarkTask) -> str:
+    """Concrete, measured repair directives for each FAILED constraint (one per line).
+
+    The maximal-actionability ("hi") repair feedback for the D2' feedback-actionability
+    ablation (see the 2026-07-23 pre-registration). It is meaningful ONLY inside the
+    oracle-critique arm, where the retry gate already uses the true metric: this varies
+    the *repair guidance* handed to the refine step, not detection, so it is NOT the
+    oracle-contamination failure mode the non-oracle runs guard against. (That
+    oracle-only / multi-task-set use is enforced by the CLI's --feedback-level /
+    --oracle-critique validation in scripts/run_validation_study.py, not by this
+    function.) Computed directives read the SAME measurement their verifier uses, so
+    they can never misstate the edit. Satisfied constraints are silent; returns "" when
+    nothing fails."""
+    lines = [
+        "- " + _EDIT_DIRECTIVE[iid](output, kw)
+        for iid, kw in _pairs(task)
+        if not MC_VERIFIERS[iid](output, kw)
+    ]
+    return "\n".join(lines)
+
+
 def render_multi_prompt(goal: str, pairs: list[tuple[str, Params]]) -> str:
     """The full instruction shown to the worker: the goal + the requirement list."""
     reqs = "\n".join(f"- {_DESCRIBE[iid](kw)}" for iid, kw in pairs)

@@ -460,3 +460,31 @@ def test_run_study_oracle_critique_makes_no_critique_llm_call(tmp_path, tasks):
     )
     assert seen  # the loop still generated
     assert not any("# Draft answer" in p for p in seen)  # oracle gate: no critique LLM call
+
+
+def test_run_study_threads_oracle_feedback_into_the_refine_step(tmp_path, tasks):
+    # D2' feedback-actionability lever: run_study must forward oracle_feedback to the
+    # loop worker so it shapes the repair text handed to the refine step (arm A's
+    # held-out scoring alone drives the loop; the fake worker always drafts "x x x"
+    # which fails no_whitespace, so the oracle gate fails and a refine runs).
+    train, heldout = tasks
+    seen = []
+
+    def spy(prompt: str) -> str:
+        seen.append(prompt)
+        return _fake_complete(prompt)
+
+    run_study(
+        WhyStuckStore(tmp_path / "store"),
+        complete=spy,
+        reflection_lm="fake",
+        train=train,
+        heldout=heldout,
+        arms=("A",),
+        _optimize=_fake_optimize,
+        oracle_critique=True,
+        oracle_feedback=lambda o, t: "ACTIONABLE_MARKER",
+    )
+    refine = [p for p in seen if "# Problems to fix" in p]
+    assert refine and all("ACTIONABLE_MARKER" in p for p in refine)
+    assert not any("# Draft answer" in p for p in seen)  # still no critique LLM call

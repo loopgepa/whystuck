@@ -146,6 +146,7 @@ def make_self_refine_run_task(
     stats_fn: Callable[[str], str] | None = None,
     critique_complete: Complete | None = None,
     oracle_critique: bool = False,
+    oracle_feedback: Feedback | None = None,
     max_retries: int = 2,
 ) -> RunTask:
     """A real generate -> critique -> refine loop (not single-shot).
@@ -185,6 +186,13 @@ def make_self_refine_run_task(
       it exists to establish the loop's performance CEILING given a perfect detector,
       isolating whether the null is about signal quality vs loop mechanics. Not a
       D-vs-B test (the verify gene cannot matter under a perfect oracle).
+    - **oracle_feedback** (feedback-actionability lever, D2'): ONLY consulted under
+      `oracle_critique`. When set, its `(draft, task) -> str` output becomes the repair
+      text fed to the refine step, replacing the default `feedback`. Detection is
+      unchanged (the gate is still the true metric) — this varies *how actionable* the
+      repair instruction is, isolating whether the residual fix-step gap (runs 7-8) is
+      feedback-limited or generator-limited. Default None falls back to `feedback`, so
+      it is a no-op unless explicitly set (and inert entirely off the oracle path).
 
     The final answer is scored by `score` (the ground-truth programmatic metric),
     so the loop cannot game it. `max_retries` bounds the critique/refine rounds and
@@ -224,12 +232,19 @@ def make_self_refine_run_task(
             if oracle_critique:
                 # Ceiling lever: the gate is the true metric, not an LLM self-check.
                 passed = score(draft, task) >= 1.0
+                # Feedback-actionability lever (D2'): `oracle_feedback` overrides ONLY
+                # the repair text handed to the refine step — detection (the gate
+                # above) is unchanged (still the true metric) and the final reflection
+                # `feedback` below is unchanged. Default None falls back to `feedback`,
+                # so oracle runs that don't set it are byte-identical to before (this
+                # is what lets run-8's cassette replay as the "mid" level unchanged).
+                refine_fb = oracle_feedback if oracle_feedback is not None else feedback
                 critique = (
                     "PASS"
                     if passed
                     else (
-                        feedback(draft, task)
-                        if feedback is not None
+                        refine_fb(draft, task)
+                        if refine_fb is not None
                         else "not all requirements are satisfied; revise"
                     )
                 )

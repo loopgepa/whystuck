@@ -34,7 +34,7 @@ Reflective prompt optimizers such as GEPA \citep{agrawal2025gepa} can evolve
 prompt. A natural hypothesis is that optimizing more of the loop --- in
 particular the self-critique / verification component of a generate--critique--refine
 loop --- should beat optimizing the generation prompt alone. We test this
-hypothesis directly and pre-register every run. Across eight pre-registered
+hypothesis directly and pre-register every run. Across ten pre-registered
 experiments on verifiable, IFEval-style instruction-following
 \citep{zhou2023ifeval} we find \textbf{no measurable advantage} for loop-level
 optimization over prompt-only optimization: the held-out gap
@@ -49,9 +49,14 @@ unreliability of LLM self-verification \citep{huang2023cannot}; yet a \emph{perf
 detector (oracle) does \emph{not} maximize performance --- detector quality vs.\
 held-out score is non-monotonic (F$_1$ $0.11\!\to\!0.83\!\to\!1.0$ maps to seed
 $0.765\!\to\!0.837\!\to\!0.748$). The binding constraint is therefore not detection
-but the \emph{fix} step: even told exactly what is wrong, the worker cannot reliably
-repair hard constraints within a bounded refine budget. We release the full harness,
-cassette-replayable transcripts, and pre-registrations for reproduction.
+but the \emph{fix} step. Holding detection at the perfect oracle and varying only
+the repair feedback's actionability isolates this: concrete \emph{measured} edits
+beat a terse verdict by $+0.063$ (seed $0.810\!\to\!0.873$), while naming the failed
+constraint alone adds nothing --- the fix step is partly feedback-limited, and the
+actionable content is the measurement, not the diagnosis. The lever is feedback
+\emph{shape}, however, not loop-level optimization ($\dd$ stays $0.00$), and a
+generator-limited residual remains. We release the full harness, cassette-replayable
+transcripts, and pre-registrations for reproduction.
 \end{abstract}
 
 \section{Introduction}
@@ -82,11 +87,11 @@ contributions are:
     loop-level from prompt-only optimization while holding the seed genome,
     budget, task distribution, and scoring metric fixed, with two flatness
     controls that verify the harness is sound.
-  \item Eight pre-registered experiments (Section~\ref{sec:results}) spanning
+  \item Ten pre-registered experiments (Section~\ref{sec:results}) spanning
     single-constraint, easy and hard multi-constraint (with genuine headroom), a
     feedback-tool regime, a three-module regime, a different-model critic, an
-    oracle-critique control, and an oracle fix-budget sweep. \dd\ is $\le 0.01$
-    (within noise) in every fair test.
+    oracle-critique control, an oracle fix-budget sweep, and a feedback-actionability
+    ablation. \dd\ is $\le 0.01$ (within noise) in every fair test.
   \item A taxonomy separating a legitimate non-oracle \emph{measurement tool}
     from oracle contamination (Section~\ref{sec:method}), a distinction a
     pre-spend design review found essential: two seemingly-innocuous statistics
@@ -206,7 +211,7 @@ persisted. Reproduction is a first-class, strict operation: re-running any study
 with \texttt{-{}-replay} re-executes the entire pipeline (loaders, GEPA search,
 scoring) against the cached calls with no API key, and any cassette miss raises.
 GEPA is deterministic under replay, so this is bit-for-bit:
-\texttt{scripts/verify\_reproducibility.py} replays all eight committed runs and
+\texttt{scripts/verify\_reproducibility.py} replays all ten committed runs and
 confirms every per-arm held-out score matches its released JSON exactly. Output tokens are hard-capped via enforced \texttt{max\_tokens};
 a pre-flight guard refuses any run whose (conservative) estimate exceeds a
 US\$5 ceiling. Every experiment was pre-registered --- hypothesis, frozen
@@ -245,7 +250,7 @@ leaderboard number.
 \section{Results}
 \label{sec:results}
 
-Table~\ref{tab:results} collects all five pre-registered runs.
+Table~\ref{tab:results} collects all ten pre-registered runs.
 
 \begin{table}[t]
 \centering
@@ -262,16 +267,21 @@ Run & Regime & Seeds & Seed & B (prompt-only) & D (loop-level) & \dd $=D-B$ \\
 6 & hard multi $+$ cross-lineage critic & 3 & 0.825 & 0.817 & 0.825 & $+0.01$ (INCONCL.) \\
 7 & hard multi $+$ oracle critique ($R{=}1$) & 3 & \textbf{0.748} & 0.74 & 0.74 & $\mathbf{0.00}$ \\
 8 & hard multi $+$ oracle critique ($R{=}3$) & 3 & \textbf{0.813} & 0.80 & 0.80 & $\mathbf{0.00}$ \\
+9 & hard multi $+$ oracle ($R{=}3$), feedback \emph{lo} (verdict) & 3 & \textbf{0.810} & 0.80 & 0.80 & $\mathbf{0.00}$ \\
+10 & hard multi $+$ oracle ($R{=}3$), feedback \emph{hi} (edits) & 3 & \textbf{0.873} & 0.86 & 0.86 & $\mathbf{0.00}$ \\
 \bottomrule
 \end{tabular}
-\caption{All eight pre-registered runs. Runs 1--2 are uninformative by design
+\caption{All ten pre-registered runs. Runs 1--2 are uninformative by design
 (the verify gene is inert on single-constraint tasks; the seed saturates at
-$0.97$ on easy multi). Runs 3--8 are fair tests with genuine headroom and no
+$0.97$ on easy multi). Runs 3--10 are fair tests with genuine headroom and no
 ceiling/floor flag. In every one $\dd \le 0.01$; the sole non-negative gap
 (run 6, a different-model critic) is $+0.01$, within seed noise
 (\textbf{INCONCLUSIVE}), and every other fair test is $\dd = 0.00$
-(\textbf{NOT SUPPORTED}). Runs 7--8 are labeled ceiling controls
-(\S\ref{sec:analysis}): the seed is the readout, not \dd.}
+(\textbf{NOT SUPPORTED}). Runs 7--10 are labeled ceiling/mechanism controls
+(\S\ref{sec:analysis}): the seed is the readout, not \dd. Runs 8--10 share the
+oracle $R{=}3$ regime and vary only the repair-feedback actionability (mid $=$
+run 8): terse verdict (lo, $0.810$) $\approx$ which-constraint (mid, $0.813$)
+$\ll$ concrete measured edits (hi, $0.873$).}
 \label{tab:results}
 \end{table}
 
@@ -305,6 +315,31 @@ oracle at three. The residual is the generator's raw capability: perfect, repeat
 cannot push \texttt{gpt-4.1-mini} past $\sim\!0.81$ on hard constraints. The gains a
 self-refine loop can extract (better detection $+$ more attempts) are real but bounded, and
 prompt-only optimization already captures them.
+
+\paragraph{Feedback \emph{actionability} is a real fix-side lever --- but it is feedback
+shape, not GEPA (runs 9--10).} Runs 7--8 leave the residual fix-step gap ambiguous: is
+the worker unable to \emph{act} on good feedback (generator-limited), or is the feedback
+itself insufficiently actionable (feedback-limited)? We separate them by holding detection
+fixed at the perfect oracle ($R{=}3$) and varying only the repair text handed to the refine
+step across three pre-registered levels: \emph{lo} (a bare ``revise'' verdict), \emph{mid}
+(which constraints failed, with their targets --- identical to run 8), and \emph{hi} (mid
+\emph{plus} a concrete \emph{measured} edit per failed constraint, e.g.\ ``the draft has 2
+words but needs exactly 20: add 18''). The primary contrast is decisive: $\dd(\text{hi}-
+\text{lo}) = 0.873 - 0.810 = +0.063$ on the seed held-out (arm A, no GEPA), clearing the
+pre-registered $+0.05$ threshold --- the fix step is partly \textbf{feedback-limited}. Two
+sharp qualifications follow. (i) The gain is entirely in the \emph{hi} step: lo $\approx$
+mid ($0.810$ vs.\ $0.813$), so naming \emph{which} constraint failed adds nothing over a
+bare verdict; only the concrete, measured edit moves the needle. (ii) The lever is the
+feedback's \emph{shape}, a hand-built measurement function --- \emph{not} loop-level GEPA:
+$\dd(D-B)=0.00$ at every level, and optimization again slightly \emph{degrades} both arms
+(hi seed $0.873 \to$ opt $0.86$). Finally, \emph{hi} ($0.873$) is the first oracle
+configuration to \emph{exceed} the tool baseline ($0.837$), resolving the run-4 tool
+$>$ oracle inversion (\S\ref{sec:analysis}) as an actionability effect: the oracle
+underperformed the tool at $R{=}1$ because its verdicts were terse, not because a perfect
+detector hurts. Yet even maximal, exact repair guidance saturates at $0.873$ (still short of
+perfect, no ceiling flag) --- so a generator-limited residual remains. The fix step is thus
+\emph{both} feedback-limited (up to $\sim\!+0.06$ from actionability) and, beyond that,
+generator-limited.
 
 \paragraph{The fair tests agree.} Run 3 is the decisive baseline: seed held-out
 $0.765$ sits inside the pre-registered band, so the loop had real headroom and
@@ -382,9 +417,15 @@ constraint (an exact word count) in one refine round; and (ii) \emph{feedback
 actionability} matters more than feedback correctness --- the tool-fed LLM critique
 emits natural, instructive fix prose, whereas the oracle emits terse per-constraint
 verdicts, so the tool-fed refine is better guided despite a less-than-perfect
-detector. At $n=3$ the tool$>$oracle inversion is suggestive, not definitive, but
-the oracle failing the pre-registered $\ge 0.85$ ceiling is itself decisive: a
-perfect detector did not rescue the loop.
+detector. Runs 9--10 test (ii) directly (\S\ref{sec:results}): holding detection at
+the perfect oracle and making the repair feedback \emph{maximally} actionable
+(concrete measured edits) lifts the seed to $0.873$, \emph{above} the tool baseline
+($0.837$) and $+0.063$ over a terse verdict --- so the tool$>$oracle inversion was an
+actionability artefact, not evidence that a perfect detector hurts. Mechanism (i)
+also survives: even the maximally-actionable oracle saturates at $0.873$, so a
+generator-limited residual remains. And the pre-registered ceiling verdict is
+decisive either way --- no oracle configuration reaches a loop-level advantage
+($\dd(D-B)=0.00$ throughout).
 
 \begin{table}[h]
 \centering
@@ -394,16 +435,21 @@ perfect detector did not rescue the loop.
 Critique detector & refine budget & detector F$_1$ & seed held-out & run \\
 \midrule
 intrinsic self-critique & 1 & 0.11 & 0.765 & 3 \\
-non-oracle measurement tool & 1 & 0.83 & \textbf{0.837} & 4 \\
-oracle (true metric) & 1 & 1.00 & 0.748 & 7 \\
-oracle (true metric) & 3 & 1.00 & 0.813 & 8 \\
+non-oracle measurement tool & 1 & 0.83 & 0.837 & 4 \\
+oracle, terse verdict & 1 & 1.00 & 0.748 & 7 \\
+oracle, terse verdict & 3 & 1.00 & 0.813 & 8 \\
+oracle, bare ``revise'' (lo) & 3 & 1.00 & 0.810 & 9 \\
+oracle, concrete measured edits (hi) & 3 & 1.00 & \textbf{0.873} & 10 \\
 \bottomrule
 \end{tabular}
 \caption{Detector quality vs.\ loop performance is \textbf{non-monotonic}: the
-perfect (oracle) detector at one retry does not maximize held-out score. Raising the
-refine budget helps the oracle ($0.748\!\to\!0.813$, run 8) --- the fix step is a real
-lever --- but it saturates below a good tool at one retry. The residual is generator
-capability, not detection.}
+perfect (oracle) detector with terse verdicts (runs 7--8) does not maximize held-out
+score, falling below a good tool at one retry (run 4). Two fix-side levers close the
+gap: raising the refine budget ($0.748\!\to\!0.813$, run 8) and --- decisively ---
+making the feedback \emph{actionable} (concrete measured edits, run 10: $0.873$, now
+\emph{above} the tool). Detector F$_1$ is fixed at $1.0$ across runs 7--10, so the
+$0.810\!\to\!0.873$ lift is pure feedback \emph{actionability}, not detection. A
+generator-limited residual remains (hi still $<1$).}
 \label{tab:curve}
 \end{table}
 
@@ -421,9 +467,12 @@ subsample and lose on held-out; this hurts B and D alike.
 \section{Threats to Validity}
 \label{sec:threats}
 
-We state these plainly. \textbf{Power:} runs 4--5 use $n{=}3$ seeds (runs 2--3
+We state these plainly. \textbf{Power:} runs 4--10 use $n{=}3$ seeds (runs 2--3
 use 5); these are exploratory, and the informal verdict rule is not a
-significance test. \textbf{Single worker/reflection model:} results may be
+significance test. The one supra-threshold effect we report --- the
+actionability lift $\dd(\text{hi}-\text{lo})=+0.063$ (runs 9--10) --- clears its
+pre-registered $+0.05$ bar and is directionally consistent across all three seeds,
+but at $n{=}3$ we report it as an effect estimate, not a significance claim. \textbf{Single worker/reflection model:} results may be
 model-dependent; \citet{huang2023cannot} find self-correction effects vary by
 model. \textbf{Cross-lineage, not cross-provider:} run 6's critic
 (\texttt{gpt-5.6-luna}) shares a vendor and training lineage with the worker
@@ -447,19 +496,28 @@ is an unreliable, self-referential detector on shallow-verification tasks.'' The
 following directions test the boundary; each changes one variable.
 
 \emph{Done in this paper:} D2 (critique-as-detector, \S\ref{sec:analysis}), a
-cross-lineage critic (run 6), and the oracle ceiling (run 7). What run 7 changed:
-the priority is no longer ``get a better detector'' --- we now know a perfect one
-does not suffice --- but ``fix the fixer.'' The agenda, re-ordered accordingly:
+cross-lineage critic (run 6), the oracle ceiling (run 7), a fix-budget sweep
+(run 8), and the feedback-actionability ablation (D2$'$, runs 9--10). What runs
+7--10 changed: the priority is no longer ``get a better detector'' --- a perfect
+one does not suffice --- but ``fix the fixer,'' and we now know the fixer is
+\emph{partly} feedback-limited (actionability buys $\sim\!+0.06$) and \emph{partly}
+generator-limited (the residual). The agenda, re-ordered accordingly:
 
 \begin{description}
   \item[D1$'$ (\emph{fix}-side interventions).] The binding constraint is repair,
-    not detection. Test: a larger refine budget ($R\!\ge\!3$); a stronger worker on
-    refinement only; and constraint-specific repair tools (e.g. a deterministic
-    word-count trimmer) that let the model \emph{act} on feedback rather than merely
-    receive it. \emph{The most promising direction given run 7.}
-  \item[D2$'$ (feedback actionability).] Run 7 suggests instructive prose beats
-    terse-but-correct verdicts. Ablate: oracle-correct verdict vs.\ oracle-correct
-    \emph{plus} LLM-rewritten actionable prose, holding detection fixed at $\mathrm{F}_1\!=\!1$.
+    not detection. Run 8 did the refine-budget half ($R{:}1\!\to\!3$, $+0.065$).
+    \emph{Remaining:} a stronger worker on refinement only, and constraint-specific
+    repair \emph{tools} (e.g.\ a deterministic word-count trimmer) that let the model
+    \emph{act} on feedback --- the natural next step given the generator-limited
+    residual runs 9--10 expose.
+  \item[D2$'$ (feedback actionability) --- \textbf{done, runs 9--10}.] Holding
+    detection at the perfect oracle, concrete \emph{measured} edits beat a terse
+    verdict by $+0.063$ (seed $0.810\!\to\!0.873$), while naming the failed
+    constraint alone adds nothing (lo $\approx$ mid). So the fix step is partly
+    feedback-limited, the actionable content is the \emph{measurement} (not the
+    diagnosis), and the effect is feedback shape, not GEPA ($\dd(D-B)=0.00$). Open
+    follow-up: does an LLM \emph{rewriting} the measured edits into fluent prose add
+    anything over the raw measurement?
   \item[D3 (true cross-family critic).] Repeat run 6 with a cross-\emph{provider}
     critic (\texttt{gemini-2.5-flash-lite} or \texttt{claude-haiku-4-5}; pre-priced,
     needs a key) at $\ge 8$ seeds, to test whether the $+0.01$ nudge is real.
@@ -478,19 +536,23 @@ does not suffice --- but ``fix the fixer.'' The agenda, re-ordered accordingly:
 \section{Conclusion}
 \label{sec:conclusion}
 
-Across eight pre-registered experiments, optimizing the verification (and plan)
+Across ten pre-registered experiments, optimizing the verification (and plan)
 components of a self-refine loop gave no held-out advantage over optimizing the
 generation prompt alone on verifiable instruction-following, at the budgets and
 models tested ($\dd \le 0.01$, within noise). Positive effects --- a measurement
-tool and a different-model critic lifting the baseline --- accrued to prompt-only
-and loop-level arms equally. Probing the cause, we found the intrinsic critique is
-a near-random detector, yet a \emph{perfect} (oracle) detector still failed to lift
-the loop: detector quality and performance are non-monotonic. The binding
-constraint is not detection but repair --- the worker cannot reliably fix hard
-constraints within a bounded refine budget even when told exactly what is wrong.
-The actionable reframe: to make a self-refine loop worth optimizing
-componentwise, improve the \emph{fixer} (and the actionability of feedback), not
-just the detector. All code, cassettes, and pre-registrations are released for
+tool, a different-model critic, and more actionable repair feedback lifting the
+baseline --- accrued to prompt-only and loop-level arms equally. Probing the cause,
+we found the intrinsic critique is a near-random detector, yet a \emph{perfect}
+(oracle) detector still failed to lift the loop: detector quality and performance
+are non-monotonic. The binding constraint is not detection but repair. Isolating
+that step, we find it is \emph{both} feedback-limited --- concrete measured edits
+beat terse verdicts by $+0.063$, while merely naming the failed constraint adds
+nothing --- and, beyond that, generator-limited: even exact, maximally-actionable
+feedback saturates below perfect. The actionable reframe: to make a self-refine loop
+worth optimizing componentwise, improve the \emph{fixer} and the \emph{actionability}
+(not merely the correctness) of its feedback, not just the detector; and note that
+the actionability win here was feedback \emph{shape}, which optimization did not
+need to discover. All code, cassettes, and pre-registrations are released for
 reproduction.
 
 \bibliographystyle{plainnat}
