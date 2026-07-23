@@ -1,10 +1,13 @@
-# GEPA validation study — results note (all three runs)
+# GEPA validation study — results note (all eight runs)
 
 *Question:* does **loop-level** GEPA (evolve the self-refine loop's `generate` **and**
 `ensure_correct` verify genes) beat **prompt-only** GEPA (evolve `generate` alone), on
 instruction-following tasks, under a matched budget?
 
-*Answer across three pre-registered paid runs:* **no measurable advantage.**
+*Answer across eight pre-registered paid runs:* **no measurable advantage** — and, from the
+oracle controls (runs 7–8), the bottleneck is the *fix step*, not detection. This note grew
+chronologically (runs 1–3, then 4–5, then 6–7, then 8); the "Final verdict across eight
+runs" section below is the current synthesis, and `docs/paper/main.tex` is the clean writeup.
 
 ## The three runs
 
@@ -114,8 +117,9 @@ warranted a 5-seed confirmation — neither produced one. Full reference list in
 
 - **Run 6 — cross-lineage critic** (`validation-study-crossfamily.md`, `.../specs/2026-07-23-cross-family-critic-preregistration.md`): critique on `gpt-5.6-luna`, generation on `gpt-4.1-mini`. **INCONCLUSIVE**: D 0.825 vs B 0.817, Δ = +0.01 — the first run where D didn't lose, but within n=3 noise. The different-model critic also lifted the seed (0.765 → 0.825). *Cross-lineage, not cross-provider* (shared vendor/lineage) — a true cross-family test (Gemini/Claude) is the follow-up. ~$0.36.
 - **Run 7 — oracle ceiling** (`validation-study-oracle.md`, `.../specs/2026-07-23-oracle-ceiling-preregistration.md`): the critique gate = the true metric (perfect detector). **Surprise: it did NOT lift the ceiling** — oracle seed 0.748, level with intrinsic (0.765) and *below* the tool (0.837). So detector quality vs performance is **non-monotonic** (F₁ 0.11→0.83→1.0 maps to seed 0.765→0.837→**0.748**). The bottleneck is not detection but the **fix step**: even told exactly what's wrong, `gpt-4.1-mini` can't repair hard constraints in one refine round. ~$0.22.
+- **Run 8 — fix budget under oracle** (`validation-study-fixbudget.md`, `.../specs/2026-07-23-fix-budget-preregistration.md`): oracle + refine budget 1→3. **More attempts help but saturate**: oracle seed 0.748 (R1) → **0.813** (R3), still below the 0.85 bar and below the tool's 0.837 — a good tool at R1 ≈ oracle at R3. The fix step is a real but bounded lever; the residual is generator capability. ~$0.33.
 
-## Final verdict across seven runs
+## Final verdict across eight runs
 
 The thesis "loop-level GEPA beats prompt-only GEPA" is **NOT SUPPORTED** on IFEval-style
 instruction-following at this budget/model — in every regime we could test: single- and
@@ -148,18 +152,18 @@ Huang et al.'s self-verification-unreliability result, inside our harness.
 
 Every LLM call in every run is recorded to a content-addressed cassette. Any run
 reproduces **offline, $0, bit-for-bit** via `--replay` (strict: no API key, and a cassette
-miss raises). `scripts/verify_reproducibility.py` replays all seven committed runs and
+miss raises). `scripts/verify_reproducibility.py` replays all eight committed runs and
 confirms each per-arm seed/optimized held-out score equals its released JSON exactly —
 GEPA is deterministic under replay. Run it with the eval venv:
 
 ```
 scratchpad/evalvenv/bin/python scripts/verify_reproducibility.py
-# → [OK] run1 … [OK] run7 ; ALL 7 RUNS REPRODUCE FROM CASSETTE ($0, offline).
+# → [OK] run1 … [OK] run8 ; ALL 8 RUNS REPRODUCE FROM CASSETTE ($0, offline).
 ```
 
 ### Toward publication
 
-A pre-print draft consolidating all seven runs, the method, the oracle taxonomy, this
+A pre-print draft consolidating all eight runs, the method, the oracle taxonomy, this
 mechanism, threats to validity, and a boundary-mapping agenda (fix-side interventions,
 budget/worker sweeps, cross-domain replication, an oracle ceiling arm) lives in
 `docs/paper/main.tex` (references in `docs/references.bib`).

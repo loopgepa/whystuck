@@ -34,7 +34,7 @@ Reflective prompt optimizers such as GEPA \citep{agrawal2025gepa} can evolve
 prompt. A natural hypothesis is that optimizing more of the loop --- in
 particular the self-critique / verification component of a generate--critique--refine
 loop --- should beat optimizing the generation prompt alone. We test this
-hypothesis directly and pre-register every run. Across seven pre-registered
+hypothesis directly and pre-register every run. Across eight pre-registered
 experiments on verifiable, IFEval-style instruction-following
 \citep{zhou2023ifeval} we find \textbf{no measurable advantage} for loop-level
 optimization over prompt-only optimization: the held-out gap
@@ -82,10 +82,11 @@ contributions are:
     loop-level from prompt-only optimization while holding the seed genome,
     budget, task distribution, and scoring metric fixed, with two flatness
     controls that verify the harness is sound.
-  \item Seven pre-registered experiments (Section~\ref{sec:results}) spanning
+  \item Eight pre-registered experiments (Section~\ref{sec:results}) spanning
     single-constraint, easy and hard multi-constraint (with genuine headroom), a
-    feedback-tool regime, a three-module regime, a different-model critic, and an
-    oracle-critique control. \dd\ is $\le 0.01$ (within noise) in every fair test.
+    feedback-tool regime, a three-module regime, a different-model critic, an
+    oracle-critique control, and an oracle fix-budget sweep. \dd\ is $\le 0.01$
+    (within noise) in every fair test.
   \item A taxonomy separating a legitimate non-oracle \emph{measurement tool}
     from oracle contamination (Section~\ref{sec:method}), a distinction a
     pre-spend design review found essential: two seemingly-innocuous statistics
@@ -205,7 +206,7 @@ persisted. Reproduction is a first-class, strict operation: re-running any study
 with \texttt{-{}-replay} re-executes the entire pipeline (loaders, GEPA search,
 scoring) against the cached calls with no API key, and any cassette miss raises.
 GEPA is deterministic under replay, so this is bit-for-bit:
-\texttt{scripts/verify\_reproducibility.py} replays all seven committed runs and
+\texttt{scripts/verify\_reproducibility.py} replays all eight committed runs and
 confirms every per-arm held-out score matches its released JSON exactly. Output tokens are hard-capped via enforced \texttt{max\_tokens};
 a pre-flight guard refuses any run whose (conservative) estimate exceeds a
 US\$5 ceiling. Every experiment was pre-registered --- hypothesis, frozen
@@ -259,17 +260,18 @@ Run & Regime & Seeds & Seed & B (prompt-only) & D (loop-level) & \dd $=D-B$ \\
 4 & hard multi $+$ feedback tool & 3 & 0.837 & 0.798 & 0.798 & $\mathbf{0.00}$ \\
 5 & hard multi $+$ plan module   & 3 & 0.757 & 0.757 & 0.757 & $\mathbf{0.00}$ \\
 6 & hard multi $+$ cross-lineage critic & 3 & 0.825 & 0.817 & 0.825 & $+0.01$ (INCONCL.) \\
-7 & hard multi $+$ oracle critique & 3 & \textbf{0.748} & 0.74 & 0.74 & $\mathbf{0.00}$ \\
+7 & hard multi $+$ oracle critique ($R{=}1$) & 3 & \textbf{0.748} & 0.74 & 0.74 & $\mathbf{0.00}$ \\
+8 & hard multi $+$ oracle critique ($R{=}3$) & 3 & \textbf{0.813} & 0.80 & 0.80 & $\mathbf{0.00}$ \\
 \bottomrule
 \end{tabular}
-\caption{All seven pre-registered runs. Runs 1--2 are uninformative by design
+\caption{All eight pre-registered runs. Runs 1--2 are uninformative by design
 (the verify gene is inert on single-constraint tasks; the seed saturates at
-$0.97$ on easy multi). Runs 3--7 are fair tests with genuine headroom and no
+$0.97$ on easy multi). Runs 3--8 are fair tests with genuine headroom and no
 ceiling/floor flag. In every one $\dd \le 0.01$; the sole non-negative gap
 (run 6, a different-model critic) is $+0.01$, within seed noise
 (\textbf{INCONCLUSIVE}), and every other fair test is $\dd = 0.00$
-(\textbf{NOT SUPPORTED}). Run 7 is a labeled ceiling control (\S\ref{sec:analysis}):
-the seed is the readout, not \dd.}
+(\textbf{NOT SUPPORTED}). Runs 7--8 are labeled ceiling controls
+(\S\ref{sec:analysis}): the seed is the readout, not \dd.}
 \label{tab:results}
 \end{table}
 
@@ -294,6 +296,15 @@ quality is therefore \textbf{not} the binding constraint. Even told exactly whic
 constraints fail, \texttt{gpt-4.1-mini} cannot reliably fix hard constraints (e.g.
 an exact word count) within the bounded refine budget. This is the crux
 (\S\ref{sec:analysis}).
+
+\paragraph{More fix attempts help, but saturate (run 8).} Holding the detector perfect
+(oracle) and raising the refine budget $1 \to 3$ lifts the seed $0.748 \to 0.813$: the
+\emph{fix} step is a genuine lever. But it still falls short of the pre-registered $0.85$
+bar and below the tool baseline ($0.837$) --- a good tool at one retry roughly equals the
+oracle at three. The residual is the generator's raw capability: perfect, repeated feedback
+cannot push \texttt{gpt-4.1-mini} past $\sim\!0.81$ on hard constraints. The gains a
+self-refine loop can extract (better detection $+$ more attempts) are real but bounded, and
+prompt-only optimization already captures them.
 
 \paragraph{The fair tests agree.} Run 3 is the decisive baseline: seed held-out
 $0.765$ sits inside the pre-registered band, so the loop had real headroom and
@@ -378,18 +389,21 @@ perfect detector did not rescue the loop.
 \begin{table}[h]
 \centering
 \small
-\begin{tabular}{lccc}
+\begin{tabular}{llccc}
 \toprule
-Critique detector & detector F$_1$ & seed held-out & run \\
+Critique detector & refine budget & detector F$_1$ & seed held-out & run \\
 \midrule
-intrinsic self-critique & 0.11 & 0.765 & 3 \\
-non-oracle measurement tool & 0.83 & \textbf{0.837} & 4 \\
-oracle (true metric) & 1.00 & 0.748 & 7 \\
+intrinsic self-critique & 1 & 0.11 & 0.765 & 3 \\
+non-oracle measurement tool & 1 & 0.83 & \textbf{0.837} & 4 \\
+oracle (true metric) & 1 & 1.00 & 0.748 & 7 \\
+oracle (true metric) & 3 & 1.00 & 0.813 & 8 \\
 \bottomrule
 \end{tabular}
 \caption{Detector quality vs.\ loop performance is \textbf{non-monotonic}: the
-perfect (oracle) detector does not maximize held-out score. The bottleneck lies in
-the fix step and feedback actionability, not detection.}
+perfect (oracle) detector at one retry does not maximize held-out score. Raising the
+refine budget helps the oracle ($0.748\!\to\!0.813$, run 8) --- the fix step is a real
+lever --- but it saturates below a good tool at one retry. The residual is generator
+capability, not detection.}
 \label{tab:curve}
 \end{table}
 
@@ -464,7 +478,7 @@ does not suffice --- but ``fix the fixer.'' The agenda, re-ordered accordingly:
 \section{Conclusion}
 \label{sec:conclusion}
 
-Across seven pre-registered experiments, optimizing the verification (and plan)
+Across eight pre-registered experiments, optimizing the verification (and plan)
 components of a self-refine loop gave no held-out advantage over optimizing the
 generation prompt alone on verifiable instruction-following, at the budgets and
 models tested ($\dd \le 0.01$, within noise). Positive effects --- a measurement

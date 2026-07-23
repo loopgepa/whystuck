@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Prove every paid run reproduces bit-for-bit from its cassette (offline, $0).
 
-For each of the seven pre-registered runs, this re-runs the FULL pipeline (loaders
+For each of the eight pre-registered runs, this re-runs the FULL pipeline (loaders
 + GEPA + scoring) in strict `--replay` mode against the committed cassette — no API
 key, no spend, and any cassette miss raises — then checks the replayed per-arm
 seed/optimized held-out scores equal the committed results JSON exactly. GEPA is
@@ -178,6 +178,28 @@ RUNS = [
             "1",
         ],
     ),
+    (
+        "run8 fix-budget",
+        "docs/validation-study-fixbudget.json",
+        f"{CASSETTES}/study-fixbudget.json",
+        [
+            "--task-set",
+            "multi-hard",
+            "--oracle-critique",
+            "--seeds",
+            "0,1,2",
+            "--n-train",
+            "8",
+            "--n-heldout",
+            "10",
+            "--max-metric-calls",
+            "20",
+            "--reflection-calls",
+            "4",
+            "--loop-max-retries",
+            "3",
+        ],
+    ),
 ]
 
 
@@ -227,7 +249,7 @@ def main() -> int:
     print(
         "\n"
         + (
-            "ALL 7 RUNS REPRODUCE FROM CASSETTE ($0, offline)."
+            "ALL 8 RUNS REPRODUCE FROM CASSETTE ($0, offline)."
             if all_ok
             else "REPRODUCTION FAILED."
         )
