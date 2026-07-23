@@ -204,6 +204,21 @@ def test_stack_walk_nonce_theft_is_rejected():
     assert "frame introspection" in r.detail
 
 
+def test_getattr_indirection_to_frame_internal_is_rejected():
+    # Closing the getattr gap: reaching a frame internal via getattr(x, "f_back") (no banned
+    # name as an attribute node) is still frame introspection and must be rejected.
+    exploit = (
+        "import sys\n"
+        "tb = None\n"
+        "try:\n    1 / 0\nexcept Exception as e:\n    tb = e.__traceback__\n"
+        'fr = getattr(tb, "tb_frame")\n'
+        'n = getattr(fr, "f_back").f_locals if fr else {}\n'
+        'sys.stdout.write("<<WS_BCB_COMPLETED_7d1e4c>>")\n'
+    )
+    r = run_unittest(exploit, _TEST, ["test_a"], timeout=40)
+    assert r.passed is False and "frame introspection" in r.detail
+
+
 def test_frame_introspection_scan_allows_ordinary_solutions():
     # The scan must not reject legitimate code — a normal numpy solution passes cleanly.
     assert run_unittest(_SOL, _TEST, timeout=40).passed is True

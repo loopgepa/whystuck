@@ -79,6 +79,17 @@ def _uses_frame_introspection(code: str) -> str | None:
             return node.attr
         if isinstance(node, ast.Name) and node.id in _FRAME_INTROSPECTION:
             return node.id
+        # Also flag getattr/setattr/hasattr(x, "<banned>") — string-literal indirection that
+        # reaches a frame internal without naming it as an attribute (closes the getattr gap).
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id in ("getattr", "setattr", "hasattr")
+            and len(node.args) >= 2
+            and isinstance(node.args[1], ast.Constant)
+            and node.args[1].value in _FRAME_INTROSPECTION
+        ):
+            return str(node.args[1].value)
     return None
 
 
