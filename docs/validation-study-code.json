@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "dataset": "MBPP+ (EvalPlus; base=visible/in-loop, plus=hidden/scored)",
+    "n_train": 6,
+    "n_heldout": 10,
+    "worker_model": "openai/gpt-4.1-mini",
+    "reflection_model": "openai/gpt-5.6-terra",
+    "max_metric_calls": 40,
+    "reflection_calls": 8,
+    "task_set": "code",
+    "loop_max_retries": 1,
+    "plan_gene": false,
+    "feedback_stats": false,
+    "critique_model": null,
+    "oracle_critique": false,
+    "feedback_level": "mid",
+    "exec_feedback": true,
+    "worker_max_output_tokens": 512,
+    "seeds": [
+      0,
+      1
+    ],
+    "estimated_usd": 4.343244800000001,
+    "generated": "2026-07-23T20:28:06.745107+00:00"
+  },
+  "runs": [
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.8,
+        "opt_heldout": 0.8,
+        "delta": 0.0,
+        "variant_id": null
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.8,
+        "opt_heldout": 0.8,
+        "delta": 0.0,
+        "variant_id": "variant-c46abfbc"
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.8,
+        "opt_heldout": 0.8,
+        "delta": 0.0,
+        "variant_id": "variant-a4ac5c15"
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.8,
+        "opt_heldout": 0.8,
+        "delta": 0.0,
+        "variant_id": "variant-c19cff00"
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.9,
+        "opt_heldout": 0.9,
+        "delta": 0.0,
+        "variant_id": null
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.9,
+        "opt_heldout": 0.9,
+        "delta": 0.0,
+        "variant_id": "variant-41a3a613"
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.9,
+        "opt_heldout": 0.9,
+        "delta": 0.0,
+        "variant_id": "variant-b454a9e0"
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.9,
+        "opt_heldout": 0.9,
+        "delta": 0.0,
+        "variant_id": "variant-d82db2dc"
+      }
+    }
+  ]
+}
