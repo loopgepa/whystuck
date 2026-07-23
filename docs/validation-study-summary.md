@@ -95,9 +95,29 @@ literature-implied levers were pre-registered and run, one change each:
 - **Run 4 — feedback richness** (`.../specs/2026-07-23-feedback-richness-preregistration.md`):
   the critique step is given a deterministic, non-oracle `text_stats` readout (the
   tool/executor signal Huang et al. found necessary). Report: `validation-study-feedback.md`.
+  **Result: NOT SUPPORTED** (B = D = 0.80, Δ = 0.00). Two findings, both consistent with
+  Huang: (i) the tool *helped the baseline* — seed rose 0.765 → **0.837** vs run 3 — so
+  external feedback works; (ii) reflective optimization then *degraded* both arms (−0.04
+  mean, −0.10 on one seed), the "self-correction can make it worse" effect. D tracked B
+  exactly in all three seeds.
 - **Run 5 — complexity** (`.../specs/2026-07-23-complexity-preregistration.md`): a third
   interacting `plan` module (plan→generate→critique→refine), so whole-genome optimization
   has more to co-tune (the DSPy lever). Report: `validation-study-plan.md`.
+  **Result: NOT SUPPORTED** (B = D = 0.76, Δ = 0.00). Optimization moved nothing on any arm;
+  the third module gave loop-level D no traction. No ceiling/floor flag on either run.
 
-Both are lower-powered exploratory runs (n = 3 seeds); a clear D > B in either would warrant
-a 5-seed confirmation. Full reference list in `docs/references.bib`.
+Both are lower-powered exploratory runs (n = 3 seeds); a clear D > B in either would have
+warranted a 5-seed confirmation — neither produced one. Full reference list in
+`docs/references.bib`.
+
+## Final verdict across five runs
+
+The thesis "loop-level GEPA beats prompt-only GEPA" is **NOT SUPPORTED** on IFEval-style
+instruction-following at this budget/model — in every regime we could test: single- and
+multi-constraint, with genuine headroom (run 3), with a real external feedback tool (run 4),
+and with an extra interacting module (run 5). Δ(D − B) = 0.00 in all three fair tests. The
+one thing that *did* move the score was feedback richness helping the **baseline** (run 4),
+exactly as Huang et al. predict — but it helped B and D equally, so it is not evidence for
+the loop-level lever. On current evidence, evolving the critique/plan components of a
+self-refine loop is not worth its cost over evolving the generation prompt alone; the
+burden is on future work to show a regime where it is.
