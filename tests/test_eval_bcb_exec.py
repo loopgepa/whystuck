@@ -125,6 +125,41 @@ def test_execution_is_deterministic():
     assert (a.passed, a.verdict) == (b.passed, b.verdict)
 
 
+def test_solution_cannot_monkeypatch_unittest_into_a_fake_pass():
+    # A solution under optimization pressure must not grade itself: patching
+    # unittest.TestResult.wasSuccessful (or assertEqual) must NOT yield a pass, because the
+    # harness reloads unittest after the solution runs and scores from the result lists.
+    cheat = (
+        "import unittest\n"
+        "unittest.TestResult.wasSuccessful = lambda self: True\n"
+        "def task_func(x):\n    raise RuntimeError('broken')\n"
+    )
+    r = run_unittest(cheat, _TEST, ["test_a", "test_b"], timeout=40)
+    assert r.passed is False and r.verdict == "failed"
+
+
+def test_skipped_tests_do_not_count_as_a_pass():
+    # A @skip'd test verified nothing; a suite of only-skips must not score a pass.
+    skipping = (
+        "import unittest\n"
+        "class TestCases(unittest.TestCase):\n"
+        "    @unittest.skip('x')\n"
+        "    def test_a(self):\n        self.assertEqual(task_func([2]), 4)\n"
+        "    @unittest.skip('x')\n"
+        "    def test_b(self):\n        self.assertEqual(task_func([3]), 9)\n"
+    )
+    r = run_unittest("def task_func(x):\n    return None\n", skipping, timeout=40)
+    assert r.passed is False
+
+
+def test_daemon_connection_error_is_sandbox_error_not_zero(monkeypatch):
+    # A mid-run daemon blip: docker CLI exits 1 with a connection message. That must be a
+    # sandbox_error (never scored 0.0), even though a real test failure also exits 1.
+    monkeypatch.setenv("DOCKER_HOST", "unix:///tmp/ws-no-such-docker.sock")
+    r = run_unittest(_SOL, _TEST, ["test_a"], timeout=40)
+    assert r.passed is False and r.verdict == "sandbox_error"
+
+
 def test_missing_image_is_a_sandbox_error_not_a_zero(monkeypatch):
     # A wrong/absent image is an infrastructure fault (docker run exit 125) → sandbox_error,
     # which the scorer must refuse to record as a genuine 0.0.

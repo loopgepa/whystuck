@@ -39,19 +39,24 @@ N_KEEP = 80  # cap the committed pool
 
 
 def _test_methods(test_src: str) -> list[str]:
-    """Sorted ``test_*`` method names of the first ``unittest.TestCase`` subclass."""
+    """Sorted, DEDUPED ``test_*`` method names of the first ``unittest.TestCase`` subclass.
+
+    Dedup is load-bearing: a class may define the same ``test_*`` name twice (legal Python;
+    the later def shadows), and ``dir(cls)`` exposes it once. Without dedup the interleaved
+    split could place that single logical test on BOTH sides — leaking a held-out (hidden)
+    test into the in-loop (visible) signal (an anti-oracle breach)."""
     try:
         tree = ast.parse(test_src)
     except SyntaxError:
         return []
     for node in ast.walk(tree):
         if isinstance(node, ast.ClassDef):
-            methods = [
+            methods = {
                 b.name
                 for b in node.body
                 if isinstance(b, ast.FunctionDef | ast.AsyncFunctionDef)
                 and b.name.startswith("test")
-            ]
+            }
             if methods:
                 return sorted(methods)
     return []
@@ -101,9 +106,17 @@ def main() -> int:
             continue
         r2 = run_unittest(reference, row["test"], timeout=int(MAX_SECONDS) + 8)
         if r2.verdict != "pass":
-            drop("nondeterministic")  # passed once, not twice
+            drop("nondeterministic")  # full suite passed once, not twice
             continue
         visible, hidden = _split(methods)
+        # Also confirm the HIDDEN subset (the actual scorer) is itself deterministic and
+        # passes twice — the full-suite double-run above doesn't prove the subset in
+        # isolation (a hidden test could depend on shared state a visible test sets up).
+        h1 = run_unittest(reference, row["test"], hidden, timeout=int(MAX_SECONDS) + 8)
+        h2 = run_unittest(reference, row["test"], hidden, timeout=int(MAX_SECONDS) + 8)
+        if not (h1.verdict == "pass" and h2.verdict == "pass"):
+            drop("hidden_subset_not_isolable")
+            continue
         kept.append(
             {
                 "task_id": row["task_id"],
