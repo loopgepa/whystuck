@@ -86,6 +86,26 @@ def test_full_report_supported_verdict_when_d_beats_b():
     assert "0.56" in md
 
 
+def test_report_flags_ceiling_when_seed_baseline_saturated():
+    # If the seed baseline already scores ~1.0 there is no headroom for ANY arm, so
+    # a mechanical NOT SUPPORTED verdict is misleading — the report must flag the
+    # ceiling and call the run inconclusive-by-saturation.
+    saturated = [{a: _arm([], 0.97, 0.97) for a in ("A", "B", "C", "D")} for _ in range(5)]
+    md = render_report(saturated, meta=_META)
+    low = md.lower()
+    assert "ceiling" in low or "saturat" in low
+    assert "headroom" in low
+
+
+def test_report_no_ceiling_note_when_seed_has_headroom():
+    # A healthy seed (0.4) with real movement must NOT trigger the ceiling/floor flag.
+    # (Key on "headroom" — unique to the note — since the word "ceiling" also appears
+    # in the unrelated reflection-budget caveat.)
+    md = render_report(_runs_where_d_beats_b(), meta=_META)
+    assert "headroom" not in md.lower()
+    assert "ceiling effect" not in md.lower() and "floor effect" not in md.lower()
+
+
 def test_single_seed_is_inconclusive_never_supported():
     # A single seed has zero measured noise; even a positive D>B gap must NOT be
     # reported SUPPORTED (the overclaim bug this guard prevents).

@@ -1,0 +1,233 @@
+{
+  "meta": {
+    "dataset": "multi-constraint (IFEval-style)",
+    "n_train": 8,
+    "n_heldout": 10,
+    "worker_model": "openai/gpt-4.1-mini",
+    "reflection_model": "openai/gpt-5.6-terra",
+    "max_metric_calls": 28,
+    "loop_max_retries": 1,
+    "worker_max_output_tokens": 320,
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "estimated_usd": 6.1759200000000005,
+    "generated": "2026-07-23T08:08:54.517239+00:00"
+  },
+  "runs": [
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.9,
+        "opt_heldout": 0.9,
+        "delta": 0.0,
+        "variant_id": null
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.9,
+        "opt_heldout": 0.9,
+        "delta": 0.0,
+        "variant_id": "variant-233023ed"
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.9,
+        "opt_heldout": 0.9,
+        "delta": 0.0,
+        "variant_id": "variant-83e3bd00"
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.9,
+        "opt_heldout": 0.9,
+        "delta": 0.0,
+        "variant_id": "variant-42d62574"
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.975,
+        "opt_heldout": 0.975,
+        "delta": 0.0,
+        "variant_id": null
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.975,
+        "opt_heldout": 1.0,
+        "delta": 0.025,
+        "variant_id": "variant-929f6000"
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.975,
+        "opt_heldout": 0.975,
+        "delta": 0.0,
+        "variant_id": "variant-75515522"
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.975,
+        "opt_heldout": 1.0,
+        "delta": 0.025,
+        "variant_id": "variant-2473f458"
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.975,
+        "opt_heldout": 0.975,
+        "delta": 0.0,
+        "variant_id": null
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.975,
+        "opt_heldout": 0.975,
+        "delta": 0.0,
+        "variant_id": "variant-ed00ef4c"
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.975,
+        "opt_heldout": 0.975,
+        "delta": 0.0,
+        "variant_id": "variant-95b96174"
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.975,
+        "opt_heldout": 0.975,
+        "delta": 0.0,
+        "variant_id": "variant-30eabb16"
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 1.0,
+        "opt_heldout": 1.0,
+        "delta": 0.0,
+        "variant_id": null
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 1.0,
+        "opt_heldout": 1.0,
+        "delta": 0.0,
+        "variant_id": "variant-62a2a388"
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 1.0,
+        "opt_heldout": 1.0,
+        "delta": 0.0,
+        "variant_id": "variant-5c6c3a13"
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 1.0,
+        "opt_heldout": 1.0,
+        "delta": 0.0,
+        "variant_id": "variant-353e8140"
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 1.0,
+        "opt_heldout": 1.0,
+        "delta": 0.0,
+        "variant_id": null
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 1.0,
+        "opt_heldout": 1.0,
+        "delta": 0.0,
+        "variant_id": "variant-19c7266d"
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 1.0,
+        "opt_heldout": 1.0,
+        "delta": 0.0,
+        "variant_id": "variant-a386c1d4"
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 1.0,
+        "opt_heldout": 1.0,
+        "delta": 0.0,
+        "variant_id": "variant-ccf316e5"
+      }
+    }
+  ]
+}

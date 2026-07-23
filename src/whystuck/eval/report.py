@@ -81,6 +81,33 @@ def _verdict(runs: list[Run]) -> tuple[str, str]:
     )
 
 
+def _headroom_note(runs: list[Run]) -> str | None:
+    """Flag a ceiling/floor that makes the D-vs-B verdict uninformative.
+
+    If the seed baseline already sits near 1.0, no arm can improve, so a mechanical
+    NOT SUPPORTED is a saturation artifact, not evidence against the thesis. The
+    mirror case (seed near 0) means the tasks may be unsolvable for the worker."""
+    baseline = [r[a]["seed_heldout"] for r in runs for a in _ARMS if a in r]
+    if not baseline:
+        return None
+    m = mean(baseline)
+    if m >= 0.9:
+        return (
+            f"⚠ **Ceiling effect.** The seed baseline already scores {_fmt(m)} (near the 1.0 "
+            "ceiling), so no arm has **headroom** to improve. This run cannot discriminate "
+            "loop-level from prompt-only regardless of the verdict above — read it as "
+            "inconclusive by saturation, not as evidence against the thesis. A fair test needs "
+            "harder tasks that push the seed well below 1.0."
+        )
+    if m <= 0.1:
+        return (
+            f"⚠ **Floor effect.** The seed baseline scores only {_fmt(m)} (near 0), so the tasks "
+            "may be unsolvable for this worker — the run has no **headroom** to discriminate the "
+            "arms. A fair test needs easier tasks or a more capable worker."
+        )
+    return None
+
+
 def _results_table(runs: list[Run]) -> str:
     header = (
         "| Arm | What GEPA evolves | seed held-out | optimized held-out (mean ± std) | Δ |\n"
@@ -138,7 +165,10 @@ def render_report(runs: list[Run], *, meta: dict[str, Any]) -> str:
     else:
         label, prose = _verdict(runs)
         body = "## Results\n\n" + _results_table(runs) + "\n"
+        note = _headroom_note(runs)
         verdict = f"## Verdict — {label}\n\n{prose}\n"
+        if note:
+            verdict += f"\n{note}\n"
 
     caveats = (
         "## Caveats\n\n"
