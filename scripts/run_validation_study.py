@@ -25,6 +25,7 @@ omitted) so the numbers and cassettes are reproducible offline afterwards.
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import os
 import sys
@@ -179,11 +180,16 @@ def main(argv: list[str] | None = None) -> int:
     # misconfigured level can never reach a paid run. lo/hi are inert off the oracle
     # path (there the LLM writes the critique), and hi's edit directives are
     # multi_constraint-specific — either misconfig would silently waste money.
-    if args.feedback_level != "mid" and not args.oracle_critique:
+    # The lever acts either on the ORACLE path (multi/multi-hard, where the LLM critique is
+    # replaced) or on the bcb EXEC path (where it shapes the executable visible-test feedback).
+    # Off both — e.g. plain ifbench, or code (whose code_feedback has no level) — lo/hi are inert.
+    _exec_lever = args.task_set == "bcb"
+    if args.feedback_level != "mid" and not (args.oracle_critique or _exec_lever):
         print(
-            f"ERROR: --feedback-level {args.feedback_level} only applies under "
-            "--oracle-critique (off the oracle path the LLM writes the critique, so the "
-            "level is inert). Add --oracle-critique or drop --feedback-level.",
+            f"ERROR: --feedback-level {args.feedback_level} only applies under --oracle-critique "
+            "(the oracle path) or --task-set bcb (where it shapes the executable visible-test "
+            "feedback). Off both paths the level is inert. Adjust the task set/oracle or drop "
+            "--feedback-level.",
             file=sys.stderr,
         )
         return 2
@@ -199,10 +205,11 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 2
 
-    if args.feedback_level == "hi" and args.task_set not in ("multi", "multi-hard"):
+    if args.feedback_level == "hi" and args.task_set not in ("multi", "multi-hard", "bcb"):
         print(
-            "ERROR: --feedback-level hi needs a multi task set (--task-set multi|multi-hard); "
-            "its concrete edit directives are multi_constraint-specific.",
+            "ERROR: --feedback-level hi needs a multi task set (--task-set multi|multi-hard), "
+            "whose concrete edit directives are multi_constraint-specific, or --task-set bcb, "
+            "where hi appends the visible-test source.",
             file=sys.stderr,
         )
         return 2
@@ -348,7 +355,10 @@ def _run_live(
             return load_bcb_tasks(split, seed=seed, n=n)  # type: ignore[arg-type]
 
         score_fn, feedback_fn = bcb_score, bcb_feedback
-        exec_feedback = bcb_feedback  # visible-test execution read into the critique
+        # Feedback-actionability lever (code D2'): shape the in-loop visible-test signal at the
+        # chosen level. mid (default) is byte-identical to the recorded runs; lo/hi are the
+        # cross-domain analogue of the IFBench actionability ablation.
+        exec_feedback = functools.partial(bcb_feedback, level=args.feedback_level)
         dataset = "BigCodeBench-Hard (Docker; visible methods in-loop, hidden methods scored)"
     elif args.task_set == "code":
         # MBPP+: base tests VISIBLE (shown in-prompt + executed by the in-loop critique

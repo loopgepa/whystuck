@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 """Prove every paid run reproduces bit-for-bit from its cassette (offline, $0).
 
-For each of the ten pre-registered runs, this re-runs the FULL pipeline (loaders
+For each of the eleven bit-for-bit runs (ten IFBench + the MBPP+ cross-domain run;
+BigCodeBench-Hard is excluded by construction, see the note after RUNS), this re-runs
+the FULL pipeline (loaders
 + GEPA + scoring) in strict `--replay` mode against the committed cassette — no API
 key, no spend, and any cassette miss raises — then checks the replayed per-arm
 seed/optimized held-out scores equal the committed results JSON exactly. GEPA is
@@ -23,7 +25,8 @@ from pathlib import Path
 import run_validation_study as cli
 
 CASSETTES = "tests/fixtures/cassettes"
-EXPECTED_RUNS = 10  # every pre-registered run must be verified before declaring success
+EXPECTED_RUNS = 11  # 10 IFBench runs + the MBPP+ cross-domain run; all bit-for-bit.
+# (BigCodeBench-Hard is excluded by construction — see the note after RUNS.)
 
 # (label, committed results JSON, cassette, exact CLI args). reflection_calls and
 # task-set come from each run's pre-registration (not stored in the older metas).
@@ -250,7 +253,39 @@ RUNS = [
             "3",
         ],
     ),
+    (
+        # Cross-domain (appendix): MBPP+ saturated its train split (all arms == seed,
+        # a degenerate zero), but it still reproduces bit-for-bit — pure-function tasks
+        # execute deterministically in the subprocess sandbox, so replay is exact.
+        "D5-code MBPP+ (saturated)",
+        "docs/validation-study-code.json",
+        f"{CASSETTES}/study-code.json",
+        [
+            "--task-set",
+            "code",
+            "--seeds",
+            "0,1",
+            "--n-train",
+            "6",
+            "--n-heldout",
+            "10",
+            "--max-metric-calls",
+            "20",
+            "--reflection-calls",
+            "4",
+            "--loop-max-retries",
+            "1",
+        ],
+    ),
 ]
+
+# The cross-domain BigCodeBench-Hard run (D5, docs/validation-study-bcb.json) is
+# INTENTIONALLY NOT verified here: it is not bit-for-bit replayable. Model solutions may
+# use unseeded randomness, so re-executing them in the Docker sandbox yields run-to-run
+# variation that shifts the content-addressed prompt key — an intrinsic property of
+# executable-code benchmarks. Per-execution grading is deterministic and the headline
+# reproduced identically across two independent paid runs (see the paper, "Reproducibility
+# scope"); strict LLM-call replay is out of scope for it by construction, not oversight.
 
 
 def _scores(runs: list[dict]) -> list[tuple]:

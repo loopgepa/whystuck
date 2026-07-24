@@ -30,6 +30,7 @@ from __future__ import annotations
 import ast
 import itertools
 import os
+import re
 import subprocess
 from collections.abc import Sequence
 
@@ -97,6 +98,27 @@ _SENTINEL = "<<WS_BCB_COMPLETED_7d1e4c>>"
 _NO_METHODS = "<<WS_BCB_NO_METHODS>>"
 _IMAGE = os.environ.get("WHYSTUCK_BCB_IMAGE", "whystuck-bcb:latest")
 _name_counter = itertools.count()
+
+# Volatile substrings that a failing BigCodeBench test can print — a process-local
+# object id / memory address (``<MagicMock ... id='140...'>``, ``at 0x7f...``) or a
+# random tempfile path. Their numeric part varies run-to-run, so if the failure text
+# reaches a prompt (in-loop feedback surfaces it), it shifts the content-addressed
+# cassette key and breaks bit-for-bit replay. Normalize each to a fixed placeholder,
+# preserving the surrounding (stable) message. Applied ONLY to the final failure
+# `detail`, after the sentinel/nonce check, so it can never mangle the hex nonce.
+_VOLATILE_SUBS: tuple[tuple[re.Pattern[str], str], ...] = (
+    (re.compile(r"id='?(?:0x[0-9a-fA-F]+|\d{5,})'?"), "id=<OBJID>"),
+    (re.compile(r"0x[0-9a-fA-F]{5,}"), "0x<ADDR>"),
+    (re.compile(r"/tmp/tmp[A-Za-z0-9_]+"), "/tmp/tmp<RAND>"),
+)
+
+
+def _scrub_volatile(text: str) -> str:
+    """Replace run-to-run-varying identifiers (object ids, hex addresses, temp paths)
+    with fixed placeholders so identical failures render identical feedback text."""
+    for pat, repl in _VOLATILE_SUBS:
+        text = pat.sub(repl, text)
+    return text
 
 # Runs INSIDE the container. Reads a per-run NONCE from stdin (into a function local — never
 # a module global, never env/argv/a file, so a solution cannot read it back via
@@ -309,5 +331,5 @@ def run_unittest(
         return ExecResult(True, "ok", verdict="pass")
     if rc == 0:  # clean exit, no valid sentinel+nonce => didn't run to a genuine pass
         return ExecResult(False, "tests did not run to completion", verdict="incomplete")
-    detail = _tail(err) or _tail(out) or f"exit {rc}"
+    detail = _scrub_volatile(_tail(err) or _tail(out) or f"exit {rc}")
     return ExecResult(False, detail, verdict="failed")

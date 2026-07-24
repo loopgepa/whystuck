@@ -1,0 +1,92 @@
+{
+ "meta": {
+  "dataset": "BigCodeBench-Hard (Docker; visible methods in-loop, hidden methods scored)",
+  "n_train": 8,
+  "n_heldout": 10,
+  "worker_model": "openai/gpt-4.1-mini",
+  "reflection_model": "openai/gpt-5.6-terra",
+  "max_metric_calls": 30,
+  "reflection_calls": 6,
+  "task_set": "bcb",
+  "loop_max_retries": 3,
+  "plan_gene": false,
+  "feedback_stats": false,
+  "critique_model": null,
+  "oracle_critique": false,
+  "feedback_level": "hi",
+  "exec_feedback": true,
+  "worker_max_output_tokens": 1024,
+  "seeds": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5
+  ],
+  "estimated_usd": 2.4514560000000003,
+  "generated": "2026-07-24T00:57:19.568422+00:00"
+ },
+ "runs": [
+  {
+   "A": {
+    "name": "A",
+    "evolvable_genes": [],
+    "seed_heldout": 0.8,
+    "opt_heldout": 0.8,
+    "delta": 0.0,
+    "variant_id": null
+   }
+  },
+  {
+   "A": {
+    "name": "A",
+    "evolvable_genes": [],
+    "seed_heldout": 0.5,
+    "opt_heldout": 0.5,
+    "delta": 0.0,
+    "variant_id": null
+   }
+  },
+  {
+   "A": {
+    "name": "A",
+    "evolvable_genes": [],
+    "seed_heldout": 0.6,
+    "opt_heldout": 0.6,
+    "delta": 0.0,
+    "variant_id": null
+   }
+  },
+  {
+   "A": {
+    "name": "A",
+    "evolvable_genes": [],
+    "seed_heldout": 0.7,
+    "opt_heldout": 0.7,
+    "delta": 0.0,
+    "variant_id": null
+   }
+  },
+  {
+   "A": {
+    "name": "A",
+    "evolvable_genes": [],
+    "seed_heldout": 0.7,
+    "opt_heldout": 0.7,
+    "delta": 0.0,
+    "variant_id": null
+   }
+  },
+  {
+   "A": {
+    "name": "A",
+    "evolvable_genes": [],
+    "seed_heldout": 0.7,
+    "opt_heldout": 0.7,
+    "delta": 0.0,
+    "variant_id": null
+   }
+  }
+ ]
+}

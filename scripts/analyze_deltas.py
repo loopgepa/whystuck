@@ -59,11 +59,14 @@ def exact_resample_ci(diffs: list[float], alpha: float = 0.05) -> tuple[float, f
     return mean(diffs), lo, hi
 
 
-# (label, per-seed differences) for the fair runs' D−B null.
+# (label, per-seed differences) for the fair runs' D−B null. Includes the cross-domain
+# BigCodeBench-Hard run (D5); MBPP+ is excluded because it saturated its training split
+# (all arms == seed, a degenerate zero — see the paper appendix), not a fair test.
 _NULL_RUNS = [
-    ("run3 hard-multi (n=5)", f"{DOCS}/validation-study-multihard.json"),
-    ("run4 feedback  (n=3)", f"{DOCS}/validation-study-feedback.json"),
-    ("run10 oracle-hi(n=3)", f"{DOCS}/validation-study-fbacthi.json"),
+    ("run3  hard-multi   (n=5)", f"{DOCS}/validation-study-multihard.json"),
+    ("run4  feedback     (n=3)", f"{DOCS}/validation-study-feedback.json"),
+    ("run10 oracle-hi    (n=3)", f"{DOCS}/validation-study-fbacthi.json"),
+    ("D5    bcb-hard code (n=2)", f"{DOCS}/validation-study-bcb.json"),
 ]
 
 
@@ -82,6 +85,15 @@ def main() -> int:  # pragma: no cover - CLI convenience
     excl = "excludes 0" if lo > 0 or hi < 0 else "includes 0"
     seeds = [f"{x:+.3f}" for x in d]
     print(f"Δ(hi−lo)={m:+.3f}  seeds={seeds}  95%CI[{lo:+.3f},{hi:+.3f}]  ({excl})")
+
+    dc = delta_between(
+        f"{DOCS}/validation-study-bcb-acthi.json", f"{DOCS}/validation-study-bcb-actlo.json"
+    )
+    print(f"\n=== code actionability: Δ(hi−lo) arm-A held-out, BigCodeBench-Hard (n={len(dc)}) ===")
+    mc, loc, hic = exact_resample_ci(dc)
+    exclc = "excludes 0" if loc > 0 or hic < 0 else "includes 0 (suggestive, not significant)"
+    seedsc = [f"{x:+.3f}" for x in dc]
+    print(f"Δ(hi−lo)={mc:+.3f}  seeds={seedsc}  95%CI[{loc:+.3f},{hic:+.3f}]  ({exclc})")
     return 0
 
 

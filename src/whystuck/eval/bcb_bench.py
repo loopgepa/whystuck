@@ -17,8 +17,10 @@ deterministic (fixed image + single-thread BLAS), so held-out scores replay bit-
 
 from __future__ import annotations
 
+import ast
 import json
 import random
+from collections.abc import Sequence
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Literal
@@ -27,6 +29,8 @@ from whystuck.eval.bcb_exec import run_unittest
 from whystuck.eval.benchmark import BenchmarkTask
 from whystuck.eval.code_bench import extract_code  # shared markdown/code extraction
 from whystuck.eval.code_exec import INFRA_VERDICTS, ExecResult
+
+FeedbackLevel = Literal["lo", "mid", "hi"]
 
 _DATA = Path(__file__).parent / "data" / "bigcodebench_hard.json"
 
@@ -70,20 +74,74 @@ def bcb_score(output: str, task: BenchmarkTask) -> float:
     return 1.0 if result.passed else 0.0
 
 
-def bcb_feedback(output: str, task: BenchmarkTask) -> str:
+def _method_sources(test_src: str, names: Sequence[str]) -> str:
+    """Source of the named ``test_*`` methods, concatenated — the 'hi' actionable payload.
+
+    Only the VISIBLE method names are ever passed in, so this never exposes the hidden
+    scorer. Returns "" on an unparseable suite (the caller then degrades 'hi' to 'mid')."""
+    try:
+        tree = ast.parse(test_src)
+    except SyntaxError:
+        return ""
+    want = set(names)
+    segs = [
+        seg
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef) and node.name in want
+        if (seg := ast.get_source_segment(test_src, node))
+    ]
+    return "\n\n".join(segs)
+
+
+def _shape_feedback(
+    level: FeedbackLevel,
+    *,
+    passed: bool,
+    n: int,
+    detail: str,
+    test_src: str,
+    visible_methods: Sequence[str],
+) -> str:
+    """Shape the visible-test outcome at one of three actionability levels (code D2' lever).
+
+    A pass reads the same at every level (the lever only shapes failures). On failure:
+    ``lo`` = a bare verdict (no detail), ``mid`` = the raw failure detail (the pre-lever
+    default, kept byte-identical), ``hi`` = the detail plus the source of the visible tests
+    the solution must satisfy. Pure/deterministic (no execution), so it is unit-testable."""
+    if passed:
+        return f"All {n} visible test(s) pass (hidden edge-case tests may still fail)."
+    if level == "lo":
+        return "One or more visible tests failed; revise the solution."
+    base = f"A visible test failed:\n{detail}"
+    if level == "hi":
+        src = _method_sources(test_src, visible_methods)
+        if src:
+            base += (
+                "\n\nThe visible tests your solution must satisfy (fix the solution, not the "
+                f"tests):\n```python\n{src}\n```"
+            )
+    return base
+
+
+def bcb_feedback(output: str, task: BenchmarkTask, level: FeedbackLevel = "mid") -> str:
     """In-loop / reflection signal from the VISIBLE test methods only (never the hidden set).
 
     Used both as the loop's execution feedback (``exec_feedback``) and GEPA's reflection prose
     (``feedback_fn``). Raises on an infrastructure verdict rather than reporting a host fault
-    as a test failure. Honest wording: passing the visible tests is necessary, not sufficient —
-    hidden edge cases can still fail."""
+    as a test failure. ``level`` is the code-domain feedback-actionability lever (default
+    ``mid`` = pre-lever behavior, byte-identical); see ``_shape_feedback``. Honest wording:
+    passing the visible tests is necessary, not sufficient — hidden edge cases can still fail."""
     payload = _payload(task)
     result = run_unittest(extract_code(output), payload["test"], payload["visible_methods"])
     _raise_if_infra(result, task, "in-loop (visible)")
-    n = len(payload["visible_methods"])
-    if result.passed:
-        return f"All {n} visible test(s) pass (hidden edge-case tests may still fail)."
-    return f"A visible test failed:\n{result.detail}"
+    return _shape_feedback(
+        level,
+        passed=result.passed,
+        n=len(payload["visible_methods"]),
+        detail=result.detail,
+        test_src=payload["test"],
+        visible_methods=payload["visible_methods"],
+    )
 
 
 def check_satisfiable(task: BenchmarkTask) -> bool:

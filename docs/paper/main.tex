@@ -41,7 +41,10 @@ optimization over prompt-only optimization: the held-out gap
 $\dd = \mathrm{mean}(D) - \mathrm{mean}(B)$ is $\le 0.01$ in every test with genuine
 headroom (and within seed noise), including runs where the critique step is given a
 real (non-oracle) measurement tool, a third interacting module, and a
-different-model critic. To locate the cause we measure the in-loop critique as a
+different-model critic. The null persists cross-domain: a replication on frontier-hard
+code (BigCodeBench-Hard \citep{zhuo2024bigcodebench}, with executable unit-test feedback)
+reproduces $\dd(D-B)=0.00$ even when loop-level optimization \emph{does} accept
+training-improving candidates --- they simply fail to transfer to held-out. To locate the cause we measure the in-loop critique as a
 failure detector (offline, from recorded transcripts) and add an oracle-critique
 control. Two findings sharpen the picture: the intrinsic self-critique is a
 near-random detector ($\mathrm{F}_1\!\approx\!0.11$), consistent with the documented
@@ -368,6 +371,69 @@ module (D co-evolving three genes, B still one), optimization moved nothing on
 any arm and $\dd = 0.00$. More optimizable structure did not translate into a
 loop-level advantage at this budget.
 
+\subsection{Cross-domain corroboration: BigCodeBench-Hard}
+\label{sec:bcb}
+
+To test whether the instruction-following null generalizes to a domain where the
+verify step catches real \emph{semantic} errors and runs as an executable tool ---
+the regime \citet{shinn2023reflexion} find self-correction works --- we replicated
+the four-arm design on \textbf{BigCodeBench-Hard} \citep{zhuo2024bigcodebench}, hard
+hard enough that strong models score far below their full-benchmark pass@1 on it (the
+Hard subset is calibrated to stay challenging) \citep{zhuo2024bigcodebench}. (An earlier attempt on MBPP+
+\citep{liu2023evalplus} saturated its training split and is reported in
+Appendix~\ref{app:mbpp-failed}; that failure motivated the move to a frontier-hard
+benchmark.) Each task's \texttt{unittest} methods are partitioned into a visible half
+(the in-loop, executable signal) and a disjoint hidden half (the held-out scorer),
+reconstructing the anti-oracle split; solutions are graded in a pinned, offline Docker
+sandbox (\texttt{-{}-network none}, memory/PID caps, single-thread BLAS). We ran arms
+A--D on $2$ seeds, $8$ train / $10$ held-out tasks drawn from a sandbox-verified
+$80$-task pool, worker \texttt{gpt-4.1-mini}, reflection \texttt{gpt-5.6-terra}, at
+$\mathrm{mmc}=30$.
+
+The seed baseline sits at $0.40$ (seed 0) and $0.50$ (seed 1) --- far from both floor
+and ceiling, so the loop has genuine headroom, unlike MBPP+. And unlike MBPP+, GEPA
+\emph{ran}: on seed 1 it accepted improving candidates for \emph{both} the prompt-only
+arm B (evolving \texttt{generate}) and the loop-level arm D (evolving \texttt{generate}
+\emph{and} \texttt{ensure\_correct}), each lifting the $8$-task training aggregate
+$0.375 \to 0.625$; on seed 0 neither arm accepted a candidate within budget, and the
+genome-blind control C is flat by construction. Yet on the held-out split \emph{every
+arm scored exactly its seed baseline} ($0.40$, $0.50$): the accepted training
+improvements changed which held-out tasks \texttt{gpt-4.1-mini} solves not at all. The
+headline is therefore a clean $\dd(D-B)=0.00$ (exact-resample $95\%$ CI
+$[0.000, 0.000]$) --- and, more pointedly, even when loop-level optimization has its
+extra lever and \emph{pulls} it (an accepted \texttt{ensure\_correct} rewrite that
+improves training), it yields no held-out gain over prompt-only. The
+instruction-following null recurs in a semantically-verified, executable-feedback
+domain: train-split improvement does not transfer, and the loop-level lever is inert
+on held-out.
+
+\paragraph{Actionable feedback lifts the code baseline too (cross-domain D2$'$).} The one
+intervention that helped on instruction-following --- concrete, measurement-shaped repair
+feedback (runs 9--10) --- transfers to code, and \emph{more strongly}. Holding the arm at A
+(no GEPA, so the lever is feedback \emph{shape}, not optimization) and varying only the in-loop
+visible-test feedback between a bare verdict (\emph{lo}) and the verdict plus the source of the
+visible tests the solution must satisfy (\emph{hi}), the held-out (hidden-test) score rises by
+a mean $+0.20$ across six seeds (per-seed $+0.40, 0.00, +0.20, +0.20, +0.20, +0.20$). An
+exact-resample $95\%$ interval is $[+0.100, +0.300]$, \emph{excluding zero} --- a
+$3\times$-larger effect than the instruction-following actionability lift ($+0.063$), plausibly
+because a code assertion is a sharper repair target than a word-count. Two qualifications hold
+as on instruction-following: the gain accrues to the \emph{baseline}, not to $\dd(D-B)$ (which
+stays $0.00$), so it is feedback \emph{shape}, not loop-level optimization --- GEPA did not need
+to discover it; and the held-out scores carry some execution non-determinism (the effect size
+dwarfs it, but we do not over-read the exact value). This reinforces the paper's conclusion:
+the productive lever is the fixer and the actionability of its feedback, not loop-level
+optimization of the critique.
+
+\paragraph{Reproducibility scope.} The main four-arm result reproduced \emph{identically}
+across two independent paid runs. Per-execution grading is deterministic, and we release the
+cassette and scores. We do \emph{not} claim byte-for-byte replay of the full LLM-call
+trace here, however: model solutions may use unseeded randomness, so re-executing them
+in the sandbox can yield run-to-run-varying test output --- an intrinsic property of
+executable-code benchmarks, not of our harness. (The instruction-following runs above,
+which never execute model code, do replay bit-for-bit.) We normalize the string-level
+non-determinism we can --- object ids, addresses, and temp paths in failure messages ---
+so that identical executions render identical feedback.
+
 \section{Analysis: Why the Loop-Level Lever Is Inert}
 \label{sec:analysis}
 
@@ -578,20 +644,18 @@ generator-limited (the residual). The agenda, re-ordered accordingly:
   \item[D4 (budget \& worker sweeps).] $\mathrm{mmc}\in\{20,40,80,160\}$ and worker
     $\in$\{nano, mini, a 5-series\} to rule out under-budgeting and map
     model-dependence.
-  \item[D5 (cross-domain) --- \emph{the priority next study, in progress}.] Replicate the
-    4-arm design where the verify step catches real \emph{semantic} errors and can be run
-    as an executable tool, the regime \citet{shinn2023reflexion} find self-correction
-    actually works. We start with \textbf{code}: MBPP+ \citep{liu2023evalplus} with its
-    base tests as the in-loop (visible) verifier and its edge-case ``plus'' tests as the
-    hidden scoring set --- a natural anti-oracle split that also restores headroom and
-    softens contamination; \texttt{gpt-4.1-mini} sits mid-band there, and the fast
-    pure-function tasks keep execution deterministic (preserving bit-for-bit replay), which
-    the timing-sensitive contamination-free alternative \citep{jain2024livecodebench} would
-    jeopardize. Math (numeric checker) follows. This tests whether reliable, actionable
-    verification is what the loop-level lever needs --- and would move the contribution from
-    ``an instruction-following observation'' to a general finding (or sharpen it to
-    ``loop-level helps iff verification is reliable and the fix is reachable''). A separate
-    pre-registered mini-project, not a variation of the runs here.
+  \item[D5 (cross-domain) --- \textbf{done} (\S\ref{sec:bcb}, App.~\ref{app:mbpp-failed}).]
+    We replicated the 4-arm design in a domain where the verify step catches real
+    \emph{semantic} errors and runs as an executable tool, the regime
+    \citet{shinn2023reflexion} find self-correction works. A first attempt on MBPP+
+    \citep{liu2023evalplus} saturated its training split (Appendix~\ref{app:mbpp-failed});
+    moving to frontier-hard BigCodeBench-Hard \citep{zhuo2024bigcodebench} restored headroom
+    (seed $0.40$--$0.50$), and there GEPA accepted training-improving candidates for
+    \emph{both} arms on one seed yet still delivered $\dd(D-B)=0.00$ on held-out
+    (\S\ref{sec:bcb}). The instruction-following null thus recurs in a semantically-verified,
+    executable-feedback domain: reliable, actionable verification is \emph{not} by itself
+    sufficient to make the loop-level lever pay off. Math (a numeric checker) remains a
+    natural next replication.
   \item[D7 (statistics) --- \emph{largely retired}.] We already report exact-resample
     intervals ($\S\ref{sec:threats}$); because the paired $\dd$ has near-zero variance
     they are tight even at $n{\le}5$, so additional seeds would only marginally narrow
@@ -620,10 +684,11 @@ reports gains elsewhere. \textbf{(iii) Does loop-level optimization beat prompt-
 ($[-0.033,+0.033]$ on the decisive run; exactly $[0,0]$ where the arms converge). The
 rest of this section explains \emph{why}.
 
-Across ten pre-registered experiments, optimizing the verification (and plan)
-components of a self-refine loop gave no held-out advantage over optimizing the
-generation prompt alone on verifiable instruction-following, at the budgets and
-models tested ($\dd \le 0.01$, within noise). Positive effects --- a measurement
+Across ten pre-registered instruction-following experiments --- and a cross-domain
+replication on frontier-hard code (\S\ref{sec:bcb}) --- optimizing the verification
+(and plan) components of a self-refine loop gave no held-out advantage over optimizing
+the generation prompt alone, at the budgets and models tested ($\dd \le 0.01$, within
+noise). Positive effects --- a measurement
 tool, a different-model critic, and more actionable repair feedback lifting the
 baseline --- accrued to prompt-only and loop-level arms equally. Probing the cause,
 we found the intrinsic critique is a near-random detector, yet a \emph{perfect}
@@ -636,8 +701,69 @@ feedback saturates below perfect. The actionable reframe: to make a self-refine 
 worth optimizing componentwise, improve the \emph{fixer} and the \emph{actionability}
 (not merely the correctness) of its feedback, not just the detector; and note that
 the actionability win here was feedback \emph{shape}, which optimization did not
-need to discover. All code, cassettes, and pre-registrations are released for
-reproduction.
+need to discover. That the same null recurs on BigCodeBench-Hard --- executable
+unit-test feedback, genuine semantic errors, real headroom, and GEPA accepting
+training-improving candidates that still fail to transfer --- indicates the finding is
+not an instruction-following artifact (\S\ref{sec:bcb}). All code, cassettes, and
+pre-registrations are released for reproduction.
+
+\appendix
+
+\section{A Failed First Attempt: MBPP+ Saturation, and What It Taught Us}
+\label{app:mbpp-failed}
+
+Our first attempt at the cross-domain code study (D5) used \textbf{MBPP+}
+\citep{liu2023evalplus}: the base tests as the in-loop (visible) verifier and the
+edge-case ``plus'' tests as the hidden scorer, with the same four arms and the same
+\texttt{gpt-4.1-mini} worker as the main study. We report it in full because its
+\emph{failure} is what motivated the design of the main cross-domain experiment
+(\S\ref{sec:bcb}).
+
+\paragraph{What happened.} The run completed and reproduces bit-for-bit from its
+cassette, but it is \emph{uninformative} for the quantity of interest. Every arm
+returned exactly the seed genome's held-out score on both seeds --- $0.80$ (seed 0)
+and $0.90$ (seed 1) --- so $\dd(D{-}B)=0$ identically. This zero is not a null result:
+GEPA's own log shows the cause --- \texttt{``All subsample scores perfect for parent
+0. Skipping''} on every iteration. The seed loop, aided by executable base-test
+feedback, already solved all six training tasks at a perfect score, so the optimizer
+had \emph{no gradient} and proposed no candidates. The ``optimized'' genome for each
+arm was therefore the seed genome, and $\dd(D{-}B)=0$ is a degenerate artifact of
+optimization never running --- the same saturation failure mode as our earliest
+IFBench pilots (runs 1--2).
+
+\paragraph{Why MBPP+ saturates.} MBPP+ is entry-level Python, and a capable worker
+with real unit-test feedback in the loop solves the easy training tasks outright.
+Held-out headroom looked adequate ($0.80$--$0.90$), but the \emph{training} split had
+none, which is what gates GEPA. The lesson: a cross-domain test of loop-level
+optimization needs headroom on the \emph{training} tasks, not merely the held-out set.
+
+\paragraph{Why we did not simply weaken the worker.} The obvious fix --- a smaller
+worker (e.g.\ \texttt{gpt-4.1-nano}) --- manufactures headroom but destroys external
+validity. A robust literature documents that both prompt-optimization and
+self-refinement gains scale \emph{inversely} with model strength:
+\citet{zhou2025bbopromptscale} measure black-box prompt-optimization lift falling from
+$12\%$ (7B) to $5.9\%$ (72B) to $1.1\%$ (671B) on the same task, concluding that gains
+measured on a small model do not transfer to a large one; and
+\citet{zhang2024smallverifiers} find small models need a \emph{strong} external verifier
+for self-correction to help at all. A positive $\dd(D{-}B)$ obtained by crippling the
+worker would thus be an upper bound that attenuates toward zero at frontier scale ---
+the opposite of a generalizing result. Conversely, the saturation we observed
+generalizes \emph{upward}: a stronger model saturates MBPP+ even more, so ``loop-level
+optimization has no headroom on easy code for a capable model'' only becomes more true
+for 2026-era frontier models.
+
+\paragraph{How this reshaped the study.} The fix is to move headroom to the
+\emph{tasks}, not away from the model: use a benchmark that is hard even for frontier
+models, so an affordable worker sits far from the ceiling in the same
+capability-relative regime a frontier model occupies on frontier-hard work. We adopted
+\textbf{BigCodeBench-Hard} \citep{zhuo2024bigcodebench}, a subset calibrated to stay hard
+even for strong models. Its tasks use scientific libraries and mock real I/O, so scoring moved
+into a pinned Docker sandbox (\texttt{-{}-network none}, memory/PID caps, single-thread
+BLAS) --- a safety and reproducibility upgrade over the subprocess sandbox, not a
+compromise of it. The anti-oracle split is reconstructed by partitioning each task's
+\texttt{unittest} methods into a visible (in-loop) and a hidden (scored) half. That
+study is reported in \S\ref{sec:bcb}; this appendix records the attempt that led to it,
+and its cassette is released alongside the others.
 
 \bibliographystyle{plainnat}
 \bibliography{references}

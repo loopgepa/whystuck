@@ -18,7 +18,9 @@ import verify_reproducibility as vr  # noqa: E402
 
 
 def test_runs_list_registers_all_expected_runs():
-    assert len(vr.RUNS) == vr.EXPECTED_RUNS == 10
+    # 10 IFBench runs + the MBPP+ cross-domain run = 11 bit-for-bit runs. BigCodeBench-Hard
+    # is excluded by construction (not bit-for-bit replayable), so it is NOT in RUNS.
+    assert len(vr.RUNS) == vr.EXPECTED_RUNS == 11
 
 
 def test_main_does_not_vacuously_succeed_on_empty_runs(monkeypatch, capsys):
