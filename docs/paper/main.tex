@@ -190,7 +190,8 @@ Self-Refine \citep{madaan2023selfrefine} popularized generate--critique--refine
 with a single model, reporting $\sim\!20\%$ gains on generation-quality tasks.
 Huang et al.\ \citep{huang2023cannot} show the sharp boundary: \emph{intrinsic}
 self-correction (no external feedback) fails to improve and often degrades
-(CommonSenseQA $75.8 \!\to\! 41.8$ after one round), and prior positive results
+(CommonSenseQA $75.8 \!\to\! 38.1$ after one round, recovering only to $41.8$ after a
+second), and prior positive results
 relied on \emph{oracle} stopping signals that ``vanish when oracle labels are
 not available.'' Self-correction helps only with a genuine external verification
 mechanism (a tool, a code executor, unit tests). A parallel line shows LLM
@@ -735,6 +736,40 @@ confirm it: arm~B spent up to four proposals on \texttt{generate}, arm~D about t
 the rest on the gene that never got accepted. This also reverses the mechanism we had
 asserted --- we wrote that arm~D ``fits the training tasks harder'' and so transfers worse,
 whereas under this selector arm~D fits the shared gene \emph{less} hard.
+
+\paragraph{Evidence 3b: half the headline effect is visibly a budget artifact.}
+The powered actuator run's per-seed held-out scores, from the released JSON and requiring no
+replay, decompose $\dd(D-B)=-0.10$ into two unlike halves:
+
+\begin{center}\small
+\begin{tabular}{cccc}
+\toprule
+seed & B (seed $\to$ opt) & D (seed $\to$ opt) & $\dd(D-B)$ \\
+\midrule
+0 & $0.55 \to 0.60$ & $0.55 \to \mathbf{0.45}$ & $-0.15$ \\
+1 & $0.45 \to \mathbf{0.60}$ & $0.45 \to 0.45$ \emph{(unmoved)} & $-0.15$ \\
+2 & $0.65 \to 0.65$ & $0.65 \to 0.65$ & $0.00$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+A score that moves proves the winning genome differed from the seed, so on seed~0 arm~D
+\emph{did} ship a change --- one that transferred badly. The audit's ``treatment never
+applied'' verdict therefore does not extend uniformly to this experiment, which evolves
+\texttt{generate} and \texttt{actuator} with the detector held fixed; which of those two
+genes changed on seed~0 we cannot recover, because bcb replay depends on container test
+outcomes that are not reproducible across hosts (one visible test times out under load on
+our machine, changing the critique prompt and hence the cassette key).
+
+Seed~1 is the informative one. There arm~B accepted a change that transferred ($+0.15$)
+while arm~D's held-out score never moved from its seed at all. That is the round-robin
+signature: under a matched proposal cap, B spent its budget on \texttt{generate} and
+accepted a winner, while D divided the same budget across two genes and accepted nothing
+that transferred. Half of the headline $-0.10$ is thus not a statement about optimizing the
+fixer; it is a statement about how much search each arm was allowed to spend on the gene
+they share. Note the asymmetry of what scores can prove: an unmoved score does \emph{not}
+establish an unchanged genome (a changed genome can score identically), so seeds~1 and~2
+remain formally inconclusive on that point.
 
 \paragraph{Evidence 4: a percentile-index error.}
 Our exact-resample interval took the upper bound at index

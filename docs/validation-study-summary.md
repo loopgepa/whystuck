@@ -31,6 +31,18 @@
 > producing byte-identical genomes, i.e. the same calls served from the same cassette entries);
 > the train-split over-fitting mechanism; "Δ = −0.10 excludes zero"; "rules out under-powering".
 >
+> **Actuator run, partially recovered (2026-07-28, $0, from the released JSON):** per-seed
+> B/D held-out are seed0 0.55→0.60 / 0.55→**0.45**; seed1 0.45→**0.60** / 0.45→0.45 unmoved;
+> seed2 0.65→0.65 / 0.65→0.65. A moved score proves the genome changed, so on seed 0 arm D
+> DID ship a change — "treatment never applied" does not extend uniformly to this experiment
+> (it evolves generate+actuator with the detector fixed). Which gene changed is unrecoverable:
+> bcb replay depends on container test outcomes, and a visible test times out under load here,
+> changing the critique prompt and hence the cassette key. Seed 1 is the tell: B accepted a
+> transferring change while D never moved — the round-robin starvation signature. So half the
+> headline −0.10 is about search budget per gene, not about optimizing the fixer. NOTE the
+> asymmetry: an unmoved score does NOT prove an unchanged genome, so seeds 1–2 are formally
+> inconclusive on that point.
+>
 > **Survives:** everything not depending on arm D having been optimized — detector F₁ = 0.11
 > (0.83 with the measurement tool), the per-constraint residual table, the fix-budget effect,
 > and the actionability effects (+0.063 text, +0.20 code). Two caveats: runs 7–10 gate on the
