@@ -120,6 +120,7 @@ def _scrub_volatile(text: str) -> str:
         text = pat.sub(repl, text)
     return text
 
+
 # Runs INSIDE the container. Reads a per-run NONCE from stdin (into a function local — never
 # a module global, never env/argv/a file, so a solution cannot read it back via
 # /proc/self/{environ,cmdline} or ``import __main__``), then execs the solution, re-imports a

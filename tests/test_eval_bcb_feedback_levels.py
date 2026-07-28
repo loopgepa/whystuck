@@ -34,8 +34,12 @@ def test_pass_message_is_identical_across_levels():
 
 def test_lo_is_verdict_only_no_detail():
     out = _shape_feedback(
-        "lo", passed=False, n=2, detail="AssertionError: 1 != 3",
-        test_src=_TEST_SRC, visible_methods=_VISIBLE,
+        "lo",
+        passed=False,
+        n=2,
+        detail="AssertionError: 1 != 3",
+        test_src=_TEST_SRC,
+        visible_methods=_VISIBLE,
     )
     assert "AssertionError" not in out  # the concrete detail is withheld at lo
     assert "revise" in out.lower()
@@ -44,23 +48,37 @@ def test_lo_is_verdict_only_no_detail():
 def test_mid_is_the_raw_detail_and_matches_legacy_string():
     # mid must be byte-identical to the pre-lever feedback so the recorded cassette/tests hold.
     out = _shape_feedback(
-        "mid", passed=False, n=2, detail="AssertionError: 1 != 3",
-        test_src=_TEST_SRC, visible_methods=_VISIBLE,
+        "mid",
+        passed=False,
+        n=2,
+        detail="AssertionError: 1 != 3",
+        test_src=_TEST_SRC,
+        visible_methods=_VISIBLE,
     )
     assert out == "A visible test failed:\nAssertionError: 1 != 3"
 
 
 def test_hi_adds_visible_test_source_but_not_hidden():
     out = _shape_feedback(
-        "hi", passed=False, n=2, detail="AssertionError: 1 != 3",
-        test_src=_TEST_SRC, visible_methods=_VISIBLE,
+        "hi",
+        passed=False,
+        n=2,
+        detail="AssertionError: 1 != 3",
+        test_src=_TEST_SRC,
+        visible_methods=_VISIBLE,
     )
-    assert "AssertionError: 1 != 3" in out          # keeps the mid detail
+    assert "AssertionError: 1 != 3" in out  # keeps the mid detail
     assert "def test_sum" in out and "def test_empty" in out  # adds visible source
-    assert "test_hidden_only" not in out            # never leaks the non-visible method
+    assert "test_hidden_only" not in out  # never leaks the non-visible method
     assert len(out) > len(
-        _shape_feedback("mid", passed=False, n=2, detail="AssertionError: 1 != 3",
-                        test_src=_TEST_SRC, visible_methods=_VISIBLE)
+        _shape_feedback(
+            "mid",
+            passed=False,
+            n=2,
+            detail="AssertionError: 1 != 3",
+            test_src=_TEST_SRC,
+            visible_methods=_VISIBLE,
+        )
     )
 
 

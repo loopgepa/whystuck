@@ -103,10 +103,12 @@ class LoopGenomeAdapter:
     ) -> None:
         """`verify_gene` + `verify_truth` enable component-specific reflection.
 
-        Both default to None, which reproduces the original behaviour exactly: every
-        component receives the same generator-shaped records. That default is load-bearing
-        for the released artifact, whose cassettes were recorded under it — a changed
-        reflection prompt is a changed cassette key.
+        Both default to None, under which every component receives the same
+        generator-shaped records — the behaviour that produced the superseded runs, and the
+        reason their loop-level arm was never meaningfully optimized. Callers that evolve a
+        critique gene should supply both; `run_validation_study` does so for every text task
+        set. The None default remains only because a truth signal is not available for every
+        task family (see below), not as a compatibility path.
 
         `verify_truth(draft, task) -> (satisfied, why)` supplies ground truth for a draft
         the critique judged, so the verify gene's records can report the detector's ERROR
@@ -196,8 +198,7 @@ class LoopGenomeAdapter:
                 said_pass = verdict.strip().upper().startswith("PASS")
                 if said_pass and not satisfied:
                     error = (
-                        "WRONG (false pass): you accepted a draft that violated "
-                        f"the task. {why}"
+                        f"WRONG (false pass): you accepted a draft that violated the task. {why}"
                     )
                 elif not said_pass and satisfied:
                     error = "WRONG (false alarm): you demanded fixes on a compliant draft."
