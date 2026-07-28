@@ -179,3 +179,28 @@ def test_report_states_seed_count_and_models():
     assert "2" in md  # seed count
     assert "openai/gpt-5.6-terra" in md
     assert "150" in md  # max_metric_calls
+
+
+def test_report_states_the_hand_written_gene_when_one_was_injected():
+    # The override IS the experimental condition, so a report that omits it describes a
+    # different experiment than the one that produced its numbers.
+    hand = "Count the words yourself, then reply PASS or the exact edit."
+    md = render_report([], meta={**_META, "gene_overrides": {"ensure_correct": hand}})
+    assert "Hand-written seed gene" in md
+    assert "ensure_correct" in md
+    assert hand in md
+
+
+def test_report_omits_the_hand_written_gene_line_when_there_is_none():
+    for meta in ({**_META}, {**_META, "gene_overrides": {}}):
+        assert "Hand-written seed gene" not in render_report([], meta=meta)
+
+
+def test_report_no_longer_calls_arm_c_a_command_control():
+    # The command control was deleted (it scored a perfect 1.0 and so could not fail);
+    # arm C is now a constant draft graded by the real metric. A report still saying
+    # "command control" would misdescribe every future run.
+    md = render_report([], meta=_META)
+    assert "command control" not in md
+    assert "command worker" not in md
+    assert "fixed-draft control" in md

@@ -48,17 +48,22 @@ error that made our one interval-excluding-zero result appear significant: the a
 run's $\dd(D-B)=-0.10$ has an exact-resample interval of $[-0.150,+0.000]$, which
 \emph{includes} zero (sign test $p=0.50$). Both defects are invisible in held-out scores,
 which is what makes them worth reporting: any componentized-optimizer study can measure a
-confident zero from an experiment that never ran. Findings that survive the audit are the
+confident zero from an experiment that never ran. A second audit, run before spending on the
+corrected harness, found the same failure mode twice more: the fix's own ground-truth signal
+was a \emph{constant}, and our ``strict'' replay silently returned a different number for one
+arm-seed while exiting zero. Findings that survive the audit are the
 mechanistic ones: the intrinsic critique is a near-random failure detector
 ($\mathrm{F}_1\!\approx\!0.11$), consistent with the documented unreliability of LLM
 self-verification \citep{huang2023cannot,kamoi2024whencan} and with the independent
 observation that detection ability does not predict correction success
 \citep{decomposing2026selfcorrection}; \emph{given} a perfect checker at inference, the
-repair signal's shape matters ($+0.063$ text, $+0.20$ code, both intervals excluding zero)
-while naming the failed constraint alone adds nothing; and the residual localizes to one
+repair signal's shape matters ($+0.063$ text, $+0.20$ code; the text interval excludes zero,
+while the code one is drawn from seeds that share held-out tasks and so cannot be read as
+replication) while naming the failed constraint alone adds nothing; and the residual localizes to one
 mechanical skill (\texttt{exact\_word\_count}, $0.16\!\to\!0.33\!\to\!0.50$). We release
-the corrected harness, which reports per-gene accepted-change counts and train aggregates
-so that ``the treatment was applied'' is checkable by a reader, together with every
+the corrected harness, which reports per-gene accepted-change counts, train aggregates and
+per-task score vectors so that ``the treatment was applied'' is checkable by a reader of any run
+made with it --- those fields postdate our own recordings --- together with every
 cassette and pre-registration --- including the superseded ones, labelled as such.
 \end{abstract}
 
@@ -262,22 +267,39 @@ D a third interacting module to co-tune (the DSPy lever); B still evolves only
 
 \paragraph{Oracle taxonomy (a required distinction).}
 Structural non-oracle-ness (the tool takes no task argument) is necessary but
-\textbf{not sufficient}. A statistic is \emph{informationally} the oracle when
-its verifier has no per-task parameter, so the raw measurement alone resolves
-the verdict. A pre-spend design review caught exactly this: reporting
-\texttt{all\_lowercase} or a comma count would hand back the verdicts of the
-parameter-free \texttt{all\_lowercase} and \texttt{no\_comma} constraints. Both
-statistics were removed before any paid run. Every reported statistic requires a
-task-supplied target (an exact/min count, a required bullet count, a max length)
-to become pass/fail, so the model must still know each target and reason --- the
-legitimate tool regime.
+\textbf{not sufficient}. Our first rule was that a statistic is \emph{informationally} the
+oracle when its verifier has no per-task parameter, so the raw measurement alone resolves the
+verdict. A pre-spend design review used it to remove \texttt{all\_lowercase} and a comma count,
+whose parameter-free verdicts the measurement would simply have been. That rule is too weak,
+and we replace it with a three-way distinction:
+\begin{itemize}\itemsep0pt
+\item a \textbf{scoring oracle}: the held-out metric itself, never admissible in the loop;
+\item a \textbf{verdict-equivalent measurement}: admissible and deployable, but it settles the
+verdict by comparison rather than judgement, because the task statement supplies the target
+and the tool supplies the measured value;
+\item a \textbf{non-determining measurement}: maps to no verifier, or leaves the verdict open.
+\end{itemize}
+Every retained field passes the old rule, since each needs a task-supplied target. Under the
+new one, four of the eight hard-constraint families are verdict-equivalent once the task
+statement is in the prompt: \texttt{words} against \texttt{exact\_word\_count},
+\texttt{longest\_word\_letters} against \texttt{word\_max\_length}, \texttt{bullet\_lines}
+against \texttt{num\_bullets}, \texttt{last\_words} against \texttt{end\_with}. That is $165$
+of $288$ constraint instances ($57\%$) in the hard pool, with at least one on every one of the
+$64$ tasks --- though only $2$ tasks ($3\%$) are settled by the tool alone, since
+\texttt{forbidden\_word} and \texttt{include\_keyword} are uncovered. This does not contaminate
+held-out scores, which never see the tool. What it changes is the reading of the detector
+result in \S\ref{sec:analysis}: the tool-fed critique's $\mathrm{F}_1$ of $0.11 \to 0.83$ is
+substantially the tool \emph{replacing} the detector on the majority of constraint checks,
+rather than a prompt that learned to detect better.
 
 \paragraph{Reproducibility and budget.}
 Every LLM call is recorded to a content-addressed cassette (\texttt{sha256} of
 name$+$args), so runs replay offline at zero cost and partial spend is always
 persisted. Reproduction is a first-class, strict operation: re-running any study
 with \texttt{-{}-replay} re-executes the entire pipeline (loaders, GEPA search,
-scoring) against the cached calls with no API key, and any cassette miss raises.
+scoring) against the cached calls with no API key, and any cassette miss raises --- per call,
+and, after the correction in Evidence~7, per run as well, since a consumer that swallows the
+per-call error can otherwise let a replay finish with a different number.
 GEPA is deterministic under replay, so replay is bit-for-bit:
 \texttt{scripts/verify\_reproducibility.py} registers eleven committed runs and confirmed
 that every per-arm held-out score matched its released JSON exactly. \textbf{Those eleven
@@ -600,7 +622,10 @@ tool makes it reliable. The tool-fed reliability helps B and D equally.}
 \paragraph{(1b) But detection quality is necessary, not sufficient --- the
 non-monotonic ceiling.} If a poor detector were the \emph{only} obstacle, a better
 one should monotonically raise the loop's held-out score. It does not
-(Table~\ref{tab:curve}). The intrinsic critique (F$_1\!=\!0.11$) yields seed
+(Table~\ref{tab:curve}). Read the second row with the taxonomy of
+\S\ref{sec:method} in hand: for $57\%$ of constraint instances the tool's readout is
+verdict-equivalent given the task statement, so that F$_1$ is largely measurement substituting
+for judgement. The intrinsic critique (F$_1\!=\!0.11$) yields seed
 $0.765$; the tool-fed critique (F$_1\!=\!0.83$) yields $0.837$; but the
 \emph{oracle} critique (F$_1\!=\!1.0$ by construction) yields only $0.748$ --- the
 best detector gives the \emph{worst} of the three. Detection quality is therefore
@@ -797,12 +822,68 @@ zero into one that appears to exclude it.}
 \label{tab:ciexcl}
 \end{table}
 
+\paragraph{Evidence 4b: the seeds are not independent replications.}
+Both statistics we report across seeds --- the exact-resample interval and the sign test ---
+assume the per-seed differences are independent draws. For three of our five task families
+they are not. Every loader ends in ``shuffle the pool, split at the midpoint'', but the
+generated multi-constraint loader reseeds the \emph{pool} first
+(\texttt{generate\_multi\_tasks(pool, seed=seed)}), whereas the vendored loaders (IFBench,
+MBPP+, BigCodeBench-Hard) shuffle a fixed file, so there a seed chooses a \emph{partition} of
+the same tasks rather than a fresh sample. Measured pairwise held-out overlap at the split
+sizes actually used: $0\%$ for multi and multi-hard, against $20\%$ for the cross-domain
+BigCodeBench-Hard null, $20\%$ and $25\%$ for the two actuator runs, and $7\%$ for the
+code-actionability pair. Positively correlated units make a bootstrap interval too narrow and
+a sign test's $p$ too small, both in the direction that overstates significance. The affected
+results are exactly the BigCodeBench-Hard ones, which include the actuator experiment; the
+text nulls (runs~3, 4, 11) and the $+0.063$ actionability effect come from the
+per-seed-regenerated pool and are unaffected. Note that overlap must be measured on task
+\emph{content}: the generator numbers tasks by index, so two seeds reuse $15$--$17$ of $32$
+ids for entirely different tasks, and an id-based comparison reports precisely the wrong
+answer for the one family that is clean. \texttt{scripts/analyze\_deltas.py} now resolves each
+run's family from its metadata and marks the affected lines; a correct interval needs per-task
+scores, which the harness now releases and no recorded run carries.
+
 \paragraph{Evidence 5: the flatness controls could not fail.}
 Arm~A copied its own seed score into its optimized slot with $\delta$ hardcoded to $0.0$, so
 it had no second measurement. Arm~C's genome-blind command loop always exits $0$, which our
 scalarization maps to exactly $1.0$ --- the optimizer's perfect score --- so it proposed
 nothing and never scored a mutated genome. Our claim that ``a non-flat A or C would
 invalidate the run'' was therefore unfalsifiable by construction.
+
+\paragraph{Evidence 6: the fix shipped with the same class of defect.}
+The corrected reflective dataset scores each critique verdict against ground truth, so it can
+label a verdict a false pass or a false alarm. Auditing that code \emph{before} spending on it,
+we found it reconstructed the task as \texttt{BenchmarkTask(id=trace.task\_id)} --- carrying
+the id but not the \emph{payload}, because a \texttt{LoopTrace} records a task's id and summary
+and not its constraints. Every programmatic scorer here returns $0.0$ for an empty constraint
+list by deliberate design (``an unscored task is not a vacuous win''), so the truth signal was
+not merely noisy but \emph{constant}: every verdict returned \texttt{(False, ``no verifiable
+constraints on this task'')}. Every PASS was therefore labelled a false pass and every
+rejection labelled correct --- a directional pressure toward a verifier that accepts nothing,
+in the one channel that constitutes the loop-level treatment. All three unit tests for the fix
+passed, because each supplied a \texttt{verify\_truth} double that ignored its \texttt{task}
+argument and so could not observe which task it was handed. We report this because it is the
+paper's own thesis recurring: the second implementation of the intervention failed silently for
+the same reason the first did, and again no output distinguished a broken treatment from an
+ineffective one. A related gap: the three provenance fields we urge below (per-gene
+accepted-change count, train aggregate, final gene text) postdate every recorded run, so they
+are empty in all $17$ released result files. The reporting minimum we propose cannot be
+checked against our own release --- only against runs made after it.
+
+\paragraph{Evidence 7: a strict replay silently reported a different number.}
+We describe replay above as strict, ``any cassette miss raises''. It is strict per call but not
+per run: GEPA catches exceptions raised inside its reflection LM and records that no candidate
+was proposed. A missed reflection call therefore does not abort a replay; it removes that arm's
+ability to accept a change and lets the run finish normally. Replaying run~11 under the
+corrected harness produced \textbf{70} swallowed reflection misses, exit status $0$, a written
+report, and $11$ of $12$ arm-seed scores matching the release. The twelfth --- seed~1, arm~D ---
+returned $0.681$ against a recorded $0.666$, and $0.681$ is exactly that seed's own baseline.
+The failure mode converts ``the arm accepted a change that hurt'' into ``the arm accepted
+nothing'', which is the precise distinction this paper argues must be reported, and it does so
+with no visible signal. The cassette now counts misses and raises on context exit (without
+displacing an exception already propagating), so the same command exits non-zero and names the
+count. This also bounds what our eleven-run verification established: a passing replay was
+evidence of reproduction only for surfaces whose misses propagate.
 
 \paragraph{What we retract.}
 The following claims are withdrawn: that there is \emph{no measurable advantage for
@@ -813,7 +894,9 @@ same calls and the cassette served the same completions --- the sharpest availab
 that the experiment did not run, not evidence for its conclusion); that the extra evolvable
 gene \emph{over-fits the train split} (the train aggregate was computed and discarded, so
 this was untestable from the release, and the selector makes the opposite prediction); that
-$\dd(D-B)=-0.10$ \emph{excludes zero}; and that this \emph{rules out under-powering}. We also
+$\dd(D-B)=-0.10$ \emph{excludes zero}; that this \emph{rules out under-powering}; and any
+reading of a BigCodeBench-Hard interval or sign test as \emph{replication across independent
+seeds} (Evidence~4b). We also
 correct two factual slips: the reproducibility script registers eleven runs, not ten, and the
 \$5 ceiling is a CLI default that three runs overrode (up to \$11.76).
 
@@ -837,7 +920,14 @@ was a false pass or a false alarm; (ii) passes an explicit component selector, d
 rewriting all genes per proposal so a multi-gene arm is not starved; (iii) replaces arm~C
 with a genome-blind constant draft scored by the real metric, which is flat without being
 saturated, and re-measures arm~A instead of copying it; and (iv) records, for every arm, the
-per-gene accepted-change count, the train aggregate, and the final gene text. Item~(iv) is
+per-gene accepted-change count, the train aggregate, and the final gene text. The audit of
+that harness (Evidence~6--7) added three more: (v) the verify gene's truth signal now receives
+the real task, not a payload-less reconstruction of it, and a trace that cannot be matched to
+an evaluated task raises rather than being scored against a stand-in; (vi) a replay that
+swallows a cassette miss now fails at context exit instead of exiting $0$ with a divergent
+report; and (vii) every run releases the \emph{per-task} held-out score vector behind each
+mean, which is what makes a paired task-level test possible for readers who --- correctly ---
+do not want to treat our seeds as replications. Item~(iv) is
 the part we would urge on others: \textbf{a componentized-optimization result should report,
 per component, whether the optimizer's output actually differs from the seed.} Had we printed
 that one number, this paper would have been a different paper eleven runs earlier. Because
@@ -864,7 +954,20 @@ $[+0.025,+0.090]$, rests on the magnitudes rather than on replication across see
 also no within-condition sampling variance anywhere in the study: the worker runs at the
 provider's default temperature with no seed, one sample per task, and the cassette memoizes
 by prompt, so every interval here describes task-draw and search-path variation only, never
-measurement noise. \textbf{Single worker/reflection model:} results may be
+measurement noise. \textbf{A do-nothing floor in the metric:} the
+fraction-of-constraints-satisfied score is not anchored at zero for an empty answer. Measured
+over the whole pool, the empty string scores $0.548$ on the vendored IFBench slice and $0.420$
+on generated multi-hard; the single character \texttt{x} scores $0.452$ and $0.499$. Five of
+eleven IFBench verifiers are vacuously satisfied by text containing no whitespace, quotes or
+bullets --- \texttt{\_sub\_bullets("")} reduces to \texttt{all([]) = True}. These are faithful
+ports of the upstream checkers, and the floor applies to every arm equally, so it does not bias
+\dd. It does compress the scale: on IFBench the floor sits at or above our reported seed
+baselines, so a $\pm 0.10$ movement is measured against a far smaller effective range than
+$[0,1]$ implies. It also makes the metric a poor instrument for this particular loop, since a
+metric that partly rewards saying less is exposed to a critique that pushes toward shorter
+answers. We looked for that failure mode in the released runs and can neither confirm nor
+exclude it, because no released run carries its evolved gene text
+(\S\ref{sec:defect}). \textbf{Single worker/reflection model:} results may be
 model-dependent; \citet{huang2023cannot} find self-correction effects vary by
 model. \textbf{Cross-lineage, not cross-provider:} run 6's critic
 (\texttt{gpt-5.6-luna}) shares a vendor and training lineage with the worker
@@ -915,6 +1018,10 @@ Budget, $\mathrm{mmc}\in[20,64]$ & Yes, by spend & An $\mathrm{mmc}{=}160$ repli
   the corrected harness \\
 Power, $n{=}3$; no sampling variance & No --- design change & Repeated samples per task and a
   fixed temperature, neither of which the study has (D7) \\
+\textbf{Seeds are partitions, not samples} (Evidence~4b) & Partly, as released & Task-level
+  pairing on the per-task scores runs now emit; for the recorded runs, a re-run \\
+\textbf{Metric has a do-nothing floor} (\S\ref{sec:threats}) & No --- benchmark change &
+  Verifiers that fail rather than vacuously pass on empty text, or a floor-subtracted score \\
 Cross-lineage, not cross-provider & No --- credential & A Gemini or Anthropic key; pricing
   already in place (D3) \\
 One task family (math) & No --- new harness & Parametric math generator plus numeric checker;
@@ -926,7 +1033,9 @@ Held-out generalization & No --- generator work & Enlarged parameter pools, then
 \caption{Threat closability against the released artifact and an OpenAI-only key. ``By
 spend'' means the harness answers it with no new code. The first row was added after the
 audit and supersedes the others in priority: it is not a threat to the interpretation of a
-result but to the existence of one.}
+result but to the existence of one. The two bolded rows were added by the second audit
+(Evidence~4b--7); neither is a threat to whether the measurement happened, but both change what
+its numbers may be read to mean.}
 \label{tab:closability}
 \end{table}
 
@@ -985,12 +1094,16 @@ generator-limited (the residual). The agenda, re-ordered accordingly:
     (\S\ref{sec:defect}). It therefore does \emph{not} close the budget/power threat. Math (a
     numeric checker) remains a natural next replication, and a re-run under the corrected
     harness now precedes all of these.
-  \item[D7 (statistics) --- \emph{reinstated}.] The near-zero paired variance we once
-    read as precision was mostly ties, i.e.\ the treatment not being applied
+  \item[D7 (statistics) --- \emph{reinstated and sharpened}.] The near-zero paired variance we
+    once read as precision was mostly ties, i.e.\ the treatment not being applied
     ($\S\ref{sec:defect}$), and no interval in the study contains within-condition sampling
-    variance at all. Repeated samples per task and more seeds are now load-bearing rather than
-    optional. Retained from the original note: exact-resample intervals are reported, and
-    them. A larger-$n$ pre-registered replication remains nice-to-have, not load-bearing.
+    variance at all: the worker runs at the provider's default temperature, one sample per task.
+    Repeated samples at a fixed temperature are therefore load-bearing rather than optional.
+    More seeds are load-bearing too, but only where a seed buys a fresh sample: Evidence~4b
+    shows that on the vendored families a seed merely re-partitions one fixed pool, so adding
+    seeds there raises apparent precision without adding independent information. The unit to
+    pair on is the \emph{task}, which is why every run now releases its per-task score vector,
+    and a pre-registered replication should state which unit its interval resamples.
   \item[D1$'$-tools (deterministic actuator).] Table~\ref{tab:residual} localizes the
     residual to \texttt{exact\_word\_count}; a deterministic count-fixer would likely
     recover most of it. Lower priority now that the decomposition has made the point

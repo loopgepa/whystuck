@@ -25,7 +25,7 @@ _ARMS = ("A", "B", "C", "D")
 _ARM_LABEL = {
     "A": "seed baseline (no optimization)",
     "B": "prompt-only GEPA (one gene)",
-    "C": "command control (genome-blind)",
+    "C": "fixed-draft control (genome-blind)",
     "D": "loop-level GEPA (whole genome)",
 }
 
@@ -170,10 +170,23 @@ def render_report(runs: list[Run], *, meta: dict[str, Any]) -> str:
         f"across {len(seeds)} seed(s) {seeds}; estimated spend "
         f"${meta.get('estimated_usd', 0):.2f}.\n"
         "- **Arms:** A = seed baseline (no optimization); B = prompt-only GEPA (evolves one "
-        "instruction gene); C = command control (genome-blind worker — the flatness control); "
+        "instruction gene); C = fixed-draft control (a constant draft graded by the real "
+        "metric, so the genome is genuinely ignored but the landscape is not saturated); "
         "D = loop-level GEPA (evolves the whole genome). All arms share an identical seed "
         "genome, so held-out gaps isolate what GEPA evolves, not prompt length.\n"
     )
+    # A hand-written gene override IS the experimental condition, so a report that omits
+    # it describes a different experiment than the one that produced its numbers.
+    overrides = meta.get("gene_overrides") or {}
+    if overrides:
+        method += (
+            "- **Hand-written seed gene(s):** "
+            + "; ".join(
+                f"`{gene}` replaced with {text.strip()!r}" for gene, text in overrides.items()
+            )
+            + ". This measures whether a BETTER gene moves held-out at all — prior to "
+            "asking whether an optimizer can find one.\n"
+        )
 
     if not runs:
         body = (
@@ -193,7 +206,7 @@ def render_report(runs: list[Run], *, meta: dict[str, Any]) -> str:
     caveats = (
         "## Caveats\n\n"
         "- Arm C's flatness is the genome-blind control; its optimization can't move the score "
-        "because the command worker ignores the genome.\n"
+        "because the fixed-draft worker ignores the genome.\n"
         f"- The split is small ({meta.get('n_heldout', '?')} held-out); this claims a *relative* "
         "result (loop-level vs prompt-only) under a matched budget, not a leaderboard number.\n"
         "- Reflection spend is a hard cap: GEPA is told to stop after `reflection_calls` "

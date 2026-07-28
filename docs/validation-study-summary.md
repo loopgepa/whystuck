@@ -1,4 +1,4 @@
-# GEPA validation study — results note (ten IFBench runs + cross-domain code)
+# GEPA validation study — results note (eleven runs + cross-domain code)
 
 > ## ⚠️ SUPERSEDED HEADLINE — read this first (added 2026-07-28)
 >
@@ -25,6 +25,51 @@
 >    [−0.150, −0.050] "excluding zero".
 > 5. **The flatness controls could not fail.** Arm A copied its own seed score with δ
 >    hardcoded to 0.0; arm C's command loop scored a saturated 1.0, so GEPA proposed nothing.
+> 6. **The seeds are not independent replications** (added 2026-07-28, second audit). Every
+>    loader ends in "shuffle the pool, split at mid", but `load_multi_constraint` reseeds the
+>    *pool* first while the vendored loaders (ifbench, code, bcb) shuffle a fixed file — there a
+>    seed picks a *partition*, not a sample. Measured pairwise held-out overlap at the sizes
+>    used: 0 % for multi/multi-hard, 20 % for the bcb null, 20 % and 25 % for the two actuator
+>    runs, 7 % for the code-actionability pair. Correlated units make the CI too narrow and the
+>    sign-test p too small, both toward overstating significance. So the bcb results, including
+>    the actuator claim, may not be read as replication; the text nulls and +0.063 are clean.
+>    Overlap must be measured on task *content*: the generator numbers tasks by index, so two
+>    seeds reuse 15–17 of 32 ids for different tasks and an id-based check reports the one clean
+>    family as ~50 % overlapping. `analyze_deltas.py` now marks the affected lines.
+> 7. **The fix shipped with the same class of defect** (second audit, found before any spend).
+>    `_detector_records` rebuilt the task as `BenchmarkTask(id=trace.task_id)` with no payload;
+>    every text scorer returns 0.0 for an empty constraint list by design, so `verify_truth` was
+>    a *constant* `(False, "no verifiable constraints on this task")` — every PASS labelled a
+>    false pass, every rejection labelled correct, i.e. directional pressure toward a verifier
+>    that never accepts, in the channel that *is* arm D's treatment. All three unit tests passed
+>    because each `verify_truth` double ignored its `task` argument.
+> 8. **A "strict" replay silently reported a different number** (second audit). GEPA catches
+>    exceptions from its reflection LM, so a `CassetteMiss` there does not abort the run.
+>    Replaying run 11 under the corrected harness: **70 swallowed misses, exit 0**, a written
+>    report, 11 of 12 arm-seed scores matching, and seed 1 arm D returning 0.681 against a
+>    recorded 0.666 — 0.681 being exactly that seed's baseline. The failure mode converts
+>    "accepted a change that hurt" into "accepted nothing", with no visible signal. The cassette
+>    now counts misses and raises on context exit.
+> 9. **The metric has a do-nothing floor.** The empty string scores 0.548 on the vendored
+>    IFBench slice and 0.420 on generated multi-hard ('x' scores 0.452 / 0.499); five of eleven
+>    IFBench verifiers pass vacuously on text with no whitespace, quotes or bullets. Faithful to
+>    upstream, equal across arms (so Δ is unbiased), but on IFBench the floor sits at or above
+>    the reported seed baselines, so ±0.10 is measured against a much smaller effective range
+>    than [0,1] suggests.
+> 10. **`text_stats` is verdict-equivalent for 57 % of constraint instances.** The paper's rule
+>    ("a field is the oracle iff its verifier has no per-task parameter") is too weak: given the
+>    task statement in the prompt, `words`/`longest_word_letters`/`bullet_lines`/`last_words`
+>    settle `exact_word_count`/`word_max_length`/`num_bullets`/`end_with` by comparison — 4 of 8
+>    families, 165 of 288 instances, at least one on all 64 tasks (only 2 tasks fully). Held-out
+>    scores are uncontaminated (they never see the tool), but the F₁ 0.11→0.83 lift is largely
+>    the tool *replacing* the detector, not a prompt that learned to detect.
+>
+> **Released artifacts do NOT carry the provenance fields.** `genes_changed`, `train_score` and
+> `final_genes` postdate every recorded run and are empty in all 17 result JSONs, so the
+> reporting minimum this study recommends cannot be checked against its own release — only
+> against runs made after it. Runs now also release the per-task held-out score vectors
+> (`seed_heldout_by_task` / `opt_heldout_by_task`), which is what a paired task-level test needs
+> given finding 6.
 >
 > **Retracted:** "no measurable advantage for loop-level optimization"; the null being "tight
 > rather than underpowered" on the strength of [0,0] intervals (those are *ties* — B and D
@@ -52,7 +97,9 @@
 >
 > **Harness now fixed** (component-specific reflective dataset; explicit `module_selector`
 > defaulting to `all`; non-saturating arm C; arm A re-measured; per-gene accepted-change counts,
-> train aggregates and final gene text released per arm). The corrected wiring changes every
+> train aggregates and final gene text released per arm; detector truth now receives the real
+> task and raises on an unmatchable trace; replay fails on a swallowed miss; per-task held-out
+> score vectors released; `--seed-gene GENE=FILE` injects a hand-written gene for ablations). The corrected wiring changes every
 > reflection prompt, hence every cassette key, so **the eleven committed cassettes cannot replay
 > under it** — `verify_reproducibility.py` now reports them as skipped/superseded rather than
 > verified, and `EXPECTED_RUNS = 0` until the study is re-run.

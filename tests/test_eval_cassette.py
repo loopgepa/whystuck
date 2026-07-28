@@ -8,6 +8,8 @@ first. These tests pin that contract with pure fakes — no network, no extra.
 
 from __future__ import annotations
 
+import contextlib
+
 import pytest
 
 from whystuck.eval.cassette import Cassette, CassetteMiss
@@ -38,10 +40,14 @@ def test_replay_miss_raises(tmp_path):
     path = tmp_path / "c.json"
     with Cassette(path, mode="record") as rec:
         rec.wrap(lambda p: "x", name="worker")("seen")
-    with Cassette(path, mode="replay") as rep:
-        complete = rep.wrap(lambda p: "x", name="worker")
-        with pytest.raises(CassetteMiss):
-            complete("never-recorded")
+    # Deliberately NOT a `with` block: this pins the per-call raise on its own. Exiting a
+    # replay context with a swallowed miss is a separate (also-failing) contract, covered
+    # by test_replay_surfaces_a_miss_that_a_consumer_swallowed.
+    rep = Cassette(path, mode="replay")
+    complete = rep.wrap(lambda p: "x", name="worker")
+    with pytest.raises(CassetteMiss):
+        complete("never-recorded")
+    assert rep.misses == ["worker"]  # and it is recorded, not just raised
 
 
 def test_record_dedups_identical_inputs(tmp_path):
@@ -85,3 +91,47 @@ def test_kwargs_participate_in_the_key(tmp_path):
         fn = rep.wrap(lambda m, **kw: None, name="reflection")
         assert fn(msgs, temperature=0.0) == "t=0.0"
         assert fn(msgs, temperature=1.0) == "t=1.0"
+
+
+def test_replay_surfaces_a_miss_that_a_consumer_swallowed(tmp_path):
+    """A swallowed miss must still fail the run.
+
+    GEPA catches exceptions raised inside its reflection LM call ("Per-task reflection
+    failed: ...") and simply proposes nothing, so a `CassetteMiss` there does not
+    propagate: the replay finishes, exits 0, and writes a report in which that arm looks
+    like it accepted no change. Measured on the committed run-11 cassette, exactly that
+    turned seed 1 arm D from 0.665625 into 0.681250 — its own baseline — silently
+    converting "accepted a change that hurt" into "the treatment never applied", which is
+    the one distinction this study exists to make. Replay is documented as strict, so the
+    strictness cannot depend on the caller choosing to propagate.
+    """
+    path = tmp_path / "c.json"
+    Cassette(path, mode="record").wrap(lambda p: "recorded", name="w")("known")
+    with Cassette(path, mode="record") as c:  # persist
+        c.wrap(lambda p: "recorded", name="w")("known")
+
+    with pytest.raises(CassetteMiss, match="did not reproduce"), Cassette(path, "replay") as c:
+        fn = c.wrap(lambda p: "live", name="w")
+        assert fn("known") == "recorded"
+        with contextlib.suppress(CassetteMiss):
+            fn("unknown")  # a consumer swallowing it, exactly as GEPA does
+
+
+def test_replay_with_no_misses_exits_cleanly(tmp_path):
+    path = tmp_path / "c.json"
+    with Cassette(path, mode="record") as c:
+        c.wrap(lambda p: "recorded", name="w")("known")
+    with Cassette(path, mode="replay") as c:
+        assert c.wrap(lambda p: "live", name="w")("known") == "recorded"
+
+
+def test_a_swallowed_miss_does_not_mask_a_real_error(tmp_path):
+    # If the body is already failing, the miss report must not replace that exception.
+    path = tmp_path / "c.json"
+    with Cassette(path, mode="record") as c:
+        c.wrap(lambda p: "recorded", name="w")("known")
+    with pytest.raises(ZeroDivisionError), Cassette(path, "replay") as c:
+        fn = c.wrap(lambda p: "live", name="w")
+        with contextlib.suppress(CassetteMiss):
+            fn("unknown")
+        raise ZeroDivisionError("a real failure, mid-replay")

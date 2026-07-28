@@ -18,14 +18,18 @@ import json
 
 import pytest
 
+from whystuck.core.models import LoopMetrics, LoopTrace
 from whystuck.core.storage import WhyStuckStore
+from whystuck.core.util import mean, utc_now_iso
 from whystuck.eval.benchmark import BenchmarkTask
 from whystuck.eval.ifbench import load_ifbench
 from whystuck.eval.study import (
+    ACTUATOR_GENE,
     GENERATE_GENE,
+    SEED_GENERATE,
     SEED_VERIFY,
     VERIFY_GENE,
-    _heldout_score,
+    _heldout_by_task,
     run_study,
     seed_genome,
 )
@@ -36,6 +40,19 @@ def _ifbench_task(constraint, key):
 
 
 SENTINEL = "OPTIMIZED"
+
+
+def _fake_run_task(genome, task):
+    """A minimal run_task that records a programmatic score, as the real worker does."""
+    return LoopTrace(
+        id=f"r-{task.id}",
+        loop_id=genome.id,
+        created_at=utc_now_iso(),
+        task_id=task.id,
+        final_outcome="success",
+        metrics=LoopMetrics(success=True),
+        metadata={"eval_score": 1.0},
+    )
 
 
 def _fake_complete(prompt: str) -> str:
@@ -243,16 +260,13 @@ def test_heldout_score_of_empty_tasks_raises_not_silent_zero():
     # silent 0.0 would report every arm as catastrophic in the paid report,
     # indistinguishable from a genuine all-fail. Fail loud instead.
     with pytest.raises(ValueError, match="empty"):
-        _heldout_score(seed_genome("x", evolvable=set()), [], lambda g, t: "anything")
+        _heldout_by_task(seed_genome("x", evolvable=set()), [], lambda g, t: "anything")
 
 
 def test_heldout_score_raises_when_trace_lacks_eval_score():
     # A run_task whose trace omits metadata['eval_score'] is misconfigured. Defaulting
     # to 0.0 would silently report every genome as catastrophic (looks like "GEPA made
     # it worse") and write that into the report. Fail loudly instead.
-    from whystuck.core.models import LoopMetrics, LoopTrace
-    from whystuck.core.util import utc_now_iso
-
     def bad_run_task(genome, task):
         return LoopTrace(
             id="r",
@@ -264,7 +278,7 @@ def test_heldout_score_raises_when_trace_lacks_eval_score():
         )
 
     with pytest.raises(ValueError, match="eval_score"):
-        _heldout_score(seed_genome("x", evolvable=set()), [BenchmarkTask(id="t")], bad_run_task)
+        _heldout_by_task(seed_genome("x", evolvable=set()), [BenchmarkTask(id="t")], bad_run_task)
 
 
 def test_b_leaves_verify_gene_at_seed_while_d_evolves_it(tmp_path, tasks):
@@ -672,3 +686,137 @@ def test_arm_a_reports_a_real_second_measurement_not_a_copy(tmp_path, tasks):
     a = res["A"]
     assert a.opt_heldout == a.seed_heldout  # deterministic path agrees
     assert a.genes_changed == ()  # nothing evolved, and it is reported as such
+
+
+# --- hand-written gene overrides (the verifier-ablation condition) -------------
+#
+# C1 asks a question no optimizer run can answer: does a BETTER verify gene move
+# held-out at all? If a hand-written verifier cannot, there is no signal for GEPA
+# to find and the loop-level null is a property of the loop, not of the search.
+# That needs a way to seed a gene with author-supplied text, which is what these
+# pin down.
+
+HAND_VERIFY = "Count the words with a counter. Reply PASS or the exact edit needed."
+
+
+def test_seed_genome_accepts_a_hand_written_gene_override():
+    g = seed_genome("x", evolvable=set(), overrides={VERIFY_GENE: HAND_VERIFY})
+    content = {gene.id: gene.content for gene in g.genes}
+    assert content[VERIFY_GENE] == HAND_VERIFY
+    assert content[GENERATE_GENE] == SEED_GENERATE  # every other gene untouched
+
+
+def test_seed_genome_override_keeps_the_evolvable_flags():
+    # The override changes the STARTING text, not what GEPA may rewrite: an ablation
+    # arm and an optimized arm must still be distinguishable.
+    g = seed_genome("x", evolvable={VERIFY_GENE}, overrides={VERIFY_GENE: HAND_VERIFY})
+    assert next(gene for gene in g.genes if gene.id == VERIFY_GENE).evolvable
+
+
+def test_seed_genome_rejects_an_override_for_a_gene_it_does_not_have():
+    # Silently dropping it would run the UN-ablated condition and bill for it.
+    with pytest.raises(KeyError, match=ACTUATOR_GENE):
+        seed_genome("x", evolvable=set(), overrides={ACTUATOR_GENE: "text"})
+
+
+def test_seed_genome_rejects_a_blank_override():
+    # A blank verify gene does not disable the critique — it sends the critique LLM a
+    # prompt with no rubric, which scores like a bad rubric. Fail loud instead.
+    with pytest.raises(ValueError, match="blank"):
+        seed_genome("x", evolvable=set(), overrides={VERIFY_GENE: "  \n "})
+
+
+def test_gene_override_reaches_the_critique_prompt(tmp_path, tasks):
+    """E2E: the injected text must actually be the head of the critique prompt.
+
+    This is the claim C1's dollars rest on. `make_self_refine_run_task` builds the
+    critique as `f"{ver}\\n\\n# Task..."`, so if the override does not arrive here it
+    would buy a re-measurement of the seed condition under a different filename.
+    """
+    train, heldout = tasks
+    prompts: list[str] = []
+
+    def recording_complete(prompt: str) -> str:
+        prompts.append(prompt)
+        return "x x x"  # never PASS, so the critique always runs
+
+    run_study(
+        WhyStuckStore(tmp_path / "store"),
+        complete=recording_complete,
+        reflection_lm="fake",
+        train=train,
+        heldout=heldout,
+        arms=("A",),
+        gene_overrides={VERIFY_GENE: HAND_VERIFY},
+        _optimize=_fake_optimize,
+    )
+    critiques = [p for p in prompts if "# Draft answer" in p]
+    assert critiques, "no critique prompt was built"
+    assert all(p.startswith(HAND_VERIFY) for p in critiques)
+    assert not any(SEED_VERIFY in p for p in prompts)  # the seed rubric is gone entirely
+
+
+def test_gene_override_is_the_baseline_for_genes_changed(tmp_path, tasks):
+    # Provenance must compare against the OVERRIDDEN seed, not the module constant,
+    # or an ablation arm would report its own starting text as an optimizer change.
+    train, heldout = tasks
+    res = run_study(
+        WhyStuckStore(tmp_path / "store"),
+        complete=_fake_complete,
+        reflection_lm="fake",
+        train=train,
+        heldout=heldout,
+        arms=("D",),
+        gene_overrides={VERIFY_GENE: HAND_VERIFY},
+        _optimize=lambda **kw: {"best_candidate": dict(kw["seed_candidate"])},  # accepts nothing
+    )
+    assert res["D"].genes_changed == ()
+
+
+# --- per-task held-out scores -------------------------------------------------
+#
+# The aggregate mean cannot support the analysis these runs are for. IFBench seeds
+# re-partition ONE 62-row pool, so any two seeds share ~50% of their held-out tasks
+# (measured: 15.4 of 31) — per-seed results are correlated pseudo-replicates, and a
+# sign test over seeds would assume an independence that does not hold. The unit that
+# IS independent is the task, so the per-task scores have to survive into the output.
+
+
+def test_heldout_by_task_returns_one_score_per_task(tmp_path, tasks):
+    _, heldout = tasks
+    got = _heldout_by_task(seed_genome("x", evolvable=set()), heldout, _fake_run_task)
+    assert set(got) == {t.id for t in heldout}
+    assert all(0.0 <= v <= 1.0 for v in got.values())
+
+
+def test_heldout_by_task_rejects_duplicate_task_ids(tmp_path):
+    # A duplicate id would silently collapse two tasks into one dict entry and change the
+    # reported mean, with nothing in the output showing that fewer tasks were scored.
+    dup = [
+        BenchmarkTask(id="same", payload={"goal": "a"}),
+        BenchmarkTask(id="same", payload={"goal": "b"}),
+    ]
+    with pytest.raises(ValueError, match="duplicate"):
+        _heldout_by_task(seed_genome("x", evolvable=set()), dup, _fake_run_task)
+
+
+def test_arm_result_carries_per_task_heldout_scores(tmp_path, tasks):
+    train, heldout = tasks
+    res = run_study(
+        WhyStuckStore(tmp_path / "store"),
+        complete=_fake_complete,
+        reflection_lm="fake",
+        train=train,
+        heldout=heldout,
+        arms=("A", "D"),
+        _optimize=_fake_optimize,
+    )
+    ids = {t.id for t in heldout}
+    for arm in ("A", "D"):
+        r = res[arm]
+        assert set(r.seed_heldout_by_task) == ids
+        assert set(r.opt_heldout_by_task) == ids
+        # The reported aggregate must be exactly the mean of the released per-task scores,
+        # or the two halves of the artifact disagree.
+        assert r.seed_heldout == pytest.approx(mean(list(r.seed_heldout_by_task.values())))
+        assert r.opt_heldout == pytest.approx(mean(list(r.opt_heldout_by_task.values())))

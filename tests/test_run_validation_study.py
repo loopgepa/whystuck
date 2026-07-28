@@ -344,3 +344,99 @@ def test_feedback_level_does_not_change_the_cost_estimate():
         _, out, _ = _run([*base, "--feedback-level", level])
         ests[level] = _estimate_from(out)
     assert ests["lo"] == ests["mid"] == ests["hi"]
+
+
+# --- hand-written gene overrides (--seed-gene) --------------------------------
+#
+# The verifier ablation (C1) needs author-supplied gene text: does a BETTER
+# hand-written verify gene move held-out at all? Text comes from a FILE, not the
+# command line — a rubric is multi-line, shell quoting mangles it silently, and the
+# file is a committable record of the condition that was actually run.
+
+
+def _gene_file(tmp_path, text="Count the words, then reply PASS or the exact edit."):
+    p = tmp_path / "verify.txt"
+    p.write_text(text, encoding="utf-8")
+    return p
+
+
+def test_parse_gene_overrides_reads_the_text_from_the_file(tmp_path):
+    cli = _load_cli()
+    f = _gene_file(tmp_path)
+    got = cli._parse_gene_overrides([f"ensure_correct={f}"], active=["generate", "ensure_correct"])
+    assert got == {"ensure_correct": f.read_text(encoding="utf-8")}
+
+
+def test_parse_gene_overrides_rejects_a_spec_without_an_equals(tmp_path):
+    cli = _load_cli()
+    with pytest.raises(ValueError, match="GENE=FILE"):
+        cli._parse_gene_overrides(["ensure_correct"], active=["ensure_correct"])
+
+
+def test_parse_gene_overrides_rejects_a_gene_absent_from_this_run(tmp_path):
+    # `actuator` exists only under --actuator. Accepting it there would run the
+    # UN-ablated condition and bill for it, so name the genes that are actually live.
+    cli = _load_cli()
+    f = _gene_file(tmp_path)
+    with pytest.raises(ValueError, match="actuator"):
+        cli._parse_gene_overrides([f"actuator={f}"], active=["generate", "ensure_correct"])
+
+
+def test_parse_gene_overrides_names_the_available_genes_in_the_error(tmp_path):
+    cli = _load_cli()
+    f = _gene_file(tmp_path)
+    with pytest.raises(ValueError, match="ensure_correct"):
+        cli._parse_gene_overrides([f"typo={f}"], active=["generate", "ensure_correct"])
+
+
+def test_parse_gene_overrides_rejects_a_missing_file(tmp_path):
+    cli = _load_cli()
+    with pytest.raises(ValueError, match="no such file"):
+        cli._parse_gene_overrides(
+            [f"ensure_correct={tmp_path / 'nope.txt'}"], active=["ensure_correct"]
+        )
+
+
+def test_parse_gene_overrides_rejects_a_blank_file(tmp_path):
+    cli = _load_cli()
+    f = _gene_file(tmp_path, text="   \n\n")
+    with pytest.raises(ValueError, match="blank"):
+        cli._parse_gene_overrides([f"ensure_correct={f}"], active=["ensure_correct"])
+
+
+def test_parse_gene_overrides_rejects_the_same_gene_twice(tmp_path):
+    # Last-wins would silently pick one of two conditions the operator asked for.
+    cli = _load_cli()
+    a, b = _gene_file(tmp_path, "first"), tmp_path / "second.txt"
+    b.write_text("second", encoding="utf-8")
+    with pytest.raises(ValueError, match="twice"):
+        cli._parse_gene_overrides(
+            [f"ensure_correct={a}", f"ensure_correct={b}"], active=["ensure_correct"]
+        )
+
+
+def test_seed_gene_dry_run_reports_the_condition(tmp_path):
+    # The operator must be able to see WHICH text they are about to pay to measure.
+    f = _gene_file(tmp_path)
+    code, out, _ = _run(["--arms", "A", "--seeds", "0", "--seed-gene", f"ensure_correct={f}"])
+    assert code == 0
+    assert "ensure_correct" in out
+    assert "Count the words" in out
+
+
+def test_seed_gene_for_an_inactive_gene_is_refused_before_spending(tmp_path):
+    f = _gene_file(tmp_path)
+    code, _, err = _run(["--arms", "A", "--seeds", "0", "--seed-gene", f"actuator={f}"])
+    assert code == 2
+    assert "actuator" in err
+
+
+def test_seed_gene_does_not_change_the_cost_estimate(tmp_path):
+    # Same prompts, same call counts: only the text changes. A different estimate would
+    # mean the flag altered the loop shape, which is not what an ablation may do.
+    f = _gene_file(tmp_path)
+    base = _estimate_from(_run(["--arms", "A", "--seeds", "0"])[1])
+    with_override = _estimate_from(
+        _run(["--arms", "A", "--seeds", "0", "--seed-gene", f"ensure_correct={f}"])[1]
+    )
+    assert base == with_override

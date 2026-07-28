@@ -11,13 +11,17 @@ from __future__ import annotations
 import pathlib
 import sys
 
+import pytest
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
 
 from analyze_deltas import (  # noqa: E402
     delta_arm,
     delta_between,
     exact_resample_ci,
+    heldout_overlap,
     sign_test_p,
+    task_set_of,
 )
 
 D = "docs"
@@ -108,3 +112,47 @@ def test_exact_resample_ci_is_deterministic_and_ordered():
     assert a == b
     m, lo, hi = a
     assert lo <= m <= hi
+
+
+# --- seed independence -------------------------------------------------------
+#
+# Both statistics above resample PER-SEED differences, so both assume seeds are
+# independent replications. For the vendored task sets they are not: the loader shuffles
+# a fixed file, so a seed only picks a partition and two seeds share ~half their held-out
+# tasks. Correlated units make the interval too narrow and the sign-test p too small,
+# both toward overstating significance, so the analysis has to know which is which.
+
+
+def test_task_set_is_resolved_for_every_released_run():
+    import glob
+    import json
+
+    for path in sorted(glob.glob(f"{D}/validation-study*.json")):
+        with open(path, encoding="utf-8") as fh:
+            meta = json.load(fh)["meta"]
+        assert task_set_of(meta) in {"ifbench", "multi", "multi-hard", "code", "bcb"}, path
+
+
+def test_task_set_prefers_the_explicit_key_over_the_dataset_string():
+    assert task_set_of({"task_set": "bcb", "dataset": "IFBench"}) == "bcb"
+
+
+def test_task_set_falls_back_to_the_dataset_string_for_older_runs():
+    # The earliest runs predate meta["task_set"]; `dataset` is present in all of them.
+    assert task_set_of({"dataset": "IFBench"}) == "ifbench"
+    assert task_set_of({"dataset": "multi-constraint-hard (IFEval-style)"}) == "multi-hard"
+    assert task_set_of({"dataset": "multi-constraint (IFEval-style)"}) == "multi"
+
+
+def test_task_set_raises_on_an_unrecognized_dataset():
+    # Guessing would silently grant replication to a run that may not have it.
+    with pytest.raises(ValueError, match="cannot determine"):
+        task_set_of({"dataset": "some new benchmark"})
+
+
+def test_measured_overlap_matches_the_documented_split_behaviour():
+    # The claim the correction rests on, measured rather than asserted.
+    assert heldout_overlap("multi-hard", [0, 1, 2]) == 0.0
+    for ts in ("ifbench", "code", "bcb"):
+        frac = heldout_overlap(ts, [0, 1, 2])
+        assert 0.35 < frac < 0.65, (ts, frac)

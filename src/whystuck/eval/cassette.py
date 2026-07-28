@@ -60,6 +60,13 @@ class Cassette:
         self.path = Path(path)
         self.mode = mode
         self._entries: dict[str, dict[str, Any]] = {}
+        #: Names of replay-mode calls that had no recorded output. Tracked separately from
+        #: the raise because a consumer may swallow it: GEPA catches exceptions from its
+        #: reflection LM and simply proposes nothing, so a missed reflection call lets the
+        #: replay finish, exit 0, and report that arm as having accepted no change. `__exit__`
+        #: turns any such miss back into a failure, so replay's documented strictness does
+        #: not depend on every caller choosing to propagate.
+        self.misses: list[str] = []
         if self.mode == "replay":
             self._load()
         elif self.path.exists():
@@ -91,6 +98,7 @@ class Cassette:
             if entry is not None:
                 return str(entry["output"])
             if self.mode == "replay":
+                self.misses.append(name)
                 raise CassetteMiss(f"no recorded output for {name}(*{args!r}, **{kwargs!r})")
             output = str(fn(*args, **kwargs))
             self._entries[key] = {"name": name, "output": output}
@@ -110,3 +118,15 @@ class Cassette:
     ) -> None:
         if self.mode == "record":
             self._persist()
+            return
+        # Report swallowed misses — but never in place of an exception already on its way
+        # out, which would hide the real failure behind a symptom of it.
+        if exc_type is None and self.misses:
+            surfaces = ", ".join(sorted(set(self.misses)))
+            raise CassetteMiss(
+                f"{len(self.misses)} call(s) on surface(s) [{surfaces}] had no recorded "
+                f"output in {self.path}, and the error was swallowed by the caller: this "
+                "replay did not reproduce the recorded run. Re-record, or match the "
+                "configuration the cassette was recorded under (--module-selector, and any "
+                "lever that changes a prompt)."
+            )

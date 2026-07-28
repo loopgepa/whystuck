@@ -158,9 +158,13 @@ def plan_study_calls(
       train set (`optimize_loop`'s post-search objectives/frontier pass, which
       re-invokes the worker per train task), and `n_heldout` to score the
       winner on held-out;
-    - arm C's optimization AND its post-search re-scoring use the *command*
-      worker (free, not counted); it still scores seed + winner on held-out via
-      the LLM worker → `2 * n_heldout`.
+    - arm C's optimization AND its post-search re-scoring use the fixed-draft
+      worker (no LLM call — it grades one constant string, so it is free and not
+      counted); it still scores seed + winner on held-out via the LLM worker →
+      `2 * n_heldout`.
+    - arm A scores held-out twice (the determinism check), but the second pass issues
+      byte-identical prompts and the cassette is content-addressed with record-mode
+      dedup, so it bills nothing — which is why arm A is priced at ONE `n_heldout`.
 
     `worker_calls_per_task` converts task-evals to LLM calls: the self-refine loop
     worker makes up to `1 + 2 * loop_max_retries` calls per eval (generate + each

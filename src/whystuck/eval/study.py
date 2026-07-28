@@ -21,8 +21,9 @@ Each arm's winning genome is scored on the held-out split with `ifbench_score`
 (graded fraction) via the LLM worker — for *every* arm, including C. B/D train on
 that *same* fractional `ifbench_score` (aligning the training objective with the
 reported metric) plus `ifbench_feedback` (per-constraint prose GEPA reflects on);
-arm C's training signal is the command exit status (genome-blind), independent of
-IFBench.
+arm C trains on the same real metric applied to a CONSTANT draft, so its signal is
+genome-blind while still leaving headroom (an exit-status control scored a perfect
+1.0 and could not fail).
 
 The study drives the low-level `optimize_loop` seam directly (not the MCP
 wrappers) so it can pass explicit train tasks and inject `_optimize` for offline
@@ -32,8 +33,8 @@ tests. Requires `whystuck[eval]` + real models only for the live run; with
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from dataclasses import dataclass
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass, field
 from typing import Any
 
 from whystuck.core.models import (
@@ -102,12 +103,18 @@ ARM_EVOLVABLE: dict[str, set[str]] = {a: arm_evolvable(a) for a in ARMS}
 class ArmResult:
     """One arm's outcome, including the provenance needed to interpret it.
 
-    The last three fields exist because held-out scores alone cannot distinguish
+    The provenance fields exist because held-out scores alone cannot distinguish
     "the extra evolvable gene was optimized and did not help" from "the optimizer
     never accepted a change to it, so the treatment was never applied". Reporting
     `genes_changed` makes that checkable by a reader; `train_score` makes the
     train-split over-fitting explanation falsifiable (it was previously computed and
     discarded); `final_genes` releases the text that actually produced the score.
+
+    The two `*_by_task` maps release the per-task score vectors behind the two means.
+    They are what makes a paired TASK-level test possible after the fact, which matters
+    because the seeds are not independent: IFBench's loader re-partitions one 62-row
+    pool, so any two seeds share about half their held-out tasks. Both were already
+    computed and thrown away.
     """
 
     name: str
@@ -119,6 +126,8 @@ class ArmResult:
     train_score: float | None = None
     genes_changed: tuple[str, ...] = ()
     final_genes: dict[str, str] | None = None
+    seed_heldout_by_task: dict[str, float] = field(default_factory=dict)
+    opt_heldout_by_task: dict[str, float] = field(default_factory=dict)
 
 
 def seed_genome(
@@ -127,6 +136,7 @@ def seed_genome(
     evolvable: set[str],
     include_plan: bool = False,
     include_actuator: bool = False,
+    overrides: Mapping[str, str] | None = None,
 ) -> LoopGenome:
     """The shared seed genome; `evolvable` marks which genes GEPA may change.
 
@@ -136,6 +146,15 @@ def seed_genome(
     loop runs plan→generate→critique→refine (the complexity lever). `include_actuator`
     instead adds the `actuator` gene, an LLM step that turns the test signal into the
     repair guidance fed to refine (the actuator experiment).
+
+    `overrides` replaces a gene's SEED text with author-supplied text, leaving the
+    evolvable flags alone. This is the ablation seam: the study can measure whether a
+    *hand-written* better gene moves held-out at all, which is logically prior to asking
+    whether an optimizer can find one — if no hand-written verifier helps, there is no
+    signal for GEPA to search for and a loop-level null says nothing about the search.
+    Applied to every arm, so the "identical content across arms" invariant holds. An
+    override naming a gene this genome does not carry, or supplying blank text, raises:
+    both would silently run the un-ablated condition and bill for it.
     """
     genes = [
         LoopGene(
@@ -173,26 +192,60 @@ def seed_genome(
                 evolvable=ACTUATOR_GENE in evolvable,
             )
         )
+    if overrides:
+        present = {g.id for g in genes}
+        unknown = sorted(set(overrides) - present)
+        if unknown:
+            raise KeyError(
+                f"gene override(s) {unknown} name no gene in this genome (has {sorted(present)}); "
+                "enable the matching lever (--plan-gene / --actuator) or fix the id — silently "
+                "ignoring the override would run the un-ablated condition"
+            )
+        blank = sorted(gid for gid, text in overrides.items() if not text.strip())
+        if blank:
+            raise ValueError(
+                f"gene override(s) {blank} are blank; a blank gene does not disable its step, "
+                "it sends the model a prompt with no instruction, which scores like a bad one"
+            )
+        # Validate everything before mutating, so a rejected override never leaves a
+        # half-applied genome behind for a caller that catches the error.
+        for gene in genes:
+            if gene.id in overrides:
+                gene.content = overrides[gene.id]
     return LoopGenome(id=loop_id, name="IFBench study loop", genes=genes)
 
 
-def _heldout_score(genome: LoopGenome, tasks: list[BenchmarkTask], run_task: RunTask) -> float:
-    """Mean graded IFBench score of the genome on `tasks`, via the SAME loop worker
-    used for training — so held-out and training measure the identical thing (the
-    loop's final programmatic score), with no single-shot/loop mismatch.
+def _heldout_by_task(
+    genome: LoopGenome, tasks: list[BenchmarkTask], run_task: RunTask
+) -> dict[str, float]:
+    """Graded score PER TASK for the genome on `tasks`, via the SAME loop worker used for
+    training — so held-out and training measure the identical thing (the loop's final
+    programmatic score), with no single-shot/loop mismatch.
 
-    Raises if a trace lacks ``metadata['eval_score']`` OR if ``tasks`` is empty: a
-    silent 0.0 in either case would report a misconfigured run (e.g. n_heldout=0, or
-    a run_task that doesn't record the score) as a catastrophic all-fail genome and
-    bury it in the paid report, rather than surfacing the misconfiguration."""
+    Per-task rather than just the mean because the mean cannot support the analysis these
+    runs exist for. IFBench's seeds re-partition ONE 62-row pool, so two seeds share about
+    half their held-out tasks and per-seed results are correlated pseudo-replicates; the
+    independent unit is the task. Releasing the per-task vector makes paired task-level
+    tests (sign test, exact bootstrap, TOST) possible after the fact, at no extra cost.
+
+    Raises if a trace lacks ``metadata['eval_score']``, if ``tasks`` is empty, or if two
+    tasks share an id: a silent 0.0 would report a misconfigured run (e.g. n_heldout=0, or
+    a run_task that doesn't record the score) as a catastrophic all-fail genome, and a
+    duplicate id would silently collapse two tasks into one and shift the reported mean
+    with nothing in the output revealing that fewer tasks were scored."""
     if not tasks:
         raise ValueError(
-            f"_heldout_score called with an empty task list for genome {genome.id!r}; "
+            f"_heldout_by_task called with an empty task list for genome {genome.id!r}; "
             "returning 0.0 would masquerade as a genuine all-fail — check n_heldout / "
             "pool sizing upstream"
         )
-    scores: list[float] = []
+    scores: dict[str, float] = {}
     for t in tasks:
+        if t.id in scores:
+            raise ValueError(
+                f"duplicate task id {t.id!r} in the held-out split; one score would be "
+                "discarded and the reported mean would silently cover fewer tasks"
+            )
         trace = run_task(genome, t)
         raw = trace.metadata.get("eval_score")
         if raw is None:
@@ -200,8 +253,8 @@ def _heldout_score(genome: LoopGenome, tasks: list[BenchmarkTask], run_task: Run
                 f"trace {trace.id!r} has no metadata['eval_score']; run_task is misconfigured "
                 "(the self-refine worker must record the programmatic score there)"
             )
-        scores.append(float(raw))
-    return mean(scores)
+        scores[t.id] = float(raw)
+    return scores
 
 
 #: The constant answer the fixed-draft control emits. Deliberately plausible-but-wrong:
@@ -262,6 +315,7 @@ def run_study(
     feedback_fn: Feedback = ifbench_feedback,
     use_plan_gene: bool = False,
     use_actuator: bool = False,
+    gene_overrides: Mapping[str, str] | None = None,
     stats_fn: Callable[[str], str] | None = None,
     exec_feedback: Feedback | None = None,
     critique_complete: Complete | None = None,
@@ -275,12 +329,14 @@ def run_study(
     `complete` is the (cassette-wrapped, for the live run) LLM worker, driven as a
     generate→critique→refine loop (`loop_max_retries` rounds); `reflection_lm` is
     passed through to GEPA. Arm C is the genome-blind control (a constant draft
-    scored by the real metric).
-    commands for arm C. `max_candidate_proposals` caps GEPA proposals per arm (one
-    reflection LM call each), making the reflection budget a hard bound rather than
+    scored by the real metric). `max_candidate_proposals` caps GEPA proposals per arm
+    (one reflection LM call each), making the reflection budget a hard bound rather than
     an estimate. `score_fn`/`feedback_fn` select the task set's scorer/feedback
     (ifbench single-constraint by default; pass the multi_constraint pair for the
-    composable multi-constraint study). Inject `_optimize` to bypass GEPA offline.
+    composable multi-constraint study). `gene_overrides` replaces seed gene text with
+    author-supplied text in every arm (the hand-written-gene ablation; see
+    `seed_genome`), which also becomes the baseline `genes_changed` is measured against.
+    Inject `_optimize` to bypass GEPA offline.
     """
     # One loop worker for BOTH training (B/D) and held-out scoring (all arms), so
     # the two measure the identical thing. The critique step is driven by the
@@ -307,9 +363,11 @@ def run_study(
             evolvable=evolvable,
             include_plan=use_plan_gene,
             include_actuator=use_actuator,
+            overrides=gene_overrides,
         )
         store.save_loop(genome)
-        seed_h = _heldout_score(genome, heldout, worker_run_task)
+        seed_by_task = _heldout_by_task(genome, heldout, worker_run_task)
+        seed_h = mean(list(seed_by_task.values()))
         evolvable_genes = tuple(g.id for g in genome.genes if g.evolvable)
 
         if arm == "A":
@@ -318,9 +376,17 @@ def run_study(
             # unfalsifiable. The two measurements agree whenever the path is deterministic
             # (under cassette replay, by construction), so this is a determinism check —
             # it is NOT the flatness control the earlier write-up claimed.
-            opt_a = _heldout_score(genome, heldout, worker_run_task)
+            opt_a_by_task = _heldout_by_task(genome, heldout, worker_run_task)
+            opt_a = mean(list(opt_a_by_task.values()))
             results[arm] = ArmResult(
-                arm, evolvable_genes, seed_h, opt_a, round(opt_a - seed_h, 4), None
+                arm,
+                evolvable_genes,
+                seed_h,
+                opt_a,
+                round(opt_a - seed_h, 4),
+                None,
+                seed_heldout_by_task=seed_by_task,
+                opt_heldout_by_task=opt_a_by_task,
             )
             continue
 
@@ -346,7 +412,8 @@ def run_study(
             _optimize=_optimize,
         )
         winner = store.load_variant(genome.id, out["variant_id"])
-        opt_h = _heldout_score(winner.genome, heldout, worker_run_task)
+        opt_by_task = _heldout_by_task(winner.genome, heldout, worker_run_task)
+        opt_h = mean(list(opt_by_task.values()))
         # Provenance: which genes the optimizer actually changed, and their final text.
         # Compared against THIS arm's own seed genome (identical content across arms),
         # so an empty tuple means "the optimizer accepted nothing" — the difference
@@ -372,5 +439,7 @@ def run_study(
             train_score=out.get("best_score"),
             genes_changed=changed,
             final_genes=final_genes,
+            seed_heldout_by_task=seed_by_task,
+            opt_heldout_by_task=opt_by_task,
         )
     return results

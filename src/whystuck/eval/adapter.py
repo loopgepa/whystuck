@@ -124,6 +124,16 @@ class LoopGenomeAdapter:
         self.run_task = run_task
         self.verify_gene = verify_gene
         self.verify_truth = verify_truth
+        # Tasks seen by `evaluate`, keyed by id, so `_detector_records` can score a
+        # judged draft against the REAL task. GEPA hands `make_reflective_dataset` an
+        # `eval_batch` carrying only traces (and re-wraps ours in its own
+        # `EvaluationBatch`, dropping any field we add), and a `LoopTrace` records the
+        # task's id and summary but not its payload — so the task itself has to be kept
+        # here or the truth signal has nothing to score against. Keyed rather than
+        # positional because GEPA's multi-task sampling evaluates every parent minibatch
+        # BEFORE reflecting on each in turn, so "the last batch" is the wrong batch for
+        # all but one of them.
+        self._tasks: dict[str, BenchmarkTask] = {}
 
     def evaluate(
         self, batch: list[BenchmarkTask], candidate: dict[str, str], capture_traces: bool = False
@@ -133,6 +143,20 @@ class LoopGenomeAdapter:
         scores: list[float] = []
         traces: list[LoopTrace] = []
         for task in batch:
+            # Ids are unique within a split, but NOT across configurations: the
+            # multi_constraint generator emits index-based ids, so two seeds produce the
+            # same id with different constraints. One adapter only ever sees one split, so
+            # this cannot fire in the current wiring — and if it ever did, a silent
+            # overwrite would score drafts against the wrong task's constraints, which is
+            # invisible in the output. Repeats of an identical task are normal (GEPA
+            # re-evaluates the same minibatch each iteration) and pass through.
+            known = self._tasks.get(task.id)
+            if known is not None and known != task:
+                raise ValueError(
+                    f"two different tasks share id {task.id!r}; the verify gene's reflection "
+                    "records would be scored against the wrong task's constraints"
+                )
+            self._tasks[task.id] = task
             trace = self.run_task(genome, task)
             outputs.append(_worker_output(trace))
             scores.append(_score_of(trace))
@@ -178,6 +202,25 @@ class LoopGenomeAdapter:
                 out[component] = records
         return out
 
+    def _task_for(self, trace: LoopTrace) -> BenchmarkTask:
+        """The benchmark task this trace came from, for scoring the drafts it judged.
+
+        Raises rather than substituting a stand-in: a payload-less task makes every
+        programmatic scorer return 0.0 by design (an unscored task is not a vacuous
+        win), which silently turns the detector's truth signal into the constant
+        "nothing was satisfied" — labelling every PASS a false pass and every rejection
+        correct, i.e. a directional bias toward a verifier that never accepts. That is
+        indistinguishable from a real result in the output, so it must be loud.
+        """
+        task = self._tasks.get(trace.task_id or "")
+        if task is None:
+            raise KeyError(
+                f"trace {trace.id!r} reports task_id {trace.task_id!r}, which `evaluate` "
+                "never saw; the verify gene's reflection records cannot be scored without "
+                "the task's payload (run_task must set task_id from the task it was given)"
+            )
+        return task
+
     def _detector_records(self, traces: list[LoopTrace]) -> list[dict[str, Any]]:
         """Reflection records for the VERIFY gene: its own verdict, scored against truth.
 
@@ -193,8 +236,9 @@ class LoopGenomeAdapter:
         records: list[dict[str, Any]] = []
         for trace in traces:
             task_text = trace.task_summary or trace.task_id or ""
+            task = self._task_for(trace)
             for draft, verdict in _critique_steps(trace):
-                satisfied, why = self.verify_truth(draft, BenchmarkTask(id=trace.task_id or ""))
+                satisfied, why = self.verify_truth(draft, task)
                 said_pass = verdict.strip().upper().startswith("PASS")
                 if said_pass and not satisfied:
                     error = (

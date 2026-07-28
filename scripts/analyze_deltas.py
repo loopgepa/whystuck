@@ -21,12 +21,91 @@ import json
 import math
 from statistics import mean
 
+from whystuck.eval.benchmark import seeds_are_independent
+
 DOCS = "docs"
+
+#: meta["dataset"] prefix -> task set, for runs recorded before meta["task_set"] existed.
+#: Prefix-matched (the strings carry parenthetical detail), longest first so
+#: "multi-constraint-hard" cannot be swallowed by "multi-constraint".
+_DATASET_TO_TASK_SET = {
+    "multi-constraint-hard": "multi-hard",
+    "multi-constraint": "multi",
+    "BigCodeBench-Hard": "bcb",
+    "MBPP+": "code",
+    "IFBench": "ifbench",
+}
 
 
 def _runs(path: str) -> list[dict]:
     with open(path, encoding="utf-8") as fh:
         return json.load(fh)["runs"]
+
+
+def _meta(path: str) -> dict:
+    with open(path, encoding="utf-8") as fh:
+        return json.load(fh)["meta"]
+
+
+def task_set_of(meta: dict) -> str:
+    """The task set a released run used, from its metadata.
+
+    Prefers `meta["task_set"]`; the earliest runs predate that key, so it falls back to
+    the `dataset` string, which every released run carries. Raises on anything it cannot
+    place: the answer decides whether a cross-seed statistic may be read as replication,
+    and guessing would hand a new task set the permissive answer by default.
+    """
+    explicit = meta.get("task_set")
+    if explicit:
+        return str(explicit)
+    dataset = str(meta.get("dataset", ""))
+    for prefix, task_set in sorted(_DATASET_TO_TASK_SET.items(), key=lambda kv: -len(kv[0])):
+        if dataset.startswith(prefix):
+            return task_set
+    raise ValueError(
+        f"cannot determine the task set for a run whose dataset is {dataset!r} and which has "
+        "no meta['task_set']; add it to _DATASET_TO_TASK_SET after checking whether its "
+        "loader regenerates the task pool per seed"
+    )
+
+
+def heldout_overlap(task_set: str, seeds: list[int], n_heldout: int | None = None) -> float:
+    """Mean pairwise fraction of held-out TASKS shared between seeds, measured.
+
+    Compares task CONTENT, not ids: the multi_constraint generator numbers tasks by index,
+    so two seeds reuse the same ids for entirely different tasks (measured: 15-17 of 32 ids
+    shared, 0 payloads shared). Keying on ids would report those runs as ~50% overlapping
+    when they in fact share nothing, i.e. exactly backwards.
+    """
+    from whystuck.eval.bcb_bench import load_bcb_tasks
+    from whystuck.eval.code_bench import load_code_tasks
+    from whystuck.eval.ifbench import load_ifbench
+    from whystuck.eval.multi_constraint import load_multi_constraint
+
+    def load(seed: int) -> set[str]:
+        if task_set in ("multi", "multi-hard"):
+            pool = max(64, 2 * (n_heldout or 32) + 2)
+            tasks = load_multi_constraint(
+                "heldout", seed=seed, n=n_heldout, pool=pool, hard=task_set == "multi-hard"
+            )
+        elif task_set == "bcb":
+            tasks = load_bcb_tasks("heldout", seed=seed, n=n_heldout)
+        elif task_set == "code":
+            tasks = load_code_tasks("heldout", seed=seed, n=n_heldout)
+        else:
+            tasks = load_ifbench(split="heldout", seed=seed, n=n_heldout)
+        return {json.dumps(t.payload, sort_keys=True, default=str) for t in tasks}
+
+    splits = {s: load(s) for s in seeds}
+    sizes = [len(v) for v in splits.values()]
+    if len(seeds) < 2 or not all(sizes):
+        return 0.0
+    fracs = [
+        len(splits[a] & splits[b]) / min(len(splits[a]), len(splits[b]))
+        for i, a in enumerate(seeds)
+        for b in seeds[i + 1 :]
+    ]
+    return mean(fracs)
 
 
 def delta_arm(
@@ -109,13 +188,30 @@ _NULL_RUNS = [
 ]
 
 
-def _describe(label: str, d: list[float]) -> str:
+def _seed_caveat(path: str) -> str:
+    """`` for a run whose seeds are independent draws, else a marker naming the measured
+    overlap. NOT cosmetic: the interval and the sign-test p on that line both assume
+    independent replications, and a shared task pool breaks that assumption in the
+    direction that overstates significance."""
+    meta = _meta(path)
+    task_set = task_set_of(meta)
+    if seeds_are_independent(task_set):
+        return ""
+    seeds = list(meta.get("seeds") or [])
+    overlap = heldout_overlap(task_set, seeds, meta.get("n_heldout"))
+    return f"  [!] seeds share {overlap:.0%} of held-out tasks — CI/p ANTI-CONSERVATIVE"
+
+
+def _describe(label: str, d: list[float], path: str | None = None) -> str:
     """One line per run: point estimate, interval, sign test, and degenerate-seed count.
 
     `ties` is the load-bearing caveat. A tie means B and D optimized to byte-identical
     genomes, so the cassette served both arms the same completion and the 0.0 is forced.
     Reporting it separates "the treatment was applied and did nothing" from "the treatment
     was never applied", which a bare interval of [0,0] silently conflates.
+
+    `path` adds the seed-independence marker. Optional only because two callers compare
+    ACROSS runs; every single-run line passes it.
     """
     m, lo, hi = exact_resample_ci(d)
     ties = sum(1 for x in d if x == 0.0)
@@ -123,14 +219,26 @@ def _describe(label: str, d: list[float]) -> str:
     return (
         f"{label}: Δ={m:+.3f}  seeds={seeds}  95%CI[{lo:+.3f},{hi:+.3f}]"
         f"  sign p={sign_test_p(d):.2f}  ties={ties}/{len(d)}"
+        f"{_seed_caveat(path) if path else ''}"
     )
+
+
+_SEED_LEGEND = (
+    "[!] = this run's loader shuffles a FIXED vendored pool, so a seed chooses a partition\n"
+    "    rather than a fresh sample and the per-seed differences are positively correlated.\n"
+    "    The exact-resample CI and the sign test both assume independent replications, so\n"
+    "    on these lines both are anti-conservative (interval too narrow, p too small) and\n"
+    "    must not be read as replication. multi/multi-hard regenerate their pool per seed\n"
+    "    and are unaffected. A correct interval needs the PER-TASK scores, which runs now\n"
+    "    release (ArmResult.opt_heldout_by_task) but none of these recorded ones carry."
+)
 
 
 def main() -> int:  # pragma: no cover - CLI convenience
     print("=== null: Δ(D−B) per-seed, mean, exact-resample 95% CI, sign test, ties ===")
     print("(ties = seeds where B and D produced byte-identical genomes: forced zeros)")
     for label, path in _NULL_RUNS:
-        print(_describe(label, delta_arm(path)))
+        print(_describe(label, delta_arm(path), path))
     print("\n=== effect: Δ(hi−lo) actionability, paired by seed (n=3) ===")
     print("NOTE: measured under --oracle-critique, which gates on the TRUE metric at")
     print("held-out scoring time too. This is a ceiling result: it says richer repair")
@@ -144,6 +252,7 @@ def main() -> int:  # pragma: no cover - CLI convenience
     print(
         f"Δ(hi−lo)={m:+.3f}  seeds={seeds}  95%CI[{lo:+.3f},{hi:+.3f}]  ({excl})"
         f"  sign p={sign_test_p(d):.2f}"
+        f"{_seed_caveat(f'{DOCS}/validation-study-fbacthi.json')}"
     )
 
     dc = delta_between(
@@ -153,7 +262,10 @@ def main() -> int:  # pragma: no cover - CLI convenience
     mc, loc, hic = exact_resample_ci(dc)
     exclc = "excludes 0" if loc > 0 or hic < 0 else "includes 0 (suggestive, not significant)"
     seedsc = [f"{x:+.3f}" for x in dc]
-    print(f"Δ(hi−lo)={mc:+.3f}  seeds={seedsc}  95%CI[{loc:+.3f},{hic:+.3f}]  ({exclc})")
+    print(
+        f"Δ(hi−lo)={mc:+.3f}  seeds={seedsc}  95%CI[{loc:+.3f},{hic:+.3f}]  ({exclc})"
+        f"{_seed_caveat(f'{DOCS}/validation-study-bcb-acthi.json')}"
+    )
 
     print("\n=== actuator experiment: Δ(D−B) aiming GEPA at the fixer's feedback gene ===")
     for label, path in (
@@ -168,7 +280,8 @@ def main() -> int:  # pragma: no cover - CLI convenience
         # does NOT exclude zero — the earlier claim that it did was an artifact of
         # dropping that atom. A degenerate [0,0] interval is reported as "point zero".
         excla = "excludes zero" if hia < 0 else ("point zero" if loa == hia == 0 else "includes 0")
-        print(f"{_describe(label, da)}  ({excla})")
+        print(f"{_describe(label, da, path)}  ({excla})")
+    print(f"\n{_SEED_LEGEND}")
     return 0
 
 

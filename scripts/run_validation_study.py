@@ -29,7 +29,8 @@ import functools
 import json
 import os
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
+from pathlib import Path
 from typing import Any
 
 from whystuck.eval.cost import (
@@ -138,6 +139,19 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
             "value cannot replay under the other."
         ),
     )
+    p.add_argument(
+        "--seed-gene",
+        action="append",
+        default=[],
+        metavar="GENE=FILE",
+        help="replace one gene's SEED text with the contents of FILE (repeatable, e.g. "
+        "`--seed-gene ensure_correct=verify_v2.txt`). The hand-written-gene ablation: it "
+        "asks whether a BETTER gene moves held-out at all, which is prior to asking "
+        "whether an optimizer can find one. Applies to every arm and does not change "
+        "which genes are evolvable, so it composes with A (measure the hand-written gene "
+        "alone) or B/D (optimize starting from it). Changes every prompt containing that "
+        "gene, so a cassette recorded with one text cannot replay under another",
+    )
     p.add_argument("--worker-model", default="openai/gpt-4.1-mini")
     p.add_argument("--reflection-model", default="openai/gpt-5.6-terra")
     p.add_argument(
@@ -163,6 +177,47 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
 
 def _seeds(args: argparse.Namespace) -> list[int]:
     return [int(s) for s in args.seeds.split(",") if s.strip() != ""]
+
+
+def _parse_gene_overrides(specs: list[str], *, active: Sequence[str]) -> dict[str, str]:
+    """Parse `--seed-gene GENE=FILE` specs into {gene_id: text}.
+
+    Every failure mode raises rather than degrading, because each one silently runs a
+    DIFFERENT experiment than the operator asked for and bills for it: a gene id that is
+    not live in this configuration (e.g. `actuator` without `--actuator`) would run the
+    un-ablated condition; a blank file would send the model a prompt with no instruction,
+    which scores like a bad instruction rather than announcing itself; and the same gene
+    given twice would let last-wins pick one of two requested conditions at random.
+
+    Kept a pure function of (specs, active) so the parsing and refusal rules are testable
+    without a run — the flag exists to make a paid measurement trustworthy, so its own
+    guards must not be reachable only through a paid path.
+    """
+    overrides: dict[str, str] = {}
+    for spec in specs:
+        gene, sep, raw_path = spec.partition("=")
+        if not sep or not gene.strip() or not raw_path.strip():
+            raise ValueError(f"--seed-gene {spec!r} is not of the form GENE=FILE")
+        gene = gene.strip()
+        if gene not in active:
+            raise ValueError(
+                f"--seed-gene {gene!r} names no gene in this run's genome "
+                f"(live genes: {', '.join(active)}); enable the lever that adds it "
+                "(--plan-gene / --actuator) or fix the id"
+            )
+        if gene in overrides:
+            raise ValueError(f"--seed-gene {gene!r} given twice; pick one file per gene")
+        path = Path(raw_path.strip())
+        if not path.is_file():
+            raise ValueError(f"--seed-gene {gene}: no such file {str(path)!r}")
+        text = path.read_text(encoding="utf-8")
+        if not text.strip():
+            raise ValueError(
+                f"--seed-gene {gene}: {str(path)!r} is blank; a blank gene does not disable "
+                "its step, it sends the model a prompt with no instruction"
+            )
+        overrides[gene] = text
+    return overrides
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -257,6 +312,28 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 2
 
+    # Hand-written gene overrides. Validated here, at the cheap dry-run step, and against
+    # the genes THIS configuration actually builds — derived from `seed_genome` itself so
+    # the live-gene set cannot drift from what the study constructs.
+    from whystuck.eval.study import seed_genome
+
+    live_genes = [
+        g.id
+        for g in seed_genome(
+            "probe",
+            evolvable=set(),
+            include_plan=args.plan_gene,
+            include_actuator=args.actuator,
+        ).genes
+    ]
+    try:
+        gene_overrides = _parse_gene_overrides(args.seed_gene, active=live_genes)
+    except ValueError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
+    for gene, text in gene_overrides.items():
+        print(f"Seed gene override [{gene}]: {text.strip()!r}")
+
     # Call count per eval: generate (+plan) + per retry a refine, plus a critique
     # UNLESS the oracle gate replaces it (no critique LLM call then), plus an actuator
     # call per retry when the actuator gene is on (critique + actuator + refine = 3).
@@ -337,7 +414,7 @@ def main(argv: list[str] | None = None) -> int:
     # Replay reproduces a prior run from its cassette: offline, no key, no spend
     # (strict — a cassette miss raises). Takes precedence over --yes.
     if args.replay:
-        return _run_live(args, arms, seeds, estimate)
+        return _run_live(args, arms, seeds, estimate, gene_overrides)
 
     if not args.yes:
         print("\nDry run only. Re-run with --yes (and OPENAI_API_KEY set) to spend.")
@@ -347,7 +424,7 @@ def main(argv: list[str] | None = None) -> int:
         print("ERROR: --yes given but OPENAI_API_KEY is not set.", file=sys.stderr)
         return 3
 
-    return _run_live(args, arms, seeds, estimate)
+    return _run_live(args, arms, seeds, estimate, gene_overrides)
 
 
 def _build_oracle_feedback(level: str, feedback_fn):
@@ -375,15 +452,19 @@ def _build_oracle_feedback(level: str, feedback_fn):
 
 
 def _run_live(
-    args: argparse.Namespace, arms: tuple[str, ...], seeds: list[int], estimate: float
+    args: argparse.Namespace,
+    arms: tuple[str, ...],
+    seeds: list[int],
+    estimate: float,
+    gene_overrides: dict[str, str],
 ) -> int:
     """The live run (reached only with --yes + a key). Not exercised offline."""
     import tempfile
-    from pathlib import Path
 
     from whystuck.core.storage import WhyStuckStore
     from whystuck.core.util import utc_now_iso
     from whystuck.eval.bcb_bench import bcb_feedback, bcb_score, load_bcb_tasks
+    from whystuck.eval.benchmark import seeds_are_independent
     from whystuck.eval.cassette import Cassette
     from whystuck.eval.code_bench import code_feedback, code_score, load_code_tasks
     from whystuck.eval.ifbench import ifbench_feedback, ifbench_score, load_ifbench
@@ -529,6 +610,7 @@ def _run_live(
                     oracle_feedback=oracle_feedback,
                     use_actuator=args.actuator,
                     actuator_context=actuator_context,
+                    gene_overrides=gene_overrides,
                 )
             runs.append({name: vars(r) for name, r in results.items()})
 
@@ -541,6 +623,10 @@ def _run_live(
         "max_metric_calls": args.max_metric_calls,
         # Recorded so a reader can tell whether a multi-gene arm was starved per gene.
         "module_selector": args.module_selector,
+        # Whether this task set regenerates its pool per seed. False means a seed only
+        # picks a partition of one fixed pool, so cross-seed intervals and sign tests are
+        # anti-conservative — the analysis must know without re-deriving it from the loader.
+        "seeds_independent": seeds_are_independent(args.task_set),
         # Recorded so a reader can tell whether the critique gene could see its own
         # behaviour at all (False = the released runs' component-agnostic reflection).
         # Whether the critique gene could see its own behaviour during reflection.
@@ -555,6 +641,9 @@ def _run_live(
         "feedback_level": args.feedback_level,
         "exec_feedback": exec_feedback is not None,
         "actuator": args.actuator,
+        # The hand-written gene text in full, not a flag: it IS the experimental
+        # condition, so a released result must carry the exact prompt that produced it.
+        "gene_overrides": gene_overrides,
         "worker_max_output_tokens": worker_max_out,
         "seeds": seeds,
         "estimated_usd": estimate,

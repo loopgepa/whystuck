@@ -4,6 +4,7 @@ A fake run_task (outcome depends on the candidate text) keeps this offline and
 lets us prove a better candidate actually scores higher.
 """
 
+import pytest
 from conftest import FIXED_TS
 
 from whystuck.core.models import GeneType, LoopGene, LoopGenome, LoopMetrics, LoopTrace
@@ -148,6 +149,7 @@ def _self_refine_trace(*, feedback="Failed: whitespace"):
         id="r",
         loop_id="x",
         created_at=FIXED_TS,
+        task_id="t",
         task_summary="FOLLOW THIS",
         final_outcome="success",
         steps=[
@@ -210,6 +212,7 @@ def _judged_trace(*, critique: str, draft: str = "draft v1 (bad)"):
         id="r",
         loop_id="x",
         created_at=FIXED_TS,
+        task_id="t",
         task_summary="FOLLOW THIS",
         final_outcome="success",
         steps=[
@@ -302,3 +305,93 @@ def test_detector_records_are_opt_in_so_committed_replays_are_unchanged():
     ds = adapter.make_reflective_dataset({"skill": "x"}, b, ["skill", "verify"])
     assert ds["skill"] == ds["verify"]
     assert ds["verify"][0]["Generated Outputs"] == "FINAL ANSWER"
+
+
+def test_detector_records_judge_the_draft_against_the_REAL_task():
+    """`verify_truth` must receive the task the trace came from, payload included.
+
+    The adapter used to synthesize `BenchmarkTask(id=trace.task_id)` with NO payload.
+    Every text scorer returns 0.0 for an empty constraint list by deliberate design
+    ("an unscored task is not a vacuous win"), so the truth signal collapsed to a
+    constant `(False, "no verifiable constraints on this task")`: every PASS was
+    labelled a false pass and every rejection correct, which pushes the reflector
+    toward a verifier that never accepts anything. That is a directional bias in the
+    channel that IS arm D's treatment, so it has to be pinned behaviourally — a truth
+    fn that ignores its `task` argument (as the tests above do) cannot see it.
+    """
+    task = BenchmarkTask(id="t", payload={"must_contain": "WIDGET"})
+
+    def truth(output: str, t: BenchmarkTask) -> tuple[bool, str]:
+        want = (t.payload or {}).get("must_contain")
+        if want is None:
+            return False, "no verifiable constraints on this task"
+        return want in output, f"wanted {want!r}"
+
+    def rt(genome, _task):
+        return _judged_trace(critique="PASS", draft="the WIDGET is present")
+
+    adapter = LoopGenomeAdapter(
+        base_genome=_genome(), run_task=rt, verify_gene="verify", verify_truth=truth
+    )
+    b = adapter.evaluate([task], {"skill": "x"}, capture_traces=True)
+    vrec = adapter.make_reflective_dataset({"skill": "x"}, b, ["verify"])["verify"][0]
+
+    # The draft DID satisfy the task and the critique said PASS, so this is a correct
+    # verdict. With the payload dropped it reads as a false pass.
+    assert "correct verdict" in vrec["Feedback"]
+    assert "wanted 'WIDGET'" in vrec["Feedback"]
+    assert "false pass" not in vrec["Feedback"]
+
+
+def test_detector_records_fail_loud_when_the_trace_cannot_be_matched_to_a_task():
+    """A trace whose task_id was never evaluated must raise, not silently score against
+    a stand-in task. Silently substituting is how the constant-truth bug above shipped."""
+
+    def rt(genome, _task):
+        return _judged_trace(critique="PASS")
+
+    adapter = LoopGenomeAdapter(
+        base_genome=_genome(),
+        run_task=rt,
+        verify_gene="verify",
+        verify_truth=lambda output, task: (True, "ok"),
+    )
+    b = adapter.evaluate([BenchmarkTask(id="t")], {"skill": "x"}, capture_traces=True)
+    assert b.trajectories is not None
+    b.trajectories[0].task_id = "never-evaluated"
+    with pytest.raises(KeyError, match="never-evaluated"):
+        adapter.make_reflective_dataset({"skill": "x"}, b, ["verify"])
+
+
+def test_detector_records_refuse_two_different_tasks_under_one_id():
+    """Task ids are NOT globally unique in this codebase: `multi_constraint` generates
+    index-based ids, so seed 0 and seed 1 both emit e.g. `mc-3` with different content
+    (measured: 15-17 of 32 ids shared, 0 payloads shared). Ids are unique within a single
+    split, which is all one adapter ever sees — but a silent overwrite here would score a
+    draft against the WRONG task's constraints, which is the same class of invisible
+    wrong-signal bug as the payload-less stub. So make the collision loud instead."""
+
+    def rt(genome, _task):
+        return _judged_trace(critique="PASS")
+
+    adapter = LoopGenomeAdapter(
+        base_genome=_genome(),
+        run_task=rt,
+        verify_gene="verify",
+        verify_truth=lambda output, task: (True, "ok"),
+    )
+    adapter.evaluate([BenchmarkTask(id="t", payload={"k": 1})], {"skill": "x"})
+    with pytest.raises(ValueError, match="two different tasks"):
+        adapter.evaluate([BenchmarkTask(id="t", payload={"k": 2})], {"skill": "x"})
+
+
+def test_re_evaluating_the_same_task_is_fine():
+    # GEPA re-evaluates the same minibatch every iteration, so an identical repeat must
+    # NOT trip the collision guard.
+    def rt(genome, _task):
+        return _judged_trace(critique="PASS")
+
+    adapter = LoopGenomeAdapter(base_genome=_genome(), run_task=rt)
+    task = BenchmarkTask(id="t", payload={"k": 1})
+    adapter.evaluate([task], {"skill": "x"})
+    adapter.evaluate([BenchmarkTask(id="t", payload={"k": 1})], {"skill": "x"})  # equal copy
