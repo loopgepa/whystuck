@@ -64,6 +64,35 @@
 >    scores are uncontaminated (they never see the tool), but the F₁ 0.11→0.83 lift is largely
 >    the tool *replacing* the detector, not a prompt that learned to detect.
 >
+> **FIRST RESULT UNDER THE CORRECTED HARNESS — C1 verifier ablation (2026-07-28, $0.043).**
+> Two arm-A conditions on multi-hard seed 0, 32 held-out tasks, differing ONLY in
+> `ensure_correct` (seed rubric vs `docs/genes/verify_measure_v2.txt`), sharing one
+> content-addressed cassette so each task's first draft is byte-identical across them.
+> Analysis pre-registered in `scripts/analyze_c1.py`, committed *before* the run was paid for.
+> Paired by TASK: n=32, 17 ties, hand better on 6 / seed better on 9, mean Δ = −0.033,
+> 95 % CI [−0.095, +0.028], sign p = 0.61 → **INCONCLUSIVE, not "no effect"** (the 90 % CI
+> passes the ±0.05 SESOI, so equivalence fails too).
+>
+> The detector numbers are the finding. On the same 32 drafts (base rate 0.16):
+>
+> | critique gene | n | tp | fp | fn | PASS rate | refines |
+> |---|---|---|---|---|---|---|
+> | run 3 intrinsic (F₁ = 0.11) | 50 | 1 | 12 | 4 | 0.26 | — |
+> | C1 seed gene | 32 | 0 | 3 | 5 | 0.09 | 29/32 |
+> | C1 hand gene | 32 | 0 | 0 | 5 | **0.00** | **32/32** |
+>
+> Neither C1 gene produced a single true positive, so F₁ is undefined for both; the
+> hand-written gene changed *when* the detector fires, not *whether it can tell*. Catching the
+> 3 false passes moved those tasks 0.800 → 0.867 (one repaired to 1.00), worth +0.006 on the
+> mean; the 5 already-compliant drafts give −0.100, and since BOTH genes demanded fixes on all
+> 5 that is one damaged draft, not a false-alarm difference. ⇒ prose-only rewriting moves the
+> threshold, not the discrimination, a mechanism for the loop-level null that does not involve
+> the optimizer. Evidence, not proof: one hand-written point in prose space. Caveat: only 5
+> positive cases per split, so tp = 0 cannot separate "no" from "weak" discrimination.
+>
+> **`verify_reproducibility.py` now reports ALL 2 RUNS REPRODUCE FROM CASSETTE**, not
+> NOTHING PROVEN. Measured cost realization: $0.043 actual vs $0.190 guard bound = **23 %**.
+>
 > **Released artifacts do NOT carry the provenance fields.** `genes_changed`, `train_score` and
 > `final_genes` postdate every recorded run and are empty in all 17 result JSONs, so the
 > reporting minimum this study recommends cannot be checked against its own release — only
