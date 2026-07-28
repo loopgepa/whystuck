@@ -304,14 +304,16 @@ scoring) against the cached calls with no API key, and any cassette miss raises 
 and, after the correction in Evidence~7, per run as well, since a consumer that swallows the
 per-call error can otherwise let a replay finish with a different number.
 GEPA is deterministic under replay, so replay is bit-for-bit:
-\texttt{scripts/verify\_reproducibility.py} registers eleven committed runs and confirmed
+\texttt{scripts/verify\_reproducibility.py} registers thirteen committed runs --- the eleven
+below plus the two corrected-harness conditions of \S\ref{sec:analysis}(1d) --- and confirmed
 that every per-arm held-out score matched its released JSON exactly. \textbf{Those eleven
 runs are now labelled superseded} (\S\ref{sec:defect}): the corrected harness changes every
 reflection prompt and therefore every cassette key, so it cannot replay them, and the script
 reports them as skipped rather than verified. Output tokens are hard-capped via enforced \texttt{max\_tokens};
 a pre-flight guard refuses any run whose (conservative) estimate exceeds
-\texttt{-{}-max-usd}, whose default is \$5; three runs raised it explicitly (to \$6.18,
-\$5.89 and \$11.76), so \$5 is a default rather than a study-wide ceiling. Every experiment was pre-registered --- hypothesis, frozen
+\texttt{-{}-max-usd}, whose default is \$5; four runs raised it explicitly, at three
+distinct values (\$6.18 twice, \$5.89, \$11.76), so \$5 is a default rather than a study-wide
+ceiling. Every experiment was pre-registered --- hypothesis, frozen
 configuration, expected seed band, and verdict rule committed to version control
 \emph{before} spending.
 
@@ -804,7 +806,15 @@ Section~\ref{sec:results} as a test of loop-level optimization.
 \paragraph{Evidence 1: the critique gene never changed.}
 Replaying run~3 --- our flagship $n{=}5$ multi-hard run --- offline from its cassette and
 dumping every winning genome gives: \texttt{generate} changed in $5/15$ winners,
-\texttt{ensure\_correct} in $\mathbf{0/15}$. GEPA \emph{did} propose critique rewrites and
+\texttt{ensure\_correct} in $\mathbf{0/15}$. Per arm, which is the sharper statement, since
+$10$ of those $15$ winners come from arms that either may not evolve the critique gene or
+evolved nothing at all: arm~B changed \texttt{generate} on $3/5$ seeds; arm~C, the control,
+changed \emph{neither} gene on any seed, which is the first direct measurement of the
+flatness Evidence~5 shows we could not otherwise have falsified; and arm~D --- the only arm
+that both could and was supposed to evolve the critique --- changed \texttt{generate} on
+$2/5$ seeds and \texttt{ensure\_correct} on $\mathbf{0/5}$. (This replay runs against the
+pre-fix commit, since the corrected reflective dataset changes every reflection prompt and
+therefore every cassette key; re-verified independently while fact-checking this paper.) GEPA \emph{did} propose critique rewrites and
 they were rejected; more revealingly, the proposals were \emph{generation} instructions
 written into a critique slot, e.g. ``\emph{For every user request, produce an answer that
 satisfies the requested content task and every stated formatting or linguistic constraint
@@ -964,8 +974,8 @@ this was untestable from the release, and the selector makes the opposite predic
 $\dd(D-B)=-0.10$ \emph{excludes zero}; that this \emph{rules out under-powering}; and any
 reading of a BigCodeBench-Hard interval or sign test as \emph{replication across independent
 seeds} (Evidence~4b). We also
-correct two factual slips: the reproducibility script registers eleven runs, not ten, and the
-\$5 ceiling is a CLI default that three runs overrode (up to \$11.76).
+correct two factual slips: the reproducibility script registers eleven superseded runs, not
+ten, and the \$5 ceiling is a CLI default that four runs overrode (up to \$11.76).
 
 \paragraph{What survives.}
 Everything that does not depend on arm~D having been optimized. The intrinsic critique's
