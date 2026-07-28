@@ -214,7 +214,11 @@ def test_default_loop_config_fits_five_dollars():
         n_seeds=2,
         worker_calls_per_task=1 + 2 * 1,
     )
-    assert estimate_usd(groups) < 3.0  # ≈ $2.92, comfortably under the $5 ceiling
+    # The guarantee this test exists for is the $5 default ceiling, not a particular
+    # figure. It was ≈$2.92 when REFLECTION_MAX_OUTPUT_TOKENS was 1500; raising that cap to
+    # 3000 (so a reasoning model has room to emit content after reasoning — see Evidence 8)
+    # moves it to ≈$3.82, which still clears the ceiling with margin.
+    assert estimate_usd(groups) < 5.0
 
 
 def test_token_shapes_price_output_at_the_enforced_cap():

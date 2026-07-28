@@ -59,22 +59,50 @@ SUPERSEDED = frozenset(
         "C2 four-arm corrected harness",
     }
 )
-EXPECTED_RUNS = 2  # under the CORRECTED harness: the two C1 conditions.
-# C2 was briefly a third. Auditing it found that two reflection completions came back empty
-# and GEPA accepted one as the verify gene, so `genome_from_candidate` now refuses blank gene
-# text -- and that guard makes C2's own cassette unreplayable, because replaying it re-serves
-# the empty completion and the guard (correctly) raises. C2's numbers therefore stand as
-# reported and measured, but they are no longer verifiable under HEAD, which is exactly the
-# state the SUPERSEDED list exists to record. It returns to the live set when re-run.
+EXPECTED_RUNS = 3  # under the CORRECTED harness: the two C1 conditions and the C2b re-run.
+# C2 is NOT among them. Auditing it found that two reflection completions came back empty and
+# GEPA accepted one as the verify gene, so `genome_from_candidate` now refuses blank gene text
+# -- and that guard makes C2's own cassette unreplayable, because replaying it re-serves the
+# empty completion and the guard (correctly) raises. Its numbers stand as measured but are not
+# verifiable under HEAD, which is exactly the state SUPERSEDED exists to record. C2b is the
+# re-run under the guard and the raised reflection cap, and it does replay bit-for-bit.
 
 # (label, committed results JSON, cassette, exact CLI args). reflection_calls and
 # task-set come from each run's pre-registration (not stored in the older metas).
 RUNS = [
     # --- recorded under the CORRECTED harness (not superseded) --------------------
-    # C2: the four-arm re-run the retraction called for, and the first run in which the
-    # loop-level treatment was actually applied (arm D changed `ensure_correct` on 2 of 3
-    # seeds, against 0 of 15 before the fix). Replaying it is what keeps the paper's
-    # central "the treatment ran this time" claim from resting on a single live run.
+    # C2b: the four-arm re-run the retraction called for, and the run the paper's
+    # "the treatment was applied" claim rests on -- arm D changed `ensure_correct` on 3 of 3
+    # seeds, against 0 of 15 before the fix, with no empty completions anywhere. It replaces
+    # C2 (below, superseded), whose seed 2 was corrupted by the empty-completion defect that
+    # motivated both the blank-gene guard and the raised reflection token cap.
+    (
+        "C2b four-arm corrected harness",
+        "docs/validation-study-c2b.json",
+        f"{CASSETTES}/study-c2b.json",
+        [
+            "--task-set",
+            "multi-hard",
+            "--arms",
+            "ABCD",
+            "--seeds",
+            "0,1,2",
+            "--n-train",
+            "8",
+            "--n-heldout",
+            "10",
+            "--max-metric-calls",
+            "28",
+            "--reflection-calls",
+            "6",
+            "--loop-max-retries",
+            "1",
+            "--module-selector",
+            "all",
+            "--reflection-model",
+            "openai/gpt-5.6-luna",
+        ],
+    ),
     (
         "C2 four-arm corrected harness",
         "docs/validation-study-c2.json",

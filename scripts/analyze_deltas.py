@@ -185,7 +185,8 @@ _NULL_RUNS = [
     # it, arm B and arm D emitted byte-identical genomes, so their Δ = 0 records the
     # absence of a treatment rather than the absence of an effect. C2's Δ is a real
     # measurement of a real contrast, which is why it is not interchangeable with them.
-    ("C2    corrected 4-arm(n=3)", f"{DOCS}/validation-study-c2.json"),
+    ("C2b   corrected 4-arm(n=3)", f"{DOCS}/validation-study-c2b.json"),
+    ("C2    [contaminated seed2]", f"{DOCS}/validation-study-c2.json"),
     ("run3  hard-multi    (n=5)", f"{DOCS}/validation-study-multihard.json"),
     ("run4  feedback      (n=3)", f"{DOCS}/validation-study-feedback.json"),
     ("D5    bcb-hard code (n=2)", f"{DOCS}/validation-study-bcb.json"),

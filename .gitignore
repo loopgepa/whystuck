@@ -31,3 +31,13 @@ htmlcov/
 .vscode/
 .DS_Store
 scratchpad/
+
+# LaTeX build artifacts. The paper source is docs/paper/main.tex; everything the
+# toolchain derives from it is regenerable and must never be committed (main.log in
+# particular embeds absolute build paths).
+docs/paper/main.pdf
+docs/paper/main.aux
+docs/paper/main.bbl
+docs/paper/main.blg
+docs/paper/main.log
+docs/paper/main.out

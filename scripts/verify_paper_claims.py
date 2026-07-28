@@ -199,9 +199,65 @@ def _checks() -> list[tuple[str, float, float, float]]:
     )
     out.append(("C2 seed2 B opt", 0.750, 0.0005, c2[2]["B"]["opt_heldout"]))
     out.append(("C2 seed2 D opt", 0.685, 0.0005, c2[2]["D"]["opt_heldout"]))
-    out.append(("C2 seed2 seed", 0.845, 0.0005, c2[2]["A"]["seed_heldout"]))
-    for arm in "ABCD":
-        out.append((f"C2 seed0 {arm} opt", 0.800, 0.0005, c2[0][arm]["opt_heldout"]))
+
+    # --- C2b: the CLEAN re-run, which is what tab:rerun and the conclusion report --------
+    # C2 above is retained only as the evidence for Evidence 8. Everything the paper claims
+    # about the corrected harness -- treatment applied on 3/3 seeds, prompt-only flat,
+    # loop-level costing 0.042 -- is checked here against the clean run.
+    c2b = _runs("validation-study-c2b.json")
+    out.append(("C2b seeds", 3, 0, len(c2b)))
+    for arm, opt_m in (("A", 0.788), ("C", 0.788), ("B", 0.788), ("D", 0.747)):
+        out.append(
+            (f"C2b {arm} seed mean", 0.788, 0.0005, mean(r[arm]["seed_heldout"] for r in c2b))
+        )
+        out.append((f"C2b {arm} opt mean", opt_m, 0.0005, mean(r[arm]["opt_heldout"] for r in c2b)))
+    out.append(
+        (
+            "C2b arm D evolved ensure_correct on N seeds",
+            3,
+            0,
+            sum(1 for r in c2b if "ensure_correct" in (r["D"].get("genes_changed") or [])),
+        )
+    )
+    out.append(
+        (
+            "C2b arm C changed nothing on N seeds",
+            3,
+            0,
+            sum(1 for r in c2b if not (r["C"].get("genes_changed") or [])),
+        )
+    )
+    # The evolved rubrics are substantial, against a 127-char seed -- the contrast with C2's
+    # zero-length gene is the whole point of the re-run.
+    for i, n in enumerate((3235, 3022, 2920)):
+        out.append(
+            (
+                f"C2b seed{i} D ensure_correct length",
+                n,
+                0,
+                len(c2b[i]["D"]["final_genes"]["ensure_correct"]),
+            )
+        )
+    out.append(("C2b seed gene length", 127, 0, len(c2b[0]["C"]["final_genes"]["ensure_correct"])))
+    d_c2b = delta_arm(f"{DOCS}/validation-study-c2b.json")
+    m, lo, hi = exact_resample_ci(d_c2b)
+    out.append(("C2b delta(D-B)", -0.042, 0.0005, m))
+    out.append(("C2b CI lo", -0.095, 0.0005, lo))
+    out.append(("C2b CI hi", 0.050, 0.0005, hi))
+    out.append(("C2b sign p", 1.00, 0.005, sign_test_p(d_c2b)))
+    # No empty completion anywhere: the defect Evidence 8 describes did not recur.
+    with open("tests/fixtures/cassettes/study-c2b.json", encoding="utf-8") as fh:
+        b_entries = json.load(fh)["entries"]
+    b_vals = list(b_entries.values()) if isinstance(b_entries, dict) else b_entries
+    out.append(("C2b empty completions", 0, 0, sum(1 for v in b_vals if not v["output"].strip())))
+    out.append(
+        (
+            "C2b shortest reflection output",
+            968,
+            0,
+            min(len(v["output"]) for v in b_vals if v["name"] == "reflection"),
+        )
+    )
 
     # --- The metric's do-nothing floor (Threats) --------------------------------------
     from whystuck.eval.ifbench import ifbench_score, load_ifbench

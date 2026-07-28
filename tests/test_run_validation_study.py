@@ -87,17 +87,21 @@ def test_default_is_two_seeds():
 
 
 def test_seeds_flag_parses_multiple_values():
-    # 3 seeds × ABCD at the corrected gpt-4.1-mini price (≈ $4.38) fits under the $5
-    # default, so no --max-usd bump is needed to reach the dry-run and exercise the
-    # parse (the refusal itself is tested below with a genuinely over-budget config).
-    code, out, _ = _run(["--seeds", "0,1,2"])
+    # What this test is for is the PARSE, so it raises the ceiling to reach the dry-run.
+    # 3 seeds × ABCD used to fit the $5 default at ≈$4.38; raising
+    # REFLECTION_MAX_OUTPUT_TOKENS from 1500 to 3000 (so a reasoning model has room to emit
+    # content after reasoning — the empty-completion defect) moves it to ≈$5.73, so the
+    # guard now refuses it at the default. That refusal is correct and is covered by
+    # test_four_seeds_default_cap_is_refused; it must not be what makes this test pass.
+    code, out, _ = _run(["--seeds", "0,1,2", "--max-usd", "6"])
     assert code == 0
     assert "seeds=[0, 1, 2]" in out
 
 
 def test_four_seeds_default_cap_is_refused():
-    # 3 seeds now fits (≈ $4.38); 4 seeds over all arms (≈ $5.84) exceeds the $5
-    # default — the guard's job to refuse pre-flight.
+    # At the current reflection cap even 3 seeds over all arms exceeds the $5 default
+    # (≈$5.73), and 4 seeds exceeds it by more — either way the guard's job is to refuse
+    # pre-flight rather than start spending and discover the ceiling mid-run.
     code, _, err = _run(["--seeds", "0,1,2,3"])
     assert code == 2
     assert "REFUSED" in err

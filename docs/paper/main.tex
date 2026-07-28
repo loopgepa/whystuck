@@ -60,14 +60,25 @@ observation that detection ability does not predict correction success
 repair signal's shape matters ($+0.063$ text, $+0.20$ code; the text interval excludes zero,
 while the code one is drawn from seeds that share held-out tasks and so cannot be read as
 replication) while naming the failed constraint alone adds nothing; and the residual localizes to one
-mechanical skill (\texttt{exact\_word\_count}, $0.16\!\to\!0.33\!\to\!0.50$). We release
-the corrected harness, which reports per-gene accepted-change counts, train aggregates and
-per-task score vectors so that ``the treatment was applied'' is checkable by a reader of any run
-made with it --- those fields postdate our own recordings --- together with every
-cassette and pre-registration --- including the superseded ones, labelled as such, and the
-first two runs recorded under the corrected harness, whose result is that a verify gene written
-by hand against our own findings changes the detector's threshold without giving it
-discrimination, and does not move held-out.
+mechanical skill (\texttt{exact\_word\_count}, $0.16\!\to\!0.33\!\to\!0.50$). We then rebuilt the harness and bought the four-arm re-run --- twice, because auditing the
+first attempt found the failure mode a fifth time: two of its reflection completions came
+back empty, both proposals for the critique gene, and one was accepted, because a loop with
+no critique outscores one with a near-random critique on the training subsample, so the arm
+carrying the treatment ran with no critique at all. On the clean re-run the treatment
+reaches the gene on \textbf{three of three} seeds, writing detector rubrics of ${\sim}3000$
+characters against a $127$-character seed, against $0/5$ before. The null survives ---
+$\dd(D-B)=-0.042$, $95\%$ CI $[-0.095,+0.050]$ at $n=3$ --- but it is now a null about a
+contrast that exists, and the two optimizing arms do not behave alike: prompt-only
+optimization is a wash (mean exactly $0.000$) while loop-level optimization \emph{costs}
+$0.042$. Because every headline here is a null, we also report a positive control: on a
+landscape where evolving the critique is the only path to a passing answer, the same harness
+and the same optimizer return $\dd(D-B)=+1.000$, so these zeros are a property of the tasks
+and not of the instrument. We release the corrected harness, which reports per-gene
+accepted-change counts, train aggregates and per-task score vectors so that ``the treatment
+was applied'' is checkable by a reader, together with every cassette and pre-registration,
+the superseded ones labelled as such. The reporting minimum we propose is one integer per
+component, and it is not hypothetical: \citet{pappu2026multiagent} independently report GEPA
+returning the seed prompt unchanged on two benchmarks.
 \end{abstract}
 
 \section{Introduction}
@@ -185,13 +196,15 @@ literature supplied the vocabulary and the stakes, not the hypotheses.
 \paragraph{Reflective and evolutionary prompt optimization.}
 GEPA \citep{agrawal2025gepa} reports beating GRPO by up to $20\%$ with $35\times$
 fewer rollouts and exceeding MIPROv2 by over $10\%$. Crucially for us, GEPA
-optimizes \emph{one or more} components and is known to plateau: practitioner
-reports note GEPA returning the seed prompt essentially unchanged on
-GPQA-Diamond and MATH-500. OPRO \citep{yang2023opro} and EvoPrompt use the LLM
-as an optimizer; both can also \emph{degrade} performance (e.g. EvoPrompt on
-GSM8K), and OPRO's authors note optimized instructions can overfit a training
-split. Our null is a member of this ``plateau/degrade'' family, isolated under
-controlled conditions.
+optimizes \emph{one or more} components and is known to plateau. The sharpest published
+instance is independent of us: optimizing a prompt with GEPA across six tasks,
+\citet{pappu2026multiagent} report that ``on GPQA Diamond and MATH-500, GEPA returned the
+original prompt essentially unchanged.'' That is our failure mode observed in someone
+else's pipeline, and reported --- which is the practice \S\ref{sec:defect} argues should be
+routine. OPRO \citep{yang2023opro} and EvoPrompt \citep{guo2024evoprompt} likewise use an
+LLM as the optimizer, and OPRO's authors quantify the over-fitting risk directly: their
+``training accuracies are often 5\%--20\% higher than our test accuracies''. Our null is a
+member of this ``plateau/degrade'' family, isolated under controlled conditions.
 
 \paragraph{Self-refine and the limits of self-correction.}
 Self-Refine \citep{madaan2023selfrefine} popularized generate--critique--refine
@@ -1002,23 +1015,21 @@ reproduced verbatim there. Same task family, budget and worker as run~3
 the three corrections in place: a component-specific reflective dataset, an explicit
 \texttt{module\_selector=all}, and a non-saturating arm~C.
 
-\textbf{The treatment was applied --- on one seed cleanly, and on a second only in a
-degenerate form.} Arm~D's \texttt{genes\_changed} lists \texttt{ensure\_correct} on two of
-three seeds, against $0/5$ for arm~D on run~3 ($0/15$ pooling all arms), so the reflector and
-selector fixes did reach the gene the released runs never touched. But the two changes are
-not alike. On seed~1 GEPA wrote a genuine $3101$-character detector rubric. On seed~2 it
-replaced the gene with the \textbf{empty string}, and inspecting why exposes a third instance
-of this paper's own failure mode (Evidence~8, \S\ref{sec:defect}): the reflection LM returned
-an empty completion, GEPA logged \texttt{``Proposed new text for ensure\_correct: ''} with
-nothing after it, and the empty gene then scored \emph{better} on the training subsample
-($2.25 \to 2.5$) and was accepted as the winner. Seed~2's arm~D therefore ran a loop with no
-critique at all, and it is exactly the seed carrying the largest held-out drop and the
-$-0.065$ that dominates $\dd$. We report the run as measured and mark the contamination
-rather than quietly dropping the seed; the corrected-guard re-run is pending.
+We bought it twice. The first attempt is the one that produced Evidence~8: two of its
+reflection completions came back empty, one was accepted as the verify gene, and the seed it
+corrupted was the seed carrying most of the effect. Rather than drop that seed we fixed the
+cause --- \texttt{genome\_from\_candidate} now refuses blank gene text, and the reflection
+token cap rose from $1500$ to $3000$ so a reasoning model has room to emit content after
+reasoning --- and re-ran the whole thing. Both runs are released; everything below is the
+clean re-run, and the contaminated one is retained only as the evidence for that defect.
 
-The selector fix is visible in the proposal counts: arm~B received $4, 2, 2$ proposal rounds
-across the three seeds and arm~D received $4, 3, 2$, so the two-gene arm is no longer
-searching the shared gene at half the rate, which was the starvation of Evidence~3.
+\textbf{The treatment was applied.} Arm~D's \texttt{genes\_changed} lists
+\texttt{ensure\_correct} on \textbf{three of three} seeds, against $0/5$ for arm~D on run~3
+($0/15$ pooling all arms). The genes GEPA wrote are substantial detector rubrics of $3235$,
+$3022$ and $2920$ characters against a $127$-character seed, and no completion anywhere in
+the run was empty (shortest reflection output: $968$ characters). The selector fix shows up
+alongside it: arm~D now receives proposal rounds at arm~B's rate rather than half of it,
+which was the starvation of Evidence~3.
 
 \begin{table}[h]
 \centering
@@ -1026,49 +1037,77 @@ searching the shared gene at half the rate, which was the starvation of Evidence
 \toprule
 Arm & GEPA evolves & seed & optimized & $\Delta$ \\
 \midrule
-A & nothing (baseline) & 0.790 & 0.790 & $+0.000$ \\
-C & genome ignored (control) & 0.790 & 0.790 & $+0.000$ \\
-B & \texttt{generate} & 0.790 & 0.750 & $-0.040$ \\
-D & \texttt{generate} $+$ \texttt{ensure\_correct} & 0.790 & 0.735 & $-0.055$ \\
+A & nothing (baseline) & 0.788 & 0.788 & $+0.000$ \\
+C & genome ignored (control) & 0.788 & 0.788 & $+0.000$ \\
+B & \texttt{generate} & 0.788 & 0.788 & $\mathbf{+0.000}$ \\
+D & \texttt{generate} $+$ \texttt{ensure\_correct} & 0.788 & 0.747 & $\mathbf{-0.042}$ \\
 \bottomrule
 \end{tabular}
-\caption{The corrected-harness re-run, held-out means over three seeds. Both optimizing arms
-fall below the seed baseline while both controls sit on it. Note what the controls do and do
-not establish: arm~A re-scores the seed genome, which under a deterministic replay path must
-reproduce its first measurement, so it is a determinism check rather than a flatness control;
-and arm~C's worker ignores the genome, so no proposal can improve its training score and its
-flatness remains true by construction. Neither is evidence about measurement noise --- there
-is none anywhere in this study (\S\ref{sec:threats}) --- so the drop in B and D is
-attributable to optimization simply because nothing else in the pipeline varies.}
+\caption{The corrected-harness re-run, held-out means over three seeds. Prompt-only
+optimization is a wash and loop-level optimization \emph{costs} $0.042$. Note what the
+controls do and do not establish: arm~A re-scores the seed genome, which under a
+deterministic replay path must reproduce its first measurement, so it is a determinism check
+rather than a flatness control; and arm~C's worker ignores the genome, so no proposal can
+improve its training score and its flatness is true by construction. Neither is evidence
+about measurement noise --- there is none anywhere in this study (\S\ref{sec:threats}) ---
+so the drop in D is attributable to optimization because nothing else in the pipeline varies.}
 \label{tab:rerun}
 \end{table}
 
-Per-seed $\dd(D-B) = [+0.000, +0.020, -0.065]$, mean $-0.015$, exact-resample 95\% CI
-$[-0.065, +0.020]$, sign $p=1.00$. The point estimate falls inside our $\pm0.05$ SESOI, so
-prediction (ii) holds as stated; the interval does not, so this is not an equivalence claim
-either, and at $n=3$ the sign test cannot fall below $p=0.25$ regardless of the data. What
-distinguishes this null from the eleven it replaces is not its width but its content: the
-arms produced different genomes and different scores, so the interval measures a contrast
-that exists. The single tie is seed~0, where GEPA accepted no proposal in \emph{any} arm and
-returned the seed genome unchanged --- the plateau behaviour reported for GEPA elsewhere
-\citep{agrawal2025gepa}, not a harness artifact.
+Per-seed $\dd(D-B) = [-0.095, -0.080, +0.050]$, mean $\mathbf{-0.042}$, exact-resample 95\%
+CI $[-0.095, +0.050]$, sign $p=1.00$. Prediction (ii) --- that $\dd$ would stay inside our
+$\pm0.05$ SESOI --- holds on the point estimate, and only just; the interval does not, so
+this is not an equivalence claim either, and at $n=3$ the sign test cannot fall below
+$p=0.25$ regardless of the data. What distinguishes this null from the eleven it replaces is
+not its width but its content: the arms produced different genomes and different scores, so
+the interval measures a contrast that exists.
 
-The result we did not predict is Table~\ref{tab:rerun}'s middle column:
-\textbf{optimization made both arms worse}, by $-0.040$ and $-0.055$. Eight training tasks
-against ten held-out is a small split and the reflective optimizer overfits it. The
-acceptance counts give this a mechanism rather than an assertion: on seed~2, where the
-largest drop occurs, arm~B accepted one candidate and fell $0.845 \to 0.750$ while arm~D
-accepted \emph{two} and fell $0.845 \to 0.685$; on seed~0 no arm accepted anything and every
-arm returned $0.800$. More accepted train-improving edits, more held-out loss. This is
-consistent with the degradation runs 4 and 5 showed and with the reported instability of
-prompt optimizers on some tasks \citep{yang2023opro,zhou2025bbopromptscale}, and it means the
-honest summary of loop-level optimization here is not that it fails to help but that, at this
-budget, it costs something.
+The result we did not predict is Table~\ref{tab:rerun}'s last column. The two optimizing arms
+did \emph{not} behave alike: \textbf{prompt-only optimization is a wash} ($+0.025$, $0.000$,
+$-0.025$; mean exactly $0.000$) while \textbf{loop-level optimization costs} $-0.042$
+($-0.070$, $-0.080$, $+0.025$). Eight training tasks against ten held-out is a small split
+and the reflective optimizer overfits it, and arm~D has two genes of surface to overfit
+rather than one. This is consistent with the degradation runs 4 and 5 showed and with the
+reported instability of prompt optimizers on some tasks
+\citep{yang2023opro,zhou2025bbopromptscale}. So the honest summary of loop-level optimization
+here is not that it fails to help but that, at this budget, it is the only arm that pays a
+price --- which is a stronger statement against the thesis than the flat null we set out to
+test, and one an underpowered $n=3$ cannot yet establish.
+
+We flag one earlier reading we withdraw. The contaminated first attempt showed \emph{both}
+arms falling below baseline, and we described that as optimization costing something
+generally. On the clean re-run arm~B is exactly flat, so that generalization does not
+survive; the cost is specific to the arm with the extra gene.
+
+\paragraph{A positive control: the instrument does respond.}
+A null is worth reading only if the instrument that produced it can register a signal, and
+after three silent failures we do not ask the reader to take that on trust. We built a
+landscape in which evolving the verify gene is the \emph{only} path to a passing answer: the
+generator always drafts \texttt{x\,x}, which fails the task's single constraint however its
+prompt is worded; the critique catches the flaw only when the verify gene carries a sentinel;
+and a caught flaw triggers a refine that passes. Arm~B therefore cannot escape the failing
+draft no matter how well it optimizes, and arm~D can. Running the real four-arm study through
+real GEPA on this landscape (no stubbed optimizer, no network, no spend) gives
+A~$0.000$, B~$0.000$, C~$0.000$, D~$\mathbf{1.000}$, i.e.\ $\dd(D-B) = +1.000$. The harness
+detects a loop-level advantage when one exists, so the near-zero $\dd$ we report on real tasks
+is a property of those tasks and that optimizer, not of the measurement path
+(\texttt{scripts/positive\_control.py}).
+
+\paragraph{Where the contrast lives.}
+Because every run now releases per-task held-out vectors, the seed-level means can be opened
+up. Arms~B and~D score the same ten held-out tasks per seed, so the contrast decomposes into
+task flips: $5/10$ tasks differ on seed~0 (B better on 4, D on 1), $4/10$ on seed~1 (B better
+on 3, D on 1), and $2/10$ on seed~2 (D better on 2, B on 0). Pooled, $19$ of $30$ task scores
+are exact ties and the entire $\dd$ rests on eleven flips, $7$ favouring B and $4$ favouring
+D. We report this as description, not as extra power: the tasks
+are nested within seeds, since one training split produces the genome pair that scores all
+ten, so the inferential unit remains the seed and $n$ is still $3$.
 
 Arm~C is worth one qualification, because its number is unchanged from the retracted runs and
 what it demonstrates is not. Previously it scored a saturated $1.0$, so GEPA saw a perfect
-program and proposed \emph{nothing}: no part of the search ran. Here it starts at $0.36$ and
-GEPA proposes four candidates on every seed, evaluates them, and accepts none. The flatness
+program and proposed \emph{nothing}: no part of the search ran. Here it starts at $0.23$ to
+$0.36$ and GEPA proposes four candidates on every seed, evaluates them, and accepts none. The
+flatness
 is still true by construction --- a genome-blind worker's training score cannot improve, so
 acceptance is impossible --- but the control now exercises the machinery it is supposed to
 check instead of exiting before it starts.
@@ -1215,10 +1254,13 @@ generator-limited (the residual). The agenda, re-ordered accordingly:
 
 \paragraph{A pre-registered prediction for the corrected-harness re-run --- \textbf{resolved,
 \S\ref{sec:rerun}}.} The prediction below was committed before the run was paid for and is
-reproduced unchanged below. Both parts held: \texttt{ensure\_correct} changed on two of three
-seeds of arm~D, and $\dd(D-B) = -0.015$ sits inside the $\pm0.05$ SESOI. One thing we did not
-predict: optimization moved both arms \emph{below} the seed baseline. \emph{The
-pre-registration, as written:} Section~\ref{sec:analysis}(1d)
+reproduced unchanged below. Prediction (i) held decisively: \texttt{ensure\_correct} changed
+on \emph{all three} seeds of arm~D. Prediction (ii) held on the point estimate and only
+barely --- $\dd(D-B) = -0.042$ against a $\pm0.05$ SESOI --- and the interval
+$[-0.095,+0.050]$ extends well past it, so we do not read this as equivalence. What we did
+not predict is that the two optimizing arms would separate: prompt-only came out exactly
+flat while loop-level cost $0.042$, which is a worse outcome for the thesis than the
+indifference we expected. \emph{The pre-registration, as written:} Section~\ref{sec:analysis}(1d)
 found that a hand-written verify gene changed the detector's threshold (PASS rate $0.09 \to
 0.00$) without producing a true positive, and moved held-out by $-0.033$ ($p=0.61$). If that
 generalizes to the search --- if the reachable improvements in prose space are threshold moves
@@ -1244,14 +1286,21 @@ detector, F$_1\!=\!0.11$). \textbf{(ii) Does GEPA lift this task?} No: its optim
 genomes gave no held-out gain and sometimes \emph{degraded} both arms (train-split
 overfitting), at the budgets tested --- not a verdict on GEPA in general, which
 reports gains elsewhere. \textbf{(iii) Does loop-level optimization beat prompt-only
-(the thesis)?} \emph{We cannot say, and that is the paper's main finding.} Our harness did not
-apply the loop-level treatment: the critique gene is byte-identical to the seed in $15/15$
-winning genomes on the flagship run, because the reflector was shown the generator's outputs
-rather than the critique's, and because a one-component-per-proposal selector starved the
-two-gene arm on the gene that moves the metric ($\S\ref{sec:defect}$). The measured
-$\dd(D{-}B)\approx 0$ is therefore consistent with the hypothesis being false \emph{and} with
-its never having been tested; the $[0,0]$ intervals we once cited as precision are ties, which
-is evidence for the latter.
+(the thesis)?} \emph{For eleven experiments we could not say, and that is the paper's main
+finding.} Our harness did not apply the loop-level treatment: the critique gene is
+byte-identical to the seed in $15/15$ winning genomes on the flagship run, because the
+reflector was shown the generator's outputs rather than the critique's, and because a
+one-component-per-proposal selector starved the two-gene arm on the gene that moves the
+metric ($\S\ref{sec:defect}$). Those $\dd(D{-}B)\approx 0$ results are consistent with the
+hypothesis being false \emph{and} with its never having been tested; the $[0,0]$ intervals we
+once cited as precision are ties, which is evidence for the latter. On the corrected harness
+(\S\ref{sec:rerun}) we can finally say something. With the treatment reaching the gene on all
+three seeds, $\dd(D-B) = -0.042$, $95\%$ interval $[-0.095,+0.050]$ at $n=3$: no advantage,
+and a point estimate at the edge of our pre-registered SESOI in the \emph{wrong} direction.
+Prompt-only optimization came out exactly flat while loop-level optimization cost $0.042$, so
+on this configuration the extra gene is not neutral but a liability. One configuration at
+$n=3$ cannot carry that claim, which is why the re-run is a beginning rather than a
+conclusion.
 
 Across ten pre-registered instruction-following experiments, a cross-domain replication on
 frontier-hard code (\S\ref{sec:bcb}), an actuator variant, and a worker-model swap, we
@@ -1268,8 +1317,11 @@ perfect detector still does not maximize held-out score, so detection is not the
 constraint there either; the repair signal's \emph{shape} is worth $+0.063$ (text) and
 $+0.20$ (code) while naming the failed constraint adds nothing; and the residual concentrates
 in one mechanical skill, exact counting, that no prompt rewrite fixed. \textbf{About
-componentized optimization:} nothing yet --- and that is the point. The apparatus we built to
-answer the question quietly answered a different one.
+componentized optimization:} one underpowered configuration in which the treatment demonstrably
+ran and bought nothing, plus the observation that optimizing at all cost held-out score on
+both arms. For eleven runs the answer was ``nothing yet'', because the apparatus we built to
+answer the question quietly answered a different one; the twelfth is a first data point, not
+a verdict.
 
 \textbf{About building such apparatus}, which is the contribution we did not plan. A
 hill-climbing loop improves a harness by attributing trace evidence to components
@@ -1278,12 +1330,16 @@ thing and every downstream number stays plausible. Two defaults were enough to c
 a reflective dataset shared across components, and a selector that rewrites one component per
 proposal. Neither is exotic; one is a library default. The cheap defence is to report, per
 component, whether the optimizer's output differs from the seed at all --- one integer per
-gene, which we now emit and which would have caught this eleven runs earlier. We release the
-corrected harness, every cassette and pre-registration including the superseded ones, and the
-audit that produced this section, on the view that a study which invalidates its own headline
-is more useful published than withdrawn.
-
-\appendix
+gene, which we now emit and which would have caught this eleven runs earlier. That this is
+worth saying out loud is not our inference alone: \citet{pappu2026multiagent}, optimizing a
+prompt with GEPA for an unrelated purpose, report that ``on GPQA Diamond and MATH-500, GEPA
+returned the original prompt essentially unchanged'' --- the same event, noticed and reported,
+in someone else's pipeline. The second cheap defence, learned the hard way five times over, is
+a positive control: an instrument that has never been shown to register a signal cannot be
+trusted to report its absence. We release the corrected harness, every cassette and
+pre-registration including the superseded ones, and the audit that produced this section, on
+the view that a study which invalidates its own headline is more useful published than
+withdrawn.
 
 \bibliographystyle{plainnat}
 \bibliography{references}

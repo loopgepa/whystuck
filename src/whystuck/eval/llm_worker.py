@@ -374,11 +374,28 @@ def litellm_complete(model: str, *, max_tokens: int) -> Complete:
             raise RuntimeError(
                 "the LLM worker needs litellm: pip install 'whystuck[eval]'"
             ) from exc
-        resp = litellm.completion(
-            model=model,
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=max_tokens,
+        # An empty completion is retried once and then raised. Reasoning models can spend
+        # the whole `max_tokens` allowance on reasoning and return `content = None`, and the
+        # old `content or ""` turned that into an empty string that flowed downstream: in the
+        # C2 run GEPA received it as a proposal of empty text for the verify gene, accepted
+        # it on one seed because a loop with no critique scores better on the training
+        # subsample than one with a near-random critique, and the arm carrying the loop-level
+        # treatment then ran with no critique at all. Nothing distinguished that from an
+        # evolved gene. Raising costs at most one aborted run, and the cassette persists per
+        # call, so a resumed run re-reads every completion already paid for.
+        for _attempt in range(2):
+            resp = litellm.completion(
+                model=model,
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=max_tokens,
+            )
+            content = resp.choices[0].message.content
+            if content and content.strip():
+                return str(content)
+        raise RuntimeError(
+            f"{model} returned an empty completion twice in a row (max_tokens={max_tokens}); "
+            "a reasoning model can exhaust the allowance before emitting content, so raise "
+            "max_tokens rather than letting an empty string reach the caller"
         )
-        return resp.choices[0].message.content or ""
 
     return complete

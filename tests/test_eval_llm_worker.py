@@ -1,5 +1,8 @@
 """Tests for whystuck.eval.llm_worker — proves text genes move the score."""
 
+import sys
+import types
+
 import pytest
 
 from whystuck.core.models import GeneType, LoopGene, LoopGenome
@@ -71,6 +74,39 @@ def test_litellm_complete_without_litellm_is_actionable():
     # extra IS the fix — superseding the earlier state where litellm was separate.
     with pytest.raises(RuntimeError, match=r"whystuck\[eval\]"):
         complete("hi")
+
+
+def test_litellm_complete_retries_an_empty_completion_then_fails_loudly(monkeypatch):
+    # Measured in C2: two reflection completions came back with `content = None`, which
+    # `content or ""` turned into an empty string. GEPA proposed empty gene text and on one
+    # seed accepted it, so the arm carrying the loop-level treatment ran with no critique.
+    # A reasoning model can exhaust max_tokens on reasoning before emitting any content, so
+    # an empty completion is retried once and then raised rather than passed downstream.
+    calls: list[int] = []
+
+    class _Msg:
+        def __init__(self, c):
+            self.content = c
+
+    class _Choice:
+        def __init__(self, c):
+            self.message = _Msg(c)
+
+    class _Resp:
+        def __init__(self, c):
+            self.choices = [_Choice(c)]
+
+    fake = types.SimpleNamespace(completion=lambda **kw: (calls.append(1), _Resp(None))[1])
+    monkeypatch.setitem(sys.modules, "litellm", fake)
+    complete = litellm_complete("openai/gpt-5.6-luna", max_tokens=1500)
+    with pytest.raises(RuntimeError, match="empty completion"):
+        complete("reflect on this")
+    assert len(calls) == 2, "an empty completion must be retried exactly once before raising"
+
+    # A retry that succeeds is used, so one transient empty response does not abort a run.
+    seq = [None, "the real proposal"]
+    fake.completion = lambda **kw: _Resp(seq.pop(0))
+    assert litellm_complete("openai/gpt-5.6-luna", max_tokens=1500)("x") == "the real proposal"
 
 
 # --- reflective-signal capture (fixes GEPA reflection starvation) -------------

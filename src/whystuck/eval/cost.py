@@ -59,7 +59,15 @@ WORKER_MAX_OUTPUT_TOKENS = 320  # ~240 words; ample for IFBench constraint-follo
 # body), and the refine step re-emits it. 512 comfortably fits an MBPP+ function while
 # still hard-capping output. Priced via CODE_WORKER_TOKENS below.
 CODE_WORKER_MAX_OUTPUT_TOKENS = 512
-REFLECTION_MAX_OUTPUT_TOKENS = 1500
+# Raised from 1500 after the C2 run: `gpt-5.6-luna` returned two completions with no content
+# at all, which is what a reasoning model does when the allowance is consumed by reasoning
+# tokens before it emits any text. Those empty completions became empty gene proposals and one
+# was accepted (see the Evidence 8 discussion), so the cap is now sized to leave room for
+# reasoning plus a full rubric. `litellm_complete` retries once and then raises, so a
+# recurrence fails loudly instead of silently deleting a gene.
+# 3000 rather than more: it is the largest value that keeps the documented two-seed
+# configuration inside the $5 default ceiling (at 4000 that config prices at $5.55).
+REFLECTION_MAX_OUTPUT_TOKENS = 3000
 
 # Per-call (in, out) shape for the worker. Output is the enforced hard cap. Input is
 # a CONSERVATIVE ESTIMATE (see module docstring): the seed-gene loop prompts measured

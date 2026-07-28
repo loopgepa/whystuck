@@ -93,7 +93,34 @@
 > **`verify_reproducibility.py` now reports ALL 2 RUNS REPRODUCE FROM CASSETTE**, not
 > NOTHING PROVEN. Measured cost realization: $0.043 actual vs $0.190 guard bound = **23 %**.
 
-> **C2 — THE FOUR-ARM RE-RUN, AND THE FIRST RUN IN WHICH THE TREATMENT WAS APPLIED
+> **C2b — THE CLEAN FOUR-ARM RE-RUN (2026-07-28). This is the run the paper reports.**
+> Same config as C2 below, re-run after the blank-gene guard and with the reflection token
+> cap raised 1500 → 3000. **No empty completions anywhere** (shortest reflection output 968
+> chars), 542 calls, and all 24 arm-scores + gene-change sets **reproduce exactly** under
+> strict replay.
+>
+> **Treatment applied on 3 of 3 seeds** — arm D wrote detector rubrics of 3235 / 3022 / 2920
+> chars against a 127-char seed. **ties = 0/3**: for the first time in the study every seed
+> produced a genuinely different B-vs-D contrast.
+>
+> | arm | evolves | seed | optimized | Δ |
+> |---|---|---|---|---|
+> | A | nothing | 0.788 | 0.788 | +0.000 |
+> | C | genome ignored | 0.788 | 0.788 | +0.000 |
+> | B | `generate` | 0.788 | 0.788 | **+0.000** |
+> | D | `generate` + `ensure_correct` | 0.788 | **0.747** | **−0.042** |
+>
+> Δ(D−B) = **−0.042**, per-seed [−0.095, −0.080, +0.050], 95 % CI [−0.095, +0.050],
+> sign p = 1.00. Point estimate at the edge of the ±0.05 SESOI in the WRONG direction.
+> **Prompt-only optimization is exactly flat (+0.000) while loop-level costs −0.042** — so
+> C2's "optimization hurts BOTH arms" does NOT survive; the cost is specific to the arm with
+> the extra gene. Task-level: 19/30 exact ties, 11 flips (7 favour B, 4 favour D).
+>
+> **Positive control (free, real GEPA):** on a landscape where evolving the critique is the
+> only path to a passing answer, the same harness returns A/B/C 0.000, D 1.000,
+> Δ(D−B) = **+1.000**. The instrument responds; the nulls are about the tasks.
+>
+> **C2 — THE CONTAMINATED FIRST ATTEMPT, retained only as the evidence for Evidence 8
 > (2026-07-28).** multi-hard, arms ABCD, seeds 0/1/2, 8 train / 10 held-out, mmc 28,
 > 6 reflection calls, 1 refine round, `--module-selector all`, reflection `gpt-5.6-luna`.
 > Both parts of the prediction pre-registered in the paper held.

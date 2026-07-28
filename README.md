@@ -191,6 +191,19 @@ See [ROADMAP.md](ROADMAP.md).
   for real repos + the benchmark writeup
 - 📋 **v0.3** — plugin marketplace listing (manifest ready), MCP-registry submission
 
+## Research artifact
+
+This repository is the supporting artifact for the paper *Your Loop Optimizer Is Not
+Optimizing Your Loop* (`docs/paper/main.tex`), a four-arm study of whether optimizing a
+generate–critique–refine loop beats optimizing its generation prompt alone — and of the
+harness defect that meant, for eleven experiments, the question was never actually asked.
+
+- **[How to reproduce it](docs/paper/REPRODUCE.md)** — four offline checks, all $0: every
+  number in the paper re-derived from the artifacts, bit-for-bit cassette replay, a positive
+  control proving the harness detects an effect when one exists, and the standalone analyses.
+- Results, cassettes and pre-registrations for every run are committed, including the
+  superseded ones, labelled as such.
+
 ## Documentation
 
 - [How it works](docs/how-it-works.md) — loop engineering, the genome, the pipeline
