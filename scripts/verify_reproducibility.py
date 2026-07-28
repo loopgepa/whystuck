@@ -56,11 +56,57 @@ SUPERSEDED = frozenset(
         "D5-code MBPP+ (saturated)",
     }
 )
-EXPECTED_RUNS = 0  # runs recorded under the CORRECTED harness; none yet.
+EXPECTED_RUNS = 2  # runs recorded under the CORRECTED harness: the two C1 conditions.
 
 # (label, committed results JSON, cassette, exact CLI args). reflection_calls and
 # task-set come from each run's pre-registration (not stored in the older metas).
 RUNS = [
+    # --- recorded under the CORRECTED harness (not superseded) --------------------
+    # The C1 verifier ablation: two conditions differing ONLY in the ensure_correct
+    # gene, sharing one content-addressed cassette so the first draft per task is
+    # identical across them. These are the first runs whose replay proves anything
+    # about the harness the paper now describes.
+    (
+        "C1 verifier ablation (seed rubric)",
+        "docs/validation-study-c1-base.json",
+        f"{CASSETTES}/study-c1.json",
+        [
+            "--task-set",
+            "multi-hard",
+            "--arms",
+            "A",
+            "--seeds",
+            "0",
+            "--n-train",
+            "32",
+            "--n-heldout",
+            "32",
+            "--loop-max-retries",
+            "1",
+        ],
+    ),
+    (
+        "C1 verifier ablation (hand rubric)",
+        "docs/validation-study-c1-hand.json",
+        f"{CASSETTES}/study-c1.json",
+        [
+            "--task-set",
+            "multi-hard",
+            "--arms",
+            "A",
+            "--seeds",
+            "0",
+            "--n-train",
+            "32",
+            "--n-heldout",
+            "32",
+            "--loop-max-retries",
+            "1",
+            "--seed-gene",
+            "ensure_correct=docs/genes/verify_measure_v2.txt",
+        ],
+    ),
+    # --- superseded: recorded under the pre-correction harness --------------------
     (
         "run1 single-constraint",
         "docs/validation-study.json",
@@ -319,10 +365,17 @@ RUNS = [
 
 
 def _scores(runs: list[dict]) -> list[tuple]:
+    """Every (seed, arm) held-out pair, over the arms each seed ACTUALLY carries.
+
+    Sorted so the comparison never depends on dict ordering. Iterating a hardcoded
+    ("A","B","C","D") raised KeyError on a single-arm run, which the ablation runs are:
+    C1 evolves nothing and needs only arm A. Comparing the arms present keeps the check
+    strict -- a replay that dropped an arm changes the key set and still fails -- while
+    letting a run register without paying for arms its question does not use."""
     return [
         (i, arm, r[arm]["seed_heldout"], r[arm]["opt_heldout"])
         for i, r in enumerate(runs)
-        for arm in ("A", "B", "C", "D")
+        for arm in sorted(r)
     ]
 
 

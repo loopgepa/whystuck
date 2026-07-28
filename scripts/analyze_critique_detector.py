@@ -24,11 +24,15 @@ from whystuck.eval.text_stats import text_stats
 
 CASSETTE_DIR = "tests/fixtures/cassettes"
 _N_HELDOUT = 10
-_POOL = max(64, 2 * _N_HELDOUT + 2)
 
 
 def collect_events(
-    cassette_path: str, seeds: list[int], *, loop_kw: dict
+    cassette_path: str,
+    seeds: list[int],
+    *,
+    loop_kw: dict,
+    n_heldout: int = _N_HELDOUT,
+    gene_overrides: dict[str, str] | None = None,
 ) -> list[tuple[bool, bool]]:
     """Return (verdict_pass, actual_pass) for every first-critique event.
 
@@ -36,8 +40,17 @@ def collect_events(
     `actual_pass` is the ground-truth mc_pass of the draft the critique judged.
     Seeds whose calls are absent from the cassette raise on replay and are
     skipped, so passing a superset of seeds is safe.
-    """
+
+    `n_heldout` and `gene_overrides` must match the run being replayed or every call
+    misses: the generated pool size is derived from `n_heldout` exactly as
+    `run_validation_study` derives it, and an overridden gene changes the critique prompt
+    and therefore its cassette key. `gene_overrides` is what lets a hand-written-gene
+    ablation (`--seed-gene`) be measured as a detector alongside the runs it is compared
+    with."""
     include_plan = "plan_gene" in loop_kw
+    # Same rule run_validation_study uses, derived rather than duplicated as a constant so
+    # the two cannot drift apart and silently generate a different task pool.
+    pool = max(64, 2 * n_heldout + 2)
     events: list[tuple[bool, bool]] = []
     skipped = 0
     with Cassette(cassette_path, mode="replay") as cas:
@@ -57,10 +70,13 @@ def collect_events(
         for seed in seeds:
             # load_multi_constraint raises loudly on a pool/seed misconfig — do NOT
             # catch it: a silently dropped seed would shrink n and misstate the sample.
-            heldout = load_multi_constraint(
-                "heldout", seed=seed, n=_N_HELDOUT, pool=_POOL, hard=True
+            heldout = load_multi_constraint("heldout", seed=seed, n=n_heldout, pool=pool, hard=True)
+            genome = seed_genome(
+                "study-A",
+                evolvable=set(),
+                include_plan=include_plan,
+                overrides=gene_overrides,
             )
-            genome = seed_genome("study-A", evolvable=set(), include_plan=include_plan)
             for task in heldout:
                 try:
                     trace = run_task(genome, task)
