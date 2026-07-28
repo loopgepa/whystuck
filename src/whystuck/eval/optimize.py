@@ -18,6 +18,7 @@ from whystuck.core.util import mean, utc_now_iso
 from whystuck.eval.adapter import (
     LoopGenomeAdapter,
     RunTask,
+    VerifyTruth,
     candidate_from_genome,
     genome_from_candidate,
 )
@@ -36,6 +37,9 @@ def optimize_loop(
     reflection_lm: str | Callable[[str], str],
     max_metric_calls: int = 50,
     max_candidate_proposals: int | None = None,
+    module_selector: str = "round_robin",
+    verify_gene: str | None = None,
+    verify_truth: VerifyTruth | None = None,
     _optimize: OptimizeFn | None = None,
 ) -> dict[str, Any]:
     """Run GEPA over a loop's text genes; save the winner as a variant + frontier.
@@ -46,9 +50,22 @@ def optimize_loop(
     `max_reflection_cost` stopper is inert for a callable reflection_lm, which is
     what the cassette wrapper always supplies). Left `None`, GEPA stops on
     `max_metric_calls` alone.
+
+    `module_selector` decides how many components one proposal may rewrite, and it is
+    load-bearing for arm fairness. GEPA's default `"round_robin"` selects exactly ONE
+    component per proposal and cycles, so a two-gene arm spends half its proposals on
+    each gene and searches the productive gene half as hard as a one-gene arm under the
+    same cap — a budget-per-gene confound that a matched-total-budget comparison cannot
+    see. `"all"` rewrites every component per proposal, which is the fair comparison for
+    "does optimizing more of the loop help". The default stays `"round_robin"` because
+    the committed cassettes were recorded under it: changing it changes every reflection
+    prompt, hence every cassette key, and would invalidate the released replays.
+
+    `verify_gene`/`verify_truth` enable component-specific reflection for the critique
+    gene (see `LoopGenomeAdapter`). Both default to None, the released behaviour.
     """
     base = store.load_loop(loop_id)
-    adapter = LoopGenomeAdapter(base, run_task)
+    adapter = LoopGenomeAdapter(base, run_task, verify_gene=verify_gene, verify_truth=verify_truth)
     optimizer = _optimize or _gepa_optimize
     optimizer_kwargs: dict[str, Any] = {
         "seed_candidate": candidate_from_genome(base),
@@ -56,6 +73,7 @@ def optimize_loop(
         "adapter": adapter,
         "reflection_lm": reflection_lm,
         "max_metric_calls": max_metric_calls,
+        "module_selector": module_selector,
     }
     if max_candidate_proposals is not None:
         optimizer_kwargs["max_candidate_proposals"] = max_candidate_proposals
@@ -133,6 +151,11 @@ def _gepa_optimize(**kwargs: Any) -> dict[str, Any]:
         adapter=_Bridge(),
         reflection_lm=kwargs["reflection_lm"],
         max_metric_calls=kwargs["max_metric_calls"],
+        # Passing this explicitly (rather than relying on GEPA's default) makes the
+        # selector part of the recorded configuration, so a reader can tell whether a
+        # multi-gene arm was budget-starved per gene. "round_robin" reproduces the
+        # committed runs byte-for-byte; "all" is the fair-budget comparison.
+        module_selector=kwargs.get("module_selector", "round_robin"),
         **optional,
     )
     return {"best_candidate": result.best_candidate}

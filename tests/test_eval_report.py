@@ -33,6 +33,21 @@ def _arm(evolvable, seed_h, opt_h):
     }
 
 
+def test_output_cap_caveat_is_task_set_aware():
+    # Regression: the output-cap caveat used to hardcode an IFBench-specific sentence
+    # ("The IFBench subset used here has only short-output constraints") that fired on
+    # every task set — factually wrong on a code/bcb report, where the cap is larger
+    # precisely because solutions are long. It must now describe the actual task set.
+    ifb = render_report([], meta={**_META, "task_set": "ifbench"})
+    assert "short outputs" in ifb
+    assert "Code solutions" not in ifb
+
+    for ts in ("code", "bcb"):
+        code = render_report([], meta={**_META, "task_set": ts})
+        assert "Code solutions can be long" in code
+        assert "IFBench subset used here has only short-output constraints" not in code
+
+
 def _runs_where_d_beats_b():
     # 2 seeds; D clearly > B on held-out, A flat, C ~ A.
     return [

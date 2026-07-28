@@ -1,15 +1,66 @@
-# GEPA validation study — results note (all ten runs)
+# GEPA validation study — results note (ten IFBench runs + cross-domain code)
+
+> ## ⚠️ SUPERSEDED HEADLINE — read this first (added 2026-07-28)
+>
+> An adversarial audit of this harness established that **the loop-level arm never received
+> its treatment**, so the Δ(D−B) numbers below do not measure loop-level optimization.
+> Evidence, all verified by offline cassette replay at $0:
+>
+> 1. **The verify gene never changed.** Replaying run 3 (the flagship n=5 multi-hard run) and
+>    dumping every winning genome: `generate` changed in 5/15 winners, `ensure_correct` in
+>    **0/15**. GEPA proposed critique rewrites and they were rejected — and the proposals were
+>    *generation* instructions written into a critique slot.
+> 2. **The reflector could not see the critique.** `adapter.py` returned the *same* records for
+>    every component, with "Generated Outputs" defined as the last *worker* step (verifier
+>    steps deliberately excluded). So the optimizer rewrote a detector while being shown the
+>    generator's answer.
+> 3. **The two-gene arm was starved per gene.** `optimize.py` passed no `module_selector`, so
+>    GEPA used its default `round_robin` — one component per proposal — meaning arm D searched
+>    the shared productive gene about half as hard as arm B under a matched cap. This also
+>    *reverses* the over-fitting mechanism the writeup asserted.
+> 4. **A percentile-index error.** `exact_resample_ci` took the upper bound at
+>    `int(0.975*N) - 1`, dropping the largest resample atom, which at n=3 carries
+>    1/27 = 3.70 % > 2.5 %. Corrected: the actuator run's Δ(D−B) = −0.10 has interval
+>    **[−0.150, +0.000]**, which *includes* zero (sign test p = 0.50). It was published as
+>    [−0.150, −0.050] "excluding zero".
+> 5. **The flatness controls could not fail.** Arm A copied its own seed score with δ
+>    hardcoded to 0.0; arm C's command loop scored a saturated 1.0, so GEPA proposed nothing.
+>
+> **Retracted:** "no measurable advantage for loop-level optimization"; the null being "tight
+> rather than underpowered" on the strength of [0,0] intervals (those are *ties* — B and D
+> producing byte-identical genomes, i.e. the same calls served from the same cassette entries);
+> the train-split over-fitting mechanism; "Δ = −0.10 excludes zero"; "rules out under-powering".
+>
+> **Survives:** everything not depending on arm D having been optimized — detector F₁ = 0.11
+> (0.83 with the measurement tool), the per-constraint residual table, the fix-budget effect,
+> and the actionability effects (+0.063 text, +0.20 code). Two caveats: runs 7–10 gate on the
+> true metric at *held-out* scoring time too, so those are **ceiling results** conditional on a
+> perfect checker at inference; and at n=3 a sign test cannot go below p = 0.25, so +0.063 rests
+> on magnitude, not on replication across seeds.
+>
+> **Harness now fixed** (component-specific reflective dataset; explicit `module_selector`
+> defaulting to `all`; non-saturating arm C; arm A re-measured; per-gene accepted-change counts,
+> train aggregates and final gene text released per arm). The corrected wiring changes every
+> reflection prompt, hence every cassette key, so **the eleven committed cassettes cannot replay
+> under it** — `verify_reproducibility.py` now reports them as skipped/superseded rather than
+> verified, and `EXPECTED_RUNS = 0` until the study is re-run.
+>
+> **Pre-audit replication worth keeping:** worker swap to `gpt-4.1-nano` (multi-hard, 3 seeds,
+> 16/16, mmc 64) → Δ(D−B) = −0.014, per-seed (+0.000, −0.041, +0.000), corrected interval
+> [−0.041, +0.000], 2/3 seeds tied; B = 0.70 ± 0.03, D = 0.69 ± 0.03, seed 0.67, actual spend
+> ≈ $0.42. Shows the pattern is not one worker model's artifact, but inherits the same harness.
+> An mmc = 160 budget replication was designed, priced (~$0.90 projected), started, and then
+> **stopped mid-run** once the audit landed: spending on superseded wiring stopped being
+> worthwhile. It consumed ≈ $0.33 (10 reflection + 271 worker calls) before being killed and
+> produced no results JSON; its partial cassette was deleted rather than committed, since a
+> cassette with no corresponding result is a misleading artifact.
 
 *Question:* does **loop-level** GEPA (evolve the self-refine loop's `generate` **and**
 `ensure_correct` verify genes) beat **prompt-only** GEPA (evolve `generate` alone), on
 instruction-following tasks, under a matched budget?
 
-*Answer across ten pre-registered paid runs:* **no measurable advantage** — and, from the
-oracle controls (runs 7–10), the bottleneck is the *fix step*, not detection (runs 9–10
-show it is partly feedback-limited, partly generator-limited). This note grew
-chronologically (runs 1–3, then 4–5, then 6–7, then 8, then 9–10); the "Final verdict across
-ten runs" section below is the current synthesis, and `docs/paper/main.tex` is the clean
-writeup.
+*Answer:* **unknown** — see the superseded-headline box above. The runs below are retained as
+the record of what was measured, not as an answer to that question.
 
 ## The three runs
 
@@ -83,12 +134,40 @@ experiments are exhausted; the two remaining paid ideas are low-value:
   point (residual = exact_word_count); a counter fixing counting is unsurprising. Its only
   residual value is confirming the other constraints don't break when the count is enforced.
 
-- **D5 (cross-domain): the one genuinely valuable next study.** Replicate the 4-arm design on
-  math (numeric checker) or code (unit tests) — domains where the verify step catches *real*
-  semantic errors and where GEPA reports gains. This moves the contribution from "an
-  IFEval-style observation" to a general finding (or sharpens it to "loop-level helps iff
-  verification is substantive"). It is a separate pre-registered mini-project (new verifier +
-  satisfiability/headroom controls), not a variation of the runs here.
+- **D5 (cross-domain): DONE — null corroborates.** Replicated the 4-arm design on code (unit
+  tests), where the verify step catches *real* semantic errors. MBPP+ saturated its train split
+  (all arms == seed, degenerate Δ=0 — kept as a documented failed attempt, paper appendix), so
+  we moved to **BigCodeBench-Hard** (Docker sandbox; visible unittest methods in-loop, hidden
+  methods scored). There the loop had genuine headroom (seed 0.40 / 0.50) and GEPA *ran*: on
+  seed 1 it accepted training-improving candidates for **both** B (generate) and D
+  (generate+ensure_correct), each lifting the 8-task train aggregate 0.375 → 0.625 — yet every
+  arm scored exactly its seed baseline on held-out, so **Δ(D−B) = 0.00** (exact CI [0,0]). Even
+  when loop-level optimization pulls its lever, the train gain does not transfer and it beats
+  prompt-only by nothing. The instruction-following null is **not** an IFEval artifact.
+  Reports: `validation-study-bcb.md` (live), `validation-study-code.md` (MBPP+). Math (numeric
+  checker) remains a natural next replication.
+  - **Code actionability ablation (cross-domain D2′): the one thing that helped transfers.**
+    Arm A (no GEPA), bcb, 6 seeds, in-loop visible-test feedback varied lo (verdict) vs hi
+    (verdict + visible-test source). **Δ(hi−lo) = +0.20 held-out, 95% CI [+0.10, +0.30]
+    (excludes 0)** — a 3× larger lift than IFBench's +0.063, and again a *baseline* gain
+    (feedback shape), not Δ(D−B) (=0), so GEPA didn't need to discover it. Reinforces "the
+    lever is the fixer + feedback actionability, not loop-level optimization." Reports:
+    `validation-study-bcb-actlo.md` / `-acthi.md`; number regenerated by `analyze_deltas.py`.
+  - **Actuator experiment (the terminal test): aiming GEPA at the fixer does NOT rescue it.**
+    Added a fourth evolvable `actuator` gene — an LLM step that turns the visible-test signal +
+    source into the refine step's repair guidance; arm D co-evolves generate+actuator with the
+    detector **held fixed**, so Δ(D−B) isolates optimizing the fixer's feedback (the component we
+    *know* helps, +0.20). **Small run (2 seeds, 8/10, mmc30): Δ(D−B)=0.00** (GEPA proposed good
+    actuator rewrites but accepted none that transferred). **Powered run (3 seeds, 20/20, mmc50):
+    Δ(D−B) = −0.10, exact CI [−0.150, −0.050] (excludes zero)** — prompt-only B now *transfers*
+    (+0.067 held-out mean) but loop-level D does *worse* (seed 0: 0.55→0.45), the 2-gene search
+    space over-fitting the small train split. Across all 3 code configs the ordering is invariant:
+    **D ≤ B on held-out, never D > B.** This **closes the budget/power threat** (raising train
+    size / held-out resolution / seeds / mmc surfaced no hidden positive — it went negative) and is
+    the paper's strongest form: the actionability gain is feedback *design*, not GEPA-discoverable.
+    Reports: `validation-study-bcb-actuator.md` / `-actuator-big.md`; `analyze_deltas.py`.
+    (Executor note: a memory-hog model draft that OOMs its container is scored a failure, not an
+    infra abort — surfaced + fixed during the powered run; genuine host faults still abort loudly.)
 
 **Recommendation: write this up as the arXiv paper now (`docs/paper/main.tex`) and treat D5
 as the scoped v2 / follow-up.** Don't spend on D7 or D1′. Optional cheap armor: re-run *only*
@@ -175,16 +254,24 @@ Huang et al.'s self-verification-unreliability result, inside our harness.
 
 ### Reproducibility (verified)
 
-Every LLM call in every run is recorded to a content-addressed cassette. Any run
-reproduces **offline, $0, bit-for-bit** via `--replay` (strict: no API key, and a cassette
-miss raises). `scripts/verify_reproducibility.py` replays all ten committed runs and
-confirms each per-arm seed/optimized held-out score equals its released JSON exactly —
-GEPA is deterministic under replay. Run it with the eval venv:
+Every LLM call in every run is recorded to a content-addressed cassette. `scripts/verify_reproducibility.py`
+replays **11 runs bit-for-bit** — the 10 IFBench runs plus the MBPP+ cross-domain run — **offline, $0**
+via strict `--replay` (no API key; a cassette miss raises), confirming each per-arm seed/optimized
+held-out score equals its released JSON exactly (GEPA is deterministic under replay). Run it with the eval venv:
 
 ```
 scratchpad/evalvenv/bin/python scripts/verify_reproducibility.py
-# → [OK] run1 … [OK] run10 ; ALL 10 RUNS REPRODUCE FROM CASSETTE ($0, offline).
+# → [OK] run1 … [OK] D5-code MBPP+ ; ALL 11 RUNS REPRODUCE FROM CASSETTE ($0, offline).
 ```
+
+**BigCodeBench-Hard is scoped differently, by construction.** It is *not* bit-for-bit replayable:
+model solutions may use unseeded randomness, so re-executing them in the Docker sandbox yields
+run-to-run-varying test output that shifts the content-addressed prompt key — an intrinsic property
+of executable-code benchmarks, not of our harness. What *is* guaranteed: per-execution grading is
+deterministic, the string-level non-determinism we can normalize (object ids, addresses, temp paths
+in failure text) is scrubbed so identical executions render identical feedback, and the headline
+Δ(D−B)=0.00 **reproduced identically across two independent paid runs**. The cassette and scores are
+released; strict call-replay is out of scope for it deliberately.
 
 ### Toward publication
 

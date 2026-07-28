@@ -173,3 +173,134 @@
   note      = {Self-repair attempts (the fix-budget lever) across scales/benchmarks;
                context for the v2 code refine-budget and the run-8 saturation finding}
 }
+
+@article{zhou2025bbopromptscale,
+  title     = {Evaluating the Effectiveness of Black-Box Prompt Optimization as the
+               Scale of {LLM}s Continues to Grow},
+  author    = {Zhou, Ziyu and Wu, Yihang and Yang, Jingyuan and Xiao, Zhan and Li, Rongjun},
+  year      = {2025},
+  eprint    = {2505.08303},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  url       = {https://arxiv.org/abs/2505.08303},
+  note      = {Inverse scaling of prompt-optimization gains: measured lift shrinks as model
+               scale grows (12\% -> 5.9\% -> 1.1\% across 7B/72B/671B), so gains on a weak
+               model do not transfer to a strong one. The external-validity basis for
+               moving v2-code headroom to a benchmark hard for frontier models}
+}
+
+@inproceedings{yang2023opro,
+  title     = {Large Language Models as Optimizers},
+  author    = {Yang, Chengrun and Wang, Xuezhi and Lu, Yifeng and Liu, Hanxiao and
+               Le, Quoc V. and Zhou, Denny and Chen, Xinyun},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2024},
+  eprint    = {2309.03409},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  url       = {https://arxiv.org/abs/2309.03409}
+}
+
+@article{zhang2024smallverifiers,
+  title     = {Small Language Models Need Strong Verifiers to Self-Correct Reasoning},
+  author    = {Zhang, Yunxiang and Khalifa, Muhammad and Logeswaran, Lajanugen and
+               Kim, Jaekyeom and Lee, Moontae and Lee, Honglak and Wang, Lu},
+  year      = {2024},
+  eprint    = {2404.17140},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  url       = {https://arxiv.org/abs/2404.17140},
+  note      = {Self-correction gains depend on verifier strength relative to the base model;
+               a weak/self verifier is insufficient. Bears on the arm-D verify-gene thesis}
+}
+
+@inproceedings{zhuo2024bigcodebench,
+  title     = {{BigCodeBench}: Benchmarking Code Generation with Diverse Function Calls
+               and Complex Instructions},
+  author    = {Zhuo, Terry Yue and Vu, Minh Chien and Chim, Jenny and Hu, Han and
+               Yu, Wenhao and others},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2025},
+  eprint    = {2406.15877},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.SE},
+  url       = {https://arxiv.org/abs/2406.15877},
+  note      = {Hard code benchmark (diverse library calls); the BigCodeBench-Hard subset is
+               difficult even for frontier models, providing the optimization headroom MBPP+
+               lacked for the v2 code study}
+}
+
+@misc{bai2026masprompt,
+  title     = {{MAS-PromptBench}: When Does Prompt Optimization Improve Multi-Agent
+               {LLM} Systems?},
+  author    = {Bai, Juyang and Shi, Laixi},
+  year      = {2026},
+  eprint    = {2606.23664},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  note      = {Johns Hopkins University},
+  url       = {https://arxiv.org/abs/2606.23664}
+}
+
+@misc{decomposing2026selfcorrection,
+  title     = {Decomposing {LLM} Self-Correction: The Accuracy-Correction Paradox and
+               Error Depth Hypothesis},
+  year      = {2026},
+  eprint    = {2601.00828},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  url       = {https://arxiv.org/abs/2601.00828}
+}
+
+@article{kamoi2024whencan,
+  title   = {When Can {LLMs} Actually Correct Their Own Mistakes? A Critical Survey of
+             Self-Correction of {LLMs}},
+  author  = {Kamoi, Ryo and Zhang, Yusen and Zhang, Nan and Han, Jiawei and Zhang, Rui},
+  journal = {Transactions of the Association for Computational Linguistics},
+  volume  = {12},
+  year    = {2024},
+  pages   = {1417--1440},
+  doi     = {10.1162/tacl_a_00713},
+  url     = {https://aclanthology.org/2024.tacl-1.78/}
+}
+
+@misc{langchain2026loopcraft,
+  title  = {The Art of Loop Engineering},
+  author = {{LangChain}},
+  year   = {2026},
+  note   = {Engineering blog. Sets out the four stacked loops --- agent, verification,
+            event-driven, and hill-climbing --- after Swyx's ``loopcraft'' framing},
+  url    = {https://www.langchain.com/blog/the-art-of-loop-engineering}
+}
+
+@misc{osmani2026loop,
+  title  = {Loop Engineering},
+  author = {Osmani, Addy},
+  year   = {2026},
+  month  = jun,
+  note   = {Essay, 8 June 2026 (Elevate); republished by O'Reilly Radar, 22 June 2026.
+            Names the practice and argues for a separated verifier: ``the model that wrote
+            the code is way too nice grading its own homework''},
+  url    = {https://www.oreilly.com/radar/loop-engineering/}
+}
+
+@misc{swyx2026loopcraft,
+  title  = {Loopcraft: The Art of Stacking Loops},
+  author = {{Swyx}},
+  year   = {2026},
+  month  = jun,
+  note   = {Opening talk, AI Engineer World's Fair 2026; Latent.Space, 12 June 2026.
+            ``One might argue the entire game of the next century is to be able to stack
+            loops as effectively as possible''},
+  url    = {https://www.latent.space/p/ainews-loopcraft}
+}
+
+@misc{steinberger2026loops,
+  title  = {Stop prompting coding agents; design the loops that prompt them},
+  author = {Steinberger, Peter},
+  year   = {2026},
+  month  = jun,
+  note   = {Social-media post, 7 June 2026, which compressed the framing into a slogan and
+            gave the practice its popular name},
+  url    = {https://x.com/steipete}
+}

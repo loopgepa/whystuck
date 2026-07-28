@@ -157,6 +157,17 @@ def preflight_code_tasks(tasks: list[BenchmarkTask]) -> None:
                     f"{suite} suite, verdict={result.verdict}): {result.detail}. The executor "
                     "must work here before spending — do not run the paid study."
                 )
+            if result.verdict == "timeout":
+                # A REFERENCE that times out is a statement about this host, not the data.
+                # One vendored MBPP+ reference needs several seconds to clear its own plus
+                # suite, so a loaded machine can exceed the wall-clock cap; blaming the data
+                # file would send the reader to re-vendor something that is correct.
+                raise RuntimeError(
+                    f"preflight: the vendored REFERENCE for task {task.id!r} timed out on its "
+                    f"own {suite} suite. This is a HOST capacity signal, not bad data: the "
+                    "reference is correct but slower than the wall-clock cap here. Re-run on "
+                    "an idle machine (or raise the cap) before spending."
+                )
             if not result.passed:
                 raise RuntimeError(
                     f"preflight: the vendored REFERENCE for task {task.id!r} fails its own "

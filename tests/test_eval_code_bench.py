@@ -189,3 +189,35 @@ def test_preflight_passes_on_vendored_data_and_flags_corruption():
     bad = _code_task(["assert f() == 999"], "assert f() == 999\n")  # ref returns 1, fails
     with pytest.raises(RuntimeError, match="preflight|reference"):
         preflight_code_tasks([bad])
+
+
+def test_preflight_reports_a_reference_timeout_as_a_host_fault_not_corrupt_data(monkeypatch):
+    """A reference solution that times out means the HOST was too slow, not bad data.
+
+    One vendored MBPP+ reference legitimately needs several seconds to clear its own plus
+    suite, so on a loaded machine it can exceed the wall-clock cap. Reporting that as ``the
+    data file is corrupt — re-vendor it'' sends the reader to fix a file that is fine, and
+    makes the reproducibility check fail for a reason unrelated to reproducibility. The
+    timeout verdict therefore needs its own branch and its own message.
+    """
+    from whystuck.eval import code_bench
+    from whystuck.eval.code_exec import ExecResult
+
+    monkeypatch.setattr(
+        code_bench, "run_tests", lambda *a, **k: ExecResult(False, "timeout", "timeout")
+    )
+    task = BenchmarkTask(
+        id="slow-1",
+        payload={
+            "prompt": "p",
+            "entry_point": "f",
+            "base_tests": ["assert f() == 1"],
+            "plus_test": "assert f() == 1",
+            "reference": "def f():\n    return 1",
+        },
+    )
+    with pytest.raises(RuntimeError) as exc:
+        code_bench.preflight_code_tasks([task])
+    msg = str(exc.value)
+    assert "timed out" in msg
+    assert "corrupt" not in msg  # must not blame the data file

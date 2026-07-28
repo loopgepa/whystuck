@@ -1,12 +1,26 @@
 #!/usr/bin/env python
-"""Prove every paid run reproduces bit-for-bit from its cassette (offline, $0).
+"""Replay the SUPERSEDED paid runs from their cassettes (offline, $0).
 
-For each of the ten pre-registered runs, this re-runs the FULL pipeline (loaders
-+ GEPA + scoring) in strict `--replay` mode against the committed cassette — no API
-key, no spend, and any cassette miss raises — then checks the replayed per-arm
-seed/optimized held-out scores equal the committed results JSON exactly. GEPA is
-deterministic on replay (verified), so a clean match end-to-end demonstrates full
-reproducibility.
+STATUS — read this before quoting any number this script prints. The eleven runs listed
+below were recorded under a harness with three defects that a later audit established:
+
+  1. the reflective dataset was component-agnostic (`adapter.py` handed every gene the
+     GENERATOR's input/output), so the critique gene was optimized blind to the critique;
+  2. GEPA ran under its default one-component-per-proposal selector, so a two-gene arm
+     searched the productive gene about half as hard as the one-gene arm; and
+  3. arm C's control was saturated (a perfect 1.0), so it proposed nothing and could not
+     detect the failure it advertised.
+
+The harness has since been corrected, and the corrected wiring changes every reflection
+prompt — hence every cassette key. These runs therefore CANNOT be replayed by the current
+code, and this script no longer asserts that they do. It is retained to document what was
+recorded, and to replay any run whose cassette was captured under the current wiring; runs
+in `SUPERSEDED` are reported and skipped rather than silently "verified".
+
+`Δ(D−B)` from a superseded run is not evidence about loop-level optimization: on the text
+runs the verify gene was byte-identical to the seed in every arm-run inspected, so the
+treatment was never applied and the zero is an identity. Re-run under the corrected
+harness before drawing conclusions.
 
 Run with the eval venv (has gepa+litellm):
     scratchpad/evalvenv/bin/python scripts/verify_reproducibility.py
@@ -23,7 +37,26 @@ from pathlib import Path
 import run_validation_study as cli
 
 CASSETTES = "tests/fixtures/cassettes"
-EXPECTED_RUNS = 10  # every pre-registered run must be verified before declaring success
+# Every entry below predates the harness correction, so none of them can replay under the
+# current code. Listing them explicitly (rather than deleting them) keeps the record of
+# what was run, and makes the count of still-verifiable runs honest: zero, until a run is
+# recorded under the corrected wiring.
+SUPERSEDED = frozenset(
+    {
+        "run1 single-constraint",
+        "run2 easy-multi",
+        "run3 hard-multi",
+        "run4 feedback",
+        "run5 plan",
+        "run6 cross-lineage",
+        "run7 oracle",
+        "run8 fix-budget",
+        "run9 fb-actionability lo",
+        "run10 fb-actionability hi",
+        "D5-code MBPP+ (saturated)",
+    }
+)
+EXPECTED_RUNS = 0  # runs recorded under the CORRECTED harness; none yet.
 
 # (label, committed results JSON, cassette, exact CLI args). reflection_calls and
 # task-set come from each run's pre-registration (not stored in the older metas).
@@ -250,7 +283,39 @@ RUNS = [
             "3",
         ],
     ),
+    (
+        # Cross-domain (appendix): MBPP+ saturated its train split (all arms == seed,
+        # a degenerate zero), but it still reproduces bit-for-bit — pure-function tasks
+        # execute deterministically in the subprocess sandbox, so replay is exact.
+        "D5-code MBPP+ (saturated)",
+        "docs/validation-study-code.json",
+        f"{CASSETTES}/study-code.json",
+        [
+            "--task-set",
+            "code",
+            "--seeds",
+            "0,1",
+            "--n-train",
+            "6",
+            "--n-heldout",
+            "10",
+            "--max-metric-calls",
+            "20",
+            "--reflection-calls",
+            "4",
+            "--loop-max-retries",
+            "1",
+        ],
+    ),
 ]
+
+# The cross-domain BigCodeBench-Hard run (D5, docs/validation-study-bcb.json) is
+# INTENTIONALLY NOT verified here: it is not bit-for-bit replayable. Model solutions may
+# use unseeded randomness, so re-executing them in the Docker sandbox yields run-to-run
+# variation that shifts the content-addressed prompt key — an intrinsic property of
+# executable-code benchmarks. Per-execution grading is deterministic and the headline
+# reproduced identically across two independent paid runs (see the paper, "Reproducibility
+# scope"); strict LLM-call replay is out of scope for it by construction, not oversight.
 
 
 def _scores(runs: list[dict]) -> list[tuple]:
@@ -290,7 +355,12 @@ def verify_one(committed: str, cassette: str, args: list[str]) -> tuple[bool, st
 def main() -> int:
     verified = 0
     all_ok = True
+    skipped = 0
     for label, committed, cassette, args in RUNS:
+        if label in SUPERSEDED:
+            skipped += 1
+            print(f"[SKIP] {label:22} recorded under the pre-correction harness")
+            continue
         try:
             ok, detail = verify_one(committed, cassette, args)
         except Exception:  # noqa: BLE001 — a cassette miss OR a real code regression
@@ -299,14 +369,22 @@ def main() -> int:
         verified += 1
         all_ok &= ok
         print(f"[{'OK ' if ok else 'FAIL'}] {label:22} {detail}")
-    # Guard against a vacuous pass: an empty/truncated RUNS list must NOT print success.
-    # `all_ok` seeds True, so without this a zero-iteration loop would claim reproduction.
-    complete = all_ok and verified >= EXPECTED_RUNS
-    if all_ok and verified < EXPECTED_RUNS:
-        print(f"\nINCOMPLETE: only {verified}/{EXPECTED_RUNS} runs registered — NOT proven.")
+    print(f"\n{skipped} run(s) skipped as superseded; {verified} replayable run(s) checked.")
+    # Guard against a vacuous pass: an empty/truncated RUNS list, or a list where every
+    # entry is superseded, must NOT print success. `all_ok` seeds True, so without the
+    # `verified > 0` term a zero-iteration loop would claim reproduction — which is exactly
+    # the failure mode this script exists to prevent.
+    complete = all_ok and verified > 0 and verified >= EXPECTED_RUNS
+    if verified == 0:
+        # Say this plainly rather than exiting 0 on an empty check, which would read as
+        # "reproduction proven" when nothing was actually replayed.
+        print(
+            "NOTHING PROVEN: no run has yet been recorded under the corrected harness. "
+            "Re-run the study, then register it here."
+        )
     else:
         print(
-            f"\nALL {verified} RUNS REPRODUCE FROM CASSETTE ($0, offline)."
+            f"ALL {verified} RUNS REPRODUCE FROM CASSETTE ($0, offline)."
             if complete
             else "REPRODUCTION FAILED."
         )

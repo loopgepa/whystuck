@@ -1,0 +1,245 @@
+{
+  "entries": {
+    "worker:127a40e766f60b8128e4b3bbf1652d28ad7acc44ab266ea52d20d86162741bb5": {
+      "name": "worker",
+      "output": "```python\ndef find_star_num(n):\n    return 6 * n * (n - 1) + 1\n```"
+    },
+    "worker:1423544775ae8f22694c1ba1258146243145194a293307149d3fd16e9cd0c418": {
+      "name": "worker",
+      "output": "```python\nimport math\n\ndef angle_complex(a, b):\n    x = a.imag if isinstance(a, complex) else a\n    y = b.imag if isinstance(b, complex) else b\n    return math.atan2(y, x)\n```"
+    },
+    "worker:1afa02179de599af50ffd332d4237ed8170737fdb44504a38da324c7371423f0": {
+      "name": "worker",
+      "output": "```python\ndef find_even_pair(lst):\n    even_count = sum(1 for x in lst if x % 2 == 0)\n    odd_count = len(lst) - even_count\n    return even_count * (even_count - 1) // 2 + odd_count * (odd_count - 1) // 2\n```"
+    },
+    "worker:1f24a119bacb57bb2b89894b33727ce85cb2a0e85326841e0346af40e2b40b64": {
+      "name": "worker",
+      "output": "```python\ndef all_unique(lst):\n    return len(lst) == len(set(lst))\n```"
+    },
+    "worker:31c3f4b0de572d7eb3c17f410f40fbba3e0ea028ea7378bab678a46083304d16": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:32091a3b920f5d061281637b41d4d3a236c01f5d93a1fc355a749e0c1268d835": {
+      "name": "worker",
+      "output": "```python\nimport math\n\ndef angle_complex(a, b):\n    return math.atan2(b.imag if isinstance(b, complex) else b, a.imag if isinstance(a, complex) else a)\n```"
+    },
+    "worker:33e89078e9c601b85375615d1ff0e7d8400ce9bf34345391db8d52a38b81b942": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:3a08ba3f8d19ff325fcfdd6b954ae25e916856322e0eb3ce0afef80d51388c91": {
+      "name": "worker",
+      "output": "```python\ndef kth_element(arr, k):\n    return arr[k-1]\n```"
+    },
+    "worker:3a1488829b8c9d8009e0106afe30882e81dbfa9be7fd7d913eac4e690b932253": {
+      "name": "worker",
+      "output": "```python\ndef count_Primes_nums(n):\n    if n < 2:\n        return 0\n    sieve = [True] * n\n    sieve[0] = sieve[1] = False\n    for i in range(2, int(n**0.5) + 1):\n        if sieve[i]:\n            for j in range(i*i, n, i):\n                sieve[j] = False\n    return sum(sieve)\n```"
+    },
+    "worker:3c3ab84893c57be6de73135303baa885dc0b49aabb53512049a17c49351851ed": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:414a4ac7bdfc7aadddfc2eb703aefdcbc4f57b901f6968eeea1255627fdaa293": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:418c4ff50b22be9be5ec21f229e4dada22c6b86637841876e8049975221a09b5": {
+      "name": "worker",
+      "output": "```python\ndef sum(a, b):\n    common_divisors_sum = 0\n    for i in range(1, min(a, b) + 1):\n        if a % i == 0 and b % i == 0:\n            common_divisors_sum += i\n    return common_divisors_sum\n```"
+    },
+    "worker:43932792ce7d704763ba79e3b4d1789b7e2201566ed73f747116014d8b819895": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:540c6377eec3fdd1c4efa1f965d2900d4e6e4a3ffb18535b1d3a78db2dcef001": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:55037d8be6881e43489a314fe76003e35341f8ea64722c37ca7e0d9e08d0457a": {
+      "name": "worker",
+      "output": "```python\nimport math\n\ndef circle_circumference(radius):\n    return 2 * math.pi * radius\n```"
+    },
+    "worker:575e453aa147d0722a1935091aa17a3092e8eb837616a1e4d83aac5ecb5005a2": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:58c0e15f482f4ffe862d29abc4ab578a89cf8913bc2bb047bf449d38dfca23cf": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:5cfad7e716400954b695e9e87866f289e9870a25ca06c399ebc3c1f8241f00bc": {
+      "name": "worker",
+      "output": "```python\ndef remove_dirty_chars(s1, s2):\n    return ''.join(ch for ch in s1 if ch not in s2)\n```"
+    },
+    "worker:5d714e9e2ae44673ab05240049664846ea3c60a89929c7f7decbb36df4dddd1e": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:600892c6af101924da2e645d23f2854d15d11330bcc43510b6f692f2fac1bad7": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:6501b31bda5e4bd1a8baf721c6069ca2d1325973138a473c4bcf6c5c20b7e192": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:696f645ab9fee9aaa97358d168ff2dec8c0dd6736ac54b6a4183833ae5c8e320": {
+      "name": "worker",
+      "output": "```python\ndef is_Sum_Of_Powers_Of_Two(n: int) -> bool:\n    # Check if the binary representation of n contains no zeros\n    return '0' not in bin(n)[2:]\n```"
+    },
+    "worker:6b5403ed20894fc5c6222dc6a3215e4c77867289c1b0f05d8cc2ffba3fc2b9a1": {
+      "name": "worker",
+      "output": "```python\ndef freq_count(lst):\n    freq = {}\n    for item in lst:\n        freq[item] = freq.get(item, 0) + 1\n    return freq\n```"
+    },
+    "worker:6c38d1b4a7829fbdc2a52c9a2566acfedc000ad703562088c3f683a4312d75b6": {
+      "name": "worker",
+      "output": "```python\ndef smallest_num(lst):\n    return min(lst)\n```"
+    },
+    "worker:706864376b533002efa361419ad99cc87d2f4f7cd029a6f490a15c68f8c9cbb2": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:7698b36eb45130a4f5ee54407bf9fb22d46c8d75ed7dd1d8cf460e4293938620": {
+      "name": "worker",
+      "output": "```python\ndef find_Max_Num(digits):\n    return int(''.join(map(str, sorted(digits, reverse=True))))\n```"
+    },
+    "worker:7734d02ee66c39dec70bf11787e8566419825048e9dd678a3425e87c8860d9be": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:7757eaaf059c33b8c8869b80cfcc68597fc2ca22925d5bd61f88443ec3797fac": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:7acc57c346514a7fc9461037d2e0564e876b5ca5aaac47c9093cf81d218d47c9": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:81297dd9e034e655061c226d5354d47c09984b62004e9e6f7a336c87ce1f5dc6": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:89aec20169042323eba66bbea73f6f530b43a09b6846b3fd7fcf33d0e92df458": {
+      "name": "worker",
+      "output": "```python\nimport math\n\ndef angle_complex(a, b):\n    x = a.imag if isinstance(a, complex) else a\n    y = b.imag if isinstance(b, complex) else b\n    return math.atan2(y, x)\n```"
+    },
+    "worker:8aa639d183e88bee2d6de1bf3185bce6f99252eb4e33da1b50b36cd7c90807ec": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:8d9f3251c61337043288d31d47093f430731c0507f1d0c3f428fe23770829b1f": {
+      "name": "worker",
+      "output": "```python\ndef sum_negativenum(nums):\n    return sum(x for x in nums if x < 0)\n```"
+    },
+    "worker:8f7d6ca5fb50cfa5bf35a240267c1d95c5eca246f7f304b821441f22556d7123": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:9139a9ef6641cd23b493af18863ae9af1f8ed6f10b75fb6a94dcfd0b71d175ee": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:9232c4dd8d7a4d3742fbe27f5cfb17f4ed08efecbda05c06dd7eb1070dbe5cf2": {
+      "name": "worker",
+      "output": "```python\ndef next_power_of_2(n):\n    if n <= 0:\n        return 1\n    power = 1\n    while power < n:\n        power <<= 1\n    return power\n```"
+    },
+    "worker:92509e777913d431c6f8af0c553e954d2271518b988a4315379116b114ac7920": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:92cbf4c2f077a58824737fa7a600f136b08b5896f32d7a55dcd54b3f4bd5101f": {
+      "name": "worker",
+      "output": "```python\ndef count_Set_Bits(n):\n    return bin(n).count('1')\n```"
+    },
+    "worker:97b2eb0af6d5667429e7f0878865b3283e474ac9ce34605d872ac0eb2672ec37": {
+      "name": "worker",
+      "output": "```python\ndef is_Sum_Of_Powers_Of_Two(n: int) -> bool:\n    # Return True if n > 0 and the least significant bit is 0 (no 2^0 term)\n    return n > 0 and (n & 1) == 0\n```"
+    },
+    "worker:994886d477c01295049b6735a0af9f14962f27c7e3496bf8fafe1c2c5ca11912": {
+      "name": "worker",
+      "output": "```python\ndef closest_num(n):\n    return n - 1\n```"
+    },
+    "worker:9d82fc1c73824c4347f6caf501689cf76aba830594f8f1e478af7fe1360e0d4a": {
+      "name": "worker",
+      "output": "```python\ndef dif_Square(n):\n    return n % 4 != 2\n```"
+    },
+    "worker:a1e63001c94661711b168fe27f8231c8f679b6de7cc5b99e9ef5f838d08fcd13": {
+      "name": "worker",
+      "output": "```python\ndef square_perimeter(side_length):\n    return 4 * side_length\n```"
+    },
+    "worker:ab8a5e2adea5f6dc07065b7215f5e0b2912ac627824d90260b2f70f74a95b2a0": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:aec40133785d34c39485b913829fea6439a5bdfab0012cc01bda19b9a6ce98df": {
+      "name": "worker",
+      "output": "The draft solution checks that the binary representation contains no zeros, which means all bits are 1's starting from the most significant bit. This corresponds to numbers like 3 (binary 11), 7 (binary 111), 15 (1111), etc.\n\nHowever, the task requires that the number be represented as the sum of **non-zero powers of two**, meaning each power of two used must have an exponent greater than zero (i.e., powers like 2^1=2, 2^2=4, 2^3=8, etc.), no zero powers (2^0=1) allowed.\n\nChecking the test cases:\n\n- 10: 10 = 2 + 8 (2^1 + 2^3) -> True  \n- 7: 7 = 1 + 2 + 4 (2^0 + 2^1 + 2^2) -> Should be False because power 0 is included  \n- 14: 14 = 2 + 4 + 8 (2^1 + 2^2 + 2^3) -> True\n\nThis confirms the requirement: the sum must include only powers of two with exponents >= 1.\n\n---\n\n**How to solve it?**\n\nWe can iterate over bits from position 1 upwards and check if the sum of those powers equals `n`. But it's easier to check if the binary representation of n has any '1' bit in the zero-th position. If it does, return False.\n\nTherefore, for `n`, check if the least significant bit is zero (meaning 2^0 is not in the sum), and all bits set are allowed powers of 2 (powers \u2265 1).\n\nIn other words:  \n- If the least significant bit of n is 1 -> return False  \n- Else -> return True if n > 0  \n\nAlso, n must be representable as sum of powers of 2 (which all positive integers are), so only the zero power check matters:\n\n```python\ndef is_Sum_Of_Powers_Of_Two(n: int) -> bool:\n    # Return False if the least significant bit is set (2^0 included)\n    if n <= 0:\n        return False\n    if n & 1:\n        return False\n    return True\n```\n\nDouble check with tests:\n\n- 10 (1010 binary) LSB=0 -> True  \n- 7 (0111 binary) LSB"
+    },
+    "worker:b12ca5450716ab6260dba6ae51c521d04370aff1b698af5ca8abdb28412041b2": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:b4ac15122bff9dcd373999d7b69c26db409beb5dc36595d1a96ca19863426d68": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:b7afde60be178a9460fad96f0b4c42ab5449c8f175dd9d1ad5298a3729665143": {
+      "name": "worker",
+      "output": "```python\ndef sum_even_and_even_index(lst):\n    return sum(x for i, x in enumerate(lst) if i % 2 == 0 and x % 2 == 0)\n```"
+    },
+    "worker:ba9e5e92a79038d01afbf8876e450a3459aff629c759ca9b6fece4982f2653a2": {
+      "name": "worker",
+      "output": "```python\ndef centered_hexagonal_number(n):\n    return 3 * n * (n - 1) + 1\n```"
+    },
+    "worker:bd30602e0ea10f0bdaf14e8957a1ca041f3f959732bbca31ad6ba0ece26834e4": {
+      "name": "worker",
+      "output": "```python\ndef power(a, b):\n    return a ** b\n```"
+    },
+    "worker:bf824582df0913bdf2692bbec53906c151a1c27fe3a991d4921ba3f96efd03e0": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:c2d7b041578d9d0aa1261a0bae98f43b5e4f61f59fc119a7901a714a489c2bf6": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:c683827b463876c3416fffa80ded83ef0799e0077dafcd9ce50ad166916182b8": {
+      "name": "worker",
+      "output": "```python\ndef max_sum(arr):\n    n = len(arr)\n    inc = arr[:]  # max sum of increasing subsequence ending at i\n    dec = arr[:]  # max sum of decreasing subsequence starting at i\n\n    for i in range(n):\n        for j in range(i):\n            if arr[j] < arr[i] and inc[j] + arr[i] > inc[i]:\n                inc[i] = inc[j] + arr[i]\n\n    for i in range(n-1, -1, -1):\n        for j in range(n-1, i, -1):\n            if arr[j] < arr[i] and dec[j] + arr[i] > dec[i]:\n                dec[i] = dec[j] + arr[i]\n\n    max_sum_bitonic = 0\n    for i in range(n):\n        # Subtract arr[i] because it is counted twice in inc[i] + dec[i]\n        max_sum_bitonic = max(max_sum_bitonic, inc[i] + dec[i] - arr[i])\n\n    return max_sum_bitonic\n```"
+    },
+    "worker:c89fe1ffb9f3f1cd1d2e2dbe0f9926824295af6736eb0cb8c50d1c5f2b68d371": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:cc8c9951a2156555cd85056d7378f6716992bb1e7afb9ffc265f8d9f7021b0be": {
+      "name": "worker",
+      "output": "```python\nimport math\n\ndef surfacearea_sphere(radius):\n    return 4 * math.pi * radius ** 2\n```"
+    },
+    "worker:cd1bd1cf5e90aa6fd4892bd0b26407849dbc394480958c562d781c17f045473b": {
+      "name": "worker",
+      "output": "```python\nimport math\n\ndef next_Perfect_Square(n):\n    root = math.isqrt(n) + 1\n    return root * root\n```"
+    },
+    "worker:cfd96160a98f16d3b52595436da160fb7106adc9102d4939136ce9d5ac57bb7d": {
+      "name": "worker",
+      "output": "```python\ndef find_Volume(length, width, height):\n    return (0.5 * width * height) * length\n```"
+    },
+    "worker:d0c71392cb7fa1e1dfdc821800d5119f3c014f21f5df42af9d4d78790aa4c563": {
+      "name": "worker",
+      "output": "```python\ndef hexagonal_num(n):\n    return n * (2 * n - 1)\n```"
+    },
+    "worker:d1648d4bdd66dfec11a99672b9a550d30ee83a4a99e181a896f19c8150a74e19": {
+      "name": "worker",
+      "output": "```python\ndef eulerian_num(n, m):\n    if m < 0 or m >= n:\n        return 0\n    if n == 1 and m == 0:\n        return 1\n    return (n - m) * eulerian_num(n - 1, m - 1) + (m + 1) * eulerian_num(n - 1, m)\n```"
+    },
+    "worker:ddfff7986a047ee3a692b498dca4d7435e323054ecc72558f310c300552e4c43": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:f2172b564560cf513f4966c20a0f211688aa9438375ae40d71e5d4e61c078c1b": {
+      "name": "worker",
+      "output": "```python\ndef even_Power_Sum(n):\n    return sum((2*i)**5 for i in range(1, n+1))\n```"
+    }
+  },
+  "version": 1
+}

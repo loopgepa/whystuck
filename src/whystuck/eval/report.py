@@ -108,6 +108,26 @@ def _headroom_note(runs: list[Run]) -> str | None:
     return None
 
 
+def _output_cap_note(meta: dict[str, Any]) -> str:
+    """Task-set-aware note on whether the worker output cap can truncate answers.
+
+    Code/BCB solutions are long, so the cap is a real (equal-for-every-arm) floor;
+    IFBench-style text constraints are short, so the cap never binds. Hardcoding the
+    IFBench wording for every task set was a template-drift bug (it misdescribed the
+    code and bcb reports, where solutions are exactly why the cap is larger)."""
+    if meta.get("task_set") in {"code", "bcb"}:
+        return (
+            "Code solutions can be long, so this cap can in principle truncate an answer; when it "
+            "does, the truncation floor applies to every arm equally, so it cannot bias the "
+            "loop-level-vs-prompt-only comparison."
+        )
+    return (
+        "The instruction-following constraints used here have short outputs, so the cap does not "
+        "truncate answers; if it ever did, that floor would apply to every arm equally, not bias "
+        "the loop."
+    )
+
+
 def _results_table(runs: list[Run]) -> str:
     header = (
         "| Arm | What GEPA evolves | seed held-out | optimized held-out (mean ± std) | Δ |\n"
@@ -182,10 +202,8 @@ def render_report(runs: list[Run], *, meta: dict[str, Any]) -> str:
         f"- Worker completions are hard-capped at {meta.get('worker_max_output_tokens', '?')} "
         "tokens (output tokens — the dominant cost — are a genuine ceiling the guard prices "
         "exactly). Input tokens are a conservative estimate sized for GEPA-evolved instructions, "
-        "not an absolute bound, so the $5 guard is enforced pre-flight on that estimate rather "
-        "than metered mid-run. The IFBench subset used here has only short-output constraints, so "
-        "the cap does not truncate answers; if it ever did, that floor would apply to every arm "
-        "equally, not bias the loop.\n"
+        "not an absolute bound, so the guard is enforced pre-flight on that estimate rather "
+        f"than metered mid-run. {_output_cap_note(meta)}\n"
     )
 
     return (

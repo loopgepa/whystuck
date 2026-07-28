@@ -18,9 +18,9 @@
 \newcommand{\dd}{\ensuremath{\Delta}}
 \newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
 
-\title{Does Optimizing the Loop Beat Optimizing the Prompt?\\
-A Pre-Registered Study of Componentized Reflective Prompt Evolution\\
-on Verifiable Instruction Following}
+\title{Your Loop Optimizer Is Not Optimizing Your Loop\\
+\large A silent failure mode in componentized prompt optimization,\\
+and the one integer that catches it}
 
 \author{Author list TBD \\ \texttt{github.com/loopgepa/whystuck}}
 \date{Draft: July 2026}
@@ -30,33 +30,36 @@ on Verifiable Instruction Following}
 
 \begin{abstract}
 Reflective prompt optimizers such as GEPA \citep{agrawal2025gepa} can evolve
-\emph{multiple} text components of a compound LLM system, not just a single
-prompt. A natural hypothesis is that optimizing more of the loop --- in
-particular the self-critique / verification component of a generate--critique--refine
-loop --- should beat optimizing the generation prompt alone. We test this
-hypothesis directly and pre-register every run. Across ten pre-registered
-experiments on verifiable, IFEval-style instruction-following
-\citep{zhou2023ifeval} we find \textbf{no measurable advantage} for loop-level
-optimization over prompt-only optimization: the held-out gap
-$\dd = \mathrm{mean}(D) - \mathrm{mean}(B)$ is $\le 0.01$ in every test with genuine
-headroom (and within seed noise), including runs where the critique step is given a
-real (non-oracle) measurement tool, a third interacting module, and a
-different-model critic. To locate the cause we measure the in-loop critique as a
-failure detector (offline, from recorded transcripts) and add an oracle-critique
-control. Two findings sharpen the picture: the intrinsic self-critique is a
-near-random detector ($\mathrm{F}_1\!\approx\!0.11$), consistent with the documented
-unreliability of LLM self-verification \citep{huang2023cannot}; yet a \emph{perfect}
-detector (oracle) does \emph{not} maximize performance --- detector quality vs.\
-held-out score is non-monotonic (F$_1$ $0.11\!\to\!0.83\!\to\!1.0$ maps to seed
-$0.765\!\to\!0.837\!\to\!0.748$). The binding constraint is therefore not detection
-but the \emph{fix} step. Holding detection at the perfect oracle and varying only
-the repair feedback's actionability isolates this: concrete \emph{measured} edits
-beat a terse verdict by $+0.063$ (seed $0.810\!\to\!0.873$), while naming the failed
-constraint alone adds nothing --- the fix step is partly feedback-limited, and the
-actionable content is the measurement, not the diagnosis. The lever is feedback
-\emph{shape}, however, not loop-level optimization ($\dd$ stays $0.00$), and a
-generator-limited residual remains. We release the full harness, cassette-replayable
-transcripts, and pre-registrations for reproduction.
+\emph{multiple} text components of a compound LLM system, not just a single prompt, and a
+natural hypothesis is that optimizing more of a generate--critique--refine loop should beat
+optimizing its generation prompt alone. We pre-registered and ran eleven four-arm
+experiments testing this on verifiable instruction following \citep{zhou2023ifeval} and on
+frontier-hard code \citep{zhuo2024bigcodebench}, and measured $\dd(D-B)\approx 0$
+throughout. \textbf{An audit of our own harness then established that the loop-level arm's
+treatment had never been applied}, and this paper reports that finding rather than the null
+it invalidates. Two defects combined: our reflective dataset was \emph{component-agnostic},
+handing the critique gene the \emph{generator's} inputs and outputs, so the optimizer
+rewrote a detector while blind to that detector's behaviour --- it duly proposed generation
+prose into a critique slot; and GEPA's default selector rewrites one component per
+proposal, so the two-gene arm searched the shared productive gene roughly half as hard as
+the one-gene arm under a matched cap. Replaying our flagship run, the critique gene is
+byte-identical to the seed in $15/15$ winning genomes. We also correct a percentile-index
+error that made our one interval-excluding-zero result appear significant: the actuator
+run's $\dd(D-B)=-0.10$ has an exact-resample interval of $[-0.150,+0.000]$, which
+\emph{includes} zero (sign test $p=0.50$). Both defects are invisible in held-out scores,
+which is what makes them worth reporting: any componentized-optimizer study can measure a
+confident zero from an experiment that never ran. Findings that survive the audit are the
+mechanistic ones: the intrinsic critique is a near-random failure detector
+($\mathrm{F}_1\!\approx\!0.11$), consistent with the documented unreliability of LLM
+self-verification \citep{huang2023cannot,kamoi2024whencan} and with the independent
+observation that detection ability does not predict correction success
+\citep{decomposing2026selfcorrection}; \emph{given} a perfect checker at inference, the
+repair signal's shape matters ($+0.063$ text, $+0.20$ code, both intervals excluding zero)
+while naming the failed constraint alone adds nothing; and the residual localizes to one
+mechanical skill (\texttt{exact\_word\_count}, $0.16\!\to\!0.33\!\to\!0.50$). We release
+the corrected harness, which reports per-gene accepted-change counts and train aggregates
+so that ``the treatment was applied'' is checkable by a reader, together with every
+cassette and pre-registration --- including the superseded ones, labelled as such.
 \end{abstract}
 
 \section{Introduction}
@@ -72,7 +75,12 @@ frontier of candidates. DSPy \citep{khattab2023dspy} similarly compiles and
 optimizes multi-module pipelines end-to-end.
 
 This capability raises a concrete engineering question that, to our knowledge,
-has not been isolated experimentally: \emph{given a self-refine loop, does
+has not been isolated experimentally for a self-refine loop's own verifier. The
+adjacent question for multi-\emph{agent} systems has since been benchmarked:
+\citet{bai2026masprompt} find that GEPA improves single-agent performance on all five of
+their tasks ($+2$ to $+14$ points) while its multi-agent extension ranges from $-16$ to
+$+14$ depending on task and workflow topology --- more optimizable surface is not reliably
+better. Our question is narrower and about a different object: \emph{given a self-refine loop, does
 optimizing the loop's verification/critique component (and beyond) yield better
 held-out performance than optimizing only its generation prompt, under a matched
 budget?} We call the former \textbf{loop-level} and the latter
@@ -80,37 +88,91 @@ budget?} We call the former \textbf{loop-level} and the latter
 optimizable surface, more headroom --- and if true it would justify the extra
 cost of evolving critique rubrics and plan modules.
 
-We answer this question with a pre-registered, control-heavy study. Our
-contributions are:
+We set out to answer this question with a pre-registered, control-heavy study, measured
+$\dd\approx 0$ eleven times, and then found that our own harness had prevented the
+loop-level arm from receiving its intervention. What we can contribute is therefore
+different from what we planned, and in one respect more useful:
 \begin{enumerate}
-  \item A four-arm experimental design (Section~\ref{sec:method}) that isolates
-    loop-level from prompt-only optimization while holding the seed genome,
-    budget, task distribution, and scoring metric fixed, with two flatness
-    controls that verify the harness is sound.
-  \item Ten pre-registered experiments (Section~\ref{sec:results}) spanning
-    single-constraint, easy and hard multi-constraint (with genuine headroom), a
-    feedback-tool regime, a three-module regime, a different-model critic, an
-    oracle-critique control, an oracle fix-budget sweep, and a feedback-actionability
-    ablation. \dd\ is $\le 0.01$ (within noise) in every fair test.
+  \item \textbf{A silent failure mode for componentized optimization}
+    (Section~\ref{sec:defect}), established on our own artifact: a
+    \emph{component-agnostic reflective dataset} shows every component the generator's
+    inputs and outputs, so a critique gene is rewritten by a reflector that cannot see the
+    critique; and a one-component-per-proposal selector silently halves a two-gene arm's
+    search on the gene that actually moves the metric. Neither is visible in held-out
+    scores. Replaying our flagship run, the critique gene is byte-identical to the seed in
+    $15/15$ winning genomes and no critique proposal was ever accepted.
+  \item \textbf{The diagnostic that catches it}, now part of the released harness: every
+    arm reports per-gene accepted-change counts, its train aggregate, and its final gene
+    text, so ``the treatment was applied'' is checkable rather than assumed. We recommend
+    this as a reporting minimum for any multi-component optimization result.
+  \item \textbf{A statistical correction}: our exact-resample interval dropped the largest
+    resample atom, which at $n{=}3$ carries $1/27 = 3.7\% > \alpha/2$ and cannot be
+    excluded. The one result we had reported as excluding zero does not
+    (Section~\ref{sec:defect}).
   \item A taxonomy separating a legitimate non-oracle \emph{measurement tool}
     from oracle contamination (Section~\ref{sec:method}), a distinction a
     pre-spend design review found essential: two seemingly-innocuous statistics
-    were the scoring oracle in disguise.
-  \item A mechanistic account: the intrinsic critique is a near-random detector,
-    but --- via an oracle-critique control --- we show even a \emph{perfect} detector
-    does not lift performance, so the binding constraint is the fix step, not
-    detection (Section~\ref{sec:analysis}); plus a map of conditions under which
-    loop-level optimization could help (Section~\ref{sec:directions}).
+    were the scoring oracle in disguise. This part of the design held up.
+  \item A mechanistic account of the loop that survives the audit
+    (Section~\ref{sec:analysis}): the intrinsic critique is a near-random detector
+    ($\mathrm{F}_1\!\approx\!0.11$); \emph{given} a perfect checker at inference, repair
+    feedback shape is worth $+0.063$ (text) and $+0.20$ (code) while naming the failed
+    constraint adds nothing; and the residual localizes to a single mechanical skill.
 \end{enumerate}
 
 We report every result as-is, including a run in which optimization
-\emph{degraded} held-out performance. The point of the paper is not that GEPA is
-weak --- it is a strong optimizer --- but that \emph{where you point it matters},
-and the critique component of a self-refine loop is, on this task family, not a
-productive place to point it.
+\emph{degraded} held-out performance, and including the audit that invalidated our own
+headline. The point is not that GEPA is weak --- it is a strong optimizer --- but that
+\emph{pointing an optimizer at a component is not the same as optimizing it}, and the
+difference does not show up in the scores.
 
 \section{Background and Related Work}
 \label{sec:related}
+
+\paragraph{Loop engineering, and which loop this paper is about.}
+During June 2026 industry practice converged on a name for designing the machinery
+\emph{around} a model rather than its prompt. Steinberger compressed it into a slogan ---
+stop prompting coding agents, design the loops that prompt them
+\citep{steinberger2026loops} --- Osmani's essay named the practice \emph{loop engineering}
+\citep{osmani2026loop}, and Swyx framed the general form as \emph{loopcraft}, ``the art of
+stacking loops'' \citep{swyx2026loopcraft}. The stack is commonly decomposed into four
+loops \citep{langchain2026loopcraft}:
+
+\begin{description}
+  \item[L1 --- Agent loop.] The model calls tools repeatedly until the task is done.
+    \emph{Out of scope here}: our worker is a fixed generate--critique--refine sequence with
+    no tool-calling agent.
+  \item[L2 --- Verification loop.] The output is scored against a rubric and retried with
+    feedback if it fails. \textbf{This is our object of study.} The \texttt{ensure\_correct}
+    gene \emph{is} the verifier, the PASS gate plus \texttt{loop\_max\_retries} \emph{is}
+    the stop rule, and our fix-budget sweep ($R{:}1\!\to\!3$) is a stop-rule experiment.
+  \item[L3 --- Event-driven loop.] External events trigger agent runs inside a larger
+    system. \emph{Out of scope}: our loop is invoked once per benchmark task, so we study no
+    triggers, schedules, or cross-task memory.
+  \item[L4 --- Hill-climbing loop.] Execution traces feed an analysis step that improves the
+    harness configuration --- called ``arguably most important''
+    \citep{langchain2026loopcraft}. \textbf{This is our intervention.} GEPA reflects on
+    recorded traces and rewrites the loop's own text components; arm~D is an L4 loop pointed
+    at an L2 loop.
+\end{description}
+
+So the paper's question, in this vocabulary, is: \emph{can a hill-climbing loop improve a
+verification loop by rewriting its verifier?} ``Loop-level'' throughout means the verifier
+and its stop rule --- not the full stack --- and we vary topology only through an optional
+\texttt{plan} module and an optional repair \texttt{actuator}.
+
+Three consequences for how we read our own results. First, this framing is what makes the
+defect in Section~\ref{sec:defect} worth a paper rather than a bug report: the failure is
+not GEPA-specific but a hazard for \emph{any} L4 loop, because attributing trace evidence to
+the wrong L2 component optimizes the wrong thing while the scores stay plausible. Second,
+Osmani's central prescription for L2 is a \emph{separated} verifier --- ``the model that
+wrote the code is way too nice grading its own homework''
+\citep{osmani2026loop} --- which is a qualitative claim our design measures directly: the
+intrinsic critique scores $\mathrm{F}_1\!\approx\!0.11$ as a failure detector
+(\S\ref{sec:analysis}), and our cross-lineage critic run tests the separation remedy.
+Third, chronology: our runs were pre-registered and executed around and before these posts
+appeared, so the correspondence is convergent rather than causal --- the practitioner
+literature supplied the vocabulary and the stakes, not the hypotheses.
 
 \paragraph{Reflective and evolutionary prompt optimization.}
 GEPA \citep{agrawal2025gepa} reports beating GRPO by up to $20\%$ with $35\times$
@@ -170,7 +232,12 @@ evolve, so a held-out gap isolates componentized optimization from a
     enabled) with the LLM worker.
 \end{itemize}
 $\dd = \mathrm{mean}(D) - \mathrm{mean}(B)$ is the quantity of interest.
-A and C are expected flat; a non-flat A or C would invalidate the run.
+A and C are expected flat. \textbf{Caveat, established after the fact}
+(\S\ref{sec:defect}): as originally implemented neither control could fail --- A copied its
+own seed score with $\delta$ hardcoded to $0.0$, and C's command loop scored a saturated
+$1.0$, so it proposed nothing. The corrected harness re-measures A and gives C a
+genome-blind constant draft scored by the real metric, which is flat without being
+saturated.
 
 \paragraph{Optimizer.}
 We drive the official GEPA \citep{agrawal2025gepa} via a loop-genome adapter:
@@ -210,11 +277,15 @@ name$+$args), so runs replay offline at zero cost and partial spend is always
 persisted. Reproduction is a first-class, strict operation: re-running any study
 with \texttt{-{}-replay} re-executes the entire pipeline (loaders, GEPA search,
 scoring) against the cached calls with no API key, and any cassette miss raises.
-GEPA is deterministic under replay, so this is bit-for-bit:
-\texttt{scripts/verify\_reproducibility.py} replays all ten committed runs and
-confirms every per-arm held-out score matches its released JSON exactly. Output tokens are hard-capped via enforced \texttt{max\_tokens};
-a pre-flight guard refuses any run whose (conservative) estimate exceeds a
-US\$5 ceiling. Every experiment was pre-registered --- hypothesis, frozen
+GEPA is deterministic under replay, so replay is bit-for-bit:
+\texttt{scripts/verify\_reproducibility.py} registers eleven committed runs and confirmed
+that every per-arm held-out score matched its released JSON exactly. \textbf{Those eleven
+runs are now labelled superseded} (\S\ref{sec:defect}): the corrected harness changes every
+reflection prompt and therefore every cassette key, so it cannot replay them, and the script
+reports them as skipped rather than verified. Output tokens are hard-capped via enforced \texttt{max\_tokens};
+a pre-flight guard refuses any run whose (conservative) estimate exceeds
+\texttt{-{}-max-usd}, whose default is \$5; three runs raised it explicitly (to \$6.18,
+\$5.89 and \$11.76), so \$5 is a default rather than a study-wide ceiling. Every experiment was pre-registered --- hypothesis, frozen
 configuration, expected seed band, and verdict rule committed to version control
 \emph{before} spending.
 
@@ -250,7 +321,7 @@ leaderboard number.
 \section{Results}
 \label{sec:results}
 
-Table~\ref{tab:results} collects all ten pre-registered runs.
+Table~\ref{tab:results} collects all ten pre-registered runs. Read them under the audit in \S\ref{sec:defect}: the $\dd(D-B)$ column does not measure what its header claims, because the loop-level arm's extra gene was never changed.
 
 \begin{table}[t]
 \centering
@@ -330,7 +401,10 @@ words but needs exactly 20: add 18''). The primary contrast is decisive: $\dd(\t
 \text{lo}) = 0.873 - 0.810 = +0.063$ on the seed held-out (arm A, no GEPA), clearing the
 pre-registered $+0.05$ threshold --- the fix step is partly \textbf{feedback-limited}.
 All three seeds are positive ($+0.090, +0.025, +0.075$) and an exact-resample $95\%$
-interval $[+0.025, +0.085]$ excludes zero, so the effect survives at $n{=}3$. Two
+interval $[+0.025, +0.090]$ excludes zero, so the effect survives at $n{=}3$ --- though a
+sign test at $n{=}3$ cannot fall below $p=0.25$, so this rests on the magnitudes rather than
+on replication across seeds, and the whole comparison is a ceiling result measured with the
+true metric gating at inference (\S\ref{sec:defect}). Two
 sharp qualifications follow. (i) The gain is entirely in the \emph{hi} step: lo $\approx$
 mid ($0.810$ vs.\ $0.813$), so naming \emph{which} constraint failed adds nothing over a
 bare verdict; only the concrete, measured edit moves the needle. (ii) The lever is the
@@ -350,11 +424,16 @@ $0.765$ sits inside the pre-registered band, so the loop had real headroom and
 the verify gene had multiple constraints to decompose --- yet $\dd = 0.00$. The
 tie is not a flat line but a wash: per-seed, D and B trade wins
 (e.g.\ seed 1 $D\!+\!0.05$; seed 4 $B\!+\!0.055$) and net to zero. Control C is
-dead-flat on every seed, confirming the harness. This null is tight, not merely
-underpowered: an exact-resample (all $n^n$ resamples) $95\%$ interval on the paired
-per-seed $\dd$ is $[-0.033, +0.033]$ for run 3 ($n{=}5$), and \emph{exactly}
-$[0.000, 0.000]$ for runs 4 and 10, where B and D produce byte-identical optimized
-genomes on every seed --- the difference is a consistent zero, not a noisy one.
+dead-flat on every seed --- which we read at the time as confirming the harness, and which
+\S\ref{sec:defect} shows it cannot, because that control was saturated and therefore
+incapable of moving. An exact-resample (all $n^n$ resamples) $95\%$ interval on the paired
+per-seed $\dd$ is $[-0.033, +0.033]$ for run 3 ($n{=}5$) and \emph{exactly}
+$[0.000, 0.000]$ for runs 4 and 10. \textbf{We previously called this ``tight, not merely
+underpowered''; that reading is withdrawn} (\S\ref{sec:defect}). The $[0,0]$ runs are ones
+where B and D produced byte-identical optimized genomes on every seed, so both arms issued
+the same calls and the cassette served the same completions: the zero is an identity, and the
+interval is evidence that the treatment was not applied rather than evidence that it did
+nothing. Of the four fair null runs, $3/5$, $3/3$, $2/2$ and $2/3$ seeds are such ties.
 
 \paragraph{Feedback helps the baseline, not the gap (run 4).} Adding the
 measurement tool raised the seed loop from $0.765$ (run 3) to $0.837$ --- direct
@@ -367,6 +446,112 @@ is not evidence for loop-level optimization.
 module (D co-evolving three genes, B still one), optimization moved nothing on
 any arm and $\dd = 0.00$. More optimizable structure did not translate into a
 loop-level advantage at this budget.
+
+\subsection{Cross-domain corroboration: BigCodeBench-Hard}
+\label{sec:bcb}
+
+To test whether the instruction-following null generalizes to a domain where the
+verify step catches real \emph{semantic} errors and runs as an executable tool ---
+the regime \citet{shinn2023reflexion} find self-correction works --- we replicated
+the four-arm design on \textbf{BigCodeBench-Hard} \citep{zhuo2024bigcodebench}, hard
+hard enough that strong models score far below their full-benchmark pass@1 on it (the
+Hard subset is calibrated to stay challenging) \citep{zhuo2024bigcodebench}. (An earlier attempt on MBPP+
+\citep{liu2023evalplus} saturated its training split and is reported in
+Appendix~\ref{app:mbpp-failed}; that failure motivated the move to a frontier-hard
+benchmark.) Each task's \texttt{unittest} methods are partitioned into a visible half
+(the in-loop, executable signal) and a disjoint hidden half (the held-out scorer),
+reconstructing the anti-oracle split; solutions are graded in a pinned, offline Docker
+sandbox (\texttt{-{}-network none}, memory/PID caps, single-thread BLAS).\footnote{Executing
+untrusted \emph{model} code at scale surfaces a subtlety absent when only reference solutions
+run: a draft can exhaust the container's memory cap. Because we run one capped container at a
+time on a host with ample free RAM, such an out-of-memory kill is the \emph{solution's} failure
+(scored $0.0$), not a host fault --- distinct from a genuine infrastructure fault (daemon down,
+image/mount error), which aborts loudly rather than silently recording a $0.0$.} We ran arms
+A--D on $2$ seeds, $8$ train / $10$ held-out tasks drawn from a sandbox-verified
+$80$-task pool, worker \texttt{gpt-4.1-mini}, reflection \texttt{gpt-5.6-terra}, at
+$\mathrm{mmc}=30$.
+
+The seed baseline sits at $0.40$ (seed 0) and $0.50$ (seed 1) --- far from both floor
+and ceiling, so the loop has genuine headroom, unlike MBPP+. And unlike MBPP+, GEPA
+\emph{ran}: on seed 1 it accepted improving candidates for \emph{both} the prompt-only
+arm B (evolving \texttt{generate}) and the loop-level arm D (evolving \texttt{generate}
+\emph{and} \texttt{ensure\_correct}), each lifting the $8$-task training aggregate
+$0.375 \to 0.625$; on seed 0 neither arm accepted a candidate within budget, and the
+genome-blind control C is flat by construction. Yet on the held-out split \emph{every
+arm scored exactly its seed baseline} ($0.40$, $0.50$): the accepted training
+improvements changed which held-out tasks \texttt{gpt-4.1-mini} solves not at all. The
+headline is therefore a clean $\dd(D-B)=0.00$ (exact-resample $95\%$ CI
+$[0.000, 0.000]$) --- and, more pointedly, even when loop-level optimization has its
+extra lever and \emph{pulls} it (an accepted \texttt{ensure\_correct} rewrite that
+improves training), it yields no held-out gain over prompt-only. The
+instruction-following null recurs in a semantically-verified, executable-feedback
+domain: train-split improvement does not transfer, and the loop-level lever is inert
+on held-out.
+
+\paragraph{Actionable feedback lifts the code baseline too (cross-domain D2$'$).} The one
+intervention that helped on instruction-following --- concrete, measurement-shaped repair
+feedback (runs 9--10) --- transfers to code, and \emph{more strongly}. Holding the arm at A
+(no GEPA, so the lever is feedback \emph{shape}, not optimization) and varying only the in-loop
+visible-test feedback between a bare verdict (\emph{lo}) and the verdict plus the source of the
+visible tests the solution must satisfy (\emph{hi}), the held-out (hidden-test) score rises by
+a mean $+0.20$ across six seeds (per-seed $+0.40, 0.00, +0.20, +0.20, +0.20, +0.20$). An
+exact-resample $95\%$ interval is $[+0.100, +0.300]$, \emph{excluding zero} --- a
+$3\times$-larger effect than the instruction-following actionability lift ($+0.063$), plausibly
+because a code assertion is a sharper repair target than a word-count. Two qualifications hold
+as on instruction-following: the gain accrues to the \emph{baseline}, not to $\dd(D-B)$ (which
+stays $0.00$), so it is feedback \emph{shape}, not loop-level optimization --- GEPA did not need
+to discover it; and the held-out scores carry some execution non-determinism (the effect size
+dwarfs it, but we do not over-read the exact value). This reinforces the paper's conclusion:
+the productive lever is the fixer and the actionability of its feedback, not loop-level
+optimization of the critique.
+
+\paragraph{Can GEPA \emph{discover} the actionable feedback? The actuator experiment.}
+The $+0.20$ lift establishes that the fixer's feedback \emph{matters} --- but that feedback
+was hand-designed. The sharpest test of our thesis is whether GEPA can \emph{discover} the
+gain by optimization when pointed squarely at it. We add a fourth evolvable gene, an
+\texttt{actuator}: an LLM step that, on a failed critique, turns the visible-test signal and
+the visible-test source (the same \emph{hi} material) into the repair guidance fed to the
+refine step. Arm~B still evolves only \texttt{generate}; arm~D now co-evolves \texttt{generate}
+\emph{and} \texttt{actuator} with the detector (\texttt{ensure\_correct}) held \emph{fixed}, so
+any $D-B$ gap isolates optimization of the fixer's feedback --- the one component we know can
+help. A first run ($2$ seeds, $8$/$10$) gave a flat $\dd(D-B)=0.00$: GEPA proposed sensible
+actuator rewrites (e.g.\ ``produce concrete, draft-specific repair instructions; do not write
+vague advice such as `fix the syntax' ''), but accepted none that beat even the training
+subsample, and the single accepted \texttt{generate} rewrite did not transfer.
+
+To rule out that this null was a small-budget artifact, we ran a \emph{powered} replication:
+$3$ seeds, $20$ train / $20$ held-out, $\mathrm{mmc}=50$ --- $2.5\times$ the train size,
+$2\times$ the held-out resolution, $1.7\times$ the search. The powered result does not merely
+reproduce the null; it sharpens \emph{against} loop-level optimization. Prompt-only arm~B now
+\emph{transfers} to held-out ($+0.05, +0.15, 0.00$; mean $+0.067$) --- with a larger training
+split, evolving \texttt{generate} alone generalizes. But the loop-level arm~D does \emph{worse}:
+$\dd(D-B) = -0.10$ (per-seed $-0.15, -0.15, 0.00$; exact-resample $95\%$ CI
+$[-0.150, +0.000]$, which \emph{includes} zero; sign test $p = 0.50$ on the two non-tied
+seeds), and on seed~0 arm~D's optimization actively \emph{degrades} held-out
+($0.55 \to 0.45$). \textbf{Two corrections apply to this paragraph as first written}
+(\S\ref{sec:defect}). We reported the interval as $[-0.150,-0.050]$ and ``excluding zero'';
+that was a percentile-index error, and corrected it includes zero. And we explained the deficit
+as textbook over-fitting --- arm~D's larger search space fitting the $20$ training tasks harder
+--- which the harness contradicts: under GEPA's default one-component-per-proposal selector,
+arm~D searched the shared \texttt{generate} gene roughly \emph{half} as hard as arm~B, and the
+train aggregate that would have distinguished the two explanations was computed and discarded.
+What remains sayable is the ordering: across all three code configurations $D \le B$ on
+held-out, never $D > B$; and on $20$ binary-scored held-out tasks $-0.10$ is two task flips,
+against a seed spread of four to five flips across configurations. The honest reading is that
+raising train size, held-out resolution, seeds and search depth surfaced no hidden positive
+\emph{for an arm whose extra gene the harness was not equipped to optimize}.
+
+\paragraph{Reproducibility scope.} The main four-arm result reproduced \emph{identically}
+across two independent paid runs. Per-execution grading is deterministic, and we release the
+cassette and scores. We do \emph{not} claim byte-for-byte replay of the full LLM-call
+trace here, however: model solutions may use unseeded randomness, so re-executing them
+in the sandbox can yield run-to-run-varying test output --- an intrinsic property of
+executable-code benchmarks, not of our harness. (The instruction-following runs above,
+which never execute model code, do replay bit-for-bit.) We normalize the string-level
+non-determinism we can --- object ids, addresses, and temp paths in failure messages ---
+so that identical executions render identical feedback. The actuator runs (both the $2$-seed
+and the powered $3$-seed replication) share this scope: cassettes and scores released,
+per-execution grading deterministic, full-trace replay not claimed.
 
 \section{Analysis: Why the Loop-Level Lever Is Inert}
 \label{sec:analysis}
@@ -515,18 +700,136 @@ optimized instructions can overfit a training set \citep{yang2023opro}. With a
 small budget and small splits, GEPA's proposals can win on the training
 subsample and lose on held-out; this hurts B and D alike.
 
+\section{A Defect in Our Own Harness, and What It Invalidates}
+\label{sec:defect}
+
+An adversarial audit of the released artifact, run after the experiments were complete,
+established that the loop-level arm had not received its intervention. We state the evidence,
+then the retractions, then the fix. This section supersedes any reading of
+Section~\ref{sec:results} as a test of loop-level optimization.
+
+\paragraph{Evidence 1: the critique gene never changed.}
+Replaying run~3 --- our flagship $n{=}5$ multi-hard run --- offline from its cassette and
+dumping every winning genome gives: \texttt{generate} changed in $5/15$ winners,
+\texttt{ensure\_correct} in $\mathbf{0/15}$. GEPA \emph{did} propose critique rewrites and
+they were rejected; more revealingly, the proposals were \emph{generation} instructions
+written into a critique slot, e.g. ``\emph{For every user request, produce an answer that
+satisfies the requested content task and every stated formatting or linguistic constraint
+exactly}''. Whatever arm~D measured, it was not a loop with an optimized verifier.
+
+\paragraph{Evidence 2: the reflector could not see the critique.}
+The cause is a single line: our reflective dataset returned the \emph{same} records for every
+component, and those records' ``Generated Outputs'' field was defined as the last
+\emph{worker} step --- deliberately excluding verifier steps. So when the optimizer reflected
+on the verify gene it was shown the task and the \emph{generator's} answer, with no
+information about what the critique said, whether it fired, or whether its verdict was right.
+A detector cannot be improved from evidence that never mentions its verdicts, and the
+observed behaviour (proposing generation prose into a critique slot) is exactly what a
+reflector shown only generator I/O should be expected to produce.
+
+\paragraph{Evidence 3: the two-gene arm was budget-starved per gene.}
+We passed no component selector to GEPA, which defaults to selecting one component per
+proposal and cycling. Under a matched \emph{total} proposal cap, a two-gene arm therefore
+searches each gene about half as hard as a one-gene arm. Measured proposal targets on run~3
+confirm it: arm~B spent up to four proposals on \texttt{generate}, arm~D about two, spending
+the rest on the gene that never got accepted. This also reverses the mechanism we had
+asserted --- we wrote that arm~D ``fits the training tasks harder'' and so transfers worse,
+whereas under this selector arm~D fits the shared gene \emph{less} hard.
+
+\paragraph{Evidence 4: a percentile-index error.}
+Our exact-resample interval took the upper bound at index
+$\lfloor(1-\alpha/2)N\rfloor - 1$. The resample distribution is discrete with $N=n^n$
+equally-likely atoms, so at $n{=}3$ each atom carries $1/27 = 3.70\% > \alpha/2 = 2.5\%$ and
+the largest atom cannot be dropped. Correctly indexed at $\lceil(1-\alpha/2)N\rceil - 1$:
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lccc}
+\toprule
+Result & per-seed & as published & corrected \\
+\midrule
+Actuator, powered ($n{=}3$) & $-0.15, -0.15, 0.00$ & $[-0.150,-0.050]$ ``excludes zero''
+  & $\mathbf{[-0.150,+0.000]}$ \emph{includes zero} \\
+Actionability, hi$-$lo ($n{=}3$) & $+0.090, +0.025, +0.075$ & $[+0.025,+0.085]$
+  & $[+0.025,+0.090]$ (still excludes zero) \\
+Null, run~3 ($n{=}5$) & $0,+0.055,0,0,-0.055$ & $[-0.033,+0.033]$ & unchanged \\
+\bottomrule
+\end{tabular}
+\caption{The upper bound was too low by one atom. Only $n{=}3$ intervals are affected, and
+the direction of the error flatters negative effects: it turns an interval that brackets
+zero into one that appears to exclude it.}
+\label{tab:ciexcl}
+\end{table}
+
+\paragraph{Evidence 5: the flatness controls could not fail.}
+Arm~A copied its own seed score into its optimized slot with $\delta$ hardcoded to $0.0$, so
+it had no second measurement. Arm~C's genome-blind command loop always exits $0$, which our
+scalarization maps to exactly $1.0$ --- the optimizer's perfect score --- so it proposed
+nothing and never scored a mutated genome. Our claim that ``a non-flat A or C would
+invalidate the run'' was therefore unfalsifiable by construction.
+
+\paragraph{What we retract.}
+The following claims are withdrawn: that there is \emph{no measurable advantage for
+loop-level optimization} (the loop-level treatment was not applied); that the null is
+\emph{tight rather than underpowered} on the strength of $[0,0]$ intervals (an interval of
+$[0,0]$ arises when B and D produce byte-identical genomes, i.e.\ when the arms issued the
+same calls and the cassette served the same completions --- the sharpest available evidence
+that the experiment did not run, not evidence for its conclusion); that the extra evolvable
+gene \emph{over-fits the train split} (the train aggregate was computed and discarded, so
+this was untestable from the release, and the selector makes the opposite prediction); that
+$\dd(D-B)=-0.10$ \emph{excludes zero}; and that this \emph{rules out under-powering}. We also
+correct two factual slips: the reproducibility script registers eleven runs, not ten, and the
+\$5 ceiling is a CLI default that three runs overrode (up to \$11.76).
+
+\paragraph{What survives.}
+Everything that does not depend on arm~D having been optimized. The intrinsic critique's
+detector quality ($\mathrm{F}_1\!=\!0.11$, and $0.83$ with the measurement tool), the
+per-constraint residual decomposition, the fix-budget effect, and the feedback-actionability
+effects ($+0.063$ text, $+0.20$ code) are all measured on arm~A or on paired conditions that
+never involved the verify gene's evolution. Two caveats attach. First, runs~7--10 gate the
+loop on the true metric at \emph{held-out} scoring time as well as during training, so those
+numbers --- including $+0.063$ and the detector-quality curve --- are \textbf{ceiling
+results} conditional on having a perfect checker at inference, not deployable gains. Second,
+at $n{=}3$ a sign test cannot fall below $p=0.25$ even when every seed agrees, so we now
+report sign-test $p$ alongside every interval: $p=0.25$ for $+0.063$ and $p=0.50$ for the
+actuator run.
+
+\paragraph{The fix, and the reporting minimum we propose.}
+The corrected harness (i) builds a \emph{component-specific} reflective dataset, so the verify
+gene's records carry the draft it judged, the verdict it returned, and whether that verdict
+was a false pass or a false alarm; (ii) passes an explicit component selector, defaulting to
+rewriting all genes per proposal so a multi-gene arm is not starved; (iii) replaces arm~C
+with a genome-blind constant draft scored by the real metric, which is flat without being
+saturated, and re-measures arm~A instead of copying it; and (iv) records, for every arm, the
+per-gene accepted-change count, the train aggregate, and the final gene text. Item~(iv) is
+the part we would urge on others: \textbf{a componentized-optimization result should report,
+per component, whether the optimizer's output actually differs from the seed.} Had we printed
+that one number, this paper would have been a different paper eleven runs earlier. Because
+the corrected wiring changes every reflection prompt, it changes every cassette key, so the
+released cassettes cannot replay under it; they are retained and labelled superseded, and the
+re-run under the corrected harness is future work.
+
 \section{Threats to Validity}
 \label{sec:threats}
 
-We state these plainly. \textbf{Power:} runs 4--10 use $n{=}3$ seeds (runs 2--3
-use 5), so we report exact-resample intervals rather than lean on the informal
-verdict rule. These are unusually informative despite small $n$ because the paired
-per-seed $\dd(D{-}B)$ has near-zero variance --- B and D often optimize to
-byte-identical genomes --- giving $[-0.033,+0.033]$ (run 3) and $[0,0]$ (runs 4, 10):
-the null is a \emph{consistent} zero, not an underpowered one. Symmetrically, the one
-positive effect, $\dd(\text{hi}-\text{lo})=+0.063$, has an interval $[+0.025,+0.085]$
-excluding zero at $n{=}3$. We still report these as effect estimates with intervals,
-not formal significance tests, and a larger seed count would tighten them further. \textbf{Single worker/reflection model:} results may be
+We state these plainly. \textbf{Power, and what a $[0,0]$ interval actually means:}
+runs 4--10 use $n{=}3$ seeds (runs 2--3 use 5). We previously argued that the intervals were
+``unusually informative despite small $n$'' because the paired per-seed $\dd(D{-}B)$ has
+near-zero variance, B and D often optimizing to byte-identical genomes. That argument was
+circular and is withdrawn: byte-identical genomes mean the two arms issued the same calls and
+the cassette served both the same completions, so the zero is an \emph{identity} rather than
+a measurement, and an interval of $[0,0]$ is the sharpest available evidence that the
+treatment was not applied (\S\ref{sec:defect}). We now report, per run, how many seeds were
+such ties, alongside the interval and an exact sign test. Of the four fair null runs,
+$3/5$ seeds are ties on run~3, $3/3$ on run~4, $2/2$ on the code replication and $2/3$ on the
+model-swap replication. At $n{=}3$ the sign test cannot fall below $p=0.25$ even with
+unanimous seeds, so the one positive effect, $\dd(\text{hi}-\text{lo})=+0.063$ with interval
+$[+0.025,+0.090]$, rests on the magnitudes rather than on replication across seeds. There is
+also no within-condition sampling variance anywhere in the study: the worker runs at the
+provider's default temperature with no seed, one sample per task, and the cassette memoizes
+by prompt, so every interval here describes task-draw and search-path variation only, never
+measurement noise. \textbf{Single worker/reflection model:} results may be
 model-dependent; \citet{huang2023cannot} find self-correction effects vary by
 model. \textbf{Cross-lineage, not cross-provider:} run 6's critic
 (\texttt{gpt-5.6-luna}) shares a vendor and training lineage with the worker
@@ -540,6 +843,57 @@ generalization:} the generator's parameter pools are small, so train/held-out
 tasks can share parameter combinations; this affects all arms equally and does
 not bias \dd, but softens the generalization claim. Section~\ref{sec:directions}
 turns each threat into a concrete follow-up.
+
+\paragraph{Which threats the released artifact can close.} The threats above are
+not equally tractable, and the difference is not scientific interest but what each one
+actually requires: more spend against the same harness, a credential we do not hold, or new
+harness code. We separate them explicitly (Table~\ref{tab:closability}) so a reader can tell
+which open questions are a budget line and which are engineering. The audit in
+Section~\ref{sec:defect} reorders this list: the harness re-run now dominates everything
+else, because until the loop-level treatment is actually applied the remaining threats are
+threats to a measurement that did not happen.
+
+We report one replication completed before the audit. A worker swap to
+\texttt{gpt-4.1-nano} on the decisive multi-hard regime ($3$ seeds, $16$/$16$,
+$\mathrm{mmc}=64$) gives $\dd(D-B) = -0.014$ (per-seed $+0.000, -0.041, +0.000$; corrected
+interval $[-0.041,+0.000]$; two of three seeds are ties), with arm~B at
+$0.70 \pm 0.03$ and arm~D at $0.69 \pm 0.03$ from a seed of $0.67$. It shows the measured
+pattern is not an artifact of one worker model --- but it inherits the same harness, so like
+the runs it replicates it is not a test of loop-level optimization. An $\mathrm{mmc}{=}160$
+budget replication was designed, priced, started and then stopped mid-run once the audit
+landed, having spent $\approx\!\$0.33$ of a projected $\$0.90$: continuing to buy data under
+the superseded wiring was no longer worthwhile. Its partial cassette is not released, since a
+recording with no corresponding result would be a misleading artifact.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{llp{0.40\textwidth}}
+\toprule
+Threat & Closable as released? & What it requires \\
+\midrule
+\textbf{Treatment not applied} (\S\ref{sec:defect}) & \textbf{No --- re-run required} &
+  The corrected harness exists; the runs do not. Blocks every row below \\
+Single worker/reflection model & Partly, by spend & Worker swap done pre-audit
+  ($\dd=-0.014$); needs redoing post-fix \\
+Budget, $\mathrm{mmc}\in[20,64]$ & Yes, by spend & An $\mathrm{mmc}{=}160$ replication under
+  the corrected harness \\
+Power, $n{=}3$; no sampling variance & No --- design change & Repeated samples per task and a
+  fixed temperature, neither of which the study has (D7) \\
+Cross-lineage, not cross-provider & No --- credential & A Gemini or Anthropic key; pricing
+  already in place (D3) \\
+One task family (math) & No --- new harness & Parametric math generator plus numeric checker;
+  instance-level visible/hidden split \\
+Held-out generalization & No --- generator work & Enlarged parameter pools, then re-run and
+  report the gap (D8) \\
+\bottomrule
+\end{tabular}
+\caption{Threat closability against the released artifact and an OpenAI-only key. ``By
+spend'' means the harness answers it with no new code. The first row was added after the
+audit and supersedes the others in priority: it is not a threat to the interpretation of a
+result but to the existence of one.}
+\label{tab:closability}
+\end{table}
 
 \section{When Would Loop-Level Help? Directions}
 \label{sec:directions}
@@ -578,23 +932,29 @@ generator-limited (the residual). The agenda, re-ordered accordingly:
   \item[D4 (budget \& worker sweeps).] $\mathrm{mmc}\in\{20,40,80,160\}$ and worker
     $\in$\{nano, mini, a 5-series\} to rule out under-budgeting and map
     model-dependence.
-  \item[D5 (cross-domain) --- \emph{the priority next study, in progress}.] Replicate the
-    4-arm design where the verify step catches real \emph{semantic} errors and can be run
-    as an executable tool, the regime \citet{shinn2023reflexion} find self-correction
-    actually works. We start with \textbf{code}: MBPP+ \citep{liu2023evalplus} with its
-    base tests as the in-loop (visible) verifier and its edge-case ``plus'' tests as the
-    hidden scoring set --- a natural anti-oracle split that also restores headroom and
-    softens contamination; \texttt{gpt-4.1-mini} sits mid-band there, and the fast
-    pure-function tasks keep execution deterministic (preserving bit-for-bit replay), which
-    the timing-sensitive contamination-free alternative \citep{jain2024livecodebench} would
-    jeopardize. Math (numeric checker) follows. This tests whether reliable, actionable
-    verification is what the loop-level lever needs --- and would move the contribution from
-    ``an instruction-following observation'' to a general finding (or sharpen it to
-    ``loop-level helps iff verification is reliable and the fix is reachable''). A separate
-    pre-registered mini-project, not a variation of the runs here.
-  \item[D7 (statistics) --- \emph{largely retired}.] We already report exact-resample
-    intervals ($\S\ref{sec:threats}$); because the paired $\dd$ has near-zero variance
-    they are tight even at $n{\le}5$, so additional seeds would only marginally narrow
+  \item[D5 (cross-domain) --- \textbf{done} (\S\ref{sec:bcb}, App.~\ref{app:mbpp-failed}).]
+    We replicated the 4-arm design in a domain where the verify step catches real
+    \emph{semantic} errors and runs as an executable tool, the regime
+    \citet{shinn2023reflexion} find self-correction works. A first attempt on MBPP+
+    \citep{liu2023evalplus} saturated its training split (Appendix~\ref{app:mbpp-failed});
+    moving to frontier-hard BigCodeBench-Hard \citep{zhuo2024bigcodebench} restored headroom
+    (seed $0.40$--$0.50$), and there GEPA accepted training-improving candidates for
+    \emph{both} arms on one seed yet still delivered $\dd(D-B)=0.00$ on held-out
+    (\S\ref{sec:bcb}). The instruction-following null thus recurs in a semantically-verified,
+    executable-feedback domain: reliable, actionable verification is \emph{not} by itself
+    sufficient to make the loop-level lever pay off. Aiming GEPA directly at the fixer's
+    feedback (the \emph{actuator} experiment, \S\ref{sec:bcb}) did not rescue it either: a
+    powered $3$-seed replication ($20$/$20$, $\mathrm{mmc}=50$) gave $\dd(D-B)=-0.10$
+    (corrected CI $[-0.150,+0.000]$, which includes zero; sign test $p=0.50$), and the
+    over-fitting explanation we attached to it does not survive the harness audit
+    (\S\ref{sec:defect}). It therefore does \emph{not} close the budget/power threat. Math (a
+    numeric checker) remains a natural next replication, and a re-run under the corrected
+    harness now precedes all of these.
+  \item[D7 (statistics) --- \emph{reinstated}.] The near-zero paired variance we once
+    read as precision was mostly ties, i.e.\ the treatment not being applied
+    ($\S\ref{sec:defect}$), and no interval in the study contains within-condition sampling
+    variance at all. Repeated samples per task and more seeds are now load-bearing rather than
+    optional. Retained from the original note: exact-resample intervals are reported, and
     them. A larger-$n$ pre-registered replication remains nice-to-have, not load-bearing.
   \item[D1$'$-tools (deterministic actuator).] Table~\ref{tab:residual} localizes the
     residual to \texttt{exact\_word\_count}; a deterministic count-fixer would likely
@@ -616,28 +976,102 @@ detector, F$_1\!=\!0.11$). \textbf{(ii) Does GEPA lift this task?} No: its optim
 genomes gave no held-out gain and sometimes \emph{degraded} both arms (train-split
 overfitting), at the budgets tested --- not a verdict on GEPA in general, which
 reports gains elsewhere. \textbf{(iii) Does loop-level optimization beat prompt-only
-(the thesis)?} No, with tight intervals: $\dd(D{-}B)$ is a consistent zero
-($[-0.033,+0.033]$ on the decisive run; exactly $[0,0]$ where the arms converge). The
-rest of this section explains \emph{why}.
+(the thesis)?} \emph{We cannot say, and that is the paper's main finding.} Our harness did not
+apply the loop-level treatment: the critique gene is byte-identical to the seed in $15/15$
+winning genomes on the flagship run, because the reflector was shown the generator's outputs
+rather than the critique's, and because a one-component-per-proposal selector starved the
+two-gene arm on the gene that moves the metric ($\S\ref{sec:defect}$). The measured
+$\dd(D{-}B)\approx 0$ is therefore consistent with the hypothesis being false \emph{and} with
+its never having been tested; the $[0,0]$ intervals we once cited as precision are ties, which
+is evidence for the latter.
 
-Across ten pre-registered experiments, optimizing the verification (and plan)
-components of a self-refine loop gave no held-out advantage over optimizing the
-generation prompt alone on verifiable instruction-following, at the budgets and
-models tested ($\dd \le 0.01$, within noise). Positive effects --- a measurement
-tool, a different-model critic, and more actionable repair feedback lifting the
-baseline --- accrued to prompt-only and loop-level arms equally. Probing the cause,
-we found the intrinsic critique is a near-random detector, yet a \emph{perfect}
-(oracle) detector still failed to lift the loop: detector quality and performance
-are non-monotonic. The binding constraint is not detection but repair. Isolating
-that step, we find it is \emph{both} feedback-limited --- concrete measured edits
-beat terse verdicts by $+0.063$, while merely naming the failed constraint adds
-nothing --- and, beyond that, generator-limited: even exact, maximally-actionable
-feedback saturates below perfect. The actionable reframe: to make a self-refine loop
-worth optimizing componentwise, improve the \emph{fixer} and the \emph{actionability}
-(not merely the correctness) of its feedback, not just the detector; and note that
-the actionability win here was feedback \emph{shape}, which optimization did not
-need to discover. All code, cassettes, and pre-registrations are released for
-reproduction.
+Across ten pre-registered instruction-following experiments, a cross-domain replication on
+frontier-hard code (\S\ref{sec:bcb}), an actuator variant, and a worker-model swap, we
+measured $\dd(D{-}B)\approx 0$ every time --- and the audit in \S\ref{sec:defect} shows why
+that consistency is not the evidence it appears to be: on the runs we inspected the critique
+gene never changed, so the arms differed mainly in how much search each spent on the gene they
+shared. A confident zero, replicated eleven times, from an experiment that did not run.
+
+What we can still say divides cleanly. \textbf{About the loop:} the intrinsic critique is a
+near-random failure detector ($\mathrm{F}_1 = 0.11$), which quantifies the practitioner
+intuition that a model grading its own homework is too lenient
+\citep{osmani2026loop,kamoi2024whencan}; \emph{given} a perfect checker at inference, a
+perfect detector still does not maximize held-out score, so detection is not the binding
+constraint there either; the repair signal's \emph{shape} is worth $+0.063$ (text) and
+$+0.20$ (code) while naming the failed constraint adds nothing; and the residual concentrates
+in one mechanical skill, exact counting, that no prompt rewrite fixed. \textbf{About
+componentized optimization:} nothing yet --- and that is the point. The apparatus we built to
+answer the question quietly answered a different one.
+
+\textbf{About building such apparatus}, which is the contribution we did not plan. A
+hill-climbing loop improves a harness by attributing trace evidence to components
+\citep{langchain2026loopcraft}; if that attribution is wrong, the optimizer rewrites the wrong
+thing and every downstream number stays plausible. Two defaults were enough to cause it here:
+a reflective dataset shared across components, and a selector that rewrites one component per
+proposal. Neither is exotic; one is a library default. The cheap defence is to report, per
+component, whether the optimizer's output differs from the seed at all --- one integer per
+gene, which we now emit and which would have caught this eleven runs earlier. We release the
+corrected harness, every cassette and pre-registration including the superseded ones, and the
+audit that produced this section, on the view that a study which invalidates its own headline
+is more useful published than withdrawn.
+
+\appendix
+
+\section{A Failed First Attempt: MBPP+ Saturation, and What It Taught Us}
+\label{app:mbpp-failed}
+
+Our first attempt at the cross-domain code study (D5) used \textbf{MBPP+}
+\citep{liu2023evalplus}: the base tests as the in-loop (visible) verifier and the
+edge-case ``plus'' tests as the hidden scorer, with the same four arms and the same
+\texttt{gpt-4.1-mini} worker as the main study. We report it in full because its
+\emph{failure} is what motivated the design of the main cross-domain experiment
+(\S\ref{sec:bcb}).
+
+\paragraph{What happened.} The run completed and reproduces bit-for-bit from its
+cassette, but it is \emph{uninformative} for the quantity of interest. Every arm
+returned exactly the seed genome's held-out score on both seeds --- $0.80$ (seed 0)
+and $0.90$ (seed 1) --- so $\dd(D{-}B)=0$ identically. This zero is not a null result:
+GEPA's own log shows the cause --- \texttt{``All subsample scores perfect for parent
+0. Skipping''} on every iteration. The seed loop, aided by executable base-test
+feedback, already solved all six training tasks at a perfect score, so the optimizer
+had \emph{no gradient} and proposed no candidates. The ``optimized'' genome for each
+arm was therefore the seed genome, and $\dd(D{-}B)=0$ is a degenerate artifact of
+optimization never running --- the same saturation failure mode as our earliest
+IFBench pilots (runs 1--2).
+
+\paragraph{Why MBPP+ saturates.} MBPP+ is entry-level Python, and a capable worker
+with real unit-test feedback in the loop solves the easy training tasks outright.
+Held-out headroom looked adequate ($0.80$--$0.90$), but the \emph{training} split had
+none, which is what gates GEPA. The lesson: a cross-domain test of loop-level
+optimization needs headroom on the \emph{training} tasks, not merely the held-out set.
+
+\paragraph{Why we did not simply weaken the worker.} The obvious fix --- a smaller
+worker (e.g.\ \texttt{gpt-4.1-nano}) --- manufactures headroom but destroys external
+validity. A robust literature documents that both prompt-optimization and
+self-refinement gains scale \emph{inversely} with model strength:
+\citet{zhou2025bbopromptscale} measure black-box prompt-optimization lift falling from
+$12\%$ (7B) to $5.9\%$ (72B) to $1.1\%$ (671B) on the same task, concluding that gains
+measured on a small model do not transfer to a large one; and
+\citet{zhang2024smallverifiers} find small models need a \emph{strong} external verifier
+for self-correction to help at all. A positive $\dd(D{-}B)$ obtained by crippling the
+worker would thus be an upper bound that attenuates toward zero at frontier scale ---
+the opposite of a generalizing result. Conversely, the saturation we observed
+generalizes \emph{upward}: a stronger model saturates MBPP+ even more, so ``loop-level
+optimization has no headroom on easy code for a capable model'' only becomes more true
+for 2026-era frontier models.
+
+\paragraph{How this reshaped the study.} The fix is to move headroom to the
+\emph{tasks}, not away from the model: use a benchmark that is hard even for frontier
+models, so an affordable worker sits far from the ceiling in the same
+capability-relative regime a frontier model occupies on frontier-hard work. We adopted
+\textbf{BigCodeBench-Hard} \citep{zhuo2024bigcodebench}, a subset calibrated to stay hard
+even for strong models. Its tasks use scientific libraries and mock real I/O, so scoring moved
+into a pinned Docker sandbox (\texttt{-{}-network none}, memory/PID caps, single-thread
+BLAS) --- a safety and reproducibility upgrade over the subprocess sandbox, not a
+compromise of it. The anti-oracle split is reconstructed by partitioning each task's
+\texttt{unittest} methods into a visible (in-loop) and a hidden (scored) half. That
+study is reported in \S\ref{sec:bcb}; this appendix records the attempt that led to it,
+and its cassette is released alongside the others.
 
 \bibliographystyle{plainnat}
 \bibliography{references}

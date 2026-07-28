@@ -17,8 +17,31 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
 import verify_reproducibility as vr  # noqa: E402
 
 
-def test_runs_list_registers_all_expected_runs():
-    assert len(vr.RUNS) == vr.EXPECTED_RUNS == 10
+def test_every_registered_run_is_marked_superseded():
+    # All eleven recorded runs predate the harness correction (component-agnostic
+    # reflective dataset + one-component-per-proposal selector + saturated arm C). The
+    # corrected wiring changes every reflection prompt, hence every cassette key, so none
+    # of them can replay under the current code. EXPECTED_RUNS counts runs recorded under
+    # the CORRECTED harness, which is zero until the study is re-run.
+    assert len(vr.RUNS) == 11
+    assert {label for label, *_ in vr.RUNS} == set(vr.SUPERSEDED)
+    assert vr.EXPECTED_RUNS == 0
+
+
+def test_all_superseded_does_not_claim_reproduction():
+    # The dangerous case: every run skipped, no failures recorded, so a naive
+    # `all_ok and verified >= EXPECTED_RUNS` would exit 0 and read as "reproduction
+    # proven" while nothing at all was replayed.
+    import contextlib
+    import io
+
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        code = vr.main()
+    out = buf.getvalue()
+    assert code != 0
+    assert "REPRODUCE FROM CASSETTE" not in out
+    assert "NOTHING PROVEN" in out
 
 
 def test_main_does_not_vacuously_succeed_on_empty_runs(monkeypatch, capsys):
@@ -29,7 +52,7 @@ def test_main_does_not_vacuously_succeed_on_empty_runs(monkeypatch, capsys):
     out = capsys.readouterr().out
     assert code != 0
     assert "REPRODUCE FROM CASSETTE" not in out
-    assert "INCOMPLETE" in out
+    assert "NOTHING PROVEN" in out
 
 
 def _mk(**arm_vals):

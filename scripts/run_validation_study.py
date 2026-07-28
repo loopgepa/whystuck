@@ -14,7 +14,7 @@ omitted) so the numbers and cassettes are reproducible offline afterwards.
 
     # the real run — the worker is a generate→critique→refine loop, so each task
     # eval is up to 1 + 2*loop_max_retries LLM calls; the default (2 seeds, mmc 64,
-    # 10 proposals, 16/16 tasks, 1 retry) ≈ $4.5 under the $5 cap. Output tokens are
+    # 10 proposals, 16/16 tasks, 1 retry) ≈ $2.7 under the $5 cap. Output tokens are
     # hard-capped; the input estimate is conservative for typical GEPA instructions
     # (see eval/cost.py). Needs ≥2 seeds for a verdict (a single seed is always
     # INCONCLUSIVE). Deeper search costs more — the guard refuses over $5.
@@ -25,11 +25,16 @@ omitted) so the numbers and cassettes are reproducible offline afterwards.
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import os
 import sys
+from collections.abc import Callable
+from typing import Any
 
 from whystuck.eval.cost import (
+    BCB_WORKER_MAX_OUTPUT_TOKENS,
+    BCB_WORKER_TOKENS,
     CODE_WORKER_MAX_OUTPUT_TOKENS,
     CODE_WORKER_TOKENS,
     MODEL_PRICES,
@@ -52,13 +57,14 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--arms", default="ABCD", help="which arms to run (default ABCD)")
     p.add_argument(
         "--task-set",
-        choices=("ifbench", "multi", "multi-hard", "code"),
+        choices=("ifbench", "multi", "multi-hard", "code", "bcb"),
         default="ifbench",
         help="ifbench = vendored single-constraint slice; multi = composable "
         "multi-constraint tasks (easy, saturated at seed 0.97); multi-hard = harder "
-        "constraints (exact count / forbidden word / max length) with real headroom; "
-        "code = vendored MBPP+ (base tests VISIBLE/in-loop, plus tests HIDDEN/scored) — "
-        "the v2 cross-domain study where in-loop verification is executable",
+        "constraints with real headroom; code = MBPP+ (base VISIBLE / plus HIDDEN) — "
+        "SATURATES a capable worker (see the appendix); bcb = BigCodeBench-Hard in a "
+        "Docker sandbox (visible/hidden unittest-method split), hard even for frontier "
+        "models — the headroom-bearing v2 code study",
     )
     p.add_argument("--n-train", type=int, default=16, help="train task count (default 16)")
     p.add_argument("--n-heldout", type=int, default=16, help="held-out task count (default 16)")
@@ -82,6 +88,13 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         action="store_true",
         help="feedback lever: inject a measured (non-oracle) text-stats readout into the "
         "critique step; no extra LLM calls (stats computed locally)",
+    )
+    p.add_argument(
+        "--actuator",
+        action="store_true",
+        help="actuator experiment (bcb only): add an `actuator` gene that turns the test "
+        "signal + visible-test source into the refine step's repair guidance; arm D evolves "
+        "generate+actuator with the detector held fixed. Adds one worker call/retry (3N).",
     )
     p.add_argument(
         "--critique-model",
@@ -110,6 +123,20 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         type=int,
         default=10,
         help="hard cap on GEPA proposals per arm (= max reflection LM calls/arm)",
+    )
+    p.add_argument(
+        "--module-selector",
+        choices=("all", "round_robin"),
+        default="all",
+        help=(
+            "how many genes one GEPA proposal may rewrite. 'round_robin' (GEPA's own "
+            "default, and what every committed run used) rewrites ONE gene per proposal "
+            "and cycles, so a multi-gene arm searches each gene only 1/k as hard as a "
+            "one-gene arm under the same cap — a budget-per-gene confound. 'all' rewrites "
+            "every gene per proposal, the fair loop-level-vs-prompt-only comparison. "
+            "Changing this changes every reflection prompt, so runs recorded under one "
+            "value cannot replay under the other."
+        ),
     )
     p.add_argument("--worker-model", default="openai/gpt-4.1-mini")
     p.add_argument("--reflection-model", default="openai/gpt-5.6-terra")
@@ -176,37 +203,69 @@ def main(argv: list[str] | None = None) -> int:
     # misconfigured level can never reach a paid run. lo/hi are inert off the oracle
     # path (there the LLM writes the critique), and hi's edit directives are
     # multi_constraint-specific — either misconfig would silently waste money.
-    if args.feedback_level != "mid" and not args.oracle_critique:
+    # The lever acts either on the ORACLE path (multi/multi-hard, where the LLM critique is
+    # replaced) or on the bcb EXEC path (where it shapes the executable visible-test feedback).
+    # Off both — e.g. plain ifbench, or code (whose code_feedback has no level) — lo/hi are inert.
+    _exec_lever = args.task_set == "bcb"
+    if args.feedback_level != "mid" and not (args.oracle_critique or _exec_lever):
         print(
-            f"ERROR: --feedback-level {args.feedback_level} only applies under "
-            "--oracle-critique (off the oracle path the LLM writes the critique, so the "
-            "level is inert). Add --oracle-critique or drop --feedback-level.",
+            f"ERROR: --feedback-level {args.feedback_level} only applies under --oracle-critique "
+            "(the oracle path) or --task-set bcb (where it shapes the executable visible-test "
+            "feedback). Off both paths the level is inert. Adjust the task set/oracle or drop "
+            "--feedback-level.",
             file=sys.stderr,
         )
         return 2
-    # The code task set's anti-oracle protocol REQUIRES the non-oracle, base-test-gated
-    # critique: --oracle-critique gates on score_fn (= code_score = the HIDDEN plus tests),
+    # The executable code task sets' anti-oracle protocol REQUIRES the non-oracle,
+    # visible-test-gated critique: --oracle-critique gates on score_fn (= the HIDDEN tests),
     # which would leak the held-out scorer into the loop. Refuse at the cheap dry-run step.
-    if args.task_set == "code" and args.oracle_critique:
+    if args.task_set in ("code", "bcb") and args.oracle_critique:
         print(
-            "ERROR: --oracle-critique is incompatible with --task-set code: it would gate "
-            "the loop on the hidden plus-test scorer (oracle contamination). The code study "
-            "uses executable base-test feedback in a non-oracle critique instead.",
+            f"ERROR: --oracle-critique is incompatible with --task-set {args.task_set}: it "
+            "would gate the loop on the hidden test scorer (oracle contamination). These task "
+            "sets use executable VISIBLE-test feedback in a non-oracle critique instead.",
             file=sys.stderr,
         )
         return 2
 
-    if args.feedback_level == "hi" and args.task_set not in ("multi", "multi-hard"):
+    # The detector's truth signal must be free of the held-out scorer AND cheap. On text
+    # that is the programmatic verifier (pure Python, no execution). On the code task sets
+    # score_fn runs the HIDDEN suite, so wiring it as detector truth would both put the
+    # held-out signal into the optimizer's channel and pay real container execution on
+    # every critique step. Refuse rather than silently doing the wrong one.
+
+    if args.feedback_level == "hi" and args.task_set not in ("multi", "multi-hard", "bcb"):
         print(
-            "ERROR: --feedback-level hi needs a multi task set (--task-set multi|multi-hard); "
-            "its concrete edit directives are multi_constraint-specific.",
+            "ERROR: --feedback-level hi needs a multi task set (--task-set multi|multi-hard), "
+            "whose concrete edit directives are multi_constraint-specific, or --task-set bcb, "
+            "where hi appends the visible-test source.",
+            file=sys.stderr,
+        )
+        return 2
+
+    if args.actuator and args.task_set != "bcb":
+        print(
+            "ERROR: --actuator needs --task-set bcb: its actuator context is the bcb "
+            "visible-test source (bcb_feedback level=hi). Other task sets have no such context.",
+            file=sys.stderr,
+        )
+        return 2
+    if args.actuator and args.plan_gene:
+        print(
+            "ERROR: --actuator and --plan-gene are distinct experiments; enable at most one.",
             file=sys.stderr,
         )
         return 2
 
     # Call count per eval: generate (+plan) + per retry a refine, plus a critique
-    # UNLESS the oracle gate replaces it (no critique LLM call then).
-    per_retry_calls = 1 if args.oracle_critique else 2
+    # UNLESS the oracle gate replaces it (no critique LLM call then), plus an actuator
+    # call per retry when the actuator gene is on (critique + actuator + refine = 3).
+    if args.oracle_critique:
+        per_retry_calls = 1
+    elif args.actuator:
+        per_retry_calls = 3
+    else:
+        per_retry_calls = 2
     worker_calls_per_task = (2 if args.plan_gene else 1) + per_retry_calls * args.loop_max_retries
     # Conservative pricing: a cross-family critic runs some worker-side calls on a
     # different (often pricier) model. We price ALL worker-side calls at the pricier
@@ -223,7 +282,9 @@ def main(argv: list[str] | None = None) -> int:
 
     # Code solutions are longer than IFBench text on both axes, so the guard must price
     # the code worker with its larger (in, out) shape or it under-counts a paid run.
-    worker_tokens = CODE_WORKER_TOKENS if args.task_set == "code" else WORKER_TOKENS
+    worker_tokens = {"code": CODE_WORKER_TOKENS, "bcb": BCB_WORKER_TOKENS}.get(
+        args.task_set, WORKER_TOKENS
+    )
 
     groups = plan_study_calls(
         arms=arms,
@@ -265,6 +326,13 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Preflighting code sandbox + data ({len(code_tasks)} vendored references)...")
         preflight_code_tasks(code_tasks)
         print("  preflight OK: executor works here and every reference passes both suites.")
+    elif args.task_set == "bcb":
+        from whystuck.eval.bcb_bench import load_bcb_tasks, preflight_bcb_tasks
+
+        bcb_tasks = load_bcb_tasks("all", seed=0)
+        print(f"Preflighting BigCodeBench Docker sandbox + data ({len(bcb_tasks)} references)...")
+        preflight_bcb_tasks(bcb_tasks)
+        print("  preflight OK: Docker executor works here and every reference passes both splits.")
 
     # Replay reproduces a prior run from its cassette: offline, no key, no spend
     # (strict — a cassette miss raises). Takes precedence over --yes.
@@ -315,6 +383,7 @@ def _run_live(
 
     from whystuck.core.storage import WhyStuckStore
     from whystuck.core.util import utc_now_iso
+    from whystuck.eval.bcb_bench import bcb_feedback, bcb_score, load_bcb_tasks
     from whystuck.eval.cassette import Cassette
     from whystuck.eval.code_bench import code_feedback, code_score, load_code_tasks
     from whystuck.eval.ifbench import ifbench_feedback, ifbench_score, load_ifbench
@@ -328,7 +397,25 @@ def _run_live(
     # `exec_feedback` is the task-aware, EXECUTABLE in-loop signal (code only); the text
     # task sets have no executor, so it stays None (their critique is LLM/oracle-gated).
     exec_feedback: Feedback | None = None
-    if args.task_set == "code":
+    # Actuator experiment (bcb): the actuator gene's raw materials = the visible-test result
+    # PLUS the visible-test source (bcb_feedback level=hi), the same signal the hand-built +0.20
+    # 'hi' lift used — so the experiment asks whether GEPA can evolve to exploit it.
+    actuator_context: Feedback | None = None
+    if args.task_set == "bcb":
+        # BigCodeBench-Hard in Docker: visible unittest methods run in-loop (exec_feedback),
+        # hidden methods score (held-out). Hard even for frontier models → real gradient.
+        def load_split(split: str, seed: int, n: int):
+            return load_bcb_tasks(split, seed=seed, n=n)  # type: ignore[arg-type]
+
+        score_fn, feedback_fn = bcb_score, bcb_feedback
+        # Feedback-actionability lever (code D2'): shape the in-loop visible-test signal at the
+        # chosen level. mid (default) is byte-identical to the recorded runs; lo/hi are the
+        # cross-domain analogue of the IFBench actionability ablation.
+        exec_feedback = functools.partial(bcb_feedback, level=args.feedback_level)
+        if args.actuator:
+            actuator_context = functools.partial(bcb_feedback, level="hi")
+        dataset = "BigCodeBench-Hard (Docker; visible methods in-loop, hidden methods scored)"
+    elif args.task_set == "code":
         # MBPP+: base tests VISIBLE (shown in-prompt + executed by the in-loop critique
         # via exec_feedback), plus tests HIDDEN (the held-out scorer). See code_bench.
         def load_split(split: str, seed: int, n: int):
@@ -356,10 +443,35 @@ def _run_live(
 
         score_fn, feedback_fn, dataset = ifbench_score, ifbench_feedback, "IFBench"
 
+    # Detector truth for the verify gene's own reflection records — arm D's actual
+    # treatment. Without it GEPA rewrites the critique gene while being shown the
+    # GENERATOR's output, and duly proposes generation prose into a critique slot, so the
+    # loop-level arm never receives a meaningful intervention.
+    #
+    # Built from the same programmatic verifier the study scores with, but consulted ONLY
+    # when building reflection records on the TRAIN split: never inside the loop and never
+    # at held-out scoring. That makes it the standard optimizer signal (which already
+    # carries per-task feedback for the generate gene) made component-appropriate, not
+    # oracle contamination of the measurement.
+    #
+    # Text task sets only. On `code`/`bcb` the equivalent truth is the VISIBLE test result;
+    # `score_fn` there runs the HIDDEN suite, so wiring it here would both put the held-out
+    # signal into the optimizer's channel and pay container execution per critique step.
+    # Those families therefore keep component-agnostic reflection until a visible-test
+    # verdict is threaded through, and the run metadata records which applied.
+    verify_truth: Callable[[str, Any], tuple[bool, str]] | None = None
+    if args.task_set not in ("code", "bcb"):
+
+        def _verify_truth(output: str, task: Any) -> tuple[bool, str]:
+            return score_fn(output, task) >= 1.0, feedback_fn(output, task)
+
+        verify_truth = _verify_truth
+
     # Worker output hard-cap matches what the guard priced for this task set.
-    worker_max_out = (
-        CODE_WORKER_MAX_OUTPUT_TOKENS if args.task_set == "code" else WORKER_MAX_OUTPUT_TOKENS
-    )
+    worker_max_out = {
+        "code": CODE_WORKER_MAX_OUTPUT_TOKENS,
+        "bcb": BCB_WORKER_MAX_OUTPUT_TOKENS,
+    }.get(args.task_set, WORKER_MAX_OUTPUT_TOKENS)
 
     # Feedback-actionability lever (D2'): the oracle-path repair-feedback fn for the
     # chosen level. None = "mid" (loop falls back to feedback_fn, byte-identical to
@@ -404,6 +516,8 @@ def _run_live(
                     arms=arms,
                     max_metric_calls=args.max_metric_calls,
                     max_candidate_proposals=args.reflection_calls,
+                    module_selector=args.module_selector,
+                    verify_truth=verify_truth,
                     loop_max_retries=args.loop_max_retries,
                     score_fn=score_fn,
                     feedback_fn=feedback_fn,
@@ -413,6 +527,8 @@ def _run_live(
                     critique_complete=critique_complete,
                     oracle_critique=args.oracle_critique,
                     oracle_feedback=oracle_feedback,
+                    use_actuator=args.actuator,
+                    actuator_context=actuator_context,
                 )
             runs.append({name: vars(r) for name, r in results.items()})
 
@@ -423,6 +539,12 @@ def _run_live(
         "worker_model": args.worker_model,
         "reflection_model": args.reflection_model,
         "max_metric_calls": args.max_metric_calls,
+        # Recorded so a reader can tell whether a multi-gene arm was starved per gene.
+        "module_selector": args.module_selector,
+        # Recorded so a reader can tell whether the critique gene could see its own
+        # behaviour at all (False = the released runs' component-agnostic reflection).
+        # Whether the critique gene could see its own behaviour during reflection.
+        "detector_reflection": verify_truth is not None,
         "reflection_calls": args.reflection_calls,
         "task_set": args.task_set,
         "loop_max_retries": args.loop_max_retries,
@@ -432,6 +554,7 @@ def _run_live(
         "oracle_critique": args.oracle_critique,
         "feedback_level": args.feedback_level,
         "exec_feedback": exec_feedback is not None,
+        "actuator": args.actuator,
         "worker_max_output_tokens": worker_max_out,
         "seeds": seeds,
         "estimated_usd": estimate,

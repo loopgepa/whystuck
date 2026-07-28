@@ -192,6 +192,80 @@ def test_self_refine_rejects_zero_retries():
         make_self_refine_run_task(_loop_complete, ifbench_score, max_retries=0)
 
 
+def _three_gene_act(generate: str, verify: str, actuator: str) -> LoopGenome:
+    return LoopGenome(
+        id="loop",
+        name="L",
+        genes=[
+            LoopGene(id="generate", type=GeneType.SKILL, name="Generate", content=generate),
+            LoopGene(id="ensure_correct", type=GeneType.VERIFIER_RUBRIC, name="V", content=verify),
+            LoopGene(id="actuator", type=GeneType.PROMPT, name="A", content=actuator),
+        ],
+    )
+
+
+def test_actuator_gene_produces_the_repair_text_fed_to_refine():
+    # Actuator experiment: on a failed critique, the actuator gene (over its context)
+    # generates the repair guidance the refine step consumes — NOT the raw critique.
+    # The detector (verify gene) still gates; the actuator only shapes the fix.
+    calls = []
+
+    def spy(prompt):
+        calls.append(prompt)
+        if "ACTUATOR_MARK" in prompt:  # the actuator gene's own step
+            return "ACTUATOR_REPAIR_GUIDANCE"
+        if "# Draft answer" in prompt:  # detector: fail so a refine round happens
+            return "FAIL: not correct"
+        if "# Problems to fix" in prompt:  # refine
+            return "solid"
+        return "x x"  # initial failing draft
+
+    ctx_calls = []
+
+    def ctx(draft, task):
+        ctx_calls.append((draft, task))
+        return "VISIBLE_TEST_SOURCE_BLOB"
+
+    run_task = make_self_refine_run_task(
+        spy,
+        ifbench_score,
+        feedback=ifbench_feedback,
+        max_retries=1,
+        actuator_gene="actuator",
+        actuator_context=ctx,
+    )
+    genome = _three_gene_act("write it", "verify it", "ACTUATOR_MARK: turn tests into a fix")
+    run_task(genome, _nw_task())
+
+    # the actuator step ran, fed by its context (not the raw critique)
+    assert ctx_calls, "actuator_context was never consulted"
+    assert any("ACTUATOR_MARK" in c and "VISIBLE_TEST_SOURCE_BLOB" in c for c in calls)
+    # the refine step consumed the actuator's output, not the detector's verdict
+    refine = next(c for c in calls if "# Problems to fix" in c)
+    assert "ACTUATOR_REPAIR_GUIDANCE" in refine
+    assert "FAIL: not correct" not in refine
+
+
+def test_actuator_is_off_by_default_refine_uses_the_critique():
+    # Default (no actuator_gene): the refine step consumes the critique verbatim, so
+    # every pre-actuator run is byte-identical.
+    calls = []
+
+    def spy(prompt):
+        calls.append(prompt)
+        if "# Draft answer" in prompt:
+            return "FAIL: fix the thing"
+        if "# Problems to fix" in prompt:
+            return "solid"
+        return "x x"
+
+    make_self_refine_run_task(spy, ifbench_score, max_retries=1)(
+        _two_gene("write it", "verify it"), _nw_task()
+    )
+    refine = next(c for c in calls if "# Problems to fix" in c)
+    assert "FAIL: fix the thing" in refine  # the critique text, no actuator indirection
+
+
 def test_self_refine_missing_gene_raises_not_silent_empty():
     # A genome lacking the generate/verify gene (a wiring bug) must fail loudly, not
     # silently run the loop with a blank instruction and report a plausible low score.
