@@ -46,6 +46,7 @@ from whystuck.eval.optimize import optimize_loop
 GENERATE_GENE = "generate"
 VERIFY_GENE = "ensure_correct"
 PLAN_GENE = "plan"  # optional third module (complexity lever); off unless use_plan_gene
+ACTUATOR_GENE = "actuator"  # optional fixer-feedback gene (actuator experiment); off by default
 
 SEED_GENERATE = "Follow every instruction in the task exactly."
 SEED_VERIFY = (
@@ -56,18 +57,30 @@ SEED_PLAN = (
     "Before answering, list each explicit constraint in the task as a short "
     "checklist the answer must satisfy."
 )
+SEED_ACTUATOR = (
+    "The draft failed a check. Using the test results, write concrete instructions "
+    "for how to fix the draft so it passes."
+)
 ARMS = ("A", "B", "C", "D")
 
 
-def arm_evolvable(arm: str, *, include_plan: bool = False) -> set[str]:
+def arm_evolvable(arm: str, *, include_plan: bool = False, actuator: bool = False) -> set[str]:
     """Which genes GEPA may evolve in each arm.
 
-    A evolves nothing; B one gene (prompt-only — stays `generate` even with a plan
-    gene present, so the B/D contrast still isolates loop-level optimization); C and
+    A evolves nothing; B one gene (prompt-only — stays `generate` even when a third
+    gene is present, so the B/D contrast still isolates loop-level optimization); C and
     D evolve the whole genome (C via the genome-blind command worker, D via the LLM
-    worker). `include_plan` widens the "whole genome" to the optional third gene.
-    """
-    whole = {GENERATE_GENE, VERIFY_GENE} | ({PLAN_GENE} if include_plan else set())
+    worker). `include_plan` widens the whole genome to the optional `plan` gene.
+
+    `actuator` selects the actuator experiment's genome: the whole genome is
+    {generate, actuator} and the detector (`ensure_correct`) is deliberately held
+    fixed — the experiment asks whether GEPA helps when pointed at the fixer's
+    feedback rather than the detector. `actuator` and `include_plan` are mutually
+    exclusive (distinct experiments)."""
+    if actuator:
+        whole = {GENERATE_GENE, ACTUATOR_GENE}
+    else:
+        whole = {GENERATE_GENE, VERIFY_GENE} | ({PLAN_GENE} if include_plan else set())
     return {"A": set(), "B": {GENERATE_GENE}, "C": set(whole), "D": set(whole)}[arm]
 
 
@@ -85,13 +98,21 @@ class ArmResult:
     variant_id: str | None
 
 
-def seed_genome(loop_id: str, *, evolvable: set[str], include_plan: bool = False) -> LoopGenome:
+def seed_genome(
+    loop_id: str,
+    *,
+    evolvable: set[str],
+    include_plan: bool = False,
+    include_actuator: bool = False,
+) -> LoopGenome:
     """The shared seed genome; `evolvable` marks which genes GEPA may change.
 
     Content is identical across arms — only the evolvable flags differ — so the
     seed prompt (and thus the seed held-out score) is the same for every arm.
     Two genes by default; `include_plan` adds the optional third `plan` gene so the
-    loop runs plan→generate→critique→refine (the complexity lever).
+    loop runs plan→generate→critique→refine (the complexity lever). `include_actuator`
+    instead adds the `actuator` gene, an LLM step that turns the test signal into the
+    repair guidance fed to refine (the actuator experiment).
     """
     genes = [
         LoopGene(
@@ -117,6 +138,16 @@ def seed_genome(loop_id: str, *, evolvable: set[str], include_plan: bool = False
                 name="Plan",
                 content=SEED_PLAN,
                 evolvable=PLAN_GENE in evolvable,
+            )
+        )
+    if include_actuator:
+        genes.append(
+            LoopGene(
+                id=ACTUATOR_GENE,
+                type=GeneType.PROMPT,
+                name="Actuator",
+                content=SEED_ACTUATOR,
+                evolvable=ACTUATOR_GENE in evolvable,
             )
         )
     return LoopGenome(id=loop_id, name="IFBench study loop", genes=genes)
@@ -185,11 +216,13 @@ def run_study(
     score_fn: Score = ifbench_score,
     feedback_fn: Feedback = ifbench_feedback,
     use_plan_gene: bool = False,
+    use_actuator: bool = False,
     stats_fn: Callable[[str], str] | None = None,
     exec_feedback: Feedback | None = None,
     critique_complete: Complete | None = None,
     oracle_critique: bool = False,
     oracle_feedback: Feedback | None = None,
+    actuator_context: Feedback | None = None,
     _optimize: Any | None = None,
 ) -> dict[str, ArmResult]:
     """Run the requested arms and return per-arm held-out results.
@@ -217,11 +250,18 @@ def run_study(
         critique_complete=critique_complete,
         oracle_critique=oracle_critique,
         oracle_feedback=oracle_feedback,
+        actuator_gene=ACTUATOR_GENE if use_actuator else None,
+        actuator_context=actuator_context,
     )
     results: dict[str, ArmResult] = {}
     for arm in arms:
-        evolvable = arm_evolvable(arm, include_plan=use_plan_gene)
-        genome = seed_genome(f"study-{arm}", evolvable=evolvable, include_plan=use_plan_gene)
+        evolvable = arm_evolvable(arm, include_plan=use_plan_gene, actuator=use_actuator)
+        genome = seed_genome(
+            f"study-{arm}",
+            evolvable=evolvable,
+            include_plan=use_plan_gene,
+            include_actuator=use_actuator,
+        )
         store.save_loop(genome)
         seed_h = _heldout_score(genome, heldout, worker_run_task)
         evolvable_genes = tuple(g.id for g in genome.genes if g.evolvable)

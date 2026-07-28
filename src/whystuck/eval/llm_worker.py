@@ -148,6 +148,8 @@ def make_self_refine_run_task(
     critique_complete: Complete | None = None,
     oracle_critique: bool = False,
     oracle_feedback: Feedback | None = None,
+    actuator_gene: str | None = None,
+    actuator_context: Feedback | None = None,
     max_retries: int = 2,
 ) -> RunTask:
     """A real generate -> critique -> refine loop (not single-shot).
@@ -203,6 +205,15 @@ def make_self_refine_run_task(
       repair instruction is, isolating whether the residual fix-step gap (runs 7-8) is
       feedback-limited or generator-limited. Default None falls back to `feedback`, so
       it is a no-op unless explicitly set (and inert entirely off the oracle path).
+
+    - **actuator_gene** / **actuator_context** (actuator experiment): when
+      `actuator_gene` is set, a failing critique no longer feeds its own text to the
+      refine step; instead this gene runs an LLM step over `actuator_context(draft,
+      task)` (the raw test signal + visible-test source, e.g. bcb `hi` feedback) and
+      its output becomes the repair guidance. Detection is unchanged (the `verify_gene`
+      critique still gates), so evolving THIS gene (arm D) tests whether GEPA helps when
+      it optimizes the fixer's feedback rather than the detector. Non-oracle only;
+      default None → `repair_text` stays the critique, so existing runs are unchanged.
 
     The final answer is scored by `score` (the ground-truth programmatic metric),
     so the loop cannot game it. `max_retries` bounds the critique/refine rounds and
@@ -285,15 +296,39 @@ def make_self_refine_run_task(
             )
             if passed:
                 break
+            # Actuator experiment: a dedicated gene turns the test signal into the repair
+            # guidance fed to refine, SEPARATE from the detector (`verify_gene`) that gated
+            # above. Evolving this gene (arm D) asks whether GEPA helps when it optimizes the
+            # fixer's feedback rather than the detector. Non-oracle only. Default off, so
+            # every existing run is byte-identical (`repair_text` stays the critique).
+            repair_text = critique
+            if actuator_gene is not None and not oracle_critique:
+                actuator_ctx = actuator_context(draft, task) if actuator_context else ""
+                repair_text = complete(
+                    f"{_gene_content(genome, actuator_gene)}\n\n# Task\n{task_text}\n\n"
+                    f"# Draft answer\n{draft}\n\n# Test results\n{actuator_ctx}\n\n"
+                    "Produce concrete, specific instructions to fix the draft so it passes."
+                )
+                steps.append(
+                    LoopStepTrace(
+                        step_id=f"actuator-{i}",
+                        role="worker",
+                        input_summary=actuator_ctx,
+                        output_summary=repair_text,
+                    )
+                )
             draft = complete(
                 f"{gen}\n\n# Task\n{task_text}{plan_block}\n\n# Your previous answer\n{draft}\n\n"
-                f"# Problems to fix\n{critique}\n\nProduce a corrected answer."
+                f"# Problems to fix\n{repair_text}\n\nProduce a corrected answer."
             )
             steps.append(
                 LoopStepTrace(
                     step_id=f"refine-{i}",
                     role="worker",
-                    input_summary=critique,
+                    # Record what actually drove the refinement: the actuator's repair text
+                    # when the actuator gene is on, else the critique (they're identical when
+                    # it is off). GEPA reads traces to optimize genes, so this must be faithful.
+                    input_summary=repair_text,
                     output_summary=draft,
                 )
             )

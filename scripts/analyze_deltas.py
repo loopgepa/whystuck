@@ -94,6 +94,19 @@ def main() -> int:  # pragma: no cover - CLI convenience
     exclc = "excludes 0" if loc > 0 or hic < 0 else "includes 0 (suggestive, not significant)"
     seedsc = [f"{x:+.3f}" for x in dc]
     print(f"Δ(hi−lo)={mc:+.3f}  seeds={seedsc}  95%CI[{loc:+.3f},{hic:+.3f}]  ({exclc})")
+
+    print("\n=== actuator experiment: Δ(D−B) aiming GEPA at the fixer's feedback gene ===")
+    for label, path in (
+        ("actuator small (n=2, 8/10, mmc30)", f"{DOCS}/validation-study-bcb-actuator.json"),
+        ("actuator powered (n=3, 20/20, mmc50)", f"{DOCS}/validation-study-bcb-actuator-big.json"),
+    ):
+        da = delta_arm(path)
+        ma, loa, hia = exact_resample_ci(da)
+        # A negative effect "excludes zero" when its upper bound < 0 (every resample mean is
+        # < 0), the powered run's finding; a degenerate [0,0] interval is "point zero".
+        excla = "excludes zero" if hia < 0 else ("point zero" if loa == hia == 0 else "includes 0")
+        seedsa = [f"{x:+.3f}" for x in da]
+        print(f"{label}: Δ(D−B)={ma:+.3f}  seeds={seedsa}  95%CI[{loa:+.3f},{hia:+.3f}]  ({excla})")
     return 0
 
 

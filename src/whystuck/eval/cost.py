@@ -37,7 +37,7 @@ from dataclasses import dataclass
 
 # USD per 1M tokens: model -> (input, output). Verified July 2026.
 MODEL_PRICES: dict[str, tuple[float, float]] = {
-    "openai/gpt-4.1-mini": (0.80, 3.20),  # GEPA's exact IFBench task LM (spec §6)
+    "openai/gpt-4.1-mini": (0.40, 1.60),  # GEPA's exact IFBench task LM (spec §6)
     "openai/gpt-4.1-nano": (0.10, 0.40),  # cheaper worker option; not in the spec
     "openai/gpt-5.6-luna": (1.00, 6.00),  # extra reflection option beyond the spec
     "openai/gpt-5.6-terra": (2.50, 15.00),  # reflection default (spec §6)

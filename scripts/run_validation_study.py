@@ -14,7 +14,7 @@ omitted) so the numbers and cassettes are reproducible offline afterwards.
 
     # the real run — the worker is a generate→critique→refine loop, so each task
     # eval is up to 1 + 2*loop_max_retries LLM calls; the default (2 seeds, mmc 64,
-    # 10 proposals, 16/16 tasks, 1 retry) ≈ $4.5 under the $5 cap. Output tokens are
+    # 10 proposals, 16/16 tasks, 1 retry) ≈ $2.7 under the $5 cap. Output tokens are
     # hard-capped; the input estimate is conservative for typical GEPA instructions
     # (see eval/cost.py). Needs ≥2 seeds for a verdict (a single seed is always
     # INCONCLUSIVE). Deeper search costs more — the guard refuses over $5.
@@ -86,6 +86,13 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         action="store_true",
         help="feedback lever: inject a measured (non-oracle) text-stats readout into the "
         "critique step; no extra LLM calls (stats computed locally)",
+    )
+    p.add_argument(
+        "--actuator",
+        action="store_true",
+        help="actuator experiment (bcb only): add an `actuator` gene that turns the test "
+        "signal + visible-test source into the refine step's repair guidance; arm D evolves "
+        "generate+actuator with the detector held fixed. Adds one worker call/retry (3N).",
     )
     p.add_argument(
         "--critique-model",
@@ -214,9 +221,29 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 2
 
+    if args.actuator and args.task_set != "bcb":
+        print(
+            "ERROR: --actuator needs --task-set bcb: its actuator context is the bcb "
+            "visible-test source (bcb_feedback level=hi). Other task sets have no such context.",
+            file=sys.stderr,
+        )
+        return 2
+    if args.actuator and args.plan_gene:
+        print(
+            "ERROR: --actuator and --plan-gene are distinct experiments; enable at most one.",
+            file=sys.stderr,
+        )
+        return 2
+
     # Call count per eval: generate (+plan) + per retry a refine, plus a critique
-    # UNLESS the oracle gate replaces it (no critique LLM call then).
-    per_retry_calls = 1 if args.oracle_critique else 2
+    # UNLESS the oracle gate replaces it (no critique LLM call then), plus an actuator
+    # call per retry when the actuator gene is on (critique + actuator + refine = 3).
+    if args.oracle_critique:
+        per_retry_calls = 1
+    elif args.actuator:
+        per_retry_calls = 3
+    else:
+        per_retry_calls = 2
     worker_calls_per_task = (2 if args.plan_gene else 1) + per_retry_calls * args.loop_max_retries
     # Conservative pricing: a cross-family critic runs some worker-side calls on a
     # different (often pricier) model. We price ALL worker-side calls at the pricier
@@ -348,6 +375,10 @@ def _run_live(
     # `exec_feedback` is the task-aware, EXECUTABLE in-loop signal (code only); the text
     # task sets have no executor, so it stays None (their critique is LLM/oracle-gated).
     exec_feedback: Feedback | None = None
+    # Actuator experiment (bcb): the actuator gene's raw materials = the visible-test result
+    # PLUS the visible-test source (bcb_feedback level=hi), the same signal the hand-built +0.20
+    # 'hi' lift used — so the experiment asks whether GEPA can evolve to exploit it.
+    actuator_context: Feedback | None = None
     if args.task_set == "bcb":
         # BigCodeBench-Hard in Docker: visible unittest methods run in-loop (exec_feedback),
         # hidden methods score (held-out). Hard even for frontier models → real gradient.
@@ -359,6 +390,8 @@ def _run_live(
         # chosen level. mid (default) is byte-identical to the recorded runs; lo/hi are the
         # cross-domain analogue of the IFBench actionability ablation.
         exec_feedback = functools.partial(bcb_feedback, level=args.feedback_level)
+        if args.actuator:
+            actuator_context = functools.partial(bcb_feedback, level="hi")
         dataset = "BigCodeBench-Hard (Docker; visible methods in-loop, hidden methods scored)"
     elif args.task_set == "code":
         # MBPP+: base tests VISIBLE (shown in-prompt + executed by the in-loop critique
@@ -446,6 +479,8 @@ def _run_live(
                     critique_complete=critique_complete,
                     oracle_critique=args.oracle_critique,
                     oracle_feedback=oracle_feedback,
+                    use_actuator=args.actuator,
+                    actuator_context=actuator_context,
                 )
             runs.append({name: vars(r) for name, r in results.items()})
 
@@ -465,6 +500,7 @@ def _run_live(
         "oracle_critique": args.oracle_critique,
         "feedback_level": args.feedback_level,
         "exec_feedback": exec_feedback is not None,
+        "actuator": args.actuator,
         "worker_max_output_tokens": worker_max_out,
         "seeds": seeds,
         "estimated_usd": estimate,

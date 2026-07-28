@@ -58,8 +58,12 @@ beat a terse verdict by $+0.063$ (seed $0.810\!\to\!0.873$), while naming the fa
 constraint alone adds nothing --- the fix step is partly feedback-limited, and the
 actionable content is the measurement, not the diagnosis. The lever is feedback
 \emph{shape}, however, not loop-level optimization ($\dd$ stays $0.00$), and a
-generator-limited residual remains. We release the full harness, cassette-replayable
-transcripts, and pre-registrations for reproduction.
+generator-limited residual remains. Aiming GEPA \emph{directly} at the fixer --- an evolvable
+\emph{actuator} gene that produces the repair feedback --- does not rescue it: a powered
+$3$-seed replication drives $\dd(D-B)$ to $-0.10$ (CI $[-0.150,-0.050]$), the extra evolvable
+gene over-fitting the train split, which also rules out under-powering as the source of the
+null. We release the full harness, cassette-replayable transcripts, and pre-registrations for
+reproduction.
 \end{abstract}
 
 \section{Introduction}
@@ -385,7 +389,12 @@ Appendix~\ref{app:mbpp-failed}; that failure motivated the move to a frontier-ha
 benchmark.) Each task's \texttt{unittest} methods are partitioned into a visible half
 (the in-loop, executable signal) and a disjoint hidden half (the held-out scorer),
 reconstructing the anti-oracle split; solutions are graded in a pinned, offline Docker
-sandbox (\texttt{-{}-network none}, memory/PID caps, single-thread BLAS). We ran arms
+sandbox (\texttt{-{}-network none}, memory/PID caps, single-thread BLAS).\footnote{Executing
+untrusted \emph{model} code at scale surfaces a subtlety absent when only reference solutions
+run: a draft can exhaust the container's memory cap. Because we run one capped container at a
+time on a host with ample free RAM, such an out-of-memory kill is the \emph{solution's} failure
+(scored $0.0$), not a host fault --- distinct from a genuine infrastructure fault (daemon down,
+image/mount error), which aborts loudly rather than silently recording a $0.0$.} We ran arms
 A--D on $2$ seeds, $8$ train / $10$ held-out tasks drawn from a sandbox-verified
 $80$-task pool, worker \texttt{gpt-4.1-mini}, reflection \texttt{gpt-5.6-terra}, at
 $\mathrm{mmc}=30$.
@@ -424,6 +433,38 @@ dwarfs it, but we do not over-read the exact value). This reinforces the paper's
 the productive lever is the fixer and the actionability of its feedback, not loop-level
 optimization of the critique.
 
+\paragraph{Can GEPA \emph{discover} the actionable feedback? The actuator experiment.}
+The $+0.20$ lift establishes that the fixer's feedback \emph{matters} --- but that feedback
+was hand-designed. The sharpest test of our thesis is whether GEPA can \emph{discover} the
+gain by optimization when pointed squarely at it. We add a fourth evolvable gene, an
+\texttt{actuator}: an LLM step that, on a failed critique, turns the visible-test signal and
+the visible-test source (the same \emph{hi} material) into the repair guidance fed to the
+refine step. Arm~B still evolves only \texttt{generate}; arm~D now co-evolves \texttt{generate}
+\emph{and} \texttt{actuator} with the detector (\texttt{ensure\_correct}) held \emph{fixed}, so
+any $D-B$ gap isolates optimization of the fixer's feedback --- the one component we know can
+help. A first run ($2$ seeds, $8$/$10$) gave a flat $\dd(D-B)=0.00$: GEPA proposed sensible
+actuator rewrites (e.g.\ ``produce concrete, draft-specific repair instructions; do not write
+vague advice such as `fix the syntax' ''), but accepted none that beat even the training
+subsample, and the single accepted \texttt{generate} rewrite did not transfer.
+
+To rule out that this null was a small-budget artifact, we ran a \emph{powered} replication:
+$3$ seeds, $20$ train / $20$ held-out, $\mathrm{mmc}=50$ --- $2.5\times$ the train size,
+$2\times$ the held-out resolution, $1.7\times$ the search. The powered result does not merely
+reproduce the null; it sharpens \emph{against} loop-level optimization. Prompt-only arm~B now
+\emph{transfers} to held-out ($+0.05, +0.15, 0.00$; mean $+0.067$) --- with a larger training
+split, evolving \texttt{generate} alone generalizes. But the loop-level arm~D does \emph{worse}:
+$\dd(D-B) = -0.10$ (per-seed $-0.15, -0.15, 0.00$; exact-resample $95\%$ CI $[-0.150, -0.050]$,
+\emph{excluding zero}), and on seed~0 arm~D's optimization actively
+\emph{degrades} held-out ($0.55 \to 0.45$). The mechanism is textbook over-fitting: arm~D's
+two-gene search space strictly contains arm~B's one-gene space, so under a matched metric budget
+it fits the $20$ training tasks harder and transfers worse. Across all three code configurations
+the ordering is invariant --- $D \le B$ on held-out, never $D > B$. Raising exactly the levers a
+budget-limited null would need (train size, held-out resolution, seeds, search depth) surfaced no
+hidden positive; it made the loop-level lever \emph{mildly counterproductive}. This is the
+strongest form of our claim: optimizing the fixer's feedback --- the very component whose
+hand-built improvement \emph{does} lift the baseline ($+0.20$) --- yields no benefit under GEPA,
+because the gain lives in feedback \emph{design}, not in anything reflective search recovers.
+
 \paragraph{Reproducibility scope.} The main four-arm result reproduced \emph{identically}
 across two independent paid runs. Per-execution grading is deterministic, and we release the
 cassette and scores. We do \emph{not} claim byte-for-byte replay of the full LLM-call
@@ -432,7 +473,9 @@ in the sandbox can yield run-to-run-varying test output --- an intrinsic propert
 executable-code benchmarks, not of our harness. (The instruction-following runs above,
 which never execute model code, do replay bit-for-bit.) We normalize the string-level
 non-determinism we can --- object ids, addresses, and temp paths in failure messages ---
-so that identical executions render identical feedback.
+so that identical executions render identical feedback. The actuator runs (both the $2$-seed
+and the powered $3$-seed replication) share this scope: cassettes and scores released,
+per-execution grading deterministic, full-trace replay not claimed.
 
 \section{Analysis: Why the Loop-Level Lever Is Inert}
 \label{sec:analysis}
@@ -654,7 +697,11 @@ generator-limited (the residual). The agenda, re-ordered accordingly:
     \emph{both} arms on one seed yet still delivered $\dd(D-B)=0.00$ on held-out
     (\S\ref{sec:bcb}). The instruction-following null thus recurs in a semantically-verified,
     executable-feedback domain: reliable, actionable verification is \emph{not} by itself
-    sufficient to make the loop-level lever pay off. Math (a numeric checker) remains a
+    sufficient to make the loop-level lever pay off. Aiming GEPA directly at the fixer's
+    feedback (the \emph{actuator} experiment, \S\ref{sec:bcb}) did not rescue it either: a
+    powered $3$-seed replication ($20$/$20$, $\mathrm{mmc}=50$) gave $\dd(D-B)=-0.10$
+    (CI $[-0.150,-0.050]$), the extra gene \emph{over-fitting} rather than helping --- which
+    also closes the budget/power threat to the null. Math (a numeric checker) remains a
     natural next replication.
   \item[D7 (statistics) --- \emph{largely retired}.] We already report exact-resample
     intervals ($\S\ref{sec:threats}$); because the paired $\dd$ has near-zero variance
@@ -680,15 +727,19 @@ detector, F$_1\!=\!0.11$). \textbf{(ii) Does GEPA lift this task?} No: its optim
 genomes gave no held-out gain and sometimes \emph{degraded} both arms (train-split
 overfitting), at the budgets tested --- not a verdict on GEPA in general, which
 reports gains elsewhere. \textbf{(iii) Does loop-level optimization beat prompt-only
-(the thesis)?} No, with tight intervals: $\dd(D{-}B)$ is a consistent zero
-($[-0.033,+0.033]$ on the decisive run; exactly $[0,0]$ where the arms converge). The
-rest of this section explains \emph{why}.
+(the thesis)?} No, with tight intervals: $\dd(D{-}B)$ is a consistent zero on
+instruction-following ($[-0.033,+0.033]$ on the decisive run; exactly $[0,0]$ where the
+arms converge), and \emph{non-positive} on code --- a powered replication that aimed GEPA
+at the fixer's own feedback drove it \emph{negative} ($-0.10$, CI $[-0.150,-0.050]$), the
+extra evolvable gene over-fitting the train split. The rest of this section explains
+\emph{why}.
 
 Across ten pre-registered instruction-following experiments --- and a cross-domain
 replication on frontier-hard code (\S\ref{sec:bcb}) --- optimizing the verification
-(and plan) components of a self-refine loop gave no held-out advantage over optimizing
-the generation prompt alone, at the budgets and models tested ($\dd \le 0.01$, within
-noise). Positive effects --- a measurement
+(and plan, and even the fixer's actuator) components of a self-refine loop gave no
+held-out advantage over optimizing the generation prompt alone, at the budgets and models
+tested: $\dd \le 0.01$ (within noise) on instruction-following, and $\dd = -0.10$ under a
+powered code replication where the extra evolvable gene over-fit the training split. Positive effects --- a measurement
 tool, a different-model critic, and more actionable repair feedback lifting the
 baseline --- accrued to prompt-only and loop-level arms equally. Probing the cause,
 we found the intrinsic critique is a near-random detector, yet a \emph{perfect}

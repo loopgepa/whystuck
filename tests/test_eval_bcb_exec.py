@@ -106,6 +106,19 @@ def test_timeout_is_a_failure_not_a_hang():
     assert time.monotonic() - start < 40  # returned near the timeout, container killed
 
 
+def test_memory_hog_solution_is_a_failure_not_an_infra_abort():
+    # A model draft that exceeds the container's OWN memory cap is a FAILED solution
+    # (verdict "oom", scored 0.0 downstream), NOT a host/infra fault — one memory-hog
+    # draft must not abort a whole paid study. Genuine launch faults stay sandbox_error.
+    hog = "def task_func(x):\n    y = bytearray(6 * 1024 * 1024 * 1024)\n    return int(sum(x))\n"
+    r = run_unittest(hog, _TEST, ["test_a"], timeout=60, mem_mb=1024)
+    assert r.passed is False
+    assert r.verdict == "oom"  # a solution failure, not sandbox_error
+    from whystuck.eval.code_exec import INFRA_VERDICTS
+
+    assert r.verdict not in INFRA_VERDICTS  # so the scorer records 0.0, does not raise/abort
+
+
 def test_network_is_blocked_offline_enforced():
     # --network none must make a real outbound connection fail (proves offline is ENFORCED,
     # not merely unused). A task_func that opens a socket errors → the test errors → failed.

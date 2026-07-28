@@ -87,17 +87,18 @@ def test_default_is_two_seeds():
 
 
 def test_seeds_flag_parses_multiple_values():
-    # 3 seeds × ABCD × Terra with the 5-call/eval loop is well over the $5 cap, so
-    # raise --max-usd to reach the dry-run and exercise the parse (the refusal
-    # itself is tested below).
-    code, out, _ = _run(["--seeds", "0,1,2", "--max-usd", "20"])
+    # 3 seeds × ABCD at the corrected gpt-4.1-mini price (≈ $4.38) fits under the $5
+    # default, so no --max-usd bump is needed to reach the dry-run and exercise the
+    # parse (the refusal itself is tested below with a genuinely over-budget config).
+    code, out, _ = _run(["--seeds", "0,1,2"])
     assert code == 0
     assert "seeds=[0, 1, 2]" in out
 
 
-def test_three_seeds_default_cap_is_refused():
-    # Documents that 3 seeds over all arms exceeds the $5 default — the guard's job.
-    code, _, err = _run(["--seeds", "0,1,2"])
+def test_four_seeds_default_cap_is_refused():
+    # 3 seeds now fits (≈ $4.38); 4 seeds over all arms (≈ $5.84) exceeds the $5
+    # default — the guard's job to refuse pre-flight.
+    code, _, err = _run(["--seeds", "0,1,2,3"])
     assert code == 2
     assert "REFUSED" in err
 

@@ -398,6 +398,26 @@ def test_arm_evolvable_extends_bd_to_the_plan_gene():
     assert PLAN_GENE not in arm_evolvable("D", include_plan=False)  # off by default
 
 
+def test_seed_genome_gets_an_actuator_gene_when_requested():
+    from whystuck.eval.study import ACTUATOR_GENE
+
+    g = seed_genome("x", evolvable=set(), include_actuator=True)
+    assert [gene.id for gene in g.genes] == [GENERATE_GENE, VERIFY_GENE, ACTUATOR_GENE]
+    assert len(seed_genome("x", evolvable=set()).genes) == 2  # default unchanged
+
+
+def test_actuator_mode_evolves_generate_and_actuator_but_holds_the_detector_fixed():
+    # The whole point of the actuator experiment: D optimizes the fixer's feedback
+    # (generate + actuator), NOT the detector (ensure_correct), which stays at seed.
+    from whystuck.eval.study import ACTUATOR_GENE, arm_evolvable
+
+    assert arm_evolvable("A", actuator=True) == set()
+    assert arm_evolvable("B", actuator=True) == {GENERATE_GENE}  # prompt-only baseline
+    assert arm_evolvable("D", actuator=True) == {GENERATE_GENE, ACTUATOR_GENE}
+    assert VERIFY_GENE not in arm_evolvable("D", actuator=True)  # detector held fixed
+    assert ACTUATOR_GENE not in arm_evolvable("D")  # off by default
+
+
 def test_run_study_with_plan_gene_lets_only_d_evolve_the_plan(tmp_path, tasks):
     from whystuck.eval.study import PLAN_GENE
 

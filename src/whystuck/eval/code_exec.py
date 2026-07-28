@@ -76,6 +76,7 @@ Verdict = Literal[
     "timeout",  # exceeded the wall-clock limit (killed) — a runaway / infinite loop
     "incomplete",  # clean exit but the sentinel never printed (early exit / swallowed tests)
     "no_assertions",  # the test block had no `assert` — a vacuous pass is impossible
+    "oom",  # the executed code exceeded the container memory cap (bcb_exec; a hog SOLUTION)
     "sandbox_error",  # the sandbox itself failed to run (fork/setrlimit) — a HOST fault
 ]
 # Verdicts attributable to the SANDBOX/DATA, not the executed code. A scorer must not

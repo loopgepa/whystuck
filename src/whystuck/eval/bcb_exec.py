@@ -266,14 +266,15 @@ def run_unittest(
     method_names: Sequence[str] | None = None,
     *,
     timeout: float = 30.0,
-    mem_mb: int = 2048,
+    mem_mb: int = 4096,
 ) -> ExecResult:
     """Run ``solution`` + ``test_code`` in a Docker sandbox, executing the given unittest
     methods (``None`` => all ``test_*``). Returns ``passed=True`` (verdict ``"pass"``) iff
     every selected method ran to success; otherwise a structured verdict:
     ``"failed"`` (a test failed / the code raised), ``"timeout"``, ``"incomplete"`` (clean
-    exit, no sentinel), ``"no_assertions"`` (no runnable test methods — a corrupt split), or
-    ``"sandbox_error"`` (Docker/host fault — the caller must NOT score this as 0.0)."""
+    exit, no sentinel), ``"oom"`` (the solution exceeded the container memory cap — a hog
+    solution, scored 0.0, NOT an infra fault), ``"no_assertions"`` (no runnable test methods
+    — a corrupt split), or ``"sandbox_error"`` (Docker/host fault — must NOT be scored 0.0)."""
     import tempfile
 
     # Reject frame-introspection up front (host-side, before any container runs): its only
@@ -314,15 +315,20 @@ def run_unittest(
         return ExecResult(False, f"sandbox error: {exc}", verdict="sandbox_error")
 
     out, err, rc = proc.stdout, proc.stderr, proc.returncode
-    # Host/sandbox faults (daemon down, image/exec broken, OOM-kill, mount fault) must NOT be
-    # scored as a genuine 0.0 — the caller (_raise_if_infra) aborts on these. A daemon
-    # connection blip exits 1 (overloaded with a real test failure), so match its message.
+    # Host/sandbox faults (daemon down, image/exec broken, mount fault) must NOT be scored as a
+    # genuine 0.0 — the caller (_raise_if_infra) aborts on these. A daemon connection blip exits
+    # 1 (overloaded with a real test failure), so match its message. (A container memory-cap OOM,
+    # exit 137, is handled below as a hog SOLUTION, not an infra fault — see that branch.)
     if any(msg in err for msg in _DOCKER_CONN_ERRORS):
         return ExecResult(False, f"sandbox error: docker daemon: {_tail(err)}", "sandbox_error")
     if rc in (125, 126, 127):  # container/exec could not start (daemon, image, PATH)
         return ExecResult(False, f"sandbox error: docker run failed: {_tail(err)}", "sandbox_error")
-    if rc == 137:  # 128+SIGKILL: OOM-killed or externally killed
-        return ExecResult(False, "sandbox error: container killed (137/OOM)", "sandbox_error")
+    if rc == 137:  # 128+SIGKILL: the container hit its OWN --memory cap (we run one container
+        # at a time on a host with ample free RAM), so this is a memory-hog SOLUTION, not a host
+        # fault. Score it as a failure (verdict "oom", NOT in INFRA_VERDICTS) so one runaway draft
+        # fails 0.0 and the study continues, instead of aborting the whole run. (A genuine host
+        # fault that prevents launch surfaces as 125/126/127 or a daemon error above — still infra.)
+        return ExecResult(False, f"solution exceeded the {mem_mb}MB memory cap (137/OOM)", "oom")
     if rc == 5:  # harness could not read the mounted files => mount/permission fault
         return ExecResult(False, f"sandbox error: mount/read fault: {_tail(err)}", "sandbox_error")
     if out.rstrip().endswith(_NO_METHODS):

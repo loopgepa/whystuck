@@ -23,10 +23,10 @@ from whystuck.eval.cost import (
 
 
 def test_estimate_usd_matches_hand_computation():
-    # gpt-4.1-mini @ $0.80/$3.20 per 1M: 1000 calls * (600 in, 250 out)
-    # = 1000 * (600*0.8 + 250*3.2)/1e6 = 1000 * (480 + 800)/1e6 = 1000 * 0.00128
+    # gpt-4.1-mini @ $0.40/$1.60 per 1M: 1000 calls * (600 in, 250 out)
+    # = 1000 * (600*0.4 + 250*1.6)/1e6 = 1000 * (240 + 400)/1e6 = 1000 * 0.00064
     groups = [CallGroup(model="openai/gpt-4.1-mini", calls=1000, in_tokens=600, out_tokens=250)]
-    assert estimate_usd(groups) == pytest.approx(1.28)
+    assert estimate_usd(groups) == pytest.approx(0.64)
 
 
 def test_estimate_usd_sums_multiple_groups():
@@ -34,8 +34,8 @@ def test_estimate_usd_sums_multiple_groups():
         CallGroup(model="openai/gpt-4.1-mini", calls=10, in_tokens=600, out_tokens=250),
         CallGroup(model="openai/gpt-5.6-terra", calls=10, in_tokens=4000, out_tokens=1500),
     ]
-    # worker: 10 * 0.00128 = 0.0128 ; reflection: 10 * (4000*2.5+1500*15)/1e6 = 10*0.0325 = 0.325
-    assert estimate_usd(groups) == pytest.approx(0.0128 + 0.325)
+    # worker: 10 * 0.00064 = 0.0064 ; reflection: 10 * (4000*2.5+1500*15)/1e6 = 10*0.0325 = 0.325
+    assert estimate_usd(groups) == pytest.approx(0.0064 + 0.325)
 
 
 def test_unknown_model_raises():
@@ -46,8 +46,8 @@ def test_unknown_model_raises():
 def test_guard_allows_plan_under_ceiling():
     guard = CostGuard(max_usd=5.0)
     groups = [CallGroup(model="openai/gpt-4.1-mini", calls=100, in_tokens=600, out_tokens=250)]
-    # 100 * 0.00128 = 0.128 < 5 — returns the estimate, no raise
-    assert guard.check(groups) == pytest.approx(0.128)
+    # 100 * 0.00064 = 0.064 < 5 — returns the estimate, no raise
+    assert guard.check(groups) == pytest.approx(0.064)
 
 
 def test_guard_refuses_plan_over_ceiling():
@@ -61,7 +61,7 @@ def test_guard_refuses_plan_over_ceiling():
 def test_guard_allows_exact_ceiling_boundary():
     # estimate == max_usd is allowed (strict `>`): pin the off-by-one boundary.
     groups = [CallGroup(model="openai/gpt-4.1-mini", calls=1000, in_tokens=600, out_tokens=250)]
-    estimate = estimate_usd(groups)  # 1.28
+    estimate = estimate_usd(groups)  # 0.64
     assert CostGuard(max_usd=estimate).check(groups) == pytest.approx(estimate)
 
 
@@ -154,15 +154,15 @@ def test_two_seed_sol_run_exceeds_cap_but_terra_fits():
             arms=("A", "B", "C", "D"),
             n_train=31,
             n_heldout=31,
-            max_metric_calls=150,
+            max_metric_calls=200,
             reflection_calls=15,
             worker_model="openai/gpt-4.1-mini",
             reflection_model=reflection,
             n_seeds=2,
         )
 
-    assert estimate_usd(plan("openai/gpt-5.6-terra")) < 5.0
-    assert estimate_usd(plan("openai/gpt-5.6-sol")) > 5.0
+    assert estimate_usd(plan("openai/gpt-5.6-terra")) < 5.0  # ≈ $3.17
+    assert estimate_usd(plan("openai/gpt-5.6-sol")) > 5.0  # ≈ $5.12
 
 
 def test_full_study_estimate_is_within_five_dollars():
@@ -214,7 +214,7 @@ def test_default_loop_config_fits_five_dollars():
         n_seeds=2,
         worker_calls_per_task=1 + 2 * 1,
     )
-    assert estimate_usd(groups) < 4.75  # ≈ $4.54, ~9% headroom under the $5 ceiling
+    assert estimate_usd(groups) < 3.0  # ≈ $2.92, comfortably under the $5 ceiling
 
 
 def test_token_shapes_price_output_at_the_enforced_cap():
