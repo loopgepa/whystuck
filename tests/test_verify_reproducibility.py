@@ -18,11 +18,11 @@ import verify_reproducibility as vr  # noqa: E402
 
 
 def test_every_registered_run_is_marked_superseded():
-    # All eleven recorded runs predate the harness correction (component-agnostic
-    # reflective dataset + one-component-per-proposal selector + saturated arm C). The
-    # corrected wiring changes every reflection prompt, hence every cassette key, so none
-    # of them can replay under the current code. EXPECTED_RUNS counts runs recorded under
-    # the CORRECTED harness, which is zero until the study is re-run.
+    # Eleven recorded runs predate the harness correction (component-agnostic reflective
+    # dataset + one-component-per-proposal selector + saturated arm C). The corrected
+    # wiring changes every reflection prompt, hence every cassette key, so none of them
+    # can replay under the current code. EXPECTED_RUNS counts runs recorded under the
+    # CORRECTED harness: the two C1 conditions and the C2 four-arm re-run.
     # Pin the INVARIANT, not the snapshot: every run recorded under the pre-correction
     # harness stays superseded, and EXPECTED_RUNS must equal however many runs are not.
     # The previous version asserted "11 runs, all superseded, EXPECTED_RUNS == 0", which

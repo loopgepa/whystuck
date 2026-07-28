@@ -122,6 +122,44 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.append(("C1 mean delta", -0.033, 0.0005, mean(c1)))
     out.append(("C1 sign p", 0.61, 0.005, sign_test_p(c1)))
 
+    # --- The corrected-harness re-run, C2 (tab:rerun and the resolved prediction) ------
+    # The gene-change counts are the load-bearing ones: they are what distinguishes this
+    # run from the eleven it replaces, and the claim "the treatment was applied" reduces
+    # entirely to them. Checked from the released JSON rather than from the prose.
+    c2 = _runs("validation-study-c2.json")
+    out.append(("C2 seeds", 3, 0, len(c2)))
+    for arm, seed_m, opt_m in (
+        ("A", 0.790, 0.790),
+        ("C", 0.790, 0.790),
+        ("B", 0.790, 0.750),
+        ("D", 0.790, 0.735),
+    ):
+        out.append(
+            (f"C2 {arm} seed mean", seed_m, 0.0005, mean(r[arm]["seed_heldout"] for r in c2))
+        )
+        out.append((f"C2 {arm} opt mean", opt_m, 0.0005, mean(r[arm]["opt_heldout"] for r in c2)))
+    out.append(
+        (
+            "C2 arm D evolved ensure_correct on N seeds",
+            2,
+            0,
+            sum(1 for r in c2 if "ensure_correct" in (r["D"].get("genes_changed") or [])),
+        )
+    )
+    out.append(
+        (
+            "C2 arm C changed nothing on N seeds",
+            3,
+            0,
+            sum(1 for r in c2 if not (r["C"].get("genes_changed") or [])),
+        )
+    )
+    d_c2 = delta_arm(f"{DOCS}/validation-study-c2.json")
+    m, lo, hi = exact_resample_ci(d_c2)
+    out.append(("C2 delta(D-B)", -0.015, 0.0005, m))
+    out.append(("C2 CI lo", -0.065, 0.0005, lo))
+    out.append(("C2 CI hi", 0.020, 0.0005, hi))
+
     # --- The metric's do-nothing floor (Threats) --------------------------------------
     from whystuck.eval.ifbench import ifbench_score, load_ifbench
     from whystuck.eval.multi_constraint import load_multi_constraint, mc_score

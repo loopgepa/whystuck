@@ -1011,10 +1011,66 @@ that one number, this paper would have been a different paper eleven runs earlie
 the corrected wiring changes every reflection prompt, it changes every cassette key, so the
 released cassettes cannot replay under it; they are retained and labelled superseded. The
 first runs recorded under the corrected harness are the two hand-written-gene conditions of
-\S\ref{sec:analysis}(1d); they replay bit-for-bit, so
-\texttt{verify\_reproducibility.py} now verifies two runs rather than reporting that nothing
-has been proven. The four-arm re-run remains future work, with a prediction registered for it
-in \S\ref{sec:directions}.
+\S\ref{sec:analysis}(1d) and the four-arm re-run of \S\ref{sec:rerun}; all three replay
+bit-for-bit, so \texttt{verify\_reproducibility.py} now verifies three runs rather than
+reporting that nothing has been proven.
+
+\subsection{The corrected-harness re-run}
+\label{sec:rerun}
+
+We then bought the re-run, under the prediction registered in \S\ref{sec:directions} and
+reproduced verbatim there. Same task family, budget and worker as run~3
+(multi-hard, $\mathrm{mmc}=28$, 8 train / 10 held-out, one refine round, three seeds), with
+the three corrections in place: a component-specific reflective dataset, an explicit
+\texttt{module\_selector=all}, and a non-saturating arm~C.
+
+\textbf{The treatment was applied.} Arm~D's \texttt{genes\_changed} includes
+\texttt{ensure\_correct} on two of three seeds, against zero of fifteen across the released
+runs. This is the check no released run could perform, and it is the difference between a
+null result and a bug report.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llccc}
+\toprule
+Arm & GEPA evolves & seed & optimized & $\Delta$ \\
+\midrule
+A & nothing (baseline) & 0.790 & 0.790 & $+0.000$ \\
+C & genome ignored (control) & 0.790 & 0.790 & $+0.000$ \\
+B & \texttt{generate} & 0.790 & 0.750 & $-0.040$ \\
+D & \texttt{generate} $+$ \texttt{ensure\_correct} & 0.790 & 0.735 & $-0.055$ \\
+\bottomrule
+\end{tabular}
+\caption{The corrected-harness re-run, held-out means over three seeds. Both controls land
+exactly on the seed baseline while both optimizing arms fall below it, so the loss is
+attributable to optimization rather than to scoring noise.}
+\label{tab:rerun}
+\end{table}
+
+Per-seed $\dd(D-B) = [+0.000, +0.020, -0.065]$, mean $-0.015$, exact-resample 95\% CI
+$[-0.065, +0.020]$, sign $p=1.00$. The point estimate falls inside our $\pm0.05$ SESOI, so
+prediction (ii) holds as stated; the interval does not, so this is not an equivalence claim
+either, and at $n=3$ the sign test cannot fall below $p=0.25$ regardless of the data. What
+distinguishes this null from the eleven it replaces is not its width but its content: the
+arms produced different genomes and different scores, so the interval measures a contrast
+that exists. The single tie is seed~0, where GEPA accepted no proposal in \emph{any} arm and
+returned the seed genome unchanged --- the plateau behaviour reported for GEPA elsewhere
+\citep{agrawal2025gepa}, not a harness artifact.
+
+The result we did not predict is Table~\ref{tab:rerun}'s middle column:
+\textbf{optimization made both arms worse}, by $-0.040$ and $-0.055$, while both controls sat
+exactly on the baseline. Eight training tasks against ten held-out is a small split, and the
+reflective optimizer overfits it; arm~D loses slightly more because it has two genes of
+surface to overfit rather than one. This is consistent with the degradation runs 4 and 5
+showed and with the reported instability of prompt optimizers on some tasks
+\citep{yang2023opro,zhou2025bbopromptscale}, and it means the honest summary of loop-level
+optimization here is not that it fails to help but that, at this budget, it costs something.
+
+Arm~C deserves its own sentence, because its number is unchanged from the retracted runs and
+its meaning is not. Previously arm~C was flat because it scored a saturated $1.0$ and could
+propose nothing; the flatness was an identity. Here it starts at $0.36$ with ample headroom,
+GEPA proposes against it, and it still lands exactly on the baseline. Same $+0.000$, and only
+the second one is evidence.
 
 \section{Threats to Validity}
 \label{sec:threats}
@@ -1195,8 +1251,11 @@ generator-limited (the residual). The agenda, re-ordered accordingly:
     train/held-out cannot near-duplicate, and report the train--held-out gap.
 \end{description}
 
-\paragraph{A pre-registered prediction for the corrected-harness re-run.}
-We state this before buying the run, so that it can be wrong. Section~\ref{sec:analysis}(1d)
+\paragraph{A pre-registered prediction for the corrected-harness re-run --- \textbf{resolved,
+\S\ref{sec:rerun}}.} The prediction below was committed before the run was paid for and is
+reproduced unchanged. Both parts held: \texttt{ensure\_correct} changed on two of three seeds
+of arm~D, and $\dd(D-B) = -0.015$ sits inside the $\pm0.05$ SESOI. One thing we did not
+predict: optimization moved both arms \emph{below} the seed baseline. We state this before buying the run, so that it can be wrong. Section~\ref{sec:analysis}(1d)
 found that a hand-written verify gene changed the detector's threshold (PASS rate $0.09 \to
 0.00$) without producing a true positive, and moved held-out by $-0.033$ ($p=0.61$). If that
 generalizes to the search --- if the reachable improvements in prose space are threshold moves

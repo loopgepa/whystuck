@@ -90,8 +90,44 @@
 > the optimizer. Evidence, not proof: one hand-written point in prose space. Caveat: only 5
 > positive cases per split, so tp = 0 cannot separate "no" from "weak" discrimination.
 >
-> **`verify_reproducibility.py` now reports ALL 2 RUNS REPRODUCE FROM CASSETTE**, not
+> **`verify_reproducibility.py` now reports ALL 3 RUNS REPRODUCE FROM CASSETTE**, not
 > NOTHING PROVEN. Measured cost realization: $0.043 actual vs $0.190 guard bound = **23 %**.
+
+> **C2 — THE FOUR-ARM RE-RUN, AND THE FIRST RUN IN WHICH THE TREATMENT WAS APPLIED
+> (2026-07-28).** multi-hard, arms ABCD, seeds 0/1/2, 8 train / 10 held-out, mmc 28,
+> 6 reflection calls, 1 refine round, `--module-selector all`, reflection `gpt-5.6-luna`.
+> Both parts of the prediction pre-registered in the paper held.
+>
+> **(i) The treatment was applied.** Arm D's `genes_changed` includes `ensure_correct` on
+> **2 of 3 seeds**, against **0 of 15** across the released runs. This is the check no
+> released run could perform.
+>
+> | arm | evolves | seed | optimized | Δ |
+> |---|---|---|---|---|
+> | A | nothing | 0.790 | 0.790 | +0.000 |
+> | C | genome ignored | 0.790 | 0.790 | +0.000 |
+> | B | `generate` | 0.790 | 0.750 | **−0.040** |
+> | D | `generate` + `ensure_correct` | 0.790 | **0.735** | **−0.055** |
+>
+> **(ii) The null holds.** Per-seed Δ(D−B) = [+0.000, +0.020, −0.065], mean **−0.015**,
+> 95 % CI [−0.065, +0.020], sign p = 1.00. Point estimate inside the ±0.05 SESOI as
+> predicted; the interval is not, so this is not equivalence either, and at n = 3 the sign
+> test floors at p = 0.25. What separates this null from the eleven it replaces is not its
+> width but that **the arms provably differ** — different genomes, different scores.
+>
+> **The unpredicted finding: optimization made both arms worse.** Both controls sit exactly
+> on the seed baseline while B and D fall below it, so the loss is attributable to
+> optimization, not scoring noise; D loses more because it has two genes of surface to
+> overfit on 8 training tasks. Seed 0 is the one tie: GEPA accepted nothing in *any* arm and
+> returned the seed genome (the documented GEPA plateau).
+>
+> **Arm C is now evidence rather than an identity.** Its +0.000 is unchanged from the
+> retracted runs, but there it was saturated at 1.0 and *could not* propose; here it starts
+> at 0.36 with headroom, GEPA proposes against it, and it still lands on the baseline.
+>
+> Integrity: 461 distinct calls, 0 empty and 0 error-shaped outputs, and all 24 arm-scores
+> plus gene-change sets reproduce **exactly** under strict replay. Cost ≈ $0.31 estimated
+> (outputs measured, inputs assumed) against the $1.7358 priced bound.
 >
 > **Released artifacts do NOT carry the provenance fields.** `genes_changed`, `train_score` and
 > `final_genes` postdate every recorded run and are empty in all 17 result JSONs, so the
