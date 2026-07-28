@@ -11,7 +11,10 @@ componentized optimization from a "more prompt text" confound:
 - **A** — evolves nothing (seed baseline; no optimization).
 - **B** — evolves the single `generate` gene (prompt-only GEPA).
 - **C** — evolves the whole genome but scores each candidate with a genome-blind
-  command worker (the control; its landscape is flat, so GEPA can't improve it).
+  constant draft graded by the real metric (the control). Its landscape is flat because
+  the worker ignores the genome, yet it is NOT saturated, so GEPA still searches and a
+  spurious gain would be visible. An earlier command-exit-status control scored a perfect
+  1.0, which made the arm incapable of failing.
 - **D** — evolves the whole genome with the LLM worker (loop-level GEPA).
 
 Each arm's winning genome is scored on the held-out split with `ifbench_score`
@@ -33,11 +36,18 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
-from whystuck.core.models import GeneType, LoopGene, LoopGenome, LoopTrace
-from whystuck.core.runner import run_command_loop
+from whystuck.core.models import (
+    GeneType,
+    LoopGene,
+    LoopGenome,
+    LoopMetrics,
+    LoopStepTrace,
+    LoopTrace,
+    outcome_for,
+)
 from whystuck.core.storage import WhyStuckStore
 from whystuck.core.util import mean, utc_now_iso
-from whystuck.eval.adapter import RunTask
+from whystuck.eval.adapter import RunTask, VerifyTruth
 from whystuck.eval.benchmark import BenchmarkTask
 from whystuck.eval.ifbench import ifbench_feedback, ifbench_score
 from whystuck.eval.llm_worker import Complete, Feedback, Score, make_self_refine_run_task
@@ -69,7 +79,7 @@ def arm_evolvable(arm: str, *, include_plan: bool = False, actuator: bool = Fals
 
     A evolves nothing; B one gene (prompt-only — stays `generate` even when a third
     gene is present, so the B/D contrast still isolates loop-level optimization); C and
-    D evolve the whole genome (C via the genome-blind command worker, D via the LLM
+    D evolve the whole genome (C via the genome-blind constant draft, D via the LLM
     worker). `include_plan` widens the whole genome to the optional `plan` gene.
 
     `actuator` selects the actuator experiment's genome: the whole genome is
@@ -90,12 +100,25 @@ ARM_EVOLVABLE: dict[str, set[str]] = {a: arm_evolvable(a) for a in ARMS}
 
 @dataclass
 class ArmResult:
+    """One arm's outcome, including the provenance needed to interpret it.
+
+    The last three fields exist because held-out scores alone cannot distinguish
+    "the extra evolvable gene was optimized and did not help" from "the optimizer
+    never accepted a change to it, so the treatment was never applied". Reporting
+    `genes_changed` makes that checkable by a reader; `train_score` makes the
+    train-split over-fitting explanation falsifiable (it was previously computed and
+    discarded); `final_genes` releases the text that actually produced the score.
+    """
+
     name: str
     evolvable_genes: tuple[str, ...]
     seed_heldout: float
     opt_heldout: float
     delta: float
     variant_id: str | None
+    train_score: float | None = None
+    genes_changed: tuple[str, ...] = ()
+    final_genes: dict[str, str] | None = None
 
 
 def seed_genome(
@@ -181,19 +204,42 @@ def _heldout_score(genome: LoopGenome, tasks: list[BenchmarkTask], run_task: Run
     return mean(scores)
 
 
-def _command_run_task(
-    loop_id: str, worker: tuple[str, ...], verifier: tuple[str, ...], max_retries: int
+#: The constant answer the fixed-draft control emits. Deliberately plausible-but-wrong:
+#: it satisfies no counting or formatting constraint, so the real metric scores it well
+#: below 1.0 and the control's landscape is flat WITHOUT being saturated.
+CONTROL_FIXED_DRAFT = "placeholder answer"
+
+
+def _fixed_draft_run_task(
+    loop_id: str, score_fn: Score, feedback_fn: Feedback, draft: str = CONTROL_FIXED_DRAFT
 ) -> Callable[[LoopGenome, BenchmarkTask], LoopTrace]:
-    """A genome-blind run_task (arm C): the command output ignores the genome."""
+    """A genome-blind run_task scored by the REAL metric (the honest arm-C control).
+
+    The command control it replaces always exits 0, so `scalarize` hands GEPA a perfect
+    1.0 and the search terminates immediately with no proposals — flat because it is
+    maxed out, which cannot detect a harness that credits a gain to an ignored genome.
+    Emitting a fixed imperfect draft and scoring it programmatically keeps the landscape
+    flat (the genome is genuinely ignored) while leaving real headroom, so a spurious
+    gain would be visible. Costs nothing: no model call, no container.
+    """
 
     def run_task(_genome: LoopGenome, task: BenchmarkTask) -> LoopTrace:
-        return run_command_loop(
+        eval_score = float(score_fn(draft, task))
+        ok = eval_score >= 1.0
+        fb = feedback_fn(draft, task)
+        return LoopTrace(
+            id=f"control-{task.id}",
             loop_id=loop_id,
-            trace_id=f"opt-{task.id}",
             created_at=utc_now_iso(),
-            worker=list(worker),
-            verifier=list(verifier),
-            max_retries=max_retries,
+            task_id=task.id,
+            task_summary=str(task.payload.get("goal", task.id)),
+            final_outcome=outcome_for(ok),
+            failure_summary=None if ok else fb,
+            steps=[
+                LoopStepTrace(step_id="generate-0", role="worker", output_summary=draft),
+            ],
+            metrics=LoopMetrics(success=ok),
+            metadata={"eval_score": eval_score, "feedback": fb},
         )
 
     return run_task
@@ -207,12 +253,11 @@ def run_study(
     train: list[BenchmarkTask],
     heldout: list[BenchmarkTask],
     arms: tuple[str, ...] = ARMS,
-    worker_cmd: tuple[str, ...] = ("true",),
-    verifier_cmd: tuple[str, ...] = ("true",),
-    max_retries: int = 1,
     loop_max_retries: int = 2,
     max_metric_calls: int = 150,
     max_candidate_proposals: int | None = None,
+    module_selector: str = "round_robin",
+    verify_truth: VerifyTruth | None = None,
     score_fn: Score = ifbench_score,
     feedback_fn: Feedback = ifbench_feedback,
     use_plan_gene: bool = False,
@@ -229,7 +274,8 @@ def run_study(
 
     `complete` is the (cassette-wrapped, for the live run) LLM worker, driven as a
     generate→critique→refine loop (`loop_max_retries` rounds); `reflection_lm` is
-    passed through to GEPA. `worker_cmd`/`verifier_cmd` are the genome-blind
+    passed through to GEPA. Arm C is the genome-blind control (a constant draft
+    scored by the real metric).
     commands for arm C. `max_candidate_proposals` caps GEPA proposals per arm (one
     reflection LM call each), making the reflection budget a hard bound rather than
     an estimate. `score_fn`/`feedback_fn` select the task set's scorer/feedback
@@ -267,11 +313,19 @@ def run_study(
         evolvable_genes = tuple(g.id for g in genome.genes if g.evolvable)
 
         if arm == "A":
-            results[arm] = ArmResult(arm, evolvable_genes, seed_h, seed_h, 0.0, None)
+            # Arm A scores held-out a SECOND time rather than copying its first result.
+            # Copying hardcoded delta = 0.0, which made "a non-flat A invalidates the run"
+            # unfalsifiable. The two measurements agree whenever the path is deterministic
+            # (under cassette replay, by construction), so this is a determinism check —
+            # it is NOT the flatness control the earlier write-up claimed.
+            opt_a = _heldout_score(genome, heldout, worker_run_task)
+            results[arm] = ArmResult(
+                arm, evolvable_genes, seed_h, opt_a, round(opt_a - seed_h, 4), None
+            )
             continue
 
         run_task = (
-            _command_run_task(genome.id, worker_cmd, verifier_cmd, max_retries)
+            _fixed_draft_run_task(genome.id, score_fn, feedback_fn)
             if arm == "C"
             else worker_run_task
         )
@@ -283,11 +337,40 @@ def run_study(
             reflection_lm=reflection_lm,
             max_metric_calls=max_metric_calls,
             max_candidate_proposals=max_candidate_proposals,
+            module_selector=module_selector,
+            # Component-specific reflection for the critique gene. Only meaningful for
+            # arms that actually evolve it, and only when a truth signal is supplied;
+            # otherwise the adapter keeps its original component-agnostic records.
+            verify_gene=VERIFY_GENE if verify_truth is not None else None,
+            verify_truth=verify_truth,
             _optimize=_optimize,
         )
         winner = store.load_variant(genome.id, out["variant_id"])
         opt_h = _heldout_score(winner.genome, heldout, worker_run_task)
+        # Provenance: which genes the optimizer actually changed, and their final text.
+        # Compared against THIS arm's own seed genome (identical content across arms),
+        # so an empty tuple means "the optimizer accepted nothing" — the difference
+        # between a treatment that failed and a treatment that never ran.
+        seed_text = {g.id: g.content for g in genome.genes}
+        changed = tuple(
+            g.id
+            for g in winner.genome.genes
+            if isinstance(g.content, str) and g.content != seed_text.get(g.id)
+        )
+        final_genes = {
+            g.id: g.content
+            for g in winner.genome.genes
+            if g.evolvable and isinstance(g.content, str)
+        }
         results[arm] = ArmResult(
-            arm, evolvable_genes, seed_h, opt_h, round(opt_h - seed_h, 4), out["variant_id"]
+            arm,
+            evolvable_genes,
+            seed_h,
+            opt_h,
+            round(opt_h - seed_h, 4),
+            out["variant_id"],
+            train_score=out.get("best_score"),
+            genes_changed=changed,
+            final_genes=final_genes,
         )
     return results

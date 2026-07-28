@@ -181,6 +181,14 @@ def preflight_bcb_tasks(tasks: list[BenchmarkTask]) -> None:
                     f"{task.id!r}, {suite} methods, verdict={result.verdict}): {result.detail}. "
                     "Fix Docker + the whystuck-bcb image before spending."
                 )
+            if result.verdict == "timeout":
+                # Same distinction as the MBPP+ preflight: a reference that times out reports
+                # host capacity, not corrupt data, and must not send the reader to re-vendor.
+                raise RuntimeError(
+                    f"preflight: the vendored REFERENCE for task {task.id!r} timed out on its "
+                    f"own {suite} methods. This is a HOST capacity signal, not bad data. "
+                    "Re-run on an idle machine (or raise the cap) before spending."
+                )
             if not result.passed:
                 raise RuntimeError(
                     f"preflight: the vendored REFERENCE for task {task.id!r} fails its own "

@@ -29,6 +29,8 @@ import functools
 import json
 import os
 import sys
+from collections.abc import Callable
+from typing import Any
 
 from whystuck.eval.cost import (
     BCB_WORKER_MAX_OUTPUT_TOKENS,
@@ -122,6 +124,20 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         default=10,
         help="hard cap on GEPA proposals per arm (= max reflection LM calls/arm)",
     )
+    p.add_argument(
+        "--module-selector",
+        choices=("all", "round_robin"),
+        default="all",
+        help=(
+            "how many genes one GEPA proposal may rewrite. 'round_robin' (GEPA's own "
+            "default, and what every committed run used) rewrites ONE gene per proposal "
+            "and cycles, so a multi-gene arm searches each gene only 1/k as hard as a "
+            "one-gene arm under the same cap — a budget-per-gene confound. 'all' rewrites "
+            "every gene per proposal, the fair loop-level-vs-prompt-only comparison. "
+            "Changing this changes every reflection prompt, so runs recorded under one "
+            "value cannot replay under the other."
+        ),
+    )
     p.add_argument("--worker-model", default="openai/gpt-4.1-mini")
     p.add_argument("--reflection-model", default="openai/gpt-5.6-terra")
     p.add_argument(
@@ -211,6 +227,12 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 2
+
+    # The detector's truth signal must be free of the held-out scorer AND cheap. On text
+    # that is the programmatic verifier (pure Python, no execution). On the code task sets
+    # score_fn runs the HIDDEN suite, so wiring it as detector truth would both put the
+    # held-out signal into the optimizer's channel and pay real container execution on
+    # every critique step. Refuse rather than silently doing the wrong one.
 
     if args.feedback_level == "hi" and args.task_set not in ("multi", "multi-hard", "bcb"):
         print(
@@ -421,6 +443,30 @@ def _run_live(
 
         score_fn, feedback_fn, dataset = ifbench_score, ifbench_feedback, "IFBench"
 
+    # Detector truth for the verify gene's own reflection records — arm D's actual
+    # treatment. Without it GEPA rewrites the critique gene while being shown the
+    # GENERATOR's output, and duly proposes generation prose into a critique slot, so the
+    # loop-level arm never receives a meaningful intervention.
+    #
+    # Built from the same programmatic verifier the study scores with, but consulted ONLY
+    # when building reflection records on the TRAIN split: never inside the loop and never
+    # at held-out scoring. That makes it the standard optimizer signal (which already
+    # carries per-task feedback for the generate gene) made component-appropriate, not
+    # oracle contamination of the measurement.
+    #
+    # Text task sets only. On `code`/`bcb` the equivalent truth is the VISIBLE test result;
+    # `score_fn` there runs the HIDDEN suite, so wiring it here would both put the held-out
+    # signal into the optimizer's channel and pay container execution per critique step.
+    # Those families therefore keep component-agnostic reflection until a visible-test
+    # verdict is threaded through, and the run metadata records which applied.
+    verify_truth: Callable[[str, Any], tuple[bool, str]] | None = None
+    if args.task_set not in ("code", "bcb"):
+
+        def _verify_truth(output: str, task: Any) -> tuple[bool, str]:
+            return score_fn(output, task) >= 1.0, feedback_fn(output, task)
+
+        verify_truth = _verify_truth
+
     # Worker output hard-cap matches what the guard priced for this task set.
     worker_max_out = {
         "code": CODE_WORKER_MAX_OUTPUT_TOKENS,
@@ -470,6 +516,8 @@ def _run_live(
                     arms=arms,
                     max_metric_calls=args.max_metric_calls,
                     max_candidate_proposals=args.reflection_calls,
+                    module_selector=args.module_selector,
+                    verify_truth=verify_truth,
                     loop_max_retries=args.loop_max_retries,
                     score_fn=score_fn,
                     feedback_fn=feedback_fn,
@@ -491,6 +539,12 @@ def _run_live(
         "worker_model": args.worker_model,
         "reflection_model": args.reflection_model,
         "max_metric_calls": args.max_metric_calls,
+        # Recorded so a reader can tell whether a multi-gene arm was starved per gene.
+        "module_selector": args.module_selector,
+        # Recorded so a reader can tell whether the critique gene could see its own
+        # behaviour at all (False = the released runs' component-agnostic reflection).
+        # Whether the critique gene could see its own behaviour during reflection.
+        "detector_reflection": verify_truth is not None,
         "reflection_calls": args.reflection_calls,
         "task_set": args.task_set,
         "loop_max_retries": args.loop_max_retries,

@@ -75,10 +75,53 @@ def genome_from_candidate(base_genome: LoopGenome, candidate: dict[str, str]) ->
     return new
 
 
+VerifyTruth = Callable[[str, BenchmarkTask], tuple[bool, str]]
+
+
+def _critique_steps(trace: LoopTrace) -> list[tuple[str, str]]:
+    """(judged draft, verdict text) for each critique step, in loop order.
+
+    The self-refine loop records its critique as role ``verifier`` with
+    ``input_summary`` = the draft under judgement and ``output_summary`` = the verdict,
+    so the detector's own behaviour is fully recoverable from the trace.
+    """
+    return [
+        (step.input_summary or "", step.output_summary or "")
+        for step in trace.steps
+        if step.role == "verifier" and step.output_summary is not None
+    ]
+
+
 class LoopGenomeAdapter:
-    def __init__(self, base_genome: LoopGenome, run_task: RunTask) -> None:
+    def __init__(
+        self,
+        base_genome: LoopGenome,
+        run_task: RunTask,
+        *,
+        verify_gene: str | None = None,
+        verify_truth: VerifyTruth | None = None,
+    ) -> None:
+        """`verify_gene` + `verify_truth` enable component-specific reflection.
+
+        Both default to None, which reproduces the original behaviour exactly: every
+        component receives the same generator-shaped records. That default is load-bearing
+        for the released artifact, whose cassettes were recorded under it — a changed
+        reflection prompt is a changed cassette key.
+
+        `verify_truth(draft, task) -> (satisfied, why)` supplies ground truth for a draft
+        the critique judged, so the verify gene's records can report the detector's ERROR
+        rather than the generator's output. Supply the signal appropriate to the task
+        family: for text, the programmatic scorer; for code, the VISIBLE test results
+        (never the hidden suite, which would both cost real execution and put the held-out
+        signal into the optimizer's channel). This is train-split-only — GEPA's reflection
+        channel already sees per-task feedback for the generate gene, and this is the same
+        standard optimizer signal made component-appropriate — so it must never be wired
+        into held-out scoring, where it would be oracle contamination.
+        """
         self.base_genome = base_genome
         self.run_task = run_task
+        self.verify_gene = verify_gene
+        self.verify_truth = verify_truth
 
     def evaluate(
         self, batch: list[BenchmarkTask], candidate: dict[str, str], capture_traces: bool = False
@@ -125,4 +168,46 @@ class LoopGenomeAdapter:
                     "Feedback": feedback,
                 }
             )
-        return {component: records for component in components_to_update}
+        out: dict[str, list[dict[str, Any]]] = {}
+        for component in components_to_update:
+            if component == self.verify_gene and self.verify_truth is not None:
+                out[component] = self._detector_records(traj)
+            else:
+                out[component] = records
+        return out
+
+    def _detector_records(self, traces: list[LoopTrace]) -> list[dict[str, Any]]:
+        """Reflection records for the VERIFY gene: its own verdict, scored against truth.
+
+        A detector is improvable only from its own errors. Each record pairs the draft the
+        critique judged with the verdict it returned, and labels that verdict a false pass
+        (said PASS on a draft that violated the task), a false alarm (demanded fixes on a
+        compliant draft), or correct. Naming the error type explicitly matters because the
+        two failure modes call for opposite prompt changes — stricter checking versus less
+        trigger-happy rejection — and a reflector shown only "score=0.4" cannot tell which
+        way to move.
+        """
+        assert self.verify_truth is not None  # guarded by the caller
+        records: list[dict[str, Any]] = []
+        for trace in traces:
+            task_text = trace.task_summary or trace.task_id or ""
+            for draft, verdict in _critique_steps(trace):
+                satisfied, why = self.verify_truth(draft, BenchmarkTask(id=trace.task_id or ""))
+                said_pass = verdict.strip().upper().startswith("PASS")
+                if said_pass and not satisfied:
+                    error = (
+                        "WRONG (false pass): you accepted a draft that violated "
+                        f"the task. {why}"
+                    )
+                elif not said_pass and satisfied:
+                    error = "WRONG (false alarm): you demanded fixes on a compliant draft."
+                else:
+                    error = f"correct verdict ({'pass' if said_pass else 'fix'}). {why}"
+                records.append(
+                    {
+                        "Inputs": f"# Task\n{task_text}\n\n# Draft under judgement\n{draft}",
+                        "Generated Outputs": verdict,
+                        "Feedback": error,
+                    }
+                )
+        return records

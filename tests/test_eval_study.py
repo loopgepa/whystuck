@@ -131,7 +131,7 @@ def test_arm_d_evolves_both_genes(tmp_path, tasks):
     assert d.opt_heldout == 1.0
 
 
-def test_arm_c_runs_command_path_and_returns_result(tmp_path, tasks):
+def test_arm_c_runs_the_genome_blind_control_and_returns_result(tmp_path, tasks):
     train, heldout = tasks
     store = WhyStuckStore(tmp_path / "store")
     res = run_study(
@@ -141,8 +141,6 @@ def test_arm_c_runs_command_path_and_returns_result(tmp_path, tasks):
         train=train,
         heldout=heldout,
         arms=("C",),
-        worker_cmd=("true",),
-        verifier_cmd=("true",),
         _optimize=_fake_optimize,
     )
     c = res["C"]
@@ -305,8 +303,6 @@ def test_all_four_arms_run_together(tmp_path, tasks):
         reflection_lm="fake",
         train=train,
         heldout=heldout,
-        worker_cmd=("true",),
-        verifier_cmd=("true",),
         _optimize=_fake_optimize,
     )
     assert set(res) == {"A", "B", "C", "D"}
@@ -532,3 +528,147 @@ def test_run_study_threads_oracle_feedback_into_the_refine_step(tmp_path, tasks)
     refine = [p for p in seen if "# Problems to fix" in p]
     assert refine and all("ACTIONABLE_MARKER" in p for p in refine)
     assert not any("# Draft answer" in p for p in seen)  # still no critique LLM call
+
+
+def _noop_optimize(**kw):
+    """Stand-in for a GEPA run that accepts nothing: the winner IS the seed candidate.
+
+    This is the empirically common case in the released study — on most seeds GEPA
+    rejected every proposal for at least one gene — so the reporting must be able to
+    say so out loud.
+    """
+    return {"best_candidate": dict(kw["seed_candidate"])}
+
+
+def test_arm_result_reports_which_genes_actually_changed(tmp_path, tasks):
+    # The load-bearing provenance datum: Δ(D−B) is only evidence about loop-level
+    # optimization if the loop-level gene actually CHANGED. When GEPA accepts nothing,
+    # genes_changed must be empty so a reader can tell "treatment did nothing" apart
+    # from "treatment was never applied" — which a bare Δ=0 silently conflates.
+    train, heldout = tasks
+    res = run_study(
+        WhyStuckStore(tmp_path / "store"),
+        complete=_fake_complete,
+        reflection_lm="fake",
+        train=train,
+        heldout=heldout,
+        arms=("D",),
+        _optimize=_noop_optimize,
+    )
+    assert res["D"].genes_changed == ()
+
+    res2 = run_study(
+        WhyStuckStore(tmp_path / "store2"),
+        complete=_fake_complete,
+        reflection_lm="fake",
+        train=train,
+        heldout=heldout,
+        arms=("D",),
+        _optimize=_fake_optimize,
+    )
+    # The fake optimizer rewrites every evolvable gene, so both must be reported.
+    assert set(res2["D"].genes_changed) == {GENERATE_GENE, VERIFY_GENE}
+
+
+def test_arm_result_reports_train_aggregate_and_final_genes(tmp_path, tasks):
+    # The paper attributes the null to train-split over-fitting, but the train aggregate
+    # was computed and discarded, making that mechanism unfalsifiable from the release.
+    # Both the train score and the final gene text must reach the result.
+    train, heldout = tasks
+    res = run_study(
+        WhyStuckStore(tmp_path / "store"),
+        complete=_fake_complete,
+        reflection_lm="fake",
+        train=train,
+        heldout=heldout,
+        arms=("B", "D"),
+        _optimize=_fake_optimize,
+    )
+    for arm in ("B", "D"):
+        assert res[arm].train_score is not None
+        assert res[arm].final_genes is not None
+        assert SENTINEL in res[arm].final_genes[GENERATE_GENE]
+    # B may not touch the verify gene, D may.
+    assert VERIFY_GENE not in (res["B"].final_genes or {})
+    assert VERIFY_GENE in (res["D"].final_genes or {})
+
+
+def test_run_study_forwards_module_selector(tmp_path, tasks):
+    # Arm fairness knob must reach the optimizer, and default to GEPA's own default so
+    # the committed cassettes keep replaying byte-for-byte.
+    train, heldout = tasks
+    seen = {}
+
+    def capturing_optimize(**kw):
+        seen.update(kw)
+        return _fake_optimize(**kw)
+
+    run_study(
+        WhyStuckStore(tmp_path / "store"),
+        complete=_fake_complete,
+        reflection_lm="fake",
+        train=train,
+        heldout=heldout,
+        arms=("D",),
+        _optimize=capturing_optimize,
+    )
+    assert seen["module_selector"] == "round_robin"
+
+    run_study(
+        WhyStuckStore(tmp_path / "store2"),
+        complete=_fake_complete,
+        reflection_lm="fake",
+        train=train,
+        heldout=heldout,
+        arms=("D",),
+        module_selector="all",
+        _optimize=capturing_optimize,
+    )
+    assert seen["module_selector"] == "all"
+
+
+def test_fixed_draft_control_is_flat_but_not_saturated(tmp_path, tasks):
+    # The replacement control: genome-blind during SEARCH (so the training signal carries
+    # no information about the genome) but scored by the REAL metric on a deliberately
+    # imperfect constant draft, so there is real headroom and GEPA actually searches.
+    #
+    # This is what makes arm C a control rather than a tautology: it selects a genome using
+    # a signal that cannot see the genome, then scores that genome with the real worker. If
+    # blindly-selected genomes reliably improved held-out, the whole comparison would be
+    # measuring harness noise. The released command control could never show that, because
+    # `scalarize` handed it a perfect 1.0 and GEPA terminated without proposing anything.
+    train, heldout = tasks
+    res = run_study(
+        WhyStuckStore(tmp_path / "store"),
+        complete=_fake_complete,
+        reflection_lm="fake",
+        train=train,
+        heldout=heldout,
+        arms=("C",),
+        _optimize=_noop_optimize,
+    )
+    c = res["C"]
+    assert c.train_score is not None
+    assert c.train_score < 1.0  # NOT saturated: there is headroom to search
+    assert c.genes_changed == ()  # this optimizer accepted nothing...
+    assert c.delta == 0.0  # ...so held-out cannot move either
+
+
+def test_arm_a_reports_a_real_second_measurement_not_a_copy(tmp_path, tasks):
+    # Arm A used to hardcode delta=0.0 by copying its own seed score, which made "a non-flat
+    # A would invalidate the run" unfalsifiable. It now scores held-out a second time through
+    # the same path. The two agree whenever that path is deterministic, so this is a
+    # DETERMINISM check, not a flatness control — labelling it honestly is the point.
+    train, heldout = tasks
+    res = run_study(
+        WhyStuckStore(tmp_path / "store"),
+        complete=_fake_complete,
+        reflection_lm="fake",
+        train=train,
+        heldout=heldout,
+        arms=("A",),
+        _optimize=_fake_optimize,
+    )
+    a = res["A"]
+    assert a.opt_heldout == a.seed_heldout  # deterministic path agrees
+    assert a.genes_changed == ()  # nothing evolved, and it is reported as such

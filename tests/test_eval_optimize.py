@@ -150,6 +150,55 @@ def test_optimize_loop_omits_proposal_cap_when_none(tmp_path):
     assert "max_candidate_proposals" not in captured
 
 
+def test_optimize_loop_forwards_module_selector(tmp_path):
+    # Arm fairness: with GEPA's default "round_robin" selector, a two-gene arm spends
+    # half its proposals on each gene, so it searches the productive gene half as hard
+    # as a one-gene arm under the same proposal cap. Testing loop-level vs prompt-only
+    # therefore requires being able to choose "all" (every component per proposal).
+    store = WhyStuckStore(tmp_path)
+    _seed_loop(store)
+    captured: dict = {}
+
+    def fake_optimize(**kw):
+        captured.update(kw)
+        return {"best_candidate": {"skill": "Fix with the minimal patch."}}
+
+    optimize_loop(
+        store,
+        "bugfix",
+        [BenchmarkTask(id="t1")],
+        _run_task,
+        reflection_lm="fake",
+        module_selector="all",
+        _optimize=fake_optimize,
+    )
+    assert captured["module_selector"] == "all"
+
+
+def test_optimize_loop_defaults_to_round_robin_for_replay_fidelity(tmp_path):
+    # The committed cassettes were recorded under GEPA's own default. Changing the
+    # default would change every reflection prompt, hence every cassette key, and would
+    # silently invalidate the released bit-for-bit replays — so the default must stay
+    # "round_robin" and the fair-budget selector must be opt-in.
+    store = WhyStuckStore(tmp_path)
+    _seed_loop(store)
+    captured: dict = {}
+
+    def fake_optimize(**kw):
+        captured.update(kw)
+        return {"best_candidate": {"skill": "Fix with the minimal patch."}}
+
+    optimize_loop(
+        store,
+        "bugfix",
+        [BenchmarkTask(id="t1")],
+        _run_task,
+        reflection_lm="fake",
+        _optimize=fake_optimize,
+    )
+    assert captured["module_selector"] == "round_robin"
+
+
 def _fake_gepa(monkeypatch):
     """Install a minimal fake `gepa` (+ the submodules `_gepa_optimize` imports)
     into sys.modules so the REAL `_gepa_optimize` runs with gepa absent from the

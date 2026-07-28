@@ -1,18 +1,66 @@
 # GEPA validation study — results note (ten IFBench runs + cross-domain code)
 
+> ## ⚠️ SUPERSEDED HEADLINE — read this first (added 2026-07-28)
+>
+> An adversarial audit of this harness established that **the loop-level arm never received
+> its treatment**, so the Δ(D−B) numbers below do not measure loop-level optimization.
+> Evidence, all verified by offline cassette replay at $0:
+>
+> 1. **The verify gene never changed.** Replaying run 3 (the flagship n=5 multi-hard run) and
+>    dumping every winning genome: `generate` changed in 5/15 winners, `ensure_correct` in
+>    **0/15**. GEPA proposed critique rewrites and they were rejected — and the proposals were
+>    *generation* instructions written into a critique slot.
+> 2. **The reflector could not see the critique.** `adapter.py` returned the *same* records for
+>    every component, with "Generated Outputs" defined as the last *worker* step (verifier
+>    steps deliberately excluded). So the optimizer rewrote a detector while being shown the
+>    generator's answer.
+> 3. **The two-gene arm was starved per gene.** `optimize.py` passed no `module_selector`, so
+>    GEPA used its default `round_robin` — one component per proposal — meaning arm D searched
+>    the shared productive gene about half as hard as arm B under a matched cap. This also
+>    *reverses* the over-fitting mechanism the writeup asserted.
+> 4. **A percentile-index error.** `exact_resample_ci` took the upper bound at
+>    `int(0.975*N) - 1`, dropping the largest resample atom, which at n=3 carries
+>    1/27 = 3.70 % > 2.5 %. Corrected: the actuator run's Δ(D−B) = −0.10 has interval
+>    **[−0.150, +0.000]**, which *includes* zero (sign test p = 0.50). It was published as
+>    [−0.150, −0.050] "excluding zero".
+> 5. **The flatness controls could not fail.** Arm A copied its own seed score with δ
+>    hardcoded to 0.0; arm C's command loop scored a saturated 1.0, so GEPA proposed nothing.
+>
+> **Retracted:** "no measurable advantage for loop-level optimization"; the null being "tight
+> rather than underpowered" on the strength of [0,0] intervals (those are *ties* — B and D
+> producing byte-identical genomes, i.e. the same calls served from the same cassette entries);
+> the train-split over-fitting mechanism; "Δ = −0.10 excludes zero"; "rules out under-powering".
+>
+> **Survives:** everything not depending on arm D having been optimized — detector F₁ = 0.11
+> (0.83 with the measurement tool), the per-constraint residual table, the fix-budget effect,
+> and the actionability effects (+0.063 text, +0.20 code). Two caveats: runs 7–10 gate on the
+> true metric at *held-out* scoring time too, so those are **ceiling results** conditional on a
+> perfect checker at inference; and at n=3 a sign test cannot go below p = 0.25, so +0.063 rests
+> on magnitude, not on replication across seeds.
+>
+> **Harness now fixed** (component-specific reflective dataset; explicit `module_selector`
+> defaulting to `all`; non-saturating arm C; arm A re-measured; per-gene accepted-change counts,
+> train aggregates and final gene text released per arm). The corrected wiring changes every
+> reflection prompt, hence every cassette key, so **the eleven committed cassettes cannot replay
+> under it** — `verify_reproducibility.py` now reports them as skipped/superseded rather than
+> verified, and `EXPECTED_RUNS = 0` until the study is re-run.
+>
+> **Pre-audit replication worth keeping:** worker swap to `gpt-4.1-nano` (multi-hard, 3 seeds,
+> 16/16, mmc 64) → Δ(D−B) = −0.014, per-seed (+0.000, −0.041, +0.000), corrected interval
+> [−0.041, +0.000], 2/3 seeds tied; B = 0.70 ± 0.03, D = 0.69 ± 0.03, seed 0.67, actual spend
+> ≈ $0.42. Shows the pattern is not one worker model's artifact, but inherits the same harness.
+> An mmc = 160 budget replication was designed, priced (~$0.90 projected), started, and then
+> **stopped mid-run** once the audit landed: spending on superseded wiring stopped being
+> worthwhile. It consumed ≈ $0.33 (10 reflection + 271 worker calls) before being killed and
+> produced no results JSON; its partial cassette was deleted rather than committed, since a
+> cassette with no corresponding result is a misleading artifact.
+
 *Question:* does **loop-level** GEPA (evolve the self-refine loop's `generate` **and**
 `ensure_correct` verify genes) beat **prompt-only** GEPA (evolve `generate` alone), on
 instruction-following tasks, under a matched budget?
 
-*Answer across ten pre-registered paid runs — plus a cross-domain replication on
-BigCodeBench-Hard code (Δ(D−B)=0.00) and an actuator experiment that aims GEPA at the fixer's
-own feedback gene (powered Δ(D−B)=−0.10, CI [−0.150,−0.050]; see the D5 entry below):* **no
-measurable advantage** — and, from the
-oracle controls (runs 7–10), the bottleneck is the *fix step*, not detection (runs 9–10
-show it is partly feedback-limited, partly generator-limited). This note grew
-chronologically (runs 1–3, then 4–5, then 6–7, then 8, then 9–10); the "Final verdict across
-ten runs" section below is the current synthesis, and `docs/paper/main.tex` is the clean
-writeup.
+*Answer:* **unknown** — see the superseded-headline box above. The runs below are retained as
+the record of what was measured, not as an answer to that question.
 
 ## The three runs
 

@@ -13,9 +13,62 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
 
-from analyze_deltas import delta_arm, delta_between, exact_resample_ci  # noqa: E402
+from analyze_deltas import (  # noqa: E402
+    delta_arm,
+    delta_between,
+    exact_resample_ci,
+    sign_test_p,
+)
 
 D = "docs"
+
+
+def _resample_means(diffs: list[float]) -> list[float]:
+    import itertools
+    from statistics import mean
+
+    return sorted(mean(s) for s in itertools.product(diffs, repeat=len(diffs)))
+
+
+def test_neither_tail_of_the_interval_may_exceed_alpha_over_two():
+    """The defining property of a percentile interval, checked on the exact distribution.
+
+    The resample distribution is discrete with N = n**n equally-likely atoms, so at
+    n = 3 a single atom carries 1/27 = 3.7% > 2.5% and therefore cannot be excluded
+    from the interval. An implementation that drops it reports an interval that is too
+    narrow on that side — and too narrow in the direction that turns an effect
+    bracketing zero into one that appears to exclude it.
+    """
+    for diffs in ([-0.15, -0.15, 0.0], [0.090, 0.025, 0.075], [0.0, 0.055, 0.0, 0.0, -0.055]):
+        _, lo, hi = exact_resample_ci(diffs)
+        means = _resample_means(diffs)
+        n = len(means)
+        below = sum(1 for m in means if m < lo) / n
+        above = sum(1 for m in means if m > hi) / n
+        assert below <= 0.025 + 1e-12, f"lower tail {below:.4f} exceeds 2.5% for {diffs}"
+        assert above <= 0.025 + 1e-12, f"upper tail {above:.4f} exceeds 2.5% for {diffs}"
+
+
+def test_actuator_interval_includes_zero():
+    """Regression pin: the actuator run's interval must NOT be reported as excluding zero.
+
+    Per-seed Δ(D−B) = (−0.15, −0.15, 0.00). The all-zero resample (probability 1/27)
+    is the largest atom, so the upper bound is exactly 0.0 and the interval includes it.
+    """
+    _, lo, hi = exact_resample_ci([-0.15, -0.15, 0.0])
+    assert (lo, hi) == (-0.15, 0.0)
+    assert lo < 0 <= hi  # includes zero: no "excludes zero" claim is available here
+
+
+def test_sign_test_drops_ties_and_is_two_sided():
+    # 3/3 same sign is the strongest possible at n=3: p = 2 * 0.5**3 = 0.25.
+    assert sign_test_p([0.090, 0.025, 0.075]) == 0.25
+    # A tie is dropped (standard sign test), leaving n=2: p = 2 * 0.5**2 = 0.50.
+    assert sign_test_p([-0.15, -0.15, 0.0]) == 0.5
+    # All ties: no signed observations, so no evidence against the null.
+    assert sign_test_p([0.0, 0.0, 0.0]) == 1.0
+    # Mixed signs are weaker than unanimous ones.
+    assert sign_test_p([0.05, -0.05, 0.05]) == 1.0
 
 
 def test_delta_D_minus_B_is_exactly_zero_where_arms_converge():

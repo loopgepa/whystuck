@@ -202,3 +202,103 @@ def test_reflective_dataset_uses_final_refined_answer_not_draft_or_critique():
     b = adapter.evaluate([BenchmarkTask(id="t")], {"skill": "x"}, capture_traces=True)
     rec = adapter.make_reflective_dataset({"skill": "x"}, b, ["skill"])["skill"][0]
     assert rec["Generated Outputs"] == "FINAL ANSWER"  # not "draft v1 (bad)", not "FAIL: fix it"
+
+
+def _judged_trace(*, critique: str, draft: str = "draft v1 (bad)"):
+    """A trace whose critique step records BOTH the draft it judged and its verdict."""
+    return LoopTrace(
+        id="r",
+        loop_id="x",
+        created_at=FIXED_TS,
+        task_summary="FOLLOW THIS",
+        final_outcome="success",
+        steps=[
+            LoopStepTrace(step_id="generate-0", role="worker", output_summary=draft),
+            LoopStepTrace(
+                step_id="critique-0", role="verifier", input_summary=draft, output_summary=critique
+            ),
+            LoopStepTrace(step_id="refine-0", role="worker", output_summary="FINAL ANSWER"),
+        ],
+        metrics=LoopMetrics(success=True),
+        metadata={"eval_score": 1.0, "feedback": "Failed: whitespace"},
+    )
+
+
+def test_verify_gene_records_are_the_critique_not_the_generator():
+    """THE root-cause test for arm D.
+
+    Previously every component received identical records whose "Generated Outputs" was
+    the GENERATOR's final answer, so GEPA optimized the critique gene while being shown
+    nothing about what the critique did — and duly proposed generation prose into the
+    critique slot. A detector cannot be optimized without seeing its own verdict, so the
+    verify component's records must show the draft it judged, the verdict it returned,
+    and whether that verdict was right.
+    """
+
+    def rt(genome, task):
+        return _judged_trace(critique="PASS")
+
+    adapter = LoopGenomeAdapter(
+        base_genome=_genome(),
+        run_task=rt,
+        verify_gene="verify",
+        # Ground truth for the judged draft: it did NOT actually satisfy the task.
+        verify_truth=lambda output, task: (False, "exact_word_count: got 25, want 20"),
+    )
+    b = adapter.evaluate([BenchmarkTask(id="t")], {"skill": "x"}, capture_traces=True)
+    ds = adapter.make_reflective_dataset({"skill": "x"}, b, ["skill", "verify"])
+
+    # The generate component is untouched: still the final worker answer.
+    assert ds["skill"][0]["Generated Outputs"] == "FINAL ANSWER"
+
+    # The verify component sees ITS OWN output, the draft it judged, and its error.
+    vrec = ds["verify"][0]
+    assert vrec["Generated Outputs"] == "PASS"
+    assert "draft v1 (bad)" in vrec["Inputs"]
+    assert "false pass" in vrec["Feedback"].lower()
+    assert "exact_word_count: got 25, want 20" in vrec["Feedback"]
+
+
+def test_verify_gene_records_flag_a_false_alarm():
+    # The opposite detector error: the critique demanded fixes on an already-correct draft.
+    def rt(genome, task):
+        return _judged_trace(critique="FIX: add more words")
+
+    adapter = LoopGenomeAdapter(
+        base_genome=_genome(),
+        run_task=rt,
+        verify_gene="verify",
+        verify_truth=lambda output, task: (True, "all requirements satisfied"),
+    )
+    b = adapter.evaluate([BenchmarkTask(id="t")], {"skill": "x"}, capture_traces=True)
+    vrec = adapter.make_reflective_dataset({"skill": "x"}, b, ["verify"])["verify"][0]
+    assert "false alarm" in vrec["Feedback"].lower()
+
+
+def test_verify_gene_records_confirm_a_correct_verdict():
+    def rt(genome, task):
+        return _judged_trace(critique="PASS")
+
+    adapter = LoopGenomeAdapter(
+        base_genome=_genome(),
+        run_task=rt,
+        verify_gene="verify",
+        verify_truth=lambda output, task: (True, "all requirements satisfied"),
+    )
+    b = adapter.evaluate([BenchmarkTask(id="t")], {"skill": "x"}, capture_traces=True)
+    vrec = adapter.make_reflective_dataset({"skill": "x"}, b, ["verify"])["verify"][0]
+    assert "correct" in vrec["Feedback"].lower()
+
+
+def test_detector_records_are_opt_in_so_committed_replays_are_unchanged():
+    # Without verify_gene/verify_truth the adapter must behave exactly as before:
+    # every component gets the identical generator-shaped records. Anything else would
+    # change the reflection prompts and invalidate the released cassette replays.
+    def rt(genome, task):
+        return _judged_trace(critique="PASS")
+
+    adapter = LoopGenomeAdapter(base_genome=_genome(), run_task=rt)
+    b = adapter.evaluate([BenchmarkTask(id="t")], {"skill": "x"}, capture_traces=True)
+    ds = adapter.make_reflective_dataset({"skill": "x"}, b, ["skill", "verify"])
+    assert ds["skill"] == ds["verify"]
+    assert ds["verify"][0]["Generated Outputs"] == "FINAL ANSWER"
