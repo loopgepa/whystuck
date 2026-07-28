@@ -1,15 +1,21 @@
 #!/usr/bin/env python
 """Check every machine-checkable number in the paper against the released artifacts.
 
-Zero cost, offline. The paper quotes roughly sixty numbers derived from the committed
-results JSONs and cassettes; each was correct when written, and each is one careless edit
-away from no longer being. This script re-derives them from the artifacts and fails loudly
-on any drift, so "the paper agrees with its data" is a test rather than a memory.
+Zero cost, offline. The paper quotes dozens of numbers derived from the committed results
+JSONs and cassettes; each was correct when written, and each is one careless edit away from
+no longer being. This script re-derives them from the artifacts and fails loudly on any
+drift, so "the paper agrees with its data" is a test rather than a memory.
 
 It exists because a fact-check pass found two real errors that had survived several
 readings: the paper said three runs overrode the \\$5 default when four did, and it said
 the reproducibility script registers eleven runs after two more had been added. Both are
 the kind of quiet arithmetic drift that a reviewer finds and an author does not.
+
+A later pass added the Evidence-8 checks, which exist for a sharper reason: the ad-hoc
+integrity scan that should have caught an empty reflection completion was itself vacuous
+(it serialised each cassette entry to JSON before measuring length, so it compared the size
+of a dictionary and could never see an empty output). Those numbers are pinned here so the
+check has to keep working rather than merely having worked once.
 
 Scope: numbers recomputable from `docs/*.json`, the vendored task data, and the committed
 cassettes. Claims that are not machine-checkable (prose, cited literature, one-off replays
@@ -159,6 +165,43 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.append(("C2 delta(D-B)", -0.015, 0.0005, m))
     out.append(("C2 CI lo", -0.065, 0.0005, lo))
     out.append(("C2 CI hi", 0.020, 0.0005, hi))
+    # The per-seed drops the overfitting mechanism is stated on: seed 2 is where arm D
+    # accepted two candidates against arm B's one and fell furthest, and seed 0 is where
+    # no arm accepted anything. The acceptance counts themselves come from the run log
+    # and are NOT in the released JSON, so only the scores they explain are checked here.
+    # Evidence 8: the seed-2 arm-D critique gene is EMPTY, and two reflection completions
+    # were empty. Pinned because the paper's "the treatment was applied" claim is qualified
+    # entirely by these two numbers, and because the check that should have caught it
+    # (scanning the cassette for empty outputs) was itself vacuous until it was rewritten.
+    out.append(
+        ("C2 seed2 D ensure_correct length", 0, 0, len(c2[2]["D"]["final_genes"]["ensure_correct"]))
+    )
+    out.append(
+        (
+            "C2 seed1 D ensure_correct length",
+            3101,
+            0,
+            len(c2[1]["D"]["final_genes"]["ensure_correct"]),
+        )
+    )
+    with open("tests/fixtures/cassettes/study-c2.json", encoding="utf-8") as fh:
+        entries = json.load(fh)["entries"]
+    vals = list(entries.values()) if isinstance(entries, dict) else entries
+    refl = [v["output"] for v in vals if v["name"] == "reflection"]
+    out.append(("C2 empty reflection completions", 2, 0, sum(1 for o in refl if not o.strip())))
+    out.append(
+        (
+            "C2 empty worker completions",
+            0,
+            0,
+            sum(1 for v in vals if v["name"] == "worker" and not v["output"].strip()),
+        )
+    )
+    out.append(("C2 seed2 B opt", 0.750, 0.0005, c2[2]["B"]["opt_heldout"]))
+    out.append(("C2 seed2 D opt", 0.685, 0.0005, c2[2]["D"]["opt_heldout"]))
+    out.append(("C2 seed2 seed", 0.845, 0.0005, c2[2]["A"]["seed_heldout"]))
+    for arm in "ABCD":
+        out.append((f"C2 seed0 {arm} opt", 0.800, 0.0005, c2[0][arm]["opt_heldout"]))
 
     # --- The metric's do-nothing floor (Threats) --------------------------------------
     from whystuck.eval.ifbench import ifbench_score, load_ifbench

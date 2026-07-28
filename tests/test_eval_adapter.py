@@ -53,6 +53,30 @@ def test_genome_from_candidate_replaces_without_mutating_base():
     assert next(g for g in base.genes if g.id == "skill").content == "Fix the bug."  # base intact
 
 
+def test_genome_from_candidate_rejects_a_blank_gene():
+    # Measured in the C2 run: the reflection LM returned an EMPTY completion twice, GEPA
+    # logged "Proposed new text for ensure_correct: " with nothing after it, and on one
+    # seed that empty gene scored better on the training subsample (deleting a weak
+    # critique helps training) and was accepted as the winner. The arm that is supposed to
+    # carry the loop-level treatment therefore shipped a loop with NO critique, and nothing
+    # in the pipeline distinguished that from an evolved one. Same failure class as the
+    # defect this paper is about, so it fails loudly rather than silently emptying a gene.
+    base = _genome()
+    for blank in ("", "   ", "\n\t "):
+        try:
+            genome_from_candidate(base, {"skill": blank})
+        except ValueError as exc:
+            assert "skill" in str(exc)
+        else:
+            raise AssertionError(f"blank gene {blank!r} was accepted silently")
+
+
+def test_genome_from_candidate_allows_ordinary_text():
+    # Guard the guard: it must not reject legitimately short genes.
+    new = genome_from_candidate(_genome(), {"skill": "Fix it."})
+    assert next(g for g in new.genes if g.id == "skill").content == "Fix it."
+
+
 def test_evaluate_scores_better_candidate_higher():
     adapter = LoopGenomeAdapter(base_genome=_genome(), run_task=_run_task)
     tasks = [BenchmarkTask(id="t1"), BenchmarkTask(id="t2")]

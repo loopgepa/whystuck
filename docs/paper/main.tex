@@ -916,6 +916,26 @@ cassette now counts misses and raises on context exit, without displacing an exc
 propagating. This also bounds what our eleven-run verification established: a passing replay
 was evidence of reproduction only for surfaces whose misses propagate.
 
+\paragraph{Evidence 8: an empty completion silently deleted the treatment gene.}
+Found in the corrected-harness re-run itself, while auditing it. Of $31$ reflection
+completions, \textbf{two were empty}, and both were proposals for \texttt{ensure\_correct} in
+arm~D --- the one gene that constitutes the loop-level treatment. GEPA turned an empty
+completion into a proposal of empty gene text; nothing validated it. On seed~0 that proposal
+was rejected on score and merely wasted a round. On seed~2 it was \emph{accepted}, because a
+loop with no critique scores better on the training subsample ($2.25 \to 2.5$) than one whose
+critique is near-random --- a coherent optimizer decision on a corrupted candidate --- and the
+empty-gene program became the winner. Every downstream number then reported arm~D as having
+evolved its critique. The likely proximate cause is our own budget guard: reflection is capped
+at $1500$ output tokens, and a reasoning model can consume that allowance before emitting any
+content. Two things about this are worth stating plainly. First, it is the third time in this
+project that a broken treatment was indistinguishable from an ineffective one, and the second
+time \emph{after} we had written the section warning about it. Second, our integrity check
+missed it: we scanned the cassette for empty outputs but serialised each entry to JSON before
+measuring its length, so the check compared the size of a dictionary and could not return
+zero. A verification that cannot fail is the same defect one level up.
+\texttt{genome\_from\_candidate} now refuses all-whitespace gene text, with a test, so an
+empty proposal raises instead of being scored.
+
 \paragraph{What we retract.}
 The following claims are withdrawn: that there is \emph{no measurable advantage for
 loop-level optimization} (the loop-level treatment was not applied); that the null is
@@ -965,9 +985,13 @@ different paper eleven runs earlier. Because
 the corrected wiring changes every reflection prompt, it changes every cassette key, so the
 released cassettes cannot replay under it; they are retained and labelled superseded. The
 first runs recorded under the corrected harness are the two hand-written-gene conditions of
-\S\ref{sec:analysis}(1d) and the four-arm re-run of \S\ref{sec:rerun}; all three replay
-bit-for-bit, so \texttt{verify\_reproducibility.py} now verifies three runs rather than
-reporting that nothing has been proven.
+\S\ref{sec:analysis}(1d); they replay bit-for-bit, so \texttt{verify\_reproducibility.py}
+verifies two runs rather than reporting that nothing has been proven. The four-arm re-run of
+\S\ref{sec:rerun} was briefly a third, and is not, for a reason worth recording: the
+blank-gene guard that run motivated (Evidence~8) makes its own cassette unreplayable, since a
+replay re-serves the empty completion and the guard raises on it. Its numbers stand as
+measured and are no longer verifiable under the current code, which is the honest definition
+of superseded, and it rejoins the verifiable set when re-run.
 
 \subsection{The corrected-harness re-run}
 \label{sec:rerun}
@@ -978,10 +1002,23 @@ reproduced verbatim there. Same task family, budget and worker as run~3
 the three corrections in place: a component-specific reflective dataset, an explicit
 \texttt{module\_selector=all}, and a non-saturating arm~C.
 
-\textbf{The treatment was applied.} Arm~D's \texttt{genes\_changed} includes
-\texttt{ensure\_correct} on two of three seeds, against zero of fifteen across the released
-runs. This is the check no released run could perform, and it is the difference between a
-null result and a bug report.
+\textbf{The treatment was applied --- on one seed cleanly, and on a second only in a
+degenerate form.} Arm~D's \texttt{genes\_changed} lists \texttt{ensure\_correct} on two of
+three seeds, against $0/5$ for arm~D on run~3 ($0/15$ pooling all arms), so the reflector and
+selector fixes did reach the gene the released runs never touched. But the two changes are
+not alike. On seed~1 GEPA wrote a genuine $3101$-character detector rubric. On seed~2 it
+replaced the gene with the \textbf{empty string}, and inspecting why exposes a third instance
+of this paper's own failure mode (Evidence~8, \S\ref{sec:defect}): the reflection LM returned
+an empty completion, GEPA logged \texttt{``Proposed new text for ensure\_correct: ''} with
+nothing after it, and the empty gene then scored \emph{better} on the training subsample
+($2.25 \to 2.5$) and was accepted as the winner. Seed~2's arm~D therefore ran a loop with no
+critique at all, and it is exactly the seed carrying the largest held-out drop and the
+$-0.065$ that dominates $\dd$. We report the run as measured and mark the contamination
+rather than quietly dropping the seed; the corrected-guard re-run is pending.
+
+The selector fix is visible in the proposal counts: arm~B received $4, 2, 2$ proposal rounds
+across the three seeds and arm~D received $4, 3, 2$, so the two-gene arm is no longer
+searching the shared gene at half the rate, which was the starvation of Evidence~3.
 
 \begin{table}[h]
 \centering
@@ -995,9 +1032,14 @@ B & \texttt{generate} & 0.790 & 0.750 & $-0.040$ \\
 D & \texttt{generate} $+$ \texttt{ensure\_correct} & 0.790 & 0.735 & $-0.055$ \\
 \bottomrule
 \end{tabular}
-\caption{The corrected-harness re-run, held-out means over three seeds. Both controls land
-exactly on the seed baseline while both optimizing arms fall below it, so the loss is
-attributable to optimization rather than to scoring noise.}
+\caption{The corrected-harness re-run, held-out means over three seeds. Both optimizing arms
+fall below the seed baseline while both controls sit on it. Note what the controls do and do
+not establish: arm~A re-scores the seed genome, which under a deterministic replay path must
+reproduce its first measurement, so it is a determinism check rather than a flatness control;
+and arm~C's worker ignores the genome, so no proposal can improve its training score and its
+flatness remains true by construction. Neither is evidence about measurement noise --- there
+is none anywhere in this study (\S\ref{sec:threats}) --- so the drop in B and D is
+attributable to optimization simply because nothing else in the pipeline varies.}
 \label{tab:rerun}
 \end{table}
 
@@ -1012,19 +1054,24 @@ returned the seed genome unchanged --- the plateau behaviour reported for GEPA e
 \citep{agrawal2025gepa}, not a harness artifact.
 
 The result we did not predict is Table~\ref{tab:rerun}'s middle column:
-\textbf{optimization made both arms worse}, by $-0.040$ and $-0.055$, while both controls sat
-exactly on the baseline. Eight training tasks against ten held-out is a small split, and the
-reflective optimizer overfits it; arm~D loses slightly more because it has two genes of
-surface to overfit rather than one. This is consistent with the degradation runs 4 and 5
-showed and with the reported instability of prompt optimizers on some tasks
-\citep{yang2023opro,zhou2025bbopromptscale}, and it means the honest summary of loop-level
-optimization here is not that it fails to help but that, at this budget, it costs something.
+\textbf{optimization made both arms worse}, by $-0.040$ and $-0.055$. Eight training tasks
+against ten held-out is a small split and the reflective optimizer overfits it. The
+acceptance counts give this a mechanism rather than an assertion: on seed~2, where the
+largest drop occurs, arm~B accepted one candidate and fell $0.845 \to 0.750$ while arm~D
+accepted \emph{two} and fell $0.845 \to 0.685$; on seed~0 no arm accepted anything and every
+arm returned $0.800$. More accepted train-improving edits, more held-out loss. This is
+consistent with the degradation runs 4 and 5 showed and with the reported instability of
+prompt optimizers on some tasks \citep{yang2023opro,zhou2025bbopromptscale}, and it means the
+honest summary of loop-level optimization here is not that it fails to help but that, at this
+budget, it costs something.
 
-Arm~C deserves its own sentence, because its number is unchanged from the retracted runs and
-its meaning is not. Previously arm~C was flat because it scored a saturated $1.0$ and could
-propose nothing; the flatness was an identity. Here it starts at $0.36$ with ample headroom,
-GEPA proposes against it, and it still lands exactly on the baseline. Same $+0.000$, and only
-the second one is evidence.
+Arm~C is worth one qualification, because its number is unchanged from the retracted runs and
+what it demonstrates is not. Previously it scored a saturated $1.0$, so GEPA saw a perfect
+program and proposed \emph{nothing}: no part of the search ran. Here it starts at $0.36$ and
+GEPA proposes four candidates on every seed, evaluates them, and accepts none. The flatness
+is still true by construction --- a genome-blind worker's training score cannot improve, so
+acceptance is impossible --- but the control now exercises the machinery it is supposed to
+check instead of exiting before it starts.
 
 \section{Threats to Validity}
 \label{sec:threats}

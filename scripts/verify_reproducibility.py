@@ -54,9 +54,18 @@ SUPERSEDED = frozenset(
         "run9 fb-actionability lo",
         "run10 fb-actionability hi",
         "D5-code MBPP+ (saturated)",
+        # Not superseded by the wiring correction like the eleven above, but by the
+        # blank-gene guard the run itself motivated. See EXPECTED_RUNS below.
+        "C2 four-arm corrected harness",
     }
 )
-EXPECTED_RUNS = 3  # under the CORRECTED harness: the two C1 conditions and the C2 re-run.
+EXPECTED_RUNS = 2  # under the CORRECTED harness: the two C1 conditions.
+# C2 was briefly a third. Auditing it found that two reflection completions came back empty
+# and GEPA accepted one as the verify gene, so `genome_from_candidate` now refuses blank gene
+# text -- and that guard makes C2's own cassette unreplayable, because replaying it re-serves
+# the empty completion and the guard (correctly) raises. C2's numbers therefore stand as
+# reported and measured, but they are no longer verifiable under HEAD, which is exactly the
+# state the SUPERSEDED list exists to record. It returns to the live set when re-run.
 
 # (label, committed results JSON, cassette, exact CLI args). reflection_calls and
 # task-set come from each run's pre-registration (not stored in the older metas).

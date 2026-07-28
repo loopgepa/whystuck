@@ -67,11 +67,32 @@ def candidate_from_genome(genome: LoopGenome) -> dict[str, str]:
 
 
 def genome_from_candidate(base_genome: LoopGenome, candidate: dict[str, str]) -> LoopGenome:
-    """A copy of the genome with its text genes replaced from the candidate."""
+    """A copy of the genome with its text genes replaced from the candidate.
+
+    A blank replacement raises. This is not defensive tidiness: in the C2 run the
+    reflection LM returned an empty completion twice, GEPA turned that into a proposal of
+    empty text for the verify gene, and on one seed the empty gene scored *better* on the
+    training subsample --- deleting a near-random critique helps training --- so it was
+    accepted and became the winner. The arm carrying the loop-level treatment thus shipped
+    a loop with no critique at all, and every downstream number (held-out score,
+    `genes_changed`, the paired delta) reported it as an evolved gene. That is precisely
+    the failure this paper documents: a broken treatment indistinguishable from an
+    ineffective one. An optimizer may legitimately want a *shorter* rubric, so only
+    all-whitespace content is refused.
+    """
     new = base_genome.model_copy(deep=True)
     for gene in new.genes:
         if gene.id in candidate and isinstance(gene.content, str):
-            gene.content = candidate[gene.id]
+            replacement = candidate[gene.id]
+            if not replacement.strip():
+                raise ValueError(
+                    f"candidate proposes blank text for gene {gene.id!r}; an empty gene "
+                    "silently disables that step of the loop, so it is rejected rather "
+                    "than scored (usual cause: the reflection LM returned an empty "
+                    "completion, e.g. a reasoning model whose max_tokens was consumed "
+                    "before it emitted content)"
+                )
+            gene.content = replacement
     return new
 
 

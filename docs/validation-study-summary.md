@@ -90,7 +90,7 @@
 > the optimizer. Evidence, not proof: one hand-written point in prose space. Caveat: only 5
 > positive cases per split, so tp = 0 cannot separate "no" from "weak" discrimination.
 >
-> **`verify_reproducibility.py` now reports ALL 3 RUNS REPRODUCE FROM CASSETTE**, not
+> **`verify_reproducibility.py` now reports ALL 2 RUNS REPRODUCE FROM CASSETTE**, not
 > NOTHING PROVEN. Measured cost realization: $0.043 actual vs $0.190 guard bound = **23 %**.
 
 > **C2 — THE FOUR-ARM RE-RUN, AND THE FIRST RUN IN WHICH THE TREATMENT WAS APPLIED
@@ -125,9 +125,23 @@
 > retracted runs, but there it was saturated at 1.0 and *could not* propose; here it starts
 > at 0.36 with headroom, GEPA proposes against it, and it still lands on the baseline.
 >
-> Integrity: 461 distinct calls, 0 empty and 0 error-shaped outputs, and all 24 arm-scores
-> plus gene-change sets reproduce **exactly** under strict replay. Cost ≈ $0.31 estimated
-> (outputs measured, inputs assumed) against the $1.7358 priced bound.
+> **⚠️ CONTAMINATED ON SEED 2 — see Evidence 8.** Of 31 reflection completions **2 were
+> empty**, both proposals for `ensure_correct` in arm D. On seed 0 the empty proposal was
+> rejected on score; on seed 2 it was **accepted** (a loop with no critique beats one with a
+> near-random critique on the training subsample, 2.25→2.5) and became the winner, so arm D
+> on seed 2 ran with **no critique at all** — and that is the seed carrying the −0.160 drop
+> and the −0.065 that dominates Δ. So the treatment was genuinely applied on **seed 1 only**
+> (a real 3101-char rubric); seed 2's "change" was gene deletion. `genome_from_candidate` now
+> refuses blank gene text, which makes C2's own cassette unreplayable (replay re-serves the
+> empty completion and the guard raises), so C2 is marked SUPERSEDED until re-run.
+> Likely cause: `REFLECTION_MAX_OUTPUT_TOKENS = 1500` consumed by a reasoning model's
+> reasoning tokens before any content is emitted.
+>
+> Integrity: 461 distinct calls, 0 empty *worker* outputs, and all 24 arm-scores plus
+> gene-change sets reproduced exactly under strict replay *at the time of the run*. Note the
+> first integrity pass wrongly reported 0 empty outputs overall: it serialised each cassette
+> entry to JSON before measuring length, so it sized a dict and could never see an empty
+> completion. Cost ≈ $0.31 estimated against the $1.7358 priced bound.
 >
 > **Released artifacts do NOT carry the provenance fields.** `genes_changed`, `train_score` and
 > `final_genes` postdate every recorded run and are empty in all 17 result JSONs, so the
