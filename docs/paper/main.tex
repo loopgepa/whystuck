@@ -1079,6 +1079,56 @@ arms falling below baseline, and we described that as optimization costing somet
 generally. On the clean re-run arm~B is exactly flat, so that generalization does not
 survive; the cost is specific to the arm with the extra gene.
 
+\paragraph{What the optimizer actually wrote, scored as a detector.}
+The re-run makes answerable the question \S\ref{sec:analysis}(1d) could only half-address.
+There we found that a verify gene written \emph{by hand} against our own findings moved only
+the detector's threshold and never gave it discrimination; the obvious objection was that a
+search over prose might find what one author could not. Arm~D's evolved genes are real
+rubrics of ${\sim}3000$ characters, so we scored each one as a detector on exactly the drafts
+it judged, against the seed rubric on the drafts \emph{it} judged (offline, \$0;
+\texttt{scripts/analyze\_evolved\_gene.py}). A same-drafts contrast does not exist, because
+the generator and critique genes moved together, but the question here is whether the evolved
+detector discriminates at all.
+
+\begin{center}\small
+\begin{tabular}{lccccc}
+\toprule
+critique & PASS rate & tp & fp & fn & tn \\
+\midrule
+seed rubric, seed 0 & 0.20 & 0 & 2 & 1 & 7 \\
+\textbf{evolved}, seed 0 & \textbf{0.00} & 0 & 0 & 0 & 10 \\
+seed rubric, seed 1 & 0.20 & 0 & 2 & 0 & 8 \\
+\textbf{evolved}, seed 1 & \textbf{0.00} & 0 & 0 & 0 & 10 \\
+seed rubric, seed 2 & 0.30 & \textbf{1} & 2 & 0 & 7 \\
+\textbf{evolved}, seed 2 & \textbf{0.00} & \textbf{0} & 0 & 2 & 8 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{The evolved critique emits \texttt{PASS} zero times, on every seed.} Pooled, the
+$127$-character seed rubric produces one true positive and the ${\sim}3000$-character evolved
+rubrics produce none. Given a large budget of prose and a reflector that could finally see
+its own verdicts, the optimizer converged on the same degenerate corner the hand-written gene
+slid toward: never accept. This is the strongest form of the C1 finding, because it now holds
+for the \emph{search} and not merely for one author --- and it supplies the mechanism for
+arm~D's $-0.042$. A critique that never passes sends every draft to a refine round, including
+drafts that were already correct, and refining a correct draft can break it (on seed~2 two
+compliant drafts were rejected). The loop-level arm does not lose because the optimizer
+failed at its job; it loses because it succeeded at optimizing a training signal that rewards
+refusing to accept.
+
+Why that corner is so attractive is worth stating, because it is not specific to our setup.
+On multi-hard almost every first draft genuinely fails, so a detector that emits \texttt{FIX}
+unconditionally is nearly indistinguishable, \emph{on the training signal}, from one that
+reasons correctly --- and it is far easier to express in prose. The penalty appears only on
+the minority of drafts that were already compliant, which a small training split barely
+contains. That is Goodhart's law operating inside the loop: the component was optimized
+against a proxy on which the degenerate policy is almost free, and the cost lands on
+held-out. Any componentized optimizer pointed at a verifier on a task with a low base rate of
+correct first drafts faces the same gradient, which makes ``never accept'' a failure mode to
+test for rather than a quirk of this run --- and it is cheap to test for, since it shows up
+as a \texttt{PASS} rate of zero.
+
 \paragraph{A positive control: the instrument does respond.}
 A null is worth reading only if the instrument that produced it can register a signal, and
 after three silent failures we do not ask the reader to take that on trust. We built a

@@ -75,7 +75,12 @@ loop-level arm beats the prompt-only arm. Expected: A/B/C at `0.000`, D at `1.00
 .venv/bin/python scripts/analyze_residual_by_constraint.py
 .venv/bin/python scripts/analyze_c1.py docs/validation-study-c1-base.json \
                                        docs/validation-study-c1-hand.json
+.venv/bin/python scripts/analyze_evolved_gene.py   # the optimizer's own critique, as a detector
 ```
+
+`analyze_evolved_gene.py` is the one to run if you read only one: it scores the rubric GEPA
+actually evolved as a failure detector and finds it emits `PASS` zero times on every seed,
+which is the mechanism behind the loop-level arm's loss.
 
 `analyze_deltas.py` marks any run whose seeds share a task pool, because on those the
 interval and the sign test are anti-conservative and must not be read as replication.
@@ -131,6 +136,13 @@ Stated here rather than discovered:
 - **Executable-code runs do not replay byte-for-byte.** Model solutions may use unseeded
   randomness, so re-executing them can yield varying test output. Scores and cassettes are
   released; full-trace replay is not claimed for the BigCodeBench runs.
+- **Two code tests skip on a loaded machine.** The code branch preflights every vendored
+  reference solution through the sandbox before pricing a run, and that check is wall-clock
+  bounded. On a busy host a correct reference (in practice `mbpp-271`) can exceed the cap,
+  which `preflight_code_tasks` reports as a *host capacity* signal rather than bad data. The
+  two tests that depend on it skip with that reason instead of failing, so a loaded machine
+  does not manufacture a data-integrity error. The guard itself is unchanged and still
+  refuses a live run, which is the case it exists for.
 - **The provenance fields postdate most runs.** `genes_changed`, `train_score` and
   `final_genes` are empty in the older result files, so the reporting minimum the paper
   proposes cannot be checked against those runs — only against ones made after it.

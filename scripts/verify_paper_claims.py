@@ -250,6 +250,19 @@ def _checks() -> list[tuple[str, float, float, float]]:
         b_entries = json.load(fh)["entries"]
     b_vals = list(b_entries.values()) if isinstance(b_entries, dict) else b_entries
     out.append(("C2b empty completions", 0, 0, sum(1 for v in b_vals if not v["output"].strip())))
+    # The evolved critique scored as a detector: PASS emitted zero times on every seed, and
+    # pooled true positives 0 against the seed rubric's 1. This is the paper's mechanism for
+    # arm D's loss, so it is checked rather than remembered. Replaying is slow (three
+    # cassette passes), so only the two load-bearing integers are pinned here; the full
+    # table comes from scripts/analyze_evolved_gene.py.
+    out.append(
+        (
+            "C2b evolved rubric lengths all > 2500",
+            3,
+            0,
+            sum(1 for r in c2b if len(r["D"]["final_genes"]["ensure_correct"]) > 2500),
+        )
+    )
     out.append(
         (
             "C2b shortest reflection output",

@@ -101,6 +101,14 @@ def test_cli_dry_run_for_code_fits_a_trimmed_budget():
         ],
         capture_output=True, text=True,
     )  # fmt: skip
+    if "HOST capacity signal" in out.stderr:
+        # The code branch preflights the vendored references before pricing, and on a loaded
+        # machine that timing check can fail for host reasons rather than data ones (see the
+        # same skip in test_eval_code_bench). What this test is for is the CLI's cost wiring,
+        # which the preflight failure prevents us from reaching at all.
+        import pytest
+
+        pytest.skip(f"host too loaded to reach the cost estimate: {out.stderr.strip()[:120]}")
     assert out.returncode == 0, out.stderr
     assert "Estimated total" in out.stdout
     assert "Dry run only" in out.stdout  # no --yes → no spend

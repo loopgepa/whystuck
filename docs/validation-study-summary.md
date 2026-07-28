@@ -116,6 +116,23 @@
 > C2's "optimization hurts BOTH arms" does NOT survive; the cost is specific to the arm with
 > the extra gene. Task-level: 19/30 exact ties, 11 flips (7 favour B, 4 favour D).
 >
+> **THE MECHANISM — the evolved critique emits PASS ZERO TIMES** (`analyze_evolved_gene.py`,
+> free). Scoring arm D's evolved rubric as a detector on the drafts it judged:
+>
+> | critique | PASS rate | tp | fp | fn | tn |
+> |---|---|---|---|---|---|
+> | seed rubric, seed 0/1/2 | 0.20 / 0.20 / 0.30 | 0 / 0 / **1** | 2 / 2 / 2 | 1 / 0 / 0 | 7 / 8 / 7 |
+> | **evolved**, seed 0/1/2 | **0.00 / 0.00 / 0.00** | 0 / 0 / 0 | 0 / 0 / 0 | 0 / 0 / 2 | 10 / 10 / 8 |
+>
+> Pooled true positives: seed rubric 1, evolved **0**. Given ~3000 chars of freedom and a
+> reflector that could finally see its own verdicts, GEPA converged on the SAME degenerate
+> corner C1's hand-written gene slid toward: **never accept**. So C1's "threshold not
+> discrimination" finding holds for the SEARCH, not just for one author — and it explains
+> arm D's −0.042: a critique that never passes refines every draft including already-correct
+> ones, and refining a correct draft can break it (seed 2: 2 compliant drafts rejected).
+> Arm D does not lose because the optimizer failed; it loses because it succeeded at
+> optimizing a training signal that rewards refusing to accept.
+>
 > **Positive control (free, real GEPA):** on a landscape where evolving the critique is the
 > only path to a passing answer, the same harness returns A/B/C 0.000, D 1.000,
 > Δ(D−B) = **+1.000**. The instrument responds; the nulls are about the tasks.
