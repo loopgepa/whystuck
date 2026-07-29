@@ -161,8 +161,12 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--out", default=None, help="where to write the results JSON")
     p.add_argument(
         "--report",
-        default="docs/validation-study.md",
-        help="where to write the Markdown report (default docs/validation-study.md)",
+        default=None,
+        help="where to write the Markdown report (default: none, symmetric with --out). "
+        "This defaulted to docs/validation-study.md, which meant any run or replay that "
+        "omitted the flag silently overwrote a COMMITTED report belonging to a different "
+        "run; nothing depended on the default (verify_reproducibility.py and REPRODUCE.md "
+        "both pass it explicitly), so the only thing it did was clobber",
     )
     p.add_argument("--yes", action="store_true", help="actually spend and run live")
     p.add_argument(
@@ -308,6 +312,41 @@ def main(argv: list[str] | None = None) -> int:
     if args.actuator and args.plan_gene:
         print(
             "ERROR: --actuator and --plan-gene are distinct experiments; enable at most one.",
+            file=sys.stderr,
+        )
+        return 2
+
+    # Starved-budget guard. GEPA charges its seed evaluation len(valset) metric calls
+    # (gepa/core/state.py sets total_num_evals = len(seed_valset_evaluation.scores_by_val_id)),
+    # and optimize_loop passes the train split as the trainset with no separate valset, so
+    # valset size IS n_train. One accept cycle therefore needs the seed evaluation, a
+    # reflection minibatch (GEPA's default 3, capped at the split size), and a second full
+    # evaluation before a proposal can enter the Pareto front.
+    #
+    # Below that, the arm still runs, still bills, and still reports -- as genes_changed=[]
+    # and a flat delta. That is indistinguishable from "optimization did not help" while
+    # being "optimization never happened", which is the precise defect this study had to
+    # retract a result over. So refuse at the dry-run step instead of pricing it.
+    #
+    # Scoped to arms that actually optimize: the released C1 conditions run `--arms A` at
+    # n_train=32 with mmc=64, where GEPA never runs and the budget is inert.
+    from whystuck.eval.study import arm_evolvable
+
+    optimizing = [
+        a for a in arms if arm_evolvable(a, include_plan=args.plan_gene, actuator=args.actuator)
+    ]
+    min_calls = 2 * args.n_train + min(3, args.n_train)
+    if optimizing and args.max_metric_calls < min_calls:
+        print(
+            f"ERROR: --max-metric-calls {args.max_metric_calls} cannot fund one accept "
+            f"cycle at --n-train {args.n_train}. GEPA spends {args.n_train} metric calls on "
+            f"the seed evaluation alone (its valset is the train split), then needs a "
+            f"minibatch of {min(3, args.n_train)} plus a further {args.n_train} to promote a "
+            f"proposal: {min_calls} minimum for arms {''.join(optimizing)}. Below it the arm "
+            f"reports genes_changed=[] and a flat delta, which reads as 'optimization did not "
+            f"help' when it means 'optimization never ran'. Raise --max-metric-calls to "
+            f">= {min_calls} (holding metric calls per train task constant across a "
+            f"split-size sweep means scaling it WITH --n-train), or lower --n-train.",
             file=sys.stderr,
         )
         return 2

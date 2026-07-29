@@ -44,6 +44,12 @@ from statistics import mean, pstdev
 DOCS = "docs"
 PAPER = f"{DOCS}/paper/main.tex"
 
+# The pre-registered split-size sweep. Kept here as the single source of truth so the
+# paper table, the guard tests and these checks cannot drift apart.
+SWEEP = ((4, 14), (8, 28), (16, 56), (24, 84))
+EPOCHS = 3.5  # metric calls per training task, held constant across the sweep
+POOL_CLIFF = 32  # first n_train whose pool leaves 64, which would move the held-out set
+
 
 def _runs(name: str) -> list[dict]:
     with open(f"{DOCS}/{name}", encoding="utf-8") as fh:
@@ -55,6 +61,34 @@ def _tex() -> str:
         return fh.read()
 
 
+def _type_overlap_counts(n_train: int, n_heldout: int = 10) -> list[int]:
+    """Per seed: how many training tasks have a constraint-type set also seen in held-out.
+
+    The sweep's attribution fails if a larger split simply contains more near-copies of
+    held-out tasks. Recomputed from the generator here rather than trusted from the table.
+    """
+    import ast
+
+    from whystuck.eval.multi_constraint import load_multi_constraint
+
+    pool = max(64, 2 * max(n_train, n_heldout) + 2)
+
+    def payload(task: object) -> dict:
+        raw = task.payload  # type: ignore[attr-defined]
+        return raw if isinstance(raw, dict) else ast.literal_eval(raw)
+
+    counts = []
+    for seed in (0, 1, 2):
+        held = [
+            frozenset(payload(t)["instruction_id_list"])
+            for t in load_multi_constraint("heldout", seed=seed, n=n_heldout, pool=64, hard=True)
+        ]
+        train = load_multi_constraint("train", seed=seed, n=n_train, pool=pool, hard=True)
+        hit = sum(1 for t in train if frozenset(payload(t)["instruction_id_list"]) in held)
+        counts.append(hit)
+    return counts
+
+
 def _scrape(tex: str, pattern: str) -> float:
     """Pull one number out of the paper's own prose.
 
@@ -63,7 +97,9 @@ def _scrape(tex: str, pattern: str) -> float:
     because a check that silently stops looking is exactly the failure this script exists
     to prevent (see the vacuous integrity scan in the module docstring).
     """
-    m = re.search(pattern, tex, re.DOTALL)
+    # MULTILINE so a pattern can anchor a LaTeX table row with ^; DOTALL so one can span
+    # the line wraps the .tex is hard-wrapped at.
+    m = re.search(pattern, tex, re.DOTALL | re.MULTILINE)
     if m is None:
         return float("nan")
     return float(m.group(1))
@@ -392,6 +428,53 @@ def _checks() -> list[tuple[str, float, float, float]]:
                 d_c2b[i],
             )
         )
+    # The pre-registered split-size sweep (sec:splitsweep). Nothing here is a measurement
+    # yet -- these are the sweep's DESIGN numbers, and pinning them is the point: the
+    # prediction is only pre-registered if the configuration it was written against cannot
+    # be edited afterwards without a gate noticing. Every value is re-derived from the
+    # generator and from GEPA's documented budget arithmetic, not copied from the table.
+    for n_train, mmc in SWEEP:
+        row = rf"^{n_train}\s*& {mmc} & (\d+) &"
+        prose.append(
+            (
+                f"tex: sweep n={n_train} accept-cycle floor",
+                row,
+                0,
+                2 * n_train + min(3, n_train),
+            )
+        )
+        prose.append(
+            (
+                f"tex: sweep n={n_train} epochs (mmc/n)",
+                rf"^{n_train}\s*& (\d+) &",
+                0.0005,
+                round(EPOCHS * n_train),
+            )
+        )
+        # `row` captures the floor, so the overlap patterns need it non-capturing or
+        # re.search hands back the floor as group(1).
+        row_nc = rf"^{n_train}\s*& {mmc} & \d+ &"
+        # Counts, not shares: an exact integer has no display rounding to argue about.
+        for i, count in enumerate(_type_overlap_counts(n_train)):
+            prose.append(
+                (
+                    f"tex: sweep n={n_train} overlap seed{i}",
+                    row_nc + r" " + r"\d+ / " * i + r"(\d+)",
+                    0,
+                    count,
+                )
+            )
+    prose.append(("tex: sweep pool below cliff", r"hence \$(\d+)\$ for every", 0, 64))
+    prose.append(
+        (
+            "tex: sweep highest safe n_train",
+            r"n_\{\\mathrm\{train\}\} \\le (\d+)\$ and larger",
+            0,
+            POOL_CLIFF - 1,
+        )
+    )
+    prose.append(("tex: sweep pool cliff", r"and larger from \$(\d+)\$", 0, POOL_CLIFF))
+
     for label, pattern, tol, artifact in prose:
         out.append((label, _scrape(tex, pattern), tol, artifact))
 

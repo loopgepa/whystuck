@@ -105,6 +105,45 @@ estimate on input tokens; measured realization has been 20–25% of the bound. A
 spend. The cassette persists after every call, so an interrupted run loses nothing and a
 re-invocation resumes from what was already paid for.
 
+Note `--reflection-model openai/gpt-5.6-luna` above. It is not the CLI default
+(`gpt-5.6-terra`), and it is the reflection model the C2b re-run used — C2 and C2b are the
+only two runs that did. Any run meant to compare against C2b must pin it, or the reflection
+model becomes an uncontrolled difference.
+
+### The pre-registered split-size sweep (§"Is the loss a small-split artifact?")
+
+Designed, guarded, priced, and pinned by `tests/test_split_size_sweep.py`; **not run** — the
+credential available at the time authenticated against neither model. One command per row,
+none of which needs the `$5` ceiling raised:
+
+```bash
+for cfg in "4 14" "16 56" "24 84"; do set -- $cfg
+  scratchpad/evalvenv/bin/python scripts/run_validation_study.py \
+    --task-set multi-hard --arms BD --seeds 0,1,2 \
+    --n-train "$1" --n-heldout 10 --max-metric-calls "$2" --reflection-calls 6 \
+    --loop-max-retries 1 --module-selector all \
+    --reflection-model openai/gpt-5.6-luna \
+    --record "tests/fixtures/cassettes/study-split$1.json" \
+    --out "docs/validation-study-split$1.json" \
+    --report "docs/validation-study-split$1.md" --yes
+done
+```
+
+`n_train=8` is not in the loop because run C2b already is that row. Arms are `BD` only:
+replaying C2b's cassette under `--arms BD` reproduces its B and D fields bit-for-bit, so arm A
+(which re-scores a fixed genome) and arm C (flat by construction) add cost and nothing else.
+
+Two things will bite anyone who varies `--n-train` without reading that section:
+
+- **`--max-metric-calls` must scale with `--n-train`.** GEPA charges its seed evaluation
+  `len(valset)` calls and the valset *is* the train split, so a fixed budget buys an arm that
+  cannot complete one accept cycle, reports `genes_changed=[]`, and looks like a null. The
+  harness now refuses this at the dry-run step; the sweep holds metric calls per training task
+  at 3.5.
+- **Keep `--n-train ≤ 31`.** The generated pool is `max(64, 2·max(n_train, n_heldout) + 2)`, so
+  at 32 it leaves 64, and because pool size seeds the shuffle the held-out set silently moves.
+  A test pins the cliff.
+
 ## Layout
 
 | path | what it holds |
