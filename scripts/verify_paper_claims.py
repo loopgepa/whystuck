@@ -405,6 +405,25 @@ def _curve_gap(a: str, b: str) -> tuple[float, float]:
     return gap, abs(gap) / _noise_estimate().sigma_delta_mean
 
 
+def _bcb_actionability_overlap() -> float:
+    """Measured held-out overlap across the code-actionability run's six seeds.
+
+    In the checks because the paper now declines to report an interval for that effect ON THE
+    STRENGTH OF THIS NUMBER. If the overlap were recomputed as zero, the refusal would be
+    unmotivated and the paragraph would need rewriting rather than silently standing.
+    """
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import analyze_deltas as ad
+
+    path = f"{DOCS}/validation-study-bcb-acthi.json"
+    meta = ad._meta(path)
+    task_set = ad.task_set_of(meta)
+    return ad.heldout_overlap(task_set, list(meta.get("seeds") or []), meta.get("n_heldout"))
+
+
 def _contrast_flag_census() -> tuple[int, int]:
     """(one-sided, both-arms-starved) among released runs with at least one optimizing arm.
 
@@ -1432,6 +1451,18 @@ def _checks() -> list[tuple[str, float, float, float]]:
         m = re.search(pattern, tex, re.DOTALL | re.MULTILINE)
         out.append((label, float(m.group(1)) if m else float("nan"), 0.0005, abs(gap)))
         out.append((f"{label} sigma", float(m.group(2)) if m else float("nan"), 0.005, in_sigma))
+
+    # The code-actionability effect, which the paper now reports WITHOUT an interval because
+    # its seeds are partitions. The overlap it cites is checked, and so is the claim that the
+    # seeds are not independent -- if that changed, an interval would become reportable again.
+    out.append(
+        (
+            "tex: bcb actionability overlap",
+            _scrape(tex, r"held-out overlap is \$([\d.]+)\\%\$"),
+            0.05,
+            _bcb_actionability_overlap() * 100,
+        )
+    )
 
     # Evidence 9's census. The paper distinguishes two shapes of the same flag and the counts
     # are the whole argument: a one-sided contrast (one arm starved, the other searched) is the

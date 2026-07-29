@@ -660,13 +660,16 @@ fixed at the perfect oracle ($R{=}3$) and varying only the repair text handed to
 step across three pre-registered levels: \emph{lo} (a bare ``revise'' verdict), \emph{mid}
 (which constraints failed, with their targets --- identical to run 8), and \emph{hi} (mid
 \emph{plus} a concrete \emph{measured} edit per failed constraint, e.g.\ ``the draft has 2
-words but needs exactly 20: add 18''). The primary contrast is decisive: $\dd(\text{hi}-
-\text{lo}) = 0.873 - 0.810 = +0.063$ on the seed held-out (arm A, no GEPA), clearing the
-pre-registered $+0.05$ threshold --- the fix step is partly \textbf{feedback-limited}.
-All three seeds are positive ($+0.090, +0.025, +0.075$) and an exact-resample $95\%$
-interval $[+0.025, +0.090]$ excludes zero, so the effect survives at $n{=}3$ --- though a
-sign test at $n{=}3$ cannot fall below $p=0.25$, so this rests on the magnitudes rather than
-on replication across seeds, and the whole comparison is a ceiling result measured with the
+words but needs exactly 20: add 18''). The primary contrast is the study's second-largest
+effect: $\dd(\text{hi}-\text{lo}) = 0.873 - 0.810 = +0.063$ on the seed held-out (arm A, no
+GEPA), clearing the pre-registered $+0.05$ threshold --- the fix step is partly
+\textbf{feedback-limited}. All three seeds are positive ($+0.090, +0.025, +0.075$) and an
+exact-resample $95\%$ interval is $[+0.025, +0.090]$. We do not lean on that interval:
+at $n{=}3$ with three same-signed deltas it \emph{must} exclude zero, so ``excludes zero'' here
+is a restatement of sign-unanimity and the sign test is at its $p=0.25$ floor --- the same
+caveat we attach to the $L_2$ gain (\S\ref{sec:p0}). What does carry it is the magnitude
+against the noise floor: $2.27\sigma$, paired on the same thirty held-out tasks
+(\S\ref{sec:threats}). The whole comparison remains a ceiling result measured with the
 true metric gating at inference (\S\ref{sec:defect}). Two
 sharp qualifications follow. (i) The gain is entirely in the \emph{hi} step: lo $\approx$
 mid ($0.810$ vs.\ $0.813$), so naming \emph{which} constraint failed adds nothing over a
@@ -796,19 +799,29 @@ feedback (runs 9--10) --- transfers to code, and \emph{more strongly}. Holding t
 (no GEPA, so the lever is feedback \emph{shape}, not optimization) and varying only the in-loop
 visible-test feedback between a bare verdict (\emph{lo}) and the verdict plus the source of the
 visible tests the solution must satisfy (\emph{hi}), the held-out (hidden-test) score rises by
-a mean $+0.20$ across six seeds (per-seed $+0.40, 0.00, +0.20, +0.20, +0.20, +0.20$). An
-exact-resample $95\%$ interval is $[+0.100, +0.300]$, \emph{excluding zero} --- a
+a mean $+0.20$ across six seeds (per-seed $+0.40, 0.00, +0.20, +0.20, +0.20, +0.20$) --- a
 $3\times$-larger effect than the instruction-following actionability lift ($+0.063$), plausibly
-because a code assertion is a sharper repair target than a word-count. Two qualifications hold
-as on instruction-following: the gain accrues to the \emph{baseline}, not to $\dd(D-B)$ (which
-stays $0.00$), so it is feedback \emph{shape}, not loop-level optimization --- GEPA did not need
-to discover it; and the held-out scores carry some execution non-determinism (the effect size
-dwarfs it, but we do not over-read the exact value). This reinforces the paper's conclusion:
+because a code assertion is a sharper repair target than a word-count. \textbf{We do not report
+an interval for it.} An exact-resample $95\%$ interval computes to $[+0.100, +0.300]$, and an
+earlier draft reported that as \emph{excluding zero}; but BigCodeBench-Hard shuffles a fixed
+vendored pool, so a seed here selects a partition rather than drawing a fresh sample. At six
+seeds of ten the measured held-out overlap is $6.7\%$, which makes both the interval and the
+sign test anti-conservative, and our own retraction list withdraws exactly this reading
+(Appendix~\ref{sec:defect}, Evidence~4b). Nor can we put the effect in units of measurement
+noise: $\sigma$ was estimated on instruction-following replicates
+(\S\ref{sec:threats}) and no repeated measurement exists in the code domain, so the $\sigma$
+column is unavailable here rather than favourable. What the evidence is, stated plainly: five of
+six seeds move by $+0.20$ or more, and on ten binary-scored held-out tasks $+0.20$ is two task
+flips per seed. Read it as a large and consistent shift with no calibrated interval, not as a
+significant one. Two further qualifications hold as on instruction-following: the gain accrues to
+the \emph{baseline}, not to $\dd(D-B)$ (which stays $0.00$), so it is feedback \emph{shape}, not
+loop-level optimization --- GEPA did not need to discover it; and the held-out scores carry some
+execution non-determinism (the effect size dwarfs it, but we do not over-read the exact value). This reinforces the paper's conclusion:
 the productive lever is the fixer and the actionability of its feedback, not loop-level
 optimization of the critique.
 
 \paragraph{Can GEPA \emph{discover} the actionable feedback? The actuator experiment.}
-The $+0.20$ lift establishes that the fixer's feedback \emph{matters} --- but that feedback
+The $+0.20$ lift indicates that the fixer's feedback \emph{matters} --- but that feedback
 was hand-designed. The sharpest test of our thesis is whether GEPA can \emph{discover} the
 gain by optimization when pointed squarely at it. We add a fourth evolvable gene, an
 \texttt{actuator}: an LLM step that, on a failed critique, turns the visible-test signal and
