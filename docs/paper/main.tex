@@ -70,7 +70,8 @@ checker yields the \emph{worst} of three held-out scores. Because several headli
 nulls we also report a positive control: on a landscape where evolving the critique is the only
 path to a passing answer, the same harness and optimizer return $\dd(D-B)=+1.000$.
 
-Reaching that measurement required discarding our own first eleven experiments. An audit
+Reaching that measurement required discarding every contrast run we had bought before it ---
+fifteen of them. An audit
 established that a component-agnostic reflective dataset and a one-component-per-proposal
 selector had together prevented the loop-level arm from ever receiving its intervention: the
 critique gene is byte-identical to the seed in $15/15$ winning genomes. Because such a defect
@@ -150,8 +151,9 @@ contributions:
   \item \textbf{A silent failure mode for componentized optimization, and the one-integer
     diagnostic that catches it} (Appendix~\ref{sec:defect}). We establish it on our own
     artifact: pointing an optimizer at a component is not the same as optimizing it, and the
-    difference does not appear in held-out scores. Our first eleven experiments measured
-    $\dd\approx 0$ from an arm that never received its treatment.
+    difference does not appear in held-out scores. Our first fifteen contrast runs measured
+    $\dd$ from an arm that never received its treatment --- ten of them exactly $0$, the rest
+    moved by a confound in the gene the arms \emph{share}.
 \end{enumerate}
 
 We report every result as-is, including a run in which optimization \emph{degraded} held-out
@@ -390,8 +392,8 @@ first should be read: \S\ref{sec:p0} varies $p_0$ and finds the contrast's sign 
 on it, and \S\ref{sec:decomp} separates the part of that contrast which is actually the
 treatment from the part contributed by the gene both arms share. The ceiling results come from the arm that
 scores a \emph{fixed} genome, so they are independent of the optimizer wiring and of the
-defect discussed in Appendix~\ref{sec:defect}; eleven earlier four-arm runs are superseded and
-are recorded, with the reason, in Appendix~\ref{sec:superseded}.
+defect discussed in Appendix~\ref{sec:defect}; fifteen earlier contrast runs are superseded and
+the ten pre-registered ones are recorded, with the reason, in Appendix~\ref{sec:superseded}.
 
 \subsection{The four-arm re-run on the corrected harness}
 \label{sec:rerun}
@@ -441,7 +443,7 @@ Per-seed $\dd(D-B) = [-0.095, -0.080, +0.050]$, mean $\mathbf{-0.042}$, exact-re
 CI $[-0.095, +0.050]$, sign $p=1.00$. Prediction (ii) --- that $\dd$ would stay inside our
 $\pm0.05$ SESOI --- holds on the point estimate, and only just; the interval does not, so
 this is not an equivalence claim either, and at $n=3$ the sign test cannot fall below
-$p=0.25$ regardless of the data. What distinguishes this null from the eleven it replaces is
+$p=0.25$ regardless of the data. What distinguishes this null from the fifteen it replaces is
 not its width but its content: the arms produced different genomes and different scores, so
 the interval measures a contrast that exists.
 
@@ -914,8 +916,10 @@ false \texttt{PASS} ends the loop on a draft that still needed repair. What chan
 is how much that discrimination is worth.
 
 \paragraph{What this does to the headline.} Loop-level optimization is not inert. It is
-\emph{conditionally} harmful, and the condition is the one the mechanism named: the eleven
-superseded runs and the corrected re-run were all measured at $p_0 = 0.067$, the end of the axis
+\emph{conditionally} harmful, and the condition is the one the mechanism named. Every
+instruction-following run in this paper, superseded or not, sits at the low-$p_0$ end of the
+axis --- the hard tier mandates \texttt{exact\_word\_count}, which caps $p_0$ at $0.16$
+(\S\ref{sec:residual}) --- and where we measure it directly it is $0.067$: the end of the axis
 where refusing to accept is nearly free. At $p_0 = 0.267$ the same harness, optimizer, budget
 and seeds give $\dd(D-B) = +0.060$ with every seed agreeing. One caveat belongs with that
 number: at $n=3$ with three same-signed deltas the exact-resample interval \emph{must} exclude
@@ -1495,8 +1499,8 @@ harness, optimizer, budget and seeds (\S\ref{sec:p0}). The mechanism named the c
 advance: unconditional refinement is nearly free on a training signal where $p_0$ is small and
 costly where it is not, and the evolved gene's \texttt{PASS} rate duly moves from zero to
 non-zero as $p_0$ rises --- while never emitting a false \texttt{PASS}, so what it gains is
-precision-1 acceptance. Our eleven superseded runs and the corrected re-run were all measured at
-$p_0 = 0.067$: at one end of an axis we had not identified. \emph{The null was real and it was
+precision-1 acceptance. Every instruction-following run we bought, superseded or not, sat at the
+low-$p_0$ end of an axis we had not identified, and the corrected re-run measures it at $0.067$. \emph{The null was real and it was
 local.} Three qualifications travel with that answer. At $n=3$ per level no interval is
 significant --- the sign test cannot fall below $p=0.25$ --- so the load-bearing evidence is the
 registered sign flip rather than any one interval. One of our three registered predictions
@@ -1505,14 +1509,16 @@ whole-system contrast: decomposed, only $40\%$ of the $-0.042$ is the treated co
 all of the $+0.060$ is (\S\ref{sec:decomp}) --- so the sign flip is cleaner on the component
 than on the headline, and the headline overstates what optimizing a verifier costs.
 
-That measurement cost us eleven prior experiments. All of them reported
-$\dd(D{-}B)\approx 0$, across instruction following, a cross-domain replication on
-frontier-hard code (\S\ref{sec:bcb}), an actuator variant and a worker-model swap --- and none
-of them tested the hypothesis, because the critique gene never changed
-(Appendix~\ref{sec:defect}). A confident zero, replicated eleven times, from an experiment
-that did not run. The generalizable lesson is not about our wiring but about what a
+That measurement cost us every contrast run that preceded it: \textbf{fifteen} of them, across
+instruction following, a cross-domain replication on frontier-hard code (\S\ref{sec:bcb}), an
+actuator variant and a worker-model swap. Ten reported $\dd(D{-}B)$ of exactly zero and the
+rest reported near-zero or, in two cases, a moderate negative --- and none of them tested the
+hypothesis, because the critique gene never changed (Appendix~\ref{sec:defect}). A zero
+replicated ten times, from an experiment that did not run, alongside non-zeros that measure a
+selector confound through the gene the arms share rather than the treatment
+(Appendix~\ref{sec:superseded}). The generalizable lesson is not about our wiring but about what a
 componentized-optimization result must print: \textbf{per component, whether the optimizer's
-output differs from the seed}, one integer, which would have ended this line of work eleven
+output differs from the seed}, one integer, which would have ended this line of work fifteen
 runs earlier. That failure mode is not ours alone ---
 \citet{pappu2026multiagent} independently report GEPA returning the seed prompt unchanged on
 two benchmarks --- and it has a cheap companion screen, since the degenerate verifier this
@@ -1530,7 +1536,7 @@ $+0.20$ (code) while naming the failed constraint adds nothing; and the residual
 in one mechanical skill, exact counting, that no prompt rewrite fixed. \textbf{About
 componentized optimization:} one underpowered configuration in which the treatment demonstrably
 ran and bought nothing, plus the observation that optimizing at all cost held-out score on
-both arms. For eleven runs the answer was ``nothing yet'', because the apparatus we built to
+both arms. For fifteen runs the answer was ``nothing yet'', because the apparatus we built to
 answer the question quietly answered a different one; the twelfth is a first data point, not
 a verdict.
 
@@ -1541,7 +1547,7 @@ thing and every downstream number stays plausible. Two defaults were enough to c
 a reflective dataset shared across components, and a selector that rewrites one component per
 proposal. Neither is exotic; one is a library default. The cheap defence is to report, per
 component, whether the optimizer's output differs from the seed at all --- one integer per
-gene, which we now emit and which would have caught this eleven runs earlier. That this is
+gene, which we now emit and which would have caught this fifteen runs earlier. That this is
 worth saying out loud is not our inference alone: \citet{pappu2026multiagent}, optimizing a
 prompt with GEPA for an unrelated purpose, report that ``on GPQA Diamond and MATH-500, GEPA
 returned the original prompt essentially unchanged'' --- the same event, noticed and reported,
@@ -1561,8 +1567,8 @@ withdrawn.
 \section{How a Componentized Treatment Can Silently Not Apply}
 \label{sec:defect}
 
-Our first eleven experiments reported $\dd(D-B)\approx 0$. They were not measurements of the
-hypothesis. Replaying the flagship run offline, arm~D's winning genome contains a critique
+Our first fifteen contrast runs reported a $\dd(D-B)$ that was exactly zero ten times and
+near-zero or moderately negative otherwise. None was a measurement of the hypothesis. Replaying the flagship run offline, arm~D's winning genome contains a critique
 gene \textbf{byte-identical to the seed in $15/15$ cases}: across all arms GEPA changed
 \texttt{generate} in $5/15$ winners and \texttt{ensure\_correct} in $0/15$. The two arms whose
 difference the study exists to measure were, for the gene that defines the difference, the
@@ -1667,7 +1673,7 @@ wiring one, which is the argument for making the refusal a property of the harne
 a habit of the operator. Item~(iv) is the part we would urge on others: \textbf{a
 componentized-optimization result should report, per component, whether the optimizer's output
 actually differs from the seed.} Had we printed that one number, this paper would have been a
-different paper eleven runs earlier. Because
+different paper fifteen runs earlier. Because
 the corrected wiring changes every reflection prompt, it changes every cassette key, so the
 released cassettes cannot replay under it; they are retained and labelled superseded. The
 first runs recorded under the corrected harness are the two hand-written-gene conditions of
@@ -1726,15 +1732,28 @@ $0.873$).}
 \end{table}
 
 \paragraph{What the \dd\ column does not say.} We report it once, above, and do not
-interpret it further. In every run in Table~\ref{tab:results} the loop-level arm's extra
-gene was never changed (\S\ref{sec:defect}), so arms B and D issued identical calls and the
-content-addressed cassette served identical completions: the zeros are identities, not
-measurements, and the four exactly-$[0,0]$ intervals are evidence that the treatment was not
-applied rather than evidence that it did nothing. We previously called those intervals
-``tight, not merely underpowered'' and that reading is withdrawn. The one apparent exception,
-run 6's $+0.01$ under a different-lineage critic, was pre-registered INCONCLUSIVE at $n{=}3$
-and falls with the rest. The corrected-harness measurement of this contrast is
-\S\ref{sec:rerun}.
+interpret it further. In every run in Table~\ref{tab:results} the loop-level arm's extra gene
+was never changed (\S\ref{sec:defect}), so no run here measures the treatment, and the four
+exactly-$[0,0]$ intervals are evidence that it was not applied rather than evidence that it
+did nothing. We previously called those intervals ``tight, not merely underpowered'' and that
+reading is withdrawn.
+
+A second reading needs withdrawing with it, and it is the one \S\ref{sec:decomp} explains. We
+described the zeros as \emph{identities} --- arms B and D issuing identical calls, so the
+cassette served identical completions. That is too strong, and its falsity is visible in this
+very table: run~1 reports $-0.09$ and run~6 $+0.01$, and run~3's per-seed vector is
+$[0,+0.055,0,0,-0.055]$, so on several seeds the two arms demonstrably did \emph{not} issue the
+same calls. An unchanged verify gene does not make the arms the same program, because they
+still differ in the gene they \emph{share}: under the default one-component-per-proposal
+selector, arm~D searched \texttt{generate} about half as hard as arm~B (Evidence~3). So the
+non-zeros in this column are not residual treatment effects and not noise --- there is no
+noise in this study --- they are the selector confound measured through the shared gene. Of the
+fifteen contrast runs recorded under the pre-correction harness, ten have a mean \dd\ of
+exactly zero and four have $|\dd| \ge 0.005$, the largest being the powered actuator run at
+$-0.100$. This is the same conflation \S\ref{sec:decomp} finds in the corrected re-run, one
+harness generation earlier: \dd\ is a whole-system contrast, so it moves when the shared gene
+moves, whether or not the treatment ever applied. The corrected-harness measurement of this
+contrast is \S\ref{sec:rerun}.
 
 What survives in these runs is the \textbf{arm-A seed baseline}, which is a measurement of
 the loop rather than of the optimizer and is untouched by the defect. Read down the ``Seed''

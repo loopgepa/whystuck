@@ -308,6 +308,7 @@ _WORD_NUM = {
     "ten": 10,
     "eleven": 11,
     "twelve": 12,
+    "fifteen": 15,
     "seventeen": 17,
 }
 
@@ -462,6 +463,40 @@ def _c1_decomposition() -> tuple[float, float]:
             named += diff
     total = sum(h_by_task[k] - b_by_task[k] for k in b_by_task)
     return named / n_heldout, (total - named) / n_heldout
+
+
+def _precorrection_counts() -> tuple[int, int, float]:
+    """(contrast runs recorded pre-correction, how many have Δ exactly 0, largest |mean Δ|).
+
+    `meta.module_selector == "all"` is the marker the corrected harness writes, so this
+    partitions the released runs by harness generation without a hand-maintained list. It
+    exists because the paper said "eleven" for a set that is fifteen, and separately claimed
+    every Δ in it was an identity when four are not: an unchanged verify gene leaves the arms
+    differing through the `generate` gene they share, which the default selector made arm D
+    search half as hard (Evidence 3).
+    """
+    import glob
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from analyze_deltas import delta_arm
+
+    means = []
+    for path in sorted(glob.glob(f"{DOCS}/validation-study*.json")):
+        with open(path, encoding="utf-8") as fh:
+            doc = json.load(fh)
+        first = doc["runs"][0]
+        arms = sorted(k for k in first if isinstance(first.get(k), dict))
+        if arms != ["A", "B", "C", "D"] or doc["meta"].get("module_selector") == "all":
+            continue
+        means.append(mean(delta_arm(path)))
+    if not means:
+        raise ValueError(
+            "no pre-correction contrast runs found; the module_selector marker must have "
+            "changed, and a count of zero would silently retract the paper's own caution"
+        )
+    return len(means), sum(1 for m in means if m == 0.0), max(abs(m) for m in means)
 
 
 def _registry_counts() -> tuple[int, int]:
@@ -1067,6 +1102,54 @@ def _checks() -> list[tuple[str, float, float, float]]:
         ("tex: retraction superseded count", r"script registers (\w+) superseded runs", superseded),
     ):
         out.append((label, _scrape_word(tex, pattern), 0, artifact))
+
+    # How many contrast runs the correction superseded, and how many of their deltas really
+    # were zero. The paper said "eleven" for a set of fifteen, and called all of their zeros
+    # identities when four are not zero at all.
+    n_pre, n_zero, max_abs = _precorrection_counts()
+    for label, pattern, artifact in (
+        (
+            "tex: pre-correction contrast runs",
+            r"discarding every contrast run we had bought before it ---\s+(\w+) of them",
+            n_pre,
+        ),
+        ("tex: intro pre-correction runs", r"Our first (\w+) contrast runs measured", n_pre),
+        (
+            "tex: defect appendix pre-correction runs",
+            r"Our first (\w+) contrast runs reported",
+            n_pre,
+        ),
+        (
+            "tex: defect appendix exact zeros",
+            r"was exactly zero (\w+) times",
+            n_zero,
+        ),
+        (
+            "tex: superseded appendix run count",
+            r"Of the\s+(\w+) contrast runs recorded under the pre-correction harness",
+            n_pre,
+        ),
+        (
+            "tex: superseded appendix exact zeros",
+            r"harness, (\w+) have a mean \\dd\\ of\s+exactly zero",
+            n_zero,
+        ),
+        ("tex: conclusion pre-correction runs", r"\\textbf\{(\w+)\} of them, across", n_pre),
+        (
+            "tex: conclusion exact zeros",
+            r"(\w+) reported \$\\dd\(D\{-\}B\)\$ of exactly zero",
+            n_zero,
+        ),
+    ):
+        out.append((label, _scrape_word(tex, pattern), 0, artifact))
+    out.append(
+        (
+            "tex: largest pre-correction |mean delta|",
+            _scrape(tex, r"the largest being the powered actuator run at\s+\$-([\d.]+)\$"),
+            0.0005,
+            max_abs,
+        )
+    )
 
     return out
 
