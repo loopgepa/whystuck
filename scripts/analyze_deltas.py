@@ -181,11 +181,16 @@ def sign_test_p(diffs: list[float]) -> float:
 # oracle"). Its Δ(D−B) = 0 is an identity, not a measurement, so citing its [0,0] as
 # evidence that the null is tight was circular. The same applies to any oracle run.
 _NULL_RUNS = [
-    # C2 first: it is the only entry here whose arms provably DIFFER. In every run below
-    # it, arm B and arm D emitted byte-identical genomes, so their Δ = 0 records the
-    # absence of a treatment rather than the absence of an effect. C2's Δ is a real
-    # measurement of a real contrast, which is why it is not interchangeable with them.
-    ("C2b   corrected 4-arm(n=3)", f"{DOCS}/validation-study-c2b.json"),
+    # The p0 sweep leads, because it is the only place in this list where the sign of Δ
+    # changes and therefore the only place a Δ carries a direction rather than an absence.
+    # L1 IS the C2b re-run; the three rows are one axis, not three experiments, and reading
+    # any of them alone reproduces the mistake the sweep exists to correct.
+    ("p0 L1 p0=0.067 (n=3)", f"{DOCS}/validation-study-c2b.json"),
+    ("p0 L2 p0=0.267 (n=3)", f"{DOCS}/validation-study-p0-L2.json"),
+    ("p0 L3 p0=0.667 SATURATED", f"{DOCS}/validation-study-p0-L3.json"),
+    # Below: runs whose arms B and D emitted byte-identical genomes, so their Δ = 0 records
+    # the absence of a treatment rather than the absence of an effect. Not interchangeable
+    # with the rows above.
     ("C2    [contaminated seed2]", f"{DOCS}/validation-study-c2.json"),
     ("run3  hard-multi    (n=5)", f"{DOCS}/validation-study-multihard.json"),
     ("run4  feedback      (n=3)", f"{DOCS}/validation-study-feedback.json"),
@@ -208,23 +213,52 @@ def _seed_caveat(path: str) -> str:
     return f"  [!] seeds share {overlap:.0%} of held-out tasks — CI/p ANTI-CONSERVATIVE"
 
 
+def _ceiling_hits(path: str) -> list[bool]:
+    """Per seed: did BOTH arms reach the metric's maximum on held-out?
+
+    A Δ of 0.0 there says the measurement ran out of headroom, not that the arms behave
+    alike. Without this the p0 sweep's saturated level reads like its inert level.
+    """
+    try:
+        runs = _runs(path)
+    except (OSError, KeyError):
+        return []
+    return [
+        r.get("B", {}).get("opt_heldout") == 1.0 and r.get("D", {}).get("opt_heldout") == 1.0
+        for r in runs
+    ]
+
+
 def _describe(label: str, d: list[float], path: str | None = None) -> str:
     """One line per run: point estimate, interval, sign test, and degenerate-seed count.
 
-    `ties` is the load-bearing caveat. A tie means B and D optimized to byte-identical
-    genomes, so the cassette served both arms the same completion and the 0.0 is forced.
-    Reporting it separates "the treatment was applied and did nothing" from "the treatment
-    was never applied", which a bare interval of [0,0] silently conflates.
+    `zeros` counts seeds whose Δ is exactly 0.0, and it is a load-bearing caveat with TWO
+    distinct causes that must not be conflated. It was previously labelled as counting
+    byte-identical genomes, which it never did: it counts equal SCORES.
+
+      * No treatment: B and D optimized to byte-identical genomes, so the cassette served
+        both arms the same completion and the 0.0 is an identity, not an observation. This is
+        what the retracted runs suffered, and a bare interval of [0,0] hides it.
+      * Ceiling: the arms differ but both hit the same capped score. The p0 sweep's highest
+        level does exactly this -- on one seed arm B evolved `generate`, arm D evolved
+        `generate` and `ensure_correct`, and BOTH scored 1.000, because the metric had no room
+        left. Reading that as "the treatment did nothing" is precisely backwards.
+
+    Distinguishing them needs the genomes, which only the newer runs release, so the count is
+    reported as what it measures and the two causes are separated by `saturated` below.
 
     `path` adds the seed-independence marker. Optional only because two callers compare
     ACROSS runs; every single-run line passes it.
     """
     m, lo, hi = exact_resample_ci(d)
-    ties = sum(1 for x in d if x == 0.0)
+    zeros = sum(1 for x in d if x == 0.0)
+    # A zero at the metric ceiling is a ceiling artifact, not an absent treatment.
+    saturated = sum(1 for x in _ceiling_hits(path) if x) if path else 0
     seeds = [f"{x:+.3f}" for x in d]
     return (
         f"{label}: Δ={m:+.3f}  seeds={seeds}  95%CI[{lo:+.3f},{hi:+.3f}]"
-        f"  sign p={sign_test_p(d):.2f}  ties={ties}/{len(d)}"
+        f"  sign p={sign_test_p(d):.2f}  zeros={zeros}/{len(d)}"
+        f"{f'  [ceiling on {saturated}]' if saturated else ''}"
         f"{_seed_caveat(path) if path else ''}"
     )
 
@@ -241,8 +275,12 @@ _SEED_LEGEND = (
 
 
 def main() -> int:  # pragma: no cover - CLI convenience
-    print("=== null: Δ(D−B) per-seed, mean, exact-resample 95% CI, sign test, ties ===")
-    print("(ties = seeds where B and D produced byte-identical genomes: forced zeros)")
+    print("=== Δ(D−B) per-seed, mean, exact-resample 95% CI, sign test, zeros ===")
+    print(
+        "(zeros = seeds with Δ exactly 0.0. Two causes, do not conflate: identical\n"
+        " genomes (no treatment), or both arms at the metric ceiling. [ceiling on N]\n"
+        " marks the second.)"
+    )
     for label, path in _NULL_RUNS:
         print(_describe(label, delta_arm(path), path))
     print("\n=== effect: Δ(hi−lo) actionability, paired by seed (n=3) ===")

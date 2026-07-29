@@ -110,37 +110,36 @@ Note `--reflection-model openai/gpt-5.6-luna` above. It is not the CLI default
 only two runs that did. Any run meant to compare against C2b must pin it, or the reflection
 model becomes an uncontrolled difference.
 
-### The pre-registered p₀ sweep (§"The p₀ law")
+### The p₀ sweep (§"The p₀ sweep: when loop-level optimization pays") — RUN
 
-The decisive experiment, and the only one that turns the paper's null into a conditional law.
-`exact_word_count` is satisfied on 0.16 of held-out final drafts and the generator forces it
-into *every* hard task, so the tier's first-draft pass rate p₀ is pinned below 0.16. Excluding
-it raises p₀ to ≈0.73 (≈0.83 also excluding `word_max_length`) while keeping a brutal anchor in
-every task, so the tier does not collapse into the saturated easy one.
+The experiment that turned the paper's null into a conditional result. `exact_word_count` is
+satisfied on 0.16 of held-out final drafts and the generator forces it into *every* hard task,
+so the tier's first-draft pass rate p₀ is pinned below 0.16. Excluding it raises p₀ while
+keeping a brutal anchor in every task.
 
-Calibrate first — arm A only, no optimizer, **$0.09** per level, and it measures the real p₀
-rather than the independence estimate the paper prints:
+Measured p₀ and outcome (treatment reached `ensure_correct` on 3/3 seeds at every level):
+
+| level | excluded | p₀ | Δ(D−B) | 95% CI | sign p |
+| --- | --- | --- | --- | --- | --- |
+| L1 | none (= C2b) | 0.067 | −0.042 | [−0.095, +0.050] | 1.00 |
+| L2 | `exact_word_count` | 0.267 | **+0.060** | [+0.005, +0.105] | 0.25 |
+| L3 | + `word_max_length` | 0.667 | −0.002 | [−0.045, +0.040] | 1.00 |
+
+The sign flips between L1 and L2. Two caveats the paper states and this file repeats because
+they are easy to drop: at n=3 with three same-signed deltas the exact interval **must** exclude
+zero, so L2's interval is equivalent to sign-unanimity and the sign test is at its floor; and
+**L3 is saturated** (baseline 0.942, both arms → ~0.97), which falsified our registered
+monotonicity prediction for a reason that is a design error, not a rescue.
+
+Measure p₀ from any cassette, free — the first critique event judged the first draft:
 
 ```bash
-for excl in "exact_word_count" "exact_word_count word_max_length"; do
-  flags=""; for e in $excl; do flags="$flags --exclude-constraint $e"; done
-  scratchpad/evalvenv/bin/python scripts/run_validation_study.py \
-    --task-set multi-hard --arms A --seeds 0,1,2 \
-    --n-train 8 --n-heldout 10 --max-metric-calls 28 \
-    --reflection-model openai/gpt-5.6-luna $flags --yes \
-    --record "tests/fixtures/cassettes/study-p0cal.json" \
-    --out "docs/validation-study-p0cal.json" --report "docs/validation-study-p0cal.md"
-done
+scratchpad/evalvenv/bin/python scripts/measure_p0.py
 ```
 
-Then the two optimizing levels, **$1.79** each, both inside the $5 ceiling (swap `--arms A`
-for `--arms BD` and give each level its own `--record`/`--out`/`--report` paths). L1 needs no
-run: it *is* the C2b re-run above.
-
-The prediction is registered in the paper and is falsifiable: the evolved critique's `PASS`
-rate should become > 0 on at least 2 of 3 seeds at the high-p₀ level. If it stays 0.00 where
-damaging an already-correct draft costs ~6× more on the training score, the Goodhart account is
-wrong and the explanation is about the reachable geometry of prose space instead.
+To reproduce the levels from scratch: one `--arms A` pass per level at **$0.09** creates the
+cassette, then `--arms BD` at **$1.79** per level (both inside the $5 ceiling). Exact flags are
+registered in `scripts/verify_reproducibility.py`; L1 needs no run because it *is* C2b.
 
 `--exclude-constraint` refuses an id that names no live constraint, because excluding an
 unknown id would run the un-ablated condition under an ablated label.
@@ -253,7 +252,7 @@ Stated here rather than discovered:
 
 ## Which runs verify
 
-`verify_reproducibility.py` should print `ALL 3 RUNS REPRODUCE FROM CASSETTE`: the two C1
+`verify_reproducibility.py` should print `ALL 5 RUNS REPRODUCE FROM CASSETTE`: the two C1
 verifier-ablation conditions and the C2b four-arm re-run. Twelve further runs are reported as
 skipped — eleven recorded under the pre-correction wiring (whose reflection prompts, and
 therefore whose cassette keys, no longer exist) and C2 as above. The script exits non-zero if

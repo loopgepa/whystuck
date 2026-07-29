@@ -59,7 +59,7 @@ SUPERSEDED = frozenset(
         "C2 four-arm corrected harness",
     }
 )
-EXPECTED_RUNS = 3  # under the CORRECTED harness: the two C1 conditions and the C2b re-run.
+EXPECTED_RUNS = 5  # corrected harness: two C1 conditions, the C2b re-run, and p0 L2/L3.
 # C2 is NOT among them. Auditing it found that two reflection completions came back empty and
 # GEPA accepted one as the verify gene, so `genome_from_candidate` now refuses blank gene text
 # -- and that guard makes C2's own cassette unreplayable, because replaying it re-serves the
@@ -101,6 +101,68 @@ RUNS = [
             "all",
             "--reflection-model",
             "openai/gpt-5.6-luna",
+        ],
+    ),
+    # The p0 sweep: the runs that turned the null into a conditional result. L1 IS the
+    # C2b row above, so only the two new levels are registered here.
+    (
+        "p0 sweep L2 (p0=0.267)",
+        "docs/validation-study-p0-L2.json",
+        f"{CASSETTES}/study-p0-L2.json",
+        [
+            "--task-set",
+            "multi-hard",
+            "--arms",
+            "BD",
+            "--seeds",
+            "0,1,2",
+            "--n-train",
+            "8",
+            "--n-heldout",
+            "10",
+            "--max-metric-calls",
+            "28",
+            "--reflection-calls",
+            "6",
+            "--loop-max-retries",
+            "1",
+            "--module-selector",
+            "all",
+            "--reflection-model",
+            "openai/gpt-5.6-luna",
+            "--exclude-constraint",
+            "exact_word_count",
+        ],
+    ),
+    (
+        "p0 sweep L3 (p0=0.667)",
+        "docs/validation-study-p0-L3.json",
+        f"{CASSETTES}/study-p0-L3.json",
+        [
+            "--task-set",
+            "multi-hard",
+            "--arms",
+            "BD",
+            "--seeds",
+            "0,1,2",
+            "--n-train",
+            "8",
+            "--n-heldout",
+            "10",
+            "--max-metric-calls",
+            "28",
+            "--reflection-calls",
+            "6",
+            "--loop-max-retries",
+            "1",
+            "--module-selector",
+            "all",
+            "--reflection-model",
+            "openai/gpt-5.6-luna",
+            "--exclude-constraint",
+            "exact_word_count",
+            "--exclude-constraint",
+            "word_max_length",
         ],
     ),
     (

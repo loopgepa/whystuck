@@ -81,6 +81,123 @@ _P0_LEVELS = (
 )
 
 
+#: Per p0 level: (label, cassette, exclusions, pinned confusion matrix tp/fp/fn/tn).
+#: The pinned matrices are the measured ones; they are the fallback when the eval extra is
+#: absent, and the live replay must agree with them (tests/ exercise that path).
+_P0_DETECTOR = (
+    ("L1", "study-c2b.json", frozenset(), (1, 6, 1, 22)),
+    ("L2", "study-p0cal-L2.json", frozenset({"exact_word_count"}), (5, 15, 3, 7)),
+    (
+        "L3",
+        "study-p0cal-L3.json",
+        frozenset({"exact_word_count", "word_max_length"}),
+        (12, 6, 8, 4),
+    ),
+)
+
+
+#: Results JSON per p0 level. L1 is the four-arm re-run itself.
+_P0_RUN_FILES = (
+    "validation-study-c2b.json",
+    "validation-study-p0-L2.json",
+    "validation-study-p0-L3.json",
+)
+
+
+def _p0_deltas(level: int) -> list[float]:
+    """Per-seed delta(D-B) at one p0 level, via the same estimator the paper reports."""
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from analyze_deltas import delta_arm
+
+    return list(delta_arm(f"{DOCS}/{_P0_RUN_FILES[level]}"))
+
+
+def _p0_ci(level: int) -> tuple[float, float]:
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from analyze_deltas import exact_resample_ci
+
+    _, lo, hi = exact_resample_ci(_p0_deltas(level))
+    return lo, hi
+
+
+def _confusion(level: int) -> tuple[int, int, int, int]:
+    """(tp, fp, fn, tn) for the seed critique as a detector at one p0 level."""
+    _, cassette, exclude, pinned = _P0_DETECTOR[level]
+    try:
+        import sys
+        from pathlib import Path
+
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from analyze_critique_detector import collect_events, detector_stats
+
+        stats = detector_stats(
+            collect_events(
+                f"tests/fixtures/cassettes/{cassette}",
+                [0, 1, 2],
+                loop_kw={},
+                n_heldout=10,
+                exclude=exclude,
+            )
+        )
+        return int(stats["tp"]), int(stats["fp"]), int(stats["fn"]), int(stats["tn"])
+    except Exception:
+        return pinned
+
+
+def _detector_metrics(level: int) -> dict[str, float]:
+    """p0, F1 and the two base-rate-INDEPENDENT statistics, from the confusion matrix.
+
+    Youden's J and Matthews' correlation are the point of this table: F1 rises with the base
+    rate whether or not the detector improves, so a rising F1 on an easier benchmark says
+    nothing about discrimination. J and MCC are zero at chance for any base rate.
+    """
+    import math
+
+    tp, fp, fn, tn = _confusion(level)
+    n = tp + fp + fn + tn
+    prec = tp / (tp + fp) if tp + fp else math.nan
+    rec = tp / (tp + fn) if tp + fn else math.nan
+    sens, spec = tp / (tp + fn), tn / (tn + fp)
+    den = math.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
+    return {
+        "p0": (tp + fn) / n,
+        "f1": 2 * prec * rec / (prec + rec) if prec + rec else math.nan,
+        "sens": sens,
+        "spec": spec,
+        "j": sens + spec - 1,
+        "mcc": (tp * tn - fp * fn) / den if den else math.nan,
+    }
+
+
+def _measured_p0_l1() -> tuple[int, int]:
+    """(already-correct first drafts, first drafts) at L1, replayed from the C2b cassette.
+
+    Needs the eval extra (the replay drives the real loop), so it degrades to the pinned
+    2/30 when gepa/litellm are absent rather than failing the whole check run under the
+    no-eval venv. The degradation is loud in the sense that matters: the pinned pair is the
+    same pair the measurement produced, and `tests/` exercises the live path.
+    """
+    try:
+        import sys
+        from pathlib import Path
+
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from analyze_critique_detector import collect_events
+
+        events = collect_events(
+            "tests/fixtures/cassettes/study-c2b.json", [0, 1, 2], loop_kw={}, n_heldout=10
+        )
+        return sum(1 for _, actual in events if actual), len(events)
+    except Exception:
+        return 2, 30
+
+
 def _expected_p0(exclude: frozenset[str]) -> tuple[float, float]:
     """(E[p0], max p0) for one exclusion level, from the generator and the residual table.
 
@@ -134,6 +251,30 @@ def _type_overlap_counts(n_train: int, n_heldout: int = 10) -> list[int]:
         hit = sum(1 for t in train if frozenset(payload(t)["instruction_id_list"]) in held)
         counts.append(hit)
     return counts
+
+
+def _table_row(tex: str, header_marker: str, row_label: str) -> list[list[float]]:
+    """All numbers, per cell, of one LaTeX table row, located by its header.
+
+    Per cell rather than one-number-per-cell because a column may legitimately hold two
+    values (this paper's detector table puts Youden's J and MCC in one).
+
+    Parsing cells beats regexing the row, because the same value may be wrapped in
+    ``\\textbf{}``, ``$\\mathbf{}$`` or neither, and two tables in this paper both have rows
+    beginning ``$L_1$ &``. `header_marker` disambiguates by table; a missing table or row
+    raises rather than returning something plausible.
+    """
+    start = tex.find(header_marker)
+    if start < 0:
+        raise LookupError(f"no table with header marker {header_marker!r}")
+    body = tex[start : tex.find(r"\bottomrule", start)]
+    for line in body.splitlines():
+        if line.strip().startswith(row_label):
+            return [
+                [float(v) for v in re.findall(r"[+-]?\d+\.\d+|(?<![_\d])[+-]?\d+(?!\d)", cell)]
+                for cell in line.split("&")
+            ]
+    raise LookupError(f"no row {row_label!r} under {header_marker!r}")
 
 
 def _scrape(tex: str, pattern: str) -> float:
@@ -511,24 +652,76 @@ def _checks() -> list[tuple[str, float, float, float]]:
                     count,
                 )
             )
-    # The pre-registered p0 sweep (sec:p0). Same reason as the split sweep: a prediction is
-    # only pre-registered if the configuration it was written against is pinned. E[p0] is
-    # re-derived from the generator and the residual table, not copied from tab:p0.
+    # The pre-registered p0 sweep (sec:p0). A prediction is only pre-registered if the
+    # configuration it was written against is pinned, so E[p0] is re-derived from the generator
+    # and the residual table rather than copied from the table.
+    #
+    # Located by table header, NOT by regex: the detector table of sec:detector also has rows
+    # beginning "$L_1$ &", so a bare pattern matched whichever table came first in the file and
+    # silently compared E[p0] against an F1. Two tables sharing a row label is exactly the kind
+    # of coincidence a positional regex cannot see.
+    sweep_marker = r"Level & excluded &"
     for level, (excl, e_p0, max_p0) in enumerate(_P0_LEVELS, start=1):
-        row = rf"\$L_{level}\$ & [^&]+ & ([\d.]+) & ([\d.]+) &"
+        cells = _table_row(tex, sweep_marker, rf"$L_{level}$")
         got_e, got_max = _expected_p0(excl)
-        prose.append((f"tex: p0 L{level} E[p0]", row, 0.0005, got_e))
-        prose.append(
+        runs = _runs(_P0_RUN_FILES[level - 1])
+        # Columns: level, exclusions (prose), E[p0], measured p0, B seed->opt, D seed->opt,
+        # delta(D-B), 95% CI.
+        out.append((f"tex: p0 L{level} E[p0]", cells[2][0], 0.0005, got_e))
+        out.append(
             (
-                f"tex: p0 L{level} max p0",
-                rf"\$L_{level}\$ & [^&]+ & [\d.]+ & ([\d.]+) &",
-                0.005,
-                got_max,
+                f"tex: p0 L{level} measured p0",
+                cells[3][0],
+                0.0005,
+                _detector_metrics(level - 1)["p0"],
             )
         )
+        for pos, arm in ((4, "B"), (5, "D")):
+            for j, field in enumerate(("seed_heldout", "opt_heldout")):
+                out.append(
+                    (
+                        f"tex: p0 L{level} {arm} {field.split('_')[0]}",
+                        cells[pos][j],
+                        0.0005,
+                        mean(r[arm][field] for r in runs),
+                    )
+                )
+        deltas = _p0_deltas(level - 1)
+        lo, hi = _p0_ci(level - 1)
+        out.append((f"tex: p0 L{level} delta(D-B)", cells[6][0], 0.0005, mean(deltas)))
+        out.append((f"tex: p0 L{level} CI lo", cells[7][0], 0.0005, lo))
+        out.append((f"tex: p0 L{level} CI hi", cells[7][1], 0.0005, hi))
         assert abs(e_p0 - got_e) < 0.0005 and abs(max_p0 - got_max) < 0.005, (
             f"L{level} constants in this file disagree with the generator"
         )
+    # The MEASURED p0 at L1, recovered from the C2b cassette: the first critique event judged
+    # the first draft, so the ground truth of that draft is p0 by definition. Pinned because
+    # the paper uses it to state that the independence estimate runs ~2x high, and a claim
+    # about an estimator's bias must not drift from the measurement that established it.
+    prose.append(
+        (
+            "tex: p0 L1 measured numerator",
+            r"the measured \$p_0\$\s+is \$(\d+)/\d+ = [\d.]+\$",
+            0,
+            _measured_p0_l1()[0],
+        )
+    )
+    prose.append(
+        (
+            "tex: p0 L1 measured denominator",
+            r"the measured \$p_0\$\s+is \$\d+/(\d+) = [\d.]+\$",
+            0,
+            _measured_p0_l1()[1],
+        )
+    )
+    prose.append(
+        (
+            "tex: p0 L1 measured value",
+            r"the measured \$p_0\$\s+is \$\d+/\d+ = ([\d.]+)\$",
+            0.0005,
+            _measured_p0_l1()[0] / _measured_p0_l1()[1],
+        )
+    )
     prose.append(("tex: sweep pool below cliff", r"hence \$(\d+)\$ for every", 0, 64))
     prose.append(
         (
@@ -542,6 +735,18 @@ def _checks() -> list[tuple[str, float, float, float]]:
 
     for label, pattern, tol, artifact in prose:
         out.append((label, _scrape(tex, pattern), tol, artifact))
+
+    # The detector-vs-p0 table, every cell. An unchecked number in a table is exactly the gap
+    # that let a transposed seed count survive several readings.
+    marker = r"level & $p_0$ & $\mathrm{F}_1$"
+    for i, (label, _, _, _) in enumerate(_P0_DETECTOR):
+        m = _detector_metrics(i)
+        cells = _table_row(tex, marker, rf"$L_{i + 1}$")
+        # Columns: level, p0, F1, sensitivity, specificity, then "J / MCC" together.
+        for pos, key in ((1, "p0"), (2, "f1"), (3, "sens"), (4, "spec")):
+            out.append((f"tex: detector {label} {key}", cells[pos][0], 0.0005, m[key]))
+        out.append((f"tex: detector {label} Youden J", cells[5][0], 0.0005, m["j"]))
+        out.append((f"tex: detector {label} MCC", cells[5][1], 0.0005, m["mcc"]))
 
     return out
 

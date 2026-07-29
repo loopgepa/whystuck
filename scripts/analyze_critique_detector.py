@@ -33,6 +33,7 @@ def collect_events(
     loop_kw: dict,
     n_heldout: int = _N_HELDOUT,
     gene_overrides: dict[str, str] | None = None,
+    exclude: frozenset[str] = frozenset(),
 ) -> list[tuple[bool, bool]]:
     """Return (verdict_pass, actual_pass) for every first-critique event.
 
@@ -46,7 +47,15 @@ def collect_events(
     `run_validation_study` derives it, and an overridden gene changes the critique prompt
     and therefore its cassette key. `gene_overrides` is what lets a hand-written-gene
     ablation (`--seed-gene`) be measured as a detector alongside the runs it is compared
-    with."""
+    with. `exclude` must match it for the same reason: it is the p₀ lever, it changes the
+    generated pool, and replaying an excluded run without it misses every call.
+
+    Note what `actual_pass` measures on the FIRST critique event: the ground truth of the
+    draft *before* any refinement. Its mean over first events is therefore exactly p₀, the
+    base rate of already-correct first drafts --- the axis the p₀ sweep varies. So p₀ is
+    measurable from any recorded cassette rather than having to be estimated, which matters
+    because the independence estimate is biased: constraint failures correlate, and on
+    multi-hard it overestimates the measured value by roughly a factor of two."""
     include_plan = "plan_gene" in loop_kw
     # Same rule run_validation_study uses, derived rather than duplicated as a constant so
     # the two cannot drift apart and silently generate a different task pool.
@@ -70,7 +79,9 @@ def collect_events(
         for seed in seeds:
             # load_multi_constraint raises loudly on a pool/seed misconfig — do NOT
             # catch it: a silently dropped seed would shrink n and misstate the sample.
-            heldout = load_multi_constraint("heldout", seed=seed, n=n_heldout, pool=pool, hard=True)
+            heldout = load_multi_constraint(
+                "heldout", seed=seed, n=n_heldout, pool=pool, hard=True, exclude=exclude
+            )
             genome = seed_genome(
                 "study-A",
                 evolvable=set(),
@@ -119,6 +130,22 @@ def detector_stats(events: list[tuple[bool, bool]]) -> dict[str, float]:
         "fn": fn,
         "tn": tn,
     }
+
+
+def base_rate_p0(events: list[tuple[bool, bool]]) -> float:
+    """p₀: the share of first drafts that already satisfied every constraint.
+
+    This is the quantity the p₀ sweep varies and the quantity the always-FIX mechanism is a
+    function of: an unconditional-refine critique can only lose where a draft was already
+    correct, so p₀ bounds what that policy costs on the training signal. Measured, not
+    estimated -- see `collect_events` on why the independence estimate runs ~2x high.
+    """
+    if not events:
+        raise ValueError(
+            "base_rate_p0 called with no events; returning 0.0 would report 'no draft was "
+            "ever correct', which is a finding, not an empty measurement"
+        )
+    return sum(1 for _, actual in events if actual) / len(events)
 
 
 _RUNS = [
