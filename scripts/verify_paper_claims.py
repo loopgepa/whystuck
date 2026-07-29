@@ -351,6 +351,60 @@ def _noise_estimate():
     return mod.noise_estimate()
 
 
+#: The seed-baseline curve's runs, which all score the SAME thirty held-out tasks. Verified on
+#: the cassettes rather than asserted: identical prompts hash to identical content-addressed
+#: keys, so a shared key IS a shared task. Never trust the metas here -- the older ones do not
+#: even record `task_set`.
+_CURVE_RUNS = {
+    "run3": "multihard",
+    "run4": "feedback",
+    "run7": "oracle",
+    "run8": "fixbudget",
+    "run9": "fbactlo",
+    "run10": "fbacthi",
+}
+_CURVE_SHARED_SEEDS = 3
+
+
+def _shared_first_draft_calls() -> int:
+    """Worker calls common to every run of the curve. Should be 3 x (10 heldout + 8 train).
+
+    This is the licence for omitting a task-draw term from the between-run comparisons: if the
+    prompts are byte-identical then the tasks are identical and difficulty cancels. If a future
+    edit breaks it, the paired standard errors in sec:threats become anti-conservative, so it is
+    checked rather than remembered.
+    """
+    from pathlib import Path
+
+    shared: set[str] | None = None
+    for slug in _CURVE_RUNS.values():
+        entries = json.loads(Path(f"tests/fixtures/cassettes/study-{slug}.json").read_text())[
+            "entries"
+        ]
+        keys = {k for k, v in entries.items() if v.get("name") == "worker"}
+        shared = keys if shared is None else (shared & keys)
+    return len(shared or ())
+
+
+def _curve_seed_mean(label: str, *, shared_seeds_only: bool = True) -> float:
+    """Arm A's seed-genome held-out mean, over the seeds the curve's runs share.
+
+    Run 3 has five seeds where the others have three, and seeds 3-4 draw DIFFERENT tasks. Pooling
+    all five would silently reintroduce the task-draw variance the paired comparison exists to
+    remove -- an error made once while writing this section.
+    """
+    runs = _runs(f"validation-study-{_CURVE_RUNS[label]}.json")
+    if shared_seeds_only:
+        runs = runs[:_CURVE_SHARED_SEEDS]
+    return mean(r["A"]["seed_heldout"] for r in runs)
+
+
+def _curve_gap(a: str, b: str) -> tuple[float, float]:
+    """(mean gap b-a, gap in units of sigma(Delta)) paired on the shared held-out tasks."""
+    gap = _curve_seed_mean(b) - _curve_seed_mean(a)
+    return gap, abs(gap) / _noise_estimate().sigma_delta_mean
+
+
 def _contrast_flag_census() -> tuple[int, int]:
     """(one-sided, both-arms-starved) among released runs with at least one optimizing arm.
 
@@ -1319,6 +1373,65 @@ def _checks() -> list[tuple[str, float, float, float]]:
             _l2 - _l1,
         )
     )
+
+    # --- The seed-baseline curve, in units of the noise floor (sec:threats) -----------
+    # Added after the section misreported one of these gaps by pooling run 3's five seeds
+    # against three-seed runs. Every gap the prose states is now recomputed from the runs.
+    out.append(
+        (
+            "tex: curve shared first-draft calls",
+            _scrape(tex, r"first-draft prompts on \$(\d+)\$ calls each"),
+            0,
+            _shared_first_draft_calls(),
+        )
+    )
+    out.append(
+        (
+            "tex: curve run3 three-seed mean",
+            _scrape(tex, r"\(\$([\d.]+)\$ rather than the"),
+            0.00005,
+            _curve_seed_mean("run3"),
+        )
+    )
+    out.append(
+        (
+            "tex: curve run3 five-seed mean",
+            _scrape(tex, r"five-seed \$([\d.]+)\$ of Table"),
+            0.00005,
+            _curve_seed_mean("run3", shared_seeds_only=False),
+        )
+    )
+    for label, pattern, pair in (
+        (
+            "tex: curve tool lift",
+            r"\(run~4 over run~3\) is \$\+([\d.]+)\$ at \$([\d.]+)\\sigma\$",
+            ("run3", "run4"),
+        ),
+        (
+            "tex: curve actionability",
+            r"\(run~10 over\s+run~9\) is \$\+([\d.]+)\$ at \$([\d.]+)\\sigma\$",
+            ("run9", "run10"),
+        ),
+        (
+            "tex: curve oracle vs tool-fed",
+            r"it is clear:\s+\$-([\d.]+)\$ at \$([\d.]+)\\sigma\$",
+            ("run4", "run7"),
+        ),
+        (
+            "tex: curve more retries",
+            r"more refine attempts\n?\s*\(\$\+([\d.]+)\$, \$([\d.]+)\\sigma\$\)",
+            ("run7", "run8"),
+        ),
+        (
+            "tex: curve oracle vs intrinsic",
+            r"it is not: \$-([\d.]+)\$ at \$([\d.]+)\\sigma\$",
+            ("run3", "run7"),
+        ),
+    ):
+        gap, in_sigma = _curve_gap(*pair)
+        m = re.search(pattern, tex, re.DOTALL | re.MULTILINE)
+        out.append((label, float(m.group(1)) if m else float("nan"), 0.0005, abs(gap)))
+        out.append((f"{label} sigma", float(m.group(2)) if m else float("nan"), 0.005, in_sigma))
 
     # Evidence 9's census. The paper distinguishes two shapes of the same flag and the counts
     # are the whole argument: a one-sided contrast (one arm starved, the other searched) is the

@@ -85,7 +85,9 @@ LLM self-verification \citep{huang2023cannot,kamoi2024whencan}; across a $10\tim
 $p_0$ its $\mathrm{F}_1$ nearly triples while Youden's $J$ and Matthews' correlation stay at or
 below chance, so a rising $\mathrm{F}_1$ on an easier benchmark is base-rate inflation and not a
 better detector. Detector quality is also not sufficient: a \emph{perfect} inference-time
-checker yields the \emph{worst} of three held-out scores. Because several headline numbers are
+checker yields the \emph{worst} of three held-out scores --- indistinguishable from the
+near-random intrinsic critique ($1.01\sigma$) and clearly below a measurement tool
+($3.16\sigma$), so what a checker cannot buy is the repair. Because several headline numbers are
 nulls we also report a positive control: on a landscape where evolving the critique is the only
 path to a passing answer, the same harness and optimizer return $\dd(D-B)=+1.000$.
 
@@ -159,7 +161,8 @@ contributions:
     outcome-side half of our own mechanism: the stratum the always-\texttt{FIX} account blames
     contributes $+0.002$, not the deficit.
   \item \textbf{A mechanistic account of the ceiling}: detection quality is necessary but not
-    sufficient (a perfect checker gives the worst of three scores); \emph{given} a perfect
+    sufficient (a perfect checker scores below a measurement tool by $3.16\sigma$ and is
+    indistinguishable from a near-random one); \emph{given} a perfect
     checker, repair-feedback \emph{shape} is worth $+0.063$ (text) and $+0.20$ (code) while
     naming the failed constraint adds nothing; and the residual localizes to a single
     mechanical skill rather than a diffuse ceiling.
@@ -577,8 +580,13 @@ verdict-equivalent given the task statement, so that F$_1$ is largely measuremen
 for judgement. The intrinsic critique (F$_1\!=\!0.11$) yields seed
 $0.765$; the tool-fed critique (F$_1\!=\!0.83$) yields $0.837$; but the
 \emph{oracle} critique (F$_1\!=\!1.0$ by construction) yields only $0.748$ --- the
-best detector gives the \emph{worst} of the three. Detection quality is therefore
-necessary but not sufficient, which independently matches
+best detector gives the \emph{worst} of the three. Two of those three gaps carry that reading
+and one does not, which \S\ref{sec:threats} sizes now that a noise floor exists: the oracle sits
+$0.088$ below the tool-fed critique at $3.16\sigma$, but only $0.028$ below the
+\emph{intrinsic} one at $1.01\sigma$, so on this evidence a perfect checker is
+\emph{indistinguishable} from a near-random one and clearly worse than a measurement tool. The
+ordering holds on point estimates; the load-bearing half of it is the comparison against the
+tool. Detection quality is therefore necessary but not sufficient, which independently matches
 \citet{decomposing2026selfcorrection}'s finding that a model's detection ability does not
 predict its correction success. Two non-exclusive mechanisms explain the inversion,
 both pointing past detection: (i) the \emph{fix} step is the true bottleneck ---
@@ -1432,7 +1440,31 @@ two independent draws, so $\sigma(\dd)$ on one task is $0.153$ and on a thirty-t
 \]
 In those units the study's effects are: the $L_1$ loss $-0.042$ at $1.49\sigma$, the $L_2$ gain
 $+0.060$ at $2.15\sigma$, the $L_3$ null $-0.002$ at $0.06\sigma$, and the actionability effect
-$+0.063$ at $2.26\sigma$. \textbf{We therefore withdraw the unconditional claim that evolving
+$+0.063$ at $2.26\sigma$. The same floor also applies to the seed-baseline curve of Table~\ref{tab:curve}, which is what
+answers questions (i) and (ii) of \S\ref{sec:conclusion} and which is measured on arm~A and so
+untouched by the treatment defect. It applies there \emph{without} a new derivation, and without
+any task-draw term, for a reason worth stating: runs 3, 4 and 7--10 issue byte-identical
+first-draft prompts on $54$ calls each --- three seeds of ten held-out and eight training tasks
+--- so they score the \emph{same} thirty held-out tasks with the \emph{same} seed gene. Task
+difficulty therefore cancels in a between-run difference, and what remains is two independent
+draws averaged over thirty tasks, which is the quantity $\sigma(\dd) = 0.0279$ already measures.
+Run~3 is restricted to its first three seeds for these comparisons ($0.7767$ rather than the
+five-seed $0.7650$ of Table~\ref{tab:curve}), because seeds~3 and~4 draw different tasks and
+would put task-draw variance back in.
+
+On that footing the curve's claims mostly strengthen, and one needs narrowing. The external-tool
+lift (run~4 over run~3) is $+0.060$ at $2.15\sigma$, and richer repair feedback (run~10 over
+run~9) is $+0.063$ at $2.27\sigma$. The result the mechanistic account turns on --- that a
+\emph{perfect} inference-time checker does not buy the best loop --- splits into two gaps that
+differ in strength, and we had reported only the ordering. Against the tool-fed loop it is clear:
+$-0.088$ at $3.16\sigma$. Against the \emph{intrinsic} loop it is not: $-0.028$ at $1.01\sigma$,
+i.e.\ indistinguishable. So the defensible form of the claim is that giving the loop the true
+metric as its checker buys nothing measurable over its own near-random self-critique, and is
+\emph{worse} than giving it text statistics --- which is the stronger reading anyway, and the one
+the residual analysis of \S\ref{sec:residual} explains. Two caveats travel with all of these:
+they compare runs recorded on different dates, so they carry the same drift confound as $\sigma$
+itself, though the measured drift ($0.007$) is well under the gaps; and runs 7--10 vary retries
+and feedback shape as well as checker quality, which \S\ref{sec:results} separates. \textbf{We therefore withdraw the unconditional claim that evolving
 the verifier costs held-out performance at low $p_0$.} It rests on a single $1.49\sigma$ cell
 that three other training-split sizes do not reproduce (\S\ref{sec:splitresult}). What survives
 is narrower and better supported: the verifier reliably degenerates to non-acceptance at low
@@ -1652,9 +1684,11 @@ discrimination we could not write.
 
 Three questions are easily conflated; our answers differ. \textbf{(i) Does the
 self-refine loop help?} Only through \emph{external} signal --- a measurement tool
-(seed $0.765\!\to\!0.837$) or more refine attempts ($0.748\!\to\!0.813$) --- never
+($+0.060$, $2.15\sigma$) or more refine attempts ($+0.065$, $2.33\sigma$), both paired on the
+same thirty held-out tasks (\S\ref{sec:threats}) --- never
 through the model grading its own draft (the intrinsic critique is a near-random
-detector, F$_1\!=\!0.11$). \textbf{(ii) Does GEPA lift this task?} No: its optimized
+detector, F$_1\!=\!0.11$, and replacing it with a \emph{perfect} checker moves held-out by
+$1.01\sigma$, i.e.\ not at all). \textbf{(ii) Does GEPA lift this task?} No: its optimized
 genomes gave no held-out gain and sometimes \emph{degraded} both arms, at the budgets tested
 --- not a verdict on GEPA in general, which reports gains elsewhere. We do not attribute the
 degradation to train-split overfitting: that was our reading until the split sweep varied the
