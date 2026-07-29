@@ -56,7 +56,9 @@ original run. Five released runs happen to re-score one fixed seed genome on one
 set, which recovers the sampling variance no interval in this study contained,
 $\sigma(\dd) = 0.028$ on a thirty-task mean --- and puts that $-0.042$ at $1.49\sigma$. So the
 degenerate verifier is real and robust while its cost is not established, and the two claims
-are separable in a way we had run together. The refine accounting shows why they can come
+are separable in a way we had run together. What the $p_0$ axis buys survives the withdrawal in
+a stronger form than either endpoint: the swing between the two levels is $0.102$, about
+$2.6\sigma$, so the finding is a dependence on $p_0$ rather than a loss becoming a gain. The refine accounting shows why they can come
 apart: a never-accepting verifier is behaviourally \emph{always refine}, and where nearly every
 draft is wrong that is close to the right policy.
 
@@ -945,8 +947,21 @@ arm~D's critique buys its acceptances at precision~1 while arm~B's are $6/19$ wr
 false \texttt{PASS} ends the loop on a draft that still needed repair. What changes with $p_0$
 is how much that discrimination is worth.
 
-\paragraph{What this does to the headline.} Loop-level optimization is not inert. It is
-\emph{conditionally} harmful, and the condition is the one the mechanism named. Every
+\paragraph{What this does to the headline.} Loop-level optimization is not inert: its effect
+depends on $p_0$, and the condition is the one the mechanism named. An earlier draft put this
+more strongly --- \emph{conditionally harmful} --- and that word is withdrawn in
+\S\ref{sec:splitresult}, because the low-$p_0$ cell it rested on is one configuration of four
+and $1.49\sigma$ of measurement noise. What survives the withdrawal is the \emph{contrast}
+between the levels, which is stronger than either cell alone and can be stated in the same
+units. Treating the two levels as independent draws,
+\[
+\frac{\dd_{L_2} - \dd_{L_1}}{\sigma\sqrt{2}}
+ \;=\; \frac{0.060 - (-0.042)}{0.0279\sqrt{2}} \;=\; \frac{0.102}{0.0395} \;\approx\; 2.6 ,
+\]
+and this is a lower bound on the ratio, since $\sigma$ was estimated on the unexcluded pool
+while $L_2$'s easier tasks sit nearer the ceiling and will vary less. So what the $p_0$ axis
+buys is not a loss turning into a gain; it is a swing of $0.102$ in $\dd$ that noise does not
+account for, from no measurable effect to the study's largest loop-level gain. Every
 instruction-following run in this paper, superseded or not, sits at the low-$p_0$ end of the
 axis --- the hard tier mandates \texttt{exact\_word\_count}, which caps $p_0$ at $0.16$
 (\S\ref{sec:residual}) --- and where we measure it directly it is $0.067$: the end of the axis
@@ -956,7 +971,9 @@ number: at $n=3$ with three same-signed deltas the exact-resample interval \emph
 zero, so ``excludes zero'' here is equivalent to sign-unanimity and the sign test is at its
 floor ($p = 0.25$). It is suggestive, not significant, and we say so because this paper already
 had to retract one interval-excludes-zero claim (Appendix~\ref{sec:defect}, defect~4). The
-load-bearing evidence is not the interval but the \emph{registered} sign flip. The saturation
+load-bearing evidence is not the interval but the \emph{registered} swing, which the paragraph
+above sizes at ${\approx}2.6\sigma$ and which does not depend on the low-$p_0$ cell being
+negative. The saturation
 bias runs the safe way at $L_2$ as well: arm~D is nearer the ceiling ($0.960$, $0.975$, exactly
 $1.000$), so a ceiling compresses its advantage rather than manufacturing it.
 
@@ -1638,24 +1655,35 @@ self-refine loop help?} Only through \emph{external} signal --- a measurement to
 (seed $0.765\!\to\!0.837$) or more refine attempts ($0.748\!\to\!0.813$) --- never
 through the model grading its own draft (the intrinsic critique is a near-random
 detector, F$_1\!=\!0.11$). \textbf{(ii) Does GEPA lift this task?} No: its optimized
-genomes gave no held-out gain and sometimes \emph{degraded} both arms (train-split
-overfitting), at the budgets tested --- not a verdict on GEPA in general, which
-reports gains elsewhere. \textbf{(iii) Does loop-level optimization beat prompt-only
-(the thesis)?} \textbf{It depends on $p_0$, and that is the paper's answer.} At $p_0 = 0.067$ it
-costs $0.042$; at $p_0 = 0.267$ it gains $0.060$ with all three seeds agreeing, under the same
-harness, optimizer, budget and seeds (\S\ref{sec:p0}). The mechanism named the condition in
+genomes gave no held-out gain and sometimes \emph{degraded} both arms, at the budgets tested
+--- not a verdict on GEPA in general, which reports gains elsewhere. We do not attribute the
+degradation to train-split overfitting: that was our reading until the split sweep varied the
+split from $4$ to $24$ and found no trend to overfit along (\S\ref{sec:splitresult}). \textbf{(iii) Does loop-level optimization beat prompt-only
+(the thesis)?} \textbf{It depends on $p_0$, and that is the paper's answer.} At $p_0 = 0.267$
+it gains $0.060$ with all three seeds agreeing; at $p_0 = 0.067$ it does not measurably help,
+under the same harness, optimizer, budget and seeds (\S\ref{sec:p0}). The swing between the two
+is $0.102$, about $2.6\sigma$ of this study's measurement noise, and it is the swing rather than
+either endpoint that carries the answer: an earlier draft read the low-$p_0$ endpoint as a
+\emph{cost} of $0.042$, and \S\ref{sec:splitresult} withdraws that on the evidence of three
+further split sizes at the same $p_0$. The mechanism named the condition in
 advance: unconditional refinement is nearly free on a training signal where $p_0$ is small and
 costly where it is not, and the evolved gene's \texttt{PASS} rate duly moves from zero to
 non-zero as $p_0$ rises --- while never emitting a false \texttt{PASS}, so what it gains is
 precision-1 acceptance. Every instruction-following run we bought, superseded or not, sat at the
 low-$p_0$ end of an axis we had not identified, and the corrected re-run measures it at $0.067$. \emph{The null was real and it was
-local.} Three qualifications travel with that answer. At $n=3$ per level no interval is
+local.} Four qualifications travel with that answer. At $n=3$ per level no interval is
 significant --- the sign test cannot fall below $p=0.25$ --- so the load-bearing evidence is the
-registered sign flip rather than any one interval. One of our three registered predictions
-(monotonicity in $p_0$) \emph{failed}, because the highest level saturates. And $\dd$ is a
+registered swing rather than any one interval. Two of our registered predictions \emph{failed}:
+monotonicity in $p_0$, because the highest level saturates, and the sign of $\dd$ at
+$n_{\mathrm{train}}{=}24$, which came out positive (\S\ref{sec:splitresult}). $\dd$ is a
 whole-system contrast: decomposed, only $40\%$ of the $-0.042$ is the treated component, while
-all of the $+0.060$ is (\S\ref{sec:decomp}) --- so the sign flip is cleaner on the component
-than on the headline, and the headline overstates what optimizing a verifier costs.
+all of the $+0.060$ is (\S\ref{sec:decomp}). And the study's intervals omit measurement noise,
+which we can now size at $\sigma(\dd) = 0.028$ and which is the reason the low-$p_0$ endpoint no
+longer supports a directional claim (\S\ref{sec:threats}). The surviving picture is narrower
+than the one we set out with and better supported: the optimizer reliably drives the verifier
+to never accept when $p_0$ is low, that behaviour is worth measuring and cheap to screen for,
+and whether it helps or hurts held-out score depends on $p_0$ by about $0.1$ across the range
+we bought.
 
 That measurement cost us every contrast run that preceded it: \textbf{fifteen} of them, across
 instruction following, a cross-domain replication on frontier-hard code (\S\ref{sec:bcb}), an

@@ -1300,6 +1300,26 @@ def _checks() -> list[tuple[str, float, float, float]]:
         got = float(prose_cycles.group(i + 1)) if prose_cycles else float("nan")
         out.append((f"tex: split promotable cycles {i}", got, 0.005, want))
 
+    # The level-to-level swing, which is what survives the withdrawal of the L1 loss. Checked
+    # because it is now the p0 section's load-bearing number: if sigma moves, this must too.
+    _l1, _l2 = _decomposition(0)["delta"], _decomposition(1)["delta"]
+    out.append(
+        (
+            "tex: p0 swing in sigma",
+            _scrape(tex, r"\\approx\\; ([\d.]+) ,\n\\]"),
+            0.05,
+            (_l2 - _l1) / (noise.sigma_delta_mean * 2**0.5),
+        )
+    )
+    out.append(
+        (
+            "tex: p0 swing magnitude",
+            _scrape(tex, r"a swing of \$([\d.]+)\$ in \$\\dd\$"),
+            0.0005,
+            _l2 - _l1,
+        )
+    )
+
     # Evidence 9's census. The paper distinguishes two shapes of the same flag and the counts
     # are the whole argument: a one-sided contrast (one arm starved, the other searched) is the
     # new defect, while both-arms-starved is the original retraction re-derived from scores.
