@@ -75,6 +75,23 @@ LEVELS = (
     Level("L3", "p0-L3", frozenset({"exact_word_count", "word_max_length"})),
 )
 
+#: The rows of the split-size sweep. n_train=8 is the L1 row above, so it is not repeated.
+#: Same decomposition, a different axis: these vary the TRAIN split with the held-out set held
+#: fixed, so the draft/loop split answers whether a bigger split rescues the treated component
+#: or only the shared gene.
+SPLIT_LEVELS = (
+    Level("n=4", "split4", frozenset()),
+    Level("n=16", "split16", frozenset()),
+    Level("n=24", "split24", frozenset()),
+)
+
+#: First `n_train` whose pool is no longer 64. `arm_rows` derives the generated pool from
+#: `n_heldout` alone, which is correct only while `2*n_train + 2 <= 64`; above it the run's own
+#: pool is larger, the shuffle is seeded differently, and a replay would silently score a
+#: DIFFERENT held-out set while reporting a confident number. That is this paper's subject
+#: matter, so it is a guard and not a comment.
+_POOL_CLIFF_N_TRAIN = 32
+
 
 @dataclass(frozen=True)
 class Row:
@@ -151,7 +168,21 @@ def arm_rows(level: Level, arm: str) -> list[Row]:
     score is recomputed from the recorded first completion, which is what the cassette is
     for. Pass `SEED_ARM` for the unoptimized seed genome.
     """
-    runs = json.loads(Path(level.results).read_text())["runs"]
+    doc = json.loads(Path(level.results).read_text())
+    runs = doc["runs"]
+    n_train = doc["meta"].get("n_train")
+    if isinstance(n_train, int) and n_train >= _POOL_CLIFF_N_TRAIN:
+        raise ValueError(
+            f"{level.results} used n_train={n_train}, at or past the pool cliff of "
+            f"{_POOL_CLIFF_N_TRAIN}: this replay derives the generated pool from n_heldout "
+            "alone, so above the cliff it would score a DIFFERENT held-out set than the run "
+            "did and report a confident decomposition of the wrong tasks"
+        )
+    if doc["meta"].get("n_heldout") not in (None, _N_HELDOUT):
+        raise ValueError(
+            f"{level.results} used n_heldout={doc['meta']['n_heldout']}, not {_N_HELDOUT}; the "
+            "replay would load a different held-out split than the run scored"
+        )
     pool = max(64, 2 * _N_HELDOUT + 2)
     rows: list[Row] = []
     with Cassette(level.cassette, mode="replay") as cas:
@@ -305,54 +336,80 @@ def refine_productivity(level: Level, arm: str) -> tuple[int, int, float]:
     return len(accepted), len(refined), gain
 
 
+def _available(levels: tuple[Level, ...]) -> tuple[Level, ...]:
+    """Levels whose released run is present, announcing any that are not.
+
+    The split-size sweep rows are registered here before they are bought, so a missing file
+    means "not run yet" rather than "broken". Saying so beats both crashing and silently
+    printing a shorter table that reads as complete.
+    """
+    have = tuple(lv for lv in levels if Path(lv.results).exists())
+    for lv in levels:
+        if lv not in have:
+            print(f"  (skipping {lv.name}: {lv.results} not present -- run not bought yet)")
+    return have
+
+
 def main() -> int:  # pragma: no cover - CLI convenience
     print("=== Δ(D−B) split into the shared gene and the treated one ===")
     print("draft term = `generate` (both arms evolve it); loop term = the treatment.\n")
-    print(f"{'level':6} {'n':>3} {'Δ(D−B)':>9} {'draft term':>11} {'loop term':>10}  share treated")
-    for level in LEVELS:
-        d = decompose(level)
-        # A share of a Δ that is itself ~0 is meaningless and can exceed 100% when the two
-        # terms cancel, so it is reported only where there is a Δ to apportion.
-        share = (
-            f"{abs(d.loop_term) / abs(d.delta):>12.0%}" if abs(d.delta) >= 0.01 else f"{'n/a':>12}"
-        )
-        print(
-            f"{d.level:6} {d.n:>3} {d.delta:>+9.4f} {d.draft_term:>+11.4f} "
-            f"{d.loop_term:>+10.4f} {share}"
-        )
+    groups = (("p0 sweep", _available(LEVELS)), ("split-size sweep", _available(SPLIT_LEVELS)))
+
+    print(f"{'axis':16} {'level':6} {'n':>3} {'Δ(D−B)':>9} {'draft':>9} {'loop':>9}  treated")
+    for axis, levels in groups:
+        for level in levels:
+            d = decompose(level)
+            # A share is only an apportionment when the two terms ADD. If they oppose, the
+            # loop term can exceed Δ itself and the "share" prints as 157%, which reads as a
+            # precision claim rather than as cancellation. Report the sign story instead.
+            same_sign = (d.draft_term >= 0) == (d.loop_term >= 0)
+            if abs(d.delta) < 0.01:
+                share = f"{'n/a':>8}"
+            elif not same_sign:
+                share = f"{'oppose':>8}"
+            else:
+                share = f"{abs(d.loop_term) / abs(d.delta):>8.0%}"
+            print(
+                f"{axis:16} {d.level:6} {d.n:>3} {d.delta:>+9.4f} {d.draft_term:>+9.4f} "
+                f"{d.loop_term:>+9.4f} {share}"
+            )
 
     print("\n=== the same Δ, stratified on the SEED genome's first draft (pre-treatment) ===")
     print("The always-FIX mechanism predicts the loss sits in the ALREADY-CORRECT stratum.\n")
     print(
-        f"{'level':6} {'stratum':16} {'n':>3} {'B':>7} {'D':>7} {'D−B':>8} {'w':>6} {'contrib':>9}"
+        f"{'axis':16} {'level':6} {'stratum':16} {'n':>3} {'B':>7} {'D':>7} "
+        f"{'D−B':>8} {'contrib':>9}"
     )
-    for level in LEVELS:
-        for correct in (True, False):
-            g = strata(level)[correct]
-            if not g.n:
-                continue
-            label = "already correct" if correct else "already wrong"
-            print(
-                f"{level.name:6} {label:16} {g.n:>3} {g.mean_b:>7.4f} {g.mean_d:>7.4f} "
-                f"{g.gap:>+8.4f} {g.weight:>6.3f} {g.contribution:>+9.4f}"
-            )
+    for axis, levels in groups:
+        for level in levels:
+            for correct in (True, False):
+                g = strata(level)[correct]
+                if not g.n:
+                    continue
+                label = "already correct" if correct else "already wrong"
+                print(
+                    f"{axis:16} {level.name:6} {label:16} {g.n:>3} {g.mean_b:>7.4f} "
+                    f"{g.mean_d:>7.4f} {g.gap:>+8.4f} {g.contribution:>+9.4f}"
+                )
 
     print("\n=== what the refine rounds bought ===")
     print("SEED is the unoptimized genome: it gives the refine step's own sign. Selection")
     print("caveat on B vs D: an arm that accepts more refines a different, selected subset.\n")
-    print(f"{'level':6} {'arm':6} {'accepted':>9} {'refined':>8} {'gain per refined':>17}")
-    for level in LEVELS:
-        for arm in (SEED_ARM, "B", "D"):
-            acc, ref, gain = refine_productivity(level, arm)
-            print(f"{level.name:6} {arm:6} {acc:>9} {ref:>8} {gain:>+17.3f}")
+    print(f"{'axis':16} {'level':6} {'arm':6} {'accepted':>9} {'refined':>8} {'gain/refined':>13}")
+    for axis, levels in groups:
+        for level in levels:
+            for arm in (SEED_ARM, "B", "D"):
+                acc, ref, gain = refine_productivity(level, arm)
+                print(f"{axis:16} {level.name:6} {arm:6} {acc:>9} {ref:>8} {gain:>+13.3f}")
 
     print("\n=== answer length by arm: is the do-nothing floor being exploited? ===")
     print("A critique pushing toward shorter answers would put D well below B.\n")
-    print(f"{'level':6} {'arm':6} {'draft words':>12} {'final words':>12} {'delta':>8}")
-    for level in LEVELS:
-        for arm in ("B", "D"):
-            d0, d1 = answer_length(level, arm)
-            print(f"{level.name:6} {arm:6} {d0:>12.1f} {d1:>12.1f} {d1 - d0:>+8.1f}")
+    print(f"{'axis':16} {'level':6} {'arm':6} {'draft words':>12} {'final words':>12} {'Δ':>8}")
+    for axis, levels in groups:
+        for level in levels:
+            for arm in ("B", "D"):
+                d0, d1 = answer_length(level, arm)
+                print(f"{axis:16} {level.name:6} {arm:6} {d0:>12.1f} {d1:>12.1f} {d1 - d0:>+8.1f}")
     return 0
 
 

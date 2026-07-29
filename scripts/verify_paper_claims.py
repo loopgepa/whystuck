@@ -39,6 +39,7 @@ from __future__ import annotations
 
 import json
 import re
+from dataclasses import dataclass
 from statistics import mean, pstdev
 
 DOCS = "docs"
@@ -305,11 +306,14 @@ _WORD_NUM = {
     "three": 3,
     "four": 4,
     "five": 5,
+    "eight": 8,
     "ten": 10,
     "eleven": 11,
     "twelve": 12,
+    "sixteen": 16,
     "fifteen": 15,
     "seventeen": 17,
+    "twenty": 20,
 }
 
 
@@ -325,6 +329,123 @@ def _scrape_word(tex: str, pattern: str) -> float:
             "than letting the check pass on an unparsed word"
         )
     return float(_WORD_NUM[word])
+
+
+#: The split sweep's rows, as (paper row label, released run slug). Run 3 is the n_train=8 row:
+#: it was not bought for the sweep, it *is* the cell the sweep was designed to interrogate.
+_SPLIT_ROWS = (("4", "split4"), ("8", "c2b"), ("16", "split16"), ("24", "split24"))
+
+#: The order `sec:threats` lists the five seed-genome replicate means in. Pinned as an explicit
+#: order rather than sorted, because the prose reads as a sentence and its order is editorial.
+_NOISE_REPLICATE_ORDER = ("c2", "c2b", "split4", "split16", "split24")
+
+
+def _noise_estimate():
+    """The measurement-noise estimator, imported lazily like the other analyzers."""
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import analyze_measurement_noise as mod
+
+    return mod.noise_estimate()
+
+
+def _contrast_flag_census() -> tuple[int, int]:
+    """(one-sided, both-arms-starved) among released runs with at least one optimizing arm.
+
+    Evidence 9's distinction, computed rather than transcribed. A run where exactly one
+    optimizing arm accepted nothing is the new defect: its Delta is labelled D-vs-B and is
+    really D-vs-seed. A run where BOTH accepted nothing is the original retraction, visible in
+    the scores for the first time. Collapsing the two would let the paper claim the sweep
+    surfaced sixteen new defects when it surfaced one.
+    """
+    import glob
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import analyze_deltas as ad
+
+    one_sided = both = 0
+    for path in sorted(glob.glob(f"{DOCS}/validation-study*.json")):
+        counts = ad.arms_optimized(path)
+        if not counts or ad.is_valid_contrast(path):
+            continue
+        if any(v > 0 for v in counts.values()):
+            one_sided += 1
+        else:
+            both += 1
+    return one_sided, both
+
+
+@dataclass(frozen=True)
+class SplitRow:
+    """One row of the split sweep, computed from the released run rather than transcribed."""
+
+    n_train: int
+    mmc: int
+    n_seeds: int
+    seed_mean: float
+    delta: float
+    per_seed: list[float]
+    #: Seeds on which the prompt-only arm changed a gene at all. In the table because at
+    #: n_train=4 it is zero, which makes that row a D-vs-seed contrast wearing a D-vs-B label
+    #: -- the retraction's defect class, entering from the arm that was not under suspicion.
+    b_accepted: int
+
+    @property
+    def cycles(self) -> float:
+        """Promotable accept cycles: the search depth the constant-epoch line does not hold."""
+        return (self.mmc - self.n_train) / (min(3, self.n_train) + self.n_train)
+
+
+def _split_row(slug: str) -> SplitRow:
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import analyze_deltas as ad
+
+    path = f"{DOCS}/validation-study-{slug}.json"
+    doc = json.loads(Path(path).read_text())
+    runs, meta = doc["runs"], doc["meta"]
+    n_train, mmc = int(meta["n_train"]), int(meta["max_metric_calls"])
+    if (n_train, mmc) not in SWEEP:
+        raise ValueError(
+            f"{path} ran at (n_train={n_train}, mmc={mmc}), which is not a registered cell of "
+            f"the pre-registered sweep {SWEEP}. Either the run is not the one the paper's table "
+            "describes, or the pre-registration was edited after the fact."
+        )
+    return SplitRow(
+        n_train=n_train,
+        mmc=mmc,
+        n_seeds=len(runs),
+        seed_mean=mean(r["B"]["seed_heldout"] for r in runs),
+        delta=mean(r["D"]["opt_heldout"] - r["B"]["opt_heldout"] for r in runs),
+        per_seed=[r["D"]["opt_heldout"] - r["B"]["opt_heldout"] for r in runs],
+        b_accepted=ad.arms_optimized(path)["B"],
+    )
+
+
+def _sweep_pass_zero() -> dict[str, int]:
+    """Per sweep row, how many arm-D critique genes emit PASS exactly zero times.
+
+    This is the sweep's load-bearing pre-registered prediction, so it is recomputed by
+    replaying each released gene against its own cassette rather than read off a table.
+    """
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import analyze_evolved_gene as ev
+
+    out: dict[str, int] = {}
+    for _, slug in _SPLIT_ROWS:
+        cassette = f"tests/fixtures/cassettes/study-{'c2b' if slug == 'c2b' else slug}.json"
+        rows = ev.score_run(f"{DOCS}/validation-study-{slug}.json", cassette)
+        out[slug] = sum(1 for r in rows if r.kind == "evolved" and r.pass_rate == 0.0)
+    return out
 
 
 def _decomp():
@@ -463,6 +584,34 @@ def _c1_decomposition() -> tuple[float, float]:
             named += diff
     total = sum(h_by_task[k] - b_by_task[k] for k in b_by_task)
     return named / n_heldout, (total - named) / n_heldout
+
+
+def _reflection_models() -> tuple[set[str], set[str]]:
+    """(reflection models on corrected-harness runs, on pre-correction runs).
+
+    The paper's Setup paragraph named one model for the whole study, and the corrected runs
+    used the other: `gpt-5.6-luna` is not the CLI default, and every run the conclusions rest
+    on passed it explicitly. A single-model claim about a two-model study is the kind of thing
+    a reader checks against the released metadata, so it is checked here.
+
+    Only runs with an evolving arm count. An `--arms A` run records whatever
+    `--reflection-model` defaulted to, but never reflects, so its metadata names a model that
+    did not run -- counting it would report a two-model study where the field is simply inert.
+    """
+    import glob
+
+    corrected: set[str] = set()
+    pre: set[str] = set()
+    for path in sorted(glob.glob(f"{DOCS}/validation-study*.json")):
+        with open(path, encoding="utf-8") as fh:
+            doc = json.load(fh)
+        model = doc["meta"].get("reflection_model")
+        first = doc["runs"][0]
+        arms = {k for k in first if isinstance(first.get(k), dict)}
+        if model is None or not (arms & {"B", "D"}):
+            continue
+        (corrected if doc["meta"].get("module_selector") == "all" else pre).add(str(model))
+    return corrected, pre
 
 
 def _precorrection_counts() -> tuple[int, int, float]:
@@ -1090,6 +1239,138 @@ def _checks() -> list[tuple[str, float, float, float]]:
     for label, pattern, tol, artifact in decomp_prose:
         out.append((label, _scrape(tex, pattern), tol, artifact))
 
+    # --- The split-size sweep, bought (sec:splitresult) --------------------------------
+    # Every number in tab:splitresults, cell by cell, plus the prose that interprets it. The
+    # table is the whole result of a $6.98 purchase, so an unchecked digit here is the most
+    # expensive kind of typo available in this paper.
+    noise = _noise_estimate()
+    for row_label, slug in (
+        ("4  &", "split4"),
+        ("8  &", "c2b"),
+        ("16 &", "split16"),
+        ("24 &", "split24"),
+    ):
+        cells = _table_row(tex, r"seed-genome & $\dd(D-B)$", row_label)
+        r = _split_row(slug)
+        n = row_label.rstrip(" &")
+        out.append((f"tex: split n={n} mmc", cells[1][0], 0, r.mmc))
+        out.append((f"tex: split n={n} seed mean", cells[2][0], 0.00005, r.seed_mean))
+        out.append((f"tex: split n={n} delta", cells[3][0], 0.0005, r.delta))
+        for i, per_seed in enumerate(cells[4]):
+            out.append((f"tex: split n={n} seed{i} delta", per_seed, 0.0005, r.per_seed[i]))
+        out.append(
+            (
+                f"tex: split n={n} in sigma",
+                cells[5][0],
+                0.005,
+                abs(r.delta) / noise.sigma_delta_mean,
+            )
+        )
+        out.append((f"tex: split n={n} arm B accepted", cells[6][0], 0, r.b_accepted))
+        out.append((f"tex: split n={n} arm B of", cells[6][1], 0, r.n_seeds))
+
+    # Prediction (i)'s resolution: PASS-rate-zero genes, per size and pooled over the sweep.
+    pass_zero = _sweep_pass_zero()
+    for label, pattern, artifact in (
+        (
+            "tex: split PASS zero at 16",
+            r"\\texttt\{PASS\} rate is \$0.00\$ on \$(\d)/3\$ arm-D genes",
+            pass_zero["split16"],
+        ),
+        (
+            "tex: split PASS zero at 24",
+            r"\{=\}16\$ and \$(\d)/3\$ at",
+            pass_zero["split24"],
+        ),
+        (
+            "tex: split PASS zero pooled",
+            r"Pooling all four sizes it is \$(\d+)/12\$",
+            sum(pass_zero.values()),
+        ),
+    ):
+        out.append((label, _scrape(tex, pattern), 0, artifact))
+
+    # The confound, quantified: promotable accept cycles and minibatch share. Recomputed from
+    # each run's own recorded (mmc, n_train), so this checks the paper against what ran.
+    cycles = [_split_row(g).cycles for _, g in _SPLIT_ROWS]
+    prose_cycles = re.search(
+        r"across the sweep as \$([\d.]+),\\,([\d.]+),\\,([\d.]+),\\,([\d.]+)\$", tex, re.DOTALL
+    )
+    for i, want in enumerate(cycles):
+        got = float(prose_cycles.group(i + 1)) if prose_cycles else float("nan")
+        out.append((f"tex: split promotable cycles {i}", got, 0.005, want))
+
+    # Evidence 9's census. The paper distinguishes two shapes of the same flag and the counts
+    # are the whole argument: a one-sided contrast (one arm starved, the other searched) is the
+    # new defect, while both-arms-starved is the original retraction re-derived from scores.
+    one_sided, no_contrast = _contrast_flag_census()
+    for label, pattern, artifact in (
+        ("tex: flagged runs total", r"(\w+) released runs trip", one_sided + no_contrast),
+        (
+            "tex: flagged both-arms-starved",
+            r"In the other\s+(\w+) \\emph\{both\} arms",
+            no_contrast,
+        ),
+    ):
+        out.append((label, _scrape_word(tex, pattern), 0, artifact))
+
+    # Between-cell spread of Δ, the sentence that licenses "one quantity plus noise".
+    out.append(
+        (
+            "tex: split between-cell spread",
+            _scrape(tex, r"spread of \$\\dd\$ \(\$([\d.]+)\$\)"),
+            0.0005,
+            pstdev([_split_row(g).delta for _, g in _SPLIT_ROWS]),
+        )
+    )
+
+    # --- The measurement-noise floor (sec:threats) -------------------------------------
+    # The component every interval in the study omits. Scraped from the prose that now
+    # reports it, checked against the estimator, so a reworded sentence breaks loudly.
+    for label, pattern, tol, artifact in (
+        ("tex: noise sigma single", r"under one draw is \$([\d.]+)\$", 0.0005, noise.sigma_single),
+        (
+            "tex: noise sigma delta task",
+            r"so \$\\sigma\(\\dd\)\$ on one task is \$([\d.]+)\$",
+            0.0005,
+            noise.sigma_delta_task,
+        ),
+        (
+            "tex: noise sigma delta mean",
+            r"0\.153/\\sqrt\{30\} \\;=\\; ([\d.]+)",
+            0.00005,
+            noise.sigma_delta_mean,
+        ),
+        (
+            "tex: noise mean signed",
+            r"between replicates, \$(-[\d.]+)\$, is confounded",
+            0.0005,
+            noise.mean_signed,
+        ),
+    ):
+        out.append((label, _scrape(tex, pattern), tol, artifact))
+
+    # The five replicate means, in the order the prose lists them.
+    prose_means = re.search(
+        r"Their means are \$([\d.]+)\$, \$([\d.]+)\$, \$([\d.]+)\$, \$([\d.]+)\$, \$([\d.]+)\$",
+        tex,
+        re.DOTALL,
+    )
+    want_means = [noise.replicate_means[k] for k in _NOISE_REPLICATE_ORDER]
+    for i, want in enumerate(want_means):
+        got = float(prose_means.group(i + 1)) if prose_means else float("nan")
+        out.append((f"tex: noise replicate mean {i}", got, 0.00005, want))
+
+    # The headline effects restated in sigma units, in both the abstract and sec:threats.
+    for label, pattern, delta in (
+        ("tex: sigma units L1", r"\$L_1\$ loss\s+\$-0.042\$ at \$([\d.]+)\\sigma\$", -0.0417),
+        ("tex: sigma units L2", r"\$\+0.060\$ at \$([\d.]+)\\sigma\$", 0.0600),
+        ("tex: sigma units L3", r"\$-0.002\$ at \$([\d.]+)\\sigma\$", -0.0017),
+        ("tex: sigma units act", r"\$\+0.063\$ at \$([\d.]+)\\sigma\$", 0.0630),
+        ("tex: abstract L1 sigma", r"puts that \$-0.042\$ at \$([\d.]+)\\sigma\$", -0.0417),
+    ):
+        out.append((label, _scrape(tex, pattern), 0.005, noise.in_sigma(delta)))
+
     # The reproducibility registry's composition, which drifted once already: the paper said
     # "seventeen ... the eleven below plus the two hand-written conditions", which is 13.
     # These counts are spelled out in the prose, so they need the word scraper.
@@ -1102,6 +1383,22 @@ def _checks() -> list[tuple[str, float, float, float]]:
         ("tex: retraction superseded count", r"script registers (\w+) superseded runs", superseded),
     ):
         out.append((label, _scrape_word(tex, pattern), 0, artifact))
+
+    # The two reflection models, asserted as a set rather than a number: the check is that the
+    # paper names exactly the model each half of the study used, in the right half.
+    corrected_models, pre_models = _reflection_models()
+    for label, want, marker in (
+        ("tex: corrected-harness reflection model", corrected_models, "on every run recorded"),
+        ("tex: pre-correction reflection model", pre_models, "which is the\nCLI default"),
+    ):
+        if len(want) != 1:
+            raise ValueError(
+                f"{label}: the released runs use {sorted(want)} reflection models, so the "
+                "paper cannot name one; widen the sentence rather than the tolerance"
+            )
+        named = want.pop().split("/")[-1].replace("-", r"\-")
+        found = 1.0 if re.search(rf"\\texttt\{{{named}\}}[^.]*?{marker}", tex, re.DOTALL) else 0.0
+        out.append((label, found, 0, 1.0))
 
     # How many contrast runs the correction superseded, and how many of their deltas really
     # were zero. The paper said "eleven" for a set of fifteen, and called all of their zeros

@@ -59,7 +59,8 @@ SUPERSEDED = frozenset(
         "C2 four-arm corrected harness",
     }
 )
-EXPECTED_RUNS = 5  # corrected harness: two C1 conditions, the C2b re-run, and p0 L2/L3.
+EXPECTED_RUNS = 8  # corrected harness: two C1 conditions, C2b, p0 L2/L3, and the three
+# rows of the split-size sweep.
 # C2 is NOT among them. Auditing it found that two reflection completions came back empty and
 # GEPA accepted one as the verify gene, so `genome_from_candidate` now refuses blank gene text
 # -- and that guard makes C2's own cassette unreplayable, because replaying it re-serves the
@@ -481,6 +482,92 @@ RUNS = [
             "4",
             "--loop-max-retries",
             "1",
+        ],
+    ),
+    # The pre-registered split-size sweep: the alternative explanation for arm D's loss at
+    # L1 was that eight training tasks is a small split. Metric calls per training task are
+    # held at 3.5 so every row can fund an accept cycle -- a fixed budget could not, and the
+    # harness now refuses that configuration at the dry-run step. n_train=8 is not a row
+    # here because C2b already is it.
+    (
+        "split sweep n_train=4 (mmc=14)",
+        "docs/validation-study-split4.json",
+        f"{CASSETTES}/study-split4.json",
+        [
+            "--task-set",
+            "multi-hard",
+            "--arms",
+            "BD",
+            "--seeds",
+            "0,1,2",
+            "--n-train",
+            "4",
+            "--n-heldout",
+            "10",
+            "--max-metric-calls",
+            "14",
+            "--reflection-calls",
+            "6",
+            "--loop-max-retries",
+            "1",
+            "--module-selector",
+            "all",
+            "--reflection-model",
+            "openai/gpt-5.6-luna",
+        ],
+    ),
+    (
+        "split sweep n_train=16 (mmc=56)",
+        "docs/validation-study-split16.json",
+        f"{CASSETTES}/study-split16.json",
+        [
+            "--task-set",
+            "multi-hard",
+            "--arms",
+            "BD",
+            "--seeds",
+            "0,1,2",
+            "--n-train",
+            "16",
+            "--n-heldout",
+            "10",
+            "--max-metric-calls",
+            "56",
+            "--reflection-calls",
+            "6",
+            "--loop-max-retries",
+            "1",
+            "--module-selector",
+            "all",
+            "--reflection-model",
+            "openai/gpt-5.6-luna",
+        ],
+    ),
+    (
+        "split sweep n_train=24 (mmc=84)",
+        "docs/validation-study-split24.json",
+        f"{CASSETTES}/study-split24.json",
+        [
+            "--task-set",
+            "multi-hard",
+            "--arms",
+            "BD",
+            "--seeds",
+            "0,1,2",
+            "--n-train",
+            "24",
+            "--n-heldout",
+            "10",
+            "--max-metric-calls",
+            "84",
+            "--reflection-calls",
+            "6",
+            "--loop-max-retries",
+            "1",
+            "--module-selector",
+            "all",
+            "--reflection-model",
+            "openai/gpt-5.6-luna",
         ],
     ),
 ]

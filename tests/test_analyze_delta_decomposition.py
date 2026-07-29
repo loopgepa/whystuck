@@ -23,6 +23,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
 from analyze_delta_decomposition import (  # noqa: E402
     LEVELS,
     SEED_ARM,
+    SPLIT_LEVELS,
     answer_length,
     decompose,
     refine_productivity,
@@ -196,3 +197,95 @@ def test_the_loop_level_arm_does_not_collapse_answer_length(level):
     for arm in ("B", "D"):
         draft_words, final_words = answer_length(lvl, arm)
         assert abs(final_words - draft_words) < 2.0
+
+
+# --------------------------------------------------------------------- the split-size sweep
+#
+# The sweep's own decomposition, pinned for the same reason the p0 levels are: these three
+# rows cost real money, they are what withdrew the paper's negative headline, and a claim that
+# lives only in prose is a claim that can drift. The rows also carry a property the p0 levels
+# do not, which is why they are worth their own assertions rather than a wider parametrize:
+# the loop term is positive at every bought size, so the treated component of Delta never
+# reproduces the sign the paper originally reported.
+
+#: level -> (delta, draft_term, loop_term), measured from the committed cassettes.
+_SPLIT_EXPECTED = {
+    "n=4": (+0.016667, +0.005000, +0.011667),
+    "n=16": (+0.061667, +0.001667, +0.060000),
+    "n=24": (+0.023333, -0.013333, +0.036667),
+}
+
+#: level -> stratum -> (n, mean_B, mean_D), on the seed genome's first-draft correctness.
+_SPLIT_STRATA = {
+    "n=4": {True: (4, 0.8125, 0.8125), False: (26, 0.7654, 0.7846)},
+    "n=16": {True: (3, 0.7667, 0.7667), False: (27, 0.7463, 0.8148)},
+    "n=24": {True: (7, 0.8000, 0.8714), False: (23, 0.7609, 0.7696)},
+}
+
+_SPLIT_NAMES = list(_SPLIT_EXPECTED)
+
+
+@pytest.fixture(scope="module")
+def split_decomposed() -> dict[str, object]:
+    return {lvl.name: decompose(lvl) for lvl in SPLIT_LEVELS}
+
+
+@pytest.mark.parametrize("level", _SPLIT_NAMES)
+def test_split_decomposition_is_pinned(split_decomposed, level):
+    d = split_decomposed[level]
+    delta, draft, loop = _SPLIT_EXPECTED[level]
+    assert d.delta == pytest.approx(delta, abs=_TOL)
+    assert d.draft_term == pytest.approx(draft, abs=_TOL)
+    assert d.loop_term == pytest.approx(loop, abs=_TOL)
+    # The identity, restated per row: the two terms must exhaust Delta, not merely correlate
+    # with it. A decomposition that leaves a residue is not a decomposition.
+    assert d.draft_term + d.loop_term == pytest.approx(d.delta, abs=1e-9)
+
+
+@pytest.mark.parametrize("level", _SPLIT_NAMES)
+def test_split_offline_replay_reproduces_the_paid_runs_own_delta(split_decomposed, level):
+    """The replay scores the released genomes itself. If it disagreed with the number the run
+    reported, the decomposition would be describing a different experiment."""
+    lvl = next(x for x in SPLIT_LEVELS if x.name == level)
+    assert split_decomposed[level].delta == pytest.approx(released_delta(lvl), abs=_TOL)
+
+
+@pytest.mark.parametrize("level", _SPLIT_NAMES)
+def test_split_strata_are_pinned_and_exhaustive(level):
+    lvl = next(x for x in SPLIT_LEVELS if x.name == level)
+    s = strata(lvl)
+    assert sum(v.n for v in s.values()) == 30
+    for correct, (n, mean_b, mean_d) in _SPLIT_STRATA[level].items():
+        assert s[correct].n == n
+        assert s[correct].mean_b == pytest.approx(mean_b, abs=_STRATA_TOL)
+        assert s[correct].mean_d == pytest.approx(mean_d, abs=_STRATA_TOL)
+
+
+def test_the_treated_component_is_positive_at_every_bought_split_size(split_decomposed):
+    """The load-bearing negative result of the paper is that the loop term is negative at
+    n_train=8. It is positive at 4, 16 and 24, which is why the paper reports the -0.042 as one
+    cell rather than as a finding about low p0. If this ever goes red, that withdrawal has to
+    be revisited -- so it is asserted rather than left to the prose."""
+    for level in _SPLIT_NAMES:
+        assert split_decomposed[level].loop_term > 0, level
+    l1_loop = decompose(next(x for x in LEVELS if x.name == "L1")).loop_term
+    assert l1_loop < 0, "n_train=8 is the cell the sweep was built to interrogate"
+
+
+def test_the_sweep_holds_the_seed_genome_fixed_while_its_score_moves(split_decomposed):
+    """The sweep's rows score the same thirty held-out tasks with the same unoptimized genome,
+    so their seed means are four draws of one number. They differ, and that difference is the
+    measurement-noise floor the paper now reports. A test that they are EQUAL would be wrong;
+    what is checkable is that they move by an amount consistent with that floor and not more.
+    """
+    import json
+
+    seeds = []
+    for slug in ("split4", "c2b", "split16", "split24"):
+        runs = json.loads(pathlib.Path(f"docs/validation-study-{slug}.json").read_text())["runs"]
+        seeds.append(sum(r["B"]["seed_heldout"] for r in runs) / len(runs))
+    spread = max(seeds) - min(seeds)
+    assert spread > 0, "identical means would mean the runs are not independent draws"
+    # sigma(mean of 30) = 0.153/sqrt(30) = 0.0279; the range of four draws should not exceed a
+    # few sigma. This is a smoke test on the noise story, not a hypothesis test.
+    assert spread < 4 * 0.0279, f"seed-genome means span {spread:.4f}, too wide to be noise"

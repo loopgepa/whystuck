@@ -139,3 +139,61 @@ def test_cli_exposes_temperature_and_defaults_to_unpinned():
     spec.loader.exec_module(mod)
     assert mod._parse_args([]).temperature is None
     assert mod._parse_args(["--temperature", "0.0"]).temperature == pytest.approx(0.0)
+
+
+# ------------------------------------------------------------------ the CLI salt (D7, P1)
+
+
+def test_cli_exposes_a_sample_salt():
+    """The repeat loop needs the salt reachable from the command line.
+
+    The salt existed at the worker level from the moment the temperature flag landed, but
+    nothing could set it: `run_validation_study` had no `--sample`. So K repeated scorings of
+    one released genome would have collapsed to one cassette entry and returned byte-identical
+    draws -- reporting ZERO sampling variance, which is the single most flattering artifact
+    available to a study whose subject is flattering artifacts.
+    """
+    import pathlib
+    import sys
+
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
+    import run_validation_study as cli
+
+    assert cli._parse_args([]).sample is None
+    assert cli._parse_args(["--sample", "3"]).sample == 3
+
+
+def test_cli_records_the_sample_in_run_metadata():
+    """A replicate whose salt is not recorded cannot be told apart from the original run."""
+    import pathlib
+    import sys
+
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
+    import run_validation_study as cli
+
+    src = pathlib.Path(cli.__file__).read_text()
+    assert '"sample": args.sample' in src, "the salt must land in meta, next to temperature"
+
+
+def test_sample_salt_and_temperature_are_independent():
+    """P1 re-scores at the provider's DEFAULT temperature on purpose: the released numbers
+    were drawn that way, so a faithful noise estimate must not pin a different value. The
+    salt therefore has to work with temperature left unset."""
+    import tempfile
+
+    from whystuck.eval.cassette import Cassette
+
+    with tempfile.TemporaryDirectory() as d:
+        path = f"{d}/c.json"
+        calls = []
+
+        def fake(prompt, *, temperature=None, sample=None):
+            calls.append((temperature, sample))
+            return f"out{len(calls)}"
+
+        with Cassette(path, mode="record") as cas:
+            w = cas.wrap(fake, name="worker")
+            a = w("p", sample=0)
+            b = w("p", sample=1)
+    assert a != b, "a distinct salt must produce a distinct recorded draw"
+    assert [t for t, _ in calls] == [None, None], "temperature must stay absent"

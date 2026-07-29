@@ -178,6 +178,18 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         "temperature would let two runs at different temperatures serve each other's "
         "completions",
     )
+    p.add_argument(
+        "--sample",
+        type=int,
+        default=None,
+        help="replicate index, used ONLY as a cassette-key salt (never sent to the provider). "
+        "Repeated scorings of one genome are identical calls, so record mode dedupes them and "
+        "K 'independent' samples come back byte-identical -- reporting ZERO sampling variance, "
+        "the most flattering artifact available to this study. Pass a distinct index per "
+        "replicate. Deliberately independent of --temperature: a faithful estimate of the "
+        "noise in the ALREADY-REPORTED numbers must draw from the same distribution they were "
+        "drawn from, which is the provider's default, so pin nothing",
+    )
     p.add_argument("--worker-model", default="openai/gpt-4.1-mini")
     p.add_argument("--reflection-model", default="openai/gpt-5.6-terra")
     p.add_argument(
@@ -664,14 +676,20 @@ def _run_live(
         complete = cassette.wrap(
             litellm_complete(args.worker_model, max_tokens=worker_max_out), name="worker"
         )
-        if args.temperature is not None:
-            # Add the kwarg at the call site, OUTSIDE the cassette wrapper, so it lands in
-            # the hashed kwargs. Absent this flag the call is unchanged and every existing
-            # cassette key still resolves.
+        if args.temperature is not None or args.sample is not None:
+            # Add the kwargs at the call site, OUTSIDE the cassette wrapper, so they land in
+            # the hashed kwargs. Absent both flags the call is unchanged and every existing
+            # cassette key still resolves. `sample` is a salt: it never reaches the provider,
+            # it only stops record mode from serving one cached draw to K replicates.
             _untempered = complete
+            _extra: dict[str, object] = {}
+            if args.temperature is not None:
+                _extra["temperature"] = args.temperature
+            if args.sample is not None:
+                _extra["sample"] = args.sample
 
             def complete(prompt: str) -> str:  # type: ignore[misc]
-                return _untempered(prompt, temperature=args.temperature)
+                return _untempered(prompt, **_extra)
 
         reflection = cassette.wrap(
             litellm_complete(args.reflection_model, max_tokens=REFLECTION_MAX_OUTPUT_TOKENS),
@@ -736,6 +754,10 @@ def _run_live(
         "reflection_calls": args.reflection_calls,
         "task_set": args.task_set,
         "temperature": args.temperature,
+        # The replicate salt. Recorded because two runs differing only in their salt are
+        # otherwise indistinguishable in the release, and a repeated-sample interval whose
+        # replicates cannot be told apart is not checkable.
+        "sample": args.sample,
         "exclude_constraint": sorted(args.exclude_constraint),
         "loop_max_retries": args.loop_max_retries,
         "plan_gene": args.plan_gene,

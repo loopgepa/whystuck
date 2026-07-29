@@ -188,6 +188,12 @@ _NULL_RUNS = [
     ("p0 L1 p0=0.067 (n=3)", f"{DOCS}/validation-study-c2b.json"),
     ("p0 L2 p0=0.267 (n=3)", f"{DOCS}/validation-study-p0-L2.json"),
     ("p0 L3 p0=0.667 SATURATED", f"{DOCS}/validation-study-p0-L3.json"),
+    # The split-size sweep, second, because it tests the one alternative explanation for the
+    # L1 row above: that eight training tasks is too small a split for the two-gene arm. Read
+    # as an axis like the p0 rows, not as three runs. n_train=8 is the p0 L1 row.
+    ("split n_train=4  (n=3)", f"{DOCS}/validation-study-split4.json"),
+    ("split n_train=16 (n=3)", f"{DOCS}/validation-study-split16.json"),
+    ("split n_train=24 (n=3)", f"{DOCS}/validation-study-split24.json"),
     # Below: runs whose arms B and D emitted byte-identical genomes, so their Δ = 0 records
     # the absence of a treatment rather than the absence of an effect. Not interchangeable
     # with the rows above.
@@ -229,6 +235,39 @@ def _ceiling_hits(path: str) -> list[bool]:
     ]
 
 
+def arms_optimized(path: str) -> dict[str, int]:
+    """Per optimizing arm, the number of seeds on which it actually changed a gene.
+
+    A Δ(D−B) is a D-vs-B contrast only if BOTH arms received their treatment. The budget
+    guard in `run_validation_study` enforces that an arm CAN complete one accept cycle; it
+    cannot enforce that a proposal is accepted, and the two are different. The split-size
+    sweep's smallest row demonstrates the gap: at n_train=4 arm B accepted nothing on three of
+    three seeds, so its Δ measures loop-level optimization against the *seed* genome.
+
+    Arms A and C are excluded because neither is asked to change anything -- A evolves nothing
+    and C's worker ignores the genome -- so counting them would report a permanent failure.
+    """
+    with open(path, encoding="utf-8") as fh:
+        runs = json.load(fh)["runs"]
+    out: dict[str, int] = {}
+    for arm in ("B", "D"):
+        if not all(isinstance(r.get(arm), dict) for r in runs):
+            continue
+        out[arm] = sum(1 for r in runs if r[arm].get("genes_changed"))
+    return out
+
+
+def is_valid_contrast(path: str) -> bool:
+    """True when every optimizing arm accepted a change on at least one seed.
+
+    Deliberately a low bar: it does not ask the arms to have optimized equally, only that
+    neither is silently the seed genome. A False here means the run's Δ cannot be read as the
+    contrast its label claims, whatever its interval says.
+    """
+    counts = arms_optimized(path)
+    return bool(counts) and all(v > 0 for v in counts.values())
+
+
 def _describe(label: str, d: list[float], path: str | None = None) -> str:
     """One line per run: point estimate, interval, sign test, and degenerate-seed count.
 
@@ -255,13 +294,30 @@ def _describe(label: str, d: list[float], path: str | None = None) -> str:
     # A zero at the metric ceiling is a ceiling artifact, not an absent treatment.
     saturated = sum(1 for x in _ceiling_hits(path) if x) if path else 0
     seeds = [f"{x:+.3f}" for x in d]
+    # An arm that accepted nothing is still the seed genome, so the line is not the contrast
+    # its label claims. Marked here rather than left to the reader, because a Δ with an
+    # interval and a p-value looks like a measurement whatever its arms did.
+    one_sided = ""
+    if path:
+        counts = arms_optimized(path)
+        starved = [a for a, v in counts.items() if v == 0]
+        if starved:
+            one_sided = f"  [!!] arm {'/'.join(starved)} accepted nothing — NOT a D-vs-B contrast"
     return (
         f"{label}: Δ={m:+.3f}  seeds={seeds}  95%CI[{lo:+.3f},{hi:+.3f}]"
         f"  sign p={sign_test_p(d):.2f}  zeros={zeros}/{len(d)}"
         f"{f'  [ceiling on {saturated}]' if saturated else ''}"
-        f"{_seed_caveat(path) if path else ''}"
+        f"{_seed_caveat(path) if path else ''}{one_sided}"
     )
 
+
+_CONTRAST_LEGEND = (
+    "[!!] = an optimizing arm accepted no proposal on any seed, so it is still running the\n"
+    "     SEED genome. The Δ on that line therefore compares the other arm against the seed,\n"
+    "     not against its intended control, and must not be read as D-vs-B. The budget guard\n"
+    "     enforces that an arm CAN fund an accept cycle; it cannot enforce that one is\n"
+    "     accepted. This is the retraction's defect entering from the unwatched side."
+)
 
 _SEED_LEGEND = (
     "[!] = this run's loader shuffles a FIXED vendored pool, so a seed chooses a partition\n"
@@ -325,6 +381,7 @@ def main() -> int:  # pragma: no cover - CLI convenience
         # dropping that atom. A degenerate [0,0] interval is reported as "point zero".
         excla = "excludes zero" if hia < 0 else ("point zero" if loa == hia == 0 else "includes 0")
         print(f"{_describe(label, da, path)}  ({excla})")
+    print(f"\n{_CONTRAST_LEGEND}")
     print(f"\n{_SEED_LEGEND}")
     return 0
 
