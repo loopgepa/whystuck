@@ -739,6 +739,10 @@ address; the loop-level lever is inert regardless.
 \begin{table}[h]
 \centering
 \small
+% Four wide header cells put this 6.6pt over the text block. Tightening the inter-column pad
+% rather than abbreviating the header keeps the row markers `verify_paper_claims` anchors its
+% per-cell checks on, which are matched as literal text.
+\setlength{\tabcolsep}{5pt}
 \begin{tabular}{lccc}
 \toprule
 Constraint (final-draft satisfaction) & run 3 (intrinsic $R1$) & run 8 (oracle mid $R3$) & run 10 (oracle hi $R3$) \\
@@ -1909,7 +1913,8 @@ generator-limited (the residual). The agenda, re-ordered accordingly:
     Open follow-up: does an LLM \emph{rewriting} the measured edits into fluent prose add
     anything over the raw measurement?
   \item[D3 (true cross-family critic).] Repeat run 6 with a cross-\emph{provider}
-    critic (\texttt{gemini-2.5-flash-lite} or \texttt{claude-haiku-4-5}; pre-priced,
+    critic (\texttt{gemini-\allowbreak 2.5-\allowbreak flash-\allowbreak lite} or
+    \texttt{claude-\allowbreak haiku-\allowbreak 4-5}; pre-priced,
     needs a key) at $\ge 8$ seeds. This is the one blocked purely on a credential, and
     the only direction that separates an intrinsically unreliable detector from a
     self-preferring one.
@@ -2174,6 +2179,7 @@ control side instead of the treatment side.}
 \begin{table}[h]
 \centering
 \small
+\setlength{\tabcolsep}{5pt}
 \begin{tabular}{lcp{0.20\textwidth}p{0.24\textwidth}}
 \toprule
 Result & per-seed & as published & corrected \\
@@ -2263,6 +2269,7 @@ prompt, hence every cassette key, so these runs cannot replay under current code
 \begin{table}[t]
 \centering
 \small
+\setlength{\tabcolsep}{4.5pt}
 \begin{tabular}{clccccl}
 \toprule
 Run & Regime & Seeds & Seed & B (prompt-only) & D (loop-level) & \dd \\
