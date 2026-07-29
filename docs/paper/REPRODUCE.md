@@ -76,11 +76,26 @@ loop-level arm beats the prompt-only arm. Expected: A/B/C at `0.000`, D at `1.00
 .venv/bin/python scripts/analyze_c1.py docs/validation-study-c1-base.json \
                                        docs/validation-study-c1-hand.json
 .venv/bin/python scripts/analyze_evolved_gene.py   # the optimizer's own critique, as a detector
+.venv/bin/python scripts/analyze_delta_decomposition.py  # how much of Δ is actually the treatment
 ```
 
 `analyze_evolved_gene.py` is the one to run if you read only one: it scores the rubric GEPA
 actually evolved as a failure detector and finds it emits `PASS` zero times on every seed,
 which is the mechanism behind the loop-level arm's loss.
+
+`analyze_delta_decomposition.py` is the one to run second, because it qualifies the headline.
+Both arms evolve `generate`, so Δ(D−B) is a whole-system contrast; the script splits it into a
+draft term (the shared gene) and a loop term (the treatment) and prints four blocks:
+
+| block | what it answers |
+|---|---|
+| the split | 60% of L1's −0.042 is the shared gene; 100% of L2's +0.060 is the treatment |
+| strata on the seed genome's first draft | the L1 loss is **not** on already-correct drafts (+0.002) |
+| refine productivity | refine is net-positive at every level, so no destructive-repair story |
+| answer length by arm | the do-nothing floor is not being exploited (D is not shorter) |
+
+The strata use the **seed** genome's draft, not each arm's own, because an arm's draft is
+downstream of the treatment: stratifying on it would condition on a collider.
 
 `analyze_deltas.py` marks any run whose seeds share a task pool, because on those the
 interval and the sign test are anti-conservative and must not be read as replication.

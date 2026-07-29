@@ -297,6 +297,184 @@ def _arm_mean(name: str, arm: str, field: str) -> float:
     return mean(r[arm][field] for r in _runs(name))
 
 
+#: Number words the paper spells out. Scraping "seventeen" as 17 keeps the prose readable
+#: while still making the count a checked claim; anything not listed raises rather than
+#: quietly returning NaN, so a new spelled-out number cannot slip past unchecked.
+_WORD_NUM = {
+    "two": 2,
+    "three": 3,
+    "four": 4,
+    "five": 5,
+    "ten": 10,
+    "eleven": 11,
+    "twelve": 12,
+    "seventeen": 17,
+}
+
+
+def _scrape_word(tex: str, pattern: str) -> float:
+    """Like `_scrape`, for a count the paper spells out in words rather than digits."""
+    m = re.search(pattern, tex, re.DOTALL | re.MULTILINE)
+    if m is None:
+        return float("nan")
+    word = m.group(1).lower()
+    if word not in _WORD_NUM:
+        raise LookupError(
+            f"the paper spells a count as {word!r}, which is not in _WORD_NUM; add it rather "
+            "than letting the check pass on an unparsed word"
+        )
+    return float(_WORD_NUM[word])
+
+
+def _decomp():
+    """The component-decomposition module, imported lazily like the other analyzers."""
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import analyze_delta_decomposition as mod
+
+    return mod
+
+
+#: Level names in the order sec:decomp prints them.
+_DECOMP_LEVELS = ("L1", "L2", "L3")
+
+
+def _decomposition(level: int) -> dict[str, float]:
+    mod = _decomp()
+    d = mod.decompose(mod.LEVELS[level])
+    return {
+        "delta": d.delta,
+        "draft_term": d.draft_term,
+        "loop_term": d.loop_term,
+        "draft_b": d.draft_b,
+        "draft_d": d.draft_d,
+    }
+
+
+def _stratum(level: int, correct: bool) -> dict[str, float]:
+    mod = _decomp()
+    g = mod.strata(mod.LEVELS[level])[correct]
+    return {
+        "n": g.n,
+        "mean_b": g.mean_b,
+        "mean_d": g.mean_d,
+        "gap": g.gap,
+        "contribution": g.contribution,
+    }
+
+
+def _refine(level: int, arm: str) -> tuple[int, int, float]:
+    mod = _decomp()
+    return mod.refine_productivity(mod.LEVELS[level], arm)
+
+
+def _length(level: int, arm: str) -> tuple[float, float]:
+    mod = _decomp()
+    return mod.answer_length(mod.LEVELS[level], arm)
+
+
+def _arm_confusion(level: int, arm: str) -> dict[str, int]:
+    """The confusion matrix for one arm's own critique on the drafts its own genome made.
+
+    Arm B evolves only `generate`, so its critique is the seed rubric; arm D's is the
+    evolved one. This is the comparator the mechanism table needed: "precision-1
+    acceptance" is only a claim if something else in the study accepts imprecisely.
+    """
+    import json as _json
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from analyze_critique_detector import collect_events, detector_stats
+
+    mod = _decomp()
+    lvl = mod.LEVELS[level]
+    runs = _json.loads(Path(lvl.results).read_text())["runs"]
+    total = {"tp": 0, "fp": 0, "fn": 0, "tn": 0, "n": 0}
+    for seed, run in enumerate(runs):
+        stats = detector_stats(
+            collect_events(
+                lvl.cassette,
+                [seed],
+                loop_kw={},
+                gene_overrides=dict(run[arm]["final_genes"]),
+                exclude=lvl.exclude,
+            )
+        )
+        for key in total:
+            total[key] += int(stats[key])
+    return total
+
+
+def _c1_decomposition() -> tuple[float, float]:
+    """(contribution of the eight tasks sec:analysis names, residual on the other 24).
+
+    The paper used to present these two as a decomposition of the whole -0.033. They are
+    not: three tasks differ in verdict and five had an already-compliant draft, and the
+    other twenty-four moved because the repair *prose* differed, not the verdict. Deriving
+    both halves here is what keeps the partial decomposition labelled as partial.
+    """
+    import json as _json
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from analyze_critique_detector import collect_events
+
+    from whystuck.eval.multi_constraint import load_multi_constraint
+
+    base_doc = _json.loads(Path(f"{DOCS}/validation-study-c1-base.json").read_text())
+    hand_doc = _json.loads(Path(f"{DOCS}/validation-study-c1-hand.json").read_text())
+    b_by_task = base_doc["runs"][0]["A"]["seed_heldout_by_task"]
+    h_by_task = hand_doc["runs"][0]["A"]["seed_heldout_by_task"]
+    n_heldout = len(b_by_task)
+    tasks = load_multi_constraint(
+        "heldout", seed=0, n=n_heldout, pool=max(64, 2 * n_heldout + 2), hard=True
+    )
+    # Both conditions share one cassette, so each task's first draft is byte-identical and
+    # the verdicts are the only thing that can differ. The gene each condition actually ran
+    # is recorded in `meta.gene_overrides` -- empty for the seed condition, which is exactly
+    # what "no override" means -- rather than in a per-arm field these arm-A runs never fill.
+    ev_seed, ev_hand = (
+        collect_events(
+            "tests/fixtures/cassettes/study-c1.json",
+            [0],
+            loop_kw={},
+            n_heldout=n_heldout,
+            gene_overrides=doc["meta"]["gene_overrides"] or None,
+        )
+        for doc in (base_doc, hand_doc)
+    )
+    if not (len(ev_seed) == len(ev_hand) == len(tasks)):
+        raise ValueError(
+            f"C1 replay produced {len(ev_seed)}/{len(ev_hand)} events for {len(tasks)} tasks; "
+            "a decomposition over a partial replay would silently reweight the strata"
+        )
+    named = 0.0
+    for task, (v_seed, actual), (v_hand, _) in zip(tasks, ev_seed, ev_hand, strict=True):
+        if task.id not in b_by_task:
+            continue
+        diff = h_by_task[task.id] - b_by_task[task.id]
+        # The eight the paper names: verdicts differ, or the draft was already compliant.
+        if v_seed != v_hand or actual:
+            named += diff
+    total = sum(h_by_task[k] - b_by_task[k] for k in b_by_task)
+    return named / n_heldout, (total - named) / n_heldout
+
+
+def _registry_counts() -> tuple[int, int]:
+    """(superseded, replayable) as `verify_reproducibility.py` itself defines them."""
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import verify_reproducibility as vr
+
+    return len(vr.SUPERSEDED), vr.EXPECTED_RUNS
+
+
 #: (claim, expected, tolerance, thunk). Tolerance matches the precision the paper prints at.
 def _checks() -> list[tuple[str, float, float, float]]:
     out: list[tuple[str, float, float, float]] = []
@@ -747,6 +925,148 @@ def _checks() -> list[tuple[str, float, float, float]]:
             out.append((f"tex: detector {label} {key}", cells[pos][0], 0.0005, m[key]))
         out.append((f"tex: detector {label} Youden J", cells[5][0], 0.0005, m["j"]))
         out.append((f"tex: detector {label} MCC", cells[5][1], 0.0005, m["mcc"]))
+
+    # The arm-D mechanism table (sec:p0). This table was the paper's least-checked and
+    # most load-bearing: it carries the PASS-rate story, and until now nothing re-derived
+    # it. It is also the table where a reader recomputing a base rate from tp+fn gets the
+    # judged-draft rate rather than p0, so both columns are pinned.
+    mech = r"level & critique & base rate judged"
+    for level_i, (label, _, _, _) in enumerate(_P0_DETECTOR):
+        for arm, arm_label in (("B", "B, seed rubric"), ("D", "D, evolved")):
+            counts = _arm_confusion(level_i, arm)
+            cells = _table_row(tex, mech, f"$L_{level_i + 1}$ & {arm_label}")
+            base = (counts["tp"] + counts["fn"]) / counts["n"]
+            out.append((f"tex: mech {label} {arm} base rate", cells[2][0], 0.0005, base))
+            out.append(
+                (
+                    f"tex: mech {label} {arm} PASS emitted",
+                    cells[3][0],
+                    0,
+                    counts["tp"] + counts["fp"],
+                )
+            )
+            for pos, key in ((4, "tp"), (5, "fp"), (6, "fn"), (7, "tn")):
+                out.append((f"tex: mech {label} {arm} {key}", cells[pos][0], 0, counts[key]))
+
+    # The component decomposition (sec:decomp): Delta = draft term + loop term. Every cell
+    # of both tables, plus the identity that the strata close on the pooled Delta.
+    dec_marker = r"level & $\dd(D-B)$ & draft term"
+    strat_marker = r"level & stratum & $n$ & B & D"
+    for level_i, level in enumerate(_DECOMP_LEVELS):
+        d = _decomposition(level_i)
+        cells = _table_row(tex, dec_marker, f"$L_{level_i + 1}$")
+        out.append((f"tex: decomp {level} delta", cells[1][0], 0.0005, d["delta"]))
+        out.append((f"tex: decomp {level} draft term", cells[2][0], 0.0005, d["draft_term"]))
+        out.append((f"tex: decomp {level} loop term", cells[3][0], 0.0005, d["loop_term"]))
+        for correct, row_label in ((True, "already correct"), (False, "already wrong")):
+            g = _stratum(level_i, correct)
+            cells = _table_row(tex, strat_marker, f"$L_{level_i + 1}$ & {row_label}")
+            out.append((f"tex: strata {level} {row_label} n", cells[2][0], 0, g["n"]))
+            out.append((f"tex: strata {level} {row_label} B", cells[3][0], 0.00005, g["mean_b"]))
+            out.append((f"tex: strata {level} {row_label} D", cells[4][0], 0.00005, g["mean_d"]))
+            out.append((f"tex: strata {level} {row_label} gap", cells[5][0], 0.00005, g["gap"]))
+            out.append(
+                (
+                    f"tex: strata {level} {row_label} contribution",
+                    cells[6][0],
+                    0.0005,
+                    g["contribution"],
+                )
+            )
+
+    # The prose numbers sec:decomp and sec:threats quote, in the order they are written.
+    seed_refine = [_refine(i, "SEED")[2] for i in range(3)]
+    final_words = [(_length(i, "B")[1], _length(i, "D")[1]) for i in range(3)]
+    decomp_prose: list[tuple[str, str, float, float]] = [
+        (
+            "tex: decomp L1 overstatement factor",
+            r"penalty by a factor of \$([\d.]+)\$",
+            0.05,
+            abs(_decomposition(0)["delta"]) / abs(_decomposition(0)["loop_term"]),
+        ),
+        (
+            "tex: decomp L2 both arms draft score",
+            r"both arms' drafts score \$([\d.]+)\$ there",
+            0.0005,
+            _decomposition(1)["draft_b"],
+        ),
+        ("tex: decomp D refines at L1", r"refines\s+\$(\d+)/30\$ held-out", 0, _refine(0, "D")[1]),
+        (
+            "tex: decomp B refines at L1",
+            r"held-out tasks against arm~B's \$(\d+)/30\$",
+            0,
+            _refine(0, "B")[1],
+        ),
+        (
+            "tex: decomp D gain per refine",
+            r"worth less, \$\+([\d.]+)\$ against",
+            0.0005,
+            _refine(0, "D")[2],
+        ),
+        (
+            "tex: decomp B gain per refine",
+            r"worth less, \$\+[\d.]+\$ against \$\+([\d.]+)\$",
+            0.0005,
+            _refine(0, "B")[2],
+        ),
+    ]
+    for i in range(3):
+        decomp_prose.append(
+            (
+                f"tex: decomp seed refine sign {i}",
+                r"on the seed genome \(" + r"\$\+[\d.]+\$,\s+" * i + r"\$\+([\d.]+)\$",
+                0.0005,
+                seed_refine[i],
+            )
+        )
+    # sec:threats quotes six answer-length figures, D then B at each level.
+    length_patterns = (
+        (r"never\s+accepts is \$([\d.]+)\$ words", final_words[0][1]),
+        (r"against prompt-only's \$([\d.]+)\$ at \$L_1\$", final_words[0][0]),
+        (r"\(\$([\d.]+)\$ vs\.\\? \$[\d.]+\$ at \$L_2\$", final_words[1][1]),
+        (r"\(\$[\d.]+\$ vs\.\\? \$([\d.]+)\$ at \$L_2\$", final_words[1][0]),
+        (r"\$([\d.]+)\$ vs\.\\? \$[\d.]+\$ at \$L_3\$", final_words[2][1]),
+        (r"\$[\d.]+\$ vs\.\\? \$([\d.]+)\$ at \$L_3\$", final_words[2][0]),
+    )
+    for i, (pattern, artifact) in enumerate(length_patterns):
+        decomp_prose.append((f"tex: threats answer length {i}", pattern, 0.05, artifact))
+
+    # The C1 decomposition: the eight verdict-differing tasks account for only part of the
+    # -0.033, and the paper now says how much. A partial decomposition presented as a whole
+    # one is exactly the kind of claim this file exists to keep honest.
+    verdict_share, prose_residual = _c1_decomposition()
+    decomp_prose.append(
+        (
+            "tex: C1 eight-task share",
+            r"account for \$(-[\d.]+)\$ of the \$-0\.033\$",
+            0.0005,
+            verdict_share,
+        )
+    )
+    decomp_prose.append(
+        (
+            "tex: C1 residual on the other 24",
+            r"the\nremaining \$(-[\d.]+)\$ falls on the twenty-four",
+            0.0005,
+            prose_residual,
+        )
+    )
+
+    for label, pattern, tol, artifact in decomp_prose:
+        out.append((label, _scrape(tex, pattern), tol, artifact))
+
+    # The reproducibility registry's composition, which drifted once already: the paper said
+    # "seventeen ... the eleven below plus the two hand-written conditions", which is 13.
+    # These counts are spelled out in the prose, so they need the word scraper.
+    superseded, replayable = _registry_counts()
+    for label, pattern, artifact in (
+        ("tex: registry total", r"registers (\w+) committed runs", superseded + replayable),
+        ("tex: registry superseded", r"(\w+) are\s+labelled \\textbf\{superseded\}", superseded),
+        ("tex: registry replayable", r"The remaining (\w+) were recorded", replayable),
+        ("tex: registry verifies N", r"verifies (\w+) runs rather than", replayable),
+        ("tex: retraction superseded count", r"script registers (\w+) superseded runs", superseded),
+    ):
+        out.append((label, _scrape_word(tex, pattern), 0, artifact))
 
     return out
 

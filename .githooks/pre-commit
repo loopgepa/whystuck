@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Fast gates, on every commit. The slow one (the full pytest suite) runs in pre-push.
+#
+# Why the paper check belongs HERE rather than only in a habit: every number in
+# docs/paper/main.tex is derived from docs/*.json and the committed cassettes, and the two
+# have drifted before -- a transposed seed count survived several readings, a $5 ceiling
+# claim survived four runs overriding it, and an interval was published as "excludes zero"
+# when it brackets it. Those are not typos a reader catches; they are arithmetic that only a
+# machine re-derives. So a commit that edits the paper, the results, the cassettes or the
+# analysis scripts has to re-derive the paper's claims before it lands.
+#
+# Install: git config core.hooksPath .githooks
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+PY=.venv/bin/python
+[ -x "$PY" ] || PY=python3
+
+echo "pre-commit: ruff check"
+$PY -m ruff check .
+echo "pre-commit: ruff format --check"
+$PY -m ruff format --check .
+echo "pre-commit: mypy"
+$PY -m mypy
+
+# Only when something the paper's numbers depend on is staged. Scoped rather than
+# unconditional because it replays cassettes and takes a few seconds, and a hook that is
+# slow on unrelated commits gets disabled -- which is the failure mode that matters.
+if git diff --cached --name-only | grep -qE '^(docs/paper/|docs/.*\.json$|scripts/|tests/fixtures/cassettes/|src/whystuck/eval/)'; then
+  echo "pre-commit: verify_paper_claims (paper vs released artifacts)"
+  # grep the verdict rather than tailing: the script ends with a list of what it CANNOT
+  # check, so `tail` would print the caveats and hide the result.
+  $PY scripts/verify_paper_claims.py | grep -E 'claims match|DRIFT|FAIL'
+fi
+
+# Never let the author's employer name into a personal-project artifact. Checks the staged
+# content, not the working tree, so it cannot be bypassed by an unstaged revert.
+#
+# The pattern is assembled at runtime rather than written out, because a hook that spells the
+# forbidden word would match its own diff and refuse the commit that installs it.
+FORBIDDEN="$(printf 'entr'; printf 'opia')"
+if git diff --cached | grep -iq "$FORBIDDEN"; then
+  echo "pre-commit: FAILED -- staged content contains the forbidden employer name" >&2
+  exit 1
+fi
+
+echo "pre-commit: all green"

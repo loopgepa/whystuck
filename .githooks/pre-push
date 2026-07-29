@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# The slow gate. Runs once per push rather than once per commit, because the suite replays
+# every committed cassette and takes minutes; a pre-commit hook that costs minutes gets
+# disabled, and a disabled hook is worse than a slow one.
+#
+# Install: git config core.hooksPath .githooks
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+PY=.venv/bin/python
+[ -x "$PY" ] || PY=python3
+
+echo "pre-push: pytest"
+$PY -m pytest -q
+
+# The reproducibility registry needs the eval extra (gepa + litellm), which lives in a
+# separate venv on purpose: the default venv deliberately has NO gepa, so the unit tests
+# cannot accidentally depend on the optimizer being installed. Skip loudly rather than
+# silently when that venv is absent -- a replay check that quietly does not run is exactly
+# the defect this study spent a section on.
+EVAL=scratchpad/evalvenv/bin/python
+if [ -x "$EVAL" ]; then
+  echo "pre-push: verify_reproducibility (every committed run, offline)"
+  $EVAL scripts/verify_reproducibility.py | tail -n 2
+else
+  echo "pre-push: SKIPPED verify_reproducibility -- no $EVAL (eval extra not installed)" >&2
+fi
+
+echo "pre-push: all green"
