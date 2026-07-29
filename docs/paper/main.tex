@@ -459,13 +459,18 @@ D & \texttt{generate} $+$ \texttt{ensure\_correct} & 0.788 & 0.747 & $\mathbf{-0
 \bottomrule
 \end{tabular}
 \caption{The corrected-harness re-run, held-out means over three seeds. Prompt-only
-optimization is a wash and loop-level optimization \emph{costs} $0.042$. Note what the
-controls do and do not establish: arm~A re-scores the seed genome, which under a
-deterministic replay path must reproduce its first measurement, so it is a determinism check
-rather than a flatness control; and arm~C's worker ignores the genome, so no proposal can
-improve its training score and its flatness is true by construction. Neither is evidence
-about measurement noise --- there is none anywhere in this study (\S\ref{sec:threats}) ---
-so the drop in D is attributable to optimization because nothing else in the pipeline varies.}
+optimization is a wash; arm~D comes out $0.042$ lower, which an earlier draft read as a
+\emph{cost} of loop-level optimization and which \S\ref{sec:splitresult} withdraws --- it is
+$1.49\sigma$ of measurement noise and three other training-split sizes at the same $p_0$ come
+out positive. Note what the controls do and do not establish: arm~A re-scores the seed genome,
+which under a deterministic replay path must reproduce its first measurement, so it is a
+determinism check rather than a flatness control; and arm~C's worker ignores the genome, so no
+proposal can improve its training score and its flatness is true by construction. Critically,
+\textbf{neither control bounds measurement noise}: both are deterministic replays of a fixed
+genome, so their flatness says nothing about the variance of a \emph{fresh} draw. An earlier
+version of this caption inferred from them that nothing else in the pipeline varies and that the
+drop in D was therefore attributable to optimization. That inference was wrong, and
+\S\ref{sec:threats} measures what does vary: $\sigma(\dd) = 0.0279$.}
 \label{tab:rerun}
 \end{table}
 
@@ -620,8 +625,10 @@ near-random and a non-oracle measurement tool makes it reliable, but that reliab
 sits in both the B and D loops. Detector quality vs.\ performance is then
 \textbf{non-monotonic}: the perfect oracle with which-constraint feedback (runs 7--8) does not
 maximize held-out score, falling below a good tool at one retry (run 4). Two fix-side levers
-close the gap: refine budget ($0.748\!\to\!0.813$, run 8) and, decisively, feedback
-\emph{actionability} (run 10: $0.873$, above the tool). F$_1$ is fixed at $1.0$ across runs
+close the gap: refine budget ($0.748\!\to\!0.813$, run 8, $2.33\sigma$) and feedback
+\emph{actionability} (run 9$\to$10, $+0.063$, $2.27\sigma$). Run 10 also lands nominally above
+the tool-fed loop ($0.873$ vs.\ $0.837$), but that particular gap is
+$1.31\sigma$ and we do not claim it; an earlier caption called it decisive. F$_1$ is fixed at $1.0$ across runs
 7--10 by construction, so the $0.810\!\to\!0.873$ lift is pure actionability, not detection;
 a generator-limited residual remains (hi still $<1$).}
 \label{tab:curve}
@@ -901,9 +908,11 @@ $L_3$ & $+$ \texttt{word\_max\_length} & 0.832 & 0.667 & $0.942 \to 0.972$ & $0.
 \end{tabular}
 \caption{The $p_0$ sweep. $L_1$ \emph{is} the four-arm re-run of \S\ref{sec:rerun}, so it cost
 nothing to include. The treatment reached \texttt{ensure\_correct} on $3/3$ seeds at every
-level. \textbf{The sign of $\dd(D-B)$ flips}: loop-level optimization loses $0.042$ where
-almost no first draft is correct and gains $0.060$ where a quarter of them are, with all three
-seeds positive at $L_2$. $\mathbb{E}[p_0]$ is the independence estimate and it runs high by
+level. \textbf{$\dd(D-B)$ swings by $0.102$ across the axis}, about $2.6\sigma$
+(\S\ref{sec:threats}): $-0.042$ where almost no first draft is correct and $+0.060$ where a
+quarter of them are, with all three seeds positive at $L_2$. The swing is the finding; the
+$L_1$ endpoint is not separable from noise on its own and we no longer report it as a loss
+(\S\ref{sec:splitresult}). $\mathbb{E}[p_0]$ is the independence estimate and it runs high by
 roughly a factor of two, because constraint failures correlate --- at $L_1$ the measured $p_0$
 is $2/30 = 0.067$ against $0.127$ predicted --- so the estimate orders the levels and the
 measured column is what they are. $L_3$ is \emph{saturated} and is discussed as such below.}

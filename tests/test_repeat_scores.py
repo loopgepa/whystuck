@@ -129,3 +129,47 @@ def test_verify_argv_matches_the_recording_argv_except_for_mode():
     i = rec_clean.index("--out")
     assert rec_clean[:i] == ver_clean[:i]
     assert rec_clean[i + 2 :] == ver_clean[i + 2 :]
+
+
+# --------------------------------------------------------------------------------- sharding
+#
+# 135 sequential replicates is ~2.7h of wall-clock for work that is embarrassingly parallel:
+# every job has its own output file and its own cassette, so nothing is shared. What is NOT
+# safe is two workers computing `todo` from the same list, which would buy every job twice.
+# Sharding makes the partition explicit, and these tests pin the two properties that make it
+# safe to run several workers at once: the shards cover everything, and they never overlap.
+
+
+def test_shards_partition_the_plan_exactly():
+    jobs = rs.plan(k=5)
+    for n in (2, 3, 4, 7):
+        shards = [rs.shard(jobs, i, n) for i in range(n)]
+        seen: list[rs.Job] = []
+        for sh in shards:
+            seen += sh
+        assert len(seen) == len(jobs), f"n={n} lost or duplicated jobs"
+        assert {j.tag for j in seen} == {j.tag for j in jobs}
+        for i in range(n):
+            for j in range(i + 1, n):
+                overlap = {x.tag for x in shards[i]} & {x.tag for x in shards[j]}
+                assert not overlap, f"shards {i} and {j} both claim {overlap}"
+
+
+def test_a_single_shard_is_the_whole_plan():
+    jobs = rs.plan(k=2)
+    assert [j.tag for j in rs.shard(jobs, 0, 1)] == [j.tag for j in jobs]
+
+
+def test_shard_rejects_an_impossible_spec():
+    jobs = rs.plan(k=1)
+    for index, count in ((0, 0), (2, 2), (-1, 3), (3, 3)):
+        with pytest.raises(ValueError):
+            rs.shard(jobs, index, count)
+
+
+def test_parse_shard_accepts_i_of_n_and_rejects_junk():
+    assert rs.parse_shard("0/3") == (0, 3)
+    assert rs.parse_shard("2/4") == (2, 4)
+    for junk in ("", "1", "a/2", "1/2/3", "1-2"):
+        with pytest.raises(ValueError):
+            rs.parse_shard(junk)

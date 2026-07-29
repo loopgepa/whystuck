@@ -103,6 +103,30 @@ def plan(k: int) -> list[Job]:
     ]
 
 
+def parse_shard(spec: str) -> tuple[int, int]:
+    """`"i/n"` -> (i, n). Raises on anything else rather than guessing a default.
+
+    A misread shard spec is the one failure mode that costs money: two workers that both
+    believe they are shard 0 buy every job twice.
+    """
+    parts = spec.split("/")
+    if len(parts) != 2 or not all(p.strip().lstrip("-").isdigit() for p in parts):
+        raise ValueError(f"--shard wants 'i/n', got {spec!r}")
+    return int(parts[0]), int(parts[1])
+
+
+def shard(jobs: list[Job], index: int, count: int) -> list[Job]:
+    """The `index`-th of `count` disjoint slices of `jobs`, by position.
+
+    Positional striding rather than hashing: it is inspectable, it needs no shared state, and
+    the union is provably the whole plan (see the tests). Every job owns its output file and its
+    own cassette, so parallel workers never contend -- the only shared resource is the API key.
+    """
+    if count < 1 or not (0 <= index < count):
+        raise ValueError(f"shard {index}/{count} is not a valid slice")
+    return [j for k, j in enumerate(jobs) if k % count == index]
+
+
 def argv_for(job: Job, gene_files: dict[str, str], *, execute: bool) -> list[str]:
     """The exact CLI invocation for one replicate.
 
@@ -277,6 +301,12 @@ def _run_jobs(jobs: list[Job], *, execute: bool) -> int:
     Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
     Path(CASSETTE_DIR).mkdir(parents=True, exist_ok=True)
     for i, job in enumerate(todo, 1):
+        # Re-check at the moment of spending, not only when `todo` was built. With parallel
+        # shards the list can be minutes stale, and the cost of a stale entry is a bought
+        # replicate, not a wasted loop iteration. Belt and braces on top of the partition.
+        if job.done:
+            print(f"[{i}/{len(todo)}] {job.tag} already done since planning, skipping")
+            continue
         genes = released_genes(job.slug, job.arm, job.seed)
         with tempfile.TemporaryDirectory() as d:
             files = {}
@@ -360,6 +390,11 @@ def main(argv: list[str] | None = None) -> int:  # pragma: no cover - CLI conven
         action="store_true",
         help="replay every completed replicate from its cassette, offline, and compare ($0)",
     )
+    p.add_argument(
+        "--shard",
+        default=None,
+        help="'i/n': run only the i-th of n disjoint slices, so n workers can run at once",
+    )
     args = p.parse_args(argv)
     if args.verify:
         checked, failures = verify_all(args.k)
@@ -372,7 +407,12 @@ def main(argv: list[str] | None = None) -> int:  # pragma: no cover - CLI conven
         return 0
     if args.aggregate:
         return _report(args.k)
-    rc = _run_jobs(plan(args.k), execute=args.yes)
+    jobs = plan(args.k)
+    if args.shard:
+        index, count = parse_shard(args.shard)
+        jobs = shard(jobs, index, count)
+        print(f"shard {index}/{count}: {len(jobs)} of {len(plan(args.k))} job(s)")
+    rc = _run_jobs(jobs, execute=args.yes)
     return _report(args.k) if (rc == 0 and args.yes) else rc
 
 

@@ -52,6 +52,13 @@ EPOCHS = 3.5  # metric calls per training task, held constant across the sweep
 POOL_CLIFF = 32  # first n_train whose pool leaves 64, which would move the held-out set
 
 
+def _meta_of(name: str) -> dict:
+    """A released run's `meta` block. Mirrors `_runs`, using plain `open` so it does not depend
+    on the lazy `pathlib` imports the analyzer shims use."""
+    with open(f"{DOCS}/{name}", encoding="utf-8") as fh:
+        return json.load(fh)["meta"]
+
+
 def _runs(name: str) -> list[dict]:
     with open(f"{DOCS}/{name}", encoding="utf-8") as fh:
         return json.load(fh)["runs"]
@@ -269,12 +276,22 @@ def _table_row(tex: str, header_marker: str, row_label: str) -> list[list[float]
     if start < 0:
         raise LookupError(f"no table with header marker {header_marker!r}")
     body = tex[start : tex.find(r"\bottomrule", start)]
-    for line in body.splitlines():
-        if line.strip().startswith(row_label):
-            return [
-                [float(v) for v in re.findall(r"[+-]?\d+\.\d+|(?<![_\d])[+-]?\d+(?!\d)", cell)]
-                for cell in line.split("&")
-            ]
+    lines = body.splitlines()
+    for i, line in enumerate(lines):
+        if not line.strip().startswith(row_label):
+            continue
+        # A LaTeX row ends at `\\`, which may be several source lines later. Joining to that
+        # terminator matters: tab:ciexcl wraps its last column onto a continuation line, and a
+        # line-based reader silently returned a SHORT row -- so a checker asking for that column
+        # got an IndexError at best and, if it guarded, skipped the cell entirely.
+        joined = line
+        while "\\\\" not in joined and i + 1 < len(lines):
+            i += 1
+            joined += " " + lines[i]
+        return [
+            [float(v) for v in re.findall(r"[+-]?\d+\.\d+|(?<![_\d])[+-]?\d+(?!\d)", cell)]
+            for cell in joined.split("&")
+        ]
     raise LookupError(f"no row {row_label!r} under {header_marker!r}")
 
 
@@ -422,6 +439,101 @@ def _bcb_actionability_overlap() -> float:
     meta = ad._meta(path)
     task_set = ad.task_set_of(meta)
     return ad.heldout_overlap(task_set, list(meta.get("seeds") or []), meta.get("n_heldout"))
+
+
+def _detector_stats(cassette: str, seeds: list[int], loop_kw: dict) -> dict[str, float]:
+    """Detector precision/F1/n replayed FROM THE CASSETTE, not read from a results JSON.
+
+    This is the paper's second independent derivation path. The seed-held-out column of
+    tab:curve comes from the results artifacts; its detector columns come from replaying the
+    recorded critique verdicts. Agreement of the two against the same table is a stronger
+    statement than either alone.
+    """
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import analyze_critique_detector as acd
+
+    events = acd.collect_events(f"tests/fixtures/cassettes/{cassette}", seeds, loop_kw=loop_kw)
+    return acd.detector_stats(events)
+
+
+def _residual_rates() -> dict[str, dict[str, float]]:
+    """Per-constraint final-draft satisfaction, replayed from the cassettes.
+
+    tab:residual's caption says "from cassettes", and this makes that literal: all 24 cells are
+    recomputed through the production self-refine loop in strict replay mode. Previously the
+    run-3 column existed here only as a hand-typed dict, which pinned nothing about the paper.
+    """
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import analyze_residual_by_constraint as arc
+
+    out: dict[str, dict[str, float]] = {}
+    for tag, name, seeds, oc, lvl, r in arc._REGIMES:
+        counts = arc.constraint_pass_counts(
+            f"{arc.CASSETTE_DIR}/{name}",
+            seeds,
+            oracle_critique=oc,
+            feedback_level=lvl,
+            max_retries=r,
+        )
+        key = tag.split()[0]
+        out[key] = {
+            iid: arc.pass_rate(counts, iid) for iid in arc._IDS if counts.get(iid, [0, 0])[1]
+        }
+    return out
+
+
+def _evolved_conditions():
+    """The arm-D mechanism table's rows: seed vs evolved critique scored as detectors.
+
+    Replayed through each condition's own genome against the c2b cassette, which is the only
+    comparison the recording supports -- `generate` and `ensure_correct` moved together, so a
+    same-drafts contrast was never recorded.
+    """
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import analyze_evolved_gene as ev
+
+    return ev.score_run(
+        f"{DOCS}/validation-study-c2b.json", "tests/fixtures/cassettes/study-c2b.json"
+    )
+
+
+def _per_seed_deltas(kind: str) -> list[float]:
+    """The per-seed Delta vectors behind tab:ciexcl, recomputed from the runs."""
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import analyze_deltas as ad
+
+    if kind == "actuator":
+        runs = _runs("validation-study-bcb-actuator-big.json")
+        return [r["D"]["opt_heldout"] - r["B"]["opt_heldout"] for r in runs]
+    if kind == "actionability":
+        return ad.delta_between(
+            f"{DOCS}/validation-study-fbacthi.json", f"{DOCS}/validation-study-fbactlo.json"
+        )
+    runs = _runs("validation-study-multihard.json")
+    return [r["D"]["opt_heldout"] - r["B"]["opt_heldout"] for r in runs]
+
+
+def _corrected_ci(kind: str) -> tuple[float, float]:
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import analyze_deltas as ad
+
+    _, lo, hi = ad.exact_resample_ci(_per_seed_deltas(kind))
+    return lo, hi
 
 
 def _contrast_flag_census() -> tuple[int, int]:
@@ -1312,6 +1424,229 @@ def _checks() -> list[tuple[str, float, float, float]]:
     for label, pattern, tol, artifact in decomp_prose:
         out.append((label, _scrape(tex, pattern), tol, artifact))
 
+    # --- Table cells, read positionally out of the .tex ------------------------------
+    # THE DRIFT HOLE THIS CLOSES. Most checks in this file compare a computed artifact value
+    # against a literal typed here, which pins the ARTIFACT but never opens main.tex: edit a
+    # number in a table and nothing fails. `_table_row` locates a row by its table's header and
+    # its own label, so these assertions read what the paper actually prints, cell by cell.
+    # Every table below carries numbers derived from a run rather than from the design.
+    c2b_runs = _runs("validation-study-c2b.json")
+    seed_mean = mean(r["A"]["seed_heldout"] for r in c2b_runs)
+    rerun_hdr = r"Arm & GEPA evolves & seed & optimized"
+    for row_label, arm in (("A &", "A"), ("C &", "C"), ("B &", "B"), ("D &", "D")):
+        cells = _table_row(tex, rerun_hdr, row_label)
+        opt = mean(r[arm]["opt_heldout"] for r in c2b_runs)
+        # cells: [arm(no number)] [genes] [seed] [optimized] [delta]
+        out.append((f"tab:rerun {arm} seed", cells[2][0], 0.0005, seed_mean))
+        out.append((f"tab:rerun {arm} optimized", cells[3][0], 0.0005, opt))
+        out.append((f"tab:rerun {arm} delta", cells[4][0], 0.0005, opt - seed_mean))
+
+    p0_hdr = r"Level & excluded & $\mathbb{E}[p_0]$ & $p_0$"
+    for row_label, slug in (("$L_1$ &", "c2b"), ("$L_2$ &", "p0-L2"), ("$L_3$ &", "p0-L3")):
+        cells = _table_row(tex, p0_hdr, row_label)
+        runs = _runs(f"validation-study-{slug}.json")
+        b_seed = mean(r["B"]["seed_heldout"] for r in runs)
+        b_opt = mean(r["B"]["opt_heldout"] for r in runs)
+        d_seed = mean(r["D"]["seed_heldout"] for r in runs)
+        d_opt = mean(r["D"]["opt_heldout"] for r in runs)
+        lvl = row_label.strip(" &")
+        # cells: [Level] [excluded] [E p0] [p0] [B seed->opt] [D seed->opt] [delta] [CI]
+        out.append((f"tab:p0 {lvl} B seed", cells[4][0], 0.0005, b_seed))
+        out.append((f"tab:p0 {lvl} B opt", cells[4][1], 0.0005, b_opt))
+        out.append((f"tab:p0 {lvl} D seed", cells[5][0], 0.0005, d_seed))
+        out.append((f"tab:p0 {lvl} D opt", cells[5][1], 0.0005, d_opt))
+        out.append((f"tab:p0 {lvl} delta", cells[6][0], 0.0005, d_opt - b_opt))
+
+    decomp_hdr = r"level & $\dd(D-B)$ & draft term"
+    for i, row_label in enumerate(("$L_1$ &", "$L_2$ &", "$L_3$ &")):
+        cells = _table_row(tex, decomp_hdr, row_label)
+        d = _decomposition(i)
+        lvl = row_label.strip(" &")
+        out.append((f"tab:decomp {lvl} delta", cells[1][0], 0.0005, d["delta"]))
+        out.append((f"tab:decomp {lvl} draft", cells[2][0], 0.0005, d["draft_term"]))
+        out.append((f"tab:decomp {lvl} loop", cells[3][0], 0.0005, d["loop_term"]))
+
+    # tab:curve's "seed held-out" column, the six-plus-one arm-A baselines that answer
+    # questions (i) and (ii). Row labels carry $R$ where two rows share a detector name, since
+    # `_table_row` returns the first match and runs 7 and 8 differ only in retries. No
+    # try/except here on purpose: an earlier version skipped a wrong header silently and all
+    # six checks vanished while the script still printed a pass.
+    curve_hdr = r"Critique detector & $R$ & precision"
+    #: (row label as printed, results slug, cell index of the seed held-out column)
+    curve_rows = (
+        ("intrinsic self-critique &", "multihard", 5),
+        ("intrinsic $+$ plan module &", "plan", 5),
+        ("non-oracle measurement tool &", "feedback", 5),
+        ("oracle, which-constraint (mid) & 1", "oracle", 5),
+        ("oracle, which-constraint (mid) & 3", "fixbudget", 5),
+        ("oracle, bare ``revise'' (lo) &", "fbactlo", 5),
+        ("oracle, concrete measured edits (hi) &", "fbacthi", 5),
+    )
+    for row_label, slug, col in curve_rows:
+        cells = _table_row(tex, curve_hdr, row_label)
+        artifact = _arm_mean(f"validation-study-{slug}.json", "A", "seed_heldout")
+        out.append((f"tab:curve {slug} seed", cells[col][0], 0.0005, artifact))
+
+    # tab:curve's DETECTOR columns, replayed from the cassettes rather than read from a results
+    # JSON -- the paper's second derivation path, landing in the same table as the first.
+    from whystuck.eval.text_stats import text_stats as _text_stats
+
+    for row_label, cassette, seeds, kw, want_f1 in (
+        ("intrinsic self-critique &", "study-multihard.json", [0, 1, 2, 3, 4], {}, True),
+        (
+            "intrinsic $+$ plan module &",
+            "study-plan.json",
+            [0, 1, 2],
+            {"plan_gene": "plan"},
+            False,  # F1 is undefined here (no true positives), and the paper prints "approx 0"
+        ),
+        (
+            "non-oracle measurement tool &",
+            "study-feedback.json",
+            [0, 1, 2],
+            {"stats_fn": _text_stats},
+            True,
+        ),
+    ):
+        cells = _table_row(tex, curve_hdr, row_label)
+        st = _detector_stats(cassette, seeds, kw)
+        tag = row_label.strip(" &").replace("$+$", "plus")
+        out.append((f"tab:curve {tag} precision", cells[2][0], 0.005, st["precision"]))
+        out.append((f"tab:curve {tag} n", cells[4][0], 0, st["n"]))
+        if want_f1:
+            out.append((f"tab:curve {tag} F1", cells[3][0], 0.005, st["f1"]))
+
+    # tab:decomp's treated-share column: |loop| / |delta|, the number the section's headline
+    # claim ("overstates by 2.5x") is the reciprocal of.
+    for i, row_label in (("0", "$L_1$ &"), ("1", "$L_2$ &")):
+        d = _decomposition(int(i))
+        cells = _table_row(tex, decomp_hdr, row_label)
+        out.append(
+            (
+                f"tab:decomp {row_label.strip(' &')} treated share",
+                cells[4][0],
+                0.5,
+                100.0 * abs(d["loop_term"]) / abs(d["delta"]),
+            )
+        )
+
+    # tab:splitsweep's priced bounds. These are money figures the prose of sec:splitresult now
+    # cites as the bound that was NOT exceeded, so they must come from each run's own recorded
+    # pre-flight estimate rather than from memory.
+    sweep_hdr = r"$n_{\mathrm{train}}$ & \texttt{mmc} & accept-cycle floor"
+    for row_label, slug in (("4  &", "split4"), ("16 &", "split16"), ("24 &", "split24")):
+        cells = _table_row(tex, sweep_hdr, row_label)
+        est = _meta_of(f"validation-study-{slug}.json")["estimated_usd"]
+        out.append((f"tab:splitsweep {slug} priced bound", cells[4][0], 0.005, est))
+
+    # tab:results: all ten pre-registered runs, retained as the record of what the defect
+    # invalidated. The paper says no claim rests on its Delta column, which is true and is not a
+    # licence for the numbers to drift. Tolerance is 0.006 because this table prints to two
+    # decimals in most cells (0.975 appears as 0.97), unlike the three-decimal tables above.
+    results_hdr = r"Run & Regime & Seeds & Seed & B (prompt-only)"
+    for row_label, slug in (
+        ("1 &", ""),
+        ("2 &", "-multi"),
+        ("3 &", "-multihard"),
+        ("4 &", "-feedback"),
+        ("5 &", "-plan"),
+        ("6 &", "-crossfamily"),
+        ("7 &", "-oracle"),
+        ("8 &", "-fixbudget"),
+        ("9 &", "-fbactlo"),
+        ("10 &", "-fbacthi"),
+    ):
+        cells = _table_row(tex, results_hdr, row_label)
+        runs = _runs(f"validation-study{slug}.json")
+        n = row_label.strip(" &")
+        b = mean(r["B"]["opt_heldout"] for r in runs)
+        d = mean(r["D"]["opt_heldout"] for r in runs)
+        out.append((f"tab:results run{n} seeds", cells[2][0], 0, len(runs)))
+        out.append(
+            (
+                f"tab:results run{n} seed",
+                cells[3][0],
+                0.006,
+                mean(r["A"]["seed_heldout"] for r in runs),
+            )
+        )
+        out.append((f"tab:results run{n} B", cells[4][0], 0.006, b))
+        out.append((f"tab:results run{n} D", cells[5][0], 0.006, d))
+        out.append((f"tab:results run{n} delta", cells[6][0], 0.006, d - b))
+
+    # tab:residual, all 24 cells, replayed from the cassettes through the production loop.
+    residual_hdr = r"Constraint (final-draft satisfaction) & run 3"
+    rates = _residual_rates()
+    residual_cols = ("run3", "run8", "run10")
+    for iid in (
+        "exact_word_count",
+        "word_max_length",
+        "forbidden_word",
+        "num_bullets",
+        "end_with",
+        "include_keyword",
+        "all_lowercase",
+        "no_comma",
+    ):
+        label = "\\texttt{" + iid.replace("_", "\\_") + "}"
+        cells = _table_row(tex, residual_hdr, label)
+        for col, run_key in enumerate(residual_cols, start=1):
+            want = rates.get(run_key, {}).get(iid)
+            if want is None:
+                continue
+            out.append((f"tab:residual {iid} {run_key}", cells[col][0], 0.005, want))
+
+    # tab:c1's run-3 row and the arm-D mechanism table, both cassette-derived confusion
+    # matrices. The mechanism table was the least-checked and most load-bearing table in the
+    # paper before the second audit; its cells are now read positionally rather than via prose.
+    c1_hdr = r"Critique gene & $n$ & base rate & tp & fp & fn & PASS rate"
+    st3 = _detector_stats("study-multihard.json", [0, 1, 2, 3, 4], {})
+    c1_cells = _table_row(tex, c1_hdr, "run 3, intrinsic")
+    for col, key in ((1, "n"), (2, "base_rate"), (3, "tp"), (4, "fp"), (5, "fn")):
+        out.append((f"tab:c1 run3 {key}", c1_cells[col][0], 0.005, st3[key]))
+    # PASS rate is the share of drafts the critique accepted: (tp + fp) / n.
+    out.append(
+        (
+            "tab:c1 run3 PASS rate",
+            c1_cells[6][0],
+            0.005,
+            (st3["tp"] + st3["fp"]) / st3["n"],
+        )
+    )
+
+    mech_hdr = r"critique & PASS rate & tp & fp & fn & tn"
+    mech_rows = _evolved_conditions()
+    for seed in (0, 1, 2):
+        for kind, label in (
+            ("seed", f"seed rubric, seed {seed}"),
+            ("evolved", f"\\textbf{{evolved}}, seed {seed}"),
+        ):
+            cond = next(c for c in mech_rows if c.seed == seed and c.kind == kind)
+            cells = _table_row(tex, mech_hdr, label)
+            out.append((f"mech s{seed} {kind} PASS", cells[1][0], 0.005, cond.pass_rate))
+            for col, key in ((2, "tp"), (3, "fp"), (4, "fn"), (5, "tn")):
+                out.append((f"mech s{seed} {kind} {key}", cells[col][0], 0, cond.stats[key]))
+
+    # tab:ciexcl: the interval-correction exhibit. Its per-seed column and its CORRECTED column
+    # are both recomputed; its "as published" column deliberately is not, because those numbers
+    # are the output of the percentile-index bug that this table documents. They are historical
+    # artifacts of a fixed defect, so no current code can reproduce them -- see the exemption
+    # list in tests/test_paper_table_coverage.py.
+    ciexcl_hdr = r"Result & per-seed & as published & corrected"
+    for row_label, kind, has_corrected in (
+        ("Actuator, powered", "actuator", True),
+        ("Actionability, hi", "actionability", True),
+        ("Null, run", "null3", False),  # the paper prints "unchanged" rather than an interval
+    ):
+        cells = _table_row(tex, ciexcl_hdr, row_label)
+        per_seed = _per_seed_deltas(kind)
+        for i, want in enumerate(per_seed):
+            out.append((f"tab:ciexcl {kind} seed{i}", cells[1][i], 0.0005, want))
+        if has_corrected:
+            lo, hi = _corrected_ci(kind)
+            out.append((f"tab:ciexcl {kind} corrected lo", cells[3][0], 0.0005, lo))
+            out.append((f"tab:ciexcl {kind} corrected hi", cells[3][1], 0.0005, hi))
+
     # --- The split-size sweep, bought (sec:splitresult) --------------------------------
     # Every number in tab:splitresults, cell by cell, plus the prose that interprets it. The
     # table is the whole result of a $6.98 purchase, so an unchecked digit here is the most
@@ -1451,6 +1786,17 @@ def _checks() -> list[tuple[str, float, float, float]]:
         m = re.search(pattern, tex, re.DOTALL | re.MULTILINE)
         out.append((label, float(m.group(1)) if m else float("nan"), 0.0005, abs(gap)))
         out.append((f"{label} sigma", float(m.group(2)) if m else float("nan"), 0.005, in_sigma))
+
+    # The one gap in the curve the paper explicitly declines to claim. Sigma only: the caption
+    # prints the two endpoints rather than their difference, so there is no gap value to scrape.
+    out.append(
+        (
+            "tex: curve run10 vs tool sigma",
+            _scrape(tex, r"that particular gap is\n\$([\d.]+)\\sigma\$"),
+            0.005,
+            _curve_gap("run4", "run10")[1],
+        )
+    )
 
     # The code-actionability effect, which the paper now reports WITHOUT an interval because
     # its seeds are partitions. The overlap it cites is checked, and so is the claim that the
