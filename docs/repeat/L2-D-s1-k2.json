@@ -1,0 +1,77 @@
+{
+  "meta": {
+    "dataset": "multi-constraint-hard (IFEval-style)",
+    "n_train": 8,
+    "n_heldout": 10,
+    "worker_model": "openai/gpt-4.1-mini",
+    "reflection_model": "openai/gpt-5.6-luna",
+    "max_metric_calls": 28,
+    "module_selector": "all",
+    "seeds_independent": true,
+    "detector_reflection": true,
+    "reflection_calls": 10,
+    "task_set": "multi-hard",
+    "temperature": null,
+    "sample": 2,
+    "exclude_constraint": [
+      "exact_word_count"
+    ],
+    "loop_max_retries": 1,
+    "plan_gene": false,
+    "feedback_stats": false,
+    "critique_model": null,
+    "oracle_critique": false,
+    "feedback_level": "mid",
+    "exec_feedback": false,
+    "actuator": false,
+    "gene_overrides": {
+      "ensure_correct": "You are a strict constraint checker. Given a task, its explicit requirements, and a draft response, determine whether the draft satisfies every requirement.\n\nBefore judging, reread the task and inspect the draft systematically. Treat every requirement as mandatory; a draft passes only if none are violated.\n\nCheck, as applicable:\n\n- forbidden words: search for the prohibited word as a standalone word, including case-insensitive matches where relevant\n- prohibited punctuation, such as commas\n- exact formatting, including the required number of bullet points and the required \"- \" prefix\n- maximum word length: inspect every word and reject any word exceeding the stated limit\n- capitalization requirements, such as entirely lowercase text\n- exact required endings, including punctuation and spacing\n- required included words or phrases\n- any other semantic or structural requirement stated by the task\n\nDo not infer that a draft passes merely because it generally follows the task. Count and verify each requirement independently. Be especially careful with words that are easy to overlook: in the technology example, \u201cblockchain\u201d exceeds the six-letter maximum, and \u201cof\u201d appears in \u201ca type of tech,\u201d so the draft must be rejected even though it satisfies the lowercase, ending, and \u201cnode\u201d requirements. A response that violates two requirements must be reported as failing two requirements, not as a pass.\n\nUse this output format:\n\n- If every requirement is satisfied, output:\n  PASS\n\n  Then briefly state that all requirements are satisfied and list the checked requirements.\n\n- If one or more requirements are violated, output:\n  WRONG\n\n  Then state the number of failed requirements, identify each failed requirement, and explain the exact offending word, character, phrase, count, or formatting issue. Also list the requirements that were satisfied when useful.\n\nApply exact, literal checking rather than charitable interpretation. Do not silently revise the draft unless the task explicitly asks for a corrected version.",
+      "generate": "For every task, generate the requested content while satisfying every stated requirement simultaneously. Treat each requirement as mandatory and verify the complete response before submitting it.\n\nUse this workflow:\n1. Identify the requested topic, format, length, and content.\n2. Extract every lexical and formatting constraint, including forbidden words, required words, capitalization, punctuation, exact ending phrases, word-length limits, and line or bullet counts.\n3. Draft content that answers the task naturally.\n4. Audit the draft token by token:\n   - Count bullets or lines exactly.\n   - Check required prefixes such as \"- \".\n   - Check every word against the maximum length.\n   - Search for forbidden words as standalone words, including accidental uses in phrases such as \u201ctype of\u201d.\n   - Confirm required words are present exactly as requested.\n   - Confirm capitalization and punctuation rules.\n   - Confirm an exact required ending appears as the final text, with no extra material afterward.\n5. Revise until all constraints pass. Output only the requested answer, with no explanation or checklist.\n\nKnown examples and pitfalls:\n- A natural-process answer about rain can use four bullets describing water droplets forming in clouds, falling, soaking into soil, and rising again due to sun heat. If the limit is six letters, words such as \u201cclouds,\u201d \u201cdrops,\u201d \u201cground,\u201d and \u201cwater\u201d are acceptable, but longer words are not.\n- A discovery note may describe a glowing cave bug that uses its glow to find food and could help scientists understand how light forms in dark places. If lowercase, no commas, no word longer than seven letters, and the exact ending \u201cthat is it.\u201d are required, check all words and end exactly with that phrase.\n- A blockchain overview may mention that blockchain links data in a chain and that each node holds a copy, making information difficult to alter. Under a six-letter limit, \u201cblockchain\u201d and \u201ctracking\u201d are too long, and the phrase \u201ctype of\u201d violates a ban on the standalone word \u201cof.\u201d Do not repeat these errors."
+    },
+    "worker_max_output_tokens": 320,
+    "seeds": [
+      1
+    ],
+    "estimated_usd": 0.02976,
+    "generated": "2026-07-29T17:10:52.465269+00:00"
+  },
+  "runs": [
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.975,
+        "opt_heldout": 0.975,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-34": 1.0,
+          "mc-35": 0.75,
+          "mc-46": 1.0,
+          "mc-20": 1.0,
+          "mc-61": 1.0,
+          "mc-37": 1.0,
+          "mc-14": 1.0,
+          "mc-63": 1.0,
+          "mc-53": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-34": 1.0,
+          "mc-35": 0.75,
+          "mc-46": 1.0,
+          "mc-20": 1.0,
+          "mc-61": 1.0,
+          "mc-37": 1.0,
+          "mc-14": 1.0,
+          "mc-63": 1.0,
+          "mc-53": 1.0
+        }
+      }
+    }
+  ]
+}

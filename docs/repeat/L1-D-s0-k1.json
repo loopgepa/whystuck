@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "dataset": "multi-constraint-hard (IFEval-style)",
+    "n_train": 8,
+    "n_heldout": 10,
+    "worker_model": "openai/gpt-4.1-mini",
+    "reflection_model": "openai/gpt-5.6-luna",
+    "max_metric_calls": 28,
+    "module_selector": "all",
+    "seeds_independent": true,
+    "detector_reflection": true,
+    "reflection_calls": 10,
+    "task_set": "multi-hard",
+    "temperature": null,
+    "sample": 1,
+    "exclude_constraint": [],
+    "loop_max_retries": 1,
+    "plan_gene": false,
+    "feedback_stats": false,
+    "critique_model": null,
+    "oracle_critique": false,
+    "feedback_level": "mid",
+    "exec_feedback": false,
+    "actuator": false,
+    "gene_overrides": {
+      "ensure_correct": "You are a strict constraint validator. Given a task, its explicit requirements, and a draft response, determine whether the draft satisfies every requirement.\n\nBefore answering, reread the task and check each constraint independently. Never return PASS based on an overall impression or partial compliance. Return PASS only when every stated requirement is satisfied. If even one requirement fails, return WRONG and identify every failed requirement, including the specific correction needed; also list the requirements that were satisfied when useful.\n\nValidate the following precisely whenever they are requested:\n\n1. Exact word count:\n   - Count all ordinary words in the response.\n   - Do not count formatting markers such as the \"- \" prefix as words.\n   - Punctuation attached to a word does not create another word.\n   - Verify the count manually or by numbering every word.\n\n2. Maximum word length:\n   - Inspect every word, not merely a sample.\n   - Count letters in each word, ignoring surrounding punctuation.\n   - A single word longer than the stated maximum means the requirement fails.\n   - For example, in the 20-word sentence \u201cA nerve node sends quick signals in the body helping control muscles and senses for smooth fast motion and response,\u201d the word \u201cresponse\u201d has 8 letters, so a 7-letter maximum is violated even though the word count, keyword, and forbidden-word checks pass.\n\n3. Required and forbidden words:\n   - A required keyword must appear as the requested standalone word, with case treated consistently unless the task specifies otherwise.\n   - A forbidden word must not appear as a standalone word.\n   - Do not confuse a keyword requirement with a semantic equivalent.\n   - In the first example, \u201cnode\u201d is present and \u201cto\u201d is absent; these facts do not override the word-length failure.\n\n4. Exact format:\n   - For \u201cexactly 3 bullet points,\u201d there must be exactly three bullet lines and no additional prose.\n   - Each line must begin exactly with \u201c- \u201d.\n   - Check that headings, blank lines, numbered lists, or extra bullets do not violate the format.\n\n5. Forbidden punctuation:\n   - If commas are forbidden, search the entire response for every comma, including commas inside otherwise valid sentences.\n\n6. Semantic task:\n   - Confirm that the response actually performs the requested task, such as explaining a scientific concept or describing a natural process, but do not mark it PASS merely because it is meaningful.\n\nUse the examples as diagnostic guidance:\n- Example 1 should be marked WRONG because \u201cresponse\u201d exceeds the 7-letter limit, despite satisfying the 20-word count, including \u201cnode,\u201d and omitting \u201cto.\u201d\n- Examples 2 and 3 should be marked WRONG because, although they have three correctly prefixed bullet points, contain \u201catom,\u201d and use no commas, they do not contain exactly 20 words and include words longer than 7 letters.\n\nWhen reporting a failure, name the failed constraint and give a concise correction, such as:\n\u201cWRONG \u2014 failed: exact_word_count (expected exactly 20 words); word_max_length (all words must be 7 letters or fewer). Satisfied: num_bullets, no_comma, include_keyword.\u201d\n\nDo not silently repair the draft before judging it. Judge the supplied draft exactly as written.",
+      "generate": "For each task input, produce the requested explanation while satisfying every stated requirement exactly.\n\nBefore responding:\n1. Identify the requested subject, output format, and every explicit constraint.\n2. Draft an accurate, clear, self-contained answer relevant to the requested scientific concept or natural process.\n3. Verify the response mechanically:\n   - Count words exactly as ordinary whitespace-separated words.\n   - Ensure any required word appears exactly as requested.\n   - Ensure forbidden words and punctuation are absent.\n   - Check every word\u2019s spelling and character length; no word may exceed the specified maximum.\n   - Confirm the required number of bullets or lines and ensure each line begins with the required prefix.\n   - Treat the entire response as subject to the word-count requirement unless the task explicitly says otherwise; do not count bullet markers as words.\n4. Revise until all requirements are simultaneously satisfied. Do not provide explanations, disclaimers, or extra text outside the requested format.\n\nPrior attempts demonstrate that apparent compliance is insufficient: one response met the 20-word count, required keyword, and forbidden-word condition but contained an overlong word (\u201cresponse\u201d); another met the bullet, comma, and keyword conditions but failed both the total 20-word count and maximum-word-length condition. Therefore, count all words across all bullets and inspect every word individually before answering."
+    },
+    "worker_max_output_tokens": 320,
+    "seeds": [
+      0
+    ],
+    "estimated_usd": 0.02976,
+    "generated": "2026-07-29T16:10:04.261106+00:00"
+  },
+  "runs": [
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.82,
+        "opt_heldout": 0.82,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-36": 0.75,
+          "mc-51": 0.8,
+          "mc-21": 0.8,
+          "mc-4": 0.75,
+          "mc-43": 0.75,
+          "mc-52": 1.0,
+          "mc-9": 1.0,
+          "mc-38": 0.8,
+          "mc-34": 0.75,
+          "mc-58": 0.8
+        },
+        "opt_heldout_by_task": {
+          "mc-36": 0.75,
+          "mc-51": 0.8,
+          "mc-21": 0.8,
+          "mc-4": 0.75,
+          "mc-43": 0.75,
+          "mc-52": 1.0,
+          "mc-9": 1.0,
+          "mc-38": 0.8,
+          "mc-34": 0.75,
+          "mc-58": 0.8
+        }
+      }
+    }
+  ]
+}

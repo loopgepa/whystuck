@@ -1,0 +1,125 @@
+{
+  "entries": {
+    "worker:046c26d40636f9d2c7e4f1e2718ce0b3f0102a0db7590dd5a0bb669f1c8805ea": {
+      "name": "worker",
+      "output": "- rain starts high as small drops in clouds  \n- wind drives these drops into cold air  \n- drops join and get big, then fall  \n- water flows down hills filling lakes fast"
+    },
+    "worker:15d1e1bbf868bc6bfcc8f490ed7954741fa1fd23c3be6363a584df123237ae26": {
+      "name": "worker",
+      "output": "- Read books and notes daily for new facts  \n- Ask good words when you don\u2019t know  \n- Use graphs and charts that help you  \n- Take short rest breaks to stay sharp"
+    },
+    "worker:28bafd7dac96066adab5be3da95d9808b8d7e1e1dd6df3d7b5a8cb35f7d2c1fa": {
+      "name": "worker",
+      "output": "Flux shows how heat or gas moves through space, helping us grasp energy flow here we go."
+    },
+    "worker:2e512786e6ce673a085257c2c92a376adb4f74c9ec4064c6d8b2fb6c9886de09": {
+      "name": "worker",
+      "output": "The new cell shapes show how small parts work with each other during growth and flux shifts."
+    },
+    "worker:33afa83c522f3fa6c39677fb7c3a8451cd3f98ae4d5ae684c3d5442a1f6b46cd": {
+      "name": "worker",
+      "output": "Task: Describe a natural process.\n\nRequirements:  \n- exactly 25 words  \n- entire response in lowercase  \n- exactly 4 bullet points, each starting with \"- \"  \n- no word longer than 7 letters  \n\nDraft answer:  \n- rain forms clouds filled with small drops  \n- wind moves these drops through cool air  \n- drops grow large and fall from clouds  \n- water flows down hills, filling lakes and streams  \n\nEvaluation:  \n1. Word count: Count total words in draft.  \nLine 1: 7 words (\"rain forms clouds filled with small drops\")  \nLine 2: 8 words (\"wind moves these drops through cool air\")  \nLine 3: 7 words (\"drops grow large and fall from clouds\")  \nLine 4: 8 words (\"water flows down hills, filling lakes and streams\")  \nTotal words = 7 + 8 + 7 + 8 = 30 words (requirement: exactly 25 words) \u2192 FAIL\n\n2. Lowercase: all words are lowercase \u2192 PASS\n\n3. Number of bullet points: exactly 4 bullet lines starting with \"- \" \u2192 PASS\n\n4. Maximum word length \u2264 7 letters: Check longest words.  \n- line 1: \"filled\" (6), \"clouds\" (6), \"small\" (5), others shorter \u2192 PASS  \n- line 2: \"moves\" (5), \"these\" (5), \"through\" (7) \u2192 PASS  \n- line 3: \"large\" (5), \"clouds\" (6)"
+    },
+    "worker:3ac33a73f09811a759c1a8bbc5f84e840410b8535f2861bb16a143773056be15": {
+      "name": "worker",
+      "output": "an idea is a thought that helps start new plans or solves hard parts. share your ideas with friends and learn while you work and grow. keep trying."
+    },
+    "worker:3bf6d3c80f87299746c029d4ca97377d929cf40d7c7ea67a345e26296cd084b9": {
+      "name": "worker",
+      "output": "Task: Explain a scientific concept.\n\nRequirements:\n- Exactly 15 words\n- Do not use the word \"the\"\n- Include the word \"flux\"\n- No word longer than 6 letters\n- End with the exact phrase \"here we go.\"\n\nDraft:\n\"Flux shows how heat or gas moves through space, helping us grasp energy flow here we go.\"\n\nEvaluation:\n\n1. Word count:\nCount words:  \nFlux (1)  \nshows (2)  \nhow (3)  \nheat (4)  \nor (5)  \ngas (6)  \nmoves (7)  \nthrough (8)  \nspace, (9)  \nhelping (10)  \nus (11)  \ngrasp (12)  \nenergy (13)  \nflow (14)  \nhere (15)  \nwe (16)  \ngo. (17)  \nTotal = 17 words, which is more than the required 15.\n\n2. No use of \"the\":  \nNo \"the\" present; passed.\n\n3. Include word \"flux\":  \n\"Flux\" is present as first word; passed.\n\n4. No words longer than 6 letters:  \nCheck each word:\n\n- Flux (4 letters) okay  \n- shows (5 letters) okay  \n- how (3) okay  \n- heat (4) okay  \n- or (2) okay  \n- gas (3) okay  \n- moves (5) okay  \n- through (7) -> FAIL (exceeds 6 letters)  \n- space, (5 letters ignoring comma) okay  \n- helping (7"
+    },
+    "worker:458bc925393a3039fa346caffd3cd7182bc8b26ac57594da5e2eaabe0939df22": {
+      "name": "worker",
+      "output": "Task: Introduce a topic to a beginner.\n\nRequirements:  \n- exactly 25 words  \n- do not use the word \"of\"  \n- no word longer than 7 letters  \n- entire response in lowercase  \n\nDraft answer:  \n\"plants grow by using light from the sun and water from soil to change energy and make food for life on earth to thrive and last.\"\n\nEvaluation:\n\n1. Word count:  \nCounting words separated by spaces:  \n\"plants\" (1), \"grow\" (2), \"by\" (3), \"using\" (4), \"light\" (5), \"from\" (6), \"the\" (7), \"sun\" (8), \"and\" (9), \"water\" (10), \"from\" (11), \"soil\" (12), \"to\" (13), \"change\" (14), \"energy\" (15), \"and\" (16), \"make\" (17), \"food\" (18), \"for\" (19), \"life\" (20), \"on\" (21), \"earth\" (22), \"to\" (23), \"thrive\" (24), \"and\" (25), \"last.\" (26)  \n\nThe draft has 26 words, not 25. Failed.\n\n2. Presence of forbidden word \"of\":  \nCheck if \"of\" is used as a standalone word in draft: no \"of\" found. Pass.\n\n3. Word length check (max 7 letters):  \nwords to check longer than 7 letters:  \n- \"energy\""
+    },
+    "worker:47ad398481663be5749bea0e0e4e4c76a4ec55f6dfe7fddaf1cff78f5f66f147": {
+      "name": "worker",
+      "output": "- Water heats up by warm rays  \n- Warm air climbs up high  \n- Clouds form in sky  \n- Rain falls down  \n- Plants grow with sun light"
+    },
+    "worker:4e653152de3a31aac6dedefbc9b897ed23de6a8ff3aced4302d63dbaeb51027e": {
+      "name": "worker",
+      "output": "- Learn new facts by reading books and notes  \n- Ask clear questions when things are not clear  \n- Use charts and graphs to help your mind  \n- Take short breaks to keep fresh and sharp"
+    },
+    "worker:56a77d1177daf7e11542ff5e8cd781120754098907662f7ef4b6338a77b8c573": {
+      "name": "worker",
+      "output": "Task: Summarize an idea for a student.\n\nRequirements:  \n- exactly 25 words  \n- exactly 4 bullet points, each line starting with \"- \"  \n- no commas anywhere  \n- no word longer than 6 letters  \n\nDraft answer:  \n- Learn new facts by reading books and notes  (9 words)  \n- Ask clear questions when things are not clear  (8 words)  \n- Use charts and graphs to help your mind  (9 words)  \n- Take short breaks to keep fresh and sharp  (8 words)\n\nTotal words: 9+8+9+8 = 34 words (exceeds 25 required)  \nCheck commas: none present  \nCheck bullet points: 4 lines, each starting \"- \" \u2713  \nCheck word length:  \n- Learn (5 letters)  \n- new (3)  \n- facts (5)  \n- by (2)  \n- reading (7) \u2192 fails (7 > 6)  \n- books (5)  \n- and (3)  \n- notes (5)  \nOne instance of \u201creading\u201d is 7 letters > 6 \u2192 fails word length  \nCheck other lines similarly for words > 6 letters:  \n- clear (5)  \n- questions (9) \u2192 fails  \n- things (6)  \n- not (3)  \n- Use (3)  \n- charts (6)  \n- graphs (6)  \n- help (4)  \n- your (4)  \n- mind (4)  \n- Take (4)  \n- short (5)  \n"
+    },
+    "worker:58632d20661bd8ac219657bef2e6b0a5c204b5b51c66f093a71f155368bad5c6": {
+      "name": "worker",
+      "output": "- rain forms clouds filled with small drops  \n- wind moves these drops through cool air  \n- drops grow large and fall from clouds  \n- water flows down hills, filling lakes and streams"
+    },
+    "worker:6f9179f49f337919d4bcc4daa8703032184fe58f133fc7b2edef17c599a27dd1": {
+      "name": "worker",
+      "output": "A wave carries energy without moving mass It transfers force light sound or heat all is set."
+    },
+    "worker:736daec8336a77f1e13df11a2843c4883abed71b1c9d1eef843170a3dc44b3a2": {
+      "name": "worker",
+      "output": "Task: Describe a natural process.\n\nRequirements:  \n- Exactly 5 bullet points, each line starting with \"- \"  \n- No word longer than 7 letters  \n- No commas  \n- Exactly 15 words total  \n- Do not use the word \"of\"\n\nDraft:  \n- Water heats up by warm rays  (5 words)  \n- Warm air climbs up high       (5 words)  \n- Clouds form in sky             (4 words)  \n- Rain falls down                (3 words)  \n- Plants grow with sun light    (5 words)  \n\nTotal words: 5 + 5 + 4 + 3 + 5 = 22 words (exceeds 15 words)  \nWords longer than 7 letters: None (words like \"Heats\" 5 letters, \"Climbs\" 6 letters, \"Clouds\" 6 letters, \"Plants\" 6 letters, \"Sunlight\" split as \"sun light\" two words)  \nNo commas present.  \nNo \"of\" present.  \nEach bullet starts correctly with \"- \".\n\nVerdict: FIX\n\nFailed requirements:  \n- Exactly 15 words (has 22)  \n\nPassed requirements:  \n- 5 bullet points starting with \"- \"  \n- No word longer than 7 letters  \n- No commas  \n- No \"of\"\n\n---\n\nCorrected version attempt with exactly 15 words, no word >7 letters, no commas, no \"of\", 5 bullets starting \"- \":  \n\n- Water heats up by rays  \n- Warm air climbs up  \n- Clouds form in sky"
+    },
+    "worker:7b3f990d909f75f62177e89de6c2ca547a452e4e13648fb4c0ce899f1fceb06f": {
+      "name": "worker",
+      "output": "Task: Summarize an idea for a student.\n\nRequirements:\n- format as exactly 3 bullet points, each line starting \"- \"\n- use no word longer than 6 letters\n- do not use commas\n- use exactly 25 words\n- write entire response in lowercase\n\nDraft answer:\n- find key facts and write them out  \n- check your work and fix small flaws  \n- share your notes so all can learn well\n\nEvaluation:\n\n1. Number of bullet points: 3 \u2192 Satisfied  \n2. Each line starts with \"- \" \u2192 Satisfied  \n3. No word longer than 6 letters:  \n   Check words longer than 6 letters:  \n   - \"small\" (5) ok  \n   - \"flaws\" (5) ok  \n   - \"share\" (5) ok  \n   - \"notes\" (5) ok  \n   - \"learn\" (5) ok  \n   - \"write\" (5) ok  \n   - \"check\" (5) ok  \n   - \"three\" (5) ok  \n   - \"key\" (3) ok  \n   - \"facts\" (5) ok  \n   - \"your\" (4) ok  \n   - \"work\" (4) ok  \n   - \"fix\" (3) ok  \n   - \"out\" (3) ok  \n   - Others: \"find\", \"and\", \"so\", \"all\", \"can\", \"well\" all \u22646 letters  \n   No word longer than 6 letters \u2192 Satisfied  \n4. No commas"
+    },
+    "worker:7ccd5c324efe65f9ffece1d7aad81aa01fd031d987e88d5873c8af5fce06fcb7": {
+      "name": "worker",
+      "output": "- find main facts and write them down  \n- check your work and fix small errors  \n- share your notes so all can learn well"
+    },
+    "worker:87260fe4c91ac38a85dcc4077686d46c04e6ad539a430516860c5e8dffccb80d": {
+      "name": "worker",
+      "output": "- Sun warms sea and land  \n- Air grows warm and climbs  \n- Clouds form in sky  \n- Rain falls down hard  \n- Plants drink rain and grow"
+    },
+    "worker:9d17c72f321a1a4277954b1bad63ec6b02233c86c1c6aaebf135306eef9e21a0": {
+      "name": "worker",
+      "output": "New cell parts show how small units act with each other during growth and flux change."
+    },
+    "worker:a76d3d4576eae138e1a7d5e0469b6381810bc3de463681f1a87e56d9b5d6f4c2": {
+      "name": "worker",
+      "output": "Task: Write a short note about a discovery.\n\nRequirements:  \n- do not use the word \"to\"  \n- include the word \"cell\"  \n- use exactly 15 words  \n- use no word longer than 6 letters\n\nDraft:  \n\"The new cell shapes show how small parts work with each other during growth and flux shifts.\"\n\nStep-by-step check:  \n1. Word count:   \nWords = [The (1), new (2), cell (3), shapes (4), show (5), how (6), small (7), parts (8), work (9), with (10), each (11), other (12), during (13), growth (14), and (15), flux (16), shifts (17)]  \nCount = 17 words \u2192 requirement is exactly 15 words \u2192 FAIL\n\n2. Presence of \"cell\": Present (word 3) \u2192 PASS\n\n3. No word longer than 6 letters:  \nCheck words longer than 6 letters:  \n- shapes (6 letters) OK  \n- growth (6 letters) OK  \n- during (6 letters) OK  \n- shifts (6 letters) OK  \nNo word > 6 letters \u2192 PASS\n\n4. Does it contain \"to\"?  \nNo standalone \"to\" in draft \u2192 PASS\n\nVerdict: FAIL word count (17 words, requires exactly 15)\n\n**Number of failed requirements: 1**  \nFailed: word count  \nPassed: \"cell\" included, no forbidden \"to\", no word longer than 6 letters\n\n# Fix: Provide a corrected"
+    },
+    "worker:a94b0272452fc129409fc9fc8b72eb82e5a49baf981dcb32528c27e8ecd71489": {
+      "name": "worker",
+      "output": "plants grow by using light from sun plus water in soil they change energy and form food so life on earth can last well"
+    },
+    "worker:c16322c35eb729fa296c6011c6acf0ac461cea99e73dea531b265623dabcd5f3": {
+      "name": "worker",
+      "output": "Checking each requirement:\n\n1. Exactly 25 words:  \nCounting words in each bullet:  \n- \"A new-type flux was found near the dark zone of Mars\" = 11 words  \n- \"It showed strange waves in this vast area\" = 8 words  \n- \"Tests ruled out noise from instruments\" = 6 words  \n- \"This flux could mean changes for future flights\" = 8 words  \n- \"The team is excited, so it goes.\" = 7 words (the phrase is 4 words plus preceding)  \nTotal = 11 + 8 + 6 + 8 + 7 = 40 words \u2192 Fails the exact 25 words requirement.\n\n2. Ends with exact phrase \"so it goes.\"  \nThe last bullet ends with \"The team is excited, so it goes.\"  \nEnding phrase exactly: \"so it goes.\"  \nYes, exact phrase as required.\n\n3. Exactly 5 bullet points, each line starts with \"- \"  \nYes, 5 bullets, each line starts with \"- \".\n\n4. Do not use the word \"and\"  \nChecked each bullet:  \n- Bullet 1: no \"and\"  \n- Bullet 2: no \"and\"  \n- Bullet 3: no \"and\"  \n- Bullet 4: no \"and\"  \n- Bullet 5: no \"and\"  \nOK.\n\nSummary:   \n- Word count: fails (40 vs 25 required)  \n- Ending phrase: passes  \n- 5 bullets: passes  \n- no \"and\": passes\n\nVerdict:"
+    },
+    "worker:c417beb418e58b1337a51cf69c135a6c27f188aa67e276e8f65527021d5d93aa": {
+      "name": "worker",
+      "output": "plants grow by using light from the sun and water from soil to change energy and make food for life on earth to thrive and last."
+    },
+    "worker:cb91f4be57a8b3df3fe44a3b8e581c8d7d02867d7a75b9dd53486cd02696d2a9": {
+      "name": "worker",
+      "output": "Task:  \nSummarize an idea for a student with these requirements:  \n- no word longer than 7 letters  \n- do not use the word \"of\" (as a standalone word)  \n- exactly 25 words  \n- all lowercase  \n\nDraft answer:  \n\"an idea is a thought that helps start new plans or solves hard parts. share your ideas with friends and learn while you work and grow. keep trying.\"\n\nCheck each requirement:  \n\n1. Word length \u22647 letters:  \nCheck longest words:  \n- idea (4)  \n- thought (7)  \n- helps (5)  \n- start (5)  \n- plans (5)  \n- solves (6)  \n- hard (4)  \n- parts (5)  \n- share (5)  \n- your (4)  \n- ideas (5)  \n- with (4)  \n- friends (7)  \n- learn (5)  \n- while (5)  \n- work (4)  \n- grow (4)  \n- keep (4)  \n- trying (6)  \nNo word exceeds 7 letters. Pass.\n\n2. No use of the word \"of\":  \nCheck for standalone \"of\":  \nWords are: an, idea, is, a, thought, that, helps, start, new, plans, or, solves, hard, parts, share, your, ideas, with, friends, and, learn, while, you, work, and, grow, keep, trying  \nThe word \"of\" is absent. Pass.\n\n3. Exactly "
+    },
+    "worker:cc5d17774a3013dcbc739efcad3a027d17fa1f9d9d8054d46fca66026e953de0": {
+      "name": "worker",
+      "output": "an idea helps you find new ways to solve hard tasks and make work fun. share thoughts, learn skills, and grow through each try and step taken."
+    },
+    "worker:ce0d35d93b1bb6e834b664ffe5eceeefbf48125fffd4f171beaf445f3b2525b6": {
+      "name": "worker",
+      "output": "A wave moves energy through space without mass transfer making it key for many fields all is set."
+    },
+    "worker:d8dfddc93037e6a517dec74853b2372d5158254b9482b3ff33c039eda0a10c38": {
+      "name": "worker",
+      "output": "Flux means flow of heat, light, or gas in space, showing change in this kind here we go."
+    },
+    "worker:f2a8ef1f11986438adabe9366731015e4598352ecdfc89a79f186b45d8fed427": {
+      "name": "worker",
+      "output": "Task: Summarize an idea for a student.\n\nRequirements:\n- End with the exact phrase \"all is set.\"\n- Do not use the word \"and\"\n- Include the word \"wave\"\n- Use exactly 15 words\n- Do not use any commas\n\nDraft answer:\n\"A wave moves energy through space without mass transfer making it key for many fields all is set.\"\n\nVerification:\n\n1. Ending check: The draft ends with \"all is set.\" exactly, case- and punctuation-sensitive. PASS\n\n2. Forbidden word \"and\": The draft does not include \"and.\" PASS\n\n3. Required word \"wave\": The draft includes \"wave.\" PASS\n\n4. Word count: Counting words:\n\n\"A\" (1)\n\"wave\" (2)\n\"moves\" (3)\n\"energy\" (4)\n\"through\" (5)\n\"space\" (6)\n\"without\" (7)\n\"mass\" (8)\n\"transfer\" (9)\n\"making\" (10)\n\"it\" (11)\n\"key\" (12)\n\"for\" (13)\n\"many\" (14)\n\"fields\" (15)\n\"all\" (16)\n\"is\" (17)\n\"set.\" (18)\n\nTotal 18 words, exceeding the required 15. FAIL\n\n5. Comma check: The draft contains no commas. PASS\n\nSummary:\n\nFailed requirements: Word count (must be exactly 15 words; draft has 18)\n\nAll others pass.\n\nVerdict: FIX\n\n---\n\nCorrection attempt with exactly 15 words, includes \"wave,\" no \"and"
+    },
+    "worker:f3d5c6f61accf7636cc5888387b29995ff00aa8a85ab4b0c38d405332b34b2f7": {
+      "name": "worker",
+      "output": "- find key facts and write them out  \n- check your work and fix small flaws  \n- share your notes so all can learn well"
+    },
+    "worker:f7eceb47f375559a3de203add3aff56758efeadebef71d9f8702da7791efab39": {
+      "name": "worker",
+      "output": "- New flux found near Mars\u2019s dark zone by keen team  \n- Sharp waves caught with clear, fresh scans  \n- Tests ruled out any faults or flaws  \n- This flux means change for flight plans  \n- Excitement grows, so it goes."
+    },
+    "worker:f863ee200f514c2a1422f2428f4dbaf0a7a616ec6e0b07d0938b0ee64795125c": {
+      "name": "worker",
+      "output": "- A new-type flux was found near the dark zone of Mars  \n- It showed strange waves in this vast area  \n- Tests ruled out noise from instruments  \n- This flux could mean changes for future flights  \n- The team is excited, so it goes."
+    }
+  },
+  "version": 1
+}

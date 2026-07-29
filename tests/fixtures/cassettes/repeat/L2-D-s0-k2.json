@@ -1,0 +1,125 @@
+{
+  "entries": {
+    "worker:0212791f57152a87b4039265ff1db9a1ae700dd788db3f58a34e3830576cc71b": {
+      "name": "worker",
+      "output": "Check each requirement against the draft:\n\n1. End exactly with \"all is set.\"  \n- Draft ends with \"all is set.\" \u2192 PASS\n\n2. Do not use the word \"to\"  \n- The word \"to\" does not appear anywhere in the draft \u2192 PASS\n\n3. Use no word longer than 7 letters  \n- Words:  \n  - here (4)  \n  - is (2)  \n  - a (1)  \n  - simple (6)  \n  - view (4)  \n  - of (2)  \n  - plants (6)  \n  - grow (4)  \n  - from (4)  \n  - small (5)  \n  - seeds (5)  \n  - they (4)  \n  - need (4)  \n  - sun (3)  \n  - soil (4)  \n  - and (3)  \n  - rain (4)  \n  - make (4)  \n  - food (4)  \n  - light (5)  \n  - also (4)  \n  - give (4)  \n  - air (3)  \n  - that (4)  \n  - all (3)  \n  - life (4)  \n  - needs (5)  \n  - you (3)  \n  - can (3)  \n  - see (3)  \n  - many (4)  \n  - kinds (5)  \n  - in (2)  \n  - parks (5)  \n  - or (2)  \n  - fields"
+    },
+    "worker:06b381c66f3b8871fe49552b3523a0a912a923509e4fba650ccc11b921bc7338": {
+      "name": "worker",
+      "output": "here is a simple view of plants. plants grow from small seeds. they need sun, soil, and rain. plants make food from light. they also give air that all life needs. you can see many kinds of plants in parks or fields. all is set."
+    },
+    "worker:1312954746dd68f0110ff072befa9fde2bb51c213cf940f43660229597a1cc53": {
+      "name": "worker",
+      "output": "plants start as small seeds. they need sun, soil, rain, and light. plants make food using light. they give air all life needs. you can find many kinds of plants in a park or yard. all is set."
+    },
+    "worker:1ef4187ea79b23cf6bb902ebbcb57369d2f76b29f77ca4fc4ca715a495c35bbf": {
+      "name": "worker",
+      "output": "Check each requirement independently against the draft:\n\n- \"do not use any commas\"  \n  Check for commas: None found. \u2714\n\n- \"format as exactly 5 bullet points, each line starting '- '\"  \n  There are 5 bullet points, each starting with \"- \". \u2714\n\n- \"do not use the word 'of'\"  \n  The word \"of\" does not appear. \u2714\n\n- \"include the word 'atom'\"  \n  The word \"atom\" appears in the first bullet. \u2714\n\n- \"use no word longer than 6 letters\"  \n  Check every lexical word:\n\n  Bullet 1: \"A\" (1), \"new\" (3), \"small\" (5), \"atom\" (4), \"was\" (3), \"found\" (5) -> all \u22646 \u2714  \n  Bullet 2: \"It\" (2), \"shows\" (5), \"traits\" (6), \"not\" (3), \"seen\" (4) -> all \u22646 \u2714  \n  Bullet 3: \"This\" (4), \"will\" (4), \"help\" (4), \"big\" (3), \"tests\" (5), \"soon\" (4) -> all \u22646 \u2714  \n  Bullet 4: \"It\" (2), \"can\" (3), \"change\" (6), \"how\" (3), \"we\" (2), \"view\" (4) -> all \u22646 \u2714  \n  Bullet 5: \"This\" (4), \"find\" (4"
+    },
+    "worker:2203a5ef93b89a0de78df909d3d6ba501913c8de17d11899d212366e32cf5553": {
+      "name": "worker",
+      "output": "Gene tech lets us edit bits in cells to fix faults or add new traits. It works by a tool that cuts DNA at a clear spot. This helps heal some ills fast. All is set."
+    },
+    "worker:369d8c3e33d6266b560efd1c1052d828c33dcad75781e625579ddcdc4fa053b7": {
+      "name": "worker",
+      "output": "- Pick a clear goal you seek  \n- Make small steps that help  \n- Write each part you need  \n- Check each step as you work  \n- Use each fault as a hint  \nthat is it."
+    },
+    "worker:388ce17d1ba3049cc912da73f2048be30860322c977263ad333cde010061e85a": {
+      "name": "worker",
+      "output": "- Found a new flux that flows fast  \n- It helps with small tasks and big  \n- It shows how life can shift and grow  \n- Tests mark great change in cells when flux acts  \n- This may shed new light on work here we go."
+    },
+    "worker:440332670be9a7ff8a66add2b877cbafdcded825f42e183c2e86e2b191678be2": {
+      "name": "worker",
+      "output": "Check each requirement:\n\n- Use no word longer than 6 letters  \n  Words longer than 6 letters appear?  \n  \"Learn\" (5), \"small\" (5), \"goal\" (4), \"want\" (4), \"Plan\" (4), \"each\" (4), \"step\" (4), \"must\" (4), \"Write\" (5), \"down\" (4), \"task\" (4), \"find\" (4), \"Check\" (5), \"go\" (2), \"from\" (4), \"fails\" (5), \"wins\" (4)  \n  All words are 6 letters or fewer.\n\n- Do not use any commas:  \n  No commas are in the draft.\n\n- Format as exactly 5 bullet points, each line starting \"- \":  \n  There are exactly 5 lines starting with \"- \". The final line starting with \"that is it.\" is separate.\n\n- Do not use the word \"to\":  \n  The word \"to\" does not appear.\n\n- End with exact phrase \"that is it.\"  \n  The last line is exactly \"that is it.\"\n\nAdditional checks:  \n- No extra punctuation except for the final period.  \n- Capitalization: all lines start with \"- \" + capital letter as in \"Think\" etc., which is acceptable and not forbidden.  \n- No forbidden words.  \n- Line count: 6 lines total (5 bullets + final phrase), acceptable given final phrase is separate.  \n\nPASS"
+    },
+    "worker:4f12418fcc943e36c109e511fe5ed90b975faa81fdf7acbee81bebea47733544": {
+      "name": "worker",
+      "output": "- Found a new flux that moves fast  \n- It can help us with tasks large and small  \n- It shows how life could shift and grow  \n- Tests show great change in cells once flux is set  \n- This could bring new light to how things work, here we go."
+    },
+    "worker:56f66a61c189cfd72dec3b87bd3b46acd4d5f904204fe55eb0b373b7dda1486d": {
+      "name": "worker",
+      "output": "rain forms when warm air lifts and cools. water turns to drops that fall to ground. plants drink rain. rivers flow in flux, wide and deep. rain helps life grow and change, so it goes."
+    },
+    "worker:5ac818776ea5dea0ea4248da266b1f21cfc226a92aae878c46e79b256ffaa1b4": {
+      "name": "worker",
+      "output": "- cats are pets that bring joy and fun  \n- they need food play and rest each day  \n- you can learn how they live and grow"
+    },
+    "worker:709270b055f5145ce288b588a4b0d81481d83509f44a8a1aa9d46ffe1e6ad470": {
+      "name": "worker",
+      "output": "wind shifts in flux, moves dust and rain. ice melts with sun\u2019s glow. waves roll and tug on sand. life flows in flux, full of change, so it goes."
+    },
+    "worker:7119bf329a0432d24a5fd984b646e204396da8d4763fbe4556f23785890ebaf2": {
+      "name": "worker",
+      "output": "Check every requirement independently:\n\n- do not use the word \"and\": PASS (the draft does not contain \"and\")  \n- do not use any commas: PASS (there are no commas)  \n- write your entire response in lowercase: PASS (all text is lowercase)  \n- use no word longer than 7 letters: FAIL (words \"bright\" (6 letters) OK, \"discovery\" absent, \"learn\" (5), \"about\" (5), \"great\" (5), \"found\" (5), \"shines\" (6), \"space\" (5), all OK; however, \"bright\" is 6 letters, OK; \"discovery\" is not used; \"discovery\" is not used; check all words carefully:  \n  - a (1)  \n  - man (3)  \n  - found (5)  \n  - a (1)  \n  - new (3)  \n  - star (4)  \n  - in (2)  \n  - the (3)  \n  - sky (3)  \n  - it (2)  \n  - shines (6)  \n  - bright (6)  \n  - with (4)  \n  - red (3)  \n  - light (5)  \n  - this (4)  \n  - will (4)  \n  - help (4)  \n  - us (2)  \n  - learn (5)  \n  - more (4)  \n  - about (5)  \n  - space (5)  \n "
+    },
+    "worker:75ae24ca5c87ac82540cb46f5d2a65ff32aeae9245bdaff4deceb9cfa99e8dc1": {
+      "name": "worker",
+      "output": "Failures:\n- Word longer than 6 letters: \"change\" (6 letters, allowed), \"things\" (6 letters, allowed), \"shift\" (5 letters), \"large\" (5 letters), \"tasks\" (5 letters), \"shows\" (5 letters), \"could\" (5 letters), \"bring\" (5 letters), \"light\" (5 letters), \"found\" (5 letters), \"moves\" (5 letters), \"great\" (5 letters), \"cells\" (5 letters), \"once\" (4 letters), \"new\" (3 letters), \"help\" (4 letters), \"with\" (4 letters), \"how\" (3 letters), \"life\" (4 letters)\u2014all words seem to be 6 letters or less, so this is okay.\n\n- Contains forbidden word: \"the\" is present multiple times (\"the word 'the' is in 'the word' itself; is \"the\" word used elsewhere? Yes:\n  - line 2: \"\u2026with tasks large and small\" no \"the\"\n  - line 3: \"It shows how life could shift and grow\"\n  - line 4: \"Tests show great change in cells once flux is set\"\n  - line 5: \"This could bring new light to how things work, here we go.\" -> \"the word 'the' is in 'how things work' no.\n  \nLooks like \"the\" appears in the sentence \"This could bring new light to how things work, here we go.\" there is no 'the'.\n\nYes"
+    },
+    "worker:8d172730d2982ab762d8e66f45bd6052257b1d07fa2a1180d39f83cf87d46058": {
+      "name": "worker",
+      "output": "Check every requirement independently:\n\n- end phrase: The draft ends with \"all is set.\" exactly \u2192 pass  \n- no word longer than 7 letters:  \n  - rain (4), falls (5), from (4), clouds (6), drops (5), drop (4), down (4), to (2), soil (4), and (3), plants (6), earth (5), drinks (6), water (5), and (3), plants (6), use (3), it (2), to (2), grow (4), sun (3), warms (5), earth (5), causing (7), water (5), to (2), turn (4), into (4), gas (3), gas (3), rises (5), up (2), cools (5), then (4), forms (5), new (3), clouds (6), this (4), loop (4), keeps (5), water (5), moving (6), through (7), air (3), and (3), land (4)  \n  All words are 7 letters or fewer \u2192 pass  \n- entire response in lowercase: all letters are lowercase \u2192 pass  \n- do not use the word \"the\": occurrences \u2014 \"the\" does not appear \u2192 pass\n\nCheck punctuation-adjacent words and punctuation:\n\n- commas: present after \"soil and plants,\" and \"water, and plants use it\"  \n  The task did not forbid commas. So commas are allowed.  \n- sentence-final periods: present correctly  \n\nNo other formatting or"
+    },
+    "worker:afef647c13f1a1e538a54ade1f5414e27d36d70ae3fffdf0aeffc23430b8a1c5": {
+      "name": "worker",
+      "output": "Check each requirement independently:\n\n- \"do not use any commas\": The draft has no commas. PASS\n- \"include the word 'gene'\": The word \"Gene\" appears as the first word. PASS\n- \"use no word longer than 7 letters\": \n  Words longer than 7 letters found:\n  - \"clearest\" (limits 7, but \"clear\" + \"spot\" are separate words, no \"clearest\" here)\n  - \"traits\" (6 letters) PASS\n  - \"faults\" (6 letters) PASS\n  - \"cells\" (5 letters) PASS\n  - \"edit\" (4 letters) PASS\n  - \"lets\" (4 letters) PASS\n  - \"some\" (4 letters) PASS\n  - \"fast\" (4 letters) PASS\n  - \"faults\" (6 letters) PASS\n  - \"clear\" (5 letters) PASS\n  - \"tools\" (5 letters) is not in the text but \"tool\" (4 letters) is there.\n  Counting the letters of all words: \"Gene\"(4), \"tech\"(4), \"lets\"(4), \"us\"(2), \"edit\"(4), \"bits\"(4), \"in\"(2), \"cells\"(5), \"to\"(2), \"fix\"(3), \"faults\"(6), \"or\"(2), \"add\"(3), \"new\"(3), \"traits\"(6), \"It\"(2), \"works\"(5), \"by\"(2), \""
+    },
+    "worker:c0308f564e6b689bbcc4ee4dcd9539a82856563be5a080e01fa679d6c70df63c": {
+      "name": "worker",
+      "output": "- cats are pets that bring joy and fun  \n- they need food play and rest each day  \n- you can learn how they live and grow"
+    },
+    "worker:c5435a417684681919b0de939b00919521404f8a443208c9e17c5e635b47af37": {
+      "name": "worker",
+      "output": "Gene tech lets us edit gene parts in cells to fix bugs or add traits. It uses tools that cut DNA at a set spot. This can heal some ills fast. All is set."
+    },
+    "worker:c60f0f577169ac91934f1391b5669577f01950ee749bf7dd60aec8c2ecd20835": {
+      "name": "worker",
+      "output": "Check each requirement against the draft:\n\n- end with exact phrase \"so it goes.\"  \n  Draft ends with: \"so it goes.\" \u2192 pass\n\n- include the word \"flux\"  \n  Draft includes \"flux\" \u2192 pass\n\n- no word longer than 6 letters  \n  Check all words:  \n  rain(4), forms(5), when(4), warm(4), air(3), lifts(5), and(3), cools(5), water(5), turns(5), to(2), drops(5), that(4), fall(4), to(2), ground(6), plants(6), drink(5), rain(4), rivers(6), flow(4), in(2), flux(4), wide(4), and(3), deep(4), rain(4), helps(5), life(4), grow(4), and(3), change(6)  \n  Here \"change\" is 6 letters exactly, allowed (not longer).  \n  \"ground\" 6 letters, allowed.  \n  \"plants\" 6 letters, allowed.  \n  \"rivers\" 6 letters, allowed.  \n  All words 6 or fewer letters \u2192 pass\n\n- write entire response in lowercase  \n  All words lowercase \u2192 pass\n\n- do not use the word \"the\"  \n  \"the\" does not appear \u2192 pass\n\nNo punctuation issues; punctuation adjacent words checked.\n\nFinal verdict: PASS"
+    },
+    "worker:c6bc7fd42cea6085527f44b161a8d329afc899487eddcd859bbcf9b8da27c164": {
+      "name": "worker",
+      "output": "Check every requirement against the draft:\n\n1. Use no word longer than 6 letters:\n- \"small\" (5 letters) \u2013 OK\n- \"inside\" (6 letters) \u2013 OK\n- \"each\" (4 letters) \u2013 OK\n- \"traits\" (6 letters) \u2013 OK\n- \"shows\" (5 letters) \u2013 OK\n- \"parts\" (5 letters) \u2013 OK\n- \"protiens\" (8 letters) \u2013 This is misspelled in the draft as \"proteins\"? Checking draft: \"proteins\" used, which is 8 letters \u2192 FAIL\n- \"build\" (5 letters) \u2013 OK\n- \"keep\" (4 letters) \u2013 OK\n- \"cells\" (5 letters) \u2013 OK\n- \"split\" (5 letters) \u2013 OK\n- \"copy\" (4 letters) \u2013 OK\n- \"change\" (6 letters) \u2013 OK\n- \"cause\" (5 letters) \u2013 OK\n- \"new\" (3 letters) \u2013 OK\n- \"good\" (4 letters) \u2013 OK\n- \"bad\" (3 letters) \u2013 OK\n- \"life\" (4 letters) \u2013 OK\n\n\"proteins\" is 8 letters, so this fails the length limit.\n\n2. Format as exactly 4 bullet points, each line starting with \"- \":\n- Four bullet points present\n- Each line starts with \"- \" exactly\n\nPass.\n\n3. Include the word \"gene\" (case-insensitive):\n- \"gene\" present in bullet point 1 and "
+    },
+    "worker:cf5ba0c312cfd751a3a8bf0fa2bcc12948f2770f7504311c8c8a56e9fb574b0b": {
+      "name": "worker",
+      "output": "- A gene is a small part inside each cell that tells what traits show up.  \n- These parts help make proteins that build and keep life in cells.  \n- When cells split, genes copy to new cells so traits pass on.  \n- Change in genes can cause new traits, good or bad, in each life."
+    },
+    "worker:db94302204b5b8a6016c8e36ef7836b2af77b957ec2888b3d55223fba9f0b73b": {
+      "name": "worker",
+      "output": "rain falls from clouds. drops drop down to soil and plants. earth drinks water, and plants use it to grow. sun warms earth, causing water to turn into gas. gas rises up, cools, then forms new clouds. this loop keeps water moving through air and land. all is set."
+    },
+    "worker:e6f49137836028ba600e76ef0edff61172cabc4738c85db99863d120d7e1f8da": {
+      "name": "worker",
+      "output": "a man found a new star in the sky. it shines bright with red light. this will help us learn more about space. it is a great find for all who look up at night."
+    },
+    "worker:e7ea4b41da5b81a02a78f9af0cb78d09ec3481560c755d81d9c7b5b4336f18d3": {
+      "name": "worker",
+      "output": "a man found a new star in the sky it glows red and will help us find new facts on space it is a good find for all who look up at night"
+    },
+    "worker:e97af2e3bd5875ad3e70c3bb291c94ac706995c7e8aaa619a6188414600540b3": {
+      "name": "worker",
+      "output": "- A new small atom was found  \n- It shows traits not seen  \n- This will help big tests soon  \n- It can change how we view  \n- This find marks a big step"
+    },
+    "worker:ebdbb2d8ae98aa64bc3a83d67521ae4bdb866c48718b7dd7e7c45522bbd9fc73": {
+      "name": "worker",
+      "output": "Check each requirement against the draft:\n\n1. do not use commas:\n- No commas found. Pass.\n\n2. do not use the word \"to\":\n- \"you can learn how they live and grow\"\n- no \"to\" present. Pass.\n\n3. use no word longer than 7 letters:\n- words: cats(4), are(3), pets(4), that(4), bring(5), joy(3), and(3), fun(3)\n- no(2), need(4), food(4), play(4), and(3), rest(4), each(4), day(3)\n- you(3), can(3), learn(5), how(3), they(4), live(4), and(3), grow(4)\n- all words have 7 or fewer letters. Pass.\n\n4. write your entire response in lowercase:\n- all words lowercase. Pass.\n\n5. format as exactly 3 bullet points, each line starting \"- \"\n- three lines, each line starts \"- \"\n- no extra spaces after hyphen and space.\n- Pass.\n\nAdditional checks:\n- no extra punctuation\n- ends properly (no special ending rules)\n- no forbidden words\n\nConclusion: The draft meets all requirements.\n\nFinal compliance checklist:\n- every required keyword is present \u2014 the topic is introducing cats to a beginner, which fits \"introduce a topic\"\n- no forbidden words present\n- word length compliant\n- commas not present\n- no \"to\" word present\n- lowercase throughout\n- exactly 3 bullet points"
+    },
+    "worker:eea46a19e4064e6e8e11521fc1b3dbc98285ad5bb85c82601e91e4a0fc8730cb": {
+      "name": "worker",
+      "output": "- Think of a small goal you want  \n- Plan each step you must make  \n- Write down each task you find  \n- Check your steps as you go  \n- Learn from what fails and wins  \nthat is it."
+    },
+    "worker:eefc869032e90e53982bdcdf354145e88d03bcf7b54607cf9f4b279eae16cd8d": {
+      "name": "worker",
+      "output": "rain falls from clouds. drops fall down onto soil. earth drinks rain. plants use rain to grow. sun warms earth and makes rain turn to gas. gas climbs up, cools, and makes new clouds. this cycle moves rain from sky to soil again. all is set."
+    },
+    "worker:f0225aa79b06d14e0a5c5da87ebc622b9ae0ce48cc5752213ed6d90ba2786b38": {
+      "name": "worker",
+      "output": "- A new small atom was found  \n- It shows traits not seen  \n- This will help big tests soon  \n- It can shift how we view  \n- This find marks a big step"
+    },
+    "worker:f7ce4c1615a1987d0de905ba8dda07fbcb9e80113005bb3d339c94fd8b16227c": {
+      "name": "worker",
+      "output": "- A gene is a small part in each cell that tells what traits show.  \n- These parts help make chains that build and keep all life in cells.  \n- When cells split, genes copy to new cells so traits pass on.  \n- A change in genes can cause new traits, good or bad, in life."
+    }
+  },
+  "version": 1
+}

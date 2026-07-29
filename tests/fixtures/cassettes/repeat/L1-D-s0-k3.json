@@ -1,0 +1,121 @@
+{
+  "entries": {
+    "worker:0503585b63db8179e293dbefbe2810fc6edc45dc34e8157c03bc4a390d9cc1c1": {
+      "name": "worker",
+      "output": "- Light is a wave that travels fast  \n- It has energy that we can see  \n- Light helps plants grow all life thrives  \n- It moves in straight paths called rays  \n- Light can bounce off things called reflection"
+    },
+    "worker:070355f0a4155f52faf13e5ec0caf9b4a0ea06e987231dbcbd08b5bb06aceb45": {
+      "name": "worker",
+      "output": "- tech sends fast data  \n- links phones and tools  \n- works with codes  \n- used in homes and cars"
+    },
+    "worker:0c6f430733e205cd06ac5c0aa3d4da5f4b02e58c29cdfdbe316a407eefcdf7a8": {
+      "name": "worker",
+      "output": "- technology helps people solve problems with tools and machines  \n- it evolves through new ideas and discoveries yearly  \n- many fields depend greatly on novel technological advances"
+    },
+    "worker:208486451a4aee46885c3543838e8e198ff2814274bca923dc1557be45a052f3": {
+      "name": "worker",
+      "output": "- technology uses machines and tools to improve daily tasks  \n- it grows fast with new ideas and gains  \n- people apply technology to boost work and life skills"
+    },
+    "worker:253af80e7a134889e6e45401d4b37f859548636dc2323aca1cf9f276e547deb3": {
+      "name": "worker",
+      "output": "- Cells form all living things  \n- They grow divide create new cells  \n- Cells have small parts called organelles  \n- Each part helps cells work well  \n- Energy comes from parts called mitochondria"
+    },
+    "worker:26aef4c03ea15365f56f40854463fb51ad587072a8edd52310e3d3855a798574": {
+      "name": "worker",
+      "output": "- A new flux shows change in light from a far bright star  \n- This flux helps us learn how such stars send waves  \n- The flux gives clues on heat, light, and air flows  \n- Study of this flux adds wide new ways to see space"
+    },
+    "worker:29ec348a079bd70283c6ee1ee1624f3d658602871f5a986b076c719483abecc9": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:2a2b659b9375f452a16011eb9266d53311ff281500ef06221a047105cfbbc040": {
+      "name": "worker",
+      "output": "WRONG \u2014 failed: exact_word_count (contains 27 words instead of exactly 15); format (contains 3 bullet points but bullet lines contain more than 15 words total). Satisfied: no_comma, forbidden_word \"to\" absent, num_bullets (3 bullets exactly)."
+    },
+    "worker:2b570eb6461e50309c6a5e04c670b2ad4e3d8208253a7cef650de59b61f43e1c": {
+      "name": "worker",
+      "output": "WRONG \u2014 failed: exact_word_count (only 18 words, expected exactly 20 words); exact format (response is in two bulleted lines, not a short note or plain text); end phrase missing from end of response as required (the phrase \"here we go.\" must be at the very end). Satisfied: include_keyword (\"wave\"), forbidden_word (\"to\") absent."
+    },
+    "worker:2d35a45b29d59371dfb555a290b75983ef62e26ea8ca58b2b690270a41af67dd": {
+      "name": "worker",
+      "output": "gene holds code that helps cells grow and form traits each gene can change how life looks and acts in small ways"
+    },
+    "worker:37104728fb4caa96e809ddce2f87a6a6276240f7699c5ff662672f3640f08537": {
+      "name": "worker",
+      "output": "WRONG \u2014 failed: exact_word_count (response has 39 words; expected exactly 15); num_bullets (response has 4 bullet points, which is correct); forbidden_word (\"of\" appears several times: \"how light moves through space and reveals new clues,\" \"how we study stars and suns,\" \"map where planets and moons may orbit,\" \"past our own place\"), word_max_length (words like \"reveals,\" \"through,\" \"planets,\" \"orbit,\" \"grasp,\" \"world\" are all 7 letters or fewer, so length is okay), include_keyword (\"flux\" present), format (correct bullet format).\n\nCorrections needed:\n- Reduce total word count to exactly 15 words.\n- Remove all occurrences of the word \"of.\"\n- Keep exactly 4 bullet points, each starting with \"- \".\n- Maintain use of the word \"flux.\"\n- Ensure no words longer than 7 letters."
+    },
+    "worker:391861f8847437794880ec6bbf3a433def9852dfcdca4bf2fb25c54e2dd54fb5": {
+      "name": "worker",
+      "output": "WRONG \u2014 failed: exact_word_count (response contains 18 words; expected exactly 15 words). Satisfied: format, lowercase, forbidden_word (\"of\")."
+    },
+    "worker:3d0ac7ae92984b530992fb831e47a4cc2e598b8b1f44ae2ca7da1a3d961bcd66": {
+      "name": "worker",
+      "output": "- genes hold codes  \n- genes affect traits  \n- genes pass on info  \n- genes help in life  \n- genes work inside cells"
+    },
+    "worker:43e183e45f3eee8648d1ae4eded090c146515ad3401631ae0147b6c6c744491f": {
+      "name": "worker",
+      "output": "- tech helps send data fast  \n- it links phones and parts  \n- works with names and signs  \n- used in homes and cars"
+    },
+    "worker:681914a64f732a83cad683b0ee3f2c035fd194281bce6d3fb467e5cf556ae42c": {
+      "name": "worker",
+      "output": "WRONG \u2014 failed: exact_word_count (expected exactly 15 words, found 16 words). Satisfied: no \"to\", word_max_length, num_bullets (4 bullets), lowercase."
+    },
+    "worker:69bd0cbe26ba9a09f84d4f1a11e738d88917f074a75c5def0ef1f42f68e4bd34": {
+      "name": "worker",
+      "output": "- The flux shows how light moves through space and reveals new clues  \n- This news marks a huge step in how we study stars and suns  \n- Each flux found can help map where planets and moons may orbit  \n- Such a find helps us grasp the vast world past our own place"
+    },
+    "worker:6b8f50e7973b9c12a8c4a8a1464c2d30d31f3c6dc8b3914ac1e9e40883ccf3b8": {
+      "name": "worker",
+      "output": "- A scientist found a small star shining brightly beyond our solar system  \n- They studied the star and found unknown facts about its light and heat  \n- This discovery helps explain how stars change during their long lives"
+    },
+    "worker:88f6c7a1bb61e1659e4fb85c74411003c8265edd2485ae2563e4853eae582e6f": {
+      "name": "worker",
+      "output": "gravity pulls objects toward each other depending on mass distance between them that is it."
+    },
+    "worker:8b90648eda05aac1acd9bac795701cfafc5ffa572fefa79487346ad703512243": {
+      "name": "worker",
+      "output": "- This wave discovery changed how scientists understand energy travel across oceans and atmospheres\n- Its impact became clear here we go."
+    },
+    "worker:8f9f3272eaf8efd02bf3b72958cb02b2879294c378773f2059cfb80f60770de2": {
+      "name": "worker",
+      "output": "WRONG \u2014 failed: exact_word_count (response has 26 words, required exactly 15); exact_format (response uses 5 bullet points instead of prose); lowercase (response contains capital letters at start of sentences); forbidden_word (response uses \"and\" indirectly by connecting ideas with bullet points); ending_phrase (response does not end with \"that is it.\" as a standalone phrase, but includes it as a bullet). Satisfied: none."
+    },
+    "worker:929b449b6736cf66d8111a79a88ce4a2fdb041da8bd625e7a82ce3eb89395502": {
+      "name": "worker",
+      "output": "- Scientists found a new small planet orbiting a distant star bright in the night sky  \n- This discovery helps experts understand better how planets form and change in space  \n- New data gives clues about planet sizes speeds and compositions in our galaxy vast"
+    },
+    "worker:942e644b0060f96621da4944e987457160ce2d08b6a21c30d2f95625d9ec7850": {
+      "name": "worker",
+      "output": "- Atoms make up all things, tiny bits all around us and in every item.  \n- They bind to form new stuff with unique traits and forms.  \n- This trust in atoms helps us know how life and stars grow, that is it."
+    },
+    "worker:a3a50be52839485795eb37b9ce2d692977a47541b62a18cdcae9ee20101a7e3f": {
+      "name": "worker",
+      "output": "A new wave form was discovered revealing unseen energy flow patterns across nature changing science forever here we go."
+    },
+    "worker:c1322024f235588a094374394bd03ee6c1b264210cc737d24c9a1328cc91ece5": {
+      "name": "worker",
+      "output": "WRONG \u2014 failed: exact_word_count (response has 30 words; expected exactly 20 words). Satisfied: word_max_length, no_comma, exclude \"and\"."
+    },
+    "worker:d87306545d730e3fc852d8519106ae93d754cc31191ec759f8e3c5a5d2540c87": {
+      "name": "worker",
+      "output": "- photosynthesis converts sunlight into energy  \n- plants use chlorophyll during this process  \n- carbon dioxide combines with water  \n- oxygen is released by plants  \n- that is it."
+    },
+    "worker:ddf37aeb99e5a30c585b038ca27afb87830f0b15991de65b9c16c9d8b60f4c8f": {
+      "name": "worker",
+      "output": "- Cells build each living thing and make it work well and stay alive  \n- They split and grow to make new cells with a clear role  \n- All life depends on cells to live, move, and grow well, that is it"
+    },
+    "worker:f13e16ca30e789e16300b7953a6e161f02ace7c94f5d065568e4253fc7ace266": {
+      "name": "worker",
+      "output": "WRONG \u2014 failed: word_max_length (words \u201cunique,\u201d \u201ctraits,\u201d \u201cforms,\u201d and \u201ctrust\u201d exceed 6 letters); exact_word_count (draft has 33 words, required exactly 15); exact_format (more than 3 bullet points and the last line contains extra sentence after \u201cthat is it.\u201d). Satisfied: format_bullet_line_start (all lines start with \"- \"), semantic_task (explains a scientific concept)."
+    },
+    "worker:f6c8aba238ae3e76c9f731a282cffcbd7577c517289b55a865d8cabbc758a485": {
+      "name": "worker",
+      "output": "WRONG \u2014 failed: exact_word_count (response has 20 words but includes 5 bullet lines, which is not allowed since the format was not specified as bullet points), exact_format (the task does not instruct using bullet points, yet the draft uses them), word_max_length (the word \"genes\" has 5 letters, which is ok, but the word \"inside\" has 6 letters, which is allowed as the max is 6 letters), however, \"pass on\" counts as two words, so the count is correct, the main problem is format and presence of bullet points not allowed. Additionally, the draft uses \"genes\" (plural) not \"gene\" (singular) as required. The task requires the word \"gene\" exactly, standalone, but the draft uses \"genes\" five times. Therefore, failed include: exact_format (bullets not allowed), required word (\"gene\") missing exact form, no mention in the requirements about format, so the draft must be a plain sentence or sentences, not bullet points.\n\nCorrection: Remove bullet points, use exactly 20 words in one or more sentences, include the word \"gene\" exactly as shown, no word longer than 6 letters, lowercase only, no \"to.\"\n\nSatisfied: no forbidden word \"to,\" all lowercase, word lengths meet criteria.\n\nSummary:\n\nWRONG \u2014 failed: exact_format (no bullet points allowed), include_keyword (must have the word \"gene\" exactly, not \"genes\"). Satisfied: word_max_length, exact_word_count, lowercase, no \"to.\""
+    },
+    "worker:fefaca3075e7c09032b217888f058f1d2af077245d30137725f2a1831c68d963": {
+      "name": "worker",
+      "output": "- ideas help learn new skills  \n- write notes for good recall  \n- use small steps for tasks  \n- ask peers when stuck  \n- check work each day"
+    }
+  },
+  "version": 1
+}

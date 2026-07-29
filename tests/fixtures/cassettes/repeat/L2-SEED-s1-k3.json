@@ -1,0 +1,105 @@
+{
+  "entries": {
+    "worker:0871d5f65c7905a5e90bdf135621dc84489c851a6baf9b902b4d94e3360d21e6": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:21eb0596038237b7aacca7db5feb18698f60f66dca057461016b9a7efa6d0a90": {
+      "name": "worker",
+      "output": "Fixes needed:\n- The word \"found\" is 5 letters (OK)\n- The word \"small\" is 5 letters (OK)\n- The word \"rock\" is 4 letters (OK)\n- The word \"gold\" is 4 letters (OK)\n- The word \"discovery\" is not used (OK)\n- The word \"towns\" is 5 letters (OK)\n- The word \"helped\" is 6 letters (OK)\n- The phrase \"that led to more digs and more gold found\" has \"led\" (3 letters), \"more\" (4), \"digs\" (4), \"gold\" (4), \"found\" (5) all good.\n- The phrase \"how some lived\" are words of 3,4,5 letters (OK)\n- No commas are used (OK)\n- The entire text is lowercase (OK)\n- Ends with \"that is it.\" (OK)\n- The word \"of\" is not used (OK)\n\nAll constraints satisfied.\n\nPASS"
+    },
+    "worker:2565a39e9ea8e01ac465a274b5c2aa9311548cbd5e6453f9c2520a9f86716115": {
+      "name": "worker",
+      "output": "- Math is the study that helps us count and solve problems  \n- It uses numbers and shapes to explain how things work  \n- You can use math to do tasks like shopping or playing games"
+    },
+    "worker:362898f6ff73b5107d6e9171165695bcc12d539ad352f7e001ce1066d0db82ce": {
+      "name": "worker",
+      "output": "- \"photosyn\" is too long (10 letters), must be changed  \n- The phrase \"plants use light from sun\" could be shorter or clearer but is acceptable  \n- The second bullet is fine, all words are 6 letters or less  \n- The third bullet ends correctly and fits requirements  \n\nFix needed: Replace \"photosyn\" with a word of 6 letters or less, e.g., \"light\" or \"food\" or rephrase the sentence.\n\nRevised answer:\n\n- Plants use light from sun to make food by a way called light work  \n- This way turns light, water, and air into sugar and oxygen  \n- Sugar gives plants power to grow and air keeps animals alive, so it goes.\n\nNow, all words are 6 letters or less and no banned word used.\n\nPASS"
+    },
+    "worker:3aa293881450bab63f8cba364108f412ba9a93b866179f2b08b184a24c9e7908": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:3b35d88f40076292f5c1ad08dd7d02993b937518727c308f30ba5a4b78b293e2": {
+      "name": "worker",
+      "output": "- The word \"materials\" exceeds 6 letters; replace with a shorter word.  \n- The phrase \"new stuff\" could be simplified for clarity and length constraint, but is acceptable.  \n- The word \"cause\" is 5 letters; acceptable.  \n- All other words meet length requirements.  \n- The word \"looks\" is 5 letters; acceptable.  \n- The format has 4 bullet points.  \n- Starts each line with \"- \".  \n- Ends with \"that is it.\"  \n\nTo fix:  \n- Replace \"stuff\" with a shorter synonym that fits the meaning. \"Stuff\" itself is 5 letters, so it is acceptable.  \n- \"hits\" is 4 letters, acceptable.  \n- \"stray\" instead of \"out of place\" could be an option but \"out of place\" is longer than 6 letters per word. So rephrase.  \n\nSuggested fix for line 3:  \n- Replace \"This bend causes things to look out of place.\"  \nwith  \n- This bend makes things seem odd.  \n\nRevised answer:  \n- Light moves in short waves called rays.  \n- It can bend when it hits new stuff.  \n- This bend makes things seem odd.  \n- This is why a straw looks bent in a glass.  \nthat is it.  \n\nNow all words are <= 6 letters, no \"and\", 4 bullets, ends correctly.\n\nPASS"
+    },
+    "worker:3cb4fd6bacd3113131b86afe22497898d5ff1283fd19df679b0986ae70833d0d": {
+      "name": "worker",
+      "output": "- Math is a skill with math for many uses  \n- It helps us count add find shapes and sizes  \n- We use math for cash work and games  \n- Math can be fun and help each day"
+    },
+    "worker:5498e0739987caadb6a40f2fe6f699670a9cf3324c4eb36c0cb7eead4c7ac1dc": {
+      "name": "worker",
+      "output": "- Each line starts with \"- \" (satisfied)  \n- No commas used (satisfied)  \n- No use of the word \"to\" (satisfied)  \n- No word longer than 6 letters (check carefully):  \n  - \"field\" (5)  \n  - \"numbers\" (7) -> exceeds limit  \n  - \"tasks\" (5)  \n  - \"helps\" (5)  \n  - \"count\" (5)  \n  - \"shapes\" (6)  \n  - \"sizes\" (5)  \n  - \"money\" (5)  \n  - \"games\" (5)  \n  - \"learning\" (8) -> exceeds limit  \n  - \"fun\" (3)  \n  - \"useful\" (6)  \n  - \"each\" (4)  \n  - \"day\" (3)  \n\nWords \"numbers\" and \"learning\" are too long.\n\nFix required: replace \"numbers\" and \"learning\" with shorter words.\n\nRevised answer:\n\n- Math is a field with math for many uses  \n- It helps us count add and find shapes and sizes  \n- We use math for cash work and games  \n- Math can be fun and help each day\n\nNow check word lengths:\n\n- \"field\" (5), \"many\" (4), \"uses\" (4) ok  \n- \"shapes\" (6), \"sizes\" (5) ok  \n- \"money\" replaced by \"cash\" (4) ok  \n- \"learning\" replaced by \"Math"
+    },
+    "worker:6283cbacdd2eefad8e82ccf88a649fd44e2b11dacaf3f33ad07db5494915d358": {
+      "name": "worker",
+      "output": "a long time ago a man found a small rock that had some gold in it this was a big find that led to more digs and more gold found it changed how some lived and helped build towns that is it."
+    },
+    "worker:7079850547705f7cc930d1d98c167f0f9a9ea14a38dc9c931485932e24b78688": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:71b94afadac7d2103086542236914fd7a723e1ae5d8fce1f475f1b60381610b7": {
+      "name": "worker",
+      "output": "Math is fun and helps us add take or find sums. It uses digits and signs like plus and minus. You can find tasks with math and solve them fast. When you get good you will see how math helps in life. All is set."
+    },
+    "worker:7416d1599d23949289222649799b025900482f127a05f5a494795b7c8f3f6f80": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:782ab53ee834a757e8525b79a594bd7b0883c9f06c9919550600727c7074d297": {
+      "name": "worker",
+      "output": "- Plants use light from sun to make food by a way called light work  \n- This way turns light, water, and air into sugar and oxygen  \n- Sugar gives plants power to grow and air keeps animals alive, so it goes."
+    },
+    "worker:7b442e46fb660e7643bfccb0bbf68bbf841b516a97fca2ab793bf09013549190": {
+      "name": "worker",
+      "output": "- A new gene was found in fish.  \n- This gene helps fish to glow bright.  \n- It may aid in fish to avoid harm.  \n- This find will help us learn more.  \nwe are done."
+    },
+    "worker:7c59dad088a310cf8610e154fa1199e207f2d0f38b875a89bac579ad3d743c85": {
+      "name": "worker",
+      "output": "- Plants use light from sun to make food by a process called photosyn  \n- This process turns light, water, and air into sugar and oxygen  \n- Sugar gives plants power to grow and air keeps animals alive, so it goes."
+    },
+    "worker:8148f8509bbb120b99bde1015c4db2b922355c4309ddae44abb1a024b1e058b2": {
+      "name": "worker",
+      "output": "- Cells form the base of all life on Earth.  \n- They hold DNA which guides growth and traits.  \n- Energy comes from food or light in cells.  \n- Cells split to make new ones for life.  \nhere we go."
+    },
+    "worker:83bfd4391d035ffb24c09235ac8a503c90037c2cbaf8eb6af3e00396233a2d80": {
+      "name": "worker",
+      "output": "- Light moves in short waves called rays.  \n- It can bend when it hits a new stuff.  \n- This bend causes things to look out of place.  \n- This is why a straw looks bent in a glass.  \nthat is it."
+    },
+    "worker:92dd09bb1ede6ac35c386709d9add40d8c7eb7a0857096f0e417f2e1c17910b5": {
+      "name": "worker",
+      "output": "Fixes:\n- The word \"numbers\" is 7 letters long (longer than 6)\n- The word \"puzzles\" is 7 letters long (longer than 6)\n- The word \"learn\" is 5 letters but is followed by \"puzzles\" that is too long\n- The word \"helps\" is 6 letters (okay)\n- The word \"minus\" is 5 letters (okay)\n- The phrase \"you can learn puzzles with math and solve them well\" includes \"learn\" and \"puzzles\" which is 7 letters\n\nRevised answer:\n\nMath is fun and helps us count add or take. It uses digits and signs like plus and minus. You can find sums with math and solve them well. When you get good you will see how math helps in real life. All is set."
+    },
+    "worker:9afb8fc1cd07969c26bdcc2a718fed2c0152f75b42bff2e680b22692621bd66c": {
+      "name": "worker",
+      "output": "- Math is a field that uses numbers for many tasks  \n- It helps us count add and find shapes and sizes  \n- We use math for money work and games  \n- Learning math can be fun and useful each day"
+    },
+    "worker:a49e671c6a0c1a35829da5d167d80aa7127e55b41f61dc26d0ae011b5c4f1fa5": {
+      "name": "worker",
+      "output": "- Scientists found a new gene linked to sleep  \n- It helps control the way brains rest at night  \n- This gene can change how long one sleeps  \n- It may lead to cures for sleep loss or stress  \n- More tests will show how this gene works well  \nwe are done."
+    },
+    "worker:e2fddd2e2adb92bee29dda3044646ac74621fbee92dc9a9e0b2d1ad003183591": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:e3be040da430f76fd5216a91dd2a321fb670f0811aac75df6955ca56977d4454": {
+      "name": "worker",
+      "output": "- Light moves in short waves called rays.  \n- It can bend when it hits new stuff.  \n- This bend makes things seem odd.  \n- This is why a straw looks bent in a glass.  \nthat is it."
+    },
+    "worker:f7b99222b969aa001b469b6fd6583c821e2df7081c8ae098d14dc62cacb56166": {
+      "name": "worker",
+      "output": "Math is fun and helps us count add or take. It uses numbers and signs like plus and minus. You can learn puzzles with math and solve them well. When you get good you will see how math helps in real life. All is set."
+    },
+    "worker:f89779e09889e76589f2d7007bda1f1f219b0fb5b392c3a97105b536962a1f29": {
+      "name": "worker",
+      "output": "- Cloud tech lets users store files in web space  \n- It makes data access fast from any smart tool  \n- This tech helps save space on local drives  \n- Many firms use cloud for safe data backup"
+    },
+    "worker:fdcfdeb72f222b1a57a6c4c77f4bed37052d1031f3082fec69b2a90f2711f7f1": {
+      "name": "worker",
+      "output": "a long time ago a man found a small rock that had some gold in it this was a big find that led to more digs and more gold found it changed how some lived and helped build towns that is it."
+    }
+  },
+  "version": 1
+}

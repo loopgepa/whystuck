@@ -1,0 +1,78 @@
+{
+  "meta": {
+    "dataset": "multi-constraint-hard (IFEval-style)",
+    "n_train": 8,
+    "n_heldout": 10,
+    "worker_model": "openai/gpt-4.1-mini",
+    "reflection_model": "openai/gpt-5.6-luna",
+    "max_metric_calls": 28,
+    "module_selector": "all",
+    "seeds_independent": true,
+    "detector_reflection": true,
+    "reflection_calls": 10,
+    "task_set": "multi-hard",
+    "temperature": null,
+    "sample": 3,
+    "exclude_constraint": [
+      "exact_word_count",
+      "word_max_length"
+    ],
+    "loop_max_retries": 1,
+    "plan_gene": false,
+    "feedback_stats": false,
+    "critique_model": null,
+    "oracle_critique": false,
+    "feedback_level": "mid",
+    "exec_feedback": false,
+    "actuator": false,
+    "gene_overrides": {
+      "ensure_correct": "Act as a meticulous constraint checker and editor.\n\nYou will receive:\n1. A task description\n2. A list of explicit response requirements\n3. A draft response\n\nFirst, reread the task and every requirement. Then inspect the draft literally and check each requirement independently before deciding whether it passes. Do not infer violations that are not present, and do not demand revisions to a compliant draft.\n\nUse this verification procedure:\n\n- Check required or forbidden words using whole-word matching rather than substring matching. For example, forbidding \u201cthe\u201d does not forbid \u201cother\u201d or \u201ctheory.\u201d Treat capitalization consistently with the wording of the requirement.\n- Check punctuation literally. A requirement forbidding commas is violated only if an actual comma character appears.\n- Check exact ending requirements character by character, including capitalization, spaces, and final punctuation. For example, ending with `we are done.` requires the final characters to be exactly that phrase and period.\n- Check lowercase requirements across the entire response. Any uppercase letter is a violation.\n- Check required keywords for actual presence as words.\n- Check formatting requirements exactly. For \u201cexactly 3 bullet points, each line starting `- `,\u201d verify that there are exactly three bullet lines and that each begins with the required hyphen and space.\n- Check all other explicit constraints individually.\n- Do not confuse a phrase appearing somewhere in the response with a requirement that the response end with that phrase.\n- Do not report a violation merely because a sentence could be improved stylistically.\n- Do not \u201cfix\u201d a draft when every requirement is already satisfied.\n\nIf every requirement is satisfied, return `PASS` and do not invent any corrections.\n\nIf one or more requirements fail, return `FIX` followed by a concise list of the specific failed requirements and the exact correction needed. Mention only genuine failures and identify all failed requirements. For example, if a draft contains no commas and no forbidden word, do not claim that it does. Before finalizing your judgment, repeat the checklist once to ensure that your verdict itself is consistent with the literal draft and the stated requirements.",
+      "generate": "For every task input, carefully parse the requested topic and every explicit output constraint before drafting. Produce only the requested answer, with no explanation of your process or compliance.\n\nSatisfy all requirements simultaneously, including:\n- Topic and audience requirements such as describing a natural process, summarizing an idea for a student, or introducing a topic to a beginner.\n- Required or forbidden words. Treat forbidden words as prohibited wherever they occur as words, and verify that required keywords appear exactly as requested.\n- Punctuation restrictions, especially bans on commas.\n- Exact formatting requirements, such as exactly three bullet points with every line beginning \"- \".\n- Case requirements, such as making the entire response lowercase.\n- Exact ending requirements. The response must end with the complete specified phrase, including its final punctuation mark, with no text after it. For example, \u201cwe are done.\u201d is not satisfied by ending with \u201cwe are done\u201d without the period.\n- Any requested word count, structure, or other literal condition.\n\nUse a final validation checklist before responding:\n1. Count bullets and verify each required prefix.\n2. Search for every forbidden word and forbidden punctuation mark.\n3. Confirm every required keyword is present.\n4. Check capitalization and lowercase requirements.\n5. Compare the final characters against the exact required ending.\n6. Ensure the answer remains relevant, grammatical, and factually accurate.\n\nUseful domain facts from prior tasks:\n- Photosynthesis is a natural biological process in which plants use sunlight, water, and carbon dioxide to produce oxygen and glucose, with chlorophyll enabling the relevant chemical reactions. Energy produced through this process supports plant growth and contributes to ecosystems.\n- A gene is a segment of DNA that influences traits and helps determine how an organism grows, looks, and functions; genes pass from parents to offspring.\n- Code is a set of instructions that tells a computer what to do. Learning code can help someone create programs, websites, and apps, and beginners can start with commands and functions.\n\nWhen constraints are restrictive, draft with simple vocabulary, omit unnecessary punctuation, and reserve the exact required ending for the final characters."
+    },
+    "worker_max_output_tokens": 320,
+    "seeds": [
+      0
+    ],
+    "estimated_usd": 0.02976,
+    "generated": "2026-07-29T17:24:35.871568+00:00"
+  },
+  "runs": [
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.975,
+        "opt_heldout": 0.975,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-36": 1.0,
+          "mc-51": 1.0,
+          "mc-21": 1.0,
+          "mc-4": 1.0,
+          "mc-43": 1.0,
+          "mc-52": 1.0,
+          "mc-9": 1.0,
+          "mc-38": 1.0,
+          "mc-34": 1.0,
+          "mc-58": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-36": 1.0,
+          "mc-51": 1.0,
+          "mc-21": 1.0,
+          "mc-4": 1.0,
+          "mc-43": 1.0,
+          "mc-52": 1.0,
+          "mc-9": 1.0,
+          "mc-38": 1.0,
+          "mc-34": 1.0,
+          "mc-58": 0.75
+        }
+      }
+    }
+  ]
+}

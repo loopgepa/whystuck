@@ -1,0 +1,125 @@
+{
+  "entries": {
+    "worker:0773d1220894ad3d7b5ccd72b3d116f3eab7e105c873a5d0d633293ada3c9139": {
+      "name": "worker",
+      "output": "- Pick one clear goal  \n- Split it up in small parts  \n- Work on each part each day  \n- Check work and fix what feels bad  \n- Keep focus and do not stop  \nthat is it."
+    },
+    "worker:1988f731ab40c1fbd0209ac6a16b8c9cd61150cba2b0d38a2a7725d7f06b648f": {
+      "name": "worker",
+      "output": "Check each requirement independently:\n\n- do not use any commas  \n  *No commas appear.* Pass.\n\n- format as exactly 5 bullet points, each line starting \"- \"  \n  *There are exactly 5 bullet points, each line starts with \"- \".* Pass.\n\n- do not use the word \"of\"  \n  *The word \"of\" does not appear anywhere.* Pass.\n\n- include the word \"atom\"  \n  *The first bullet point includes \"atom\".* Pass.\n\n- use no word longer than 6 letters  \n  *Words and their lengths: \"discovery\" (in task, not draft so ignore), draft words checked:  \n   A(1), new(3), atom(4), was(3), found(5)  \n   It(2), could(5), change(6), how(3), we(2), see(3), things(6)  \n   This(4), find(4), helps(5), us(2), learn(5), more(4)  \n   The(3), work(4), was(3), done(4), by(2), a(1), team(4)  \n   This(4), news(4), now(3), spreads(7), fast(4)  \n\n  The word \"spreads\" has 7 letters, so that fails the max length 6 requirement.* Fail.\n\nSummary of failures:\n\n- Word \"spreads\" is longer than 6 letters.\n\nTherefore, the draft fails due to use of a word longer than 6"
+    },
+    "worker:22d410aff2b750dcf01085ea2c18cc2c66462d423f1102aaf78c19c3259898e2": {
+      "name": "worker",
+      "output": "- Think of a main goal  \n- Break the goal down in small bits  \n- Work on each bit a bit each day  \n- Check your work and fix what feels wrong  \n- Keep focus and do not quit  \nthat is it."
+    },
+    "worker:23850518527556def3bc651242c6abff256fef05252116ca551e26245f4309d0": {
+      "name": "worker",
+      "output": "- A new flux was found in space  \n- Stars shift due to this vast flux  \n- This change may shift our past view  \n- Small laws may need fresh work  \n- This flux will spark new quests here we go."
+    },
+    "worker:3f8da4a9c4af08bd0afe4f410ba8aaf03be8b533f13c1dc388cb431ef1e94978": {
+      "name": "worker",
+      "output": "here is a quick start on math. math is skill that lets you add, count, and find rules in tasks. it helps plan, solve, and check facts in daily life. math uses signs and digits in clear ways. with some work, you can find math fun and easy. all is set."
+    },
+    "worker:3fa66f4b77a061b6e25a2e584deb794552182e1a0df4677e21b0eb8ac618265e": {
+      "name": "worker",
+      "output": "Check against requirements:\n\n- do not use the word \"the\":  \n  The draft contains \"the vast flux\" and \"the past view\"; \"the\" is present twice.  \n  **Fail**\n\n- format as exactly 5 bullet points, each line starting \"- \":  \n  There are 5 bullet points, each line starts correctly.  \n  **Pass**\n\n- include the word \"flux\":  \n  The word \"flux\" appears multiple times.  \n  **Pass**\n\n- use no word longer than 6 letters:  \n  Check each lexical word's length:  \n  - A(1) new(3) flux(4) was(3) found(5) in(2) space(5) - all \u22646  \n  - Stars(5) shift(5) due(3) to(2) this(4) vast(4) flux(4) - all \u22646  \n  - This(4) change(6) may(3) shift(5) our(3) past(4) view(4) - all \u22646  \n  - Small(5) laws(4) may(3) need(4) fresh(5) work(4) - all \u22646  \n  - This(4) flux(4) will(4) spark(5) new(3) quests(6) here(4) we(2) go(2) - all \u22646  \n  **Pass**\n\n- end your response with the exact phrase \"here we go.\":  \n  The last bullet point"
+    },
+    "worker:4267f3a8c8079f0cf4335db23091a4fdb8e5cfd580d787f9a5a04a0a5b093fbd": {
+      "name": "worker",
+      "output": "rain falls from clouds in sky. drops soak soil and feed plants. plants grow tall and change air. streams flow to lakes and seas. sun warms earth and fuels life. all is set."
+    },
+    "worker:493ec0742b6d26881cdcbb181f8049fae21d3dec92050472ae6d12271dae087e": {
+      "name": "worker",
+      "output": "Check each requirement against the draft:\n\n- End with the exact phrase \"all is set.\"  \n  The draft ends with \"all is set.\" \u2713\n\n- Do not use the word \"to\"  \n  The draft uses \"to\" twice: \"use sums\" (this \"to\" is part of \"of use sums,\" not \"to\"), \"you can find math fun and easy\" (no \"to\" there). Actually, the phrase \"the skill of use sums\" is ungrammatical but does not contain \"to.\" The word \"to\" is not found anywhere \u2192 \u2713\n\n- Use no word longer than 7 letters  \n  Check all words:  \n  - here (4), is(2), a(1), quick(5), start(5), on(2), math(4)  \n  - math(4) is(2) the(3) skill(5) of(2) use(3) sums(4), count(5), and(3) find(4) rules(5) in(2) tasks(5)  \n  - it(2) helps(5) plan(4), solve(5), and(3) check(5) facts(5) in(2) daily(5) life(4)  \n  - math(4) uses(4) sign(4) and(3) digits(6) in(2) clear(5) ways(4)  \n  - with(4) some(4) time(4), you(3)"
+    },
+    "worker:4e9992885440e97a8d752e30598926ca30179511cd52d6354585847617aec658": {
+      "name": "worker",
+      "output": "Check every requirement:\n\n- Use no word longer than 6 letters:\n  - \"change\" (6) is okay\n  - \"cells\" (5)\n  - \"small\" (5)\n  - \"parts\" (5)\n  - \"traits\" (6)\n  - \"make\" (4)\n  - \"build\" (5)\n  - \"genes\" (5)\n  - \"code\" (4)\n  - \"holds\" (5)\n  - \"DNA\" (3)\n  - \"your\" (4)\n  - \"work\" (4)\n  - \"data\" (4)\n  - \"skin\" (4)\n  - \"hair\" (4)\n  - All words are 6 letters or less. PASSED\n\n- Use exactly 4 bullet points, each line starting \"- \":\n  - There are 4 bullet points.\n  - Each line starts with \"- \"\n  - PASSED\n\n- Include the word \"gene\":\n  - \"gene\" is present in line 1\n  - \"genes\" is also present; plural of gene is acceptable.\n  - PASSED\n\n- Do not use the word \"of\":\n  - The first line says: \"A gene is a small part of your DNA code.\"\n  - The word \"of\" is used here twice: \"part of your DNA code.\"\n  - This violates the rule strictly.\n  - FAILED\n\nBecause \"of\" is present, the draft fails the \"do not use the word 'of'\" requirement.\n\n---\n\nSummary:\n\n- Word"
+    },
+    "worker:59eb8226da395ce24f6709edc0344b97d06b9e86c623cdf2abe464109704179b": {
+      "name": "worker",
+      "output": "- A new atom was found  \n- It may shift how we see facts  \n- This find helps us learn more  \n- The work was done by a team  \n- This news will move fast"
+    },
+    "worker:5c9aea81570df93c7ca90df648fa27368eda5bd57fbb1a9e1d4cf62a4d7dd9b3": {
+      "name": "worker",
+      "output": "a group made a new find near earth it is a small star that shines bright at night this find may show clues on past life in space many want to learn from this new fact this step will help all who watch the sky each find like this can shift how we view the world more finds could come soon."
+    },
+    "worker:673f1697e9d8d303b127b5cb6d0928ebea22208c593884ea66318ba9ab72d05e": {
+      "name": "worker",
+      "output": "Failures:\n- The draft uses the word \"code,\" which is allowed (4 letters), so no issue there.\n- The draft ends with \"All is set.\" but the requirement is to end with \"all is set.\" (with lowercase \"all\"). Capitalization does not match exactly.\n- The draft contains the word \"make-up.\" This word has a hyphen and is composed of two parts, \"make\" and \"up,\" which are short enough, but the hyphenated compound might be considered a single word\u2014does the rule treat hyphenated words as single words? The instructions say to count letters in every word; punctuation does not help long words be okay. But \"make-up\" counts as one word? Usually hyphen is a delimiter, so two words? Likely two words \"make\" and \"up\" are separately counted. So no issue.\n- The draft uses the phrase \"by code swap,\" which is okay.\n- The draft has no commas.\n- The draft does not use the word \"and.\"\n- No words longer than 7 letters: gene(4), tech(4), helps(5), change(6), make-up (maximum 6 letters per part), traits(6), works(5), code(4), swap(4), cells(5), stop(4), start(5), some(4), acts(4), many(4), fight(5), ills(4), grow(4), crops(5), fast(4), all(3), is(2), set(3).\n- \""
+    },
+    "worker:6ca5545225a49c57cc447277aa8aa1d892e71b5b06bc02a306a9b2dc2f01c690": {
+      "name": "worker",
+      "output": "Check each requirement against the draft:\n\n- Ends with exact phrase \"all is set.\"  \n  - Draft ends with \"all is set.\" \u2192 PASS.\n\n- Use no word longer than 7 letters  \n  - Words: rain(4), falls(5), from(4), clouds(6), in(2), sky(3). drops(5), soak(4), soil(4), and(3), feed(4), plants(6). plants(6), grow(4), tall(4), and(3), change(6), air(3). streams(7), flow(4), to(2), lakes(5), and(3), seas(4). sun(3), warms(5), earth(5), and(3), fuels(5), life(4). all(3), is(2), set(3).  \n  - All words are 7 letters or fewer \u2192 PASS.\n\n- Write entire response in lowercase (no capitals)  \n  - Draft is entirely lowercase \u2192 PASS.\n\n- Do not use word \"the\"  \n  - No \"the\" present \u2192 PASS.\n\nNo punctuation or formatting errors. All periods are standard and final.\n\nNo extra text or new lines violating formatting.\n\nConclusion: All requirements met.\n\nReply: PASS"
+    },
+    "worker:6cfd2fdf693855d5fac0430285919b857374608e99adb779360b76183908ae22": {
+      "name": "worker",
+      "output": "- A gene is a small part inside your DNA code  \n- Genes hold data to help your cells work well  \n- Cells use gene plans to make skin, hair, or eyes  \n- A change in gene can shift traits you have now"
+    },
+    "worker:6de67cc4df97a4db8b7740dd0758c920b84bf9aaa9b2c271a0ba2109ac5b5171": {
+      "name": "worker",
+      "output": "- A gene is a small part of your DNA code.  \n- Genes hold data to make your cells work.  \n- Cells use genes to build parts like skin or hair.  \n- Change in genes can change traits you have."
+    },
+    "worker:6e675a864f7c348724e8a5d11cbf8cc7612b1a359adb4fd1d4bc6e1a174cde27": {
+      "name": "worker",
+      "output": "Check of requirements against the draft:\n\n- use no word longer than 6 letters  \n  - \"Break\" (5), \"small\" (5), \"bits\" (4), \"each\" (4), \"check\" (5), \"wrong\" (5), \"focus\" (5), \"quite\" (5), \"Think\" (5), \"goal\" (4), \"work\" (4), \"fix\" (3), \"that\" (4), \"is\" (2), \"it\" (2)  \n  All words are 6 or fewer letters except \"without,\" \"feel,\" \"feels,\" \"which\"?? The word \"feels\" is 5 letters, so okay. The word \"wrong\" is 5. No words longer than 6 letters appear.\n\n- do not use any commas  \n  The draft uses no commas.\n\n- format as exactly 5 bullet points, each line starting \"- \"  \n  There are 5 lines starting with \"- \".\n\n- do not use the word \"to\"  \n  The draft uses \"to\" once in \"do not quit\" => \"do not quit\" does not contain \"to\" as a separate word, but as part of \"do not\" which is acceptable. The word \"to\" does not appear standalone anywhere.\n\n- end your response with the exact phrase \"that is it.\"  \n  Ends perfectly with \"that is it.\"\n\nAdditional checks:\n\n- Capitalization and case rules: The first letter of each bullet point is capitalized, which is normal.\n\n- No commas"
+    },
+    "worker:70333fa0579a6cbfc82405010266269810b84ca9e9b74f30b8c70210d78c41dd": {
+      "name": "worker",
+      "output": "rain falls from clouds in sky. drops soak soil to feed plants. plants grow tall and change air. streams flow to lakes and seas. sun warms earth and fuels life. all is set."
+    },
+    "worker:714a37c2041c110ce68af5d831e7e10df7db7642422e41b493976e8684c04280": {
+      "name": "worker",
+      "output": "Gene tech lets us swap gene parts to fix ills or boost traits. It acts in cells to turn on or off key acts. Many use this to help sick or to grow food fast. all is set."
+    },
+    "worker:80c90f557b24c94f9f77829b391b3fb07c60d0a3a19405699b38104f7b22b2c3": {
+      "name": "worker",
+      "output": "a team found a new star near earth it shines bright at night this star may hold keys to past life in space many hope to learn much from this find this is a big step for all who watch the sky every fact from it can change how we see the world there is hope for more finds soon."
+    },
+    "worker:8ae5c280f57208b92401f4b26315db8b7d0fe896dbb6edd21c250cfb42c3a7a2": {
+      "name": "worker",
+      "output": "- math helps us learn how we count  \n- math shows clear ways to find sums  \n- math can make your mind strong"
+    },
+    "worker:9a57bed2c6ed85b66388f5cf9de20afa7c93d087496e65c60759ae0eb65b6f28": {
+      "name": "worker",
+      "output": "- A new atom was found  \n- It could change how we see things  \n- This find helps us learn more  \n- The work was done by a team  \n- This news now spreads fast"
+    },
+    "worker:aa284ca4cf2f61036325e4a405cf5169f9f761fec40bb3a5f40621c8981ecf18": {
+      "name": "worker",
+      "output": "- A new flux was found in space  \n- Stars shift due to vast flux  \n- Such flux may shift our past view  \n- Small laws may need fresh work  \n- This flux will spawn new quests here we go."
+    },
+    "worker:b7cb14a9de20ddddd188ed54611cd9aab11d9a2ff5a52ad64be2b7711abd7a50": {
+      "name": "worker",
+      "output": "Check of each requirement:\n\n- end with exact phrase \"so it goes.\"  \n  *Present at end exactly as required.*  \n  Pass.\n\n- include the word \"flux\"  \n  *Word \"flux\" is present.*  \n  Pass.\n\n- no word longer than 6 letters  \n  *Words present include: water(5), flows(5), down(4), hills(5), constant(8), flux(4), where(5), rain(4), falls(5), from(4), clouds(6), seeps(5), into(4), soil(4), joins(5), streams(7), cycle(5), keeps(5), life(4), strong(6), fresh(5), each(4), drop(4), moving(6), fast(4), slow(4), so(2), it(2), goes(4)*  \n  *\"constant\" (8 letters) and \"streams\" (7 letters) violate the max length rule.*  \n  Fail.\n\n- entire response in lowercase  \n  *All is lowercase.*  \n  Pass.\n\n- do not use the word \"the\"  \n  *No \"the\" found.*  \n  Pass.\n\nOther checks: punctuation-adjacent words, commas and periods do not mask length violations.  \n\nSummary:  \nFail due to presence of \"constant\" (8 letters) and \"streams\" (7 letters), both exceeding 6 letters.\n\n---\n\nRequired fix: remove or replace any words longer than 6 letters.\n\n---\n\nRevised draft:\n\nwater flows down hills"
+    },
+    "worker:b84a91184b73921fe4e162d7c22a5ce89ebd7230faf0cd9e05f85067a868a090": {
+      "name": "worker",
+      "output": "Gene tech helps to change gene make-up to fix or boost traits. It works by code swap in cells to stop or start some acts. Many use this to fight ills or grow crops fast. All is set."
+    },
+    "worker:c0631eaeeb7d1459f3720964b7a510f3e28ba2dfa34e7b4c75fb09f3fe6e8a42": {
+      "name": "worker",
+      "output": "here is a quick start on math. math is the skill of use sums, count, and find rules in tasks. it helps plan, solve, and check facts in daily life. math uses sign and digits in clear ways. with some time, you can find math fun and easy. all is set."
+    },
+    "worker:d1453ba5208db1aa9b1c962b169c21ecd9720a080c81fd6f415cfb2d2e560542": {
+      "name": "worker",
+      "output": "water flows down hills in a constant flux, where rain falls from clouds, seeps into soil, and joins streams. this cycle keeps life strong and fresh, with each drop moving fast or slow. so it goes."
+    },
+    "worker:da10b221d0e5e006d4a241f141851e8279b3e940e313b163e300416114ce0dad": {
+      "name": "worker",
+      "output": "water flows down hills in flux, rain falls from clouds, seeps into soil, joins creeks. this cycle keeps life fresh with each drop moving fast or slow. so it goes."
+    },
+    "worker:e96aae5fd528aa2c6ac7fc8bd7668ece714c1bdb8e5de9f652b207ab9e10f351": {
+      "name": "worker",
+      "output": "- math helps us count and solve small sums  \n- math builds skill for tasks that need sharp mind  \n- math is fun and helps in real world jobs"
+    },
+    "worker:f48d9a1db30fd7f6908df4d9ea5846e40c2bae9c7740c4fe694eaf97063186ff": {
+      "name": "worker",
+      "output": "Check every requirement independently:\n\n- no commas:  \n  The draft has no commas. PASS\n\n- do not use the word \"to\":  \n  The draft uses \"to\" twice: \"builds skill for tasks that need sharp mind\" (no \"to\" here), but \"helps us count and solve small sums\" (no \"to\"), \"helps in real world jobs\" no \"to.\" So \"to\" is not present. PASS\n\n- use no word longer than 7 letters:  \n  Words like \"helps\" (6), \"small\" (5), \"builds\" (6), \"skill\" (5), \"tasks\" (5), \"sharp\" (5), \"world\" (5), \"sums\" (4), \"count\" (5), \"solve\" (5), \"fun\" (3), \"jobs\" (4) are all 7 letters or fewer. \n\n  The word \"builds\" is 6 letters, \"sharp\" is 5, \"count\" is 5, \"solve\" is 5, \"small\" is 5.\n\n  Check \"world\": 5 letters.\n\n  \"needs\" (5), \"helps\" (6), \"math\" (4), \"skill\" (5), \"tasks\" (5), \"sum\" (3).\n\n  The phrase \"need sharp mind\" - \"sharp\" is 5 letters, \"mind\" is 4.\n\n  All words are at most 7 letters. PASS\n\n- write your entire response in lowercase:  \n"
+    },
+    "worker:f7ea90f59e2b05580d126623a89ea61b9489866eece8971629f1e2cddd96ee85": {
+      "name": "worker",
+      "output": "Check every requirement independently:\n\n- do not use the word \"and\": PASSED (no \"and\" found)\n- do not use any commas: PASSED (no commas found)\n- write your entire response in lowercase: PASSED (all letters lowercase)\n- use no word longer than 7 letters:  \n  Check each word length:\n\n  a(1) team(4) found(5) a(1) new(3) star(4) near(4) earth(5) it(2) shines(6) bright(6) at(2) night(5) this(4) star(4) may(3) hold(4) keys(4) to(2) past(4) life(4) in(2) space(5) many(4) hope(4) to(2) learn(5) much(4) from(4) this(4) find(4) this(4) is(2) a(1) big(3) step(4) for(3) all(3) who(3) watch(5) the(3) sky(3) every(5) fact(4) from(4) it(2) can(3) change(6) how(3) we(2) see(3) the(3) world(5) there(5) is(2) hope(4) for(3) more(4) finds(5) soon(4). \n\n  The longest word is 7 letters max"
+    }
+  },
+  "version": 1
+}

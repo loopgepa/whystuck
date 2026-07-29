@@ -1,0 +1,109 @@
+{
+  "entries": {
+    "worker:0034e6f8dcce383576bce9e82c5278e4990a4a6437c3241458276ed767a0d31d": {
+      "name": "worker",
+      "output": "Books are great aids for growth. They hold facts and tales which help us grow. When you read your mind gains new thoughts and skill. Start with fun books and soon you will see how much you can gain. Just pick one and jump in. all is set."
+    },
+    "worker:1357ba98696027327aed94c427dd6b3b85a1619e6551f193199d47fb5e45fa0c": {
+      "name": "worker",
+      "output": "a small bug was found that glows in dark caves it uses this glow to find food and stay safe this bug may help us learn how glow works in warm dark places that is it."
+    },
+    "worker:17d8b98c443c5abd3b01cbaa7065293c04f8325af0845140c70f5c97130da772": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:330282395bc180644d7e73410de548aba0ad9ce3392ebb4322f2bc715e02fa6f": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:4df3021f219d9d7090e74ef801220dd332db1f1d2d68ad02a192a847c0207b90": {
+      "name": "worker",
+      "output": "- Plants use light to make food from air and water  \n- This process is key for life on Earth as it makes oxygen  \n- Green bits in leaves trap light to start the food task  \n- Sun energy turns air and water into food for plants, that is it."
+    },
+    "worker:54d933a5689a78a7a388964f29e036a45a270b9b60994529834708fe4a025fc6": {
+      "name": "worker",
+      "output": "- Clouds send rain to land where it helps plants grow  \n- Rain sinks into soil then fills lakes rivers too  \n- Sun heat turns water to steam that climbs up high  \n- Steam cools in the sky and forms clouds once more"
+    },
+    "worker:5e7ea4ba31d82d79e820ebcb2aaf14ca9312a74eb6a21128a81de0f59495fc1c": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:6aad4bad4c6018ee14c293ff94cfe040cc76221c421ee18f53e9c8668df83dd8": {
+      "name": "worker",
+      "output": "- A new gene was found in a small fish.  \n- This gene helps the fish live in cold sea.  \n- It may show how life can adapt fast.  \n- Experts plan to test if it works in man.  \n- This find may lead to new drugs. we are done."
+    },
+    "worker:71256ab9e639798b71484767b52a22a1b3f5e0bfeb896c23bbc1593a96263cfb": {
+      "name": "worker",
+      "output": "- The word \"learning\" is 8 letters long and should be replaced  \n- The phrase \"to\" is used, which is not allowed  \n- The phrase \"All is set.\" must be exactly at the end, but currently it is \"All is set.\" with capital \"A\"  \n- The word \"books\" is fine but \"tools\" is 5 letters and okay  \n- The phrase \"that help us grow.\" contains the word \"help\" which is okay  \n- The phrase \"When you read, your mind gains new ideas and skills.\" includes a comma which is not allowed  \n- The phrase \"Start with fun books and soon you will see how much you can gain.\" has \"with\" (4 letters), \"soon\", \"you\", \"will\", \"much\", \"gain\" all okay, but the sentence could be simplified  \n- The phrase \"Just pick one and jump in.\" is okay  \n\nSummary of fixes needed:  \n- Remove commas  \n- Remove word longer than 6 letters (learning, skills, ideas)  \n- Remove the word \"to\"  \n- Make sure the ending phrase \"all is set.\" is exactly that (all lowercase)  \n\nRewrite the answer accordingly."
+    },
+    "worker:73f8373b47410d6dfc01113f4ee0f9ef67fa9f0abdbb7b8ae64aff7e3d0ee998": {
+      "name": "worker",
+      "output": "- A new gene was found in a small fish  \n- This gene helps the fish live in cold seas  \n- It may show how life can adapt fast  \n- Experts plan to test if it works in man  \n- This find may lead to new drugs soon, we are done."
+    },
+    "worker:75e115b008abf0e0e9f76952097ffec1c9dba5200d6fe85bacca01a792c30dbd": {
+      "name": "worker",
+      "output": "- \"more complex\" has a word longer than 6 letters  \n- \"energy\" has a word longer than 6 letters  \n- \"split\" and \"it can free or use energy\" could be simplified to meet length and clarity  \n\nRevise the answer to remove words longer than 6 letters.\n\nRevised version:  \n- Atoms are small bits that make all things  \n- They link to form new, large stuff  \n- When they join or break, this can give or use heat so it goes.\n\nPASS"
+    },
+    "worker:78724bc50bf1d5a74795f995128e4ce3843cfe432e5a391af817cf962d5e119c": {
+      "name": "worker",
+      "output": "- A plant needs sun rain and soil  \n- It grows roots leaves and blooms  \n- Plants make food with sun and light  \n- They give air fresh and cool"
+    },
+    "worker:7af32a78e213ff503e9cc3a039b46f43b555770b991aa63485b7a46459693b92": {
+      "name": "worker",
+      "output": "- The last line contains 15 words; it uses the word \"soon,\" which is fine, but the phrase \"we are done.\" is included at the end of the sentence, not as a separate entity as required.\n\n- The draft has a line ending with a comma, which is not an issue by itself, but to ensure clarity and formality, each bullet should ideally be a full sentence ending with a period, and the task specifies the exact phrase \"we are done.\" should be at the end, presumably as its own ending phrase.\n\n- The word \"Experts\" has 7 letters, which is acceptable.\n\n- The word \"discovery\" or \"discover\" is not used explicitly. However, the task only requires a short note about a discovery, not that the word itself must appear.\n\n- All sentences start with \"- \", as required.\n\n- No word longer than 7 letters found.\n\nTherefore, the main fix is the last line format:\n\n- It should end exactly with the phrase \"we are done.\" as a separate bullet point or as the final sentence.\n\nHence, to fully meet the task:\n\n- Either make the last bullet line finish with \"we are done.\" exactly, or add a sixth line with \"we are done.\"\n\nBut the task says must be exactly 5 bullets, so the phrase must be at the end of the last bullet.\n\nThe last bullet ends with \"... soon, we are done.\" which is not strictly the phrase; the phrase should be only \"we are done.\"\n\nTherefore, revise the last bullet to end with \"we are done.\" only"
+    },
+    "worker:9d3c027fe82acdf4f46be7cb5801b2d603fd599582f1e107b3b0008df3bfce62": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:a5d3928997ef85362090c4a71b05e45838ca3e02da261c86bcbb850a2667f222": {
+      "name": "worker",
+      "output": "- The word \"process\" is 7 letters, which is longer than the allowed 6 letters.  \n- The sentence \"Sun energy turns air and water into food for plants, that is it.\" contains the word \"energy\" (6 letters, allowed) but \"plants,\" (6 letters, allowed). This seems fine.  \n- The sentences use the word \"and,\" which is explicitly not allowed. \"from air and water,\" \"air and water,\" and \"air and water\" include \"and.\"  \n- The last line ends with \"that is it.\" which is correct.  \n- The lines start with \"- \" and there are 4 bullet points.  \n\nSummary:  \n- Need to remove the word \"and.\"  \n- Replace \"process\" (7 letters) with a shorter word (max 6 letters).  \n- Rewrite to avoid the word \"and\" in phrases like \"air and water.\"  \n\nTherefore, the draft answer does not satisfy all requirements.\n\nFix needed:  \n1. Remove the word \"and\" everywhere.  \n2. Replace \"process\" with a suitable 6 letter or less synonym (e.g., \"phase,\" \"stage,\" \"cycle,\" \"train,\" \"craft,\" but none match well). Possibly \"task,\" \"work,\" or \"step\" might fit.  \n3. Possibly rewrite to avoid \"and\" by splitting phrases, e.g., \"air plus water\" is 6 letters for \"plus,\" acceptable. Or use commas or separate sentences.\n\nFinal verdict: The draft answer fails; needs to fix word length and"
+    },
+    "worker:aef2d113074531c62e35f53a8b9f44c266c7c5da62560784ecdaeea375c8f501": {
+      "name": "worker",
+      "output": "- Atoms are small bits that make up all things  \n- They link to form more complex stuff  \n- When they split or join, it can free or use energy so it goes."
+    },
+    "worker:b2a3b9da653cb197d7164849c075a3cfdf3ad09dc319369aa5a790d95b918612": {
+      "name": "worker",
+      "output": "- Plants use light to make food from air plus water  \n- This step is key for life on Earth as it makes oxygen  \n- Green bits in leaves trap light to start the food task  \n- Sun rays turn air plus water into food for plants, that is it."
+    },
+    "worker:b9eab2b26bdcd8b156614c919db9d214612b38e4e8860f6b37fb8a7724b8f165": {
+      "name": "worker",
+      "output": "- Stars are huge balls made from gas  \n- They give light and heat in space  \n- We see stars shine at night sky"
+    },
+    "worker:c5ac6c34abbf6be77d40980679ce5f33cb34e27292cc79523a57e2bfc491b51d": {
+      "name": "worker",
+      "output": "- A new gene was found in grass.  \n- This gene helps plants stay moist in drought.  \n- It may aid crops to grow and feed more.  \n- This may help us face dry land. we are done.\n\nPASS"
+    },
+    "worker:c9816e6b7bbe916470b92ca4bd0de656ce2aff2939fc92e0efa50092f67ade10": {
+      "name": "worker",
+      "output": "Books are great tools for learning. They hold facts and tales that help us grow. When you read, your mind gains new ideas and skills. Start with fun books and soon you will see how much you can gain. Just pick one and jump in. All is set."
+    },
+    "worker:cd3eb4b8468eca1d04b167e48eb13f49d0512dbe4f09dc1052c557bf96d54471": {
+      "name": "worker",
+      "output": "- A new gene was found in grass.  \n- This gene helps plants stay wet in drought.  \n- It may aid crops to grow and feed more.  \n- This may help us deal with dry land. we are done."
+    },
+    "worker:cd6c9a2038cd466adab04b0837a14a8d236bb28b9708ae0db888c2ca654da3e8": {
+      "name": "worker",
+      "output": "- Atoms are small bits that make all things  \n- They link to form new, large stuff  \n- When they join or break, this can give or use heat so it goes."
+    },
+    "worker:cd9b4df5318be51a68d6ba77e52073df43e584adfdb56c501d08ae649920ef12": {
+      "name": "worker",
+      "output": "- Light moves fast in waves that we can see  \n- It bends when it goes through glass or rain  \n- It splits into hues like red, blue, and green  \n- We use light to see the world each day here we go."
+    },
+    "worker:d77fb51ed9863de88f2cbc1ff77dc8d2d070425e45721b53097dc48e8e0eb9b4": {
+      "name": "worker",
+      "output": "- A plant needs sun rain and soil  \n- It grows roots leaves and blooms  \n- Plants make food using sun light  \n- They give air fresh and cool"
+    },
+    "worker:ee85c8c7b32ad9fbb68b57cbcf24d488bf3fd11810542f012cefc014fbe81c9c": {
+      "name": "worker",
+      "output": "- New gene found in wild vines  \n- This gene helps vines resist bugs  \n- It may help crops fight pest fast  \n- This new find may boost food growth we are done."
+    },
+    "worker:fc64d6e4f5109767e5a8af6d4b62009d9ed828e66e4bd1a366b3dc843dd3d3cc": {
+      "name": "worker",
+      "output": "Fix:  \n- Line 3 uses \"using\" which is longer than 6 letters  \n- Line 4 uses \"fresh\" which is fine but \"cool\" is acceptable; no issue here  \n- No commas but line 1 should add space after commas and in original line no commas present so no commas issue  \n\nCorrection for line 3:  \n- Plants make food with sun and light  \n\nRevised answer:  \n- A plant needs sun rain and soil  \n- It grows roots leaves and blooms  \n- Plants make food with sun and light  \n- They give air fresh and cool  \n\nPASS"
+    }
+  },
+  "version": 1
+}

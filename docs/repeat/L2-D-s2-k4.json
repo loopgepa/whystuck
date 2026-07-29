@@ -1,0 +1,77 @@
+{
+  "meta": {
+    "dataset": "multi-constraint-hard (IFEval-style)",
+    "n_train": 8,
+    "n_heldout": 10,
+    "worker_model": "openai/gpt-4.1-mini",
+    "reflection_model": "openai/gpt-5.6-luna",
+    "max_metric_calls": 28,
+    "module_selector": "all",
+    "seeds_independent": true,
+    "detector_reflection": true,
+    "reflection_calls": 10,
+    "task_set": "multi-hard",
+    "temperature": null,
+    "sample": 4,
+    "exclude_constraint": [
+      "exact_word_count"
+    ],
+    "loop_max_retries": 1,
+    "plan_gene": false,
+    "feedback_stats": false,
+    "critique_model": null,
+    "oracle_critique": false,
+    "feedback_level": "mid",
+    "exec_feedback": false,
+    "actuator": false,
+    "gene_overrides": {
+      "ensure_correct": "Act as a strict constraint checker for a task specification and a proposed draft response.\n\nFor each case:\n\n1. Read the task and every stated requirement carefully.\n2. Inspect the draft itself rather than trusting any claimed verdict or feedback.\n3. Check every requirement independently before deciding the result.\n4. Return PASS only if all requirements are satisfied. If even one requirement fails, return WRONG.\n5. Report:\n   - the overall verdict;\n   - every failed requirement, with a precise explanation and a concrete fix;\n   - every satisfied requirement.\n6. Do not overlook exact-format requirements, capitalization, punctuation, word boundaries, or the final characters of the response.\n7. After forming the verdict, re-read the task and verify each constraint again. Revise the verdict or explanation if necessary.\n\nUse these checking rules:\n\n- \u201cExactly N bullet points\u201d means exactly N bullet lines, with no extra prose, and each line must begin with the literal prefix \u201c- \u201d.\n- A word-length limit applies to every word in the response, including words in the final sentence. Count alphabetic words rather than punctuation; punctuation attached to a word does not make the word shorter.\n- A forbidden word means that exact standalone word, case-insensitively unless the task specifies otherwise. Do not treat harmless substrings as occurrences.\n- A required word must occur as the required standalone word, not merely as part of a longer word.\n- \u201cEntire response in lowercase\u201d includes every letter in bullets, sentences, and required closing phrases.\n- \u201cEnd with the exact phrase\u201d requires the response\u2019s final characters to match exactly, including spelling, capitalization, punctuation, and spacing. Do not accept a capitalized or otherwise altered version.\n- \u201cNo commas\u201d means no comma characters anywhere in the response.\n- Check the complete response, including words such as \u201chappens,\u201d \u201cchanges,\u201d and other easily overlooked long words.\n\nKnown calibration cases:\n\n- In the music example, the draft passes: it has exactly three \u201c- \u201d bullet lines, no word longer than six letters, no standalone \u201cof,\u201d and ends exactly with \u201cthat is it.\u201d\n- In the natural-process example, the draft must be WRONG, not PASS, because \u201chappens\u201d has seven letters, violating the six-letter maximum. The other requirements\u2014lowercase text, five bullets, no standalone \u201cof,\u201d and inclusion of \u201catom\u201d/\u201catoms\u201d as applicable\u2014must be checked separately and reported accurately.\n- In the gene example, the draft must be WRONG for at least three reasons: \u201cChanges\u201d has seven letters and violates the six-letter maximum; the ending is \u201cWe are done.\u201d rather than the exact lowercase phrase \u201cwe are done.\u201d; and the forbidden standalone word \u201cto\u201d appears in phrases such as \u201cto make\u201d and \u201cto fix.\u201d The no-comma and required \u201cgene\u201d requirements are satisfied.\n\nNever produce a false PASS merely because most requirements are met. Explicitly identify all failed requirements and distinguish them from satisfied ones.",
+      "generate": "Act as a strict constraint-satisfaction writer.\n\nThe task input will contain:\n1. A broad writing goal, such as introducing a topic to a beginner, describing a natural process, or explaining a scientific concept.\n2. A list of requirements introduced by wording such as \u201cYour response MUST satisfy ALL of the following requirements.\u201d\n\nWrite a response that fulfills the broad goal while satisfying every listed requirement exactly. Treat every requirement as mandatory; do not prioritize some requirements over others.\n\nBefore producing the final response, use this process:\n\n1. Parse every requirement into a checklist.\n2. Draft content that answers the requested topic clearly and accurately.\n3. Check the entire response, including punctuation, capitalization, the final line, and any required phrase.\n4. Count bullets by lines beginning exactly with \u201c- \u201d. If an exact bullet count is required, use precisely that many such lines and do not add accidental bullets.\n5. If a maximum word length is specified, inspect every word. Count letters in each word and replace any word that exceeds the limit. For example, \u201cbetween\u201d has 7 letters and fails a 6-letter limit; \u201cchanges\u201d also has 7 letters. Do not rely on the topic being simple\u2014verify every word.\n6. Treat forbidden-word rules as exact word restrictions, including occurrences in otherwise natural sentences. For example, if \u201cto\u201d or \u201cof\u201d is forbidden, neither may appear anywhere.\n7. Treat required keywords as exact required words. Include them in a natural sentence, and ensure capitalization matches any case-sensitive requirement.\n8. If the response must be entirely lowercase, make every letter lowercase, including required keywords and closing phrases.\n9. If an exact ending is required, make the response end with that phrase exactly, with matching capitalization, spacing, punctuation, and no text after it. For example, \u201cwe are done.\u201d is not satisfied by \u201cWe are done.\u201d.\n10. Check interactions between constraints. A required keyword or exact ending must itself comply with word-length, case, forbidden-word, punctuation, and lowercase rules unless the requirements explicitly conflict.\n11. Do not include explanations, headings, checklists, apologies, or validation commentary in the final response unless the task explicitly requests them.\n\nUse concise wording and choose short, simple words when word-length limits apply. Revise repeatedly until every requirement passes. Output only the completed response."
+    },
+    "worker_max_output_tokens": 320,
+    "seeds": [
+      2
+    ],
+    "estimated_usd": 0.02976,
+    "generated": "2026-07-29T17:13:40.972736+00:00"
+  },
+  "runs": [
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.9400000000000001,
+        "opt_heldout": 0.9400000000000001,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-29": 0.8,
+          "mc-46": 1.0,
+          "mc-1": 1.0,
+          "mc-48": 1.0,
+          "mc-17": 1.0,
+          "mc-41": 0.8,
+          "mc-28": 1.0,
+          "mc-34": 0.8,
+          "mc-60": 1.0,
+          "mc-32": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-29": 0.8,
+          "mc-46": 1.0,
+          "mc-1": 1.0,
+          "mc-48": 1.0,
+          "mc-17": 1.0,
+          "mc-41": 0.8,
+          "mc-28": 1.0,
+          "mc-34": 0.8,
+          "mc-60": 1.0,
+          "mc-32": 1.0
+        }
+      }
+    }
+  ]
+}

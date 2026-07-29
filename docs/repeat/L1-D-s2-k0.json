@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "dataset": "multi-constraint-hard (IFEval-style)",
+    "n_train": 8,
+    "n_heldout": 10,
+    "worker_model": "openai/gpt-4.1-mini",
+    "reflection_model": "openai/gpt-5.6-luna",
+    "max_metric_calls": 28,
+    "module_selector": "all",
+    "seeds_independent": true,
+    "detector_reflection": true,
+    "reflection_calls": 10,
+    "task_set": "multi-hard",
+    "temperature": null,
+    "sample": 0,
+    "exclude_constraint": [],
+    "loop_max_retries": 1,
+    "plan_gene": false,
+    "feedback_stats": false,
+    "critique_model": null,
+    "oracle_critique": false,
+    "feedback_level": "mid",
+    "exec_feedback": false,
+    "actuator": false,
+    "gene_overrides": {
+      "ensure_correct": "Act as a rigorous constraint validator and reviser for responses to highly specified writing tasks.\n\nBefore answering, reread the task and inspect every explicit requirement independently. Do not accept the draft\u2019s own claims about compliance. Check each constraint mechanically, then revise the response until all constraints are satisfied. If a requirement is impossible or ambiguous, state the issue clearly rather than declaring PASS.\n\nUse this validation procedure:\n\n1. Identify structural requirements:\n   - Count bullets or lines exactly.\n   - Verify every bullet begins with the exact required prefix, such as \"- \".\n   - Check required beginnings, endings, and exact phrases character-for-character where requested.\n\n2. Count words independently:\n   - Count whitespace-separated word tokens in the proposed response.\n   - Punctuation attached to a word does not create an additional word.\n   - Do not count bullet markers as words.\n   - Verify exact word counts rather than merely checking whether the response is approximately short.\n   - Recount the final revised response from scratch.\n\n3. Check lexical constraints:\n   - For maximum word length, inspect every word and count its letters; punctuation does not increase letter count.\n   - For required words, verify the exact word is present, normally case-insensitively.\n   - For forbidden words, verify the forbidden word is absent as a standalone word; do not treat an unrelated substring as the forbidden word unless the task explicitly says to forbid substrings.\n   - Do not invent semantic violations. For example, \u201cwith,\u201d commas, apostrophes, or grammatical implications do not count as the word \u201cand\u201d unless the literal forbidden word appears.\n\n4. Check punctuation and formatting literally:\n   - If commas are forbidden, ensure no comma character appears.\n   - Preserve an exact required ending, including punctuation, while still counting its words.\n   - Do not assume a semicolon, comma, or period changes the word count.\n\n5. Report the result accurately:\n   - List each requirement and mark it PASS or FAIL with concise evidence.\n   - If any requirement fails, give a corrected response and recheck every requirement on that corrected response.\n   - Do not label a response PASS if even one exact constraint is unmet.\n\nRelevant recurring task patterns from prior examples:\n- A natural-process description may require exactly 5 bullets, each beginning \"- \", no commas, no word longer than 7 letters, and exactly 25 words.\n- A beginner topic introduction may require exactly 4 bullets, each beginning \"- \", inclusion of the word \u201catom,\u201d exactly 25 words, and no standalone use of \u201cand.\u201d\n- A technology overview may require inclusion of \u201cnode,\u201d exactly 20 words, no standalone use of \u201cand,\u201d and an ending that is exactly \u201cwe are done.\u201d\nThese examples illustrate the validation method; always follow the requirements in the current task if they differ.",
+      "generate": "Act as a strict constraint-satisfaction writer. For each task input, identify the requested topic or action and every explicit output requirement, then produce only the final response\u2014without commentary, explanations, or validation notes.\n\nBefore responding, create an internal checklist and verify every requirement:\n\n1. Follow the requested format exactly, including the exact number of bullet points, required line prefixes, paragraph structure, and ordering.\n2. Count words carefully using whitespace-separated tokens; punctuation attached to a token does not create an additional word. Meet the exact word count, not merely an approximate count.\n3. Check maximum word-length requirements letter by letter, ignoring punctuation when determining a word\u2019s length.\n4. Include every required keyword exactly as requested.\n5. Exclude every forbidden word exactly as requested, treating it as a standalone word unless the task explicitly specifies substring matching.\n6. Match required beginnings, endings, phrases, capitalization, and punctuation exactly. If an exact ending phrase is required, make it the final text, including its punctuation.\n7. Ensure unrelated wording does not accidentally violate any constraint.\n8. Revise and recount internally until all requirements are simultaneously satisfied.\n\nKnown lessons from prior attempts:\n- The outputs correctly satisfied bullet formatting, keyword inclusion, forbidden-word avoidance, word-length limits, and required endings, but failed because their word counts were not exact.\n- Therefore, exact word counting is especially important; never assume a response has the correct count.\n- A response may satisfy several constraints while still failing overall, so treat every listed requirement as mandatory."
+    },
+    "worker_max_output_tokens": 320,
+    "seeds": [
+      2
+    ],
+    "estimated_usd": 0.02976,
+    "generated": "2026-07-29T16:22:26.580081+00:00"
+  },
+  "runs": [
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.775,
+        "opt_heldout": 0.775,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-29": 0.8,
+          "mc-46": 0.8,
+          "mc-1": 0.75,
+          "mc-48": 0.5,
+          "mc-17": 0.75,
+          "mc-41": 0.8,
+          "mc-28": 0.8,
+          "mc-34": 1.0,
+          "mc-60": 0.8,
+          "mc-32": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-29": 0.8,
+          "mc-46": 0.8,
+          "mc-1": 0.75,
+          "mc-48": 0.5,
+          "mc-17": 0.75,
+          "mc-41": 0.8,
+          "mc-28": 0.8,
+          "mc-34": 1.0,
+          "mc-60": 0.8,
+          "mc-32": 0.75
+        }
+      }
+    }
+  ]
+}

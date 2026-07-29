@@ -54,7 +54,14 @@ held-out tasks and fixed seeds, returns $+0.017$, $-0.042$, $+0.062$, $+0.023$ a
 $n_{\mathrm{train}} \in \{4,8,16,24\}$: three of four positive, the lone negative cell being the
 original run. Five released runs happen to re-score one fixed seed genome on one fixed held-out
 set, which recovers the sampling variance no interval in this study contained,
-$\sigma(\dd) = 0.028$ on a thirty-task mean --- and puts that $-0.042$ at $1.49\sigma$. So the
+$\sigma(\dd) = 0.028$ on a thirty-task mean --- and puts that $-0.042$ at $1.49\sigma$. We then
+bought the direct version: $135$ re-scorings, five independent draws of every released genome on
+its own held-out tasks. Averaged over five draws the loss halves to $-0.021$ and sits $1.12$
+standard errors from zero, while the $+0.060$ gain holds at $+0.055$ with $t=3.02$ on four
+degrees of freedom --- $p<0.05$, and the only significance claim in this paper that does not rest
+on three seeds. The same replicates show that $\sigma$ is a property of the \emph{genome}, not
+of the study, ranging over a factor of $5.9$ ($0.006$ to $0.034$): an arm near the metric ceiling
+varies least, and a critique that refines every draft issues the most sampled calls. So the
 degenerate verifier is real and robust while its cost is not established, and the two claims
 are separable in a way we had run together. What the $p_0$ axis buys survives the withdrawal in
 a stronger form than either endpoint: the swing between the two levels is $0.102$, about
@@ -915,7 +922,7 @@ $L_1$ endpoint is not separable from noise on its own and we no longer report it
 (\S\ref{sec:splitresult}). $\mathbb{E}[p_0]$ is the independence estimate and it runs high by
 roughly a factor of two, because constraint failures correlate --- at $L_1$ the measured $p_0$
 is $2/30 = 0.067$ against $0.127$ predicted --- so the estimate orders the levels and the
-measured column is what they are. $L_3$ is \emph{saturated} and is discussed as such below.}
+measured column is what they are. $L_3$ is \emph{saturated}; its $-0.002$ is one draw, and five replicates put it at $+0.019$ (\S\ref{sec:repeat}), still not significant but not the zero this column shows.}
 \label{tab:p0}
 \end{table}
 
@@ -1439,6 +1446,89 @@ becoming visible: $1.43$ promotable cycles is enough budget to pass the guard an
 for a one-gene arm to reliably land an acceptance. This is the correct reading of the guard's
 scope --- it enforces that an arm \emph{can} fund an accept cycle, never that one is accepted.
 
+\subsection{Pre-registered: is it a search-depth artifact?}
+\label{sec:budgetprereg}
+
+The split sweep moved split size and metric-call budget together along a constant-epoch line, by
+necessity (\S\ref{sec:splitsweep}), so it cannot say which of the two produced the swing from
+$-0.042$ to $+0.062$. The complement holds the split fixed at eight and varies only the budget.
+We pre-register it here, before paying, in the same form as the two predictions this paper has
+already resolved.
+
+\paragraph{A budget sweep that ignores the proposal cap measures nothing.} The obvious design ---
+raise \texttt{-{}-max-metric-calls} and change nothing else --- is broken, and we caught it at
+the dry-run step. GEPA's search is bounded by \emph{two} independent limits in this harness: the
+metric-call budget, which affords $(\mathrm{mmc} - n_{\mathrm{train}})/(\min(3,
+n_{\mathrm{train}}) + n_{\mathrm{train}})$ promotable accept cycles, and
+\texttt{-{}-reflection-calls}, a hard cap on candidate proposals per arm wired through to GEPA's
+stopper. Effective search depth is the \emph{minimum} of the two. Every contrast run recorded
+under the corrected harness used a cap of $6$, and every one was budget-bound --- $1.43$ to
+$2.22$ cycles, far under it --- so the cap has never yet bitten and no published number is
+affected. But it saturates at $\mathrm{mmc} = 8 + 6 \times 11 = 74$: at a cap of $6$, budgets of
+$80$ and $160$ buy the \emph{same} six proposals, issue the same prompts and must return the
+same result. Our first draft of this sweep was $\mathrm{mmc} \in \{20,40,80,160\}$ at the
+inherited cap, which would have spent \$7.93 of priced bound on two cells that are one
+experiment, and then reported a ``$12\times$ budget range'' whose effective range was
+$1.09$ to $6$. This is Evidence~3's confound and the split sweep's confound in a third place, and
+the pattern is now explicit enough to state as a rule: \textbf{before sweeping a budget, check
+every other limit that could bind first.}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{ccccc}
+\toprule
+\texttt{mmc} & cap & promotable cycles & effective depth & priced bound \\
+\midrule
+20  & 6  & 1.09  & 1.09 & \$1.65 \\
+28  & 6  & 1.82  & 1.82 & (the re-run, free) \\
+40  & 6  & 2.91  & 2.91 & \$2.01 \\
+56  & 6  & 4.36  & 4.36 & \$2.29 \\
+80  & 6  & 6.55  & \textbf{6.00} & \$2.72 \\
+160 & 12 & 13.82 & \textbf{12.00} & \$4.94 \\
+\bottomrule
+\end{tabular}
+\caption{The pre-registered budget sweep, at $n_{\mathrm{train}} = 8$ with held-out tasks, seeds
+and every other lever fixed at the four-arm re-run's values. Arms B and D only: replaying that
+run's cassette under \texttt{-{}-arms BD} reproduces its B and D fields bit-for-bit, which we
+verified rather than assumed, so the $\mathrm{mmc}{=}28$ row is the four-arm re-run of \S\ref{sec:rerun} at no cost. \emph{Effective depth} is
+$\min$(cycles, cap): the first five rows share the inherited cap of $6$ and so form a
+single-knob budget axis, while the last row must raise the cap to exceed it --- that row moves
+two knobs and is reported as such, because at a cap of $6$ no budget can buy more than six
+proposals. Every cell sits under the study's own \$5 default ceiling, so unlike four earlier runs
+this sweep needs no override.}
+\label{tab:budgetsweep}
+\end{table}
+
+\paragraph{The predictions.} The mechanism of \S\ref{sec:analysis} says the degenerate verifier
+is optimal on a training signal where almost nothing is already correct, which is a property of
+$p_0$ and not of how long the search runs. So we predict (i) the evolved critique's \texttt{PASS}
+rate remains $0.00$ on at least four of the six arm-D genes at the two deepest cells
+($\mathrm{mmc}{=}80$ and $\mathrm{mmc}{=}160$). And we predict (ii) \textbf{no monotone trend in
+$\dd(D-B)$ across effective depth}, with no cell exceeding $2.5$ times the directly measured
+$\sigma(\dd) = 0.042$ at this level (\S\ref{sec:repeat}), i.e.\ $|\dd| < 0.105$ throughout. The
+grounds: within the split sweep, depth already ranged $1.43$ to $2.22$ with no ordering
+($+0.017$, $-0.042$, $+0.062$, $+0.023$), and five three-seed cells cannot resolve a small trend.
+
+\paragraph{The verdict rule, and what would change our minds.} If $\dd$ at $12$ proposals exceeds
+$+0.05$ (the SESOI) \emph{and} $2\sigma$, prediction (ii) fails and the honest headline becomes
+\emph{loop-level optimization needs more search than we bought} --- the live alternative this
+paper has flagged since the retraction, and the one outcome that would turn a null into a
+positive result. If no cell clears $2\sigma$ and the ordering is not monotone, the under-search
+explanation is rejected over an $11\times$ depth range and the null is that much more robust.
+Anything between is reported as inconclusive rather than resolved.
+
+\paragraph{Two risks we state in advance.} The $\mathrm{mmc}{=}20$ cell affords $1.09$ promotable
+cycles, i.e.\ about one proposal per arm, so either arm may accept nothing and produce a
+one-sided or empty contrast. The budget guard permits it --- it enforces that an arm \emph{can}
+fund an accept cycle, never that one is accepted (Evidence~9) --- so that row will be labelled by
+the acceptance census and excluded from the trend test rather than read as a null. Second, these
+five runs re-measure the same unoptimized genome on the same thirty held-out tasks as the four-arm
+re-run, so they will nearly double the replicate count behind the cross-run $\sigma$ estimate
+($5 \to 9$). That estimate will therefore move, and every ratio derived from it will be
+re-derived; we note it now so the change reads as the improvement it is rather than as a
+convenient adjustment.
+
 \section{Threats to Validity}
 \label{sec:threats}
 
@@ -1496,7 +1586,99 @@ predict loop performance. Two caveats on the estimate itself: the mean signed di
 between replicates, $-0.007$, is confounded with any provider-side drift between recording
 dates, and five replicates of three seeds cannot separate the two. It establishes an order of
 magnitude, and that order of magnitude is the same as the effects being reported. Direct
-replicate sampling (D7) is the fix and needs no re-optimization.
+replicate sampling (D7) is the fix, needs no re-optimization, and has since been run: the next
+subsection reports it and supersedes this estimate wherever the two overlap.
+
+\subsection{Measured: 135 re-scorings, and \texorpdfstring{$\sigma$}{sigma} is not one number}
+\label{sec:repeat}
+
+The estimate above is an inference from runs that happened to re-measure one genome. We then
+bought the direct version (D7): every released genome of the $p_0$ sweep re-scored $K=5$ times
+on its own held-out tasks --- three levels $\times$ \{prompt-only, loop-level, unoptimized\}
+$\times$ three seeds $\times$ five replicates, $135$ runs. No re-optimization is involved, so
+this is the existing scoring path on a fixed genome, and all $135$ replay from their cassettes
+offline. Two properties make it a measurement rather than a cache: repeated scorings of one
+genome are \emph{identical} calls, so a per-replicate salt enters the content-addressed key
+without reaching the provider (without it, record-mode dedup would hand $K$ replicates one
+cached draw and report zero variance); and no temperature is pinned, because the point is the
+noise in the numbers the paper already reports, which were drawn at the provider's default.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lcccccl}
+\toprule
+level & single draw & $\dd$ ($K{=}5$) & sd(draw) & se(mean) & $t$ & verdict \\
+\midrule
+$L_1$ & $-0.042$ & $-0.021$ & 0.0418 & 0.0187 & 1.12 & not significant \\
+$L_2$ & $+0.060$ & $+0.055$ & 0.0410 & 0.0184 & \textbf{3.02} & $\mathbf{p < 0.05}$ \\
+$L_3$ & $-0.002$ & $+0.019$ & 0.0197 & 0.0088 & 2.12 & not significant \\
+\bottomrule
+\end{tabular}
+\caption{$\dd(D-B)$ at each $p_0$ level from five independent draws of the same released
+genomes on the same held-out tasks. \emph{Single draw} is what the paper reports elsewhere.
+$t$ is the five-replicate mean over its own standard error, on $4$ degrees of freedom, so the
+critical values are $2.132$ ($p<0.10$) and $2.776$ ($p<0.05$) --- \emph{not} $1.96$. That
+distinction decides two of the three rows: a normal approximation would call $L_3$ significant.
+These standard errors describe sampling noise on a \emph{fixed} task set, since every replicate
+scores the same thirty tasks; they contain no task-draw component and are not a substitute for
+more seeds.}
+\label{tab:repeat}
+\end{table}
+
+Three things follow, and they cut in different directions. First, \textbf{the withdrawal of the
+$L_1$ loss is confirmed by direct measurement}: averaged over five draws it halves, from
+$-0.042$ to $-0.021$, and sits $1.12$ standard errors from zero. Second, \textbf{the $L_2$ gain
+survives at $p<0.05$} --- $+0.055$ against its own five-replicate standard error. This is the
+only significance statement in the paper that does not rest on three seeds, and it is the
+study's one properly supported loop-level effect. Third, \textbf{$L_3$ is not the zero we
+reported}. We described it as a saturated null on the strength of a single draw of $-0.002$;
+five draws give $+0.019$ with $t=2.12$, which fails the $p<0.10$ threshold by $0.01$ and is
+therefore still not a result --- but the sign was an artifact of one sample, and we say so
+rather than leave the earlier reading standing.
+
+\paragraph{\texorpdfstring{$\sigma$}{Sigma} is a property of the genome.} The estimate above
+assumed a single study-wide $\sigma$, which is what every ratio in this section was scaled by.
+Measured per genome it ranges over almost a factor of six:
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lccc}
+\toprule
+level & prompt-only (B) & loop-level (D) & unoptimized (seed) \\
+\midrule
+$L_1$ & 0.0292 & 0.0205 & 0.0144 \\
+$L_2$ & \textbf{0.0336} & 0.0152 & 0.0140 \\
+$L_3$ & 0.0142 & \textbf{0.0057} & 0.0099 \\
+\bottomrule
+\end{tabular}
+\caption{Sd of one draw of a thirty-task mean, by genome. The range is $0.0057$ to $0.0336$,
+a factor of $5.9$. Two mechanisms are visible: a genome nearer the metric ceiling has less room
+to vary ($L_3$'s loop-level arm scores ${\approx}0.98$), and a critique that refines
+\emph{every} draft issues more sampled calls per task than one that accepts some. So ``the
+noise'' is not a constant of the study, and a single $\sigma$ applied study-wide is an
+approximation whose direction depends on which genome it came from.}
+\label{tab:sigmagenome}
+\end{table}
+
+That splits the section's own $\sigma$ into two quantities that were being conflated, and it is
+worth being explicit about which belongs where. A comparison \emph{between two runs recorded on
+different dates} --- the seed-baseline curve of Table~\ref{tab:curve} --- must carry
+provider-side drift, and the cross-run estimate is the one that contains it; the ratios reported
+above for that curve are therefore the right ones and stand. A comparison \emph{between two arms
+inside one run} carries no drift, and there the directly measured value applies: $\sigma(\dd)$
+is $0.042$ at $L_1$, $0.041$ at $L_2$ and $0.020$ at $L_3$, all larger than the $0.0279$ the
+cross-run estimate gave, because optimized arms vary more than the seed genome it was built
+from. On a \emph{single} draw the three headline effects are therefore $1.00\sigma$,
+$1.46\sigma$ and $0.09\sigma$ --- weaker than this section first reported, not stronger. The
+five-replicate means in Table~\ref{tab:repeat} are the better statement and supersede both.
+
+One control, without which the table is void: the unoptimized genome's thirty-task mean moves
+across replicates with sd $0.0144$, comfortably non-zero, so the salt is producing independent
+draws rather than five copies of one cached call. That number is also a check on the offline
+estimate, which put the same quantity at $0.0197$: the cross-run figure is $1.4\times$ larger,
+which is the size of the drift contamination its own caveat predicted.
 \textbf{A do-nothing floor in the
 metric:} the fraction-of-constraints-satisfied score is not anchored at zero for an empty
 answer --- the empty string scores $0.548$ on the vendored IFBench slice and $0.420$ on
@@ -1631,8 +1813,7 @@ generator-limited (the residual). The agenda, re-ordered accordingly:
     is not by itself sufficient to make the loop-level lever pay off; aiming GEPA directly
     at the fixer's feedback did not rescue it either. Math (a numeric checker) remains a
     natural next replication.
-  \item[D7 (statistics) --- \emph{reinstated, sharpened, and now the study's highest-value
-    purchase}.] The near-zero paired variance we
+  \item[D7 (statistics) --- \textbf{done} (\S\ref{sec:repeat}).] The near-zero paired variance we
     once read as precision was mostly ties, i.e.\ the treatment not being applied
     ($\S\ref{sec:defect}$), and no interval in the study contains within-condition sampling
     variance at all: the worker runs at the provider's default temperature, one sample per task.
@@ -1641,7 +1822,12 @@ generator-limited (the residual). The agenda, re-ordered accordingly:
     is what moved the $-0.042$ from a finding to a $1.49\sigma$ fluctuation. Estimating a
     variance from replicates that were recorded on different dates confounds it with
     provider-side drift, though, and $\sigma$ is what every remaining marginal claim now turns
-    on. Repeated samples are therefore load-bearing rather than optional.
+    on. Repeated samples were therefore load-bearing rather than optional, and are now bought:
+    $135$ re-scorings settle all three $p_0$ effects, confirm the $L_1$ withdrawal, raise the
+    $L_2$ gain to $p<0.05$, and show $\sigma$ varying by $5.9\times$ across genomes. What
+    remains open is the same measurement on the runs D7 did not cover --- the seed-baseline curve
+    and the code domain, where no repeated measurement exists and the $\sigma$ column is
+    consequently unavailable rather than favourable.
     The harness now supports the pinned temperature, and a per-call sample salt, because both
     are cassette traps rather than parameters: a temperature baked into the completion factory
     never enters the content-addressed key, so two runs at different temperatures would serve

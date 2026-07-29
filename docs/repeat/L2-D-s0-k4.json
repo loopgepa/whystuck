@@ -1,0 +1,77 @@
+{
+  "meta": {
+    "dataset": "multi-constraint-hard (IFEval-style)",
+    "n_train": 8,
+    "n_heldout": 10,
+    "worker_model": "openai/gpt-4.1-mini",
+    "reflection_model": "openai/gpt-5.6-luna",
+    "max_metric_calls": 28,
+    "module_selector": "all",
+    "seeds_independent": true,
+    "detector_reflection": true,
+    "reflection_calls": 10,
+    "task_set": "multi-hard",
+    "temperature": null,
+    "sample": 4,
+    "exclude_constraint": [
+      "exact_word_count"
+    ],
+    "loop_max_retries": 1,
+    "plan_gene": false,
+    "feedback_stats": false,
+    "critique_model": null,
+    "oracle_critique": false,
+    "feedback_level": "mid",
+    "exec_feedback": false,
+    "actuator": false,
+    "gene_overrides": {
+      "ensure_correct": "Act as a meticulous constraint validator and reviser. Before responding, reread the task, extract every explicit requirement, and inspect the proposed draft against each one. Do not infer that a draft passes merely because its meaning is correct.\n\nFor every draft:\n\n1. Check every requirement independently.\n2. Treat requirements as exact and cumulative.\n3. Check the entire response, including headings, punctuation-adjacent words, bullet markers, capitalization, and the final character or phrase.\n4. For word-based rules, inspect every lexical word individually. Count the letters in each word; punctuation does not make an overlong word acceptable. Apply forbidden-word checks case-insensitively unless the task explicitly says otherwise.\n5. For formatting rules, count and inspect the actual lines and prefixes exactly. For example, \u201cexactly 3 bullet points, each line starting `- `\u201d requires precisely three such lines.\n6. For exact-ending rules, verify that the response ends with the required phrase exactly, including capitalization and punctuation.\n7. For case rules, inspect every letter in the entire response.\n8. If any requirement fails, the result is not a pass. Never emit PASS for a partially compliant draft.\n9. If revision is requested or appropriate, rewrite the draft so that all requirements are satisfied, then validate the revised version again from scratch.\n10. Report which requirements passed and which failed, with a concise explanation of each failure. If the required output is only a verdict, output PASS only after all checks succeed; otherwise output the required failure status.\n\nKnown failure patterns from prior evaluations must be prevented:\n\n- A draft explaining DNA as a \u201ccode\u201d violated \u201cuse no word longer than 6 letters\u201d because it contained the word \u201cinstruction,\u201d despite satisfying the keyword, forbidden-word, and no-comma requirements.\n- A three-bullet explanation of cells violated both \u201cdo not use the word \u2018and\u2019\u201d and the six-letter maximum because it contained \u201cand\u201d and \u201cnucleus,\u201d despite satisfying the keyword and bullet-count requirements.\n- A lowercase introduction to math violated the six-letter maximum because it contained \u201cnumbers,\u201d despite satisfying the lowercase, forbidden-word, and exact-ending requirements.\n\nUse a final compliance checklist before answering:\n- every required keyword is present;\n- every forbidden word is absent;\n- every word-length limit is obeyed;\n- punctuation restrictions are obeyed;\n- capitalization and case rules are obeyed;\n- exact phrases and endings match;\n- line, bullet, and other formatting counts are exact;\n- no additional text accidentally violates any requirement.",
+      "generate": "For each task, answer the user\u2019s requested content directly while satisfying every stated requirement simultaneously. Treat all requirements as hard constraints, not suggestions.\n\nFirst, identify:\n1. The subject and audience requested by the task.\n2. Every formatting, wording, vocabulary, punctuation, length, capitalization, and ending requirement.\n3. Any required or forbidden exact words or phrases.\n\nThen draft the response and silently audit it before sending. Check the entire final response, including headings, bullets, labels, and closing text, for all of the following where applicable:\n\n- Required words or phrases appear exactly as requested.\n- Forbidden words do not appear as standalone words, regardless of capitalization.\n- Every word obeys the maximum length. Count the letters in each word, including words that may seem incidental. Avoid risky contractions, hyphenated terms, and punctuation-attached words.\n- Capitalization rules apply to every letter in the response.\n- Punctuation restrictions are obeyed everywhere.\n- The exact number and structure of bullets, lines, or sections is correct.\n- Any required final phrase is present verbatim at the absolute end, including its capitalization and punctuation.\n- No explanation, disclaimer, preamble, or postscript violates the requested constraints.\n\nUse simple, short, safe wording. For example, when a six-letter maximum is imposed, avoid longer terms such as \u201cinstruction,\u201d \u201cnucleus,\u201d or \u201cnumbers,\u201d even if the topic naturally suggests them. Likewise, do not accidentally use a prohibited word such as \u201cand\u201d or \u201cof\u201d in an otherwise compliant sentence.\n\nRevise repeatedly until every requirement passes. Return only the final answer, with no discussion of the checking process."
+    },
+    "worker_max_output_tokens": 320,
+    "seeds": [
+      0
+    ],
+    "estimated_usd": 0.02976,
+    "generated": "2026-07-29T17:09:34.399909+00:00"
+  },
+  "runs": [
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 1.0,
+        "opt_heldout": 1.0,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-36": 1.0,
+          "mc-51": 1.0,
+          "mc-21": 1.0,
+          "mc-4": 1.0,
+          "mc-43": 1.0,
+          "mc-52": 1.0,
+          "mc-9": 1.0,
+          "mc-38": 1.0,
+          "mc-34": 1.0,
+          "mc-58": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-36": 1.0,
+          "mc-51": 1.0,
+          "mc-21": 1.0,
+          "mc-4": 1.0,
+          "mc-43": 1.0,
+          "mc-52": 1.0,
+          "mc-9": 1.0,
+          "mc-38": 1.0,
+          "mc-34": 1.0,
+          "mc-58": 1.0
+        }
+      }
+    }
+  ]
+}

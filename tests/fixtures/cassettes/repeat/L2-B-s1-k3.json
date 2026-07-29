@@ -1,0 +1,97 @@
+{
+  "entries": {
+    "worker:0738c174345b11d66326c250a18b2f56c2d4f650d4afaab1cf670eec0e0fa80c": {
+      "name": "worker",
+      "output": "- Mars is a red world near Earth  \n- It has ice and dust and thin air there  \n- Mars may hold signs on how life can last  "
+    },
+    "worker:0a778ae8040e31fe1351cb506e335dbc1ff8f41c495b2fcfdea4f037ed794de5": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:135f85064eb595c156a6e777e99db499f4206fffd1cf75832340380d085876d6": {
+      "name": "worker",
+      "output": "- Plants make food with light and water  \n- Roots draw up water from the soil  \n- Leaves use light and air for food  \n- Plants help keep air fresh and cool"
+    },
+    "worker:15a8c6bd0817af4f3942ca4fec7cfa382a12195ca8ed3202ebd3939525ab36b2": {
+      "name": "worker",
+      "output": "- Atoms are small parts that make up all stuff.  \n- They link in ways to form new things like cells, gas, or rock.  \n- Heat shifts how they move, which can change state like ice to water.  \n- Light waves carry info to help us see and know more. here we go."
+    },
+    "worker:16afc94b472e5d3e7de8251427758217eeca759cb6a1dda4271368eebd603e81": {
+      "name": "worker",
+      "output": "- Atoms are small parts that build all stuff.  \n- They link to form new types such as rock, gas, or cells.  \n- Heat shifts how they move which can turn ice to fluid.  \n- Light waves bring news to help us see and learn. here we go."
+    },
+    "worker:2408d69469f5a002d1dc45bffd5dee0c3754837ae57289e29ec62ae605c9f88b": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:38d92bf32f6a586e1033621940fb8503d495abd00fe6249464e43aad1de0d5f9": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:4e9208d476af11a365121ba3df43d6eb96b83f846f8775f8acc31941b725d2fa": {
+      "name": "worker",
+      "output": "- Tech is a tool that helps work get done fast  \n- It can run apps to boost how we live life  \n- Gear like phones lets us chat or find things quick  \n- New tools help us solve problems in new ways"
+    },
+    "worker:5ec96c1c1517d8bffa0d1d5ad642944d5a20e5e3705557299bf8052a41413155": {
+      "name": "worker",
+      "output": "- A team found a rare gene in a fish  \n- This gene can help the fish live in cold seas  \n- It may lead to new drugs for cold wounds  \n- Tests show the gene acts fast to heal cells  \n- This new find is good news for health work we are done."
+    },
+    "worker:6a2da63c657ddbe0e52296242c3a8fd4aadc0f99a54f0d40af9901ddf5f539a0": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:7349e2260aa6ab1cbaf3fd58c9704c88ece3e4904b33aec5c3ad5c6709e71a70": {
+      "name": "worker",
+      "output": "- Atoms bond to form small bits that join to make stuff.  \n- Heat can cause change by shift or move in these bits.  \n- These moves make things act in ways we can learn. so it goes."
+    },
+    "worker:ae1908ca9b775290f95a5c8f9d1d011843c272173f45ad7c5f9a8686eaf567af": {
+      "name": "worker",
+      "output": "- Line 2: The word \"cells\" has 5 letters (OK), \"things\" has 6 letters (OK), \"like\" 4 letters(OK), \"water\" 5 letters (OK).  \n- Line 3: The word \"change\" has 6 letters (OK).  \n- Line 4: The phrase \"here we go.\" is correctly placed at the end.  \n- The word \"and\" is not used.  \n- There are exactly 4 bullet points.  \n- No word exceeds 7 letters.  \n\nPASS"
+    },
+    "worker:b37246dfd3b0e3273aeb889c1ea6a363f2b25fab5bc4be846ce1777ee95567b6": {
+      "name": "worker",
+      "output": "- The last line does not start with \"- \".  \n- The last line also does not end with the phrase \"we are done.\" as a separate phrase following the bullet.  \n- The bullet point lines are fewer than or equal to 7 letters per word, so that is satisfied.  \n- The word \"and\" is not used, so that is satisfied.  \n- The word \"gene\" is included, so that is satisfied.  \n\nTo fix:  \n- Place \"we are done.\" at the end of the last bullet point line after a space.  \n- Ensure each line starts with \"- \".  \n\nRevised version:  \n- A team found a rare gene in a fish  \n- This gene can help the fish live in cold seas  \n- It may yield new drugs for cold wounds  \n- Tests show the gene acts fast to heal cells  \n- This new find is good news for health work we are done.\n\nNow, the last line starts with \"- \" and ends with \"we are done.\"\n\nPASS"
+    },
+    "worker:b9a09c2e6eab26eb30da95914cba0fe499eb4d5a2616082f2da366dd944dbd1a": {
+      "name": "worker",
+      "output": "a team found a new bug that glows at night this helps it seek food and avoid foes the glow may also help learn how light can form in dark spots that is it."
+    },
+    "worker:c0584d1bc133fddd1b895c1560d1e45486d23917593bff7d76db550168961157": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:c1271cf8fd5fe4a9112dafe16616b9891ed6b855319c464a663f1802d817c007": {
+      "name": "worker",
+      "output": "- Mars is a red world that lies near Earth  \n- It has ice and dust and thin air there  \n- Mars may hold signs on how life can last  \n\nPASS"
+    },
+    "worker:d2d0902b4b1c380284cbd70aa2e0955f3aeff7a67cb64df0454b227b37d1b5f3": {
+      "name": "worker",
+      "output": "- A new gene was found in a small fish  \n- This gene helps fish to live in cold seas  \n- It may aid us in long-term care for ill  \n- More tests will find how it works well  \nwe are done."
+    },
+    "worker:e0571329b59d0a59b22ba718480af72786454a8bf809a80311aff83c72c2efdd": {
+      "name": "worker",
+      "output": "A plant is a living thing that grows from a seed. It needs sun heat and soil help for growth. Plants make food using light from the sun. They give out air so we can live. This is why plants are so key in life. All is set."
+    },
+    "worker:e3253d3b9e13beae57b6855e2d555120f6c3de1edc4213309c8618b7597314a0": {
+      "name": "worker",
+      "output": "- Mars is a red planet that lies near Earth  \n- It has ice and dust and a very thin air  \n- Mars may hold clues to how life could last there"
+    },
+    "worker:e5782e8209032b9d357fa3bcaf516da175918d212fa399e7b80235091511c2de": {
+      "name": "worker",
+      "output": "- Light moves fast in waves that spread out and bounce  \n- It can bend when it goes through glass or drops  \n- Eyes catch the waves to help us see shapes and hues  \n- This helps us learn how things work in our world that is it."
+    },
+    "worker:e67939e00fbe1b2c088629e1470df2e7699e761262043c7ecf4f03ea731fbcd7": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:ef9d1d8ce16215503fc5ac935a9261f4be2fa3648b75e6a5420b45dc799db91e": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:f49c5a89f2182c5ddc7721e5834830cfe7aa29fc38ed8410868965ab11e16f16": {
+      "name": "worker",
+      "output": "- A team found a rare gene in a fish  \n- This gene may help the fish live in cold seas  \n- It may yield new drugs for cold wounds  \n- Tests show the gene acts fast to heal cells  \n- This new find is good news for health work we are done."
+    }
+  },
+  "version": 1
+}

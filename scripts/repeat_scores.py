@@ -188,6 +188,13 @@ def verify_argv_for(job: Job, gene_files: dict[str, str], *, out: str) -> list[s
 # ------------------------------------------------------------------------------ aggregation
 
 
+#: Two-sided Student-t critical values, by degrees of freedom. Tabulated rather than computed
+#: so the script needs no special-function implementation, and pinned by a test so a typo cannot
+#: quietly turn a null into a result. K replicates give df = K - 1.
+T_CRIT_05 = {2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571, 6: 2.447, 7: 2.365, 8: 2.306, 9: 2.262}
+T_CRIT_10 = {2: 2.920, 3: 2.353, 4: 2.132, 5: 2.015, 6: 1.943, 7: 1.895, 8: 1.860, 9: 1.833}
+
+
 @dataclass(frozen=True)
 class LevelResult:
     level: str
@@ -209,9 +216,33 @@ class LevelResult:
         """sd/√K: the noise on the K-replicate mean, i.e. what K buys."""
         return self.sd_between_replicates / len(self.replicate_deltas) ** 0.5
 
-    def in_sigma(self) -> float:
+    @property
+    def df(self) -> int:
+        return len(self.replicate_deltas) - 1
+
+    def t_stat(self) -> float:
+        """The mean over its own standard error. At K=5 this is Student-t with 4 df."""
         se = self.standard_error
         return abs(self.delta) / se if se else float("inf")
+
+    def verdict(self) -> str:
+        """Significance against the t critical values, not the normal ones.
+
+        At K=5 the normal 1.96 would call a 2.2-se effect significant while t(4) does not. Two
+        of the three effects here land in exactly that gap, so the distinction is the result.
+        """
+        t, df = self.t_stat(), self.df
+        if df not in T_CRIT_05:
+            return "df out of table"
+        if t > T_CRIT_05[df]:
+            return "p < 0.05"
+        if t > T_CRIT_10[df]:
+            return "p < 0.10"
+        return "not significant"
+
+    def in_sigma(self) -> float:
+        """Retained name for the t statistic, which is what earlier drafts called sigma."""
+        return self.t_stat()
 
 
 def _vector(path: str) -> dict[str, float]:
@@ -252,6 +283,35 @@ def aggregate(k: int) -> list[LevelResult]:
                 n_tasks = len(b_scores)
         if deltas:
             out.append(LevelResult(level, len(deltas), deltas, n_tasks))
+    return out
+
+
+def sigma_by_genome(k: int) -> dict[tuple[str, str], float]:
+    """(level, arm) -> sd of that genome's 30-task mean across the K replicates.
+
+    THE EXPERIMENT'S OWN FINDING. The offline estimate assumed one sigma for the whole study,
+    which is what every interval in the paper was then scaled by. Measured directly, sigma is a
+    property of the GENOME: a critique that refines every draft issues more sampled calls than
+    one that accepts some, and an arm near the metric ceiling has less room to vary at all. A
+    single study-wide sigma is therefore an approximation, and this returns the spread it hides.
+    """
+    out: dict[tuple[str, str], float] = {}
+    for level, slug, excl in LEVELS:
+        for arm in ARMS:
+            means: list[float] = []
+            for rep in range(k):
+                vals: list[float] = []
+                for seed in SEEDS:
+                    job = Job(level, slug, excl, arm, seed, rep)
+                    if not job.done:
+                        vals = []
+                        break
+                    v = _vector(job.out)
+                    vals += [v[t] for t in sorted(v)]
+                if vals:
+                    means.append(mean(vals))
+            if len(means) > 1:
+                out[(level, arm)] = pstdev(means)
     return out
 
 
@@ -365,18 +425,37 @@ def _report(k: int) -> int:
     n_seed, sd_seed = seed_replicate_spread(k)
     print("=== control: does the salt actually produce independent draws? ===")
     print(f"SEED genome, {n_seed} replicate(s), sd of its 30-task mean = {sd_seed:.4f}")
-    print("Cross-run estimate for the same quantity: ~0.030. A value near 0 means record mode")
-    print("served one cached draw to every replicate and the numbers below are void.\n")
+    print("Cross-run estimate for the SAME quantity (one draw of a 30-task mean) is 0.0197,")
+    print("i.e. 0.153/sqrt(30) with drift between recording dates included. A value near 0 here")
+    print("would mean record mode served one cached draw to every replicate.")
+    print("The numbers below are void if that happens.\n")
     if not results:
         print("No completed B/D replicate pairs yet.")
         return 0
     print("=== Δ(D−B) with a repeated-sample interval ===")
-    print(f"{'level':6} {'K':>3} {'Δ':>9} {'sd(single draw)':>16} {'se(mean)':>10} {'|Δ|/se':>8}")
+    print(
+        f"{'level':6} {'K':>3} {'Δ':>9} {'sd(draw)':>10} {'se(mean)':>10} "
+        f"{'t':>6} {'df':>3} verdict"
+    )
     for r in results:
         print(
-            f"{r.level:6} {r.k:>3} {r.delta:>+9.4f} {r.sd_between_replicates:>16.4f} "
-            f"{r.standard_error:>10.4f} {r.in_sigma():>8.2f}"
+            f"{r.level:6} {r.k:>3} {r.delta:>+9.4f} {r.sd_between_replicates:>10.4f} "
+            f"{r.standard_error:>10.4f} {r.t_stat():>6.2f} {r.df:>3} {r.verdict()}"
         )
+    print(f"\n(t critical values at df=4: {T_CRIT_10[4]} for p<0.10, {T_CRIT_05[4]} for p<0.05.")
+    print("A normal approximation would use 1.96 and call two of these significant.)")
+
+    sig = sigma_by_genome(len(results[0].replicate_deltas))
+    if sig:
+        print("\n=== sigma is a property of the GENOME, not of the study ===")
+        print("sd of one 30-task-mean draw, per (level, arm):")
+        print(f"{'level':6} " + " ".join(f"{a:>8}" for a in ARMS))
+        for level, _, _ in LEVELS:
+            row = " ".join(f"{sig.get((level, a), float('nan')):>8.4f}" for a in ARMS)
+            print(f"{level:6} {row}")
+        lo, hi = min(sig.values()), max(sig.values())
+        print(f"\nrange {lo:.4f} to {hi:.4f} ({hi / lo:.1f}x). Any single study-wide sigma is an")
+        print("approximation; the offline cross-run estimate assumed one.")
     return 0
 
 

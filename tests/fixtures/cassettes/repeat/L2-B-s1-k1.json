@@ -1,0 +1,97 @@
+{
+  "entries": {
+    "worker:22bc88de8d1ede332a985cedb4a5a8fd3d87c3cf913ab321d03875e27e25b306": {
+      "name": "worker",
+      "output": "Math is a field that helps us add and solve sums It helps in daily life like when we buy food or plan trips Learn math slow and hard tasks get less tough all is set."
+    },
+    "worker:2d86f88afffc786a6c552f2fa1eecabbb54eee097badf2b8dd13b9cb67f6c5e7": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:2f4d2975e44c02dc4f1670278619d0c6180903ed9eaeb9715961a23fdc4575a6": {
+      "name": "worker",
+      "output": "- Light moves fast in space with waves that can bend  \n- It has parts you can see and parts you cannot  \n- When light hits stuff it can bounce or get soaked  \n- This helps us see things or get heat from the sun here we go."
+    },
+    "worker:4f585ceaf568048efa75759d165800a03576bdefc763726a43965362bc686f99": {
+      "name": "worker",
+      "output": "- A new gene was found in a rare fish  \n- This gene helps the fish live in cold water  \n- It may aid crops to grow in cool spots  \n- This may help us with food and health challenges  \nwe are done."
+    },
+    "worker:5c8881694cb57969687d95787421e90f8e349cbc855b5da3b5a290ec2917164c": {
+      "name": "worker",
+      "output": "- Atoms make up all things; they bond to form bits we see  \n- Heat can cause atoms to move fast or slow, which changes state  \n- Light is a form of wave that can also act like small bits, so it goes."
+    },
+    "worker:66385d5927218d500577b75807ead5611bdb0a1a549b5681d3420a88a7366a1d": {
+      "name": "worker",
+      "output": "- Plants are life forms that grow from soil  \n- They use light from the sun for food  \n- Water and air help them grow well  \n- Plants give us fresh air and food"
+    },
+    "worker:6c82937384d84aeb56263b3be2dfb0a06bccd643b0f10b288ed7fcc04b780e2f": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:72ca8ea82032d744e7c7af9c4c840f60963c1a47bd029372f36bd1b3697e6999": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:7bf144081b3f503d7b510252c2a5c22db10941d1f61346c67db5008b2b2db47e": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:8341315183cb5446bf29612eb4c9f786825066c822c444f50b34307461aa1393": {
+      "name": "worker",
+      "output": "Math is a field that helps us count add and solve sums It helps in daily life like when we buy food or plan a trip Learning math step by step can make hard tasks less tough All is set."
+    },
+    "worker:9a690cc0b8489caaad50ad77a0f362c5b6642d5a2eed8287357b8800b2bf1f2f": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:9a756fd27f0b2dc341c199a0514540832134e1f07b1aa5993f6ef85c5b39e5de": {
+      "name": "worker",
+      "output": "- A new gene was found in a rare fish  \n- This gene helps the fish live in cold water  \n- It may aid crops to grow in cool spots  \n- This may help us with food and health care  \nwe are done."
+    },
+    "worker:aaa82e1018305eed28e1bb8721474f00afb228a4731665a7bceeecaf02067b27": {
+      "name": "worker",
+      "output": "- All bullet points start with \"- \"  \n- The word \"gene\" is included  \n- Response is exactly 4 bullet points  \n- The last line is exactly \"we are done.\"  \n- No word longer than 6 letters (words like \"challenges\" and \"health\" exceed 6 letters)  \n- The word \"the\" is not used  \n\nIssue: \"challenges\" (10 letters) and \"health\" (6 letters, acceptable), so only \"challenges\" is too long.\n\nFix needed: Replace \"challenges\" with a 6 letter or less word.\n\nRevised draft:\n\n- A new gene was found in a rare fish  \n- This gene helps the fish live in cold water  \n- It may aid crops to grow in cool spots  \n- This may help us with food and health needs  \nwe are done.\n\nPASS"
+    },
+    "worker:b11723c213ec9bc86b0aa7383e949311a5bf8c01d826a3c731b7525f28ed3b39": {
+      "name": "worker",
+      "output": "- Light moves in waves that can be seen by the eyes  \n- It can bend when it goes through glass or water  \n- Colors come from thin lines that break up light in a prism  \n- Rays from the sun give life and heat to earth that is it."
+    },
+    "worker:b79901e70cfcbbbb65ec3c24a030453b986156e4c1cd5cfbee7b57de41d86c4c": {
+      "name": "worker",
+      "output": "a small bug was found in a cave it glows bright to help it hunt food this may help folks learn how light can form in dark spots that is it."
+    },
+    "worker:c95e24d8a5a46a73e825c448c62339f41c27b9ba0ee2ef13afbdd7480bb493bf": {
+      "name": "worker",
+      "output": "- Line 5 uses the word \"such\" (6 letters, OK), \"bugs\" (4 letters OK), \"thrive\" (6 letters OK), \"and\" (forbidden word)  \n- The word \"and\" appears in line 5, which is not allowed  \n- The phrase \"we are done.\" is part of a longer sentence in line 5, but the requirement is to end with the exact phrase \"we are done.\"  \n- The last line should end with the phrase \"we are done.\" separately or at the end, not preceded by other text  \n\nFixes needed:  \n- Remove the word \"and\" from line 5  \n- Ensure the phrase \"we are done.\" stands exactly at the end of the last line  \n- Check that all words are no longer than 7 letters (OK)  \n- Keep the format with 5 bullet points and each line starts with \"- \"  \n- Keep \"gene\" included  \n\nA revision is needed."
+    },
+    "worker:cb7c396e683116912355e31e3907bee0af5384c5a3b61c7ae28945601c58cd76": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:e4c8c5c6807d962b85ef61ff52083d53c26ac414f0bed15b6f9610b26f3bddb2": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:e73d3967b43ff3218285ab507b9391d8f4a693843f05a8b53cc75221a25a4be3": {
+      "name": "worker",
+      "output": "- A virus is a tiny germ that can cause a sick feel  \n- It spreads fast when you touch, cough, or get too near  \n- To stay safe wash hands well and rest to heal well"
+    },
+    "worker:ec9b6945ce60b03e6aac39b04ca87c387066c7607d1269975adeae0b327d3594": {
+      "name": "worker",
+      "output": "- A rare gene was found in a fish  \n- This gene helps the fish live in cold seas  \n- It is key to how the fish stays quick  \n- The gene may aid in new drugs for use  \n- Such finds show how bugs thrive and grow, we are done."
+    },
+    "worker:ee495d60eb9fe6ea673fe8002c31b6c66909e7447cd61430bf70c2122af0d271": {
+      "name": "worker",
+      "output": "- A rare gene was found in a fish  \n- This gene helps the fish live in cold seas  \n- It is key to how the fish stays quick  \n- The gene may aid in new drugs for use  \n- This find shows how bugs grow and shift we are done."
+    },
+    "worker:f003bf6645c154b8a2fd3e6dbdad16a81f0d94cbb1870315ce25944731058755": {
+      "name": "worker",
+      "output": "- The phrase \"to count\" uses the word \"to\" which is not allowed  \n- The phrase \"to plan\" uses the word \"to\" which is not allowed  \n- The word \"Learning\" is longer than 6 letters  \n- The phrase \"step by step\" uses the word \"by\" which is not disallowed but could be simplified to be safer  \n\nFix these issues and recheck."
+    },
+    "worker:fe4d4552d4bb94488f95331a893fd6511954f4c9f8694e62c64ff89ed567b89b": {
+      "name": "worker",
+      "output": "- A phone uses waves to send voice or text fast  \n- It can link to wifi for fast web use  \n- Apps let users do work play news or chat  \n- Small size lets users take it to all spots"
+    }
+  },
+  "version": 1
+}

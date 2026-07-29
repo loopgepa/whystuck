@@ -1,0 +1,78 @@
+{
+  "meta": {
+    "dataset": "multi-constraint-hard (IFEval-style)",
+    "n_train": 8,
+    "n_heldout": 10,
+    "worker_model": "openai/gpt-4.1-mini",
+    "reflection_model": "openai/gpt-5.6-luna",
+    "max_metric_calls": 28,
+    "module_selector": "all",
+    "seeds_independent": true,
+    "detector_reflection": true,
+    "reflection_calls": 10,
+    "task_set": "multi-hard",
+    "temperature": null,
+    "sample": 0,
+    "exclude_constraint": [
+      "exact_word_count",
+      "word_max_length"
+    ],
+    "loop_max_retries": 1,
+    "plan_gene": false,
+    "feedback_stats": false,
+    "critique_model": null,
+    "oracle_critique": false,
+    "feedback_level": "mid",
+    "exec_feedback": false,
+    "actuator": false,
+    "gene_overrides": {
+      "ensure_correct": "Act as a strict, literal, and accurate constraint checker for the draft response.\n\nFirst, extract every explicit requirement from the task, including:\n- required or forbidden words\n- capitalization and lowercase requirements\n- exact beginning or ending phrases\n- punctuation requirements\n- line, bullet, and formatting requirements\n- word-count or quantity requirements\n- content requirements\n\nThen inspect the draft systematically against that checklist.\n\nRules:\n\n1. Output exactly `PASS` if and only if every explicit requirement is satisfied.\n2. If at least one requirement is genuinely violated, do not output `PASS`. Instead, output only a concise list of the specific fixes needed.\n3. Do not invent requirements or impose stylistic preferences. In particular:\n   - Do not require commas, separate lines, or improved clarity unless the task explicitly requires them.\n   - Do not require an exact phrase to appear on its own line unless the task explicitly says so.\n   - Do not require bullets to end before a concluding phrase unless the task explicitly says the phrase must follow the bullets separately.\n4. Check required and prohibited words as exact standalone words, respecting the task\u2019s capitalization instructions. Do not treat substrings as words:\n   - `and` does not prohibit `android`.\n   - `the` does not prohibit `there` or `then`.\n   - A required word such as `gene` is satisfied by an occurrence of the exact word `gene`; `Genes` is not the same word unless capitalization or matching rules allow it.\n5. A prohibition applies only to the exact prohibited standalone word unless the task clearly states otherwise. Check every occurrence, including words in required ending phrases.\n6. A requirement to \u201cinclude the word\u201d is satisfied by at least one exact occurrence with the required capitalization.\n7. For exact-ending requirements, verify the final characters of the entire draft, including punctuation. Extra preceding content is allowed unless explicitly forbidden. The required phrase may be appended to the final bullet or sentence; do not demand that it be placed on a separate line unless that is explicitly required.\n8. For exact-beginning requirements, verify the actual first characters of the draft, including capitalization and punctuation where applicable.\n9. For structural requirements such as \u201cexactly 3 bullet points,\u201d count the actual bullet lines and verify that each required line begins with the specified marker. Do not count a concluding phrase as an additional bullet unless it begins with the bullet marker.\n10. Requirements for lowercase or capitalization apply only when explicitly stated. If lowercase is required, inspect the entire draft for capital letters.\n11. Verify punctuation literally. Do not claim that commas or other punctuation are present when they are absent, and do not reject missing punctuation that was not required.\n12. Before deciding, reread the task, the extracted checklist, and the draft once more.\n13. If the draft is compliant, the final response must be exactly `PASS` with no explanation, commentary, or list of non-issues.\n14. If the draft is not compliant, identify only actual violations and state the precise fixes required.\n\nImportant calibration examples:\n- A draft that contains no standalone `and`, includes `code`, is entirely lowercase, and ends exactly with `here we go.` is compliant even if it lacks optional commas.\n- A draft with exactly three lines beginning `- `, containing `wave`, containing no standalone `the`, and ending with `that is it.` is compliant even if `that is it.` is appended to the third bullet. Do not require it to appear on a separate line unless the task explicitly requires that structure.",
+      "generate": "Act as a rigorous constraint-satisfaction writing assistant.\n\nThe user will provide a task description followed by a list of mandatory requirements. Produce only the requested answer and obey every requirement simultaneously.\n\nBefore writing:\n1. Identify the subject, audience, tone, and requested length.\n2. Extract every constraint, including required words or phrases, forbidden words, capitalization, lowercase rules, punctuation rules, bullet count, line prefixes, and exact ending text.\n3. Treat evaluator checks as literal. The relevant checks may include:\n   - include_keyword: a required word must appear exactly\n   - forbidden_word: a disallowed word must not appear\n   - end_with: the response must finish with the exact required phrase\n   - all_lowercase: use lowercase throughout\n   - num_bullets: provide exactly the required number of bullet lines\n4. Resolve formatting interactions explicitly. If exactly three bullet points are required and an exact ending phrase is also required, put the ending phrase at the end of the third bullet. Do not add a heading, explanation, or separate closing line.\n5. If a word is forbidden, avoid it everywhere in the response, including repeated use, common inflected forms, and accidental appearances inside longer words when an evaluator could count them as matches.\n6. If a required phrase conflicts with a general rule such as lowercase text, reproduce the exact required phrase because exact phrases take precedence.\n7. Prefer simple wording and short sentences. Avoid unnecessary punctuation, especially commas when punctuation is restricted.\n8. Silently audit the final draft for subject relevance, all required terms, all forbidden terms, capitalization, case, punctuation, line count, bullet prefixes, and exact ending text.\n9. Output only the final answer. Never include analysis, labels, explanations, apologies, checklists, alternative versions, or comments about whether the constraints were satisfied.\n\nFor bullet-point tasks, each bullet must occupy exactly one line and begin with \"- \" unless the user specifies another prefix. Do not add any non-bullet line when an exact bullet count is required."
+    },
+    "worker_max_output_tokens": 320,
+    "seeds": [
+      2
+    ],
+    "estimated_usd": 0.02976,
+    "generated": "2026-07-29T17:27:39.754588+00:00"
+  },
+  "runs": [
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 1.0,
+        "opt_heldout": 1.0,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-29": 1.0,
+          "mc-46": 1.0,
+          "mc-1": 1.0,
+          "mc-48": 1.0,
+          "mc-17": 1.0,
+          "mc-41": 1.0,
+          "mc-28": 1.0,
+          "mc-34": 1.0,
+          "mc-60": 1.0,
+          "mc-32": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-29": 1.0,
+          "mc-46": 1.0,
+          "mc-1": 1.0,
+          "mc-48": 1.0,
+          "mc-17": 1.0,
+          "mc-41": 1.0,
+          "mc-28": 1.0,
+          "mc-34": 1.0,
+          "mc-60": 1.0,
+          "mc-32": 1.0
+        }
+      }
+    }
+  ]
+}

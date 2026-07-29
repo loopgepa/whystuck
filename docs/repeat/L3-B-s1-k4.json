@@ -1,0 +1,77 @@
+{
+  "meta": {
+    "dataset": "multi-constraint-hard (IFEval-style)",
+    "n_train": 8,
+    "n_heldout": 10,
+    "worker_model": "openai/gpt-4.1-mini",
+    "reflection_model": "openai/gpt-5.6-luna",
+    "max_metric_calls": 28,
+    "module_selector": "all",
+    "seeds_independent": true,
+    "detector_reflection": true,
+    "reflection_calls": 10,
+    "task_set": "multi-hard",
+    "temperature": null,
+    "sample": 4,
+    "exclude_constraint": [
+      "exact_word_count",
+      "word_max_length"
+    ],
+    "loop_max_retries": 1,
+    "plan_gene": false,
+    "feedback_stats": false,
+    "critique_model": null,
+    "oracle_critique": false,
+    "feedback_level": "mid",
+    "exec_feedback": false,
+    "actuator": false,
+    "gene_overrides": {
+      "generate": "Carefully read the task input and produce the requested response directly. Identify the subject, the type of explanation or content requested, and every explicit output constraint. Treat all requirements as mandatory and satisfy them simultaneously.\n\nBefore finalizing, verify the response mechanically:\n\n- Follow the required format exactly, including the precise number of bullet points and the required \"- \" prefix.\n- If a required closing phrase is specified, make it the exact final characters of the response. A closing phrase after the bullet points is acceptable when the task requires both a fixed number of bullets and a final phrase, and it does not count as an additional bullet.\n- Apply capitalization requirements to every character, including required phrases.\n- Check forbidden words using word boundaries and avoid them everywhere, including headings, bullet text, and closing phrases. When possible, avoid likely variants or phrases containing a forbidden word as well.\n- Check punctuation restrictions character by character, especially commas.\n- Include required keywords exactly and naturally.\n- Do not add explanations, headings, disclaimers, or extra commentary that could violate the format.\n- Ensure the requested content remains scientifically accurate, clear, and relevant.\n\nUse concise wording and draft each sentence around the restrictions rather than trying to remove violations afterward. For example, when \u201cof\u201d is forbidden, write \u201cFlux measures light energy crossing a surface per unit time\u201d instead of \u201cFlux describes the amount of light energy passing through a surface,\u201d because the latter contains the forbidden word. Before submitting, count the bullets, inspect every forbidden word and punctuation mark, confirm all required keywords, and verify the exact ending."
+    },
+    "worker_max_output_tokens": 320,
+    "seeds": [
+      1
+    ],
+    "estimated_usd": 0.02976,
+    "generated": "2026-07-29T17:21:06.718644+00:00"
+  },
+  "runs": [
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 1.0,
+        "opt_heldout": 1.0,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-34": 1.0,
+          "mc-35": 1.0,
+          "mc-46": 1.0,
+          "mc-20": 1.0,
+          "mc-61": 1.0,
+          "mc-37": 1.0,
+          "mc-14": 1.0,
+          "mc-63": 1.0,
+          "mc-53": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-34": 1.0,
+          "mc-35": 1.0,
+          "mc-46": 1.0,
+          "mc-20": 1.0,
+          "mc-61": 1.0,
+          "mc-37": 1.0,
+          "mc-14": 1.0,
+          "mc-63": 1.0,
+          "mc-53": 1.0
+        }
+      }
+    }
+  ]
+}

@@ -173,3 +173,45 @@ def test_parse_shard_accepts_i_of_n_and_rejects_junk():
     for junk in ("", "1", "a/2", "1/2/3", "1-2"):
         with pytest.raises(ValueError):
             rs.parse_shard(junk)
+
+
+# ------------------------------------------------------------------ statistics of K replicates
+#
+# With K=5 the sampling distribution of the mean is Student-t with 4 df, not normal. Using a
+# normal critical value would overstate significance by a wide margin at this K (1.96 vs 2.776),
+# which is exactly the direction that flatters a marginal result -- and two of this study's three
+# headline effects are marginal. So the critical values are pinned, not looked up in prose.
+
+
+def test_t_statistic_is_the_mean_over_its_own_standard_error():
+    r = rs.LevelResult(level="X", k=5, replicate_deltas=[0.05, 0.06, 0.04, 0.05, 0.05], n_tasks=30)
+    assert r.t_stat() == pytest.approx(r.delta / r.standard_error, abs=1e-9)
+    assert r.df == 4
+
+
+def test_significance_uses_the_t_critical_value_not_the_normal_one():
+    """A mean 2.2 standard errors from zero is significant under a normal approximation and NOT
+    under t with 4 df. The distinction decides how L3 is reported."""
+    # These are L3's actual per-replicate deltas, i.e. the real borderline case: significant
+    # under a normal approximation, not significant under t(4).
+    borderline = rs.LevelResult(
+        level="X", k=5, replicate_deltas=[0.018, 0.044, -0.010, 0.037, 0.005], n_tasks=30
+    )
+    t = borderline.t_stat()
+    assert 2.0 < t < 2.5, f"fixture should be borderline, got t={t}"
+    assert t > 1.96, "a normal approximation would call this significant"
+    assert borderline.verdict() == "not significant", "t(4) must not"
+    assert rs.T_CRIT_05[4] == pytest.approx(2.776, abs=0.001)
+    assert rs.T_CRIT_10[4] == pytest.approx(2.132, abs=0.001)
+
+
+def test_sigma_by_genome_reports_one_sd_per_level_and_arm():
+    """The finding this experiment produced: sigma is NOT a study-wide constant."""
+    sig = rs.sigma_by_genome(k=5)
+    if not sig:
+        pytest.skip("replicates not present")
+    assert set(sig) == {(lvl, arm) for lvl, _, _ in rs.LEVELS for arm in rs.ARMS}
+    assert all(v >= 0.0 for v in sig.values())
+    # The seed genome is scored identically in every level's SEED job, so its sd must be
+    # comparable across levels, while an arm near the metric ceiling must vary less.
+    assert sig[("L3", "D")] < sig[("L1", "B")], "a ceiling-bound genome should vary least"

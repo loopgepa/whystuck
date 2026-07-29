@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "dataset": "multi-constraint-hard (IFEval-style)",
+    "n_train": 8,
+    "n_heldout": 10,
+    "worker_model": "openai/gpt-4.1-mini",
+    "reflection_model": "openai/gpt-5.6-luna",
+    "max_metric_calls": 28,
+    "module_selector": "all",
+    "seeds_independent": true,
+    "detector_reflection": true,
+    "reflection_calls": 10,
+    "task_set": "multi-hard",
+    "temperature": null,
+    "sample": 2,
+    "exclude_constraint": [],
+    "loop_max_retries": 1,
+    "plan_gene": false,
+    "feedback_stats": false,
+    "critique_model": null,
+    "oracle_critique": false,
+    "feedback_level": "mid",
+    "exec_feedback": false,
+    "actuator": false,
+    "gene_overrides": {
+      "ensure_correct": "You are a rigorous constraint checker and reviser. For each input, identify the task, the complete list of requirements, the draft under judgment, any generated evaluation, and the feedback.\n\nIndependently verify the draft against every stated requirement. Do not trust the prior evaluation or feedback: they may contain incorrect claims. Re-read the task and check each constraint explicitly before reaching a verdict.\n\nUse these rules:\n\n1. Treat exact phrases as case-sensitive and punctuation-sensitive unless the task says otherwise. For example, a requirement to end with the exact phrase \u201call is set.\u201d is not satisfied by \u201cAll is set.\u201d\n2. Count words carefully. Count ordinary whitespace-separated words, with punctuation attached to a word not creating extra words. Report the count and compare it with the required exact count.\n3. Check maximum word length character by character. \u201cprotons\u201d has 7 letters and \u201cneutrons\u201d has 8, so either violates a six-letter maximum.\n4. Check required keywords for presence and forbidden words as standalone words, not merely as accidental letter sequences inside other words, unless the requirement clearly specifies substring matching.\n5. Check the actual draft text. In particular, do not claim that the word \u201cto\u201d occurs merely because a suggested paraphrase or imagined phrase contains it. In the discovery examples, the original sentence contains no standalone \u201cto\u201d; the phrase \u201cto give us more clues\u201d is not present in the displayed draft.\n6. Recount any proposed revision from scratch. A revision that replaces \u201cchange\u201d with \u201cshift\u201d may satisfy the length limit, but the displayed revised sentence still has 16 words, not the required 15, and therefore must not be marked PASS.\n7. Determine whether every requirement is satisfied. If any one fails, the verdict must be FIX, not PASS. State the number of failed requirements and identify each failed constraint. Also list the satisfied constraints.\n8. If a fix is requested or appropriate, provide a corrected version that satisfies all requirements, then verify the corrected version again. Do not call it PASS until every constraint has been independently rechecked.\n9. Be concise but show enough evidence to make the judgment auditable, including relevant word counts, offending words, exact-ending checks, and keyword/forbidden-word checks.\n\nKnown examples to use as calibration:\n- Example 1 fails exactly three of four requirements: the ending is \u201cAll is set.\u201d rather than the exact lowercase phrase \u201call is set.\u201d; \u201cprotons\u201d and \u201cneutrons\u201d exceed the six-letter maximum; and the draft has 22 words rather than 20. It satisfies the requirement to include \u201catom.\u201d\n- Examples 2 and 3 use the same discovery task. The original draft has 16 words, includes \u201cflux,\u201d contains no standalone \u201cto,\u201d and has no word longer than 7 letters. Thus it fails only the exact 15-word requirement. The prior claim that \u201cto\u201d appears is factually wrong. The suggested revision also has 16 words, so it still fails the word-count requirement.",
+      "generate": "For each task, read the requested subject and every MUST requirement carefully, then produce a response that satisfies all requirements simultaneously. Do not rely on the example outputs as correct; treat the feedback as identifying their failures.\n\nUse this validation process before submitting:\n1. Draft the response for the requested topic.\n2. Check that every required keyword appears exactly as requested.\n3. Check that every forbidden word is absent, including as a standalone word.\n4. Count words carefully, using whitespace-separated tokens; punctuation attached to a word does not create an extra word.\n5. Ensure every word obeys the maximum-length limit, ignoring surrounding punctuation when measuring length.\n6. Check exact endings character by character, including capitalization, spacing, and punctuation.\n7. Revise until every constraint is satisfied, and output only the requested response.\n\nImportant examples and corrections:\n- For the scientific-concept task, the response must contain \u201catom,\u201d use no word longer than 6 letters, contain exactly 20 words, and end with the exact lowercase phrase \u201call is set.\u201d The example failed because it had 22 words and ended with \u201cAll is set.\u201d rather than the exact required phrase.\n- For the discovery-note task, the response must contain \u201cflux,\u201d must not contain the word \u201cto,\u201d use no word longer than 7 letters, and contain exactly 15 words. The repeated example met the keyword, forbidden-word, and word-length requirements but failed the word-count requirement: it contained 16 words."
+    },
+    "worker_max_output_tokens": 320,
+    "seeds": [
+      1
+    ],
+    "estimated_usd": 0.02976,
+    "generated": "2026-07-29T16:17:51.063132+00:00"
+  },
+  "runs": [
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.795,
+        "opt_heldout": 0.795,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-42": 0.75,
+          "mc-34": 1.0,
+          "mc-35": 0.8,
+          "mc-46": 0.75,
+          "mc-20": 0.6,
+          "mc-61": 0.75,
+          "mc-37": 0.75,
+          "mc-14": 0.8,
+          "mc-63": 1.0,
+          "mc-53": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 0.75,
+          "mc-34": 1.0,
+          "mc-35": 0.8,
+          "mc-46": 0.75,
+          "mc-20": 0.6,
+          "mc-61": 0.75,
+          "mc-37": 0.75,
+          "mc-14": 0.8,
+          "mc-63": 1.0,
+          "mc-53": 0.75
+        }
+      }
+    }
+  ]
+}

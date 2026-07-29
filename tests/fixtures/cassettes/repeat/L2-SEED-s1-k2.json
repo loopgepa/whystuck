@@ -1,0 +1,97 @@
+{
+  "entries": {
+    "worker:035c33a4cac31141d28a34167903500f5ab1bb56a8ad59defd19e4404938d4b1": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:17008ab27f7958d9bbd9a69a39ae3fb6698c44565129a9ef8cd03c6509b879f7": {
+      "name": "worker",
+      "output": "- Light is made of small bits called waves or rays that move fast.  \n- It can bend or split when it hits glass or rain, which makes rainbows.  \n- Eyes catch light to send signs to brain for us to see, so it goes."
+    },
+    "worker:34b2fc930fe5386d808b90bd7107baff5ce3e64edc9714e7a7c37fb1eb998b26": {
+      "name": "worker",
+      "output": "- The last bullet line is too long; \"This find brings new hope for all we are done.\" has 9 words, some of which exceed 7 letters (\"brings,\" \"hope,\" \"found\" is okay, but \"brings\" and \"hope\" might be acceptable since hope is 4 letters but \"brings\" is 7 letters which is allowed). But the sentence is a bit awkward and possibly exceeds the limit.\n\n- The phrase \"we are done.\" must be alone at the end, separate from other words per instructions? It says end \"with the exact phrase 'we are done.'\"\n\n- The last bullet line should end exactly with \"we are done.\" Probably better to have \"we are done.\" as the last bullet and sentence.\n\n- Also, check for words longer than 7 letters. Words like \"plants,\" \"growth,\" \"boost,\" \"crops,\" \"yield,\" \"bring\" are all 7 or less letters. \"Brings\" is 7 letters. \"discovery\" is longer, but not used.\n\n- The draft is close but the last point breaks the constraint because \"we are done.\" must be at the end exactly as phrase, not mixed in the line.\n\nTherefore, fix the last bullet to contain only \"we are done.\" or better end the last bullet text with \"we are done.\"\n\n---\n\nCorrected example:\n\n- A new gene was found in cells  \n- It helps in the growth of plants  \n- This gene works fast to heal cuts  \n- It may boost food crop yields  \n- This find"
+    },
+    "worker:49bdf120eb4d62e408770f23b549264f3544b4d432ac3f4d4b794b4234e5458c": {
+      "name": "worker",
+      "output": "- Math deals with numbers and how they fit and work  \n- It helps us count add take away and find paths  \n- Math can be fun with games or puzzles to solve"
+    },
+    "worker:5696c57f814e740fc3ab81db4c7ac2438856559e003ed5da5a4cb8cb498ea094": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:5a5250a2437c3cf9e46c8c6238985b16fefa467edab05af6174ab1dd39425286": {
+      "name": "worker",
+      "output": "Let's talk about the sun. The sun is a star in space. It gives us light and heat. This makes life on Earth grow and live. The sun is big and hot. Every day the sun moves in the sky. Plants use the sun's light each day. Without the sun, life would be dark and cold. The sun helps us feel warm and happy. Learning about the sun can be fun and easy. Now all is set."
+    },
+    "worker:7e04b9c0259094348802950490110ba0bff23caaa714325ffad506d4b6612721": {
+      "name": "worker",
+      "output": "- A new gene was found in a rare plant.  \n- This gene helps plants fight off bugs.  \n- It may lead to crops that need less aid.  \n- This find could help feed more kids soon.  \nwe are done."
+    },
+    "worker:7f34345a7b6ddd1c642d953ab9571ee7b9a554d415827e0c1fd73ba60eb56e8a": {
+      "name": "worker",
+      "output": "- A new gene was found in cells  \n- It helps in growth of plants  \n- This gene works fast to heal cuts  \n- It may boost food crops' yield  \n- This find brings new hope for all we are done."
+    },
+    "worker:7f978a3563b29910b47111388ba60f0ad1d5c35a653a6577c1e200defd15fc15": {
+      "name": "worker",
+      "output": "- Math is the use of digits and signs  \n- It helps us add take away and share  \n- Math shows shapes lines and sums  \n- Study math can be fun and good"
+    },
+    "worker:91610632b70027114b117052aca9434cda87beed86255bf021bf5250d0bf4248": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:93acdb57cce756cb7b72ad87a2cd287cf2a4b6288d65ea308ec14809a15e36f8": {
+      "name": "worker",
+      "output": "- A new gene was found in cells  \n- It helps in the growth of plants  \n- This gene works fast to heal cuts  \n- It may boost food crop yield  \n- we are done."
+    },
+    "worker:a71ec9d4c2165ba4b7c37e9b297a720b0699378a6aaf3893599f305dffb4a08a": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:aad49ecb7ab1cc5d2b8aff69e15a9a1f59a8c92e24734a05d8da896c650c3f21": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:b2189551bf3ba89a49bb39d20f3f8e0d5380c60522da4f3d795459a6a4727885": {
+      "name": "worker",
+      "output": "a new star was found in the sky near a small cloud. it is bright and may help us learn how stars form. this find can teach us much. that is it."
+    },
+    "worker:bd3bc69c8d4a5c3429cc2d9bb0ce65eb9a7ef0955f5a689cd5132162c8ba5a58": {
+      "name": "worker",
+      "output": "- \"Energy\" has 6 letters, which is fine.  \n- The word \"energy\" is used only once, which is acceptable.  \n- The sentence count is 4 bullet points, each starting with \"- \".  \n- No words exceed 7 letters.  \n- The phrase \"here we go.\" appears exactly at the end.  \n- The word \"and\" does not appear.  \n\nPASS"
+    },
+    "worker:bdad56cc0f7fbe03bcef69ae63c3c0b2622843bdd1ac55b171ed0ee03fe4033b": {
+      "name": "worker",
+      "output": "- Light is made of small parts called photons  \n- These bits act like waves or tiny balls at times  \n- They move fast, close to the speed of light  \n- This helps us see things each day, that is it."
+    },
+    "worker:cf803f29ffc7144b166efedc6548c208a7ec55522763da1c1557d3e687502f27": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:db5f6a6414e828f76ad0ca5abc0bee6d78918c15df8b07589a92a94a9471d375": {
+      "name": "worker",
+      "output": "- The word \"numbers\" has 7 letters  \n- The word \"patterns\" has 8 letters  \n- The word \"learning\" has 8 letters  \n- The word \"count\" is followed by a comma which is not allowed  \n\nFix these issues and revise the answer."
+    },
+    "worker:df5933b50372f067787b9b913b35198b5115ecbedb11fbd43fdab59f02f88d1c": {
+      "name": "worker",
+      "output": "- Light is a form of wave that can move through space.  \n- These waves have parts called peaks and dips that go up and down.  \n- Light can show as colors we see or help plants grow.  \n- It moves fast and can bounce off or pass through things.  \nhere we go."
+    },
+    "worker:e38808d71b08da3298723c1e98d24bc52dc05b7d8f94702130248228c4d170c9": {
+      "name": "worker",
+      "output": "- Heat is a form of energy that moves from warm to cold.  \n- This shift is due to small fast atoms that bump into each other.  \n- Heat can move by touch, flow of air, or waves of light.  \n- This flow stops when both things reach the same warm state.  \nhere we go."
+    },
+    "worker:e9072bcc0bbcf429c32cc94860186ff9974c262f707a72029b28ac68165ded80": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:ed8b8b6fd0f381c66e9f0c12a45bba36a720fc7d90d83159e477b654ab1ee358": {
+      "name": "worker",
+      "output": "- Solar power uses rays from the sun  \n- It helps to give energy to homes  \n- Panels change light into electric flow  \n- This tech is clean with no smoke rise"
+    },
+    "worker:fd353db88008c0a9d35c7836946d23f41b34ff3a4d81b2a3c55a38fb09c393c9": {
+      "name": "worker",
+      "output": "- Math is the use of numbers and signs  \n- It helps us count add take away and split  \n- Math shows patterns shapes and sums  \n- Learning math can be fun and clear"
+    }
+  },
+  "version": 1
+}

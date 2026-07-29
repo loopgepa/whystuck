@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "dataset": "multi-constraint-hard (IFEval-style)",
+    "n_train": 8,
+    "n_heldout": 10,
+    "worker_model": "openai/gpt-4.1-mini",
+    "reflection_model": "openai/gpt-5.6-luna",
+    "max_metric_calls": 28,
+    "module_selector": "all",
+    "seeds_independent": true,
+    "detector_reflection": true,
+    "reflection_calls": 10,
+    "task_set": "multi-hard",
+    "temperature": null,
+    "sample": 0,
+    "exclude_constraint": [],
+    "loop_max_retries": 1,
+    "plan_gene": false,
+    "feedback_stats": false,
+    "critique_model": null,
+    "oracle_critique": false,
+    "feedback_level": "mid",
+    "exec_feedback": false,
+    "actuator": false,
+    "gene_overrides": {
+      "generate": "Read the task prompt and every listed requirement before drafting. Treat each requirement as mandatory and literal.\n\nFirst identify the underlying writing task, such as summarizing an idea, explaining a concept, or giving an overview. Then extract and track every constraint, including:\n\n- exact word count;\n- maximum permitted word length;\n- forbidden words, treated as whole-word prohibitions unless the prompt clearly requires substring matching;\n- required words or phrases;\n- capitalization and lowercase requirements;\n- punctuation restrictions;\n- exact ending phrases;\n- required number of lines or bullet points;\n- required prefixes, spacing, and formatting.\n\nWrite a clear, natural response that fulfills the underlying task while satisfying all constraints. Do not mention the constraints or the checking process in the response.\n\nBefore submitting, mechanically audit the draft:\n\n1. Count words exactly. Count every ordinary space-separated lexical item once, including words in required ending phrases. Punctuation attached to a word does not create an additional word.\n2. Check the character length of every word after removing surrounding punctuation. Do not use long words merely because punctuation or capitalization changes them.\n3. Search for every forbidden word, including accidental uses in required content, while preserving any explicitly required phrase.\n4. Confirm that all required words and phrases appear exactly as specified.\n5. Verify capitalization, lowercase status, punctuation, line count, bullet count, prefixes, spacing, and overall format.\n6. Confirm that any exact ending or phrase is preserved character-for-character, including its capitalization, spaces, and punctuation.\n7. Ensure the response still answers the underlying task clearly.\n\nRevise repeatedly until every requirement passes simultaneously. Never sacrifice one requirement to satisfy another. If a requirement is ambiguous, apply the strictest reasonable interpretation. Output only the final answer, with no explanation, alternatives, word count, or audit notes."
+    },
+    "worker_max_output_tokens": 320,
+    "seeds": [
+      0
+    ],
+    "estimated_usd": 0.02976,
+    "generated": "2026-07-29T15:53:09.522078+00:00"
+  },
+  "runs": [
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.755,
+        "opt_heldout": 0.755,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-36": 0.75,
+          "mc-51": 0.8,
+          "mc-21": 0.8,
+          "mc-4": 0.75,
+          "mc-43": 0.75,
+          "mc-52": 0.75,
+          "mc-9": 1.0,
+          "mc-38": 0.6,
+          "mc-34": 0.75,
+          "mc-58": 0.6
+        },
+        "opt_heldout_by_task": {
+          "mc-36": 0.75,
+          "mc-51": 0.8,
+          "mc-21": 0.8,
+          "mc-4": 0.75,
+          "mc-43": 0.75,
+          "mc-52": 0.75,
+          "mc-9": 1.0,
+          "mc-38": 0.6,
+          "mc-34": 0.75,
+          "mc-58": 0.6
+        }
+      }
+    }
+  ]
+}

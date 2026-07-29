@@ -1,0 +1,125 @@
+{
+  "entries": {
+    "worker:019cf5ec82cc43cd0a42ff006b581304bb811bdd0881fca3d8766fc52488dbfd": {
+      "name": "worker",
+      "output": "photosynthesis uses sunlight's code within leaves, creating energy and oxygen, fueling life cycles while supporting earth's ecosystems naturally."
+    },
+    "worker:0221365597c9623f9a9ab6186ef0976448361bf23c460d46d345032152f05042": {
+      "name": "worker",
+      "output": "- Learn every day by asking lots  \n- Study hard in short, clear bursts  \n- Use notes to keep key info  \n- Rest well for your brain boost"
+    },
+    "worker:04406dcef22e32ccfc3468d1899b8fecd86a0fdbed07b119f862f13107768c03": {
+      "name": "worker",
+      "output": "- Technology drives innovation across many fields and changes how people live work and communicate every single day  \n- New devices improve efficiency solve problems and create unique experiences for individuals and businesses seeking growth  \n- Advancements often focus on computing connectivity and automation supporting faster data transfer and smarter decision-making processes  \n- Continuous development pushes boundaries enabling better solutions that impact education health and industry in numerous positive ways all is set."
+    },
+    "worker:063c308dcc43d08ff039a7213f9e499f82e5cf1a1bea0cfc5f48b54125ed1767": {
+      "name": "worker",
+      "output": "Check each requirement independently:\n\n1. Structural requirements:\n- Exactly 4 bullet points: Draft has 4 bullets. PASS\n- Each bullet starts with \"- \": Each line begins with \"- \". PASS\n- Ends with exact phrase \"all is set.\": The phrase \"all is set.\" appears at the end of the last bullet, but is it the exact ending? The last bullet ends with \"all is set.\" \u2014 so this is satisfied. PASS\n\n2. Word count:\n- Count words excluding bullet marker:\n\nBullet 1: \"Technology drives innovation across many fields and changes how people live work and communicate every single day\"  \nCount words: Technology(1) drives(2) innovation(3) across(4) many(5) fields(6) and(7) changes(8) how(9) people(10) live(11) work(12) and(13) communicate(14) every(15) single(16) day(17)   \nBullet 1 word count: 17\n\nBullet 2: \"New devices improve efficiency solve problems and create unique experiences for individuals and businesses seeking growth\"  \nCount words: New(1) devices(2) improve(3) efficiency(4) solve(5) problems(6) and(7) create(8) unique(9) experiences(10) for(11) individuals(12) and(13) businesses(14) seeking(15) growth(16)  \nBullet 2 word count:16\n\nBullet 3: \"Advancements often focus on computing connectivity"
+    },
+    "worker:191316d217f691c0d388d9575cd46740843f07db8a812576c50db632414a10ee": {
+      "name": "worker",
+      "output": "focus on managing time well to achieve goals stay motivated avoid distractions keep learning daily"
+    },
+    "worker:1d7b2d6e715619928a1e23102b2d91c5776bdf00e13636a3ab51b3d0cec2cf02": {
+      "name": "worker",
+      "output": "Light travels in waves or tiny bits called photons. It moves fast and can show colors or create heat when it hits objects and changes form."
+    },
+    "worker:2a20381889c2d64e1c77bdd344ecbceaf83e367db913778e41db6a2fcb8e5161": {
+      "name": "worker",
+      "output": "1. Exactly 15 words  \n- Count words: \"focus on managing time well to achieve goals stay motivated and avoid distractions keep learning daily\"  \n- Word count: 16 words (focus, on, managing, time, well, to, achieve, goals, stay, motivated, and, avoid, distractions, keep, learning, daily)  \n- FAIL (16 words, required 15)  \n\n2. Entire response in lowercase  \n- All words are lowercase  \n- PASS  \n\n3. Do not use the word \"the\"  \n- No occurrence of \"the\"  \n- PASS  \n\n4. Do not use any commas  \n- No commas found  \n- PASS  \n\n# Fix needed: reduce word count by one to 15 words exactly. Possible revision:  \n\"focus on managing time well to achieve goals stay motivated avoid distractions keep learning daily\"  \n(reduce \"and\" by removing the word \"and\")  \n\nCount the revised version:  \nfocus (1) on (2) managing (3) time (4) well (5) to (6) achieve (7) goals (8) stay (9) motivated (10) avoid (11) distractions (12) keep (13) learning (14) daily (15)  \n\nNo \"the,\" all lowercase, no commas, exactly 15 words.  \n\n# Recheck Revised Response:\n\n- Word count: 15 words PASS  \n- lowercase: PASS  \n- no \"the\": PASS  \n- no commas: PASS  \n\n# Final answer:\n\nfocus on managing time well to achieve goals stay motivated avoid distractions keep learning"
+    },
+    "worker:34eefd05e90039463f47a7c32387ed5d6b13c4c805771381e4797560df814394": {
+      "name": "worker",
+      "output": "DNA is a code that cells read, guiding growth, health, and traits, so it goes."
+    },
+    "worker:36b14b0dc9f9e30260b17d858fab91c00e489531a1ba0355b303266e9ff4ded6": {
+      "name": "worker",
+      "output": "Check each requirement:\n\n1. Structural requirements:  \n- Exactly 4 bullet points: 4 bullets present \u2192 PASS  \n- Each bullet begins with \"- \": all start with \"- \" \u2192 PASS  \n\n2. Word count:  \nCount words excluding bullet markers:  \n- line 1: programming (1) means (2) writing (3) instructions (4) computers (5) follow (6) \u2192 6 words  \n- line 2: it (7) helps (8) solve (9) problems (10) by (11) breaking (12) tasks (13) into (14) steps (15) \u2192 9 words  \n- line 3: beginners (16) start (17) learning (18) simple (19) commands (20) before (21) building (22) projects (23) \u2192 8 words  \n- line 4: practice (24) regularly (25) and (26) explore (27) tutorials (28) to (29) improve (30) skills (31) fast (32) \u2192 9 words\n\nTotal words = 6 + 9 + 8 + 9 = 32 words, but the requirement is exactly 25 words \u2192 FAIL  \n\n3. Lexical constraints:  \n- entirely lowercase? Yes \u2192 PASS  \n- no word \"of\"?  \nCheck presence of \"of\" as standalone: None found \u2192 PASS  \n- any forbidden commas? None \u2192 PASS  \n- does it contain the word \"and\"? Yes, line 4 has \"and\" \u2192 allowed? No specific forbidding"
+    },
+    "worker:38d1f7ef880d187e78fadf58588edb62941ec2594acdfd599ca25f7b5fa98ad3": {
+      "name": "worker",
+      "output": "- Plan your work well and start small  \n- Focus daily on tasks to reach goals  \n- Stay calm review steps all is set."
+    },
+    "worker:3c0e19603e3de1f4fe13ca6d610acc91e2cccf0792c24c23f91204657044f451": {
+      "name": "worker",
+      "output": "Requirement checks:\n\n1. Structural requirements:\n- No bullet points or line count specified, so N/A.\n- No required beginnings or endings specified, so N/A.  \nPASS\n\n2. Word count:\n- Counting words (whitespace-separated):\n\"a\" (1)  \n\"new\" (2)  \n\"find\" (3)  \n\"shows\" (4)  \n\"small\" (5)  \n\"birds\" (6)  \n\"sing\" (7)  \n\"near\" (8)  \n\"streams.\" (9)  \n\"this\" (10)  \n\"news\" (11)  \n\"may\" (12)  \n\"help\" (13)  \n\"us\" (14)  \n\"learn\" (15)  \n\"more\" (16)  \n\"about\" (17)  \n\"life\" (18)  \n\"and\" (19)  \n\"how\" (20)  \n\"each\" (21)  \n\"part\" (22)  \n\"fits.\" (23)  \n\"life\" (24)  \n\"here\" (25)  \n\"is\" (26)  \n\"rich.\" (27)  \n\nTotal: 27 words (includes punctuation attached but punctuation doesn't add words). So word count is 27, not 25.\n\nFAIL: word count is 27, goal is exactly 25.\n\n3. Lexical constraints:\n\nNo use of the word \"to\":\n- The word \"to\" does not appear.\n\nAll lowercase:\n- All letters are lowercase.\n\nNo word longer than 6 letters:\nWords with length"
+    },
+    "worker:45d8607a59c68a55f3ccb8be217858b8497eab2abfaaf23468814cbbd04241f6": {
+      "name": "worker",
+      "output": "Check each requirement mechanically:\n\n1. Exact word count = 25\nCount words:  \n\"Light (1) travels (2) in (3) waves (4) or (5) tiny (6) bits (7) called (8) photons (9). It (10) moves (11) fast (12) and (13) can (14) show (15) colors (16) or (17) create (18) heat (19) when (20) it (21) hits (22) objects (23) and (24) changes (25) form (26).\"  \nThere are 26 words, not 25. FAIL.\n\n2. No word longer than 7 letters  \nCheck longest words:  \n- \"travels\" (7) - ok  \n- \"photons\" (7) - ok  \n- \"colors\" (6) - ok  \n- \"objects\" (7) - ok  \n- \"changes\" (7) - ok  \nAll words are 7 letters or fewer. PASS.\n\n3. No commas  \nThe draft has no commas. PASS.\n\n4. No use of word \"the\"  \nNo \"the\" in the draft. PASS.\n\nSummary: Only fail is word count (26 words instead of 25).\n\n---\n\nFix word count to exactly 25 words, keeping other constraints. Also, consider removing one word or combining ideas.\n\n---\n\nRevised answer, 25 words:\n\nLight travels in waves or tiny bits called photons It moves fast can show colors or create heat as it hits objects and changes form"
+    },
+    "worker:519bfda2d0cd75533fe01e612f79451c544fc1ee01c1cd3f0953ab7e4144dabd": {
+      "name": "worker",
+      "output": "- Think hard and plan steps you want to take  \n- Break work into parts to stay on track  \n- Keep calm and check progress each day all is set."
+    },
+    "worker:577db159e841d04bb619f197ffcb13b0b44758f412edbd88146bcbaa5151c5ff": {
+      "name": "worker",
+      "output": "- Tech grows fast, reshaping how humans live, work, and play daily.  \n- It fuels new tools, boosts speed, and inspires creative minds.  \n- Data flows swift, aiding smart choices in various fields.  \n- Change drives life forward, making each day fresh and bright; we are done."
+    },
+    "worker:60628fd7acf1c8fb5981af7c269cd253f4f35e84a8a4ef58163d05969a6d5114": {
+      "name": "worker",
+      "output": "Check each requirement:\n\n1. Structural requirements:  \n- Exactly 4 bullet points? Yes, 4 lines.  \n- Every bullet starts with \"- \"? Yes.  \n\n2. Count words independently:  \nCount words (excluding bullet markers):  \n- Learn every day by asking lots \u2192 6 words  \n- Study hard in short, clear bursts \u2192 6 words  \n- Use notes to keep key info \u2192 6 words  \n- Rest well for your brain boost \u2192 7 words  \nTotal = 6 + 6 + 6 + 7 = 25 words \u2192 PASS\n\n3. Lexical constraints:  \n- No word longer than 7 letters?  \n\"Learn\" (5), \"every\" (5), \"day\" (3), \"by\" (2), \"asking\" (6), \"lots\" (4) \u2192 all \u22647  \n\"Study\" (5), \"hard\" (4), \"in\" (2), \"short\" (5), \"clear\" (5), \"bursts\" (6) \u2192 all \u22647  \n\"Use\" (3), \"notes\" (5), \"to\" (2), \"keep\" (4), \"key\" (3), \"info\" (4) \u2192 all \u22647  \n\"Rest\" (4), \"well\" (4), \"for\" (3), \"your\" (4), \"brain\" (5), \"boost\" (5) \u2192 all \u22647  \nPASS\n\n- Do not use the word \"the\" \u2192 \"the\" is not used \u2192 PASS"
+    },
+    "worker:63b5fc4f734e50963ca7a9f3d331ca6cd453b6e4ea5eb682ac3ac7b3e63f53a4": {
+      "name": "worker",
+      "output": "focus on managing time well to achieve goals stay motivated and avoid distractions keep learning daily"
+    },
+    "worker:8bdbd98ae27d9315c1d1417bdd1366124b563d57c615753f555a09562a8e6274": {
+      "name": "worker",
+      "output": "1. Exactly 4 bullets, each starting with \"- \"  \n   - PASS (4 bullets, each starts with \"- \")\n\n2. Do not use the word \"to\"  \n   - FAIL (Bullet 2 has \"to\" : \"It fuels new tools, boosts speed, and inspires creative minds.\" The phrase \"new tools\" contains \"to\" as part of \"tools,\" but that's allowed since \"tools\" is not the standalone word \"to.\" The word \"to\" does not appear standalone. Check carefully: Yes, no standalone \"to\". So it is not violated.) Re-check entire text for standalone \"to\": no standalone \"to\" found. PASS\n\n3. End response with exact phrase \"we are done.\"  \n   - FAIL (Last bullet ends with \"we are done.\" but preceded by a semicolon: \"...bright; we are done.\" The required phrase is exact at the end, so the final phrase must be \"we are done.\" without a semicolon before it. This violates exact ending requirement.)\n\n4. No word longer than 7 letters  \n   - FAIL (Check each word's length ignoring punctuation:  \n      - Bullet 1: \"Tech\"(4), \"grows\"(5), \"fast\"(4), \"reshaping\"(9) \u2192 \"reshaping\" is 9 letters (FAIL)  \n      So violates this.)\n\n5. Exactly 20 words total (excluding bullet markers)  \n   Count words:  \n   Bullet 1: \"Tech\"(1), \"grows\"(2), \"fast\"(3), \"resh"
+    },
+    "worker:8c071450ee8b01ae8ddd192a8d33b1ef2274021b0a852e67f51379673ef9055f": {
+      "name": "worker",
+      "output": "water cycles through clouds, earth, and plants, following nature\u2019s secret code, renewing life, sustaining ecosystems, balancing heat and moisture daily."
+    },
+    "worker:8e6e0e9fd948910832e05bc128af9bc379ca364aa23bdd70df8e72a950846c01": {
+      "name": "worker",
+      "output": "Requirement checks:\n\n1. Exactly 15 words?  \nCount words:  \nDNA (1) is (2) a (3) code (4) that (5) cells (6) read, (7) guiding (8) growth, (9) health, (10) and (11) traits, (12) so (13) it (14) goes. (15)  \n-- PASS\n\n2. Ends with exact phrase \"so it goes.\"?  \nThe ending phrase is \"so it goes.\" (note the period)  \n-- PASS\n\n3. No word longer than 7 letters?  \nCheck each word's length ignoring punctuation:  \nDNA (3), is (2), a (1), code (4), that (4), cells (5), read (4), guiding (7), growth (6), health (6), and (3), traits (6), so (2), it (2), goes (5)  \n-- PASS\n\n4. Includes the word \"code\"?  \n\"code\" is present  \n-- PASS\n\n5. Does not use the word \"to\"?  \nCheck presence of standalone \"to\": None present  \n-- PASS\n\n6. The draft uses commas, are commas forbidden?  \nTask does not forbid commas.  \n-- PASS\n\nSummary: All constraints PASS.\n\nFinal verdict: PASS"
+    },
+    "worker:8f43815b44aaa6c3c66c0d8919f4066d37e7b07c2814c3e1a869640c04593ea0": {
+      "name": "worker",
+      "output": "- Tech grows fast, shaping how humans live, work, and play each day well.  \n- It fuels new tools, boosts speed, and sparks bright minds.  \n- Data flows swift, aids sound choice in many fields.  \n- Change drives life on, makes each day fresh and bright; we are done."
+    },
+    "worker:9fb700953c2147bbab2a2f8954c238184d2326c56178f55826147cb527020923": {
+      "name": "worker",
+      "output": "Light travels in waves or tiny bits called photons It moves fast can show colors or create heat as it hits objects changing form"
+    },
+    "worker:ae55b2762d62bddf56153a2db39f4ca04750716a6a5b6c6c521fae6c6280312c": {
+      "name": "worker",
+      "output": "1. Count bullets:  \n- There are 3 bullets.  \n- Each bullet starts with \"- \".  \nPASS\n\n2. Word count:  \n- Count words excluding bullet markers:  \nBullet 1: Think(1) hard(2) and(3) plan(4) steps(5) you(6) want(7) to(8) take(9) \u2192 9 words  \nBullet 2: Break(1) work(2) into(3) parts(4) to(5) stay(6) on(7) track(8) \u2192 8 words  \nBullet 3: Keep(1) calm(2) and(3) check(4) progress(5) each(6) day(7) all(8) is(9) set.(10) \u2192 10 words  \nTotal = 9 + 8 + 10 = 27 words  \nRequired: exactly 20 words.  \nFAIL\n\n3. Commas:  \n- The draft contains no commas.  \nPASS\n\n4. Word length:  \n- Check if any word is longer than 7 letters:  \n\"progress\" = 8 letters \u2192 violates max 7 letters.  \nFAIL\n\n5. Ending phrase:  \n- The ending phrase \"all is set.\" must be exact at the end of the entire response.  \n- The phrase \"all is set.\" is at the end of the last bullet line.  \nPASS\n\nSummary of failures:  \n- Word count is 27 not 20.  \n- The word \"progress\""
+    },
+    "worker:afef437ca1d5fcfc03beab5a0d47d86c2b8655c5d3d1395b7d5c29c2f06079aa": {
+      "name": "worker",
+      "output": "- Technology shapes how people live work and connect across various fields influencing daily life worldwide  \n- Devices boost efficiency solve problems and provide novel experiences for both individuals and enterprises  \n- Progress in computing networks and automation enables faster data flow and smarter choices everywhere  \n- Constant innovation expands limits with better tools affecting health education industry and more all is set."
+    },
+    "worker:b51d82879ef745b0a5f0a3163d67de673fd7804b383e3f13abbf016d4d7c80f0": {
+      "name": "worker",
+      "output": "Requirement checks:\n\n1. Structural requirements:\n   - No bullet points required; response is a single sentence, acceptable. PASS\n\n2. Word count (20 words required):\n   - Counting words (split by whitespace):  \n     photosynthesis(1) uses(2) sunlight's(3) code(4) within(5) leaves,(6) creating(7) energy(8) and(9) oxygen,(10) fueling(11) life(12) cycles(13) while(14) supporting(15) earth's(16) ecosystems(17) naturally.(18)  \n   - There are 18 words, not 20. FAIL\n\n3. Lexical constraints:\n   - Entirely lowercase?  \n     Original starts with \"photosynthesis\" lowercase, all other words lowercase except \"sunlight's\" and \"earth's\" which are lowercase. OK  \n     But punctuation and apostrophes allowed. PASS\n   - Includes the word \"code\"? Yes, word 4. PASS\n   - Does NOT use the word \"to\"?  \n     Contains \"and\" twice (and, and). The task forbids only \"to,\" not \"and\", so OK.  \n     No \"to\" found. PASS\n\n4. Punctuation and formatting:\n   - Lowercase throughout, yes. PASS  \n   - Punctuation allowed? Yes. PASS\n\nSummary:  \n- Word count FAIL (18 instead of 20)  \nNo other failures.\n\nCorrected response needed with exactly 20 words, lowercase, includes \"code,\" no \"to\".\n\n---\n\n"
+    },
+    "worker:c98cfff0ca2d9a14d6f4f4c9967e6a8778ca5687341414842ba67cd47971a73c": {
+      "name": "worker",
+      "output": "DNA is a code cells use for traits, health, and form, so it goes."
+    },
+    "worker:cf45ab2543fe2132c5b9d980e2d22f6dad2a04c4ca23f8af49f02dc50d186f1c": {
+      "name": "worker",
+      "output": "- programming means writing instructions computers follow  \n- it helps solve problems by breaking tasks into steps  \n- beginners start learning simple commands before building projects  \n- practice regularly and explore tutorials to improve skills fast"
+    },
+    "worker:e74bffb3152dc0227b345515a4dc917ef77c098fe15f913dd68c37c7e9c7a806": {
+      "name": "worker",
+      "output": "a new find shows small birds sing near streams. this news may help us learn more about life and how each part fits. life here is rich."
+    },
+    "worker:ebb07ce576e58d3db95e08f0b4008b0c3c4bee79cb673ed31bd3ed1f0176a7dc": {
+      "name": "worker",
+      "output": "- programming means writing instructions computers follow  \n- it helps solve problems using simple step plans  \n- beginners learn commands then build small projects  \n- practice often explore tutorials to gain new skills"
+    },
+    "worker:f531b08f487198948ca0d67d42323ae1f7c475e646982a8743a4ee949a8e0a0f": {
+      "name": "worker",
+      "output": "a small cave held rare gems and old tools. this find gives clues about past life and how each piece linked in many ways. such truth helps growth."
+    },
+    "worker:fc7ba72b6917eb69f2f98128181e609ada2535f2ed68cc1b68a3f76d11e22c0b": {
+      "name": "worker",
+      "output": "- Ask lots of clear, short questions  \n- Plan each day with a small task  \n- Write notes to save all ideas  \n- Sleep well to keep your mind sharp"
+    }
+  },
+  "version": 1
+}

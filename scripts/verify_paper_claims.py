@@ -536,6 +536,61 @@ def _corrected_ci(kind: str) -> tuple[float, float]:
     return lo, hi
 
 
+def _repeat():
+    """The D7 replicate driver, imported lazily like the other analyzers."""
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import repeat_scores as mod
+
+    return mod
+
+
+def _repeat_results() -> dict[str, object]:
+    mod = _repeat()
+    return {r.level: r for r in mod.aggregate(5)}
+
+
+def _repeat_sigma() -> dict[tuple[str, str], float]:
+    return _repeat().sigma_by_genome(5)
+
+
+#: The pre-registered budget sweep: (mmc, proposal cap). n_train is fixed at 8 throughout, which
+#: is what makes it a single-knob axis where the cap does not bind.
+BUDGET_SWEEP = ((20, 6), (28, 6), (40, 6), (56, 6), (80, 6), (160, 12))
+BUDGET_N_TRAIN = 8
+
+
+def _budget_cell(mmc: int, cap: int) -> dict[str, float]:
+    """Cycles, effective depth and priced bound for one budget-sweep cell.
+
+    Derived, not transcribed. The bound comes from the same cost model the pre-spend guard uses,
+    so the paper's priced column and the guard's refusal threshold cannot disagree -- and the
+    whole table is checkable BEFORE the runs exist, which is what a pre-registration needs.
+    """
+    from whystuck.eval.cost import WORKER_TOKENS, plan_study_calls
+
+    cycles = (mmc - BUDGET_N_TRAIN) / (min(3, BUDGET_N_TRAIN) + BUDGET_N_TRAIN)
+    groups = plan_study_calls(
+        arms=("B", "D"),
+        n_train=BUDGET_N_TRAIN,
+        n_heldout=10,
+        max_metric_calls=mmc,
+        reflection_calls=cap,
+        worker_model="openai/gpt-4.1-mini",
+        reflection_model="openai/gpt-5.6-luna",
+        n_seeds=3,
+        worker_calls_per_task=3,
+        worker_tokens=WORKER_TOKENS,
+    )
+    return {
+        "cycles": cycles,
+        "depth": min(cycles, float(cap)),
+        "usd": sum(g.usd() for g in groups),
+    }
+
+
 def _contrast_flag_census() -> tuple[int, int]:
     """(one-sided, both-arms-starved) among released runs with at least one optimizing arm.
 
@@ -1646,6 +1701,93 @@ def _checks() -> list[tuple[str, float, float, float]]:
             lo, hi = _corrected_ci(kind)
             out.append((f"tab:ciexcl {kind} corrected lo", cells[3][0], 0.0005, lo))
             out.append((f"tab:ciexcl {kind} corrected hi", cells[3][1], 0.0005, hi))
+
+    # --- D7: the 135 replicate re-scorings (sec:repeat) --------------------------------
+    # Every cell of tab:repeat and tab:sigmagenome, recomputed from the replicate outputs. These
+    # supersede the offline noise estimate wherever they overlap, so drift between the two would
+    # leave the paper asserting a superseded number as current.
+    reps = _repeat_results()
+    if reps:
+        repeat_hdr = r"level & single draw & $\dd$ ($K{=}5$) & sd(draw)"
+        for lvl in ("L1", "L2", "L3"):
+            r = reps.get(lvl)
+            if r is None:
+                continue
+            cells = _table_row(tex, repeat_hdr, f"${lvl[0]}_{lvl[1]}$ &")
+            out.append((f"tab:repeat {lvl} K", 5.0, 0, len(r.replicate_deltas)))
+            out.append((f"tab:repeat {lvl} delta", cells[2][0], 0.0005, r.delta))
+            out.append((f"tab:repeat {lvl} sd", cells[3][0], 0.00005, r.sd_between_replicates))
+            out.append((f"tab:repeat {lvl} se", cells[4][0], 0.00005, r.standard_error))
+            out.append((f"tab:repeat {lvl} t", cells[5][0], 0.005, r.t_stat()))
+
+        mod = _repeat()
+
+        # The critical values the verdicts use. Scraped from the caption that names them, so a
+        # future edit cannot quietly swap in the normal 1.96 that would flip two verdicts.
+        out.append(
+            (
+                "tex: t crit 10 df4",
+                _scrape(tex, r"critical values are \$([\d.]+)\$ \(\$p<0.10\$\)"),
+                0.0005,
+                mod.T_CRIT_10[4],
+            )
+        )
+        out.append(
+            (
+                "tex: t crit 05 df4",
+                _scrape(tex, r"and \$([\d.]+)\$ \(\$p<0.05\$\)"),
+                0.0005,
+                mod.T_CRIT_05[4],
+            )
+        )
+
+        sig = _repeat_sigma()
+        if sig:
+            sigma_hdr = r"level & prompt-only (B) & loop-level (D) & unoptimized (seed)"
+            for lvl in ("L1", "L2", "L3"):
+                cells = _table_row(tex, sigma_hdr, f"${lvl[0]}_{lvl[1]}$ &")
+                for col, arm in ((1, "B"), (2, "D"), (3, "SEED")):
+                    out.append(
+                        (f"tab:sigmagenome {lvl} {arm}", cells[col][0], 0.00005, sig[(lvl, arm)])
+                    )
+            lo, hi = min(sig.values()), max(sig.values())
+            out.append(
+                (
+                    "tex: sigma genome range factor",
+                    _scrape(tex, r"a factor of \$([\d.]+)\$\. Two mechanisms"),
+                    0.05,
+                    hi / lo,
+                )
+            )
+            out.append(
+                ("tex: sigma genome lo", _scrape(tex, r"range is \$([\d.]+)\$ to"), 0.00005, lo)
+            )
+            out.append(
+                ("tex: sigma genome hi", _scrape(tex, r"to \$([\d.]+)\$,\na factor"), 0.00005, hi)
+            )
+            out.append(
+                (
+                    "tex: seed control sd",
+                    _scrape(tex, r"moves\nacross replicates with sd \$([\d.]+)\$"),
+                    0.00005,
+                    _repeat().seed_replicate_spread(5)[1],
+                )
+            )
+
+    # tab:budgetsweep: the pre-registered budget axis. Checkable before the runs exist because
+    # every column is derived -- cycles and effective depth are arithmetic on (mmc, cap, n_train),
+    # and the priced bound comes from the SAME cost model the pre-spend guard consults, so the
+    # paper cannot advertise a bound the guard would not enforce.
+    budget_hdr = r"\texttt{mmc} & cap & promotable cycles & effective depth"
+    for mmc, cap in BUDGET_SWEEP:
+        cells = _table_row(tex, budget_hdr, f"{mmc}  &" if mmc < 100 else f"{mmc} &")
+        cell = _budget_cell(mmc, cap)
+        out.append((f"tab:budgetsweep mmc{mmc} value", cells[0][0], 0, mmc))
+        out.append((f"tab:budgetsweep mmc{mmc} cap", cells[1][0], 0, cap))
+        out.append((f"tab:budgetsweep mmc{mmc} cycles", cells[2][0], 0.005, cell["cycles"]))
+        out.append((f"tab:budgetsweep mmc{mmc} depth", cells[3][0], 0.005, cell["depth"]))
+        if cells[4]:  # the free row prints "(run 3b, free)" rather than a number
+            out.append((f"tab:budgetsweep mmc{mmc} bound", cells[4][0], 0.005, cell["usd"]))
 
     # --- The split-size sweep, bought (sec:splitresult) --------------------------------
     # Every number in tab:splitresults, cell by cell, plus the prose that interprets it. The

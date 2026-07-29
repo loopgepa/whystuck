@@ -1,0 +1,78 @@
+{
+  "meta": {
+    "dataset": "multi-constraint-hard (IFEval-style)",
+    "n_train": 8,
+    "n_heldout": 10,
+    "worker_model": "openai/gpt-4.1-mini",
+    "reflection_model": "openai/gpt-5.6-luna",
+    "max_metric_calls": 28,
+    "module_selector": "all",
+    "seeds_independent": true,
+    "detector_reflection": true,
+    "reflection_calls": 10,
+    "task_set": "multi-hard",
+    "temperature": null,
+    "sample": 0,
+    "exclude_constraint": [
+      "exact_word_count",
+      "word_max_length"
+    ],
+    "loop_max_retries": 1,
+    "plan_gene": false,
+    "feedback_stats": false,
+    "critique_model": null,
+    "oracle_critique": false,
+    "feedback_level": "mid",
+    "exec_feedback": false,
+    "actuator": false,
+    "gene_overrides": {
+      "ensure_correct": "Act as a meticulous constraint-compliance evaluator. The input will usually contain:\n\n1. a task description,\n2. a list of mandatory response requirements,\n3. a \u201cDraft under judgement,\u201d\n4. a \u201cGenerated Outputs\u201d response,\n5. and possibly feedback claiming PASS or WRONG.\n\nYour job is to independently determine whether the generated response satisfies every stated requirement. Do not accept the supplied feedback as authoritative: it may itself contain a false pass or false alarm. Evaluate the actual text character by character and word by word.\n\nFollow this procedure:\n\n1. Re-read the task and enumerate every requirement.\n2. Inspect the generated response, not merely the draft, unless explicitly asked to judge the draft.\n3. Check every requirement independently:\n   - exact number of bullet points;\n   - whether every bullet line begins exactly with \u201c- \u201d;\n   - whether extra standalone lines or prose violate an \u201cexactly N bullet points\u201d requirement;\n   - required words or phrases, using the requested spelling and case;\n   - forbidden words as whole words, case-insensitively unless the task specifies otherwise;\n   - forbidden punctuation, such as commas;\n   - capitalization and lowercase requirements;\n   - exact ending phrases, including final punctuation and whether any trailing whitespace or text follows;\n   - any semantic or content requirements.\n4. Do not infer compliance from general meaning. A single occurrence of a forbidden word or punctuation mark is a failure.\n5. Report every failed requirement and quote the offending text when useful. If all requirements pass, report PASS. If any requirement fails, report WRONG and state the precise fixes needed.\n6. Never \u201cfix\u201d a response that is already compliant, and never mark a response PASS merely because most requirements are satisfied.\n7. If requirements conflict or are ambiguous, explain the interpretation used, but apply the strictest ordinary reading when the wording says \u201cALL,\u201d \u201cexactly,\u201d \u201centire,\u201d \u201cmust,\u201d or \u201cdo not.\u201d\n\nImportant lessons from the examples:\n\n- In the lowercase/photosynthesis example, the text contains forbidden occurrences of \u201cthe,\u201d including phrases such as \u201cthe process,\u201d \u201cthe reactions,\u201d and \u201cthe atmosphere.\u201d Therefore it is not compliant with \u201cdo not use the word \u2018the\u2019,\u201d despite being lowercase and having four bullet lines. A response that moves \u201cso it goes.\u201d onto a separate line also risks violating \u201cformat as exactly 4 bullet points,\u201d because that creates extra non-bullet content.\n- In the flux example, the sentence \u201cFlux describes the amount of light energy passing through a surface area per unit time\u201d contains the forbidden standalone word \u201cof\u201d in \u201camount of light.\u201d Thus the response fails even though it has five bullets, no commas, and includes \u201cflux.\u201d\n- The flux example appears twice and must be evaluated the same way both times.\n- Words such as \u201cof\u201d and \u201cthe\u201d should be checked as standalone words rather than as arbitrary letter sequences inside longer words. Punctuation adjacent to a word does not make the word permissible.\n- Content such as photosynthesis, chlorophyll, light energy, carbon dioxide, glucose, oxygen, and flux is incidental scientific subject matter here. Unless the task explicitly imposes factual-content requirements, focus on the stated formatting, lexical, punctuation, and semantic constraints.\n- The generalizable strategy is exhaustive requirement-by-requirement validation followed by a final pass/fail decision, with no reliance on superficial appearance or prior feedback.\n\nReturn a clear verdict and a compact checklist of satisfied and failed requirements.",
+      "generate": "Carefully read the task input and produce the requested response directly. Identify the subject, the type of explanation or content requested, and every explicit output constraint. Treat all requirements as mandatory and satisfy them simultaneously.\n\nBefore finalizing, verify the response mechanically:\n\n- Follow the required format exactly, including the precise number of bullet points and the required \"- \" prefix.\n- If a required closing phrase is specified, make it the exact final characters of the response. A closing phrase after the bullet points is acceptable when the task requires both a fixed number of bullets and a final phrase, and it does not count as an additional bullet.\n- Apply capitalization requirements to every character, including required phrases.\n- Check forbidden words using word boundaries and avoid them everywhere, including headings, bullet text, and closing phrases. When possible, avoid likely variants or phrases containing a forbidden word as well.\n- Check punctuation restrictions character by character, especially commas.\n- Include required keywords exactly and naturally.\n- Do not add explanations, headings, disclaimers, or extra commentary that could violate the format.\n- Ensure the requested content remains scientifically accurate, clear, and relevant.\n\nUse concise wording and draft each sentence around the restrictions rather than trying to remove violations afterward. For example, when \u201cof\u201d is forbidden, write \u201cFlux measures light energy crossing a surface per unit time\u201d instead of \u201cFlux describes the amount of light energy passing through a surface,\u201d because the latter contains the forbidden word. Before submitting, count the bullets, inspect every forbidden word and punctuation mark, confirm all required keywords, and verify the exact ending."
+    },
+    "worker_max_output_tokens": 320,
+    "seeds": [
+      1
+    ],
+    "estimated_usd": 0.02976,
+    "generated": "2026-07-29T17:26:21.290920+00:00"
+  },
+  "runs": [
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.975,
+        "opt_heldout": 0.975,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-34": 1.0,
+          "mc-35": 1.0,
+          "mc-46": 1.0,
+          "mc-20": 1.0,
+          "mc-61": 1.0,
+          "mc-37": 1.0,
+          "mc-14": 1.0,
+          "mc-63": 1.0,
+          "mc-53": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-34": 1.0,
+          "mc-35": 1.0,
+          "mc-46": 1.0,
+          "mc-20": 1.0,
+          "mc-61": 1.0,
+          "mc-37": 1.0,
+          "mc-14": 1.0,
+          "mc-63": 1.0,
+          "mc-53": 0.75
+        }
+      }
+    }
+  ]
+}

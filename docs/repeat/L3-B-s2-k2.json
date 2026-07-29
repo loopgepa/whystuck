@@ -1,0 +1,77 @@
+{
+  "meta": {
+    "dataset": "multi-constraint-hard (IFEval-style)",
+    "n_train": 8,
+    "n_heldout": 10,
+    "worker_model": "openai/gpt-4.1-mini",
+    "reflection_model": "openai/gpt-5.6-luna",
+    "max_metric_calls": 28,
+    "module_selector": "all",
+    "seeds_independent": true,
+    "detector_reflection": true,
+    "reflection_calls": 10,
+    "task_set": "multi-hard",
+    "temperature": null,
+    "sample": 2,
+    "exclude_constraint": [
+      "exact_word_count",
+      "word_max_length"
+    ],
+    "loop_max_retries": 1,
+    "plan_gene": false,
+    "feedback_stats": false,
+    "critique_model": null,
+    "oracle_critique": false,
+    "feedback_level": "mid",
+    "exec_feedback": false,
+    "actuator": false,
+    "gene_overrides": {
+      "generate": "For each task, carefully parse the requested content and every explicit constraint before writing. Produce only the requested answer, with no commentary about the constraints or your process.\n\nUse this workflow:\n1. Identify the task type, required topic, length, tone, format, required words or phrases, forbidden words, capitalization rules, and exact beginning or ending requirements.\n2. Draft content that fulfills the substantive task while avoiding accidental violations.\n3. Audit the draft character by character and word by word before responding:\n   - Treat forbidden words as forbidden standalone words unless the task clearly specifies substring matching.\n   - Include every required word or phrase exactly as requested, with the required capitalization.\n   - For an exact ending, ensure the final characters\u2014including punctuation\u2014match exactly. Do not add a citation, explanation, extra punctuation, or trailing text afterward.\n   - For lowercase requirements, use no capital letters anywhere.\n   - For an exact bullet count, use exactly that many lines beginning with \u201c- \u201d, with no introduction or conclusion outside the bullets.\n   - Keep any required ending phrase within the final permitted line when a strict format, such as exactly three bullets, is also required.\n4. Revise until every requirement is satisfied simultaneously, then return only the final answer.\n\nImportant lessons from prior attempts:\n- A response about programming may include \u201ccode,\u201d but it must not contain the standalone word \u201cand,\u201d must be entirely lowercase, and must end with the exact lowercase phrase \u201chere we go.\u201d\n- A discovery note may need exactly three bullet points, each beginning with \u201c- \u201d, must include \u201cwave,\u201d must not contain the standalone word \u201cthe,\u201d and must end with the exact phrase \u201cthat is it.\u201d The period is required, and the phrase must be the final text.\n- Do not assume that approximately satisfying a requirement is sufficient: exact word bans, exact bullet counts, capitalization, punctuation, and suffixes must all be verified."
+    },
+    "worker_max_output_tokens": 320,
+    "seeds": [
+      2
+    ],
+    "estimated_usd": 0.02976,
+    "generated": "2026-07-29T17:21:54.276552+00:00"
+  },
+  "runs": [
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.96,
+        "opt_heldout": 0.96,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-29": 0.8,
+          "mc-46": 0.8,
+          "mc-1": 1.0,
+          "mc-48": 1.0,
+          "mc-17": 1.0,
+          "mc-41": 1.0,
+          "mc-28": 1.0,
+          "mc-34": 1.0,
+          "mc-60": 1.0,
+          "mc-32": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-29": 0.8,
+          "mc-46": 0.8,
+          "mc-1": 1.0,
+          "mc-48": 1.0,
+          "mc-17": 1.0,
+          "mc-41": 1.0,
+          "mc-28": 1.0,
+          "mc-34": 1.0,
+          "mc-60": 1.0,
+          "mc-32": 1.0
+        }
+      }
+    }
+  ]
+}

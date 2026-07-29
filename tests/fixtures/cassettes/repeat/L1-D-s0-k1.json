@@ -1,0 +1,125 @@
+{
+  "entries": {
+    "worker:01058190522684713f92e8605e927cbc264dc52d01a9b21072d1e5870abcc9b9": {
+      "name": "worker",
+      "output": "WRONG \u2014 failed: exact_word_count (response has 28 words, expected exactly 15); bullet_count (4 bullets present, satisfied); forbidden_word (\"of\" appears multiple times); word_max_length (words \"important\" (9), \"shifts\" (6 letters, okay), \"changes\" (7), \"clues\" (5), \"helps\" (5), all okay, but \"important\" exceeds 7 letters); include_keyword (\"flux\" included, satisfied)"
+    },
+    "worker:045e806f303e24a07cf44385a171c663ff532bb124586b713dc4273c8b8050ab": {
+      "name": "worker",
+      "output": "- wifi lets you link to the web without cords  \n- it uses radio waves for data flow  \n- many homes and spots have wifi access  \n- devices must have wifi chips for use"
+    },
+    "worker:1ddb4aaaf56e4cd66db6ddf57c03cc57ce7aa90a0ff7a75db23620a2b56323d7": {
+      "name": "worker",
+      "output": "WRONG \u2014 failed: exact_word_count (response has 18 words; expected exactly 15 words). Satisfied: no_forbidden_word (\"to\"), format (3 bullets with correct prefix), no_comma."
+    },
+    "worker:20340445c2528ca2f675a20f6e0bdd49d351b4bbcfdbafb126d04b2a2d29b07e": {
+      "name": "worker",
+      "output": "- ideas help us learn  \n- focus on main points  \n- ask others for facts  \n- use notes for help  \n- check work for errors"
+    },
+    "worker:2c54d8abf4c39cdc6edb587e38612fb43b83fa0e51da67b054ad717f600315e2": {
+      "name": "worker",
+      "output": "- genes hold codes  \n- genes affect traits  \n- each gene has role  \n- genes pass from past  \n- genes shape who you are  \n- genes work in cells  \n- gene change may cause illness  \n- study genes helps health  \n- genes mix in birth  \n- genes link us all"
+    },
+    "worker:34350f08afbefdf64676d748597ef932ee6b08aff59a5c71568c6091177d1f21": {
+      "name": "worker",
+      "output": "- Gravity pulls all things down toward Earth  \n- It keeps the moon close in its path  \n- Stars form from gas under strong pull  \n- Planets move in loops while orbiting stars  \n- Force acts at a long range everywhere"
+    },
+    "worker:3c46bc3bb6f14a2108d3ca24971593e5e0114da86b69889fb420be7af2aa3d3b": {
+      "name": "worker",
+      "output": "- A flux change helped find new clues about stars and their light.  \n- This helps us track shifts in space more well.  \n- New tools came with this important find.  \n- It opens more ways to learn about the world."
+    },
+    "worker:47a3da1e857ae07de9628491def4471e00cb1448014ff8b3ab189bf27808d79d": {
+      "name": "worker",
+      "output": "- Discovery changed human knowledge in major ways  \n- It opened new paths for future study  \n- Many now use original findings daily"
+    },
+    "worker:59e1f93462de55c0a44106083bb8e3f46563e4e81c140220b87e7755e7b19a50": {
+      "name": "worker",
+      "output": "WRONG \u2014 failed: exact_word_count (response contains 22 words; required exactly 15 words), exact_format (response uses bullet points but no bullet-point format was requested), end_phrase (does not end with the exact phrase \"that is it.\" as the last words of the response; instead it appears only in the last bullet), lowercase (all lines begin lowercase, so satisfied), forbidden_word (\"and\" is not present), case (lowercase respected).\n\nSatisfied: forbidden_word, lowercase."
+    },
+    "worker:5c093f437f67eb545f8cebb4ac9087b280ff5fdaad9ac6003f2000a326cc2ecf": {
+      "name": "worker",
+      "output": "- A flux shift led to new data and key facts from stars in sky.  \n- This gave rise to fresh views on solar winds and light.  \n- Tools now help test change and track moves across space.  \n- Such finds grow skills to grasp how things work near us."
+    },
+    "worker:5c3f274e63da0b0f239c51ea2156e3cbda994cc629054e05059ecb7dc5eeffb7": {
+      "name": "worker",
+      "output": "WRONG \u2014 failed: exact_word_count (only 18 words present; required exactly 20 words). Satisfied: lowercase, bullet_format (5 lines with \u201c- \u201d), word_max_length (all \u22647 letters), forbidden_word (\u201cto\u201d) absent."
+    },
+    "worker:63d49da96d6b2fd9e6344ddfc06a9de33f4883d08d5c548fa50a8bd68b264555": {
+      "name": "worker",
+      "output": "- technology helps people communicate quickly across vast distances  \n- it improves daily life with gadgets and tools  \n- innovation drives progress in health transport and energy"
+    },
+    "worker:6a903221c8814298a943d33a3f6033a802d0a4fea5f6a45e4d9e22aa2d15399c": {
+      "name": "worker",
+      "output": "WRONG \u2014 failed: exact_word_count (draft has 22 words; must have exactly 20); exact format (response must be a short note, not a bulleted list), end phrase (must end response with exact phrase \"here we go.\" with no extra text after), no forbidden word \"to\" (passed), include_keyword \"wave\" (passed). \n\nCorrection: Provide a single short note (not bullets) of exactly 20 words including \"wave\", no word \"to\", ending exactly with \"here we go.\""
+    },
+    "worker:8afa4293f2e2484570bb807766006c85d3dab8a72e94212f22e9d31750dbdc72": {
+      "name": "worker",
+      "output": "- wifi gives web access without cords  \n- it uses radio waves for data  \n- many spots have wifi now  \n- devices need wifi chips for use"
+    },
+    "worker:90eb8138963c80a54eb042b85d1154c6a966f213d5ba318da5211659538ee103": {
+      "name": "worker",
+      "output": "- Light travels fast in waves that move through space  \n- Heat makes things move more with strong energy  \n- Atoms join to build all matter we see"
+    },
+    "worker:937889976ada3b2615b5b856eb64bc98ffef4fbb943e4fffb8d73bc637f19885": {
+      "name": "worker",
+      "output": "- Scientists found a strange wave moving through space  \n- This wave might change our view of light  \n- Exciting news ahead, here we go."
+    },
+    "worker:95e7344f228b2a7a501dab8f8b7e40245b17788f4d4b908c59e8a70ba807404d": {
+      "name": "worker",
+      "output": "- The discovery gave fresh insight about nature and human life  \n- It helped create tools new ideas grow from  \n- This changed many fields with facts never known before"
+    },
+    "worker:968adbcc8b2fd7c7302b75f6ca4fe1273a15c7a0a929f67343385d850095891c": {
+      "name": "worker",
+      "output": "WRONG \u2014 failed: exact_word_count (response contains 16 words; must be exactly 15 words). Satisfied: format, lowercase, no_use_of_forbidden_word."
+    },
+    "worker:9d372597b692ce7986003cf3b4d869ff70f6a2789de00552f6de018317eb16a0": {
+      "name": "worker",
+      "output": "photosynthesis is how plants use light energy to make food releasing oxygen that is it."
+    },
+    "worker:a05c9930f9a3737b460f701376bb1bce3311689f246eb4b108a92bc59d626ee7": {
+      "name": "worker",
+      "output": "WRONG \u2014 failed: exact_word_count (must use exactly 20 words; draft has 31 words), exact_format (must have exactly 3 bullet points starting with \u201c- \u201d; draft has 5 bullet points), forbidden_word (\"and\" must not appear; draft does not contain \"and\" so this is satisfied), word_max_length (all words must be 7 letters or fewer; \"Gravity,\" \"toward,\" \"orbiting,\" and \"Planets\" exceed 7 letters), no_comma (no commas present; satisfied).\n\nSatisfied: no_comma, forbidden_word"
+    },
+    "worker:ab3246deaf9e29fe59e36bf4f2b6843a2f48ff82d47d0a632ab44d8fead83d74": {
+      "name": "worker",
+      "output": "- Light acts both as wave and as small parts called photons  \n- Waves spread with set speed, photons hit or move in straight line  \n- This dual nature makes light key for many new forms in tech that is it."
+    },
+    "worker:b4cc31d765f6e49a7c8a34126b498fa73a7e8d03135e67ce26f001340b9ee9a7": {
+      "name": "worker",
+      "output": "- Light acts as wave and as small bits called quanta  \n- Waves move with set pace, quanta hit or go in line  \n- This dual role lets light aid many new tools that is it."
+    },
+    "worker:baa4c97e96915705ba6d6fa04a931a366725ae8a187b3d28affb905747fea1ad": {
+      "name": "worker",
+      "output": "- ideas help with study  \n- focus on main steps  \n- ask peers for facts  \n- use flashcards each day  \n- check notes for errors"
+    },
+    "worker:baeaefb748600dec710dd3036781a79e28aef755f96d75b6e6d9f225f664ec89": {
+      "name": "worker",
+      "output": "- technology enables data transfer fast across wide places  \n- tools created increase life ease and work speed  \n- progress comes through new ideas shaping health energy transport"
+    },
+    "worker:c5e21b22d2440fb3d24a0aa4a3156b66c40985a8d74d2762d0d4653a719e3da3": {
+      "name": "worker",
+      "output": "WRONG \u2014 failed: exact_word_count (response contains 20 words; expected exactly 15 words); num_bullets (response has 4 bullet points as required, so num_bullets satisfied); include forbidden_word (the word \"to\" is present in the first bullet \"link to the web\"); word_max_length (all words are 7 letters or fewer, so word_max_length satisfied); lowercase (all lowercase, satisfied).  \n\nCorrection needed: Remove the word \"to,\" reduce word count to exactly 15 words, keep exactly 4 bullet points with proper formatting, and maintain lowercase."
+    },
+    "worker:e8a52302d3c015f26d679150210e1475b856061ea70e4f4889fca541e71d6959": {
+      "name": "worker",
+      "output": "WRONG \u2014 failed: exact_word_count (draft has 38 words, expected exactly 20 words); exact_format (contains 10 bullet points instead of none, since the task requires a summary, not bullets); lowercase (draft includes uppercase letters in \"genes,\" which should be lowercase); word_max_length (word \"illness\" has 7 letters, exceeding 6-letter max); include_keyword (draft uses both \"gene\" and \"genes,\" but \"gene\" must appear\u2014this is met); do_not_use_word_to (draft contains \"to\" nowhere, so this is met).  \n\nSummary: please rewrite the answer as a single lowercase sentence or sentences without bullet points, with exactly 20 words total, all words max 6 letters, including the word \"gene,\" and not using \"to.\""
+    },
+    "worker:e9a4bf6febaf9e914d591780b7e71710d74103ea3a5ec4bd7bad88a00bdf56e8": {
+      "name": "worker",
+      "output": "a gene holds a code that shapes traits and guides cells each gene works in us and links all living things here"
+    },
+    "worker:fca344ec60f3e91bb444cbd2b1b6395e3a4390a564401d2a0a76a729d2517d94": {
+      "name": "worker",
+      "output": "Scientists discovered a strange wave crossing space that might change our view of light and sound forever here we go."
+    },
+    "worker:fcaa56f87a6fcbf8d1ed4863b6b4d43e8d792169fb13e461a2140d780ef1de74": {
+      "name": "worker",
+      "output": "- photosynthesis allows plants to convert light into energy\n- it produces oxygen which animals need\n- sunlight fuels the process that is it"
+    },
+    "worker:ff5b17eb52faae73d1e6f390128464cdfe7bc2e47b28eba7ab0161382266e8da": {
+      "name": "worker",
+      "output": "WRONG \u2014 failed: word_max_length (words longer than 6 letters present: \"photons,\" \"spread,\" \"nature,\" \"makes,\" \"forms,\" \"tech\"). Satisfied: num_bullets (3 bullets, each starting with \"- \"), exact_word_count (15 words), ends_with_phrase (\"that is it.\")."
+    }
+  },
+  "version": 1
+}
