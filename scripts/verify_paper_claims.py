@@ -1806,22 +1806,6 @@ def _checks() -> list[tuple[str, float, float, float]]:
             # test_paper_sigma_coverage.
             out.append(
                 (
-                    "tex: abstract sigma genome range",
-                    _scrape(tex, r"factor of \$5.9\$ \(\$([\d.]+)\$ to"),
-                    0.0005,
-                    lo,
-                )
-            )
-            out.append(
-                (
-                    "tex: abstract sigma genome range hi",
-                    _scrape(tex, r"\(\$0.006\$ to \$([\d.]+)\$\)"),
-                    0.0005,
-                    hi,
-                )
-            )
-            out.append(
-                (
                     "tex: seed control sd",
                     _scrape(tex, r"moves\nacross replicates with sd \$([\d.]+)\$"),
                     0.00005,
@@ -2107,11 +2091,16 @@ def _checks() -> list[tuple[str, float, float, float]]:
     # replicate automatically, so the estimator's count grows while the prose keeps its old
     # number and the sigma it quotes is derived from a different set than it claims.
     n_reps = noise.n_replicates
-    for label, pattern in (
-        ("tex: noise n replicates (threats)", r"scope note\. (\w+) released runs"),
-        ("tex: noise n replicates (abstract)", r"(\w+) released runs happen to re-score"),
-    ):
-        out.append((label, _scrape_word(tex, pattern), 0, n_reps))
+    # The abstract used to restate this count; it was cut to meet the 200-word / one-paragraph
+    # limit, so sec:threats is now the only place that states it and the only anchor needed.
+    out.append(
+        (
+            "tex: noise n replicates (threats)",
+            _scrape_word(tex, r"scope note\. (\w+) released runs"),
+            0,
+            n_reps,
+        )
+    )
 
     # --- The measurement-noise floor (sec:threats) -------------------------------------
     # The component every interval in the study omits. Scraped from the prose that now
@@ -2160,7 +2149,6 @@ def _checks() -> list[tuple[str, float, float, float]]:
         ("tex: sigma units L1", r"\$L_1\$ loss\s+\$-0.042\$ at \$([\d.]+)\\sigma\$", -0.0417),
         ("tex: sigma units L2", r"\$\+0.060\$ at \$([\d.]+)\\sigma\$", 0.0600),
         ("tex: sigma units L3", r"\$-0.002\$ at \$([\d.]+)\\sigma\$", -0.0017),
-        ("tex: abstract L1 sigma", r"puts that \$-0.042\$ at \$([\d.]+)\\sigma\$", -0.0417),
     ):
         out.append((label, _scrape(tex, pattern), 0.005, noise.in_sigma(delta)))
 
@@ -2180,16 +2168,6 @@ def _checks() -> list[tuple[str, float, float, float]]:
     # what `_curve_gap` returns. Dividing a number the paper already rounded for display gives
     # an answer that depends on the display.
     for label, pattern, pair in (
-        (
-            "tex: abstract oracle vs intrinsic sigma",
-            r"near-random intrinsic critique \(\$([\d.]+)\\sigma\$\)",
-            ("run3", "run7"),
-        ),
-        (
-            "tex: abstract oracle vs tool sigma",
-            r"clearly below a measurement tool\s+\(\$([\d.]+)\\sigma\$\)",
-            ("run4", "run7"),
-        ),
         (
             "tex: contributions oracle vs tool sigma",
             r"below a measurement tool by \$([\d.]+)\\sigma\$",
@@ -2305,11 +2283,6 @@ def _checks() -> list[tuple[str, float, float, float]]:
             r"it reads \$\+0.0017\$ .*?which is \$([\d.]+)\\sigma\$",
             abs(deepest) / within["L1"],
         ),
-        (
-            "tex: abstract deepest cell sigma",
-            r"the flattest of all \(\$\+0.0017\$, \$([\d.]+)\\sigma\$\)",
-            abs(deepest) / within["L1"],
-        ),
     ):
         out.append((label, _scrape(tex, pattern), 0.005, want))
 
@@ -2324,6 +2297,83 @@ def _checks() -> list[tuple[str, float, float, float]]:
             1.0 if re.search(r"no cell reaches one standard deviation", tex) else 0.0,
             0,
             1.0 if worst < 1.0 else 0.0,
+        )
+    )
+
+    # The saturation arithmetic sec:p0 uses to report its own falsified prediction: L3's seed
+    # genome is already near the ceiling, so the headroom is what bounds any contrast there. The
+    # headroom was the one number in that sentence no check derived, and it is the number the
+    # whole "design error" admission rests on.
+    l3 = _runs("validation-study-p0-L3.json")
+    l3_seed = mean(r["B"]["seed_heldout"] for r in l3)
+    for label, pattern, want in (
+        ("tex: L3 seed baseline", r"scores \$([\d.]+)\$, leaving", l3_seed),
+        ("tex: L3 headroom", r"leaving \$([\d.]+)\$ of headroom", 1.0 - l3_seed),
+        (
+            "tex: L3 arm B consumes",
+            r"nearly all of it \(\$([\d.]+)\$ and",
+            mean(r["B"]["opt_heldout"] for r in l3),
+        ),
+        (
+            "tex: L3 arm D consumes",
+            r"nearly all of it \(\$[\d.]+\$ and\s*\$([\d.]+)\$\)",
+            mean(r["D"]["opt_heldout"] for r in l3),
+        ),
+    ):
+        out.append((label, _scrape(tex, pattern), 0.0005, want))
+
+    # The superseded first four-arm attempt's delta. sec:superseded scales it by the noise floor
+    # and the SIGMA was checked while the delta itself was a literal inside the pattern -- so the
+    # quotient was pinned to a number nothing verified. The run is `validation-study.json`, the one
+    # released artifact whose name carries no suffix, which is also why a glob over
+    # `validation-study-*.json` silently misses it.
+    from analyze_deltas import delta_arm as _delta_arm
+
+    out.append(
+        (
+            "tex: superseded first-attempt delta",
+            _scrape(tex, r"attempt at \$-([\d.]+)\$, \$\\approx"),
+            0.0005,
+            abs(mean(_delta_arm(f"{DOCS}/validation-study.json"))),
+        )
+    )
+
+    # The PER-ARM drops from baseline, which sec:rerun prints alongside the contrast. These are a
+    # different quantity from $\dd$ and were unbound, which is exactly the confusion the paper's own
+    # decomposition exists to prevent: $d_B$ and $d_D$ are each arm against its own seed score,
+    # while $\dd = d_D - d_B$. Two of the six values happened to collide with checked numbers and
+    # one did not, which is how a coverage audit found them. Checking the vectors AND that their
+    # difference reproduces the published contrast pins the identity, not just the digits.
+    c2b_runs = _runs("validation-study-c2b.json")
+    drops = {
+        arm: [r[arm]["opt_heldout"] - r[arm]["seed_heldout"] for r in c2b_runs]
+        for arm in ("B", "D")
+    }
+    per_arm = _scrape_all(
+        tex,
+        r"prompt-only optimization is a wash\}? \(\$\+([\d.]+)\$, \$([\d.]+)\$,\s*"
+        r"\$-([\d.]+)\$; mean exactly \$([\d.]+)\$\) while \\textbf\{loop-level optimization "
+        r"costs\} \$-([\d.]+)\$\s*\(\$-([\d.]+)\$, \$-([\d.]+)\$, \$\+([\d.]+)\$\)",
+    )
+    for i, (label, want) in enumerate(
+        (
+            ("tex: rerun d_B seed0", drops["B"][0]),
+            ("tex: rerun d_B seed1", drops["B"][1]),
+            ("tex: rerun d_B seed2", -drops["B"][2]),
+            ("tex: rerun d_B mean", mean(drops["B"])),
+            ("tex: rerun d_D mean", -mean(drops["D"])),
+            ("tex: rerun d_D seed0", -drops["D"][0]),
+            ("tex: rerun d_D seed1", -drops["D"][1]),
+            ("tex: rerun d_D seed2", drops["D"][2]),
+        )
+    ):
+        out.append((label, per_arm[i], 0.0005, want))
+    out.append(
+        (
+            "tex: rerun d_D minus d_B is the published contrast",
+            mean(drops["D"]) - mean(drops["B"]),
+            0.0005,
+            mean(r["D"]["opt_heldout"] - r["B"]["opt_heldout"] for r in c2b_runs),
         )
     )
 
@@ -2391,9 +2441,17 @@ def _checks() -> list[tuple[str, float, float, float]]:
     # identities when four are not zero at all.
     n_pre, n_zero, max_abs = _precorrection_counts()
     for label, pattern, artifact in (
+        # Three independent anchors for the retraction count, in the abstract, the conclusion and
+        # the introduction. It has drifted once already (published as eleven for a set of fifteen),
+        # and it is the number a reader is most likely to quote back.
         (
-            "tex: pre-correction contrast runs",
-            r"discarding every contrast run we had bought before it ---\s+(\w+) of them",
+            "tex: abstract pre-correction runs",
+            r"discarding (\w+) earlier contrast runs",
+            n_pre,
+        ),
+        (
+            "tex: conclusion pre-correction runs",
+            r"preceded it: \\textbf\{(\w+)\} of them",
             n_pre,
         ),
         ("tex: intro pre-correction runs", r"Our first (\w+) contrast runs measured", n_pre),
