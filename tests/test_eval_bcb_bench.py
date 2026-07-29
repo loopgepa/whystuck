@@ -119,7 +119,18 @@ def test_score_zero_on_genuine_model_failure(monkeypatch):
 def test_preflight_passes_on_vendored_data_and_flags_corruption():
     from whystuck.eval.bcb_bench import load_bcb_tasks, preflight_bcb_tasks
 
-    preflight_bcb_tasks(load_bcb_tasks("all", seed=0)[:3])  # sample keeps it quick; must not raise
+    # Sample keeps it quick; must not raise on sound data. It executes real references in the
+    # Docker sandbox under a timeout, so a loaded host can make the reference time out --- which
+    # `preflight_bcb_tasks` deliberately reports as a HOST capacity signal rather than bad data.
+    # Skip on exactly that signal and on nothing else: a gate that fails whenever the machine is
+    # busy gets bypassed, and a gate that swallows real corruption is worse than none. This fired
+    # for real while three paid replicate shards were saturating the box.
+    try:
+        preflight_bcb_tasks(load_bcb_tasks("all", seed=0)[:3])
+    except RuntimeError as exc:
+        if "HOST capacity" not in str(exc):
+            raise
+        pytest.skip(f"host too loaded to time the sandbox references: {exc}")
 
     bad = BenchmarkTask(
         id="synthetic",
