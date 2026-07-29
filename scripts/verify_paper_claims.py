@@ -17,8 +17,18 @@ integrity scan that should have caught an empty reflection completion was itself
 of a dictionary and could never see an empty output). Those numbers are pinned here so the
 check has to keep working rather than merely having worked once.
 
+A third pass added the `tex:` checks, for the same reason one level up. Every other check
+compares an artifact against a number typed into *this file*, so it verifies the data and
+not the paper; the two can disagree. They did: the closability table claimed the corrected
+re-run changed `ensure_correct` on 2/3 seeds while the data and the body text both say 3/3
+(the 2/3 is arm B's `generate`, transposed). The `tex:` checks scrape main.tex itself, so
+the claimed side is the paper's own sentence. A pattern that stops matching yields NaN and
+fails, because a reworded sentence must break the check loudly rather than quietly stop
+being checked.
+
 Scope: numbers recomputable from `docs/*.json`, the vendored task data, and the committed
-cassettes. Claims that are not machine-checkable (prose, cited literature, one-off replays
+cassettes, plus the headline numbers as they are written in `docs/paper/main.tex`. Claims
+that are not machine-checkable (unquantified prose, cited literature, one-off replays
 against superseded commits) are out of scope and listed at the bottom of the output so the
 gap is visible rather than implied.
 
@@ -28,14 +38,35 @@ gap is visible rather than implied.
 from __future__ import annotations
 
 import json
+import re
 from statistics import mean, pstdev
 
 DOCS = "docs"
+PAPER = f"{DOCS}/paper/main.tex"
 
 
 def _runs(name: str) -> list[dict]:
     with open(f"{DOCS}/{name}", encoding="utf-8") as fh:
         return json.load(fh)["runs"]
+
+
+def _tex() -> str:
+    with open(PAPER, encoding="utf-8") as fh:
+        return fh.read()
+
+
+def _scrape(tex: str, pattern: str) -> float:
+    """Pull one number out of the paper's own prose.
+
+    Returns NaN when the pattern does not match, which fails the check rather than
+    skipping it. That direction matters: a reworded sentence must break the check loudly,
+    because a check that silently stops looking is exactly the failure this script exists
+    to prevent (see the vacuous integrity scan in the module docstring).
+    """
+    m = re.search(pattern, tex, re.DOTALL)
+    if m is None:
+        return float("nan")
+    return float(m.group(1))
 
 
 def _arm_mean(name: str, arm: str, field: str) -> float:
@@ -304,6 +335,66 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.append(("runs over the $5 default", 4, 0, sum(1 for u in est if u > 5.0)))
     out.append(("largest estimate", 11.76, 0.005, max(est)))
 
+    # Prose cross-checks. Everything above re-derives a number from the artifacts and
+    # compares it to a number typed into *this file*; nothing above reads the paper. That
+    # gap let a real error through: the closability table said the re-run changed
+    # ensure_correct on 2/3 seeds when the data (and the body text) say 3/3 -- the 2/3 is
+    # arm B's generate, transposed. The checks below scrape the paper's own sentences, so
+    # the claimed side comes from main.tex rather than from an author's memory of it.
+    tex = _tex()
+    d_row = r"D & \\texttt\{generate\} \$\+\$ \\texttt\{ensure\\_correct\} & 0\.788 & "
+    prose: list[tuple[str, str, float, float]] = [
+        (
+            "tex: D evolved ensure_correct on N/3",
+            r"corrected harness changed \\texttt\{ensure\\_correct\} on \$(\d)/3\$",
+            0,
+            sum(1 for r in c2b if "ensure_correct" in (r["D"].get("genes_changed") or [])),
+        ),
+        (
+            "tex: tab:rerun D optimized",
+            d_row + r"([\d.]+) &",
+            0.0005,
+            mean(r["D"]["opt_heldout"] for r in c2b),
+        ),
+        (
+            "tex: tab:rerun D delta",
+            d_row + r"[\d.]+ & \$\\mathbf\{(-?[\d.]+)\}",
+            0.0005,
+            mean(r["D"]["opt_heldout"] - r["D"]["seed_heldout"] for r in c2b),
+        ),
+        (
+            "tex: shortest reflection output",
+            r"shortest reflection output: \$(\d+)\$",
+            0,
+            968,
+        ),
+        (
+            "tex: seed rubric length",
+            r"against a \$(\d+)\$-character seed",
+            0,
+            len(c2b[0]["C"]["final_genes"]["ensure_correct"]),
+        ),
+    ]
+    for i in range(3):
+        prose.append(
+            (
+                f"tex: evolved rubric {i} length",
+                r"detector rubrics of " + r"\$\d+\$,?\s*(?:and\s*)?" * i + r"\$(\d+)\$",
+                0,
+                len(c2b[i]["D"]["final_genes"]["ensure_correct"]),
+            )
+        )
+        prose.append(
+            (
+                f"tex: per-seed delta(D-B) {i}",
+                r"Per-seed \$\\dd\(D-B\) = \[" + r"-?[\d.+]+, " * i + r"(-?[\d.+]+)",
+                0.0005,
+                d_c2b[i],
+            )
+        )
+    for label, pattern, tol, artifact in prose:
+        out.append((label, _scrape(tex, pattern), tol, artifact))
+
     return out
 
 
@@ -332,7 +423,8 @@ def main() -> int:  # pragma: no cover - CLI convenience
         "  - Evidence 7's 70 swallowed misses and the 0.666 -> 0.681 substitution, which\n"
         "    require a deliberately mismatched replay.\n"
         "  - The stopped mmc=160 run's partial spend, whose cassette is not released.\n"
-        "  - Every prose claim and every cited external result."
+        "  - Every cited external result, and every prose claim that is not one of the\n"
+        "    `tex:` numbers above -- those are scraped from main.tex, the rest are not."
     )
     return 0
 
