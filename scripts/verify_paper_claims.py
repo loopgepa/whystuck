@@ -311,6 +311,20 @@ def _scrape(tex: str, pattern: str) -> float:
     return float(m.group(1))
 
 
+def _scrape_all(tex: str, pattern: str) -> list[float]:
+    """`_scrape` for a sentence that lists several numbers in one breath.
+
+    Same NaN-on-no-match contract, one per capture group, so a reworded sentence fails every
+    number it carried instead of silently dropping the ones past the first. Sentences of the form
+    "$a$ at $L_1$, $b$ at $L_2$ and $c$ at $L_3$" are where this study's stalest numbers hid:
+    one of the three gets updated and its neighbours do not.
+    """
+    m = re.search(pattern, tex, re.DOTALL | re.MULTILINE)
+    if m is None:
+        return [float("nan")] * max(1, re.compile(pattern).groups)
+    return [float(g) for g in m.groups()]
+
+
 def _arm_mean(name: str, arm: str, field: str) -> float:
     return mean(r[arm][field] for r in _runs(name))
 
@@ -324,13 +338,16 @@ _WORD_NUM = {
     "four": 4,
     "five": 5,
     "eight": 8,
+    "nine": 9,
     "ten": 10,
     "eleven": 11,
     "twelve": 12,
-    "sixteen": 16,
+    "thirteen": 13,
     "fifteen": 15,
+    "sixteen": 16,
     "seventeen": 17,
     "twenty": 20,
+    "twenty-five": 25,
 }
 
 
@@ -351,10 +368,6 @@ def _scrape_word(tex: str, pattern: str) -> float:
 #: The split sweep's rows, as (paper row label, released run slug). Run 3 is the n_train=8 row:
 #: it was not bought for the sweep, it *is* the cell the sweep was designed to interrogate.
 _SPLIT_ROWS = (("4", "split4"), ("8", "c2b"), ("16", "split16"), ("24", "split24"))
-
-#: The order `sec:threats` lists the five seed-genome replicate means in. Pinned as an explicit
-#: order rather than sorted, because the prose reads as a sentence and its order is editorial.
-_NOISE_REPLICATE_ORDER = ("c2", "c2b", "split4", "split16", "split24")
 
 
 def _noise_estimate():
@@ -589,6 +602,28 @@ def _budget_cell(mmc: int, cap: int) -> dict[str, float]:
         "depth": min(cycles, float(cap)),
         "usd": sum(g.usd() for g in groups),
     }
+
+
+def _search_depth(slug: str, mmc: int, cap: int) -> int | None:
+    """Measured GEPA iterations, replayed from the cassette. See analyze_search_depth."""
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import analyze_search_depth as asd
+
+    return asd.measured_depth(slug, mmc, cap)
+
+
+def _budget_delta(slug: str) -> float:
+    runs = _runs(f"validation-study-{slug}.json")
+    return mean(r["D"]["opt_heldout"] - r["B"]["opt_heldout"] for r in runs)
+
+
+def _budget_acceptance(slug: str) -> int:
+    """Arm-seed pairs where the optimizer changed any gene, out of six."""
+    runs = _runs(f"validation-study-{slug}.json")
+    return sum(1 for r in runs for arm in ("B", "D") if (r.get(arm, {}).get("genes_changed") or []))
 
 
 def _contrast_flag_census() -> tuple[int, int]:
@@ -1789,6 +1824,77 @@ def _checks() -> list[tuple[str, float, float, float]]:
         if cells[4]:  # the free row prints "(run 3b, free)" rather than a number
             out.append((f"tab:budgetsweep mmc{mmc} bound", cells[4][0], 0.005, cell["usd"]))
 
+    # tab:closability quotes sigma to three decimals in a narrow cell. Checked at that precision
+    # so the rounded restatement cannot drift away from the estimator either.
+    out.append(
+        (
+            "tex: closability sigma",
+            _scrape(tex, r"\$\\sigma\(\\dd\) = ([\d.]+)\$ is\n  recoverable"),
+            0.0005,
+            _noise_estimate().sigma_delta_mean,
+        )
+    )
+
+    # --- D4: the budget sweep, bought (sec:budgetresult) -------------------------------
+    # The depth column is MEASURED (a cassette replay counting GEPA iterations), not the
+    # pre-registered formula, because the formula was wrong: it charges rejected proposals for a
+    # valset pass they never take. Checking both columns keeps that correction honest.
+    budget_res_hdr = r"\texttt{mmc} & cap & priced depth & \textbf{measured depth}"
+    budget_cells = (
+        (20, 6, "mmc20"),
+        (28, 6, "c2b"),
+        (40, 6, "mmc40"),
+        (56, 6, "mmc56"),
+        (80, 6, "mmc80"),
+        (160, 12, "mmc160"),
+    )
+    accepted = []
+    for mmc, cap, slug in budget_cells:
+        cells = _table_row(tex, budget_res_hdr, f"{mmc}  &" if mmc < 100 else f"{mmc} &")
+        out.append((f"tab:budgetresult mmc{mmc} value", cells[0][0], 0, mmc))
+        out.append((f"tab:budgetresult mmc{mmc} cap", cells[1][0], 0, cap))
+        out.append(
+            (
+                f"tab:budgetresult mmc{mmc} priced",
+                cells[2][0],
+                0.005,
+                _budget_cell(mmc, cap)["cycles"],
+            )
+        )
+        depth = _search_depth(slug, mmc, cap)
+        if depth is not None:
+            out.append((f"tab:budgetresult mmc{mmc} measured depth", cells[3][0], 0, depth))
+        out.append((f"tab:budgetresult mmc{mmc} delta", cells[5][0], 0.0005, _budget_delta(slug)))
+        accepted.append(_budget_acceptance(slug))
+
+    # The acceptance sequence, which is the sweep's dissociation: it moves where Delta does not.
+    prose_acc = re.search(
+        r"the sweep gives \$(\d)/6\$, \$(\d)/6\$, \$(\d)/6\$, "
+        r"\$(\d)/6\$, \$(\d)/6\$ and \$(\d)/6\$",
+        tex,
+        re.DOTALL,
+    )
+    if prose_acc is None:
+        prose_acc = re.search(
+            r"gives \$(\d)/6\$, \$(\d)/6\$, \$(\d)/6\$, \$(\d)/6\$, \$(\d)/6\$, \$(\d)/6\$",
+            tex,
+            re.DOTALL,
+        )
+    for i, want in enumerate(accepted):
+        got = float(prose_acc.group(i + 1)) if prose_acc else float("nan")
+        out.append((f"tex: budget acceptance {i}", got, 0, want))
+
+    # The triplicate at the cap-bound depth, and its mean.
+    trip = [_budget_delta(s) for s in ("mmc40", "mmc56", "mmc80")]
+    out.append(
+        (
+            "tex: budget triplicate mean",
+            _scrape(tex, r"\$-0.008\$, \$-0.018\$, mean \$-([\d.]+)\$"),
+            0.0005,
+            abs(mean(trip)),
+        )
+    )
+
     # --- The split-size sweep, bought (sec:splitresult) --------------------------------
     # Every number in tab:splitresults, cell by cell, plus the prose that interprets it. The
     # table is the whole result of a $6.98 purchase, so an unchecked digit here is the most
@@ -1976,6 +2082,17 @@ def _checks() -> list[tuple[str, float, float, float]]:
         )
     )
 
+    # The replicate COUNT behind the noise estimate, in both places the paper states it. This
+    # was silently wrong once: buying a run at n_train=8 on multi-hard makes it eligible as a
+    # replicate automatically, so the estimator's count grows while the prose keeps its old
+    # number and the sigma it quotes is derived from a different set than it claims.
+    n_reps = noise.n_replicates
+    for label, pattern in (
+        ("tex: noise n replicates (threats)", r"scope note\. (\w+) released runs"),
+        ("tex: noise n replicates (abstract)", r"(\w+) released runs happen to re-score"),
+    ):
+        out.append((label, _scrape_word(tex, pattern), 0, n_reps))
+
     # --- The measurement-noise floor (sec:threats) -------------------------------------
     # The component every interval in the study omits. Scraped from the prose that now
     # reports it, checked against the estimator, so a reworded sentence breaks loudly.
@@ -1989,7 +2106,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
         ),
         (
             "tex: noise sigma delta mean",
-            r"0\.153/\\sqrt\{30\} \\;=\\; ([\d.]+)",
+            r"/\\sqrt\{30\} \\;=\\; ([\d.]+)",
             0.00005,
             noise.sigma_delta_mean,
         ),
@@ -2002,24 +2119,208 @@ def _checks() -> list[tuple[str, float, float, float]]:
     ):
         out.append((label, _scrape(tex, pattern), tol, artifact))
 
-    # The five replicate means, in the order the prose lists them.
-    prose_means = re.search(
-        r"Their means are \$([\d.]+)\$, \$([\d.]+)\$, \$([\d.]+)\$, \$([\d.]+)\$, \$([\d.]+)\$",
-        tex,
-        re.DOTALL,
-    )
-    want_means = [noise.replicate_means[k] for k in _NOISE_REPLICATE_ORDER]
-    for i, want in enumerate(want_means):
-        got = float(prose_means.group(i + 1)) if prose_means else float("nan")
-        out.append((f"tex: noise replicate mean {i}", got, 0.00005, want))
+    # The replicate means as a RANGE rather than an enumeration. Any future run at this split
+    # size enrols itself as a replicate, so a list of means would go stale silently and a
+    # positional check on it would need editing every time. Min, max and the span are stable
+    # summaries of the same evidence and they cannot rot the same way.
+    means = list(noise.replicate_means.values())
+    for label, pattern, want in (
+        ("tex: noise replicate min", r"means span \$([\d.]+)\$ to", min(means)),
+        ("tex: noise replicate max", r"span \$[\d.]+\$ to\n\$([\d.]+)\$", max(means)),
+        (
+            "tex: noise replicate range",
+            r"a range of \$([\d.]+)\$ on a quantity",
+            max(means) - min(means),
+        ),
+    ):
+        out.append((label, _scrape(tex, pattern), 0.0005, want))
 
     # The headline effects restated in sigma units, in both the abstract and sec:threats.
     for label, pattern, delta in (
         ("tex: sigma units L1", r"\$L_1\$ loss\s+\$-0.042\$ at \$([\d.]+)\\sigma\$", -0.0417),
         ("tex: sigma units L2", r"\$\+0.060\$ at \$([\d.]+)\\sigma\$", 0.0600),
         ("tex: sigma units L3", r"\$-0.002\$ at \$([\d.]+)\\sigma\$", -0.0017),
-        ("tex: sigma units act", r"\$\+0.063\$ at \$([\d.]+)\\sigma\$", 0.0630),
         ("tex: abstract L1 sigma", r"puts that \$-0.042\$ at \$([\d.]+)\\sigma\$", -0.0417),
+    ):
+        out.append((label, _scrape(tex, pattern), 0.005, noise.in_sigma(delta)))
+
+    # EVERY OTHER PLACE A GAP IS RESTATED IN SIGMA UNITS. The five checks above and the curve
+    # block pinned one sentence each, and the paper restates the same six gaps in the abstract,
+    # the contributions list, two captions, sec:results and the conclusion. Those copies went
+    # unchecked, and drifted: sigma moved from five replicates to ten during the study, and the
+    # restatements kept the old quotient. Measured at the time this block was added, the paper
+    # printed 3.16 for 3.09 twice, 1.01 for 0.99 three times, 2.15 for 2.10, 2.27 for 2.22
+    # twice, and -- worst, because it is off by a factor -- "5 sigma" for 3.50. One of them sat
+    # in the same SENTENCE as a value that had been updated. A number restated in six places is
+    # six numbers unless every one of them is derived.
+    #
+    # Note the actionability effect appears as both 2.21 and 2.22 depending on whether the
+    # rounded +0.063 or the exact gap 0.06333 is divided. That is a real disagreement, not a
+    # tolerance question, so it is settled one way: divide the EXACT gap everywhere, which is
+    # what `_curve_gap` returns. Dividing a number the paper already rounded for display gives
+    # an answer that depends on the display.
+    for label, pattern, pair in (
+        (
+            "tex: abstract oracle vs intrinsic sigma",
+            r"near-random intrinsic critique \(\$([\d.]+)\\sigma\$\)",
+            ("run3", "run7"),
+        ),
+        (
+            "tex: abstract oracle vs tool sigma",
+            r"clearly below a measurement tool\s+\(\$([\d.]+)\\sigma\$\)",
+            ("run4", "run7"),
+        ),
+        (
+            "tex: contributions oracle vs tool sigma",
+            r"below a measurement tool by \$([\d.]+)\\sigma\$",
+            ("run4", "run7"),
+        ),
+        (
+            "tex: results oracle vs tool sigma",
+            r"below the tool-fed critique at \$([\d.]+)\\sigma\$",
+            ("run4", "run7"),
+        ),
+        (
+            "tex: results oracle vs intrinsic sigma",
+            r"\\emph\{intrinsic\} one at \$([\d.]+)\\sigma\$",
+            ("run3", "run7"),
+        ),
+        (
+            "tex: curve caption refine budget sigma",
+            r"run 8, \$([\d.]+)\\sigma\$",
+            ("run7", "run8"),
+        ),
+        (
+            "tex: curve caption actionability sigma",
+            r"\(run 9\$\\to\$10, \$\+0.063\$, \$([\d.]+)\\sigma\$\)",
+            ("run9", "run10"),
+        ),
+        (
+            "tex: fixside actionability sigma",
+            r"against the noise floor: \$([\d.]+)\\sigma\$",
+            ("run9", "run10"),
+        ),
+        (
+            "tex: threats actionability sigma",
+            r"\$\+0.063\$ at \$([\d.]+)\\sigma\$",
+            ("run9", "run10"),
+        ),
+        (
+            "tex: conclusion tool sigma",
+            r"a measurement tool\s+\(\$\+0.060\$, \$([\d.]+)\\sigma\$\)",
+            ("run3", "run4"),
+        ),
+        (
+            "tex: conclusion refine sigma",
+            r"more refine attempts \(\$\+0.065\$, \$([\d.]+)\\sigma\$\)",
+            ("run7", "run8"),
+        ),
+        (
+            "tex: conclusion oracle sigma",
+            r"moves held-out by\s+\$([\d.]+)\\sigma\$, i\.e\.\\ not at all",
+            ("run3", "run7"),
+        ),
+    ):
+        out.append((label, _scrape(tex, pattern), 0.005, _curve_gap(*pair)[1]))
+
+    # The WITHIN-RUN sigma trio and the single-draw ratios sec:repeat derives from it. Unbound
+    # until now, and the sentence carrying them was wrong twice over: it quoted a cross-run sigma
+    # that a later replicate superseded, and asserted that all three within-run values exceeded it
+    # when L3 -- the level nearest the metric ceiling, and so the least variable -- is well under.
+    # Both errors are of the same kind: a comparison written once and never re-derived when the
+    # quantity on one side of it moved.
+    within = {r.level: r.sd_between_replicates for r in _repeat().aggregate(5)}
+    single = {f"L{i + 1}": _decomposition(i)["delta"] for i in range(3)}
+    trio = _scrape_all(
+        tex, r"is \$([\d.]+)\$ at \$L_1\$, \$([\d.]+)\$ at \$L_2\$ and \$([\d.]+)\$ at \$L_3\$"
+    )
+    ratios = _scrape_all(
+        tex, r"are therefore \$([\d.]+)\\sigma\$,\s+\$([\d.]+)\\sigma\$ and \$([\d.]+)\\sigma\$"
+    )
+    for i, lvl in enumerate(("L1", "L2", "L3")):
+        out.append((f"tex: within-run sigma {lvl}", trio[i], 0.0005, within[lvl]))
+        out.append(
+            (
+                f"tex: single-draw ratio {lvl}",
+                ratios[i],
+                0.005,
+                abs(single[lvl]) / within[lvl],
+            )
+        )
+    out.append(
+        (
+            "tex: within-run vs cross-run sigma",
+            _scrape(tex, r"exceed the\s+\$([\d.]+)\$ the cross-run estimate gave"),
+            0.00005,
+            noise.sigma_delta_mean,
+        )
+    )
+    # "Two of the three exceed it" is the corrected count. Asserted as a number so that a future
+    # replicate which moves one of the four quantities cannot leave the word "two" standing.
+    out.append(
+        (
+            "tex: within-run exceeding cross-run count",
+            _scrape_word(tex, r"(\w+) of the three exceed the"),
+            0,
+            sum(1 for lvl in within if within[lvl] > noise.sigma_delta_mean),
+        )
+    )
+
+    # sec:budgetresult scales the depth cells by the L1 within-run sigma rather than the cross-run
+    # one, because a budget sweep compares two arms inside one run. Three numbers, none bound.
+    deepest = _budget_delta("mmc160")
+    for label, pattern, want in (
+        (
+            "tex: depth sigma denominator",
+            r"\$\\sigma\(\\dd\)=([\d.]+)\$",
+            within["L1"],
+        ),
+        (
+            "tex: depth largest cell sigma",
+            r"the largest is the original \$-0.042\$ at \$([\d.]+)\\sigma\$",
+            abs(single["L1"]) / within["L1"],
+        ),
+        (
+            "tex: depth deepest cell sigma",
+            r"it reads \$\+0.0017\$ .*?which is \$([\d.]+)\\sigma\$",
+            abs(deepest) / within["L1"],
+        ),
+        (
+            "tex: abstract deepest cell sigma",
+            r"the flattest of all \(\$\+0.0017\$, \$([\d.]+)\\sigma\$\)",
+            abs(deepest) / within["L1"],
+        ),
+    ):
+        out.append((label, _scrape(tex, pattern), 0.005, want))
+
+    # "No cell reaches one standard deviation" is a claim about the MAXIMUM over the six cells, so
+    # it is checked against that maximum rather than against the cell the sentence goes on to name.
+    # It replaced an arbitrary "$1.1\sigma$" -- true, but derived from nothing, and the only sigma
+    # figure in the paper that no artifact could produce.
+    worst = max(abs(_budget_delta(s)) for _, _, s in budget_cells) / within["L1"]
+    out.append(
+        (
+            "tex: depth no cell reaches one sigma",
+            1.0 if re.search(r"no cell reaches one standard deviation", tex) else 0.0,
+            0,
+            1.0 if worst < 1.0 else 0.0,
+        )
+    )
+
+    # The two superseded-run deltas sec:superseded scales by the same floor. These were quoted as
+    # "5 sigma" and "3.5 sigma" for 0.100 and 0.094, which are 3.50 and 3.29 -- the first is what
+    # you get from a sigma of 0.020, a value this study never estimated.
+    for label, pattern, delta in (
+        (
+            "tex: superseded actuator sigma",
+            r"powered actuator run at \$\\approx\\!([\d.]+)\\sigma\$",
+            0.100,
+        ),
+        (
+            "tex: superseded first-attempt sigma",
+            r"attempt at \$-0.094\$, \$\\approx\\!([\d.]+)\\sigma\$",
+            0.094,
+        ),
     ):
         out.append((label, _scrape(tex, pattern), 0.005, noise.in_sigma(delta)))
 
@@ -2028,7 +2329,8 @@ def _checks() -> list[tuple[str, float, float, float]]:
     # These counts are spelled out in the prose, so they need the word scraper.
     superseded, replayable = _registry_counts()
     for label, pattern, artifact in (
-        ("tex: registry total", r"registers (\w+) committed runs", superseded + replayable),
+        # [\w-] not \w: the count is spelled out, and past twenty that means a hyphen.
+        ("tex: registry total", r"registers ([\w-]+) committed runs", superseded + replayable),
         ("tex: registry superseded", r"(\w+) are\s+labelled \\textbf\{superseded\}", superseded),
         ("tex: registry replayable", r"The remaining (\w+) were recorded", replayable),
         ("tex: registry verifies N", r"verifies (\w+) runs rather than", replayable),

@@ -253,3 +253,38 @@ def test_missing_image_is_a_sandbox_error_not_a_zero(monkeypatch):
     monkeypatch.setattr(be, "_IMAGE", "whystuck-bcb-nonexistent:latest")
     r = run_unittest(_SOL, _TEST, ["test_a"], timeout=40)
     assert r.passed is False and r.verdict == "sandbox_error"
+
+
+# ------------------------------------------------------------- where the workdir is created
+#
+# The sandbox bind-mounts a host workdir into the container. Some Docker installations (Docker
+# Desktop, and rootless setups with a restricted allowlist) refuse to mount paths outside a
+# configured set, and /tmp is commonly outside it -- which surfaces as `sandbox_error: You can
+# configure shared paths from Docker -> Preferences`, i.e. an INFRA fault that would otherwise be
+# indistinguishable from a broken image. Honouring an env var lets a host point the workdir at a
+# shareable path without patching code, and it cannot affect scoring: the container always sees
+# the mount at /w, so the host-side path never enters a prompt or a cassette key.
+
+
+def test_workdir_parent_defaults_to_the_tempfile_default(monkeypatch):
+    from whystuck.eval.bcb_exec import workdir_parent
+
+    monkeypatch.delenv("WHYSTUCK_BCB_TMPDIR", raising=False)
+    assert workdir_parent() is None
+
+
+def test_workdir_parent_honours_the_env_override(monkeypatch, tmp_path):
+    from whystuck.eval.bcb_exec import workdir_parent
+
+    monkeypatch.setenv("WHYSTUCK_BCB_TMPDIR", str(tmp_path))
+    assert workdir_parent() == str(tmp_path)
+
+
+def test_workdir_parent_is_created_if_absent(monkeypatch, tmp_path):
+    """A configured root that does not exist yet must not turn into a sandbox error."""
+    from whystuck.eval.bcb_exec import workdir_parent
+
+    target = tmp_path / "nested" / "root"
+    monkeypatch.setenv("WHYSTUCK_BCB_TMPDIR", str(target))
+    assert workdir_parent() == str(target)
+    assert target.is_dir()

@@ -90,3 +90,54 @@ def test_effects_are_reported_in_units_of_the_noise():
     # The paper's own headline numbers, in sigma. None of them should silently exceed 3.
     for delta in (-0.0417, 0.0600, 0.0617):
         assert est.in_sigma(delta) < 3.0
+
+
+def test_uniform_drift_cancels_but_task_specific_drift_does_not():
+    """The property the paper's interpretation of sigma rests on.
+
+    The estimator takes `pstdev` of the PER-TASK difference vector between two replicates, and
+    pstdev subtracts the mean. So a provider shift that moves every task by the same amount --
+    uniform drift -- cancels exactly, and sigma measures sampling noise cleaned of it. Only
+    TASK-SPECIFIC drift inflates sigma. Getting this backwards would understate the estimate's
+    trustworthiness in one direction and overstate it in the other, and an earlier draft of
+    sec:threats said only "confounded with drift" without the distinction.
+
+    The uniform component is not lost, it is reported separately as `mean_signed`.
+    """
+    import itertools
+    from statistics import mean, pstdev
+
+    names = [r.name for r in eligible_replicates()]
+    if len(names) < 2:
+        pytest.skip("need at least two eligible replicates")
+    vectors = seed_vectors(names)
+
+    def sigma_of(vecs: dict[str, list[float]]) -> float:
+        sds = [
+            pstdev([y - x for x, y in zip(vecs[a], vecs[b], strict=True)])
+            for a, b in itertools.combinations(names, 2)
+        ]
+        return mean(sds) / 2**0.5
+
+    base = sigma_of(vectors)
+
+    uniform = {k: ([x + 0.1 for x in v] if k == names[0] else list(v)) for k, v in vectors.items()}
+    assert sigma_of(uniform) == pytest.approx(base, abs=1e-12), (
+        "a uniform shift must cancel: pstdev of the difference removes its mean"
+    )
+
+    # Task-specific drift: alternating tasks in opposite directions, so the MEAN shift is still
+    # zero and only the per-task pattern changes. The amplitude is deliberately large (0.3): only
+    # the pairs involving the perturbed replicate change, so a small amplitude is diluted by the
+    # unperturbed pairs and would make this assert a threshold rather than the property.
+    def alternate(v: list[float]) -> list[float]:
+        return [x + (0.3 if i % 2 else -0.3) for i, x in enumerate(v)]
+
+    specific = {k: (alternate(v) if k == names[0] else list(v)) for k, v in vectors.items()}
+    assert sigma_of(specific) > base * 1.2, (
+        "task-specific drift MUST inflate sigma, or the estimator would be blind to it"
+    )
+
+    # And the uniform component is still reported, just elsewhere.
+    est = noise_estimate(names)
+    assert abs(est.mean_signed) < 0.05, "a re-measurement's mean signed difference should be small"

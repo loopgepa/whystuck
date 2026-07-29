@@ -19,6 +19,7 @@ from __future__ import annotations
 import itertools
 import json
 import math
+from pathlib import Path
 from statistics import mean
 
 from whystuck.eval.benchmark import seeds_are_independent
@@ -180,6 +181,18 @@ def sign_test_p(diffs: list[float]) -> float:
 # (`llm_worker.py`: "Not a D-vs-B test — the verify gene cannot matter under a perfect
 # oracle"). Its Δ(D−B) = 0 is an identity, not a measurement, so citing its [0,0] as
 # evidence that the null is tight was circular. The same applies to any oracle run.
+#: The pre-registered budget sweep at fixed n_train=8 (D4). Effective search depth is
+#: min(promotable cycles, --reflection-calls), so the label carries the depth rather than the
+#: budget: at a cap of 6, mmc 80 and mmc 160 would buy the same six proposals.
+_BUDGET_RUNS = [
+    ("budget mmc=20  (depth 1.09)", f"{DOCS}/validation-study-mmc20.json"),
+    ("budget mmc=28  (depth 1.82)", f"{DOCS}/validation-study-c2b.json"),
+    ("budget mmc=40  (depth 2.91)", f"{DOCS}/validation-study-mmc40.json"),
+    ("budget mmc=56  (depth 4.36)", f"{DOCS}/validation-study-mmc56.json"),
+    ("budget mmc=80  (depth 6.00)", f"{DOCS}/validation-study-mmc80.json"),
+    ("budget mmc=160 (depth 12.0)", f"{DOCS}/validation-study-mmc160.json"),
+]
+
 _NULL_RUNS = [
     # The p0 sweep leads, because it is the only place in this list where the sign of Δ
     # changes and therefore the only place a Δ carries a direction rather than an absence.
@@ -339,6 +352,40 @@ def main() -> int:  # pragma: no cover - CLI convenience
     )
     for label, path in _NULL_RUNS:
         print(_describe(label, delta_arm(path), path))
+
+    # The budget sweep is reported as its own block, ordered by effective search depth rather
+    # than by budget, because depth is what it varies: above mmc=74 the proposal cap binds and
+    # extra budget buys nothing.
+    budget = [(lab, p) for lab, p in _BUDGET_RUNS if Path(p).exists()]
+    if budget:
+        print("\n=== budget sweep (D4): Δ(D−B) by effective search depth, n_train=8 fixed ===")
+        print("depth = min(promotable cycles, proposal cap). The cap was 6 on every run before")
+        print("this sweep and never bound; the deepest cell raises it to 12 and says so.")
+        for label, path in budget:
+            print(_describe(label, delta_arm(path), path))
+
+        # A coarser readout than Δ, and worth printing beside it: if budget mattered anywhere, the
+        # first place it should show is arms accepting more often as depth grows. NOT a
+        # deterministic function of depth, though -- the observed pattern is non-monotone (a seed
+        # can accept at a smaller depth and not at a larger one), because the search path depends
+        # on sampled reflections. So read it as a second noisy signal that happens to be coarse,
+        # not as a clean instrument.
+        print("\nper-seed acceptance (did the arm change a gene?), by effective depth:")
+        print(f"{'depth':>7}  {'arm B':<14} {'arm D':<14}")
+        for label, path in budget:
+            runs = _runs(path)
+            cells = []
+            for arm in ("B", "D"):
+                marks = "".join(
+                    "Y" if (r.get(arm, {}).get("genes_changed") or []) else "." for r in runs
+                )
+                cells.append(f"{marks:<14}")
+            depth = label.split("depth")[-1].strip(" )")
+            print(f"{depth:>7}  {cells[0]}{cells[1]}")
+        print("(one character per seed, in order; Y = accepted at least one gene change)")
+        if len(budget) < len(_BUDGET_RUNS):
+            missing = [lab for lab, p in _BUDGET_RUNS if not Path(p).exists()]
+            print(f"NOT YET BOUGHT: {', '.join(missing)}")
     print("\n=== effect: Δ(hi−lo) actionability, paired by seed (n=3) ===")
     print("NOTE: measured under --oracle-critique, which gates on the TRUE metric at")
     print("held-out scoring time too. This is a ceiling result: it says richer repair")

@@ -74,3 +74,26 @@ def test_scores_comparison_discriminates_a_perturbed_result():
     perturbed = [_mk(A=0.5, B=0.5, C=0.5, D=0.6)]  # one arm differs
     assert vr._scores(base) == vr._scores(same)
     assert vr._scores(base) != vr._scores(perturbed)
+
+
+def test_a_registered_but_unbought_run_is_pending_not_a_failure(monkeypatch, capsys):
+    """A registry row whose results artifact does not exist yet must read as PENDING.
+
+    The registry deliberately carries rows for pre-registered runs before they are bought, so
+    the exact CLI args are committed ahead of the numbers. Reporting an absent artifact as FAIL
+    conflates "not bought yet" with "does not reproduce" -- the same infra-versus-data
+    conflation this study spent an appendix on. Pending rows must also NOT count toward
+    `verified`, so the script still refuses to claim completeness.
+    """
+    monkeypatch.setattr(
+        vr,
+        "RUNS",
+        [("future run", "docs/does-not-exist-yet.json", "tests/fixtures/nope.json", [])],
+    )
+    monkeypatch.setattr(vr, "SUPERSEDED", frozenset())
+    rc = vr.main()
+    out = capsys.readouterr().out
+    assert "PENDING" in out, out
+    assert "FAIL" not in out, "an absent artifact is not a reproduction failure"
+    assert rc != 0, "nothing was verified, so the script must not report success"
+    assert "0 replayable run(s) checked" in out or "checked" in out

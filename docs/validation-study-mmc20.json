@@ -1,0 +1,293 @@
+{
+  "meta": {
+    "dataset": "multi-constraint-hard (IFEval-style)",
+    "n_train": 8,
+    "n_heldout": 10,
+    "worker_model": "openai/gpt-4.1-mini",
+    "reflection_model": "openai/gpt-5.6-luna",
+    "max_metric_calls": 20,
+    "module_selector": "all",
+    "seeds_independent": true,
+    "detector_reflection": true,
+    "reflection_calls": 6,
+    "task_set": "multi-hard",
+    "temperature": null,
+    "sample": null,
+    "exclude_constraint": [],
+    "loop_max_retries": 1,
+    "plan_gene": false,
+    "feedback_stats": false,
+    "critique_model": null,
+    "oracle_critique": false,
+    "feedback_level": "mid",
+    "exec_feedback": false,
+    "actuator": false,
+    "gene_overrides": {},
+    "worker_max_output_tokens": 320,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "estimated_usd": 1.6490879999999999,
+    "generated": "2026-07-29T18:04:18.782432+00:00"
+  },
+  "runs": [
+    {
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.77,
+        "opt_heldout": 0.775,
+        "delta": 0.005,
+        "variant_id": "variant-7d12eb04",
+        "train_score": 0.8313,
+        "genes_changed": [
+          "generate"
+        ],
+        "final_genes": {
+          "generate": "For every task, produce only the requested response and satisfy every stated requirement simultaneously.\n\nBefore answering:\n1. Identify the requested subject and format.\n2. List every constraint, including content, word count, word-length limits, forbidden or required words, capitalization, punctuation, ending phrases, and layout.\n3. Draft a response that answers the task clearly and naturally.\n4. Check the draft mechanically before submitting:\n   - Count words carefully; revise until the count is exact.\n   - Treat each whitespace-separated item as a word for counting, and count words in bullet lines as well.\n   - Ensure no word exceeds the stated maximum length. For example, \u201cthrough\u201d has 7 letters and must not be used when the limit is 6.\n   - Check forbidden words as complete words, including words attached to punctuation.\n   - Check required words are present exactly as requested.\n   - Verify capitalization, punctuation, line count, bullet count, spacing, and any required exact ending phrase.\n   - Ensure the response actually addresses the requested scientific concept or natural process.\n5. If constraints conflict, prioritize the most explicit and exact wording, but do not knowingly submit an answer that violates any requirement.\n6. Output no explanation, checklist, apology, or commentary\u2014only the final answer.\n\nUse concise wording and prefer short, simple words when word-length or word-count constraints apply. An answer is successful only when all requirements are satisfied, not merely most of them."
+        },
+        "seed_heldout_by_task": {
+          "mc-36": 0.75,
+          "mc-51": 0.8,
+          "mc-21": 0.6,
+          "mc-4": 0.75,
+          "mc-43": 0.75,
+          "mc-52": 0.75,
+          "mc-9": 0.75,
+          "mc-38": 0.8,
+          "mc-34": 0.75,
+          "mc-58": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-36": 0.75,
+          "mc-51": 0.8,
+          "mc-21": 0.6,
+          "mc-4": 0.75,
+          "mc-43": 0.75,
+          "mc-52": 1.0,
+          "mc-9": 0.75,
+          "mc-38": 0.6,
+          "mc-34": 0.75,
+          "mc-58": 1.0
+        }
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.77,
+        "opt_heldout": 0.79,
+        "delta": 0.02,
+        "variant_id": "variant-8a7d06a9",
+        "train_score": 0.8938,
+        "genes_changed": [
+          "generate",
+          "ensure_correct"
+        ],
+        "final_genes": {
+          "generate": "For every task, produce only the requested response and satisfy every stated requirement simultaneously.\n\nBefore answering:\n1. Identify the requested subject and format.\n2. List every constraint, including content, word count, word-length limits, forbidden or required words, capitalization, punctuation, ending phrases, and layout.\n3. Draft a response that answers the task clearly and naturally.\n4. Check the draft mechanically before submitting:\n   - Count words carefully; revise until the count is exact.\n   - Treat each whitespace-separated item as a word for counting, and count words in bullet lines as well.\n   - Ensure no word exceeds the stated maximum length. For example, \u201cthrough\u201d has 7 letters and must not be used when the limit is 6.\n   - Check forbidden words as complete words, including words attached to punctuation.\n   - Check required words are present exactly as requested.\n   - Verify capitalization, punctuation, line count, bullet count, spacing, and any required exact ending phrase.\n   - Ensure the response actually addresses the requested scientific concept or natural process.\n5. If constraints conflict, prioritize the most explicit and exact wording, but do not knowingly submit an answer that violates any requirement.\n6. Output no explanation, checklist, apology, or commentary\u2014only the final answer.\n\nUse concise wording and prefer short, simple words when word-length or word-count constraints apply. An answer is successful only when all requirements are satisfied, not merely most of them.",
+          "ensure_correct": "Act as a strict constraint checker and answer evaluator.\n\nFirst, reread the task and extract every requirement as a separate checklist item. Treat all requirements as mandatory and conjunctive: a draft passes only if it satisfies every one. Do not infer that a draft passes merely because it is scientifically meaningful or mostly compliant.\n\nUse these verification rules:\n\n1. Count words consistently as whitespace-separated tokens. Punctuation attached to a token does not create an additional word; for word-length checks, ignore surrounding punctuation and count the letters in the word.\n2. Treat a forbidden \u201cword\u201d as an exact case-insensitive word, not as a substring. For example, forbidding \u201cto\u201d does not forbid words such as \u201ctiny.\u201d\n3. Check exact word counts yourself rather than trusting a draft or a previous assessment.\n4. Check maximum word length for every word.\n5. Check capitalization, forbidden words, punctuation restrictions, required words, required phrases, ending phrases, and any semantic requirements exactly as stated.\n6. For formatting requirements, count lines and bullets precisely. A bullet point must begin exactly as specified, such as \u201c- \u201d, and no extra non-bullet text may be included when the task requires only bullet points.\n7. An exact ending phrase must match the required text exactly at the end of the response, including capitalization and punctuation rules. Do not append anything after it.\n8. If a requirement says \u201centire response,\u201d apply it to every character of the response, including headings, explanations, and formatting.\n\nAfter checking every requirement, do one final full recheck before responding.\n\nIf all requirements are satisfied, respond with:\nPASS\n\nIf any requirement is violated, do not say PASS. Respond with \u201cFix:\u201d and list every failed requirement, including the concrete reason and the needed correction. You may also list the requirements that were satisfied, but never omit a failure. If asked to revise the draft, produce a revised answer and then recheck that revision against every constraint before presenting it."
+        },
+        "seed_heldout_by_task": {
+          "mc-36": 0.75,
+          "mc-51": 0.8,
+          "mc-21": 0.6,
+          "mc-4": 0.75,
+          "mc-43": 0.75,
+          "mc-52": 0.75,
+          "mc-9": 0.75,
+          "mc-38": 0.8,
+          "mc-34": 0.75,
+          "mc-58": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-36": 1.0,
+          "mc-51": 0.8,
+          "mc-21": 0.8,
+          "mc-4": 0.75,
+          "mc-43": 0.75,
+          "mc-52": 0.75,
+          "mc-9": 0.75,
+          "mc-38": 0.8,
+          "mc-34": 0.5,
+          "mc-58": 1.0
+        }
+      }
+    },
+    {
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.865,
+        "opt_heldout": 0.72,
+        "delta": -0.145,
+        "variant_id": "variant-19139ac3",
+        "train_score": 0.7688,
+        "genes_changed": [
+          "generate"
+        ],
+        "final_genes": {
+          "generate": "Act as a strict constraint-satisfaction response generator. For every task:\n\n1. Identify the requested subject and response format.\n2. Extract every mandatory requirement, including:\n   - exact word count\n   - required or forbidden words\n   - maximum word length\n   - capitalization rules\n   - punctuation restrictions\n   - required ending phrases\n   - bullet-point count and exact line prefixes\n   - any other formatting or content constraints\n3. Draft a response that satisfies the subject request while meeting every constraint simultaneously.\n4. Validate the draft before responding:\n   - Count words precisely; punctuation attached to a word does not create an additional word.\n   - Check every required keyword and forbidden word, treating capitalization as specified.\n   - Check the length of every word.\n   - Check capitalization, punctuation, line count, bullet count, prefixes, and exact phrase placement.\n   - Ensure the required ending phrase is reproduced exactly, including punctuation.\n5. Revise until all requirements pass. Output only the final response, with no explanation, checklist, or self-critique.\n\nUse these prior examples as calibration:\n- In the first example, the response met the lowercase, required-word, and forbidden-word constraints but contained 14 words instead of the required 15.\n- In the second example, the response met the lowercase, forbidden-word, and exact-ending constraints, but \u201cscientists\u201d and \u201cunderground\u201d exceeded the six-letter maximum, and it contained 16 rather than 15 words.\n- In the third example, the response met the four-bullet, six-letter maximum, required-\u201ccell,\u201d and no-comma constraints, but contained 31 rather than 15 words.\n\nTherefore, never assume that a nearly compliant response is sufficient: independently verify every requirement, especially exact word counts and word-length limits."
+        },
+        "seed_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-34": 0.8,
+          "mc-35": 1.0,
+          "mc-46": 0.75,
+          "mc-20": 0.6,
+          "mc-61": 1.0,
+          "mc-37": 1.0,
+          "mc-14": 1.0,
+          "mc-63": 0.75,
+          "mc-53": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 0.75,
+          "mc-34": 0.8,
+          "mc-35": 0.8,
+          "mc-46": 0.5,
+          "mc-20": 0.8,
+          "mc-61": 0.75,
+          "mc-37": 0.75,
+          "mc-14": 0.8,
+          "mc-63": 0.75,
+          "mc-53": 0.5
+        }
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.865,
+        "opt_heldout": 0.79,
+        "delta": -0.075,
+        "variant_id": "variant-5a36a4d3",
+        "train_score": 0.8,
+        "genes_changed": [
+          "generate",
+          "ensure_correct"
+        ],
+        "final_genes": {
+          "generate": "Act as a strict constraint-satisfaction response generator. For every task:\n\n1. Identify the requested subject and response format.\n2. Extract every mandatory requirement, including:\n   - exact word count\n   - required or forbidden words\n   - maximum word length\n   - capitalization rules\n   - punctuation restrictions\n   - required ending phrases\n   - bullet-point count and exact line prefixes\n   - any other formatting or content constraints\n3. Draft a response that satisfies the subject request while meeting every constraint simultaneously.\n4. Validate the draft before responding:\n   - Count words precisely; punctuation attached to a word does not create an additional word.\n   - Check every required keyword and forbidden word, treating capitalization as specified.\n   - Check the length of every word.\n   - Check capitalization, punctuation, line count, bullet count, prefixes, and exact phrase placement.\n   - Ensure the required ending phrase is reproduced exactly, including punctuation.\n5. Revise until all requirements pass. Output only the final response, with no explanation, checklist, or self-critique.\n\nUse these prior examples as calibration:\n- In the first example, the response met the lowercase, required-word, and forbidden-word constraints but contained 14 words instead of the required 15.\n- In the second example, the response met the lowercase, forbidden-word, and exact-ending constraints, but \u201cscientists\u201d and \u201cunderground\u201d exceeded the six-letter maximum, and it contained 16 rather than 15 words.\n- In the third example, the response met the four-bullet, six-letter maximum, required-\u201ccell,\u201d and no-comma constraints, but contained 31 rather than 15 words.\n\nTherefore, never assume that a nearly compliant response is sufficient: independently verify every requirement, especially exact word counts and word-length limits.",
+          "ensure_correct": "Act as a meticulous constraint checker and reviser.\n\nFirst, read the task and every stated requirement. Then independently inspect the current draft; do not trust any provided verdict, generated output, or feedback without verifying it yourself. Distinguish clearly between the original draft and any revised/generated draft, since their word counts and violations may differ.\n\nUse these validation rules unless the task explicitly specifies otherwise:\n- Count words as whitespace-separated lexical items, ignoring surrounding punctuation. Punctuation attached to a word does not create an extra word.\n- Treat a forbidden \u201cword\u201d as a whole-word prohibition, not as an arbitrary substring prohibition, unless the requirement explicitly says \u201ccontains.\u201d\n- Check capitalization, exact word count, required words, forbidden words, word-length limits, bullet count, line prefixes, punctuation restrictions, and exact ending phrases separately.\n- For an exact ending phrase such as `so it goes.`, preserve the final period and verify that the response ends with that exact sequence.\n- For bullet requirements, count only the response\u2019s bullet lines and verify that every line begins exactly with `- `.\n- For word-length limits, measure each word individually after removing surrounding punctuation; capitalization does not affect length.\n- A required word normally means the exact word, subject to the task\u2019s capitalization rules; do not silently substitute a related form such as `Cells` for `cell` unless the requirement permits it.\n\nKnown examples and lessons:\n1. The sentence `dna carries genetic code that guides cellular functions, enabling life through replication and protein synthesis.` has exactly 15 words, is entirely lowercase, contains `code`, and contains no standalone word `to`. The reported count of 17 and claim that `to` appears twice are false alarms; do not \u201cfix\u201d a compliant draft.\n2. `scientists found small bugs that live deep underground and glow bright at night, so it goes.` has 16 words, because `so it goes` contributes three words and the preceding words contribute 13. It also violates the six-letter maximum through words such as `scientists` and `underground`. Thus a `PASS` verdict is false even though it is lowercase, has no standalone `to`, and ends with `so it goes.`.\n3. In the four-bullet cell example, the original draft has 36 words and includes the seven-letter word `animals`, so it violates the 15-word and six-letter limits. The revised displayed output has 34 words, not 15, but its words are all six letters or fewer; therefore a claim that this revised output violates the word-length limit is false. It does satisfy the four-bullet, `cell`, and no-comma requirements.\n\nAfter checking every constraint, if any constraint fails, revise the draft while preserving the requested meaning and format. Recheck the revised response from scratch, including recounting words and rescanning every forbidden or required item. Do not declare PASS until every requirement is demonstrably satisfied. Return the final response or, if the task is specifically asking for evaluation, give an accurate verdict and identify each failed and satisfied requirement."
+        },
+        "seed_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-34": 0.8,
+          "mc-35": 1.0,
+          "mc-46": 0.75,
+          "mc-20": 0.6,
+          "mc-61": 1.0,
+          "mc-37": 1.0,
+          "mc-14": 1.0,
+          "mc-63": 0.75,
+          "mc-53": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-34": 1.0,
+          "mc-35": 0.8,
+          "mc-46": 0.75,
+          "mc-20": 0.8,
+          "mc-61": 0.75,
+          "mc-37": 0.5,
+          "mc-14": 0.8,
+          "mc-63": 0.75,
+          "mc-53": 0.75
+        }
+      }
+    },
+    {
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.82,
+        "opt_heldout": 0.82,
+        "delta": 0.0,
+        "variant_id": "variant-241c572a",
+        "train_score": 0.75,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly."
+        },
+        "seed_heldout_by_task": {
+          "mc-29": 0.6,
+          "mc-46": 0.8,
+          "mc-1": 0.75,
+          "mc-48": 0.75,
+          "mc-17": 1.0,
+          "mc-41": 1.0,
+          "mc-28": 0.8,
+          "mc-34": 0.75,
+          "mc-60": 1.0,
+          "mc-32": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-29": 0.6,
+          "mc-46": 0.8,
+          "mc-1": 0.75,
+          "mc-48": 0.75,
+          "mc-17": 1.0,
+          "mc-41": 1.0,
+          "mc-28": 0.8,
+          "mc-34": 0.75,
+          "mc-60": 1.0,
+          "mc-32": 0.75
+        }
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.82,
+        "opt_heldout": 0.82,
+        "delta": 0.0,
+        "variant_id": "variant-b85690fd",
+        "train_score": 0.75,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-29": 0.6,
+          "mc-46": 0.8,
+          "mc-1": 0.75,
+          "mc-48": 0.75,
+          "mc-17": 1.0,
+          "mc-41": 1.0,
+          "mc-28": 0.8,
+          "mc-34": 0.75,
+          "mc-60": 1.0,
+          "mc-32": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-29": 0.6,
+          "mc-46": 0.8,
+          "mc-1": 0.75,
+          "mc-48": 0.75,
+          "mc-17": 1.0,
+          "mc-41": 1.0,
+          "mc-28": 0.8,
+          "mc-34": 0.75,
+          "mc-60": 1.0,
+          "mc-32": 0.75
+        }
+      }
+    }
+  ]
+}

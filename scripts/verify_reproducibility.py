@@ -59,8 +59,8 @@ SUPERSEDED = frozenset(
         "C2 four-arm corrected harness",
     }
 )
-EXPECTED_RUNS = 8  # corrected harness: two C1 conditions, C2b, p0 L2/L3, and the three
-# rows of the split-size sweep.
+EXPECTED_RUNS = 13  # corrected harness: two C1 conditions, C2b, p0 L2/L3, the three rows of
+# the split-size sweep, and the five bought rows of the budget sweep (D4).
 # C2 is NOT among them. Auditing it found that two reflection completions came back empty and
 # GEPA accepted one as the verify gene, so `genome_from_candidate` now refuses blank gene text
 # -- and that guard makes C2's own cassette unreplayable, because replaying it re-serves the
@@ -570,6 +570,145 @@ RUNS = [
             "openai/gpt-5.6-luna",
         ],
     ),
+    # The pre-registered budget sweep (D4). n_train is fixed at 8 throughout; what varies is
+    # EFFECTIVE search depth = min(promotable cycles, --reflection-calls). The cap matters: at 6
+    # it saturates at mmc=74, so the deepest cell raises it to 12 and is the only row that moves
+    # two knobs. The cap is registered explicitly so the registry shows which limit bound.
+    (
+        "budget sweep mmc=20 (cap 6, depth 1.09)",
+        "docs/validation-study-mmc20.json",
+        f"{CASSETTES}/study-mmc20.json",
+        [
+            "--task-set",
+            "multi-hard",
+            "--arms",
+            "BD",
+            "--seeds",
+            "0,1,2",
+            "--n-train",
+            "8",
+            "--n-heldout",
+            "10",
+            "--max-metric-calls",
+            "20",
+            "--reflection-calls",
+            "6",
+            "--loop-max-retries",
+            "1",
+            "--module-selector",
+            "all",
+            "--reflection-model",
+            "openai/gpt-5.6-luna",
+        ],
+    ),
+    (
+        "budget sweep mmc=40 (cap 6, depth 2.91)",
+        "docs/validation-study-mmc40.json",
+        f"{CASSETTES}/study-mmc40.json",
+        [
+            "--task-set",
+            "multi-hard",
+            "--arms",
+            "BD",
+            "--seeds",
+            "0,1,2",
+            "--n-train",
+            "8",
+            "--n-heldout",
+            "10",
+            "--max-metric-calls",
+            "40",
+            "--reflection-calls",
+            "6",
+            "--loop-max-retries",
+            "1",
+            "--module-selector",
+            "all",
+            "--reflection-model",
+            "openai/gpt-5.6-luna",
+        ],
+    ),
+    (
+        "budget sweep mmc=56 (cap 6, depth 4.36)",
+        "docs/validation-study-mmc56.json",
+        f"{CASSETTES}/study-mmc56.json",
+        [
+            "--task-set",
+            "multi-hard",
+            "--arms",
+            "BD",
+            "--seeds",
+            "0,1,2",
+            "--n-train",
+            "8",
+            "--n-heldout",
+            "10",
+            "--max-metric-calls",
+            "56",
+            "--reflection-calls",
+            "6",
+            "--loop-max-retries",
+            "1",
+            "--module-selector",
+            "all",
+            "--reflection-model",
+            "openai/gpt-5.6-luna",
+        ],
+    ),
+    (
+        "budget sweep mmc=80 (cap 6, depth 6.00)",
+        "docs/validation-study-mmc80.json",
+        f"{CASSETTES}/study-mmc80.json",
+        [
+            "--task-set",
+            "multi-hard",
+            "--arms",
+            "BD",
+            "--seeds",
+            "0,1,2",
+            "--n-train",
+            "8",
+            "--n-heldout",
+            "10",
+            "--max-metric-calls",
+            "80",
+            "--reflection-calls",
+            "6",
+            "--loop-max-retries",
+            "1",
+            "--module-selector",
+            "all",
+            "--reflection-model",
+            "openai/gpt-5.6-luna",
+        ],
+    ),
+    (
+        "budget sweep mmc=160 (cap 12, depth 12.00)",
+        "docs/validation-study-mmc160.json",
+        f"{CASSETTES}/study-mmc160.json",
+        [
+            "--task-set",
+            "multi-hard",
+            "--arms",
+            "BD",
+            "--seeds",
+            "0,1,2",
+            "--n-train",
+            "8",
+            "--n-heldout",
+            "10",
+            "--max-metric-calls",
+            "160",
+            "--reflection-calls",
+            "12",
+            "--loop-max-retries",
+            "1",
+            "--module-selector",
+            "all",
+            "--reflection-model",
+            "openai/gpt-5.6-luna",
+        ],
+    ),
 ]
 
 # The cross-domain BigCodeBench-Hard run (D5, docs/validation-study-bcb.json) is
@@ -626,10 +765,20 @@ def main() -> int:
     verified = 0
     all_ok = True
     skipped = 0
+    pending = 0
     for label, committed, cassette, args in RUNS:
         if label in SUPERSEDED:
             skipped += 1
             print(f"[SKIP] {label:22} recorded under the pre-correction harness")
+            continue
+        # A row can be registered BEFORE it is bought: the point of committing the exact args
+        # ahead of the numbers is that the configuration cannot be edited to fit the result. An
+        # absent artifact is therefore "not bought yet", not "does not reproduce", and conflating
+        # the two would make the gate red for a pre-registration. It still does not count as
+        # verified, so `complete` below stays false until the run actually lands.
+        if not Path(committed).exists():
+            pending += 1
+            print(f"[PENDING] {label:22} registered, not yet bought ({committed} absent)")
             continue
         try:
             ok, detail = verify_one(committed, cassette, args)
@@ -639,7 +788,11 @@ def main() -> int:
         verified += 1
         all_ok &= ok
         print(f"[{'OK ' if ok else 'FAIL'}] {label:22} {detail}")
-    print(f"\n{skipped} run(s) skipped as superseded; {verified} replayable run(s) checked.")
+    pending_note = f"; {pending} registered but not yet bought" if pending else ""
+    print(
+        f"\n{skipped} run(s) skipped as superseded{pending_note}; "
+        f"{verified} replayable run(s) checked."
+    )
     # Guard against a vacuous pass: an empty/truncated RUNS list, or a list where every
     # entry is superseded, must NOT print success. `all_ok` seeds True, so without the
     # `verified > 0` term a zero-iteration loop would claim reproduction — which is exactly
@@ -651,6 +804,14 @@ def main() -> int:
         print(
             "NOTHING PROVEN: no run has yet been recorded under the corrected harness. "
             "Re-run the study, then register it here."
+        )
+    elif all_ok and not complete:
+        # Everything replayed exactly, but not everything registered has been bought. That is
+        # INCOMPLETE, not FAILED, and saying "failed" here would read as a broken replay when the
+        # truth is a pending purchase -- the same conflation the PENDING status above avoids.
+        print(
+            f"INCOMPLETE: all {verified} bought run(s) reproduce exactly, but "
+            f"{EXPECTED_RUNS - verified} registered run(s) are not bought yet."
         )
     else:
         print(

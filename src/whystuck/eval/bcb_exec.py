@@ -97,6 +97,26 @@ def _uses_frame_introspection(code: str) -> str | None:
 _SENTINEL = "<<WS_BCB_COMPLETED_7d1e4c>>"
 _NO_METHODS = "<<WS_BCB_NO_METHODS>>"
 _IMAGE = os.environ.get("WHYSTUCK_BCB_IMAGE", "whystuck-bcb:latest")
+
+
+def workdir_parent() -> str | None:
+    """Parent directory for the per-run sandbox workdir, or None for the tempfile default.
+
+    Set ``WHYSTUCK_BCB_TMPDIR`` when the host's Docker refuses to bind-mount the default temp
+    location. Docker Desktop and some rootless configurations enforce a file-sharing allowlist
+    that commonly excludes /tmp, and the refusal arrives as a generic `docker run failed`, which
+    is indistinguishable from a missing image without reading the message. Pointing the workdir
+    at a shared path (typically under $HOME) fixes it without touching the scoring path: the
+    container always sees the mount at /w, so the host-side path never reaches a prompt, a
+    verdict or a cassette key.
+    """
+    root = os.environ.get("WHYSTUCK_BCB_TMPDIR")
+    if not root:
+        return None
+    os.makedirs(root, exist_ok=True)
+    return root
+
+
 _name_counter = itertools.count()
 
 # Volatile substrings that a failing BigCodeBench test can print — a process-local
@@ -292,7 +312,7 @@ def run_unittest(
     # solution that forges the sentinel + os._exit(0) cannot produce the matching nonce.
     nonce = os.urandom(16).hex()
     try:
-        with tempfile.TemporaryDirectory() as workdir:
+        with tempfile.TemporaryDirectory(dir=workdir_parent()) as workdir:
             for fname, content in (
                 ("solution.py", solution),
                 ("tests.py", test_code),

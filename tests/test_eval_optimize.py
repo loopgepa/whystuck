@@ -95,8 +95,11 @@ def test_llm_optimize_landscape_responds_to_genome(tmp_path):
     assert bad["best_score"] == 0.0  # genome did not → same tasks now fail (not flat)
 
 
-def test_real_optimize_without_gepa_gives_actionable_error():
-    # gepa is not in the base install; the real path must fail with guidance.
+def test_real_optimize_without_gepa_gives_actionable_error(hide_import):
+    # gepa is not in the base install; the real path must fail with guidance. The absence is
+    # SIMULATED: this test used to rely on gepa being genuinely uninstalled, which made it pass
+    # for months and then fail the moment the eval extra was restored to the venv.
+    hide_import("gepa")
     with pytest.raises(RuntimeError, match="whystuck\\[eval\\]"):
         _gepa_optimize(
             seed_candidate={}, trainset=[], adapter=None, reflection_lm="x", max_metric_calls=1

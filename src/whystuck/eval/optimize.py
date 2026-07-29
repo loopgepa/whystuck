@@ -114,11 +114,9 @@ def _gepa_optimize(**kwargs: Any) -> dict[str, Any]:
     """The real GEPA call. Requires `pip install whystuck[eval]` and a network
     reflection LM; not exercised in the offline test suite."""
     try:
-        import gepa  # type: ignore[import-not-found]
-        from gepa.core.adapter import EvaluationBatch, GEPAAdapter  # type: ignore[import-not-found]
-        from gepa.utils.stop_condition import (  # type: ignore[import-not-found]
-            MaxCandidateProposalsStopper,
-        )
+        import gepa
+        from gepa.core.adapter import EvaluationBatch, GEPAAdapter
+        from gepa.utils.stop_condition import MaxCandidateProposalsStopper
     except ImportError as exc:  # pragma: no cover - exercised only without the extra
         raise RuntimeError(
             "loop optimization requires the eval extra: pip install whystuck[eval]"

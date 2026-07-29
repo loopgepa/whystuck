@@ -80,3 +80,18 @@ testpaths = ["tests"]
 python_version = "3.12"
 strict = true
 files = ["src/whystuck"]
+
+# The eval extra (gepa, litellm) is OPTIONAL by ADR-011, so without this override mypy gives a
+# DIFFERENT verdict depending on whether it happens to be installed: absent, `import gepa` needs
+# an `import-not-found` ignore; present, that same ignore is flagged unused under strict. A gate
+# whose colour tracks the environment is not a gate --- this one reported "Success: no issues" for
+# as long as the extra was missing from the venv, while seven errors waited behind the import.
+# `follow_imports = "skip"` pins both modes to one answer by treating these modules as untyped
+# whether or not they can be imported. Their surfaces become Any, which strict's
+# disallow_subclassing_any still catches at the adapter bridge, so the boundary stays checked; it
+# just stops depending on an install. Keep the bare names alongside the globs: mypy's `X.*` is
+# documented to cover X itself, and relying on that is a needless bet.
+[[tool.mypy.overrides]]
+module = ["gepa", "gepa.*", "litellm", "litellm.*"]
+ignore_missing_imports = true
+follow_imports = "skip"

@@ -386,7 +386,7 @@ def litellm_complete(model: str, *, max_tokens: int) -> Complete:
         """
         del sample  # salt only; its effect is on the cassette key, upstream of here
         try:
-            import litellm  # type: ignore[import-not-found]
+            import litellm
         except ImportError as exc:
             raise RuntimeError(
                 "the LLM worker needs litellm: pip install 'whystuck[eval]'"

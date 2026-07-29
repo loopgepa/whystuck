@@ -67,7 +67,9 @@ def test_keyword_score_without_expectation_is_not_a_free_win():
     assert keyword_score("anything at all", BenchmarkTask(id="t1")) is False
 
 
-def test_litellm_complete_without_litellm_is_actionable():
+def test_litellm_complete_without_litellm_is_actionable(hide_import):
+    # Absence is simulated rather than inherited from the environment --- see `hide_import`.
+    hide_import("litellm")
     complete = litellm_complete("openai/gpt-4o-mini", max_tokens=256)
     # The error must name the real fix. litellm is now part of the `whystuck[eval]`
     # extra (added so the one paid run reproduces from a single install), so the
