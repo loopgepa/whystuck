@@ -110,6 +110,64 @@ Note `--reflection-model openai/gpt-5.6-luna` above. It is not the CLI default
 only two runs that did. Any run meant to compare against C2b must pin it, or the reflection
 model becomes an uncontrolled difference.
 
+### The pre-registered p₀ sweep (§"The p₀ law")
+
+The decisive experiment, and the only one that turns the paper's null into a conditional law.
+`exact_word_count` is satisfied on 0.16 of held-out final drafts and the generator forces it
+into *every* hard task, so the tier's first-draft pass rate p₀ is pinned below 0.16. Excluding
+it raises p₀ to ≈0.73 (≈0.83 also excluding `word_max_length`) while keeping a brutal anchor in
+every task, so the tier does not collapse into the saturated easy one.
+
+Calibrate first — arm A only, no optimizer, **$0.09** per level, and it measures the real p₀
+rather than the independence estimate the paper prints:
+
+```bash
+for excl in "exact_word_count" "exact_word_count word_max_length"; do
+  flags=""; for e in $excl; do flags="$flags --exclude-constraint $e"; done
+  scratchpad/evalvenv/bin/python scripts/run_validation_study.py \
+    --task-set multi-hard --arms A --seeds 0,1,2 \
+    --n-train 8 --n-heldout 10 --max-metric-calls 28 \
+    --reflection-model openai/gpt-5.6-luna $flags --yes \
+    --record "tests/fixtures/cassettes/study-p0cal.json" \
+    --out "docs/validation-study-p0cal.json" --report "docs/validation-study-p0cal.md"
+done
+```
+
+Then the two optimizing levels, **$1.79** each, both inside the $5 ceiling (swap `--arms A`
+for `--arms BD` and give each level its own `--record`/`--out`/`--report` paths). L1 needs no
+run: it *is* the C2b re-run above.
+
+The prediction is registered in the paper and is falsifiable: the evolved critique's `PASS`
+rate should become > 0 on at least 2 of 3 seeds at the high-p₀ level. If it stays 0.00 where
+damaging an already-correct draft costs ~6× more on the training score, the Goodhart account is
+wrong and the explanation is about the reachable geometry of prose space instead.
+
+`--exclude-constraint` refuses an id that names no live constraint, because excluding an
+unknown id would run the un-ablated condition under an ablated label.
+
+### Repeated samples and a pinned temperature (D7, partially built)
+
+No interval in this study contains within-condition sampling variance: the worker draws one
+sample per task at the provider's default temperature. Two of the three pieces now exist.
+
+`--temperature` pins the worker's sampling temperature. It is passed **per call**, not baked
+into the `litellm_complete` factory, so it enters the cassette key — a factory-level
+temperature would not appear in the key and two runs at different temperatures would silently
+serve each other's completions. Omitting the flag omits the parameter from the request body
+entirely, so committed cassette keys are unchanged.
+
+The worker also accepts a `sample=` salt whose only effect is on the cassette key. It is
+required because the cassette dedupes identical calls in record mode: K identical sampling
+calls would otherwise collapse to one entry and return byte-identical "samples", reading as
+*zero* sampling variance — the most flattering artifact available. It is deliberately not sent
+to the provider.
+
+**Not built:** the repeat loop itself. Scoring threads through `run_task` and the GEPA adapter,
+so the clean shape is a standalone offline re-scorer that rebuilds a released genome from its
+`final_genes`, re-scores held-out K times with `sample=0..K-1` at a fixed temperature, and
+emits per-(task, sample) scores. That needs no schema change and no re-optimization, since the
+genomes are already released.
+
 ### The pre-registered split-size sweep (§"Is the loss a small-split artifact?")
 
 Designed, guarded, priced, and pinned by `tests/test_split_size_sweep.py`; **not run** — the

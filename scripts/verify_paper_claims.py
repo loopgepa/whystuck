@@ -61,6 +61,53 @@ def _tex() -> str:
         return fh.read()
 
 
+#: Per-constraint final-draft satisfaction on held-out, run 3 (intrinsic, R=1), from
+#: tab:residual. The p0 estimate is built from these, so if that table changes this must too.
+_RESIDUAL_RATES = {
+    "exact_word_count": 0.16,
+    "word_max_length": 0.85,
+    "forbidden_word": 0.92,
+    "num_bullets": 1.00,
+    "end_with": 0.95,
+    "include_keyword": 1.00,
+    "all_lowercase": 0.95,
+    "no_comma": 0.95,
+}
+#: (excluded constraints, E[p0], max p0) per level of the pre-registered p0 sweep.
+_P0_LEVELS = (
+    (frozenset(), 0.127, 0.16),
+    (frozenset({"exact_word_count"}), 0.725, 0.85),
+    (frozenset({"exact_word_count", "word_max_length"}), 0.832, 0.92),
+)
+
+
+def _expected_p0(exclude: frozenset[str]) -> tuple[float, float]:
+    """(E[p0], max p0) for one exclusion level, from the generator and the residual table.
+
+    E[p0] multiplies the per-constraint rates over each generated task and averages over the
+    three seeds, so it assumes independence and uses final-draft rates -- an ordering and
+    magnitude estimate, which is all the pre-registration claims. `max p0` is the ceiling set
+    by the hardest constraint present in *every* task at that level, which is what makes the
+    hard tier's p0 low: `exact_word_count` is in all of them and is satisfied 0.16 of the time.
+    """
+    from statistics import mean
+
+    from whystuck.eval.multi_constraint import generate_multi_tasks
+
+    products, common = [], None
+    for seed in (0, 1, 2):
+        tasks = generate_multi_tasks(64, seed=seed, k_min=4, k_max=5, hard=True, exclude=exclude)
+        for t in tasks:
+            ids = t.payload["instruction_id_list"]
+            p = 1.0
+            for i in ids:
+                p *= _RESIDUAL_RATES[i]
+            products.append(p)
+            common = set(ids) if common is None else (common & set(ids))
+    ceiling = min((_RESIDUAL_RATES[c] for c in (common or ())), default=1.0)
+    return mean(products), ceiling
+
+
 def _type_overlap_counts(n_train: int, n_heldout: int = 10) -> list[int]:
     """Per seed: how many training tasks have a constraint-type set also seen in held-out.
 
@@ -464,6 +511,24 @@ def _checks() -> list[tuple[str, float, float, float]]:
                     count,
                 )
             )
+    # The pre-registered p0 sweep (sec:p0). Same reason as the split sweep: a prediction is
+    # only pre-registered if the configuration it was written against is pinned. E[p0] is
+    # re-derived from the generator and the residual table, not copied from tab:p0.
+    for level, (excl, e_p0, max_p0) in enumerate(_P0_LEVELS, start=1):
+        row = rf"\$L_{level}\$ & [^&]+ & ([\d.]+) & ([\d.]+) &"
+        got_e, got_max = _expected_p0(excl)
+        prose.append((f"tex: p0 L{level} E[p0]", row, 0.0005, got_e))
+        prose.append(
+            (
+                f"tex: p0 L{level} max p0",
+                rf"\$L_{level}\$ & [^&]+ & [\d.]+ & ([\d.]+) &",
+                0.005,
+                got_max,
+            )
+        )
+        assert abs(e_p0 - got_e) < 0.0005 and abs(max_p0 - got_max) < 0.005, (
+            f"L{level} constants in this file disagree with the generator"
+        )
     prose.append(("tex: sweep pool below cliff", r"hence \$(\d+)\$ for every", 0, 64))
     prose.append(
         (

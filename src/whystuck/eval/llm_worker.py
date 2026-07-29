@@ -367,7 +367,24 @@ def litellm_complete(model: str, *, max_tokens: int) -> Complete:
     default would let a future caller void the budget bound with no error (the same
     footgun the rest of this module's guards exist to prevent)."""
 
-    def complete(prompt: str) -> str:
+    def complete(
+        prompt: str, *, temperature: float | None = None, sample: int | None = None
+    ) -> str:
+        """`temperature` and `sample` are passed PER CALL, never baked into the factory.
+
+        That is load-bearing for the cassette, which keys on ``(name, args, kwargs)`` of this
+        call. A factory-level temperature would not appear in the key, so two runs at
+        different temperatures would silently serve each other's completions --- a
+        contamination of exactly the kind this study had to retract a result over. Passed as
+        kwargs, they are part of the key.
+
+        ``sample`` is a cache-busting salt and is deliberately NOT sent to the provider: K
+        identical calls otherwise collapse to one cassette entry and K ``independent'' samples
+        come back byte-identical, which would read as zero sampling variance. Leaving both
+        ``None`` reproduces the original single-argument call exactly, so every committed
+        cassette key is preserved.
+        """
+        del sample  # salt only; its effect is on the cassette key, upstream of here
         try:
             import litellm  # type: ignore[import-not-found]
         except ImportError as exc:
@@ -384,11 +401,22 @@ def litellm_complete(model: str, *, max_tokens: int) -> Complete:
         # evolved gene. Raising costs at most one aborted run, and the cassette persists per
         # call, so a resumed run re-reads every completion already paid for.
         for _attempt in range(2):
-            resp = litellm.completion(
-                model=model,
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=max_tokens,
-            )
+            # Two explicit calls rather than a splatted kwargs dict, so the no-temperature
+            # path is provably the original call and not a construction that merely
+            # evaluates to it.
+            if temperature is None:
+                resp = litellm.completion(
+                    model=model,
+                    messages=[{"role": "user", "content": prompt}],
+                    max_tokens=max_tokens,
+                )
+            else:
+                resp = litellm.completion(
+                    model=model,
+                    messages=[{"role": "user", "content": prompt}],
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                )
             content = resp.choices[0].message.content
             if content and content.strip():
                 return str(content)

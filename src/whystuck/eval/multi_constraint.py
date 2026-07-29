@@ -472,7 +472,13 @@ def _sample_params(iid: str, rng: random.Random, *, hard: bool) -> Params:
 
 
 def generate_multi_tasks(
-    n: int, *, seed: int = 0, k_min: int = 3, k_max: int = 4, hard: bool = False
+    n: int,
+    *,
+    seed: int = 0,
+    k_min: int = 3,
+    k_max: int = 4,
+    hard: bool = False,
+    exclude: frozenset[str] = frozenset(),
 ) -> list[BenchmarkTask]:
     """Deterministically generate ``n`` satisfiable multi-constraint tasks.
 
@@ -480,21 +486,55 @@ def generate_multi_tasks(
     word length) that models miss even when instructed — creating the headroom the
     easy tier lacked. Each task picks k ∈ [k_min, k_max] distinct constraints with
     compatible params, renders an NL instruction, and is emitted only after its
-    witness is verified to score 1.0 — enforcing satisfiability at the source."""
+    witness is verified to score 1.0 — enforcing satisfiability at the source.
+
+    ``exclude`` drops constraint ids from the pool. It exists as a **p₀ lever**: the base
+    rate of correct first drafts is what makes an always-FIX critique cheap on the training
+    signal, so varying p₀ is how the always-FIX mechanism gets tested rather than asserted.
+    ``exact_word_count`` is the useful knob — it is forced into every hard task and the
+    residual analysis localizes nearly all remaining error to it — so excluding it raises p₀
+    while keeping a brutal anchor, rather than collapsing to the easy tier.
+
+    Excluding is refused when it would leave too few ids to honour ``k_max``, or no brutal
+    anchor in the hard tier: emitting fewer constraints than asked would make the reported
+    difficulty disagree with the tasks actually scored.
+
+    The default is empty and the RNG call sequence is unchanged under it, so default output
+    is byte-identical to the pre-``exclude`` generator — pinned by fingerprint in
+    ``tests/test_multi_constraint_exclude.py``, because a change here would silently
+    invalidate every committed cassette."""
     rng = random.Random(seed)
     tasks: list[BenchmarkTask] = []
+    if exclude:
+        pool = [i for i in (_HARD_IDS if hard else _EASY_IDS) if i not in exclude]
+        if len(pool) < k_max:
+            raise ValueError(
+                f"exclude={sorted(exclude)} leaves {len(pool)} constraint ids but k_max="
+                f"{k_max} are needed per task; emitting fewer would make the reported task "
+                "difficulty disagree with the tasks actually scored"
+            )
+        if hard and not [b for b in _BRUTAL if b not in exclude]:
+            raise ValueError(
+                f"exclude={sorted(exclude)} removes every brutal constraint {list(_BRUTAL)}, "
+                "which silently turns the hard tier into the easy one; use hard=False if "
+                "that is what you want"
+            )
     for i in range(n):
         k = rng.randint(k_min, k_max)
         if hard:
             # Guarantee real difficulty: always exact_word_count (the skill gap) + one
             # more brutal constraint, then fill the rest from the remaining hard ids.
-            extra_brutal = [b for b in _BRUTAL if b != "exact_word_count"]
-            ids = ["exact_word_count", rng.choice(extra_brutal)]
-            rest = [i for i in _HARD_IDS if i not in ids]
+            # Under `exclude` the anchor falls back to whichever brutal id survives, so
+            # the tier stays hard even when the usual anchor is the excluded one.
+            brutal = [b for b in _BRUTAL if b not in exclude]
+            anchor = "exact_word_count" if "exact_word_count" in brutal else brutal[0]
+            extra_brutal = [b for b in brutal if b != anchor]
+            ids = [anchor, rng.choice(extra_brutal)] if extra_brutal else [anchor]
+            rest = [i for i in _HARD_IDS if i not in ids and i not in exclude]
             ids += rng.sample(rest, k - len(ids))
             rng.shuffle(ids)  # requirement order varies in the prompt
         else:
-            ids = rng.sample(_EASY_IDS, k)
+            ids = rng.sample([i for i in _EASY_IDS if i not in exclude], k)
         pairs = [(iid, _sample_params(iid, rng, hard=hard)) for iid in ids]
         goal = rng.choice(_GOALS)
         task = BenchmarkTask(
@@ -516,15 +556,28 @@ Split = Literal["all", "train", "heldout"]
 
 
 def load_multi_constraint(
-    split: Split = "all", *, n: int | None = None, seed: int = 0, pool: int = 64, hard: bool = False
+    split: Split = "all",
+    *,
+    n: int | None = None,
+    seed: int = 0,
+    pool: int = 64,
+    hard: bool = False,
+    exclude: frozenset[str] = frozenset(),
 ) -> list[BenchmarkTask]:
     """Generate a deterministic pool and split it into disjoint train/heldout halves.
 
     Mirrors ``load_ifbench``: same seed → same tasks; ``train`` and ``heldout`` are
     disjoint (first/second half of the shuffled pool), and ``n`` caps the result.
-    ``hard`` selects the harder constraint tier (wider k = 4–5 for more constraints)."""
+    ``hard`` selects the harder constraint tier (wider k = 4–5 for more constraints).
+    ``exclude`` is the p₀ lever (see ``generate_multi_tasks``); it applies to the whole pool
+    before the split, so train and held-out always share a difficulty tier."""
     tasks = generate_multi_tasks(
-        pool, seed=seed, k_min=4 if hard else 3, k_max=5 if hard else 4, hard=hard
+        pool,
+        seed=seed,
+        k_min=4 if hard else 3,
+        k_max=5 if hard else 4,
+        hard=hard,
+        exclude=exclude,
     )
     random.Random(seed).shuffle(tasks)
     if split != "all":

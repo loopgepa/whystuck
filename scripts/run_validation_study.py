@@ -152,6 +152,32 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         "alone) or B/D (optimize starting from it). Changes every prompt containing that "
         "gene, so a cassette recorded with one text cannot replay under another",
     )
+    p.add_argument(
+        "--exclude-constraint",
+        action="append",
+        default=[],
+        metavar="ID",
+        help="p0 lever (multi task sets, repeatable): drop a constraint type from the "
+        "generated pool. The mechanism this study ends at is a critique that never emits "
+        "PASS, which is near-free on the training signal only because most first drafts "
+        "fail; raising the base rate of correct first drafts is therefore how that "
+        "mechanism gets tested rather than asserted. `exact_word_count` is the useful "
+        "knob: it is in every hard task and carries nearly all the residual. Changes "
+        "every task, hence every cassette key, so a run recorded with an exclusion "
+        "cannot replay without it",
+    )
+    p.add_argument(
+        "--temperature",
+        type=float,
+        default=None,
+        help="pin the worker sampling temperature (default: the provider's, which is "
+        "what every committed run used). Required before repeated-sample intervals mean "
+        "anything: no interval in this study contains within-condition sampling "
+        "variance, because the worker draws one sample per task at an unpinned "
+        "temperature. Passed per call so it enters the cassette key -- a factory-level "
+        "temperature would let two runs at different temperatures serve each other's "
+        "completions",
+    )
     p.add_argument("--worker-model", default="openai/gpt-4.1-mini")
     p.add_argument("--reflection-model", default="openai/gpt-5.6-terra")
     p.add_argument(
@@ -315,6 +341,31 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 2
+
+    # p0-lever guard. An id that names no live constraint would leave the pool untouched and
+    # run the UN-ablated condition under an ablated label -- the same failure as a gene
+    # override naming a gene that is not live, so it is refused the same way.
+    if args.exclude_constraint:
+        if args.task_set not in ("multi", "multi-hard"):
+            print(
+                f"ERROR: --exclude-constraint needs --task-set multi or multi-hard; "
+                f"{args.task_set!r} draws its tasks from a vendored file, not a generator.",
+                file=sys.stderr,
+            )
+            return 2
+        from whystuck.eval.multi_constraint import _EASY_IDS, _HARD_IDS
+
+        live = set(_HARD_IDS if args.task_set == "multi-hard" else _EASY_IDS)
+        unknown = sorted(set(args.exclude_constraint) - live)
+        if unknown:
+            print(
+                f"ERROR: --exclude-constraint {unknown} names no constraint in the "
+                f"{args.task_set!r} pool (live: {', '.join(sorted(live))}). Excluding an "
+                "unknown id would silently run the un-ablated condition under an ablated "
+                "label.",
+                file=sys.stderr,
+            )
+            return 2
 
     # Starved-budget guard. GEPA charges its seed evaluation len(valset) metric calls
     # (gepa/core/state.py sets total_num_evals = len(seed_valset_evaluation.scores_by_val_id)),
@@ -550,9 +601,12 @@ def _run_live(
         # of n_train/n_heldout — otherwise load_multi_constraint raises rather than
         # silently truncating below the requested (and cost-priced) sample size.
         mc_pool = max(64, 2 * max(args.n_train, args.n_heldout) + 2)
+        mc_exclude = frozenset(args.exclude_constraint)
 
         def load_split(split: str, seed: int, n: int):
-            return load_multi_constraint(split, seed=seed, n=n, pool=mc_pool, hard=hard)  # type: ignore[arg-type]
+            return load_multi_constraint(  # type: ignore[arg-type]
+                split, seed=seed, n=n, pool=mc_pool, hard=hard, exclude=mc_exclude
+            )
 
         score_fn, feedback_fn = mc_score, mc_feedback
         dataset = f"multi-constraint{'-hard' if hard else ''} (IFEval-style)"
@@ -610,6 +664,15 @@ def _run_live(
         complete = cassette.wrap(
             litellm_complete(args.worker_model, max_tokens=worker_max_out), name="worker"
         )
+        if args.temperature is not None:
+            # Add the kwarg at the call site, OUTSIDE the cassette wrapper, so it lands in
+            # the hashed kwargs. Absent this flag the call is unchanged and every existing
+            # cassette key still resolves.
+            _untempered = complete
+
+            def complete(prompt: str) -> str:  # type: ignore[misc]
+                return _untempered(prompt, temperature=args.temperature)
+
         reflection = cassette.wrap(
             litellm_complete(args.reflection_model, max_tokens=REFLECTION_MAX_OUTPUT_TOKENS),
             name="reflection",
@@ -672,6 +735,8 @@ def _run_live(
         "detector_reflection": verify_truth is not None,
         "reflection_calls": args.reflection_calls,
         "task_set": args.task_set,
+        "temperature": args.temperature,
+        "exclude_constraint": sorted(args.exclude_constraint),
         "loop_max_retries": args.loop_max_retries,
         "plan_gene": args.plan_gene,
         "feedback_stats": args.feedback_stats,
