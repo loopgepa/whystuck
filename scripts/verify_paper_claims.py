@@ -1800,6 +1800,26 @@ def _checks() -> list[tuple[str, float, float, float]]:
             out.append(
                 ("tex: sigma genome hi", _scrape(tex, r"to \$([\d.]+)\$,\na factor"), 0.00005, hi)
             )
+            # The abstract restates the same range at three decimals. Bound separately rather than
+            # trusted to agree: the four-decimal copy above was correct while a sibling
+            # restatement of a different quantity had gone stale, which is the whole lesson of
+            # test_paper_sigma_coverage.
+            out.append(
+                (
+                    "tex: abstract sigma genome range",
+                    _scrape(tex, r"factor of \$5.9\$ \(\$([\d.]+)\$ to"),
+                    0.0005,
+                    lo,
+                )
+            )
+            out.append(
+                (
+                    "tex: abstract sigma genome range hi",
+                    _scrape(tex, r"\(\$0.006\$ to \$([\d.]+)\$\)"),
+                    0.0005,
+                    hi,
+                )
+            )
             out.append(
                 (
                     "tex: seed control sd",
@@ -2306,6 +2326,18 @@ def _checks() -> list[tuple[str, float, float, float]]:
             1.0 if worst < 1.0 else 0.0,
         )
     )
+
+    # Arm C's training-score range, which is the whole of the qualification sec:rerun attaches to
+    # that control: previously it saturated at 1.0 and GEPA proposed nothing, so the control exited
+    # before exercising anything. The two endpoints were the last MEASURED values in the paper's
+    # prose that no check derived. Tolerance is 0.006 because the paper prints two decimals and the
+    # low endpoint is 0.225, exactly half a unit away.
+    c_train = [r["C"]["train_score"] for r in _runs("validation-study-c2b.json")]
+    for label, pattern, want in (
+        ("tex: arm C train lo", r"it starts at \$([\d.]+)\$ to", min(c_train)),
+        ("tex: arm C train hi", r"it starts at \$0.23\$ to\s+\$([\d.]+)\$", max(c_train)),
+    ):
+        out.append((label, _scrape(tex, pattern), 0.006, want))
 
     # The two superseded-run deltas sec:superseded scales by the same floor. These were quoted as
     # "5 sigma" and "3.5 sigma" for 0.100 and 0.094, which are 3.50 and 3.29 -- the first is what
