@@ -70,3 +70,23 @@ def test_author_year_is_read_from_the_bibliography():
     # Single-author entries must not claim co-authors.
     single = [v for v in cites.values() if "et al." not in v]
     assert single, "no single-author entries resolved, so the 'et al.' branch is untested"
+
+
+def test_the_author_block_has_no_placeholder():
+    """The one blocker a script can check for itself.
+
+    This paper carried "Author list TBD" for its whole life; a fixed checklist line reminding a
+    human to fix it would now be a false statement standing in the output forever, which is the
+    same stale-assertion failure the paper's own coverage guards exist to catch. So the reminder is
+    derived from the file and disappears when it is satisfied.
+    """
+    assert ap.unresolved_placeholders() == [], (
+        f"the author block still reads {ap.author_block()!r}, which arXiv cannot accept"
+    )
+
+
+def test_a_placeholder_author_block_is_detected():
+    """The detector has to fire on the string it was built for, not merely pass on a clean file."""
+    for bad in ("Author list TBD", "Anonymous Authors", "TODO fill in"):
+        assert [w for w in ap._PLACEHOLDERS if w.lower() in bad.lower()], bad
+    assert not [w for w in ap._PLACEHOLDERS if w.lower() in "Vladimir Rotariu".lower()]

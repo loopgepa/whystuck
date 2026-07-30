@@ -106,6 +106,24 @@ def plain_abstract(paper: Path = PAPER) -> str:
     return ab
 
 
+#: Words that mean "we have not decided yet". A paper carrying any of these in its author block
+#: cannot be submitted, and the check is dynamic rather than a fixed checklist line so that the
+#: reminder disappears when it is satisfied instead of standing there falsely.
+_PLACEHOLDERS = ("TBD", "TODO", "Anonymous", "XXX", "FIXME", "Author list")
+
+
+def author_block(paper: Path = PAPER) -> str:
+    m = re.search(r"\\author\{(.*?)\}\s*\n\\date", (paper / "main.tex").read_text(), re.DOTALL)
+    if m is None:
+        raise RuntimeError("no author block found in main.tex")
+    return " ".join(m.group(1).split())
+
+
+def unresolved_placeholders(paper: Path = PAPER) -> list[str]:
+    block = author_block(paper)
+    return [w for w in _PLACEHOLDERS if w.lower() in block.lower()]
+
+
 def _author_year(paper: Path) -> dict[str, str]:
     """key -> "Surname et al., Year", parsed from references.bib."""
     bib = (paper / "references.bib").read_text(encoding="utf-8")
@@ -165,17 +183,21 @@ def main() -> int:
 
     print("\n--- plain-text abstract for the submission form ---")
     print(plain_abstract())
+    print(f"\n--- author block ---\n    {author_block()}")
+    stale = unresolved_placeholders()
     print("\n--- still required from a human ---")
-    for item in (
-        "a real author list: main.tex says 'Author list TBD', and arXiv metadata needs names",
+    items = [
         "the repository must be public, or the abstract's release claim and the URL in the "
         "author block both point at nothing",
         "a licence (arXiv default vs CC BY) and a primary category (cs.LG or cs.CL, cross-list "
         "the other)",
         "endorsement, if this is a first submission to that archive",
-    ):
+    ]
+    if stale:
+        items.insert(0, f"a real author list: the block still contains {stale}")
+    for item in items:
         print(f"  [ ] {item}")
-    return 0
+    return 1 if stale else 0
 
 
 if __name__ == "__main__":  # pragma: no cover
