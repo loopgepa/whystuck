@@ -12,6 +12,10 @@
 \usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage{hyperref}
+% Default hyperref draws a coloured rule around every link, so every \S and \ref printed as a red
+% box. Invisible in the source and unmissable on paper; found by rasterising a page rather than by
+% reading the log, which reports nothing about it.
+\hypersetup{hidelinks}
 \usepackage{natbib}
 \usepackage[margin=1in]{geometry}
 \usepackage{xcolor}
@@ -19,6 +23,17 @@
 % cost eleven overfull boxes running up to 1.7in into the margin. This lets it stretch
 % interword space as a last resort instead; content is unchanged.
 \setlength{\emergencystretch}{3em}
+% Float placement. With sixteen tables already queued, LaTeX's defaults (a top float may occupy at
+% most 0.7 of the text height, and 0.2 of every float-bearing page must be text) deferred two
+% full-width figures to the end of the document --- twenty-eight pages from the section that
+% references them. Relaxing the fractions lets a tall figure sit at the top of its own page near
+% its reference instead of falling off the back of the float queue.
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.75}
+\renewcommand{\textfraction}{0.08}
+\renewcommand{\floatpagefraction}{0.70}
+\setcounter{topnumber}{3}
+\setcounter{totalnumber}{4}
 \newcommand{\dd}{\ensuremath{\Delta}}
 
 \title{Your Loop Optimizer Is Not Optimizing Your Loop\\
@@ -480,6 +495,22 @@ check instead of exiting before it starts.
 \subsection{Detector quality, and the non-monotonic ceiling}
 \label{sec:detector}
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig-detector.pdf}
+\caption{\textbf{Detection is necessary and not sufficient, and the ordering is the evidence.}
+Held-out score for the seed genome on the thirty tasks runs~3 and~7--10 share, so difficulty
+cancels and the differences are two independent draws (\S\ref{sec:threats}). \emph{Upper group:}
+the fix side is held at one refine round and only the critique changes. A \emph{perfect} oracle
+checker (ringed) gives the \emph{lowest} of the three scores --- $0.088$, or $3.09\sigma$, below a
+mere text-statistics tool, which is the gap the mechanistic claim rests on. Against the
+near-random intrinsic critique the same oracle is $0.028$ better, $0.99\sigma$, which we do not
+claim. \emph{Lower group:} the checker is now fixed perfect and the fix side varies instead, where
+the same budget buys real gains. Read together: what a checker cannot buy is the repair. The rule
+at the foot is $\sigma(\dd)$ to scale, so any gap in the panel can be sized by eye.}
+\label{fig:detector}
+\end{figure}
+
 \paragraph{The critique is an unreliable detector --- measured.} The
 mechanism by which a better verify gene \emph{could} help is by catching failures
 the generator cannot self-see and steering refinement. We measure the in-loop
@@ -823,6 +854,25 @@ scope.
 
 \subsection{The \texorpdfstring{$p_0$}{p0} sweep: when loop-level optimization pays}
 \label{sec:p0}
+
+\begin{figure}[!tb]
+\centering
+\includegraphics[width=\textwidth]{figures/fig-p0.pdf}
+\caption{\textbf{The paper's answer, and the mechanism under it.} \emph{Top:} the loop-level
+contrast $\dd(D-B)$ against $p_0$, the base rate of first drafts that already satisfy every
+requirement. Open squares are the single draw each level was first published from; filled circles
+are the five-replicate means of \S\ref{sec:repeat} with $95\%$ intervals on $t(4)$, which is the
+distribution four degrees of freedom actually have. Small open circles are the three per-seed
+values; the grey band is the measured noise floor $\pm\sigma(\dd) = 0.0286$ and the dashed rules
+the pre-registered $\pm0.05$ SESOI. No endpoint is individually significant except $L_2$: what
+carries the finding is the $0.102$ swing, about $2.5\sigma$ once the denominator is allowed to
+carry $\sigma$ twice. \emph{Bottom:} why the sign moves. As $p_0$ rises the evolved critique begins
+to accept and is never wrong when it does, while the seed rubric accepts more often and is wrong
+six, six and two times --- precision-$1$ acceptance, not looser acceptance. Every number is derived
+from a released cassette by \texttt{scripts/make\_figures.py}, and
+\texttt{tests/test\_figures.py} fails if any disagrees with the text.}
+\label{fig:p0}
+\end{figure}
 
 Every result above was measured at one point on one axis. \S\ref{sec:analysis} explains the
 loss with a mechanism that makes a quantitative commitment, and that commitment turns out to be
@@ -1499,6 +1549,24 @@ convenient adjustment.
 
 \subsection{Result: not a search-depth artifact either}
 \label{sec:budgetresult}
+
+\begin{figure}[!tb]
+\centering
+\includegraphics[width=\textwidth]{figures/fig-depth.pdf}
+\caption{\textbf{The last route to a positive result, closed.} \emph{Top:} $\dd(D-B)$ against
+\emph{measured} search depth --- GEPA iterations counted by replaying each cassette, not the
+registered formula this section corrects. Labels are each cell's \texttt{max\_metric\_calls}; open
+markers are budget-bound cells and filled ones have reached the proposal cap. The band is the
+directly measured within-run $\sigma(\dd) = 0.042$ and the dashed rule the $\pm0.05$ SESOI. Over a
+six-fold depth range $\dd$ does not order along depth, and the deepest cell is the flattest of the
+six at $+0.0017$, or $0.04\sigma$, against a registered rule that required it to clear both
+$+0.05$ and $2\sigma$. \emph{Bottom:} the dissociation, and the sweep's most useful result.
+Acceptance rises with budget while $\dd$ does not, so the optimizer is searching and accepting and
+what it accepts does not transfer. The shaded column marks three cells that share one measured
+depth: they are independent draws of a single configuration, which is why they are not joined by a
+line that would turn their offset into a slope.}
+\label{fig:depth}
+\end{figure}
 
 All five cells were bought. Both registered predictions hold, and the section that registered
 them contains an arithmetic error worth reporting first, because it is the same class of error

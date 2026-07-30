@@ -59,6 +59,10 @@ dev = [
 docs = [
     "mkdocs-material>=9.5",
 ]
+# Paper figures only. Kept out of `dev` so the ordinary test path stays light: the figure
+# module's data layer is pure and imports matplotlib lazily inside `render`, which is what lets
+# `test_figures.py` check every plotted number against the paper without a plotting stack.
+figures = ["matplotlib>=3.8"]
 
 [tool.ruff]
 line-length = 100
