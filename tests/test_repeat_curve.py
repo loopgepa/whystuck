@@ -42,6 +42,10 @@ import verify_paper_claims as vpc  # noqa: E402
 
 CHECKER = pathlib.Path("scripts/verify_paper_claims.py")
 
+#: Held-out tasks per seed. Every curve run used ten, so a pooled row is thirty tasks -- the same
+#: scale as the p0 replicates, which is what makes the two sigma families comparable.
+N_HELDOUT_PER_SEED = 10
+
 
 def _meta(slug: str) -> dict:
     return json.loads(pathlib.Path(f"docs/validation-study-{slug}.json").read_text())["meta"]
@@ -102,6 +106,52 @@ def test_each_curve_row_pins_the_task_generating_parameters(run: rs.CurveRun):
     assert argv[argv.index("--task-set") + 1] == "multi-hard"
     assert argv[argv.index("--seeds") + 1] == "1"
     assert "--exclude-constraint" not in argv, "the curve runs excluded no constraints"
+
+
+#: Metadata fields that change what a replicate scores. `curve_argv_for` sets some explicitly and
+#: inherits the rest from CLI defaults, and an inherited default is exactly the kind of thing that
+#: can move under a run without anyone passing a flag -- so these are compared against what the
+#: released run RECORDED, not against what the argv says.
+#:
+#: Values are the CLI default each field takes when ABSENT. The older released runs omit the
+#: levers they did not use, so a missing key means "the default" and not "different" -- comparing
+#: raw `.get()` results reports False against None on every row, which a first draft of this test
+#: duly did.
+_SCORING_FIELDS = {
+    "worker_model": "openai/gpt-4.1-mini",
+    "worker_max_output_tokens": 320,
+    "loop_max_retries": 1,
+    "n_train": 16,
+    "n_heldout": 16,
+    "oracle_critique": False,
+    "feedback_stats": False,
+    "feedback_level": "mid",
+    "plan_gene": False,
+}
+
+
+@pytest.mark.parametrize("run", rs.CURVE, ids=lambda r: r.label)
+def test_a_bought_replicate_recorded_the_same_configuration_as_its_run(run: rs.CurveRun):
+    """End-to-end fidelity, checked from the artifact rather than from the invocation.
+
+    `curve_argv_for` passes the flags that differ between rows and lets the rest fall to CLI
+    defaults --- worker model and the 320-token output cap among them. A default that drifted
+    would produce replicates of a subtly different loop while every argv assertion still passed,
+    and the measured σ would belong to a configuration the paper never ran. Comparing recorded
+    metadata closes that gap. Skipped for rows not yet bought, so the check strengthens as the
+    experiment completes instead of blocking on it.
+    """
+    job = rs.CurveJob(run, rs.CURVE_SEEDS[0], 0)
+    if not job.done:
+        pytest.skip(f"{run.label} not bought yet")
+    got = json.loads(pathlib.Path(job.out).read_text())["meta"]
+    want = _meta(run.slug)
+    bad = [
+        f"{f}: replicate {got.get(f, d)!r} vs run {want.get(f, d)!r}"
+        for f, d in _SCORING_FIELDS.items()
+        if got.get(f, d) != want.get(f, d)
+    ]
+    assert not bad, f"{run.label} replicate scored a different loop:\n  " + "\n  ".join(bad)
 
 
 def test_the_curve_measures_every_row_the_paper_scales_by_sigma():
@@ -231,10 +281,25 @@ def test_paired_gaps_refuse_mismatched_task_sets():
         rs.paired_gaps([{"t1": 1.0}], [{"t2": 1.0}])
 
 
-def test_sigma_by_run_and_aggregate_are_empty_before_anything_is_bought():
-    """Nothing is bought yet, so both must report emptiness rather than a fabricated zero."""
-    assert rs.curve_aggregate(k=5) == []
-    assert rs.sigma_by_run(k=5) == {}
+def test_sigma_by_run_and_aggregate_never_fabricate_a_spread_from_one_draw():
+    """A single draw has no spread, and reporting $0$ for it would read as perfect precision.
+
+    This replaced an assertion that both were — literally — *empty*, on the grounds that nothing
+    had been bought yet. That was a claim about the calendar rather than about the code, and it
+    duly failed on the pre-push hook of the commit that bought the replicates. The invariant
+    worth pinning is that a row appears only once it has at least two complete replicates,
+    whatever exists on disk.
+    """
+    # k=1 cannot support a spread however many replicates are on disk.
+    assert rs.sigma_by_run(k=1) == {}
+    assert rs.curve_aggregate(k=1) == []
+    # Replicate indices beyond what was bought must be skipped, not counted as zeros.
+    beyond = 500
+    for label, sd in rs.sigma_by_run(k=beyond).items():
+        assert sd >= 0.0, label
+    for result in rs.curve_aggregate(k=beyond):
+        assert result.k == len(result.replicate_deltas) >= 2, result.level
+        assert result.n_tasks == len(rs.CURVE_SEEDS) * N_HELDOUT_PER_SEED
 
 
 def test_the_fidelity_check_gates_the_spend_and_not_only_the_tests():
