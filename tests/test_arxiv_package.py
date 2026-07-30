@@ -14,6 +14,8 @@ import pathlib
 import re
 import sys
 
+import pytest
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
 
 import make_arxiv_package as ap  # noqa: E402
@@ -90,3 +92,57 @@ def test_a_placeholder_author_block_is_detected():
     for bad in ("Author list TBD", "Anonymous Authors", "TODO fill in"):
         assert [w for w in ap._PLACEHOLDERS if w.lower() in bad.lower()], bad
     assert not [w for w in ap._PLACEHOLDERS if w.lower() in "Vladimir Rotariu".lower()]
+
+
+def test_preflight_is_clean_and_checks_what_it_claims():
+    assert ap.preflight() == [], "the paper should be submittable at HEAD"
+    src = inspect.getsource(ap.preflight)
+    for concern in ("unresolved_placeholders", "pdfoutput_line", "ABSTRACT_LIMIT"):
+        assert concern in src, f"preflight stopped checking {concern}"
+
+
+def test_pdfoutput_is_declared_early_enough():
+    """arXiv reads only the first five lines, and comments count toward that budget.
+
+    Without the declaration, arXiv's pipeline may choose the DVI path, which cannot include a PDF
+    figure --- so a paper with three PDF figures could be announced with all three missing.
+    """
+    line = ap.pdfoutput_line()
+    assert line is not None, r"main.tex has no \pdfoutput=1"
+    assert line <= 5, f"declared on line {line}, outside the window arXiv inspects"
+
+
+def test_build_bbl_removes_the_old_file_before_regenerating():
+    """Otherwise "exists" means "left over from a previous build", not "produced by this run".
+
+    That was a real defect: the function ran bibtex, ignored its exit status, and then checked only
+    that main.bbl existed --- which it always did. A bibtex failure would have shipped a stale
+    bibliography while the docstring promised a fresh one.
+    """
+    src = inspect.getsource(ap.build_bbl)
+    assert "unlink" in src, "a stale .bbl could be shipped"
+    assert src.index("unlink") < src.index('"bibtex"'), "the deletion must precede the run"
+    assert "main.blg" in src, "bibtex errors must be detected, not just a missing file"
+
+
+def test_an_unsubmittable_paper_produces_no_package():
+    """A tarball that cannot be submitted is worse than none: it looks like a finished artifact."""
+    src = inspect.getsource(ap.main)
+    assert src.index("preflight()") < src.index("build_bbl()"), "preflight must gate the build"
+    assert "NOT SUBMITTABLE" in src
+
+
+def test_an_unresolvable_citation_is_an_actionable_error(tmp_path):
+    """Not a bare KeyError from a dict lookup two frames down."""
+    paper = tmp_path / "paper"
+    paper.mkdir()
+    (paper / "main.tex").write_text(
+        "\\begin{abstract}\nSee \\citep{ghost} for details.\n\\end{abstract}\n"
+    )
+    (paper / "references.bib").write_text("@misc{other,\n  title = {T},\n  year = {2020}\n}\n")
+    with pytest.raises(RuntimeError, match="ghost"):
+        ap.plain_abstract(paper)
+
+
+def test_the_arxiv_limits_are_the_documented_ones():
+    assert ap.ABSTRACT_LIMIT == 1920, "arXiv's documented abstract field limit"

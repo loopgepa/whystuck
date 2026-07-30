@@ -35,16 +35,29 @@ def _run(cmd: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
 
 
 def build_bbl(paper: Path = PAPER) -> Path:
-    """Regenerate `main.bbl` from `references.bib`, so the tarball cannot ship a stale one."""
-    for cmd in (
-        ["pdflatex", "-interaction=nonstopmode", "main.tex"],
-        ["bibtex", "main"],
-        ["pdflatex", "-interaction=nonstopmode", "main.tex"],
-    ):
-        _run(cmd, paper)
+    """Regenerate `main.bbl` from `references.bib`, so the tarball cannot ship a stale one.
+
+    The deletion is the load-bearing line. An earlier version of this function ran bibtex and then
+    merely checked that `main.bbl` existed --- which it always did, left over from a previous build
+    --- so a bibtex failure would have shipped a stale bibliography while the docstring claimed
+    otherwise. Removing the file first turns "exists" into "was produced by this run".
+    """
     bbl = paper / "main.bbl"
+    bbl.unlink(missing_ok=True)
+    _run(["pdflatex", "-interaction=nonstopmode", "main.tex"], paper)
+    bib = _run(["bibtex", "main"], paper)
+    _run(["pdflatex", "-interaction=nonstopmode", "main.tex"], paper)
     if not bbl.exists():
-        raise RuntimeError("bibtex produced no main.bbl; the upload would post with [?] citations")
+        raise RuntimeError(
+            "bibtex produced no main.bbl, so the upload would post with [?] citations. "
+            f"bibtex said:\n{bib.stdout[-2000:]}"
+        )
+    blg = (paper / "main.blg").read_text(errors="ignore") if (paper / "main.blg").exists() else ""
+    fatal = [ln for ln in blg.splitlines() if ln.startswith("I couldn't") or "---line" in ln]
+    if fatal:
+        raise RuntimeError(
+            "bibtex reported errors, so main.bbl is unreliable:\n" + "\n".join(fatal)
+        )
     return bbl
 
 
@@ -87,10 +100,20 @@ def plain_abstract(paper: Path = PAPER) -> str:
     # inventing a surname to fill an abstract would be a fabrication, and dropping the citation
     # entirely leaves the abstract asserting someone else's result unattributed.
     cites = _author_year(paper)
+
+    def _render(mm: re.Match[str], fmt: str) -> str:
+        names = []
+        for key in (k.strip() for k in mm.group(1).split(",")):
+            if key not in cites:
+                raise RuntimeError(
+                    f"cited key {key!r} has no author/year in references.bib, so it cannot be "
+                    "rendered for the metadata field; fix the entry rather than dropping the cite"
+                )
+            names.append(cites[key])
+        return fmt.format(", ".join(names))
+
     for macro, fmt in ((r"\\citep", "({})"), (r"\\citet", "{}")):
-        for mm in re.finditer(macro + r"\{([^}]*)\}", ab):
-            names = ", ".join(cites[k.strip()] for k in mm.group(1).split(","))
-            ab = ab.replace(mm.group(0), fmt.format(names))
+        ab = re.sub(macro + r"\{([^}]*)\}", lambda mm, f=fmt: _render(mm, f), ab)
     ab = re.sub(r"\s+\(", " (", ab)
     ab = re.sub(r"\\emph\{([^}]*)\}", r"\1", ab)
     ab = re.sub(r"\\text(?:bf|it|tt)\{([^}]*)\}", r"\1", ab)
@@ -141,10 +164,81 @@ def _author_year(paper: Path) -> dict[str, str]:
     return out
 
 
+#: arXiv's hard limit on the abstract metadata field, in characters. Exceeding it is a rejection at
+#: the form, not a warning.
+ABSTRACT_LIMIT = 1920
+
+
+def pdfoutput_line(paper: Path = PAPER) -> int | None:
+    """Which line declares `\\pdfoutput=1`, or None. Must be within the first five."""
+    for i, line in enumerate(
+        (paper / "main.tex").read_text(encoding="utf-8").splitlines()[:5], start=1
+    ):
+        if line.strip().startswith(r"\pdfoutput=1"):
+            return i
+    return None
+
+
+def preflight(paper: Path = PAPER) -> list[str]:
+    """Everything the script can decide for itself. Returns blocking problems, empty if clean.
+
+    Checked BEFORE anything is written, because a tarball that cannot be submitted is worse than no
+    tarball: it looks like a finished artifact.
+    """
+    problems = []
+    stale = unresolved_placeholders(paper)
+    if stale:
+        problems.append(f"the author block still contains {stale}: {author_block(paper)!r}")
+    if pdfoutput_line(paper) is None:
+        problems.append(
+            r"no \pdfoutput=1 in the first five lines of main.tex. This submission has PDF "
+            "figures, and a DVI run cannot include them, so they could be announced missing"
+        )
+    n = len(plain_abstract(paper))
+    if n > ABSTRACT_LIMIT:
+        problems.append(f"the plain abstract is {n} characters, over arXiv's {ABSTRACT_LIMIT}")
+    return problems
+
+
+#: The two choices arXiv forces at the form, with the reasoning, because both are consequential and
+#: one of them is irreversible.
+LICENCE_NOTE = """  Licence:  CC BY 4.0 is the recommendation.
+      This paper's contribution is a reporting practice plus a released artifact --- every
+      cassette, every pre-registration, the audit --- and it asks other people to re-run and
+      re-analyse it. The arXiv Perpetual Non-Exclusive licence (the default) grants arXiv
+      distribution rights and limits re-use by everyone else, which contradicts the point.
+      CC BY permits redistribution and derivative work with attribution.
+      THE CHOICE IS IRREVOCABLE. arXiv cannot change it after announcement; only a new version
+      can carry a different licence, and the old one stays licensed as posted."""
+
+CATEGORY_NOTE = """  Categories:  primary cs.LG, cross-list cs.CL.
+      The object of study is an optimizer's behaviour and how to measure it, which is cs.LG;
+      the tasks are instruction-following and code, which is why cs.CL is the cross-list.
+      DECIDE THIS BEFORE HUNTING AN ENDORSER: endorsement is granted per endorsement domain,
+      so the primary category determines which endorsement you need."""
+
+ENDORSEMENT_NOTE = """  Endorsement:  as an independent researcher, expect to need one, and expect
+      to ask a person for it. arXiv tightened this on 21 January 2026: an institutional email
+      address is no longer sufficient on its own. The automatic route now needs an institutional
+      address AND prior authorship in the same endorsement domain; with neither, the only route
+      is a personal endorsement from an established arXiv author in that domain (an endorser
+      needs roughly five submissions there). arXiv staff cannot endorse and cannot waive it.
+      What to send: the built PDF, one paragraph on what the paper measures, and the repository
+      link. The paper's own strongest hook is that it invalidated its own headline twice and
+      releases the cassettes to prove it."""
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--outdir", default="dist", help="where to write the tarball")
     args = ap.parse_args()
+
+    problems = preflight()
+    if problems:
+        print("NOT SUBMITTABLE, so no package was written:")
+        for pr in problems:
+            print(f"  - {pr}")
+        return 1
 
     build_bbl()
     out = Path(args.outdir)
@@ -184,20 +278,18 @@ def main() -> int:
     print("\n--- plain-text abstract for the submission form ---")
     print(plain_abstract())
     print(f"\n--- author block ---\n    {author_block()}")
-    stale = unresolved_placeholders()
-    print("\n--- still required from a human ---")
-    items = [
-        "the repository must be public, or the abstract's release claim and the URL in the "
-        "author block both point at nothing",
-        "a licence (arXiv default vs CC BY) and a primary category (cs.LG or cs.CL, cross-list "
-        "the other)",
-        "endorsement, if this is a first submission to that archive",
-    ]
-    if stale:
-        items.insert(0, f"a real author list: the block still contains {stale}")
-    for item in items:
-        print(f"  [ ] {item}")
-    return 1 if stale else 0
+    print(f"    abstract: {len(plain_abstract())} characters of {ABSTRACT_LIMIT}")
+    print(f"    \\pdfoutput=1 on line {pdfoutput_line()} (must be <= 5)")
+    print("\n--- decisions the form will ask for ---")
+    for note in (LICENCE_NOTE, CATEGORY_NOTE, ENDORSEMENT_NOTE):
+        print(note + "\n")
+    print("--- the one thing this script cannot check ---")
+    print(
+        "  [ ] the repository must be public. The abstract claims a release and the title block\n"
+        "      prints the URL under the author's name, so posting while it is private ships a\n"
+        "      paper citing a 404."
+    )
+    return 0
 
 
 if __name__ == "__main__":  # pragma: no cover

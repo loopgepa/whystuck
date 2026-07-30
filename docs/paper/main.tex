@@ -1,3 +1,8 @@
+\pdfoutput=1
+% ^ MUST stay within the first five lines, and comments count toward that budget. arXiv's TeX
+% pipeline decides between latex (DVI) and pdflatex by inspection, and a DVI run cannot
+% \includegraphics a PDF figure; without this declaration a submission carrying PDF figures can be
+% announced with its figures silently missing.
 \documentclass[11pt]{article}
 
 % ---------------------------------------------------------------------------
