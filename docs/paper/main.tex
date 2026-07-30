@@ -598,7 +598,7 @@ since even maximally-actionable feedback saturates at $0.873$.
 \toprule
 Critique detector & $R$ & precision & F$_1$ & $n$ & seed held-out & run \\
 \midrule
-intrinsic self-critique & 1 & 0.08 & 0.11 & 50 & 0.765 & 3 \\
+intrinsic self-critique & 1 & 0.08 & 0.11 & 50 & 0.765$^{\dagger}$ & 3 \\
 intrinsic $+$ plan module & 1 & 0.00 & $\approx 0$ & 30 & 0.757 & 5 \\
 non-oracle measurement tool & 1 & \textbf{1.00} & \textbf{0.83} & 30 & 0.837 & 4 \\
 oracle, which-constraint (mid) & 1 & 1.00 & 1.00 & --- & 0.748 & 7 \\
@@ -618,7 +618,11 @@ close the gap: refine budget ($0.748\!\to\!0.813$, run 8, $2.28\sigma$) and feed
 the tool-fed loop ($0.873$ vs.\ $0.837$), but that particular gap is
 $1.28\sigma$ and we do not claim it. F$_1$ is fixed at $1.0$ across runs
 7--10 by construction, so the $0.810\!\to\!0.873$ lift is pure actionability, not detection;
-a generator-limited residual remains (hi still $<1$).}
+a generator-limited residual remains (hi still $<1$). $^{\dagger}$Run~3 released five seeds and
+this is their mean; every \emph{gap} in this paper uses its first three
+($0.7767$), because seeds~3--4 draw different tasks and pooling them would put task-draw
+variance back into a comparison built to cancel it (\S\ref{sec:threats}). So the external-tool
+lift is $0.8367 - 0.7767 = +0.060$ and not the $+0.072$ this column's rounded entries suggest.}
 \label{tab:curve}
 \end{table}
 
@@ -1942,15 +1946,14 @@ generator-limited (the residual). The agenda, re-ordered accordingly:
     self-preferring one.
   \item[D4 (budget sweep) --- \textbf{done} (\S\ref{sec:budgetresult}); worker sweep open.]
     Bought at fixed $n_{\mathrm{train}}{=}8$ over a measured six-fold range of search depth: no
-    trend, and the deepest cell is the flattest, so under-search is rejected. \emph{Remaining:}
-    worker
-    $\in$\{nano, mini, a 5-series\} to rule out under-budgeting and map
-    model-dependence. The split sweep (\S\ref{sec:splitresult}) moved split size and budget
-    together along a constant-epoch line, by necessity, so it cannot say which of the two
-    produced the swing from $-0.042$ to $+0.062$. Holding the split fixed and varying only the
-    budget is the experiment that separates them, and it is the one place where a positive
-    finding would still be available: if $\dd$ rises with budget at fixed split, the story is
-    under-search rather than instability.
+    trend, and the deepest cell is the flattest, so under-search is rejected. That closes a
+    route this paper flagged for a long time as the last one open: the split sweep
+    (\S\ref{sec:splitresult}) moved split size and budget together along a constant-epoch line,
+    by necessity, so it could not say which of the two produced the swing from $-0.042$ to
+    $+0.062$, and holding the split fixed while varying only the budget was the experiment that
+    separates them. It was bought, and $\dd$ does not rise with depth.
+    \emph{Remaining:} worker $\in$\{nano, mini, a 5-series\}, which tests under-budgeting of the
+    \emph{model} rather than of the search, and maps model-dependence.
   \item[D5 (cross-domain) --- \textbf{done} (\S\ref{sec:bcb}).] The null recurs in a
     semantically-verified, executable-feedback domain, so reliable, actionable verification
     is not by itself sufficient to make the loop-level lever pay off; aiming GEPA directly
@@ -2140,7 +2143,7 @@ This paper's earlier drafts published claims it now withdraws, and two of its pr
 predictions failed. Reporting guidance for preregistered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change is collected here and the body text states only
-the surviving claim. \textbf{Sixteen} entries follow. Substantive withdrawals give the claim as
+the surviving claim. \textbf{Twenty-one} entries follow. Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
 superseded values themselves are recoverable from the repository history released with this paper.
@@ -2212,6 +2215,29 @@ superseded values themselves are recoverable from the repository history release
   \item \textbf{Cost figures.} The harness records a pre-flight \emph{bound} on spend, not an
     invoice (\S\ref{sec:prereg}). Bounds are labelled as bounds throughout; an earlier draft
     reported one as a measured spend.
+  \item \textbf{``No measurable advantage for loop-level optimization.''} The original headline,
+    across ten pre-registered runs. Withdrawn: the treatment never reached the gene, so those
+    runs compared a genome against itself (Appendix~\ref{sec:defect}). What replaces it is one
+    configuration in which the treatment demonstrably ran (\S\ref{sec:rerun}).
+  \item \textbf{``The null is tight rather than merely underpowered.''} It rested on four
+    intervals of exactly $[0,0]$. An interval of $[0,0]$ arises when the two arms produce
+    byte-identical genomes and the cassette therefore serves identical completions, which is the
+    sharpest available evidence that the experiment did \emph{not} run rather than support for
+    its conclusion.
+  \item \textbf{``The extra evolvable gene over-fits the train split.''} Untestable from the
+    release as published, because the train aggregate was computed and discarded; and the
+    default one-component-per-proposal selector predicts the \emph{opposite}, since the two-gene
+    arm searched the shared gene about half as hard (Evidence~3). The split sweep then found no
+    split-size trend to overfit along at all (\S\ref{sec:splitresult}).
+  \item \textbf{``$\dd(D-B) = -0.10$ excludes zero,'' and that it rules out under-powering.} A
+    percentile-index error dropped the largest resample atom, which at $n=3$ carries
+    $1/27 = 3.7\% > \alpha/2$. Corrected, the interval is $[-0.150,+0.000]$ and includes zero
+    (Table~\ref{tab:ciexcl}). The error's direction flatters negative effects.
+  \item \textbf{Any BigCodeBench-Hard interval or sign test read as replication across
+    independent seeds.} That benchmark shuffles a fixed vendored pool, so a seed selects a
+    partition rather than drawing a fresh sample; at six seeds of ten the measured held-out
+    overlap is $6.7\%$ (Evidence~4b). The affected effect is reported without an interval
+    (\S\ref{sec:bcb}).
 \end{enumerate}
 
 \section{How a Componentized Treatment Can Silently Not Apply}
@@ -2450,33 +2476,15 @@ and training lineage, so this is cross-\emph{lineage}, not the cross-\emph{provi
 that would rule out self-preference bias (D3, \S\ref{sec:directions}).
 
 \paragraph{What we retract.}
-The following claims are withdrawn: that there is \emph{no measurable advantage for
-loop-level optimization} (the loop-level treatment was not applied); that the null is
-\emph{tight rather than underpowered} on the strength of $[0,0]$ intervals (an interval of
-$[0,0]$ arises when B and D produce byte-identical genomes, i.e.\ when the arms issued the
-same calls and the cassette served the same completions --- the sharpest available evidence
-that the experiment did not run, not evidence for its conclusion); that the extra evolvable
-gene \emph{over-fits the train split} (the train aggregate was computed and discarded, so
-this was untestable from the release, and the selector makes the opposite prediction); that
-$\dd(D-B)=-0.10$ \emph{excludes zero}; that this \emph{rules out under-powering}; and any
-reading of a BigCodeBench-Hard interval or sign test as \emph{replication across independent
-seeds} (Evidence~4b); and that arm~D's $-0.042$ at $L_1$ measures the loop-level treatment,
-when the component decomposition of \S\ref{sec:decomp} attributes $-0.025$ of it to the
-\texttt{generate} gene both arms evolve.
-
-Two further claims are withdrawn on the evidence of the split sweep and the noise estimate,
-both of which post-date the draft that made them. First, \textbf{that evolving the verifier
-costs held-out performance at low $p_0$}: the $-0.042$ is $1.46\sigma$ of a measurement noise
-we had asserted did not exist, and three other training-split sizes at the same $p_0$ return
-$+0.017$, $+0.062$ and $+0.023$ (\S\ref{sec:splitresult}). What replaces it is narrower and is
-what the mechanism actually predicts --- the verifier degenerates to non-acceptance at low
-$p_0$, on $11/12$ genes across four split sizes --- together with the observation that a
-degenerate verifier is not thereby a harmful one, since always-refine is close to the right
-policy where almost every draft is wrong. Second, \textbf{that this study contains no
-measurement noise}: it contains $\sigma(\dd) = 0.029$ on a thirty-task mean, recoverable at \$0
-from released runs, and every interval in the paper omits it (\S\ref{sec:threats}). We also
-correct two factual slips: the
-reproducibility script registers twelve superseded runs, not ten, and the \$5 ceiling is a CLI
-default that four runs overrode (up to \$11.76).
+Every withdrawal in this paper is registered in one place,
+Appendix~\ref{sec:corrections}; a second list here would be the thing that appendix exists to
+prevent, so this paragraph does not repeat it. Five of its entries are withdrawals of claims
+made specifically about the runs in this table --- that they showed \emph{no measurable
+advantage} for loop-level optimization, that their null was \emph{tight rather than merely
+underpowered}, that the extra gene \emph{over-fit the train split}, that
+$\dd(D-B) = -0.10$ \emph{excluded zero} and thereby ruled out under-powering, and that a
+BigCodeBench-Hard interval constituted replication across independent seeds. Two factual slips
+belong with them: the reproducibility script registers twelve superseded runs, not ten, and the
+\$5 ceiling is a CLI default that four runs overrode (up to \$11.76).
 
 \end{document}

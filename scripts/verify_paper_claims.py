@@ -347,6 +347,7 @@ _WORD_NUM = {
     "sixteen": 16,
     "seventeen": 17,
     "twenty": 20,
+    "twenty-one": 21,
     "twenty-five": 25,
 }
 
@@ -2007,6 +2008,47 @@ def _checks() -> list[tuple[str, float, float, float]]:
             _curve_seed_mean("run3", shared_seeds_only=False),
         )
     )
+    # The dagger footnote on the run-3 row of tab:curve. That row prints the FIVE-seed mean while
+    # every gap uses the three-seed one, so a reader subtracting the printed column gets +0.072
+    # where the paper says +0.060. The footnote states both and the arithmetic between them, and
+    # all three numbers are checked here -- the trap caught one of this study's own authors.
+    for label, pattern, artifact in (
+        (
+            "tex: curve dagger three-seed",
+            r"its first three\n?\s*\(\$([\d.]+)\$\)",
+            _curve_seed_mean("run3"),
+        ),
+        ("tex: curve dagger tool row", r"lift is \$([\d.]+) -", _curve_seed_mean("run4")),
+        ("tex: curve dagger subtrahend", r"lift is \$[\d.]+ - ([\d.]+)", _curve_seed_mean("run3")),
+        (
+            "tex: curve dagger gap",
+            r"lift is \$[\d.]+ - [\d.]+ = \+([\d.]+)\$",
+            _curve_gap("run3", "run4")[0],
+        ),
+        (
+            "tex: curve dagger naive gap",
+            r"not the \$\+([\d.]+)\$ this column",
+            _curve_seed_mean("run4") - _curve_seed_mean("run3", shared_seeds_only=False),
+        ),
+    ):
+        out.append((label, _scrape(tex, pattern), 0.0005, artifact))
+
+    # The corrections appendix asserts its own length in words. Nothing checked it, which is the
+    # exact shape of stale assertion the appendix is a register of: adding an entry and leaving
+    # the word alone would make the register misstate itself.
+    _corr = tex[tex.index(r"\section{Withdrawals") : tex.index(r"\section{How a Componentized")]
+    out.append(
+        (
+            "tex: corrections entry count",
+            # `[\w-]+` because the counts are spelled and cross ten: "Twenty-one" is not `\w+`,
+            # and a `\w+` pattern returns nan rather than failing, so the check would pass
+            # vacuously the moment the appendix grew past twenty.
+            _scrape_word(tex, r"\\textbf\{([\w-]+)\} entries follow"),
+            0,
+            len(re.findall(r"^\s*\\item", _corr, re.M)),
+        )
+    )
+
     for label, pattern, pair in (
         (
             "tex: curve tool lift",
