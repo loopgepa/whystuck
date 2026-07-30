@@ -229,7 +229,12 @@ Highest-impact area right now: **real loop examples** beyond the bugfix loop
 
 ## License
 
-Apache-2.0 — see [LICENSE](LICENSE).
+Apache-2.0 for the code — see [LICENSE](LICENSE).
+
+The paper under `docs/paper/` is licensed **CC BY 4.0** instead — see
+[docs/paper/LICENSE](docs/paper/LICENSE). Two separate grants: a patent grant and NOTICE
+requirement make no sense for a document, and the paper is meant to be redistributed and
+built upon. CC BY 4.0 is also the licence selected for the arXiv submission.
 
 ---
 
