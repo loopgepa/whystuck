@@ -318,30 +318,22 @@ substantially the tool \emph{replacing} the detector on the majority of constrai
 rather than a prompt that learned to detect better.
 
 \paragraph{Reproducibility and budget.}
-Every LLM call is recorded to a content-addressed cassette (\texttt{sha256} of
-name$+$args), so runs replay offline at zero cost and partial spend is always
-persisted. Reproduction is a first-class, strict operation: re-running any study
-with \texttt{-{}-replay} re-executes the entire pipeline (loaders, GEPA search,
-scoring) against the cached calls with no API key, and any cassette miss raises --- per call,
-and, after the correction in Evidence~7, per run as well, since a consumer that swallows the
-per-call error can otherwise let a replay finish with a different number.
-GEPA is deterministic under replay, so replay is bit-for-bit:
-\texttt{scripts/verify\_reproducibility.py} registers twenty-five committed runs. Twelve are
-labelled \textbf{superseded} (\S\ref{sec:defect}) --- the ten of
-Appendix~\ref{sec:superseded}, the MBPP+ attempt of \S\ref{sec:bcb}, and the discarded first
-four-arm attempt --- because the corrected harness changes every reflection prompt and
-therefore every cassette key, so it cannot replay them and the script reports them as skipped
-rather than verified. The remaining thirteen were recorded under the corrected harness and every
-per-arm held-out score replays exactly: the two hand-written-verifier conditions of
-\S\ref{sec:analysis}, the four-arm re-run of \S\ref{sec:rerun}, the two new $p_0$ levels
-of \S\ref{sec:p0}, the three bought rows of the split sweep (\S\ref{sec:splitresult}) and the
-five bought rows of the budget sweep (\S\ref{sec:budgetresult}).
-Output tokens are hard-capped via enforced \texttt{max\_tokens};
-a pre-flight guard refuses any run whose (conservative) estimate exceeds
-\texttt{-{}-max-usd}, whose default is \$5; four runs raised it explicitly, at three
-distinct values (\$6.18 twice, \$5.89, \$11.76), so \$5 is a default rather than a study-wide
-ceiling. Every experiment was pre-registered --- hypothesis, frozen
-configuration, expected seed band, and verdict rule committed to version control
+Every LLM call is recorded to a content-addressed cassette (\texttt{sha256} of name$+$args), so
+runs replay offline at zero cost and partial spend is always persisted. Reproduction is strict:
+re-running any study with \texttt{-{}-replay} re-executes the whole pipeline (loaders, GEPA search,
+scoring) against the cached calls with no API key, and any cassette miss raises --- per call, and,
+after the correction in Evidence~7, per run as well, since a consumer that swallows the per-call
+error can otherwise let a replay finish with a different number. GEPA is deterministic under
+replay, so replay is bit-for-bit, and \texttt{scripts/verify\_reproducibility.py}
+registers twenty-five committed runs. Twelve are labelled \textbf{superseded} (\S\ref{sec:defect}) because
+the corrected harness changes every reflection prompt and therefore every cassette key, so it
+cannot replay them and the script reports them as skipped rather than verified.
+The remaining thirteen were recorded under the corrected harness and every per-arm held-out score replays
+exactly. Output tokens are hard-capped via enforced \texttt{max\_tokens}; a pre-flight guard
+refuses any run whose conservative estimate exceeds \texttt{-{}-max-usd}, whose default is \$5.
+Four runs raised it explicitly, at three distinct values (\$6.18 twice, \$5.89, \$11.76), so \$5 is
+a default rather than a study-wide ceiling. Every experiment was pre-registered --- hypothesis,
+frozen configuration, expected seed band and verdict rule committed to version control
 \emph{before} spending.
 
 \paragraph{Verdict rule (pre-registered).}
@@ -449,23 +441,21 @@ $p=0.25$ regardless of the data. What distinguishes this null from the fifteen i
 not its width but its content: the arms produced different genomes and different scores, so
 the interval measures a contrast that exists.
 
-The result we did not predict is Table~\ref{tab:rerun}'s last column. The two optimizing arms
-did \emph{not} behave alike: \textbf{prompt-only optimization is a wash} ($+0.025$, $0.000$,
-$-0.025$; mean exactly $0.000$) while \textbf{loop-level optimization costs} $-0.042$
-($-0.070$, $-0.080$, $+0.025$). We read that, at the time, as small-split overfitting: eight
-training tasks against ten held-out, with arm~D carrying two genes of surface to overfit rather
-than one. Three later results dismantle the reading, and the paragraph is left standing so the
-correction is legible rather than quietly absorbed. \S\ref{sec:decomp} attributes $-0.025$ of
-the $-0.042$ to the gene both arms evolve. The pre-registered split sweep
-(\S\ref{sec:splitresult}) finds no split-size trend to overfit along: a \emph{smaller} split
-gives $+0.017$ and larger ones $+0.062$ and $+0.023$, all at the same $p_0$ and the same
-held-out tasks. And the noise floor (\S\ref{sec:threats}) puts this cell at $1.46\sigma$. The
-degradation runs 4 and 5 showed, and the reported instability of prompt optimizers on some tasks
+The result we did not predict is Table~\ref{tab:rerun}'s last column. The two optimizing arms did
+\emph{not} behave alike:
+\textbf{prompt-only optimization is a wash} ($+0.025$, $0.000$, $-0.025$; mean exactly $0.000$) while \textbf{loop-level optimization costs} $-0.042$ ($-0.070$, $-0.080$, $+0.025$). We read that, at the time, as small-split overfitting: eight training tasks against ten
+held-out, with arm~D carrying two genes of surface to overfit rather than one. Three later results
+dismantle the reading, and the paragraph is left standing so the correction is legible rather than
+quietly absorbed. \S\ref{sec:decomp} attributes $-0.025$ of the $-0.042$ to the gene both arms
+evolve; the pre-registered split sweep (\S\ref{sec:splitresult}) finds no split-size trend to
+overfit along, a \emph{smaller} split giving $+0.017$ and larger ones $+0.062$ and $+0.023$ at the
+same $p_0$ and the same held-out tasks; and the noise floor (\S\ref{sec:threats}) puts this cell at
+$1.46\sigma$. So the honest summary is neither that loop-level optimization fails to help nor that
+it pays a price: this is the one configuration of four where it came out negative, by an amount
+the study cannot separate from measurement noise. The degradation runs 4 and 5 showed, and the
+reported instability of prompt optimizers on some tasks
 \citep{yang2023opro,zhou2025bbopromptscale}, remain the relevant context; what they no longer
-support is a directional claim from this cell. So the honest summary of loop-level optimization
-here is not that it fails to help, and no longer that it pays a price: it is that this is the
-one configuration of four where it came out negative, by an amount this study cannot separate
-from measurement noise.
+support is a directional claim from this cell.
 
 Arm~B is exactly flat on this clean re-run, so no general claim that optimizing at all costs
 held-out score is available here; the loss is specific to the arm carrying the extra gene. The
@@ -1140,17 +1130,13 @@ the drafts that were already \emph{wrong}. The training-signal argument for \emp
 search goes here} stands; the outcome-side argument for \emph{what it costs} needs the
 decomposition, which also finds that $-0.025$ of the $-0.042$ is not this gene at all.
 
-Why that corner is so attractive is worth stating, because it is not specific to our setup.
-On multi-hard almost every first draft genuinely fails, so a detector that emits \texttt{FIX}
-unconditionally is nearly indistinguishable, \emph{on the training signal}, from one that
-reasons correctly --- and it is far easier to express in prose. The penalty appears only on
-the minority of drafts that were already compliant, which a small training split barely
-contains. That is Goodhart's law operating inside the loop: the component was optimized
-against a proxy on which the degenerate policy is almost free, and the cost lands on
-held-out. Any componentized optimizer pointed at a verifier on a task with a low base rate of
-correct first drafts faces the same gradient, which makes ``never accept'' a failure mode to
-test for rather than a quirk of this run --- and it is cheap to test for, since it shows up
-as a \texttt{PASS} rate of zero.
+Why that corner is so attractive is not specific to our setup. On multi-hard almost every first
+draft genuinely fails, so a detector that emits \texttt{FIX} unconditionally is nearly
+indistinguishable \emph{on the training signal} from one that reasons correctly, and it is far
+easier to express in prose; the penalty appears only on the minority of drafts that were already
+compliant, which a small training split barely contains. Any componentized optimizer pointed at a
+verifier on a task with a low base rate of correct first drafts faces the same gradient, which
+makes ``never accept'' a failure mode to test for rather than a quirk of this run.
 
 \paragraph{The same corner is reachable by hand, which is why the re-run was worth buying.}
 Before paying for it we wrote a verify gene by hand against this paper's own findings and ran it
