@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -60,6 +61,55 @@ SEEDS = (0, 1, 2)
 
 
 @dataclass(frozen=True)
+class CurveRun:
+    """One row of the detector-quality curve (Table `tab:curve`).
+
+    Every row re-scores the SAME unoptimized seed genome. What differs is the critique that gates
+    the loop and how many refine rounds it gets, which is exactly what makes the sequence a curve
+    rather than six unrelated runs -- and what makes each row's noise a separate quantity.
+    """
+
+    label: str
+    slug: str
+    flags: tuple[str, ...]
+    retries: int
+
+
+#: The curve, whose σ-scaled ratios all divide by ONE borrowed denominator: σ(Δ) = 0.0286,
+#: estimated from a seed genome at R=1 in the p0 family. Table `tab:sigmagenome` then measures σ
+#: as a property of the genome spanning 5.9x, and three of the curve's ratios have a margin
+#: against 2σ smaller than that spread. This measures each row's σ directly.
+#:
+#: The flags are checked against each released run's own metadata by
+#: tests/test_repeat_curve.py, because a row that silently drops `--oracle-critique` measures the
+#: intrinsic critique's noise and files it under the oracle.
+CURVE: tuple[CurveRun, ...] = (
+    CurveRun("run3", "multihard", (), 1),
+    CurveRun("run4", "feedback", ("--feedback-stats",), 1),
+    CurveRun("run7", "oracle", ("--oracle-critique",), 1),
+    CurveRun("run8", "fixbudget", ("--oracle-critique",), 3),
+    CurveRun("run9", "fbactlo", ("--oracle-critique", "--feedback-level", "lo"), 3),
+    CurveRun("run10", "fbacthi", ("--oracle-critique", "--feedback-level", "hi"), 3),
+)
+
+#: Seeds 0-2 only. Run 3 released five, but its seeds 3-4 draw DIFFERENT tasks, so pooling them
+#: would reintroduce the task-draw variance the pairing exists to remove -- an error the paper's
+#: own checker guards against with `_CURVE_SHARED_SEEDS`.
+CURVE_SEEDS = (0, 1, 2)
+
+#: (label, run a, run b): the gap b - a, for every comparison the paper reports in units of σ.
+#: Coverage against the checker's own list is a test, not a convention.
+CURVE_PAIRS: tuple[tuple[str, str, str], ...] = (
+    ("tool lift (4 over 3)", "run3", "run4"),
+    ("oracle vs tool (7 under 4)", "run4", "run7"),
+    ("refine budget (8 over 7)", "run7", "run8"),
+    ("actionability (10 over 9)", "run9", "run10"),
+    ("oracle vs intrinsic (7 under 3)", "run3", "run7"),
+    ("hi vs tool (10 over 4)", "run4", "run10"),
+)
+
+
+@dataclass(frozen=True)
 class Job:
     level: str
     slug: str
@@ -83,6 +133,122 @@ class Job:
     @property
     def done(self) -> bool:
         return Path(self.out).exists()
+
+
+@dataclass(frozen=True)
+class CurveJob:
+    """One replicate of one curve row at one seed.
+
+    A separate type from `Job` rather than extra fields on it, deliberately: 135 replicates are
+    already bought and their `out` paths are what marks them done. A shared dataclass whose tag
+    format shifted would silently re-buy all of them.
+    """
+
+    run: CurveRun
+    seed: int
+    k: int
+
+    @property
+    def tag(self) -> str:
+        return f"curve-{self.run.label}-s{self.seed}-k{self.k}"
+
+    @property
+    def out(self) -> str:
+        return f"{OUT_DIR}/{self.tag}.json"
+
+    @property
+    def cassette(self) -> str:
+        return f"{CASSETTE_DIR}/{self.tag}.json"
+
+    @property
+    def done(self) -> bool:
+        return Path(self.out).exists()
+
+
+def released_meta(slug: str) -> dict:
+    """The released run's own metadata, which is where every replicate's config comes from.
+
+    Transcribing the flags into this file would let the driver and the run it claims to replicate
+    drift apart, which is the failure that produces a σ for a configuration nobody ran.
+    """
+    return json.loads(Path(f"{DOCS}/validation-study-{slug}.json").read_text())["meta"]
+
+
+def curve_plan(k: int) -> list[CurveJob]:
+    return [CurveJob(run, seed, rep) for run in CURVE for seed in CURVE_SEEDS for rep in range(k)]
+
+
+def curve_argv_for(job: CurveJob, *, execute: bool) -> list[str]:
+    """The exact CLI invocation for one curve replicate.
+
+    `--arms A` scores the seed genome and runs no optimizer, so no gene overrides are involved
+    and the whole comparison stays the arm-A baseline the paper's curve reports.
+    """
+    meta = released_meta(job.run.slug)
+    argv = [
+        EVAL_PY,
+        CLI,
+        "--task-set",
+        "multi-hard",
+        "--arms",
+        "A",
+        "--seeds",
+        str(job.seed),
+        "--n-train",
+        str(meta["n_train"]),
+        "--n-heldout",
+        str(meta["n_heldout"]),
+        "--max-metric-calls",
+        str(meta["max_metric_calls"]),
+        "--loop-max-retries",
+        str(job.run.retries),
+        "--module-selector",
+        "all",
+        "--reflection-model",
+        str(meta["reflection_model"]),
+        "--sample",
+        str(job.k),
+        "--record",
+        job.cassette,
+        "--out",
+        job.out,
+        *job.run.flags,
+    ]
+    if execute:
+        argv.append("--yes")
+    return argv
+
+
+def curve_row_mismatches(run: CurveRun) -> list[str]:
+    """Every way this row's invocation differs from the released run it claims to replicate.
+
+    Lives here rather than only in the tests so it can gate the spend: a row that drops
+    `--oracle-critique` measures the intrinsic critique's noise and files it under the oracle,
+    and a row that drops `--feedback-level hi` re-measures run 9 twice and reports the
+    actionability gap as having exactly zero variance. Both produce a clean-looking table.
+    """
+    meta = released_meta(run.slug)
+    argv = curve_argv_for(CurveJob(run, CURVE_SEEDS[0], 0), execute=False)
+    level = argv[argv.index("--feedback-level") + 1] if "--feedback-level" in argv else "mid"
+    out: list[str] = []
+    if run.retries != meta["loop_max_retries"]:
+        out.append(f"R={run.retries} but the run used {meta['loop_max_retries']}")
+    if ("--oracle-critique" in argv) is not bool(meta.get("oracle_critique", False)):
+        out.append(f"oracle_critique={meta.get('oracle_critique', False)} not reproduced")
+    if ("--feedback-stats" in argv) is not bool(meta.get("feedback_stats", False)):
+        out.append(f"feedback_stats={meta.get('feedback_stats', False)} not reproduced")
+    if level != meta.get("feedback_level", "mid"):
+        out.append(f"feedback level {level} but the run used {meta.get('feedback_level', 'mid')}")
+    if meta.get("plan_gene", False):
+        out.append("the run used a plan module, which changes both call count and task text")
+    return out
+
+
+def curve_verify_argv_for(job: CurveJob, *, out: str) -> list[str]:
+    """The same invocation in replay mode, writing somewhere other than the committed output."""
+    argv = curve_argv_for(job, execute=False)
+    argv[argv.index("--out") + 1] = out
+    return argv + ["--replay"]
 
 
 def released_genes(slug: str, arm: str, seed: int) -> dict[str, str]:
@@ -115,8 +281,8 @@ def parse_shard(spec: str) -> tuple[int, int]:
     return int(parts[0]), int(parts[1])
 
 
-def shard(jobs: list[Job], index: int, count: int) -> list[Job]:
-    """The `index`-th of `count` disjoint slices of `jobs`, by position.
+def shard[J](jobs: list[J], index: int, count: int) -> list[J]:
+    """The `index`-th of `count` disjoint slices of `jobs`, by position. Either job family.
 
     Positional striding rather than hashing: it is inspectable, it needs no shared state, and
     the union is provably the whole plan (see the tests). Every job owns its output file and its
@@ -339,6 +505,102 @@ def seed_replicate_spread(k: int) -> tuple[int, float]:
     return len(means), (pstdev(means) if len(means) > 1 else float("nan"))
 
 
+# ------------------------------------------------------------------------ curve aggregation
+
+
+def paired_gaps(a: list[dict[str, float]], b: list[dict[str, float]]) -> list[float]:
+    """One gap per replicate, differenced WITHIN that replicate over the shared tasks.
+
+    Pooling replicates before differencing would average away the very quantity being bought.
+    The task ids are compared rather than assumed: a gap taken across two different task sets is
+    a difficulty difference wearing a noise label.
+    """
+    gaps: list[float] = []
+    for va, vb in zip(a, b, strict=True):
+        if sorted(va) != sorted(vb):
+            raise ValueError("the two runs scored different held-out task ids; that is not a gap")
+        keys = sorted(va)
+        gaps.append(mean(vb[t] for t in keys) - mean(va[t] for t in keys))
+    return gaps
+
+
+def _curve_vector(label: str, rep: int) -> dict[str, float] | None:
+    """One replicate's per-task scores for one curve row, pooled over the shared seeds.
+
+    Keys are seed-qualified because two seeds can carry the same task id, and a plain dict merge
+    would then drop 20 of the 30 tasks while still looking like a 30-task mean.
+    """
+    run = next(r for r in CURVE if r.label == label)
+    out: dict[str, float] = {}
+    for seed in CURVE_SEEDS:
+        job = CurveJob(run, seed, rep)
+        if not job.done:
+            return None
+        for task, value in _vector(job.out).items():
+            out[f"s{seed}:{task}"] = value
+    return out
+
+
+def curve_aggregate(k: int) -> list[LevelResult]:
+    """Per σ-scaled comparison, the gap of each replicate and the interval it implies."""
+    out: list[LevelResult] = []
+    for label, a, b in CURVE_PAIRS:
+        va: list[dict[str, float]] = []
+        vb: list[dict[str, float]] = []
+        for rep in range(k):
+            x, y = _curve_vector(a, rep), _curve_vector(b, rep)
+            if x is not None and y is not None:
+                va.append(x)
+                vb.append(y)
+        if len(va) > 1:
+            gaps = paired_gaps(va, vb)
+            out.append(LevelResult(label, len(gaps), gaps, len(va[0])))
+    return out
+
+
+def sigma_by_run(k: int) -> dict[str, float]:
+    """label -> sd of that curve row's 30-task mean across replicates.
+
+    THE POINT OF THE EXPERIMENT. The paper divides every curve gap by a σ measured on a different
+    genome family; this is the same quantity measured on the rows the gaps actually come from.
+    """
+    out: dict[str, float] = {}
+    for run in CURVE:
+        means: list[float] = []
+        for rep in range(k):
+            vec = _curve_vector(run.label, rep)
+            if vec is not None:
+                means.append(mean(vec.values()))
+        if len(means) > 1:
+            out[run.label] = pstdev(means)
+    return out
+
+
+def curve_cost_estimate(k: int) -> list[tuple[str, float, int, float]]:
+    """(label, per-job estimate, pending jobs, subtotal), priced by the study CLI itself.
+
+    The CLI owns a token-level estimator and prints it on its dry-run path with no key required,
+    so the price comes from the code that priced every run in the paper. A per-call rate blended
+    over the existing R=1 replicates would understate the R=3 rows, whose calls are refine prompts
+    carrying a previous draft.
+    """
+    rows: list[tuple[str, float, int, float]] = []
+    pending = [j for j in curve_plan(k) if not j.done]
+    for run in CURVE:
+        probe = curve_argv_for(CurveJob(run, CURVE_SEEDS[0], 0), execute=False)
+        proc = subprocess.run(probe, capture_output=True, text=True)
+        match = re.search(r"Estimated total: \$([\d.]+)", proc.stdout)
+        if match is None:
+            raise RuntimeError(
+                f"{run.label}: the study CLI printed no estimate, so this cannot be priced.\n"
+                f"stdout:\n{proc.stdout[-1500:]}\nstderr:\n{proc.stderr[-1500:]}"
+            )
+        per_job = float(match.group(1))
+        n = len([j for j in pending if j.run.label == run.label])
+        rows.append((run.label, per_job, n, per_job * n))
+    return rows
+
+
 def _run_jobs(jobs: list[Job], *, execute: bool) -> int:
     import tempfile
 
@@ -382,6 +644,130 @@ def _run_jobs(jobs: list[Job], *, execute: bool) -> int:
             print(proc.stderr[-2000:], file=sys.stderr)
             print(f"FAILED on {job.tag}; stopping so the spend is not compounded.", file=sys.stderr)
             return 1
+    return 0
+
+
+def _curve_run_jobs(jobs: list[CurveJob], *, execute: bool) -> int:
+    """Buy the curve replicates. Dry run by default, priced by the CLI's own estimator."""
+    # Gate the spend on configuration fidelity, before pricing and before any key is needed. A
+    # row that does not reproduce its released run buys the noise of a configuration the paper
+    # never ran, and the resulting table is indistinguishable from a correct one.
+    bad = {run.label: curve_row_mismatches(run) for run in CURVE}
+    if any(bad.values()):
+        print("NOT RUNNABLE — a curve row does not reproduce its released run:", file=sys.stderr)
+        for label, reasons in bad.items():
+            for reason in reasons:
+                print(f"  {label}: {reason}", file=sys.stderr)
+        return 1
+
+    todo = [j for j in jobs if not j.done]
+    print(f"{len(jobs)} job(s); {len(jobs) - len(todo)} already done, {len(todo)} to run.")
+    if not execute:
+        print("\nDRY RUN — nothing is bought. Per-row price from the study CLI's own estimator:\n")
+        rows = curve_cost_estimate(max((j.k for j in jobs), default=0) + 1)
+        print(f"{'row':7} {'R':>2} {'$/job':>8} {'jobs':>5} {'subtotal':>9}  flags")
+        total = 0.0
+        for label, per_job, n, subtotal in rows:
+            run = next(r for r in CURVE if r.label == label)
+            total += subtotal
+            print(
+                f"{label:7} {run.retries:>2} {per_job:>8.4f} {n:>5} {subtotal:>9.4f}  "
+                f"{' '.join(run.flags) or '(intrinsic critique)'}"
+            )
+        print(f"\n{'TOTAL':7} {'':>2} {'':>8} {len(todo):>5} {total:>9.4f}")
+        if todo:
+            print("\nOne representative invocation:\n")
+            print("  " + " ".join(curve_argv_for(todo[0], execute=False)))
+        print("\nRe-run with --curve --yes to execute. Completed jobs are skipped.")
+        return 0
+
+    Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
+    Path(CASSETTE_DIR).mkdir(parents=True, exist_ok=True)
+    for i, job in enumerate(todo, 1):
+        # Re-checked at the moment of spending, not only when `todo` was built: with parallel
+        # shards the list can be minutes stale, and a stale entry costs a bought replicate.
+        if job.done:
+            print(f"[{i}/{len(todo)}] {job.tag} already done since planning, skipping")
+            continue
+        argv = curve_argv_for(job, execute=True)
+        print(f"[{i}/{len(todo)}] {job.tag}", flush=True)
+        proc = subprocess.run(argv, capture_output=True, text=True)
+        if proc.returncode != 0:
+            print(proc.stdout[-2000:], file=sys.stderr)
+            print(proc.stderr[-2000:], file=sys.stderr)
+            print(f"FAILED on {job.tag}; stopping so the spend is not compounded.", file=sys.stderr)
+            return 1
+    return 0
+
+
+def curve_verify_all(k: int) -> tuple[int, list[str]]:
+    """Replay every completed curve replicate from its own cassette. Offline and free."""
+    import tempfile
+
+    done = [j for j in curve_plan(k) if j.done]
+    failures: list[str] = []
+    for i, job in enumerate(done, 1):
+        with tempfile.TemporaryDirectory() as d:
+            out = str(Path(d) / "replay.json")
+            proc = subprocess.run(
+                curve_verify_argv_for(job, out=out), capture_output=True, text=True
+            )
+            if proc.returncode != 0:
+                failures.append(f"{job.tag}: replay exited {proc.returncode}")
+                print(f"[{i}/{len(done)}] {job.tag} REPLAY FAILED", flush=True)
+                continue
+            want = json.loads(Path(job.out).read_text())["runs"][0]["A"]["seed_heldout_by_task"]
+            got = json.loads(Path(out).read_text())["runs"][0]["A"]["seed_heldout_by_task"]
+        ok = want == got
+        if not ok:
+            failures.append(f"{job.tag}: replay produced different per-task scores")
+        print(f"[{i}/{len(done)}] {job.tag} {'ok' if ok else 'MISMATCH'}", flush=True)
+    return len(done), failures
+
+
+def _borrowed_sigma() -> float:
+    """The denominator the paper currently divides every curve gap by.
+
+    Imported from the checker rather than pinned here, so the contrast this report prints cannot
+    drift away from the value the paper actually uses.
+    """
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import verify_paper_claims as vpc
+
+    return float(vpc._noise_estimate().sigma_delta_mean)
+
+
+def _curve_report(k: int) -> int:
+    sig = sigma_by_run(k)
+    borrowed = _borrowed_sigma()
+    if not sig:
+        print("No completed curve replicates yet.")
+        return 0
+    print("=== sigma measured on the curve's OWN rows ===")
+    print(f"The paper divides every gap below by a borrowed {borrowed:.4f}, from the p0 family.")
+    print(f"{'row':7} {'R':>2} {'sd(draw)':>9} {'vs borrowed':>12}")
+    for run in CURVE:
+        if run.label in sig:
+            s = sig[run.label]
+            print(f"{run.label:7} {run.retries:>2} {s:>9.4f} {s / borrowed:>11.2f}x")
+    print()
+    results = curve_aggregate(k)
+    if not results:
+        print("No pair has both of its rows completed yet.")
+        return 0
+    print("=== the sigma-scaled claims, re-scaled by their own measurement ===")
+    print(
+        f"{'comparison':34} {'K':>3} {'gap':>8} {'sd':>8} {'se':>8} {'t':>6} "
+        f"{'borrowed':>9} verdict"
+    )
+    for r in results:
+        print(
+            f"{r.level:34} {r.k:>3} {r.delta:>+8.4f} {r.sd_between_replicates:>8.4f} "
+            f"{r.standard_error:>8.4f} {r.t_stat():>6.2f} "
+            f"{abs(r.delta) / borrowed:>8.2f}σ {r.verdict()}"
+        )
+    print(f"\n(t critical values at df={results[0].df}: p<0.10 and p<0.05 in the tables above.)")
+    print("`borrowed` is what the paper prints today; `t` is what the measurement supports.")
     return 0
 
 
@@ -474,7 +860,31 @@ def main(argv: list[str] | None = None) -> int:  # pragma: no cover - CLI conven
         default=None,
         help="'i/n': run only the i-th of n disjoint slices, so n workers can run at once",
     )
+    p.add_argument(
+        "--curve",
+        action="store_true",
+        help="operate on the detector-curve rows (Table tab:curve) instead of the p0 sweep",
+    )
     args = p.parse_args(argv)
+    if args.curve:
+        if args.verify:
+            checked, failures = curve_verify_all(args.k)
+            if failures:
+                print(f"\n{len(failures)} of {checked} replicate(s) did NOT reproduce:")
+                for f in failures:
+                    print(f"  {f}")
+                return 1
+            print(f"\nALL {checked} COMPLETED CURVE REPLICATES REPRODUCE FROM CASSETTE ($0).")
+            return 0
+        if args.aggregate:
+            return _curve_report(args.k)
+        jobs = curve_plan(args.k)
+        if args.shard:
+            index, count = parse_shard(args.shard)
+            jobs = shard(jobs, index, count)
+            print(f"shard {index}/{count}: {len(jobs)} of {len(curve_plan(args.k))} job(s)")
+        rc = _curve_run_jobs(jobs, execute=args.yes)
+        return _curve_report(args.k) if (rc == 0 and args.yes) else rc
     if args.verify:
         checked, failures = verify_all(args.k)
         if failures:
