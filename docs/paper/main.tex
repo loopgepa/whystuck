@@ -20,7 +20,6 @@
 % interword space as a last resort instead; content is unchanged.
 \setlength{\emergencystretch}{3em}
 \newcommand{\dd}{\ensuremath{\Delta}}
-\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
 
 \title{Your Loop Optimizer Is Not Optimizing Your Loop\\
 \large A silent failure mode in componentized prompt optimization,\\
@@ -1104,7 +1103,13 @@ training score is a proxy on which ``never accept'' is near-optimal at low $p_0$
 the proxy is what moves the true objective the wrong way. Their result that unhackable proxies
 are essentially unavailable is worth stating here, because it says the defence is not a better
 training signal but a screen on the optimizer's output --- which is what a \texttt{PASS} rate of
-zero provides.
+zero provides. The same convergence has been reported independently, with the same optimizer and
+a different degenerate corner: on the tasks where GEPA did change their prompt,
+\citet{pappu2026multiagent} report it converging on \emph{extreme-deference} instructions telling
+non-expert agents to treat the expert's answer as correct by default. Refusing to accept and
+deferring unconditionally are the same move --- collapse the component to a constant policy that
+the training signal cannot punish --- which suggests the corner is a property of reflective search
+under a weak signal rather than of our task family.
 
 One step of that account does not survive measurement, and \S\ref{sec:decomp} is where we
 check it. The natural next sentence --- that refining an already-correct draft breaks it, and

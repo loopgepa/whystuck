@@ -308,18 +308,21 @@
   url    = {https://x.com/steipete/status/2063697162748260627}
 }
 
-@misc{pappu2026multiagent,
-  title  = {Multi-Agent Teams Hold Experts Back},
-  author = {Pappu, Aneesh and El, Batu and Cao, Hancheng and di Nolfo, Carmelo and
-            Sun, Yanchao and Cao, Meng and Zou, James},
-  year   = {2026},
-  eprint = {2602.01011},
+@inproceedings{pappu2026multiagent,
+  title     = {Multi-Agent Teams Hold Experts Back},
+  author    = {Pappu, Aneesh and El, Batu and Cao, Hancheng and di Nolfo, Carmelo and
+               Sun, Yanchao and Cao, Meng and Zou, James},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  year      = {2026},
+  eprint    = {2602.01011},
   archivePrefix = {arXiv},
-  primaryClass  = {cs.CL},
-  note   = {Independent report of the failure mode this paper is about: optimizing a
-            prompt with GEPA, they state ``On GPQA Diamond and MATH-500, GEPA returned
-            the original prompt essentially unchanged'' (Appendix G)},
-  url    = {https://arxiv.org/abs/2602.01011}
+  url       = {https://arxiv.org/abs/2602.01011},
+  note      = {Peer-reviewed, independent report of BOTH halves of this paper's finding:
+               optimizing a prompt with GEPA, they state ``On GPQA Diamond and MATH-500,
+               GEPA returned the original prompt essentially unchanged'' (the treatment
+               silently not applying), and on their remaining tasks GEPA converged on
+               extreme-deference prompts instructing non-experts to defer to the expert
+               by default (a degenerate policy that is optimal on the training signal)}
 }
 
 @inproceedings{guo2024evoprompt,
