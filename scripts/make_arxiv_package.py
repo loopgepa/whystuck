@@ -202,14 +202,15 @@ def preflight(paper: Path = PAPER) -> list[str]:
 
 #: The two choices arXiv forces at the form, with the reasoning, because both are consequential and
 #: one of them is irreversible.
-LICENCE_NOTE = """  Licence:  CC BY 4.0 is the recommendation.
-      This paper's contribution is a reporting practice plus a released artifact --- every
-      cassette, every pre-registration, the audit --- and it asks other people to re-run and
-      re-analyse it. The arXiv Perpetual Non-Exclusive licence (the default) grants arXiv
-      distribution rights and limits re-use by everyone else, which contradicts the point.
-      CC BY permits redistribution and derivative work with attribution.
-      THE CHOICE IS IRREVOCABLE. arXiv cannot change it after announcement; only a new version
-      can carry a different licence, and the old one stays licensed as posted."""
+LICENCE_NOTE = """  Licence:  CC BY 4.0. DECIDED. Select it on the form; do not take the default.
+      The paper's contribution is a reporting practice plus a released artifact (every cassette,
+      every pre-registration, the audit) and it asks other people to re-run and re-analyse it.
+      arXiv's Perpetual Non-Exclusive licence, which is the default, grants arXiv distribution
+      rights while limiting re-use by everyone else, and that works against the point. The
+      conclusion of the paper now states the same thing, so the metadata and the text agree.
+      Code in this repository stays Apache-2.0; the two are separate grants.
+      IRREVOCABLE: arXiv cannot change a licence after announcement. Only a later version can
+      carry a different one, and the version posted stays licensed as posted."""
 
 CATEGORY_NOTE = """  Categories:  primary cs.LG, cross-list cs.CL.
       The object of study is an optimizer's behaviour and how to measure it, which is cs.LG;
