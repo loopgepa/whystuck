@@ -4,15 +4,21 @@ WHY THIS EXPERIMENT EXISTS. Every ratio in the detector-quality curve divides an
 σ(Δ) = 0.0286, which was estimated from a *seed* genome at R=1 in a different run family. The
 paper then measures, two tables later, that σ is a property of the genome and spans a factor of
 5.9 (0.0057 to 0.0336). Three of the curve's ratios have a margin against the 2σ line smaller
-than that spread, so they are neither confirmed nor refuted by the number they are scaled by:
+than that spread, so they are neither confirmed nor refuted by the number they are scaled by.
+The table below is parsed and checked against the artifacts by
+`test_the_fragility_table_in_this_docstring_is_derived`, because a hand-typed margin is exactly
+the kind of number this paper exists to complain about --- and a first draft of it did read the
+tool lift off run 3's FIVE-seed mean (0.7650) where every gap uses the three-seed mean (0.7767),
+which understated the fragility by a factor of five:
 
-    refine budget   0.065 / σ  falls below 2σ if σ ≥ 0.0325   (borrowed 0.0286, +14 %)
-    actionability   0.063 / σ  falls below 2σ if σ ≥ 0.0315   (+10 %)
-    tool lift       0.072 / σ  falls below 2σ if σ ≥ 0.0360   (+26 %)
+    run4 - run3    +0.0600   under 2 sigma if sigma >= 0.0300   (+5 % over the borrowed 0.0286)
+    run10 - run9   +0.0633   under 2 sigma if sigma >= 0.0317   (+11 %)
+    run8 - run7    +0.0650   under 2 sigma if sigma >= 0.0325   (+14 %)
+    run7 - run4    -0.0883   under 2 sigma if sigma >= 0.0442   (+55 %)
 
-Only the mechanistic gap (oracle vs. tool, 0.088, needs σ ≥ 0.044) sits outside the plausible
-envelope. This driver measures σ for each curve row directly, the same way the 135 p₀ replicates
-did, so the ratios stop being borrowed.
+Only the last, the mechanistic gap, sits outside the plausible envelope. This driver measures σ
+for each curve row directly, the same way the 135 p₀ replicates did, so the ratios stop being
+borrowed.
 
 The failure modes are the ones that produce a clean table from a wrong experiment, so they are
 pinned rather than reviewed: a row whose flags do not reproduce its released run measures the
@@ -120,6 +126,33 @@ def test_every_pair_the_checker_sigma_scales_is_aggregated():
     assert used, "no curve pairs found in the checker; the pattern went stale"
     ours = {tuple(sorted((a, b))) for _, a, b in rs.CURVE_PAIRS}
     assert used <= ours, f"the paper σ-scales pairs this driver does not measure: {used - ours}"
+
+
+def test_the_fragility_table_in_this_docstring_is_derived():
+    """The motivation for a paid experiment must itself be checked against the artifacts.
+
+    The first version of the table above was transcribed, and one row was wrong: it took run 3's
+    five-seed mean (0.7650, which is what Table tab:curve prints) instead of the three-seed mean
+    the gaps are actually computed on (0.7767, per `_curve_seed_mean`). That turned a 5 % margin
+    into a 26 % one and moved the tool lift from the most fragile claim to the least. Exactly the
+    failure this driver exists to fix, one level up.
+    """
+    rows = re.findall(
+        r"^\s{4}(run\d+) - (run\d+)\s+([+-][\d.]+)\s+under 2 sigma if sigma >= ([\d.]+)",
+        __doc__ or "",
+        re.M,
+    )
+    assert len(rows) == 4, f"the docstring table went unparseable, found {len(rows)} rows"
+    bad = []
+    for b, a, gap_s, need_s in rows:
+        gap, _ = vpc._curve_gap(a, b)
+        if abs(gap - float(gap_s)) > 5e-5:
+            bad.append(f"{b}-{a}: docstring says {gap_s}, artifacts give {gap:+.4f}")
+        if abs(abs(gap) / 2 - float(need_s)) > 5e-5:
+            bad.append(f"{b}-{a}: threshold {need_s} is not |{gap:+.4f}|/2")
+    assert not bad, "the docstring's motivation disagrees with the artifacts:\n  " + "\n  ".join(
+        bad
+    )
 
 
 def test_the_shared_seed_count_matches_the_checkers():
