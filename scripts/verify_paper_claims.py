@@ -21,13 +21,14 @@ A third pass added the `tex:` checks, for the same reason one level up. Every ot
 compares an artifact against a number typed into *this file*, so it verifies the data and
 not the paper; the two can disagree. They did: the closability table claimed the corrected
 re-run changed `ensure_correct` on 2/3 seeds while the data and the body text both say 3/3
-(the 2/3 is arm B's `generate`, transposed). The `tex:` checks scrape main.tex itself, so
+(the 2/3 is arm B's `generate`, transposed). The `tex:` checks scrape the papers' own sources, so
 the claimed side is the paper's own sentence. A pattern that stops matching yields NaN and
 fails, because a reworded sentence must break the check loudly rather than quietly stop
 being checked.
 
 Scope: numbers recomputable from `docs/*.json`, the vendored task data, and the committed
-cassettes, plus the headline numbers as they are written in `docs/paper/main.tex`. Claims
+cassettes, plus the headline numbers as they are written in the three papers under
+`docs/papers/`. Claims
 that are not machine-checkable (unquantified prose, cited literature, one-off replays
 against superseded commits) are out of scope and listed at the bottom of the output so the
 gap is visible rather than implied.
@@ -45,13 +46,24 @@ from pathlib import Path
 from statistics import mean, pstdev
 
 DOCS = "docs"
-PAPER = f"{DOCS}/paper/main.tex"
 
 # The pre-registered split-size sweep. Kept here as the single source of truth so the
 # paper table, the guard tests and these checks cannot drift apart.
 SWEEP = ((4, 14), (8, 28), (16, 56), (24, 84))
 EPOCHS = 3.5  # metric calls per training task, held constant across the sweep
 POOL_CLIFF = 32  # first n_train whose pool leaves 64, which would move the held-out set
+
+
+@cache
+def _sources():
+    """The `paper_sources` module, imported lazily so this file stays runnable from the repo root
+    without a package install (the same shim the analyzer imports below use)."""
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import paper_sources
+
+    return paper_sources
 
 
 def _meta_of(name: str) -> dict:
@@ -67,8 +79,17 @@ def _runs(name: str) -> list[dict]:
 
 
 def _tex() -> str:
-    with open(PAPER, encoding="utf-8") as fh:
-        return fh.read()
+    """Every paper's source, concatenated, shared inputs expanded.
+
+    The `tex:` checks below ask whether the series' prose agrees with the artifact, which is a
+    question about the series and not about which of the three files a sentence landed in. Reading
+    the concatenation is also what let the split preserve every pinned-phrase check written
+    against the pre-split draft: a sentence that survived into *some* paper is still found, and
+    one dropped by the split yields NaN and fails loudly. Per-paper questions -- does each paper
+    still carry its own headline numbers, do two papers quoting one number agree -- are asked
+    separately, in `_spine_checks` and `_cross_paper_checks`.
+    """
+    return _sources().all_tex()
 
 
 #: Per-constraint final-draft satisfaction on held-out, run 3 (intrinsic, R=1), from
@@ -339,6 +360,8 @@ _WORD_NUM = {
     "three": 3,
     "four": 4,
     "five": 5,
+    "six": 6,
+    "seven": 7,
     "eight": 8,
     "nine": 9,
     "ten": 10,
@@ -1257,7 +1280,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     # gap let a real error through: the closability table said the re-run changed
     # ensure_correct on 2/3 seeds when the data (and the body text) say 3/3 -- the 2/3 is
     # arm B's generate, transposed. The checks below scrape the paper's own sentences, so
-    # the claimed side comes from main.tex rather than from an author's memory of it.
+    # the claimed side comes from the papers rather than from an author's memory of it.
     tex = _tex()
     d_row = r"D & \\texttt\{generate\} \$\+\$ \\texttt\{ensure\\_correct\} & 0\.788 & "
     prose: list[tuple[str, str, float, float]] = [
@@ -1572,7 +1595,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
 
     # --- Table cells, read positionally out of the .tex ------------------------------
     # THE DRIFT HOLE THIS CLOSES. Most checks in this file compare a computed artifact value
-    # against a literal typed here, which pins the ARTIFACT but never opens main.tex: edit a
+    # against a literal typed here, which pins the ARTIFACT but never opens a paper: edit a
     # number in a table and nothing fails. `_table_row` locates a row by its table's header and
     # its own label, so these assertions read what the paper actually prints, cell by cell.
     # Every table below carries numbers derived from a run rather than from the design.
@@ -2216,21 +2239,10 @@ def _checks() -> list[tuple[str, float, float, float]]:
         )
     )
 
-    # The corrections appendix asserts its own length in words. Nothing checked it, which is the
-    # exact shape of stale assertion the appendix is a register of: adding an entry and leaving
-    # the word alone would make the register misstate itself.
-    _corr = tex[tex.index(r"\section{Withdrawals") : tex.index(r"\section{How a Componentized")]
-    out.append(
-        (
-            "tex: corrections entry count",
-            # `[\w-]+` because the counts are spelled and cross ten: "Twenty-one" is not `\w+`,
-            # and a `\w+` pattern returns nan rather than failing, so the check would pass
-            # vacuously the moment the appendix grew past twenty.
-            _scrape_word(tex, r"\\textbf\{([\w-]+)\} entries follow"),
-            0,
-            len(re.findall(r"^\s*\\item", _corr, re.M)),
-        )
-    )
+    # The corrections appendix asserts its own length in words, and nothing checked it until an
+    # entry was added and the word left alone -- the exact shape of stale assertion the appendix is
+    # a register of. Each paper now carries its own register, so the check is per paper and lives in
+    # `_corrections_count_checks`; slicing the concatenation here would count all three at once.
 
     for label, pattern, pair in (
         (
@@ -2720,6 +2732,262 @@ def _checks() -> list[tuple[str, float, float, float]]:
         )
     )
 
+    # The lo->mid difference, which the split introduced as an explicit number where the pre-split
+    # draft only printed the two levels side by side ("lo $\approx$ mid ($0.810$ vs. $0.813$)").
+    # A derived number stated in an abstract needs the same pinning as one from a table.
+    out.append(
+        (
+            "tex: lo-to-mid actionability step",
+            _scrape(tex, r"naming which constraint failed adds \$\+([\d.]+)\$"),
+            0.0005,
+            _arm_mean("validation-study-fixbudget.json", "A", "seed_heldout")
+            - _arm_mean("validation-study-fbactlo.json", "A", "seed_heldout"),
+        )
+    )
+
+    out.extend(_spine_checks())
+    out.extend(_cross_paper_checks())
+    out.extend(_corrections_count_checks())
+
+    return out
+
+
+#: Per paper, the numbers that paper cannot lose without ceasing to be itself. The concatenated
+#: `tex:` checks above verify that each number survived the split into *some* paper; these verify
+#: it survived into the *right* one. Without them a headline could migrate to a companion paper
+#: and every other check would still pass.
+_SPINE: tuple[tuple[str, str, str, float, float], ...] = (
+    # (paper slug, label, pattern scraped from that paper alone, claimed, tolerance)
+    (
+        "p1-conditional-lever",
+        "P1 swing",
+        r"a swing of \$([\d.]+)\$ in \$\\dd\$",
+        0.102,
+        0.0005,
+    ),
+    (
+        "p1-conditional-lever",
+        "P1 swing in sigma",
+        r"\\approx\\; ([\d.]+) ,\n\\]",
+        2.5,
+        0.05,
+    ),
+    (
+        "p1-conditional-lever",
+        "P1 cross-run sigma",
+        r"\\sigma\(\\dd\) \\;=\\; 0.1591/\\sqrt\{30\} \\;=\\; ([\d.]+)",
+        0.0291,
+        0.00005,
+    ),
+    (
+        "p1-conditional-lever",
+        "P1 positive control",
+        r"\\dd\(D-B\) = \+([\d.]+)\$\. The harness",
+        1.000,
+        0.0005,
+    ),
+    (
+        "p1-conditional-lever",
+        "P1 L2 five-replicate t",
+        r"\$\+0.055\$ & 0.0459 & 0.0205 & \\textbf\{([\d.]+)\}",
+        2.70,
+        0.005,
+    ),
+    (
+        "p2-repair-not-detection",
+        "P2 oracle seed held-out",
+        r"\\emph\{oracle\} critique \(F\$_1\\!=\\!1.0\$ by construction\) yields only \$([\d.]+)\$",
+        0.748,
+        0.0005,
+    ),
+    (
+        "p2-repair-not-detection",
+        "P2 perfect-checker null t",
+        r"the oracle\nmoves \$-0.0027\$ at \$t = ([\d.]+)\$",
+        0.33,
+        0.005,
+    ),
+    (
+        "p2-repair-not-detection",
+        "P2 actionability t",
+        r"\$\+0.0613\$ at \$t = ([\d.]+)\$ over five replicates",
+        8.08,
+        0.005,
+    ),
+    (
+        "p2-repair-not-detection",
+        "P2 hi-over-tool reinstated",
+        r"measured, it is \$\+0.0640\$ at \$t = ([\d.]+)\$",
+        5.47,
+        0.005,
+    ),
+    (
+        "p3-silent-no-op",
+        "P3 verify gene unchanged",
+        r"byte-identical to the seed in \$(\d+)/15\$ cases",
+        15.0,
+        0.0,
+    ),
+    (
+        "p3-silent-no-op",
+        "P3 generate changed",
+        r"changed\n\\texttt\{generate\} in \$(\d+)/15\$ winners",
+        5.0,
+        0.0,
+    ),
+    (
+        "p3-silent-no-op",
+        "P3 positive control",
+        r"\\dd\(D-B\) = \+([\d.]+)\$\. The harness",
+        1.000,
+        0.0005,
+    ),
+    (
+        "p3-silent-no-op",
+        "P3 sigma spread factor",
+        r"a factor of \$([\d.]+)\$\. Two mechanisms",
+        5.9,
+        0.05,
+    ),
+)
+
+
+def _spine_checks() -> list[tuple[str, float, float, float]]:
+    """Each paper still carries its own headline numbers, read from that paper alone."""
+    src = _sources()
+    out = []
+    for slug, label, pattern, claimed, tol in _SPINE:
+        out.append((f"spine: {label}", claimed, tol, _scrape(src.paper_tex(slug), pattern)))
+    return out
+
+
+#: Numbers that legitimately appear in more than one paper, because more than one paper's argument
+#: needs them. Duplication is fine; silent disagreement is not, and nothing else in this file would
+#: catch it -- `_scrape` on the concatenation returns the first match and would never see the
+#: second. Each entry is scraped from every paper whose text matches, and all values must agree.
+_SHARED: tuple[tuple[str, str], ...] = (
+    ("cross-run sigma derivation", r"0.1591/\\sqrt\{30\} \\;=\\; ([\d.]+)"),
+    ("per-task sigma one draw", r"one task under one draw is \$([\d.]+)\$"),
+    ("seed-baseline span low", r"Their means span \$([\d.]+)\$ to"),
+    ("seed-baseline span range", r"a range of \$([\d.]+)\$ on a quantity that is constant"),
+    ("replicate signed difference", r"between replicates, \$-([\d.]+)\$, is confounded"),
+    ("repeat replicate count", r"five replicates, \$(\d+)\$ runs"),
+    ("positive control delta", r"\\dd\(D-B\) = \+([\d.]+)\$\. The harness"),
+    ("ciexcl actuator corrected hi", r"\\mathbf\{\[-0.150,\+([\d.]+)\]\}"),
+    (
+        "ciexcl actionability corrected hi",
+        r"\$\[\+0.025,\+([\d.]+)\]\$ \(still excludes zero\)",
+    ),
+    ("empty-string IFBench floor", r"the empty string scores \$([\d.]+)\$ on the vendored"),
+    ("empty-string multihard floor", r"and \$([\d.]+)\$ on\ngenerated multi-hard"),
+)
+
+#: The same number quoted by two papers in *different* words, so one pattern cannot find both.
+#: These are the cases where the split forced a rephrasing -- a table cell in one paper and a
+#: sentence in another -- and they are exactly where a hand-copied number can drift unnoticed.
+_SHARED_ALIASED: tuple[tuple[str, dict[str, str]], ...] = (
+    (
+        "salt control sd (0.0144)",
+        {
+            "p2-repair-not-detection": (
+                r"measured independently in two experiments: \$[\d.]+\$ against \$([\d.]+)\$"
+            ),
+            "p3-silent-no-op": r"moves\nacross replicates with sd \$([\d.]+)\$",
+        },
+    ),
+    (
+        "sigma genome spread (5.9x)",
+        {
+            "p2-repair-not-detection": r"genome across that family it spans \$([\d.]+)\\times\$",
+            "p3-silent-no-op": r"a factor of \$([\d.]+)\$\. Two mechanisms",
+        },
+    ),
+    (
+        "actionability lift (0.063)",
+        {
+            "p1-conditional-lever": (
+                r"feedback \\emph\{actionability\} \(Paper~II, worth \$\+([\d.]+)\$\)"
+            ),
+            "p2-repair-not-detection": r"0.873 - 0.810 = \+([\d.]+)\$ on the seed held-out",
+        },
+    ),
+    (
+        "run7 oracle seed held-out",
+        {
+            "p2-repair-not-detection": r"the oracle seed is \$([\d.]+)\$, level with",
+            "p3-silent-no-op": r"oracle critique \(\$R\{=\}1\$\) & 3 & \\textbf\{([\d.]+)\}",
+        },
+    ),
+    (
+        "run10 actionability-hi seed held-out",
+        {
+            "p2-repair-not-detection": (
+                r"even maximal, exact repair guidance saturates at \$([\d.]+)\$"
+            ),
+            "p3-silent-no-op": r"concrete measured edits \(hi,\n\$([\d.]+)\$\)",
+        },
+    ),
+)
+
+
+def _cross_paper_checks() -> list[tuple[str, float, float, float]]:
+    """A number quoted by two papers must be the same number in both.
+
+    Reported as (first paper's value) against (every other matching paper's value), so a drift
+    shows up as a normal FAIL row rather than an exception.
+    """
+    src = _sources()
+    out = []
+    for label, pattern in _SHARED:
+        matching = [s for s in src.PAPERS if re.search(pattern, src.paper_tex(s))]
+        if len(matching) < 2:
+            # A pattern that stops matching two papers is itself a defect: either the split moved
+            # a claim and the pattern is now stale, or a paper dropped a number it needs. Surface
+            # it as a failure with a sentinel rather than skipping quietly.
+            out.append((f"shared: {label} (in >=2 papers)", 2.0, 0.0, float(len(matching))))
+            continue
+        first = _scrape(src.paper_tex(matching[0]), pattern)
+        for other in matching[1:]:
+            out.append(
+                (
+                    f"shared: {label} {src.PAPER_NUMERALS[other]}",
+                    first,
+                    0.0,
+                    _scrape(src.paper_tex(other), pattern),
+                )
+            )
+    for label, mapping in _SHARED_ALIASED:
+        slugs = list(mapping)
+        first = _scrape(src.paper_tex(slugs[0]), mapping[slugs[0]])
+        for other in slugs[1:]:
+            out.append(
+                (
+                    f"aliased: {label} {src.PAPER_NUMERALS[other]}",
+                    first,
+                    0.0,
+                    _scrape(src.paper_tex(other), mapping[other]),
+                )
+            )
+    return out
+
+
+def _corrections_count_checks() -> list[tuple[str, float, float, float]]:
+    """Each paper's corrections appendix declares a count in words; it must equal the number of
+    entries it actually lists.
+
+    The pre-split draft had one register and one count, and the count drifted twice during the
+    study (`Sixteen` -> `Twenty-one` -> `Twenty-two`). Three registers are three chances to
+    drift, so the count is derived from the enumerate body rather than trusted.
+    """
+    src = _sources()
+    out = []
+    for slug in src.PAPERS:
+        tex = src.paper_tex(slug)
+        claimed = _scrape_word(tex, r"\\textbf\{([\w-]+)\} entries follow")
+        start = tex.index("entries follow")
+        body = tex[start : tex.index("\\end{enumerate}", start)]
+        listed = float(len(re.findall(r"^  \\item ", body, re.MULTILINE)))
+        out.append((f"corrections count {src.PAPER_NUMERALS[slug]}", claimed, 0.0, listed))
     return out
 
 
@@ -2749,7 +3017,7 @@ def main() -> int:  # pragma: no cover - CLI convenience
         "    require a deliberately mismatched replay.\n"
         "  - The stopped mmc=160 run's partial spend, whose cassette is not released.\n"
         "  - Every cited external result, and every prose claim that is not one of the\n"
-        "    `tex:` numbers above -- those are scraped from main.tex, the rest are not."
+        "    `tex:` numbers above -- those are scraped from the papers' sources, the rest are not."
     )
     return 0
 

@@ -23,9 +23,14 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
 
+import paper_sources  # noqa: E402
 import verify_paper_claims as vpc  # noqa: E402
 
-PAPER = pathlib.Path("docs/paper/main.tex")
+# The three papers, concatenated with their shared inputs expanded. Reading them through
+# `paper_sources` rather than one hard-coded path is what keeps this guard covering the whole series
+# after the 46-page draft was split three ways: a guard that silently narrowed its own scope is
+# precisely the defect these papers are about.
+PAPERS_TEX = paper_sources.all_tex
 
 #: Same tokenizer `_table_row` uses, so coverage is measured over exactly the cells a check
 #: could read. The lookbehind keeps LaTeX subscripts ($L_1$) from reading as data.
@@ -55,7 +60,7 @@ _EXEMPT: dict[float, str] = {
 
 def _tables() -> list[tuple[str, list[float]]]:
     """(label, every number in the row body) for each tabular in the paper."""
-    tex = PAPER.read_text(encoding="utf-8")
+    tex = PAPERS_TEX()
     out: list[tuple[str, list[float]]] = []
     for m in re.finditer(r"\\begin\{tabular\}", tex):
         end = tex.find(r"\bottomrule", m.end())
@@ -115,7 +120,7 @@ def test_coverage_is_not_vacuous():
 def test_table_row_joins_a_wrapped_row():
     """`tab:ciexcl` wraps its last column onto a continuation line. A line-based reader returns
     a short row, and a checker asking for that column then either raises or skips it."""
-    tex = PAPER.read_text(encoding="utf-8")
+    tex = PAPERS_TEX()
     cells = vpc._table_row(
         tex, r"Result & per-seed & as published & corrected", "Actuator, powered"
     )

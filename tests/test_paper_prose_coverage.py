@@ -33,10 +33,15 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
 
+import paper_sources  # noqa: E402
 import verify_paper_claims as vpc  # noqa: E402
 
 CHECKER = pathlib.Path("scripts/verify_paper_claims.py")
-PAPER = pathlib.Path("docs/paper/main.tex")
+# The three papers, concatenated with their shared inputs expanded. Reading them through
+# `paper_sources` rather than one hard-coded path is what keeps this guard covering the whole series
+# after the 46-page draft was split three ways: a guard that silently narrowed its own scope is
+# precisely the defect these papers are about.
+PAPERS_TEX = paper_sources.all_tex
 
 #: Prose decimals, i.e. inside inline math. Two or more decimal places, so section numbers and
 #: LaTeX lengths do not enter. Tables are excluded because the table guard owns them.
@@ -56,7 +61,7 @@ _EXEMPT: dict[float, str] = {
 def _bound_values() -> set[float]:
     """Every number the checker derives, plus every number its regexes pull from the paper."""
     src = CHECKER.read_text(encoding="utf-8")
-    tex = PAPER.read_text(encoding="utf-8")
+    tex = PAPERS_TEX()
     out = {round(float(c[1]), 4) for c in vpc._checks() if isinstance(c[1], (int, float))}
     for node in ast.walk(ast.parse(src)):
         if not (isinstance(node, ast.Constant) and isinstance(node.value, str)):
@@ -78,7 +83,7 @@ def _bound_values() -> set[float]:
 
 def _prose() -> tuple[str, list[str]]:
     """The paper with tabular bodies blanked, newlines preserved so line numbers survive."""
-    tex = PAPER.read_text(encoding="utf-8")
+    tex = PAPERS_TEX()
     prose = re.sub(
         r"\\begin\{tabular\}.*?\\end\{tabular\}",
         lambda m: re.sub(r"[^\n]", " ", m.group(0)),
@@ -141,7 +146,7 @@ def test_tables_are_excluded_so_the_table_guard_stays_responsible():
     """The blanking must actually remove tabular bodies, or the two guards silently overlap and a
     regression in either looks covered by the other."""
     prose, _ = _prose()
-    tex = PAPER.read_text(encoding="utf-8")
+    tex = PAPERS_TEX()
     assert r"\begin{tabular}" in tex, "no tables found; the fixture is wrong, not the paper"
     assert len(_NUM.findall(prose)) < len(_NUM.findall(tex)), "tabular bodies were not blanked"
     assert len(prose.split("\n")) == len(tex.split("\n")), "blanking changed the line count"

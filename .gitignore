@@ -32,12 +32,19 @@ htmlcov/
 .DS_Store
 scratchpad/
 
-# LaTeX build artifacts. The paper source is docs/paper/main.tex; everything the
-# toolchain derives from it is regenerable and must never be committed (main.log in
-# particular embeds absolute build paths).
-docs/paper/main.pdf
-docs/paper/main.aux
-docs/paper/main.bbl
-docs/paper/main.blg
-docs/paper/main.log
-docs/paper/main.out
+# LaTeX build artifacts. The paper sources are docs/papers/*/main.tex; everything the
+# toolchain derives from them is regenerable and must never be committed (main.log in
+# particular embeds absolute build paths). Globbed across the series rather than listed per
+# paper, so adding a fourth paper cannot quietly start committing its build output.
+docs/papers/*/main.pdf
+docs/papers/*/main.aux
+docs/papers/*/main.bbl
+docs/papers/*/main.blg
+docs/papers/*/main.log
+docs/papers/*/main.out
+docs/papers/*/main.toc
+# The frozen pre-split draft is provenance and is never built; if it ever acquires a build,
+# that is a mistake rather than an artifact to keep. A test asserts these do not exist.
+docs/papers/PRE-SPLIT-SOURCE.pdf
+docs/papers/PRE-SPLIT-SOURCE.aux
+docs/papers/PRE-SPLIT-SOURCE.log

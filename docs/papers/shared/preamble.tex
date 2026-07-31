@@ -1,0 +1,36 @@
+% Shared preamble for the three papers of this series. Each paper's main.tex declares
+% \pdfoutput and \documentclass itself -- \pdfoutput must sit within the first five lines of the
+% file arXiv reads, and an \input cannot satisfy that -- then inputs this file for everything else.
+%
+% Kept as one file rather than triplicated because every setting below was arrived at by fixing a
+% specific rendering defect, and three copies would drift apart at the first fix.
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+% Default hyperref draws a coloured rule around every link, so every \S and \ref printed as a red
+% box. Invisible in the source and unmissable on paper; found by rasterising a page rather than by
+% reading the log, which reports nothing about it.
+\hypersetup{hidelinks}
+\usepackage{natbib}
+\usepackage[margin=1in]{geometry}
+\usepackage{xcolor}
+% Long \texttt{} identifiers and inline result vectors give TeX nothing to break on, which
+% cost eleven overfull boxes running up to 1.7in into the margin. This lets it stretch
+% interword space as a last resort instead; content is unchanged.
+\setlength{\emergencystretch}{3em}
+% Float placement. With many tables queued, LaTeX's defaults (a top float may occupy at most 0.7 of
+% the text height, and 0.2 of every float-bearing page must be text) deferred two full-width figures
+% to the end of the document --- twenty-eight pages from the section that references them. Relaxing
+% the fractions lets a tall figure sit at the top of its own page near its reference instead of
+% falling off the back of the float queue.
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.75}
+\renewcommand{\textfraction}{0.08}
+\renewcommand{\floatpagefraction}{0.70}
+\setcounter{topnumber}{3}
+\setcounter{totalnumber}{4}
+\newcommand{\dd}{\ensuremath{\Delta}}

@@ -9,6 +9,7 @@ produce clean-looking tables. So both are pinned here.
 from __future__ import annotations
 
 import json
+import math
 import pathlib
 import sys
 
@@ -75,17 +76,26 @@ def test_level_result_arithmetic():
     overstate or understate every conclusion the experiment supports."""
     r = rs.LevelResult(level="X", k=4, replicate_deltas=[0.10, 0.20, 0.30, 0.40], n_tasks=30)
     assert r.delta == pytest.approx(0.25)
-    # population sd of [.1,.2,.3,.4] is sqrt(0.0125) ≈ 0.1118
-    assert r.sd_between_replicates == pytest.approx(0.111803, abs=1e-5)
-    assert r.standard_error == pytest.approx(0.111803 / 2, abs=1e-5)
-    assert r.in_sigma() == pytest.approx(0.25 / (0.111803 / 2), abs=1e-4)
+    # SAMPLE sd (n-1) of [.1,.2,.3,.4] is sqrt(0.05/3) ≈ 0.129099. Not the population sd, which
+    # is 0.111803: that is the unbiased estimator t(K-1) requires, and using the population one
+    # inflated every t in this study by sqrt(K/(K-1)) until 2026-07-31.
+    assert r.sd_between_replicates == pytest.approx(0.129099, abs=1e-5)
+    assert r.standard_error == pytest.approx(0.129099 / 2, abs=1e-5)
+    assert r.in_sigma() == pytest.approx(0.25 / (0.129099 / 2), abs=1e-4)
 
 
 def test_a_single_replicate_reports_no_standard_error_rather_than_zero():
-    """K=1 has no spread to report. Zero would read as infinite precision."""
+    """K=1 has no spread to report, and every derived quantity must say so.
+
+    Zero would read as infinite precision, which is why the population sd's 0.0 was the wrong
+    answer here as well as at K=5. nan propagates instead, so nothing downstream can manufacture a
+    significance from one draw.
+    """
     r = rs.LevelResult(level="X", k=1, replicate_deltas=[0.05], n_tasks=30)
-    assert r.sd_between_replicates == 0.0
-    assert r.in_sigma() == float("inf")
+    assert math.isnan(r.sd_between_replicates)
+    assert math.isnan(r.standard_error)
+    assert math.isnan(r.t_stat())
+    assert math.isnan(r.in_sigma())
 
 
 def test_aggregate_is_empty_before_anything_is_bought():
@@ -192,15 +202,18 @@ def test_t_statistic_is_the_mean_over_its_own_standard_error():
 def test_significance_uses_the_t_critical_value_not_the_normal_one():
     """A mean 2.2 standard errors from zero is significant under a normal approximation and NOT
     under t with 4 df. The distinction decides how L3 is reported."""
-    # These are L3's actual per-replicate deltas, i.e. the real borderline case: significant
-    # under a normal approximation, not significant under t(4).
+    # These are L2's actual per-replicate deltas -- the real borderline case, and the study's
+    # headline: significant under a normal approximation, NOT significant at p<0.05 under t(4).
     borderline = rs.LevelResult(
-        level="X", k=5, replicate_deltas=[0.018, 0.044, -0.010, 0.037, 0.005], n_tasks=30
+        level="X",
+        k=5,
+        replicate_deltas=[0.033333, 0.123333, 0.073333, 0.001667, 0.045],
+        n_tasks=30,
     )
     t = borderline.t_stat()
-    assert 2.0 < t < 2.5, f"fixture should be borderline, got t={t}"
-    assert t > 1.96, "a normal approximation would call this significant"
-    assert borderline.verdict() == "not significant", "t(4) must not"
+    assert 2.0 < t < 2.776, f"fixture should be borderline, got t={t}"
+    assert t > 1.96, "a normal approximation would call this significant at p<0.05"
+    assert borderline.verdict() == "p < 0.10", "t(4) must put it in the weaker band, not p<0.05"
     assert rs.T_CRIT_05[4] == pytest.approx(2.776, abs=0.001)
     assert rs.T_CRIT_10[4] == pytest.approx(2.132, abs=0.001)
 

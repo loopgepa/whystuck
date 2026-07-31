@@ -22,7 +22,7 @@ U+2212 and matplotlib would silently substitute a box.
 Colours are Okabe--Ito, the de-facto standard colourblind-safe categorical set (Okabe & Ito 2002,
 popularised by Wong, Nature Methods 2011). Yellow is unused: it is nearly invisible as a thin line.
 
-Usage: `python scripts/make_figures.py` writes docs/paper/figures/*.pdf. Offline, $0.
+Usage: `python scripts/make_figures.py` writes docs/papers/shared/figures/*.pdf. Offline, $0.
 """
 
 from __future__ import annotations
@@ -36,7 +36,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import verify_paper_claims as vpc  # noqa: E402
 
-OUTDIR = Path("docs/paper/figures")
+OUTDIR = Path("docs/papers/shared/figures")
 
 #: Okabe--Ito. Yellow (#F0E442) deliberately absent: unreadable as a stroke.
 BLACK = "#000000"

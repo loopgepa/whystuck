@@ -19,6 +19,7 @@ import pytest
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
 
 import make_arxiv_package as ap  # noqa: E402
+import paper_sources  # noqa: E402
 
 
 def test_the_bbl_is_staged():
@@ -44,17 +45,46 @@ def test_the_rehearsal_fails_the_build_rather_than_warning():
 
 
 def test_plain_abstract_has_no_latex_left():
-    text = ap.plain_abstract()
-    assert "\\" not in text, "a macro survived into the metadata field"
-    for macro in ("citep", "citet", "emph", "ref{", "textbf"):
-        assert macro not in text, f"{macro} survived into the metadata field"
+    """Every macro that resolves against the document must become words; standard math may stay.
+
+    The distinction is what arXiv's metadata field can render. `\\sigma` it renders. `\\dd` is
+    defined in our own preamble, which the field never sees, so it would render as nothing at all --
+    silently deleting the symbol from a sentence about a measured quantity.
+    """
+    for slug in paper_sources.PAPERS:
+        text = ap.plain_abstract(paper_sources.paper_dir(slug))
+        for macro in ("citep", "citet", "emph", "ref{", "textbf", "\\dd"):
+            assert macro not in text, f"{slug}: {macro} survived into the metadata field"
+        left = set(re.findall(r"\\[a-zA-Z]+", text)) - ap.MATH_MACROS_ARXIV_RENDERS
+        assert not left, f"{slug}: unrenderable macros survived: {sorted(left)}"
 
 
 def test_plain_abstract_attributes_rather_than_dropping():
-    """Dropping a citation leaves the abstract asserting someone else's result unattributed."""
-    text = ap.plain_abstract()
-    assert re.search(r"\(Agrawal et al\., 2025\)", text), "GEPA is cited in the source abstract"
-    assert re.search(r"\(Pappu et al\., 2026\)", text), "the corroboration must stay attributed"
+    """Dropping a citation leaves the abstract asserting someone else's result unattributed.
+
+    Checked per paper, because each abstract cites a different set and a test pinned to one paper's
+    citations would pass vacuously on the other two.
+    """
+    for slug in paper_sources.PAPERS:
+        text = ap.plain_abstract(paper_sources.paper_dir(slug))
+        source = paper_sources.paper_tex(slug)
+        abstract_src = source[source.index(r"\begin{abstract}") : source.index(r"\end{abstract}")]
+        for key in set(re.findall(r"\\cite[tp]\{([^}]*)\}", abstract_src)):
+            for one in (k.strip() for k in key.split(",")):
+                surname = ap._author_year(paper_sources.paper_dir(slug))[one].split()[0]
+                assert surname in text, f"{slug}: {one} lost its attribution"
+    # GEPA is the object of the series, so at least one abstract must cite it -- but not every one.
+    # Paper II runs no optimizer at all, and an abstract of it citing GEPA would misdescribe the
+    # experiments, so a blanket assertion here would be wrong rather than merely strict.
+    citing_gepa = [
+        slug
+        for slug in paper_sources.PAPERS
+        if "Agrawal" in ap.plain_abstract(paper_sources.paper_dir(slug))
+    ]
+    assert citing_gepa, "no abstract attributes GEPA, though the series is about it"
+    assert "p2-repair-not-detection" not in citing_gepa, (
+        "Paper II invokes no optimizer; citing GEPA in its abstract would misdescribe its design"
+    )
 
 
 def test_plain_abstract_fits_the_arxiv_field():
@@ -95,7 +125,9 @@ def test_a_placeholder_author_block_is_detected():
 
 
 def test_preflight_is_clean_and_checks_what_it_claims():
-    assert ap.preflight() == [], "the paper should be submittable at HEAD"
+    for slug in paper_sources.PAPERS:
+        problems = ap.preflight(paper_sources.paper_dir(slug))
+        assert problems == [], f"{slug} should be submittable at HEAD: {problems}"
     src = inspect.getsource(ap.preflight)
     for concern in ("unresolved_placeholders", "pdfoutput_line", "ABSTRACT_LIMIT"):
         assert concern in src, f"preflight stopped checking {concern}"
@@ -128,7 +160,9 @@ def test_build_bbl_removes_the_old_file_before_regenerating():
 def test_an_unsubmittable_paper_produces_no_package():
     """A tarball that cannot be submitted is worse than none: it looks like a finished artifact."""
     src = inspect.getsource(ap.main)
-    assert src.index("preflight()") < src.index("build_bbl()"), "preflight must gate the build"
+    assert src.index("preflight(paper)") < src.index("build_bbl(paper)"), (
+        "preflight must gate the build"
+    )
     assert "NOT SUBMITTABLE" in src
 
 

@@ -31,7 +31,13 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
 
 CHECKER = pathlib.Path("scripts/verify_paper_claims.py")
-PAPER = pathlib.Path("docs/paper/main.tex")
+import paper_sources  # noqa: E402
+
+# The three papers, concatenated with their shared inputs expanded. Reading them through
+# `paper_sources` rather than one hard-coded path is what keeps this guard covering the whole series
+# after the 46-page draft was split three ways: a guard that silently narrowed its own scope is
+# precisely the defect these papers are about.
+PAPERS_TEX = paper_sources.all_tex
 
 #: Any pattern that captures a number. Deliberately not restricted to sigma-bearing patterns: the
 #: p0 swing is quoted as "2.5" in five places while the checker binds it through a displayed
@@ -58,7 +64,7 @@ _EXEMPT: dict[float, str] = {
 def _bound_values() -> set[float]:
     """Every number the checker's own regexes pull out of the paper."""
     src = CHECKER.read_text(encoding="utf-8")
-    tex = PAPER.read_text(encoding="utf-8")
+    tex = PAPERS_TEX()
     out: set[float] = set()
     for node in ast.walk(ast.parse(src)):
         if not (isinstance(node, ast.Constant) and isinstance(node.value, str)):
@@ -80,7 +86,7 @@ def _bound_values() -> set[float]:
 
 def _sigma_mentions() -> list[tuple[int, float]]:
     """(line number, value) for every `$X\\sigma$` in the paper."""
-    tex = PAPER.read_text(encoding="utf-8")
+    tex = PAPERS_TEX()
     return [
         (tex[: m.start()].count("\n") + 1, round(float(m.group(1)), 4))
         for m in re.finditer(r"([\d.]+)\\sigma", tex)
@@ -129,9 +135,16 @@ def test_a_stale_sigma_quotient_is_caught():
     Replays the exact defect: 3.16 was a correct quotient of a five-replicate sigma that ten
     replicates superseded, so it survived every check while its own sentence's neighbour was
     fixed. Asserting on a mutated copy keeps the test honest about what it detects.
+
+    The live value is 3.04. It was 3.09 until the K=5 standard errors were corrected from a
+    population sd to a sample sd, which is the same class of stale-quotient bug one level down --
+    and 3.09 is now itself an orphaned value, so it serves as a second negative case.
     """
     bound = _bound_values()
-    assert 3.09 in bound, "the corrected quotient should be derived by a check"
+    assert 3.04 in bound, "the corrected quotient should be derived by a check"
+    assert 3.09 not in bound, (
+        "3.09 is the pre-correction quotient and must no longer be derivable from any artifact"
+    )
     assert 3.16 not in bound, (
         "3.16 is derivable from some artifact, so this test can no longer distinguish the stale "
         "value from the correct one --- rewrite it against a value that is genuinely orphaned"

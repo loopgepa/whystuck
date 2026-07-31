@@ -31,15 +31,20 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
 
 import make_figures as mf  # noqa: E402
+import paper_sources  # noqa: E402
 import verify_paper_claims as vpc  # noqa: E402
 
-PAPER = pathlib.Path("docs/paper/main.tex")
+# The three papers, concatenated with their shared inputs expanded. Reading them through
+# `paper_sources` rather than one hard-coded path is what keeps this guard covering the whole series
+# after the 46-page draft was split three ways: a guard that silently narrowed its own scope is
+# precisely the defect these papers are about.
+PAPERS_TEX = paper_sources.all_tex
 CHECKER = pathlib.Path("scripts/verify_paper_claims.py")
 
 
 def _bound_values() -> set[float]:
     """Every number the checker derives, plus every number its regexes pull out of the paper."""
-    tex = PAPER.read_text(encoding="utf-8")
+    tex = PAPERS_TEX()
     out = {round(float(c[1]), 4) for c in vpc._checks() if isinstance(c[1], (int, float))}
     for node in ast.walk(ast.parse(CHECKER.read_text(encoding="utf-8"))):
         if not (isinstance(node, ast.Constant) and isinstance(node.value, str)):
@@ -120,10 +125,10 @@ def test_every_plotted_number_is_derived():
 
 def test_headline_quantities_equal_the_text():
     """Membership is not enough: a figure could plot a derived value in the wrong place."""
-    tex = PAPER.read_text(encoding="utf-8")
+    tex = PAPERS_TEX()
     d = mf.figure_data()
     checks = [
-        ("sigma", d.sigma, r"\\sigma\(\\dd\) \\;=\\; 0.1565/\\sqrt\{30\} \\;=\\; ([\d.]+)", 5e-5),
+        ("sigma", d.sigma, r"\\sigma\(\\dd\) \\;=\\; 0.1591/\\sqrt\{30\} \\;=\\; ([\d.]+)", 5e-5),
         ("swing", d.swing, r"is \$([\d.]+)\$, about", 5e-4),
         ("swing in sigma", d.swing_in_sigma, r"\\approx\\; ([\d.]+) ,", 0.05),
         (

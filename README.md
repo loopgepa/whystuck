@@ -159,7 +159,7 @@ and tested.
 | LLM worker + output→apply→verify wiring (real-repo scoring) | 🟡 v0.2-alpha |
 | Optimize + frontier MCP tools (gated on the extra) | 🟡 v0.2-alpha |
 
-**182 tests**, all local and offline; `ruff` + `mypy --strict` (on `src/`) + docs `--strict` clean.
+**1548 tests**, all local and offline; `ruff` + `mypy --strict` (on `src/`) + docs `--strict` clean.
 
 ## Configure
 
@@ -193,19 +193,28 @@ See [ROADMAP.md](ROADMAP.md).
 
 ## Research artifact
 
-This repository is the supporting artifact for the paper *Your Loop Optimizer Is Not
-Optimizing Your Loop* (`docs/paper/main.tex`), a four-arm study of whether optimizing a
-generate–critique–refine loop beats optimizing its generation prompt alone — and of the
-harness defect that meant, for eleven experiments, the question was never actually asked.
+This repository is the supporting artifact for a **three-paper series** on optimizing
+generate–critique–refine loops. Start at **[docs/papers/README.md](docs/papers/README.md)** — it
+says which paper answers which question.
 
-- **[How to reproduce it](docs/paper/REPRODUCE.md)** — four offline checks, all $0: every
-  number in the paper re-derived from the artifacts, bit-for-bit cassette replay, a positive
-  control proving the harness detects an effect when one exists, and the standalone analyses.
-- Results, cassettes and pre-registrations for every run are committed, including the
-  superseded ones, labelled as such.
+| | paper | in one line |
+|---|---|---|
+| **I** | *Whether Optimizing the Loop Beats Optimizing the Prompt Depends on One Number* | Evolving a loop's verifier beats evolving its generation prompt **only when enough first drafts are already correct**: +0.060 held-out at p₀ = 0.267, nothing measurable at p₀ = 0.067, a 0.102 swing across the axis |
+| **II** | *What a Checker Cannot Buy Is the Repair* | A **perfect** inference-time checker gives the loop its **worst** score, indistinguishable from a near-random one; concrete measured repair instructions are worth +0.0613. No optimizer anywhere in the design |
+| **III** | *Your Loop Optimizer Is Not Optimizing Your Loop* | Pointing an optimizer at a component is not the same as optimizing it. Our first fifteen contrast runs had a critique gene **byte-identical to the seed in 15/15** winning genomes. Print one integer per component |
+
+- **[Every experiment, and the command that produced it](docs/EXPERIMENTS.md)** — one script spends
+  money and it refuses to without `--yes`; everything else is $0 and offline.
+- **[How to reproduce it](docs/papers/REPRODUCE.md)** — offline checks, all $0: every number in
+  every paper re-derived from the artifacts, bit-for-bit cassette replay, a positive control proving
+  the harness detects an effect when one exists, and a proof that the three-way split lost no claim.
+- Results, cassettes and pre-registrations for every run are committed, including the superseded
+  ones, labelled as such.
 
 ## Documentation
 
+- [The three papers](docs/papers/README.md) — which paper answers which question
+- [Every experiment and its command](docs/EXPERIMENTS.md) — the map from a claim to a script
 - [How it works](docs/how-it-works.md) — loop engineering, the genome, the pipeline
 - [Getting started](docs/getting-started.md)
 - [Trust & safety](docs/safety.md) · [SECURITY.md](SECURITY.md)
@@ -231,10 +240,10 @@ Highest-impact area right now: **real loop examples** beyond the bugfix loop
 
 Apache-2.0 for the code — see [LICENSE](LICENSE).
 
-The paper under `docs/paper/` is licensed **CC BY 4.0** instead — see
-[docs/paper/LICENSE](docs/paper/LICENSE). Two separate grants: a patent grant and NOTICE
-requirement make no sense for a document, and the paper is meant to be redistributed and
-built upon. CC BY 4.0 is also the licence selected for the arXiv submission.
+The papers under `docs/papers/` are licensed **CC BY 4.0** instead — see
+[docs/papers/shared/LICENSE](docs/papers/shared/LICENSE). Two separate grants: a patent grant and NOTICE
+requirement make no sense for a document, and the papers are meant to be redistributed and
+built upon. CC BY 4.0 is also the licence selected for the arXiv submissions.
 
 ---
 

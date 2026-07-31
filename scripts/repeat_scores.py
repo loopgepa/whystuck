@@ -37,7 +37,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from statistics import mean, pstdev
+from statistics import mean, stdev
 
 DOCS = "docs"
 OUT_DIR = f"{DOCS}/repeat"
@@ -374,8 +374,23 @@ class LevelResult:
 
     @property
     def sd_between_replicates(self) -> float:
-        """The sampling noise on a single-draw Δ — what the paper's headlines omit."""
-        return pstdev(self.replicate_deltas)
+        """The sampling noise on a single-draw Δ — what the paper's headlines omit.
+
+        Sample sd (n−1 denominator), which is the unbiased estimator of σ from K draws and the one
+        `t_stat` requires. This used the population sd until 2026-07-31, which understated σ by
+        √(K/(K−1)) = 1.118 at K=5 and therefore inflated every t by 10.6% -- against critical
+        values from t(4), a distribution that exists *because* the denominator is n−1. The error
+        was invisible to `verify_paper_claims.py`, which checks the paper against this function, so
+        paper and checker were wrong together. It flattered the claims, which is the worst
+        direction, and it moved one verdict: the L2 gain was reported at p<0.05 and is p<0.10.
+
+        K=1 returns nan rather than 0.0. The population sd returned 0.0 there, which reads as
+        infinite precision from a single draw; nan is the honest answer and propagates into
+        `standard_error` and `t_stat` instead of manufacturing a significance.
+        """
+        if len(self.replicate_deltas) < 2:
+            return float("nan")
+        return stdev(self.replicate_deltas)
 
     @property
     def standard_error(self) -> float:
@@ -394,8 +409,10 @@ class LevelResult:
     def verdict(self) -> str:
         """Significance against the t critical values, not the normal ones.
 
-        At K=5 the normal 1.96 would call a 2.2-se effect significant while t(4) does not. Two
-        of the three effects here land in exactly that gap, so the distinction is the result.
+        At K=5 the normal 1.96 would call a 2.7-se effect significant while t(4) does not, and the
+        L2 gain lands in exactly that gap, so the distinction decides the study's headline. Getting
+        the denominator right matters for the same reason: see `sd_between_replicates`, whose
+        population-sd version put this same effect on the other side of the p<0.05 line.
         """
         t, df = self.t_stat(), self.df
         if df not in T_CRIT_05:
@@ -477,7 +494,7 @@ def sigma_by_genome(k: int) -> dict[tuple[str, str], float]:
                 if vals:
                     means.append(mean(vals))
             if len(means) > 1:
-                out[(level, arm)] = pstdev(means)
+                out[(level, arm)] = stdev(means)
     return out
 
 
@@ -502,7 +519,7 @@ def seed_replicate_spread(k: int) -> tuple[int, float]:
                 vals += [v[t] for t in sorted(v)]
         if vals:
             means.append(mean(vals))
-    return len(means), (pstdev(means) if len(means) > 1 else float("nan"))
+    return len(means), (stdev(means) if len(means) > 1 else float("nan"))
 
 
 # ------------------------------------------------------------------------ curve aggregation
@@ -572,7 +589,7 @@ def sigma_by_run(k: int) -> dict[str, float]:
             if vec is not None:
                 means.append(mean(vec.values()))
         if len(means) > 1:
-            out[run.label] = pstdev(means)
+            out[run.label] = stdev(means)
     return out
 
 

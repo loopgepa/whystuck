@@ -36,7 +36,7 @@ import itertools
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from statistics import mean, pstdev
+from statistics import mean, stdev
 
 DOCS = "docs"
 
@@ -233,7 +233,13 @@ def noise_estimate(names: list[str] | None = None) -> Noise:
     sds, signed = [], []
     for a, b in itertools.combinations(chosen, 2):
         diff = [y - x for x, y in zip(vectors[a], vectors[b], strict=True)]
-        sds.append(pstdev(diff))
+        # Sample sd (n−1). The population sd was used until 2026-07-31; over 30 paired tasks it
+        # understates σ by √(30/29) = 1.017, which moved σ(Δ) from 0.0291 to 0.0286 and inflated
+        # every ratio scaled by it by 1.7%. No verdict turned on it -- the bias is a quarter of
+        # this estimate's own acknowledged drift confound -- but it ran in the flattering
+        # direction, and the same mistake at K=5 (see `repeat_scores.sd_between_replicates`) did
+        # move a verdict, so both are corrected rather than the one that mattered.
+        sds.append(stdev(diff))
         signed.append(mean(diff))
     return Noise(
         n_replicates=len(chosen),

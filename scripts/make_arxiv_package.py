@@ -19,15 +19,41 @@ import argparse
 import re
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 from pathlib import Path
 
-PAPER = Path("docs/paper")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import paper_sources  # noqa: E402
+
+#: Which paper to package. The series has three (`docs/papers/README.md`); each is submitted
+#: separately, so this is a required choice rather than a default worth guessing at. `--paper`
+#: overrides it.
+PAPER = paper_sources.paper_dir(paper_sources.PAPERS[0])
 #: Everything arXiv needs and nothing it does not. `.bbl` is added separately because it is a build
 #: artifact rather than a tracked source file, which is the whole point of this script.
-SOURCES = ("main.tex", "references.bib")
+SOURCES = ("references.bib",)
 FIGURES = "figures"
+
+#: Standard TeX math macros arXiv's abstract field renders, so they may survive into the plain
+#: abstract. Everything else must be converted to words, because in the metadata field it resolves
+#: against nothing: a document-local macro like `\dd` renders as empty, and a `\ref` renders as a
+#: dangling "the paper". The allowlist is deliberately short -- if an abstract needs a macro not
+#: here, the right move is usually to reword the abstract, not to extend this set.
+MATH_MACROS_ARXIV_RENDERS = frozenset(
+    {
+        r"\sigma",
+        r"\Delta",
+        r"\approx",
+        r"\times",
+        r"\le",
+        r"\ge",
+        r"\pm",
+        r"\to",
+    }
+)
 
 
 def _run(cmd: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
@@ -62,7 +88,17 @@ def build_bbl(paper: Path = PAPER) -> Path:
 
 
 def stage(dest: Path, paper: Path = PAPER) -> Path:
+    """Copy what arXiv needs into a flat tree, with every `\\input` inlined.
+
+    The inlining is load-bearing since the split. Each paper `\\input`s three files from
+    `../shared/` -- the preamble, the harness section and the companion-paper note -- and arXiv
+    receives a flat directory with no parent to resolve them against. Copying `main.tex` verbatim
+    would upload a file whose first `\\input` fails, which pdflatex survives in
+    `nonstopmode`: the submission would post with no packages, no title and no harness section.
+    `rehearse()` would catch it, but inlining means there is nothing to catch.
+    """
     dest.mkdir(parents=True, exist_ok=True)
+    (dest / "main.tex").write_text(paper_sources.paper_tex(paper.name), encoding="utf-8")
     for name in (*SOURCES, "main.bbl"):
         shutil.copy2(paper / name, dest / name)
     shutil.copytree(paper / FIGURES, dest / FIGURES, dirs_exist_ok=True)
@@ -96,6 +132,10 @@ def plain_abstract(paper: Path = PAPER) -> str:
     if m is None:
         raise RuntimeError("no abstract found in main.tex")
     ab = m.group(1).strip()
+    # Our own macros first. `\dd` is defined in shared/preamble.tex, so arXiv's metadata field --
+    # which sees the abstract as text and has no preamble -- would render it as nothing. Standard
+    # math macros are a different case and are allowlisted below rather than expanded.
+    ab = re.sub(r"\\dd\b", r"\\Delta", ab)
     # Citations become author-year, read out of references.bib rather than guessed from the key:
     # inventing a surname to fill an abstract would be a fabrication, and dropping the citation
     # entirely leaves the abstract asserting someone else's result unattributed.
@@ -123,8 +163,8 @@ def plain_abstract(paper: Path = PAPER) -> str:
     # stand for rather than leaving "--" for a reader to decode.
     ab = ab.replace("~", " ").replace("---", "\u2014").replace("--", "\u2013")
     ab = re.sub(r"[ \t]+", " ", ab).strip()
-    if "\\" in ab:
-        leftover = sorted(set(re.findall(r"\\[a-zA-Z]+", ab)))
+    leftover = sorted(set(re.findall(r"\\[a-zA-Z]+", ab)) - MATH_MACROS_ARXIV_RENDERS)
+    if leftover:
         raise RuntimeError(f"unconverted LaTeX left in the plain abstract: {leftover}")
     return ab
 
@@ -232,20 +272,31 @@ ENDORSEMENT_NOTE = """  Endorsement:  as an independent researcher, expect to ne
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--outdir", default="dist", help="where to write the tarball")
+    ap.add_argument(
+        "--paper",
+        default=paper_sources.PAPERS[0],
+        choices=paper_sources.PAPERS,
+        help="which paper of the series to package (each is submitted separately)",
+    )
     args = ap.parse_args()
+    paper = paper_sources.paper_dir(args.paper)
+    print(
+        f"packaging {paper_sources.PAPER_NUMERALS[args.paper]}: "
+        f"{paper_sources.PAPER_TITLES[args.paper]}\n"
+    )
 
-    problems = preflight()
+    problems = preflight(paper)
     if problems:
         print("NOT SUBMITTABLE, so no package was written:")
         for pr in problems:
             print(f"  - {pr}")
         return 1
 
-    build_bbl()
+    build_bbl(paper)
     out = Path(args.outdir)
     out.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:
-        staged = stage(Path(tmp) / "arxiv")
+        staged = stage(Path(tmp) / "arxiv", paper)
         result = rehearse(staged)
         bad = (
             result["undefined_citations"]
@@ -259,7 +310,7 @@ def main() -> int:
                 if result[k]:
                     print(f"  {k}: {result[k]}")
             return 1
-        tar = out / "arxiv-submission.tar.gz"
+        tar = out / f"arxiv-{args.paper}.tar.gz"
         with tarfile.open(tar, "w:gz") as t:
             for item in sorted(staged.iterdir()):
                 if item.name.startswith("main.") and item.suffix not in (".tex", ".bbl"):
@@ -277,10 +328,10 @@ def main() -> int:
             )
 
     print("\n--- plain-text abstract for the submission form ---")
-    print(plain_abstract())
-    print(f"\n--- author block ---\n    {author_block()}")
-    print(f"    abstract: {len(plain_abstract())} characters of {ABSTRACT_LIMIT}")
-    print(f"    \\pdfoutput=1 on line {pdfoutput_line()} (must be <= 5)")
+    print(plain_abstract(paper))
+    print(f"\n--- author block ---\n    {author_block(paper)}")
+    print(f"    abstract: {len(plain_abstract(paper))} characters of {ABSTRACT_LIMIT}")
+    print(f"    \\pdfoutput=1 on line {pdfoutput_line(paper)} (must be <= 5)")
     print("\n--- decisions the form will ask for ---")
     for note in (LICENCE_NOTE, CATEGORY_NOTE, ENDORSEMENT_NOTE):
         print(note + "\n")

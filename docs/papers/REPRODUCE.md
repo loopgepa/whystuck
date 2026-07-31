@@ -1,13 +1,17 @@
-# Reproducing the paper
+# Reproducing the papers
 
-This directory is the supporting artifact for *Your Loop Optimizer Is Not Optimizing Your
-Loop*. Everything below runs offline and costs **$0** unless a step says otherwise.
+This directory holds the **three papers** of the series ([README.md](README.md) says which one
+answers which question). Everything below runs offline and costs **$0** unless a step says
+otherwise.
 
-The paper's central methodological claim is that a componentized-optimization result should
+Paper III's central methodological claim is that a componentized-optimization result should
 report, per component, whether the optimizer's output actually differs from the seed. That
 claim is only credible if our own numbers can be re-derived rather than taken on trust, so
-each of the four checks below re-derives a different part of the paper from the released
+each check below re-derives a different part of the series from the released
 artifacts, and each one fails loudly on drift.
+
+For the full map from a claim to the script that produced it, see
+[../EXPERIMENTS.md](../EXPERIMENTS.md).
 
 ## Setup
 
@@ -22,15 +26,15 @@ python -m venv .venv && .venv/bin/pip install -e '.[dev]'
 python -m venv scratchpad/evalvenv && scratchpad/evalvenv/bin/pip install -e '.[eval]'
 ```
 
-## The four checks
+## The checks
 
-### 1. Every number in the paper matches the artifacts ($0, ~30s)
+### 1. Every number in all three papers matches the artifacts ($0, ~30s)
 
 ```bash
 .venv/bin/python scripts/verify_paper_claims.py
 ```
 
-Re-derives every machine-checkable figure the paper prints — the detector table, the
+Re-derives every machine-checkable figure the three papers print — the detector table, the
 residual decomposition, both actionability effects with intervals and sign tests, the
 metric floors, the oracle taxonomy, the C1 ablation, the C2 re-run, and the count of runs
 that overrode the spend ceiling — directly from `docs/*.json`, the vendored task data, and
@@ -99,6 +103,21 @@ downstream of the treatment: stratifying on it would condition on a collider.
 
 `analyze_deltas.py` marks any run whose seeds share a task pool, because on those the
 interval and the sign test are anti-conservative and must not be read as replication.
+
+### 5. The three-way split lost no claim ($0, ~5s)
+
+```bash
+.venv/bin/python scripts/verify_split_coverage.py
+```
+
+The papers were carved out of one 46-page draft. A split is a mass edit of prose, and its failure
+mode is silent: a paragraph belonging to no paper's argument gets dropped and nothing errors. This
+compares the frozen pre-split source against the three papers and requires every quantity to be
+carried by at least one of them, superseded by a replacement it verifies is present, or explicitly
+dropped with a reason. All 322 are accounted for and none is dropped.
+
+Also runs as tests (`tests/test_split_coverage.py`), including one that re-reads the pre-split draft
+from git to prove the baseline was not edited to make the check pass.
 
 ## Making a live run (costs money)
 
@@ -220,8 +239,11 @@ Two things will bite anyone who varies `--n-train` without reading that section:
 
 | path | what it holds |
 | --- | --- |
-| `docs/paper/main.tex` | the paper |
-| `docs/paper/references.bib` | bibliography; every entry verified against its source |
+| `docs/papers/p1-conditional-lever/main.tex` | Paper I — the conditional lever |
+| `docs/papers/p2-repair-not-detection/main.tex` | Paper II — repair, not detection |
+| `docs/papers/p3-silent-no-op/main.tex` | Paper III — the silent no-op |
+| `docs/papers/shared/` | preamble, harness section, bibliography, figures, CC BY licence |
+| `docs/papers/PRE-SPLIT-SOURCE.tex` | the pre-split draft, frozen at `fe628ed`, never built |
 | `docs/validation-study-*.json` | per-run results, including per-task held-out vectors |
 | `docs/validation-study-*.md` | the generated report for each run |
 | `tests/fixtures/cassettes/` | recorded LLM calls, content-addressed, prompts not stored |

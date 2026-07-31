@@ -1,0 +1,24 @@
+% The companion-paper note. Every paper in the series carries it so a reader who arrives at one
+% knows what the other two contain and, more importantly, which claims are NOT in the paper they
+% are holding. Three papers were carved out of one 46-page draft; the carve is documented in
+% docs/papers/README.md, and the split's completeness is machine-checked by
+% scripts/verify_split_coverage.py against the pre-split source.
+
+\paragraph{This paper is one of three.}
+One study produced three separable results, and they are reported separately because they answer
+different questions, rest on different experiments, and are useful to different readers. All three
+share one harness, one artifact release and one corrections register.
+\begin{description}\itemsep0pt
+  \item[I. The conditional lever.] Whether optimizing a self-refine loop's verifier beats
+    optimizing its generation prompt, and the quantity that decides it: $p_0$, the base rate of
+    first drafts already satisfying every requirement.
+  \item[II. What a checker cannot buy is the repair.] The loop's own ceiling, with no optimizer
+    anywhere in it: how good the intrinsic critique is as a detector, what happens when the
+    detector is made perfect, and which fix-side levers actually pay.
+  \item[III. Your loop optimizer is not optimizing your loop.] A silent failure mode in
+    componentized prompt optimization: pointing an optimizer at a component is not the same as
+    optimizing it, the difference does not appear in held-out scores, and one integer per component
+    catches it.
+\end{description}
+Shared artifact, including every cassette, pre-registration and the corrections register:
+\texttt{github.com/loopgepa/whystuck}.

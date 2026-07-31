@@ -1,0 +1,51 @@
+% The harness description common to all three papers of this series. Copied into each rather than
+% cited across them, because a reader of any one paper needs it to read that paper's numbers.
+%
+% Kept as a single input, verbatim, for a reason specific to this study: the claim checker
+% (scripts/verify_paper_claims.py) matches several of these sentences as literal text, spaces and
+% line breaks included, so three hand-maintained copies would drift and silently stop being
+% checked. Edit here, and never reflow a line that contains a number.
+
+\paragraph{The loop.}
+The worker is a real generate--critique--refine loop. A \texttt{generate} gene
+drafts an answer; a \texttt{ensure\_correct} (verify) gene drives an LLM
+self-critique that returns \texttt{PASS} or a list of fixes and gates a bounded
+number of refine rounds; the final answer is scored by a programmatic metric.
+Critically, the critique is \emph{intrinsic}: the programmatic scorer is never
+consulted inside the loop (that would be oracle contamination), so the loop
+cannot game its own metric. Each eval costs $1 + 2R$ LLM calls for $R$ refine
+rounds (or $2 + 2R$ with the optional plan module).
+
+\paragraph{Tasks.} A composable IFEval-style \citep{zhou2023ifeval}
+multi-constraint generator with nine independent, parameter-carrying verifiers
+(e.g.\ \texttt{exact\_word\_count}, \texttt{forbidden\_word},
+\texttt{word\_max\_length}, \texttt{num\_bullets}). Joint satisfiability of every
+generated task is guaranteed by a witness the generator validates to score
+$1.0$ (verified exhaustively: $3{,}189$ easy-tier and $19{,}632$ hard-tier
+combinations). The \emph{hard} tier mandates \texttt{exact\_word\_count} (a
+genuine LLM skill gap) plus at least one further ``brutal'' constraint, which
+structurally caps the seed below saturation.
+
+\paragraph{Metric.} Mean fraction of constraints satisfied on a disjoint
+held-out split (\texttt{mc\_score} $\in [0,1]$), scored programmatically (no LLM
+judge). We report a relative result under matched budget, not a
+leaderboard number.
+
+\paragraph{Reproducibility and budget.}
+Every LLM call is recorded to a content-addressed cassette (\texttt{sha256} of name$+$args), so
+runs replay offline at zero cost and partial spend is always persisted. Reproduction is strict:
+re-running any study with \texttt{-{}-replay} re-executes the whole pipeline (loaders, GEPA search,
+scoring) against the cached calls with no API key, and any cassette miss raises --- per call, and,
+after the correction in Evidence~7, per run as well, since a consumer that swallows the per-call
+error can otherwise let a replay finish with a different number. GEPA is deterministic under
+replay, so replay is bit-for-bit, and \texttt{scripts/verify\_reproducibility.py}
+registers twenty-five committed runs. Twelve are labelled \textbf{superseded} because
+the corrected harness changes every reflection prompt and therefore every cassette key, so it
+cannot replay them and the script reports them as skipped rather than verified.
+The remaining thirteen were recorded under the corrected harness and every per-arm held-out score replays
+exactly. Output tokens are hard-capped via enforced \texttt{max\_tokens}; a pre-flight guard
+refuses any run whose conservative estimate exceeds \texttt{-{}-max-usd}, whose default is \$5.
+Four runs raised it explicitly, at three distinct values (\$6.18 twice, \$5.89, \$11.76), so \$5 is
+a default rather than a study-wide ceiling. Every experiment was pre-registered --- hypothesis,
+frozen configuration, expected seed band and verdict rule committed to version control
+\emph{before} spending.
