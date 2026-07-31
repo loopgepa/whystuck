@@ -201,8 +201,9 @@ verification outperforming self-verification. The boundary is not undisputed:
 satisfy --- it samples at the provider's default temperature (\S\ref{sec:setup}), and that
 choice is what makes the noise floor of \S\ref{sec:threats} non-zero in the first place.
 These results predict our loop-level null, and Paper~II measures the loop's own ceiling
-independently of any optimizer: the intrinsic critique sits at chance on base-rate-independent
-statistics, and a \emph{perfect} inference-time checker does not beat it.
+independently of any optimizer: the intrinsic critique's discrimination does not improve on
+base-rate-independent statistics as the tasks get easier, even as its $\mathrm{F}_1$ nearly triples,
+and a \emph{perfect} inference-time checker does not beat it.
 
 \paragraph{When does optimization help?}
 Recent work explicitly frames the boundary question for multi-agent systems and
@@ -377,7 +378,12 @@ ten, so the inferential unit remains the seed and $n$ is still $3$.
 Arm~C is worth one qualification, because its number is unchanged from the retracted runs and
 what it demonstrates is not. Previously it scored a saturated $1.0$, so GEPA saw a perfect
 program and proposed \emph{nothing}: no part of the search ran. Here it starts at $0.23$ to
-$0.36$ and GEPA proposes four candidates on every seed, evaluates them, and accepts none. The
+$0.36$, GEPA proposes candidates, evaluates them, and accepts none on any seed. We do not report
+a per-arm proposal count, because the released cassette is content-addressed and does not
+attribute a reflection call to the arm that issued it; an earlier draft printed one, and it was
+not derivable from the artifact. What the artifact does show is run-level and makes the same
+point: the corrected re-run issued $32$ reflection calls over three seeds against the superseded
+flagship's $22$ over five, so the search ran harder on fewer seeds. The
 flatness
 is still true by construction --- a genome-blind worker's training score cannot improve, so
 acceptance is impossible --- but the control now exercises the machinery it is supposed to
@@ -1500,7 +1506,7 @@ This paper's earlier drafts published claims it now withdraws, and two of its pr
 predictions failed. Reporting guidance for preregistered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Ten} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Eleven} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1556,6 +1562,11 @@ The series' other two papers carry the entries bearing on their own claims.
     It ran in the flattering direction and it moved one verdict: the $L_2$ gain was published at
     $p<0.05$ ($t = 3.02$) and is $p<0.10$ ($t = 2.70$). \S\ref{sec:repeat} states it that way, and
     the paper no longer claims any effect at $p<0.05$.
+  \item \textbf{Arm~C's per-arm proposal count.} An earlier draft reported that GEPA proposed
+    ``four candidates on every seed'' for the genome-blind control. Withdrawn as not derivable from
+    the release: the cassette is content-addressed on a call's name and arguments, so an entry
+    carries no arm label and no per-arm proposal count can be recovered from it. \S\ref{sec:rerun}
+    now reports the run-level count, which is derivable and makes the same point.
 \end{enumerate}
 
 \section{The Actuator Experiment, and the MBPP+ Attempt}

@@ -29,14 +29,14 @@ verifiable instruction-following family, with \emph{no} optimizer anywhere in th
 number below scores a fixed, hand-written genome, so nothing here depends on a search. Detection
 turns out not to be the binding constraint. Replacing the loop's near-random self-critique
 (F$_1 = 0.11$) with the true metric as a \emph{perfect} inference-time gate moves held-out score by
-$-0.0027$ ($t = 0.37$ over five replicates): a perfect checker is statistically indistinguishable
+$-0.0027$ ($t = 0.33$ over five replicates): a perfect checker is statistically indistinguishable
 from one at chance, and it scores $0.042$ \emph{below} a mere text-statistics tool ($t = 2.89$).
 What does pay sits on the fix side. Holding the checker perfect and varying only the repair text,
 naming which constraint failed adds $+0.003$ over a bare ``revise'' while a concrete measured edit
 adds $+0.0613$ ($t = 8.08$, the best-supported effect we measure), and that configuration beats the
 measurement tool outright ($+0.0640$, $t = 5.47$). We also show F$_1$ is the wrong statistic for an
 in-loop critique: across a $10\times$ range of task difficulty the same critique's F$_1$ nearly
-triples while Youden's $J$ and Matthews' correlation stay at or below chance, so a rising F$_1$ on
+triples while Youden's $J$ and Matthews' correlation do not improve at all, so a rising F$_1$ on
 an easier benchmark is base-rate inflation. The residual is not a diffuse capability wall but one
 mechanical skill --- exact word counting, $0.16 \to 0.33 \to 0.50$ under better feedback and never
 solved. The practical consequence is a reordering of priorities: do not buy a better detector, buy
@@ -89,9 +89,9 @@ connects an optimizer to a component. Our contributions:
     (\S\ref{sec:curverepeat}). An earlier draft scaled every gap by a $\sigma$ estimated on a
     different genome family; three of six gaps had a margin against the $2\sigma$ line smaller than
     the known spread in $\sigma$. We bought the direct measurement --- each row re-scored five
-    times, $90$ runs --- and report paired $t$-tests. Every claim survives, three magnitudes shrink
-    by $35$ to $52\%$, and one claim the earlier draft had \emph{withdrawn} for lack of power is
-    reinstated.
+    times, $90$ runs --- and report paired $t$-tests. Every claim survives; the magnitudes move in
+    both directions, three shrinking by $34$ to $52\%$ and the one claim the earlier draft had
+    \emph{withdrawn} for lack of power growing by $74\%$ and reinstated.
   \item \textbf{Cross-domain corroboration} (\S\ref{sec:bcb}): on BigCodeBench-Hard the same
     actionability lever is worth $+0.20$, a $3\times$ larger effect, plausibly because a code
     assertion is a sharper repair target than a word count.
@@ -307,8 +307,13 @@ $\mathrm{F}_1$ nearly triples as the tasks get easier, and it is measuring the b
 the detector: Youden's $J$ and Matthews' correlation --- both of which are zero for a
 chance-level detector regardless of base rate --- do not improve at all, and at $L_3$ they are
 \emph{exactly} zero because $\mathrm{tp}\cdot\mathrm{tn} = \mathrm{fp}\cdot\mathrm{fn} = 48$.
-Across a $10\times$ range of task difficulty the intrinsic critique never rises above chance at
-telling a compliant draft from a non-compliant one. This sharpens the claim and bounds its scope:
+Across a $10\times$ range of task difficulty $\mathrm{F}_1$ orders the levels and the
+base-rate-independent statistics do not: $J$ runs $+0.286$, $-0.057$, $0.000$, which is a fall and
+not an ordering. Nor is the one positive value evidence of discrimination --- at $L_1$ only two
+held-out drafts are compliant, so sensitivity can take the values $0$, $0.5$ or $1$ and nothing in
+between, and $J = +0.286$ is one true positive out of two. What the three levels establish is that
+the detector's measured discrimination does not improve as the tasks get easier, while
+$\mathrm{F}_1$ nearly triples. This sharpens the claim and bounds its scope:
 the $\mathrm{F}_1 \approx 0.11$ reported elsewhere is a figure for one task
 distribution, and a reader should not read a higher $\mathrm{F}_1$ on an easier benchmark as a
 better detector. It is the base-rate-independent statistics that carry the mechanism.
@@ -329,7 +334,7 @@ $0.088$ below the tool-fed critique at $3.04\sigma$, but only $0.028$ below the
 ordering holds on point estimates; the load-bearing half of it is the comparison against the
 tool. Both halves have since been re-scored five times each (\S\ref{sec:curverepeat}): the gap
 against the tool is $-0.0420$ at $t = 2.89$, replicated, and the gap against the intrinsic
-critique is $-0.0027$ at $t = 0.37$. So the reading above is confirmed on a replicated interval
+critique is $-0.0027$ at $t = 0.33$. So the reading above is confirmed on a replicated interval
 rather than a borrowed floor, with the caveat that both magnitudes are smaller than one draw
 suggested. Detection quality is therefore necessary but not sufficient, which independently matches
 \citet{decomposing2026selfcorrection}'s finding that a model's detection ability does not
@@ -583,8 +588,10 @@ oracle under intrinsic, 7 under 3 & $-0.0283$ & $-0.0027$ & 0.0081 & 0.33 & not 
 \caption{Each comparison paired \emph{within} a replicate over the shared held-out tasks, on
 $t(4)$, so the critical values are $2.132$ and $2.776$ rather than $1.96$. Every claim the paper
 leans on survives, and every one is now carried by a replicated interval instead of a single draw
-divided by a borrowed $\sigma$. The magnitudes are the part that moves: three shrink by $35$ to
-$52\%$. Each discrepancy is within $1.65$ single-draw sd of the published value --- $0.79$, $1.65$,
+divided by a borrowed $\sigma$. The magnitudes are the part that moves, and not all one way:
+three shrink by $34$ to $52\%$, actionability is essentially unchanged at $-3\%$, the
+oracle-under-intrinsic null falls to near nothing, and the row the paper had withdrawn \emph{grows}
+by $74\%$. Each discrepancy is within $1.65$ single-draw sd of the published value --- $0.79$, $1.65$,
 $1.00$, $0.09$, $1.36$ and $0.95$ --- so the two measurements are consistent and the shrinkage is
 what one draw does, not a systematic effect. The largest published ratio regresses the furthest,
 which is what regression to the mean looks like when a paper reports the biggest number it saw.}
@@ -719,9 +726,11 @@ combinations; this affects all rows equally but softens the generalization claim
 thirty held-out tasks --- never through the model grading its own draft, whose critique is a
 near-random detector (F$_1\!=\!0.11$) and whose replacement by a \emph{perfect} checker
 moves held-out by $0.98\sigma$, i.e.\ not at all. Those three comparisons have since been
-re-scored five times each, and all three hold at $p<0.05$ on a replicated interval rather than a
+re-scored five times each, and all three survive on a replicated interval rather than a
 borrowed noise floor, with smaller magnitudes than one draw suggested
-(\S\ref{sec:curverepeat}).
+(\S\ref{sec:curverepeat}). The two positive effects survive as effects, at $p<0.05$
+($t = 4.38$ and $t = 3.12$); the third survives as a \emph{null}, at $t = 0.33$, which is the
+stronger reading and not a significance claim.
 
 The loop's bottleneck is therefore the fixer, not the detector, and the two are cleanly separable by
 experiment. Give the loop a \emph{perfect} inference-time checker and held-out score moves
@@ -735,14 +744,14 @@ better verifier'', and it is absent.
 What resolves the inversion is \emph{actionability}, not correctness. Holding the checker perfect,
 a bare ``revise'' yields $0.810$ and naming the failed constraint yields $0.813$: identifying the
 failure is worth essentially nothing. A concrete measured edit --- ``the draft has 15 word(s) but
-needs exactly 20: add 5 more word(s)'' --- yields $0.873$, worth $+0.0613$ at $t = 9.03$, and beats
+needs exactly 20: add 5 more word(s)'' --- yields $0.873$, worth $+0.0613$ at $t = 8.08$, and beats
 the measurement tool outright at $+0.0640$, $t = 5.47$. More refine attempts are worth $+0.0367$.
 So the two things that pay are both on the fix side, and the one that pays most is the shape of the
 repair instruction.
 
 Two methodological points travel with this. First, \textbf{F$_1$ is the wrong statistic for an
 in-loop critique}: across a $10\times$ range of task difficulty the same critique's F$_1$ nearly
-triples while Youden's $J$ and Matthews' correlation stay at or below chance, so a rising F$_1$ on
+triples while Youden's $J$ and Matthews' correlation do not improve at all, so a rising F$_1$ on
 an easier benchmark is base-rate inflation and not a better detector. Second,
 \textbf{$\sigma$ is a property of the genome, so a borrowed denominator can decide a claim}. Ours
 was borrowed from another genome family and three of six gaps had less margin against $2\sigma$
@@ -774,14 +783,14 @@ Earlier drafts of this work published claims it now withdraws. Reporting guidanc
 preregistered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Seven} entries follow. The
+collected here and the body text states only the surviving claim. \textbf{Nine} entries follow. The
 series' other two papers carry the entries bearing on their own claims, and the full
 register across all three, with the superseded values themselves, is in the released repository.
 
 \begin{enumerate}\itemsep2pt
   \item \textbf{$\mathrm{F}_1 = 0.11$ as a property of the detector.} It is a figure for one task
     distribution. Across a $10\times$ range of $p_0$ the same critique's $\mathrm{F}_1$ nearly
-    triples while Youden's $J$ and Matthews' correlation stay at or below chance
+    triples while Youden's $J$ and Matthews' correlation do not improve at all
     (\S\ref{sec:detector}), so a rising $\mathrm{F}_1$ on an easier benchmark is base-rate
     inflation.
   \item \textbf{``Run~10 beats the tool-fed loop.''} An earlier caption called that gap decisive.
@@ -798,8 +807,8 @@ register across all three, with the superseded values themselves, is in the rele
     study that also shows $\sigma$ to be genome-specific across a $5.9\times$ range. Three of the
     six had a margin against $2\sigma$ smaller than that spread. Now measured directly on the
     curve's own rows (\S\ref{sec:curverepeat}): every claim survives and is upgraded from a
-    single draw to a five-replicate $t$-test, three magnitudes shrink by $35$ to $52\%$ within
-    what one draw accounts for, and the borrowed $\sigma$ turns out to have been conservative for
+    single draw to a five-replicate $t$-test, three magnitudes shrink by $34$ to $52\%$ and one
+    grows by $74\%$, all within what one draw accounts for, and the borrowed $\sigma$ turns out to have been conservative for
     all six rows --- which is why entry~2 needed reinstating rather than strengthening.
   \item \textbf{Any BigCodeBench-Hard interval or sign test read as replication across
     independent seeds.} That benchmark shuffles a fixed vendored pool, so a seed selects a
@@ -822,6 +831,21 @@ register across all three, with the superseded values themselves, is in the rele
     No verdict in this paper turns on it: all six comparisons of
     Table~\ref{tab:curvepairs} keep their side of the $2.776$ line, the closest being the
     oracle-under-tool gap at $t = 2.89$. Only the magnitudes of the $t$ statistics move.
+  \item \textbf{Four restatements of a corrected statistic, and one selective summary.} A
+    paragraph-by-paragraph audit after the estimator correction found this paper quoting the
+    oracle-under-intrinsic $t$ as $0.37$ in two places (one of them the abstract) and $0.33$ in two
+    others, and the actionability $t$ as $9.03$ in the conclusion against $8.08$ elsewhere; the
+    curve-$\sigma$ ratio range also disagreed with the companion paper's. Every pinned check passed
+    throughout, because each was anchored to one phrasing of a claim the paper makes four times.
+    Separately, ``three magnitudes shrink by $35$ to $52\%$'' was selectively true: a fourth
+    magnitude falls to near nothing and a fifth \emph{grows} by $74\%$, so the sentence read as the
+    shape of the whole correction when it described part of it. All restatements now agree, and a
+    check compares every restatement of a statistic against the first.
+  \item \textbf{``Youden's $J$ and Matthews' correlation stay at or below chance.''} Withdrawn as
+    stated: at $L_1$ they are $+0.286$ and $+0.169$. What is true, and is the load-bearing point, is
+    that they \emph{do not improve} as $\mathrm{F}_1$ nearly triples --- $J$ runs $+0.286$, $-0.057$,
+    $0.000$, a fall rather than an ordering. Nor is the positive value evidence of discrimination:
+    at $L_1$ two held-out drafts are compliant, so it is one true positive out of two.
 \end{enumerate}
 
 \end{document}

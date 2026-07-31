@@ -94,6 +94,7 @@ SUPERSEDED: dict[str, str] = {
     "0.0147": "0.0164",
     "0.0149": "0.0166",  # R=1 mean
     "0.0162": "0.0181",  # R=3 mean
+    "0.35": "0.38",
     "0.48": "0.53",
     "0.51": "0.56",
     # --- tab:curvepairs, the six paired standard errors and t statistics ------------------------

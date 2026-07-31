@@ -2968,6 +2968,183 @@ def _cross_paper_checks() -> list[tuple[str, float, float, float]]:
                     _scrape(src.paper_tex(other), mapping[other]),
                 )
             )
+    out.extend(_restated_statistic_checks())
+    out.extend(_magnitude_movement_checks())
+    out.extend(_reflection_call_checks())
+    return out
+
+
+def _reflection_call_checks() -> list[tuple[str, float, float, float]]:
+    """How many reflection calls each run issued, counted from its cassette.
+
+    Replaces a per-arm proposal count an earlier draft printed and the release cannot support: the
+    cassette is content-addressed on the call's name and arguments, so an entry carries no arm
+    label and no proposal count can be attributed. This is the run-level quantity that *is*
+    derivable, and it carries the same argument -- the corrected re-run searched harder on three
+    seeds than the superseded flagship did on five.
+    """
+    out = []
+    for label, cassette, claimed in (
+        ("corrected re-run reflection calls", "study-c2b.json", 32),
+        ("superseded flagship reflection calls", "study-multihard.json", 22),
+    ):
+        with open(f"tests/fixtures/cassettes/{cassette}", encoding="utf-8") as fh:
+            entries = json.load(fh)["entries"]
+        n = sum(
+            1 for e in entries.values() if isinstance(e, dict) and e.get("name") == "reflection"
+        )
+        out.append((label, float(claimed), 0.0, float(n)))
+    tex = _sources().paper_tex("p1-conditional-lever")
+    quoted = _scrape_all(
+        tex,
+        r"issued \$(\d+)\$ reflection calls over three seeds against the"
+        r" superseded\nflagship's \$(\d+)\$",
+    )
+    out.append(("tex: re-run reflection calls", quoted[0], 0.0, 32.0))
+    out.append(("tex: superseded reflection calls", quoted[1], 0.0, 22.0))
+    return out
+
+
+def _magnitude_movement_checks() -> list[tuple[str, float, float, float]]:
+    """How far each published magnitude moved when its row was re-scored five times.
+
+    Unchecked until a paragraph audit found the prose claim selectively true: it named the three
+    rows that shrank by 34-52% and said nothing about the fourth, which fell by 90%, or the fifth,
+    which *grew* by 74%. A reader takes "three shrink by 34 to 52%" as the shape of the correction,
+    so the omitted rows change its meaning. Pinned here so the count, the range and the growth are
+    derived rather than recalled.
+    """
+    src = _sources()
+    tex = src.paper_tex("p2-repair-not-detection")
+    published = _scrape_all(
+        tex,
+        r"tool lift, run 4 over run 3\s+& \$\+([\d.]+)\$.*?"
+        r"oracle under tool, 7 under 4\s+& \$-([\d.]+)\$.*?"
+        r"refine budget, run 8 over run 7\s+& \$\+([\d.]+)\$.*?"
+        r"actionability, run 10 over run 9 & \$\+([\d.]+)\$.*?"
+        r"oracle under intrinsic, 7 under 3 & \$-([\d.]+)\$.*?"
+        r"run 10 over the tool-fed loop\} & \$\+([\d.]+)\$",
+    )
+    # The null row is excluded, and the exclusion is the substance rather than a convenience. Its
+    # magnitude falls 90% (-0.0283 -> -0.0027), but a percentage shrinkage of a quantity that is not
+    # an effect is not a magnitude changing -- it is a null becoming a cleaner null, which the
+    # caption states separately. Significance at K=5 is what separates the two, so it is what
+    # partitions here: t > 2.132 is the p<0.10 threshold at 4 df.
+    rows = _sources_curve()
+    effects = [r for r in rows if r.t_stat() > 2.132]
+    nulls = [r for r in rows if r.t_stat() <= 2.132]
+    published_effects = [p for p, r in zip(published, rows, strict=True) if r.t_stat() > 2.132]
+    moves = sorted(abs(r.delta) / p - 1 for p, r in zip(published_effects, effects, strict=True))
+    shrank = [m for m in moves if m < -0.30]
+    out = [
+        ("curve rows that are effects at K=5", 5.0, 0.0, float(len(effects))),
+        ("curve rows that are nulls at K=5", 1.0, 0.0, float(len(nulls))),
+        ("magnitudes shrinking by more than 30%", 3.0, 0.0, float(len(shrank))),
+        ("smallest of the three shrinkages", 0.34, 0.005, abs(max(shrank))),
+        ("largest of the three shrinkages", 0.52, 0.005, abs(min(shrank))),
+        ("the reinstated row's growth", 0.74, 0.005, max(moves)),
+    ]
+    # And the paper's own words for the same three quantities.
+    for label, pattern, artifact in (
+        ("tex: shrink range lo", r"three shrink by \$(\d+)\$ to", 100 * abs(max(shrank))),
+        (
+            "tex: shrink range hi",
+            r"three shrink by \$\d+\$ to \$(\d+)\\%\$",
+            100 * abs(min(shrank)),
+        ),
+        ("tex: reinstated growth", r"\\emph\{grows\}\nby \$(\d+)\\%\$", 100 * max(moves)),
+    ):
+        out.append((label, _scrape(tex, pattern), 0.5, artifact))
+    return out
+
+
+def _sources_curve():
+    """The six curve comparisons at K=5, in the order `tab:curvepairs` prints them."""
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import repeat_scores as rc
+
+    by_label = {r.level: r for r in rc.curve_aggregate(5)}
+    return [by_label[label] for label, _a, _b in rc.CURVE_PAIRS if label in by_label]
+
+
+#: A statistic quoted beside its effect size, matched wherever it appears. Unlike `_SHARED`, which
+#: compares one site per paper, this compares EVERY site to every other, because the sites are
+#: *within* one paper and phrased differently at each.
+#:
+#: This family exists because a paragraph-by-paragraph audit found four stale values that 762
+#: checks had missed: the oracle-vs-intrinsic t was 0.33 in two places and 0.37 in two others (one
+#: of them Paper II's abstract), the actionability t was 8.08 in two places and 9.03 in the
+#: conclusion, and the curve-sigma ratio range disagreed between two papers. Every pinned check
+#: passed throughout, because each was anchored to one phrasing of a claim the paper makes four
+#: times. The lesson is the one the series is about: a check that covers one site reads exactly
+#: like a check that covers the claim.
+_RESTATED: tuple[tuple[str, str], ...] = (
+    # (label, pattern with the effect size in group 1 and the statistic in group 2)
+    ("t beside its effect", r"\$([-+]?\d+\.\d{3,4})\$[^$]{0,30}\$t = ([\d.]+)\$"),
+    ("effect stated in sigma", r"\$([-+]?\d+\.\d{3,4})\$ at \$([\d.]+)\\sigma\$"),
+)
+
+
+#: Effects the papers deliberately state against TWO denominators, so a bare disagreement between
+#: restatements is correct rather than stale. Each entry names the effect and the two sigmas, and is
+#: verified by ratio rather than exempted: the two quoted multiples must stand in the same
+#: proportion as the two sigmas, so a typo in either one still fails. An exemption that merely
+#: skipped the pair would be the weaker check and would hide exactly what it was added for.
+_DUAL_DENOMINATOR: tuple[tuple[str, str, str, str], ...] = (
+    (
+        "p1-conditional-lever",
+        "-0.042",
+        # cross-run sigma(delta), which carries provider drift between recording dates ...
+        r"\\sigma\(\\dd\) \\;=\\; 0.1591/\\sqrt\{30\} \\;=\\; ([\d.]+)",
+        # ... against the within-run sigma at this level, which does not.
+        r"whose single-draw \$\\sigma\$ is \$([\d.]+)\$",
+    ),
+)
+
+
+def _restated_statistic_checks() -> list[tuple[str, float, float, float]]:
+    """Every restatement of one statistic must agree with the first statement of it.
+
+    Grouped by the effect size it sits beside rather than by section, so a value restated in an
+    abstract, a caption and a conclusion is one group. Reported as (first site, other site) pairs so
+    a disagreement is a normal FAIL row naming both values.
+    """
+    src = _sources()
+    dual = {(slug, effect): (a, b) for slug, effect, a, b in _DUAL_DENOMINATOR}
+    out = []
+    for slug in src.PAPERS:
+        tex = src.paper_tex(slug)
+        for label, pattern in _RESTATED:
+            groups: dict[str, list[str]] = {}
+            for m in re.finditer(pattern, tex, re.DOTALL):
+                groups.setdefault(m.group(1), []).append(m.group(2))
+            for effect, values in groups.items():
+                if (slug, effect) in dual:
+                    # Two denominators, so the multiples must differ. Check they differ by exactly
+                    # the ratio of the two sigmas, which is what makes them the same effect.
+                    pat_a, pat_b = dual[(slug, effect)]
+                    sigma_ratio = _scrape(tex, pat_b) / _scrape(tex, pat_a)
+                    quoted = sorted(float(v) for v in values)
+                    out.append(
+                        (
+                            f"dual-denominator {src.PAPER_NUMERALS[slug]}: {effect} ratio",
+                            quoted[-1] / quoted[0],
+                            0.02,
+                            sigma_ratio,
+                        )
+                    )
+                    continue
+                for i, value in enumerate(values[1:], start=2):
+                    out.append(
+                        (
+                            f"restated {src.PAPER_NUMERALS[slug]}: {label} {effect} (site {i})",
+                            float(values[0]),
+                            0.0,
+                            float(value),
+                        )
+                    )
     return out
 
 
