@@ -40,6 +40,8 @@ from __future__ import annotations
 import json
 import re
 from dataclasses import dataclass
+from functools import cache
+from pathlib import Path
 from statistics import mean, pstdev
 
 DOCS = "docs"
@@ -348,6 +350,7 @@ _WORD_NUM = {
     "seventeen": 17,
     "twenty": 20,
     "twenty-one": 21,
+    "twenty-two": 22,
     "twenty-five": 25,
 }
 
@@ -428,6 +431,58 @@ def _curve_seed_mean(label: str, *, shared_seeds_only: bool = True) -> float:
     if shared_seeds_only:
         runs = runs[:_CURVE_SHARED_SEEDS]
     return mean(r["A"]["seed_heldout"] for r in runs)
+
+
+@cache
+def _curve_replicates() -> tuple[dict[str, float], dict[tuple[str, str], object]]:
+    """The 90 curve replicates: (sd of each row's 30-task mean, paired result per claimed gap).
+
+    Read through `repeat_scores` rather than re-implemented, so the paper, the driver and the
+    aggregation cannot disagree about what was measured. Cached because every check below would
+    otherwise re-read ninety JSON files.
+    """
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import repeat_scores as rc
+
+    by_label = {r.level: r for r in rc.curve_aggregate(5)}
+    pairs = {(a, b): by_label[label] for label, a, b in rc.CURVE_PAIRS if label in by_label}
+    return rc.sigma_by_run(5), pairs
+
+
+@cache
+def _curve_priced_bound() -> float:
+    """Summed pre-flight estimate over the 90 curve replicates.
+
+    A BOUND, never an invoice: the harness records what the guard priced, not what was billed.
+    Corrections entry 16 exists because an earlier draft reported one as a measured spend, and the
+    prose-coverage guard caught the curve subsection doing it a second time.
+    """
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import repeat_scores as rc
+
+    return sum(
+        json.loads(Path(job.out).read_text())["meta"].get("estimated_usd") or 0.0
+        for job in rc.curve_plan(5)
+    )
+
+
+@cache
+def _p0_seed_sigma() -> float:
+    """The p0 family's unoptimized L1 sigma: the same genome and configuration as curve run 3.
+
+    The cross-family control. Two experiments measured one quantity independently, so a
+    disagreement would mean one of them was not measuring what it claimed.
+    """
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import repeat_scores as rc
+
+    return rc.sigma_by_genome(5)[("L1", "SEED")]
 
 
 def _curve_gap(a: str, b: str) -> tuple[float, float]:
@@ -2033,6 +2088,134 @@ def _checks() -> list[tuple[str, float, float, float]]:
     ):
         out.append((label, _scrape(tex, pattern), 0.0005, artifact))
 
+    # --- sec:curverepeat: the 90 curve replicates ------------------------------------------
+    # The subsection exists because the ratios above divided by a borrowed sigma. Every number it
+    # prints is therefore bound to `repeat_scores`, including the margins that motivated buying it.
+    _csig, _cpairs = _curve_replicates()
+    _rows = (
+        ("run3", 1, r"run 3  & intrinsic\s+& 1 & \\textbf\{([\d.]+)\}"),
+        ("run4", 1, r"run 4  & tool-fed\s+& 1 & ([\d.]+)"),
+        ("run7", 1, r"run 7  & oracle\s+& 1 & ([\d.]+)"),
+        ("run8", 3, r"run 8  & oracle, mid\s+& 3 & \\textbf\{([\d.]+)\}"),
+        ("run9", 3, r"run 9  & oracle, lo\s+& 3 & ([\d.]+)"),
+        ("run10", 3, r"run 10 & oracle, hi\s+& 3 & ([\d.]+)"),
+    )
+    for label, _r, pattern in _rows:
+        out.append((f"tab:curvesigma {label}", _scrape(tex, pattern), 0.00005, _csig[label]))
+        out.append(
+            (
+                f"tab:curvesigma {label} ratio",
+                # `_scrape` returns group 1, which here is the sd the base pattern captures, so
+                # the ratio needs the SECOND group. A first draft compared 0.0099 against 0.345.
+                _scrape_all(tex, pattern + r" & \$([\d.]+)\\times\$")[1],
+                0.005,
+                _csig[label] / _noise_estimate().sigma_delta_mean,
+            )
+        )
+    # The two R-group means, which carry the claim that R=3 is not the noisier group.
+    for label, keys in (("R1", ("run3", "run4", "run7")), ("R3", ("run8", "run9", "run10"))):
+        pat = (
+            r"\$R\{=\}1\$ averages \$([\d.]+)\$"
+            if label == "R1"
+            else r"against \$R\{=\}3\$'s \$([\d.]+)\$"
+        )
+        out.append(
+            (
+                f"tab:curvesigma {label} mean",
+                _scrape(tex, pat),
+                0.00005,
+                mean(_csig[k] for k in keys),
+            )
+        )
+    out.append(
+        (
+            "tab:curvesigma spread",
+            _scrape(tex, r"The spread here is \$([\d.]+)\\times\$"),
+            0.05,
+            max(_csig.values()) / min(_csig.values()),
+        )
+    )
+    # The paired table. Each row prints three quantities the driver produces --- the published
+    # single draw, the K=5 mean and its standard error --- plus a t. All four are bound, and the
+    # two means SIGN-FAITHFULLY: the table guard reads signed cells, so registering a magnitude
+    # leaves a negative row unchecked, which is what it caught on two of these six.
+    _rowspec = (
+        ("run3", "run4", "tool lift, run 4 over run 3", "+", "+"),
+        ("run4", "run7", "oracle under tool, 7 under 4", "-", "-"),
+        ("run7", "run8", "refine budget, run 8 over run 7", "+", "+"),
+        ("run9", "run10", "actionability, run 10 over run 9", "+", "+"),
+        ("run3", "run7", "oracle under intrinsic, 7 under 3", "-", "-"),
+        ("run4", "run10", r"run 10 over the tool-fed loop\}", "+", "+"),
+    )
+    for a, b, label, s_pub, s_mean in _rowspec:
+        res = _cpairs[(a, b)]
+        pub_sign = -1.0 if s_pub == "-" else 1.0
+        mean_sign = -1.0 if s_mean == "-" else 1.0
+        num = r"([\d.]+)"
+        pub_tok = rf"\${re.escape(s_pub)}{num}\$"
+        # The reinstated row prints its mean in \mathbf, so the cell markup differs by row.
+        mean_tok = (
+            rf"\$\\mathbf\{{{re.escape(s_mean)}{num}\}}\$"
+            if b == "run10" and a == "run4"
+            else rf"\${re.escape(s_mean)}{num}\$"
+        )
+        row = rf"{label}\s+& {pub_tok} & {mean_tok} & ([\d.]+) &"
+        pub, mn, se = _scrape_all(tex, row)
+        out.append(
+            (f"tab:curvepairs {b}-{a} published", pub_sign * pub, 0.00005, _curve_gap(a, b)[0])
+        )
+        out.append((f"tab:curvepairs {b}-{a} mean", mean_sign * mn, 0.00005, res.delta))  # type: ignore[attr-defined]
+        out.append((f"tab:curvepairs {b}-{a} se", se, 0.00005, res.standard_error))  # type: ignore[attr-defined]
+        # Two capture groups precede the t (the published cell and the mean), and `_scrape`
+        # returns the first, so this must index. A first draft compared the t against the
+        # published gap and reported six drifts that were all one bug.
+        t_pat = rf"{label}\s+& {pub_tok} & {mean_tok} & [\d.]+ & (?:\\textbf\{{)?([\d.]+)"
+        out.append((f"tab:curvepairs {b}-{a} t", _scrape_all(tex, t_pat)[2], 0.005, res.t_stat()))  # type: ignore[attr-defined]
+
+    # The published-vs-measured discrepancies, in single-draw sd units: the sentence that licenses
+    # reading the shrinkage as one draw's variation rather than as a systematic effect.
+    _disc = [
+        abs(_cpairs[(a, b)].delta - _curve_gap(a, b)[0])  # type: ignore[attr-defined]
+        / (_csig[a] ** 2 + _csig[b] ** 2) ** 0.5
+        for _, a, b in (
+            ("", "run3", "run4"),
+            ("", "run4", "run7"),
+            ("", "run7", "run8"),
+            ("", "run9", "run10"),
+            ("", "run3", "run7"),
+            ("", "run4", "run10"),
+        )
+    ]
+    _printed = _scrape_all(
+        tex,
+        r"within \$([\d.]+)\$ single-draw sd of the published value --- \$([\d.]+)\$, "
+        r"\$([\d.]+)\$,\s*\$([\d.]+)\$, \$([\d.]+)\$, \$([\d.]+)\$ and \$([\d.]+)\$",
+    )
+    out.append(("tex: curve worst discrepancy", _printed[0], 0.005, max(_disc)))
+    for i, d in enumerate(_disc):
+        out.append((f"tex: curve discrepancy {i}", _printed[i + 1], 0.005, d))
+    out.append(
+        (
+            "tex: curve control p0 family",
+            _scrape(
+                tex,
+                r"family, measured independently in two experiments: "
+                r"\$[\d.]+\$ against \$([\d.]+)\$",
+            ),
+            0.00005,
+            _p0_seed_sigma(),
+        )
+    )
+
+    out.append(
+        (
+            "tex: curve priced bound",
+            _scrape(tex, r"\$90\$ runs under a priced bound of \\\$\$([\d.]+)\$"),
+            0.005,
+            _curve_priced_bound(),
+        )
+    )
+
     # The corrections appendix asserts its own length in words. Nothing checked it, which is the
     # exact shape of stale assertion the appendix is a register of: adding an entry and leaving
     # the word alone would make the register misstate itself.
@@ -2232,7 +2415,10 @@ def _checks() -> list[tuple[str, float, float, float]]:
         ),
         (
             "tex: curve caption actionability sigma",
-            r"\(run 9\$\\to\$10, \$\+0.063\$, \$([\d.]+)\\sigma\$\)",
+            # Not anchored on a closing paren: the caption now also carries the replicated t, and
+            # a pattern that insists on `)` immediately after the sigma breaks the moment the
+            # sentence is extended rather than when the number changes.
+            r"\(run 9\$\\to\$10, \$\+0.063\$, \$([\d.]+)\\sigma\$",
             ("run9", "run10"),
         ),
         (

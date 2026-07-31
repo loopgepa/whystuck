@@ -497,7 +497,9 @@ mere text-statistics tool, which is the gap the mechanistic claim rests on. Agai
 near-random intrinsic critique the same oracle is $0.028$ better, $0.99\sigma$, which we do not
 claim. \emph{Lower group:} the checker is now fixed perfect and the fix side varies instead, where
 the same budget buys real gains. Read together: what a checker cannot buy is the repair. The rule
-at the foot is $\sigma(\dd)$ to scale, so any gap in the panel can be sized by eye.}
+at the foot is $\sigma(\dd)$ to scale, so any gap in the panel can be sized by eye; it is the
+cross-run estimate, and \S\ref{sec:curverepeat} replaces it with each row's own, measured from
+five replicates, which agrees in sign and significance throughout.}
 \label{fig:detector}
 \end{figure}
 
@@ -564,7 +566,11 @@ $0.088$ below the tool-fed critique at $3.09\sigma$, but only $0.028$ below the
 \emph{intrinsic} one at $0.99\sigma$, so on this evidence a perfect checker is
 \emph{indistinguishable} from a near-random one and clearly worse than a measurement tool. The
 ordering holds on point estimates; the load-bearing half of it is the comparison against the
-tool. Detection quality is therefore necessary but not sufficient, which independently matches
+tool. Both halves have since been re-scored five times each (\S\ref{sec:curverepeat}): the gap
+against the tool is $-0.0420$ at $t = 3.23$, replicated, and the gap against the intrinsic
+critique is $-0.0027$ at $t = 0.37$. So the reading above is confirmed on a replicated interval
+rather than a borrowed floor, with the caveat that both magnitudes are smaller than one draw
+suggested. Detection quality is therefore necessary but not sufficient, which independently matches
 \citet{decomposing2026selfcorrection}'s finding that a model's detection ability does not
 predict its correction success. Two non-exclusive mechanisms explain the inversion,
 both pointing past detection: (i) the \emph{fix} step is the true bottleneck ---
@@ -598,10 +604,11 @@ near-random and a non-oracle measurement tool makes it reliable, but that reliab
 sits in both the B and D loops. Detector quality vs.\ performance is then
 \textbf{non-monotonic}: the perfect oracle with which-constraint feedback (runs 7--8) does not
 maximize held-out score, falling below a good tool at one retry (run 4). Two fix-side levers
-close the gap: refine budget ($0.748\!\to\!0.813$, run 8, $2.28\sigma$) and feedback
-\emph{actionability} (run 9$\to$10, $+0.063$, $2.22\sigma$). Run 10 also lands nominally above
+close the gap: refine budget ($0.748\!\to\!0.813$, run 8, $2.28\sigma$; $t = 3.49$ replicated)
+and feedback \emph{actionability} (run 9$\to$10, $+0.063$, $2.22\sigma$; $t = 9.03$ replicated). Run 10 also lands nominally above
 the tool-fed loop ($0.873$ vs.\ $0.837$), but that particular gap is
-$1.28\sigma$ and we do not claim it. F$_1$ is fixed at $1.0$ across runs
+$1.28\sigma$ on this single draw and we did not claim it; five replicates of both rows
+subsequently give $+0.0640$ at $t = 6.11$, and \S\ref{sec:curverepeat} reinstates it. F$_1$ is fixed at $1.0$ across runs
 7--10 by construction, so the $0.810\!\to\!0.873$ lift is pure actionability, not detection;
 a generator-limited residual remains (hi still $<1$). $^{\dagger}$Run~3 released five seeds and
 this is their mean; every \emph{gap} in this paper uses its first three
@@ -653,7 +660,9 @@ at $n{=}3$ with three same-signed deltas it \emph{must} exclude zero, so ``exclu
 is a restatement of sign-unanimity and the sign test is at its $p=0.25$ floor --- the same
 caveat we attach to the $L_2$ gain (\S\ref{sec:p0}). What does carry it is the magnitude
 against the noise floor: $2.22\sigma$, paired on the same thirty held-out tasks
-(\S\ref{sec:threats}). The whole comparison remains a ceiling result measured with the
+(\S\ref{sec:threats}) --- and, since that floor was borrowed from another run family, the direct
+measurement: $+0.0613$ at $t = 9.03$ over five replicates of each row, the best-supported effect
+in the paper (\S\ref{sec:curverepeat}). The whole comparison remains a ceiling result measured with the
 true metric gating at inference (\S\ref{sec:defect}). Two
 sharp qualifications follow. (i) The gain is entirely in the \emph{hi} step: lo $\approx$
 mid ($0.810$ vs.\ $0.813$), so naming \emph{which} constraint failed adds nothing over a
@@ -761,12 +770,10 @@ genome-blind control C is flat by construction. Yet on the held-out split \emph{
 arm scored exactly its seed baseline} ($0.40$, $0.50$): the accepted training
 improvements changed which held-out tasks \texttt{gpt-4.1-mini} solves not at all. The
 headline is therefore a clean $\dd(D-B)=0.00$ (exact-resample $95\%$ CI
-$[0.000, 0.000]$) --- and, more pointedly, even when loop-level optimization has its
-extra lever and \emph{pulls} it (an accepted \texttt{ensure\_correct} rewrite that
-improves training), it yields no held-out gain over prompt-only. The
-instruction-following null recurs in a semantically-verified, executable-feedback
-domain: train-split improvement does not transfer, and the loop-level lever is inert
-on held-out.
+$[0.000, 0.000]$): even when loop-level optimization has its extra lever and \emph{pulls} it,
+an accepted \texttt{ensure\_correct} rewrite that improves training, train-split improvement
+does not transfer and the lever is inert on held-out. The instruction-following null recurs in a
+semantically-verified, executable-feedback domain.
 
 \paragraph{Actionable feedback lifts the code baseline too (cross-domain D2$'$).} The one
 intervention that helped on instruction-following --- concrete, measurement-shaped repair
@@ -1018,9 +1025,8 @@ The registered sign flip therefore survives the decomposition and is cleaner on 
 component alone: the loop term runs $-0.017 \to +0.060 \to -0.007$. We report the aggregate
 $\dd$ as the headline because it is the pre-registered quantity, but the loop term is the one
 that answers the paper's title question, and a componentized-optimization result should print
-both. This is the same lesson as the reporting minimum of Appendix~\ref{sec:defect}, one level
-up: knowing that the optimizer \emph{changed} a component does not tell you that the component
-is what moved the score.
+both --- knowing that the optimizer \emph{changed} a component does not tell you that the
+component is what moved the score.
 
 \paragraph{Where the loss sits, and the mechanism it does not support.} The always-\texttt{FIX}
 account says the cost of never accepting is borne by drafts that needed no repair, a stratum
@@ -1798,6 +1804,95 @@ its numbers may be read to mean.}
 \label{tab:closability}
 \end{table}
 
+\subsection{Measured: the curve's own \texorpdfstring{$\sigma$}{sigma}, and a withdrawal withdrawn}
+\label{sec:curverepeat}
+
+Every ratio in the subsection above divides a gap of Table~\ref{tab:curve} by
+$\sigma(\dd) = 0.0286$, which was estimated on a \emph{seed} genome at $R{=}1$ in the $p_0$ family.
+Table~\ref{tab:sigmagenome} then shows $\sigma$ is a property of the genome and spans $5.9\times$,
+and three of those ratios have a margin against the $2\sigma$ line smaller than that spread: the
+tool lift needs only $5\%$ more $\sigma$ to fall under it, actionability $11\%$ and the refine
+budget $14\%$. A borrowed denominator was therefore deciding them, so we bought the direct
+measurement: each of the six curve rows re-scored $K=5$ times on the thirty held-out tasks they
+share, $90$ runs under a priced bound of \$$2.98$. As with the $p_0$ replicates this is arm~A on a fixed genome with no
+re-optimization, each replicate carries a salt so record-mode dedup cannot serve one cached draw
+$K$ times, and all $90$ replay from their cassettes offline. Unlike the published rows, which were
+recorded hours apart, every replicate here was drawn in one session, so these standard errors carry
+no provider-side drift.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lcccc}
+\toprule
+row & critique & $R$ & sd of one draw & vs.\ the borrowed $0.0286$ \\
+\midrule
+run 3  & intrinsic          & 1 & \textbf{0.0099} & $0.35\times$ \\
+run 4  & tool-fed           & 1 & 0.0211 & $0.74\times$ \\
+run 7  & oracle             & 1 & 0.0137 & $0.48\times$ \\
+run 8  & oracle, mid        & 3 & \textbf{0.0212} & $0.74\times$ \\
+run 9  & oracle, lo         & 3 & 0.0127 & $0.44\times$ \\
+run 10 & oracle, hi         & 3 & 0.0147 & $0.51\times$ \\
+\bottomrule
+\end{tabular}
+\caption{$\sigma$ measured on the rows the gaps actually come from. \textbf{Every row is quieter
+than the denominator the paper borrowed}, between $0.35$ and $0.74$ of it, so the borrowing was
+conservative and the published ratios were understated rather than flattered. The direction was
+not knowable in advance, and we had guessed wrong: Table~\ref{tab:sigmagenome}'s caption offers
+sampled-call count as one mechanism for genome-dependent $\sigma$, which predicts the $R{=}3$ rows
+should be the noisiest. They are not --- $R{=}1$ averages $0.0149$ against $R{=}3$'s $0.0162$, and
+the quietest and second-noisiest rows sit at the same $R$. The spread here is $2.2\times$ against
+$5.9\times$ across the $p_0$ genomes, so ``$\sigma$ is a property of the genome'' survives with a
+smaller coefficient on this family.}
+\label{tab:curvesigma}
+\end{table}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lccccl}
+\toprule
+comparison & published (one draw) & $K{=}5$ mean & se & $t$ & verdict \\
+\midrule
+tool lift, run 4 over run 3      & $+0.0600$ & $+0.0393$ & 0.0080 & \textbf{4.89} & $\mathbf{p<0.05}$ \\
+oracle under tool, 7 under 4     & $-0.0883$ & $-0.0420$ & 0.0130 & \textbf{3.23} & $\mathbf{p<0.05}$ \\
+refine budget, run 8 over run 7  & $+0.0650$ & $+0.0367$ & 0.0105 & \textbf{3.49} & $\mathbf{p<0.05}$ \\
+actionability, run 10 over run 9 & $+0.0633$ & $+0.0613$ & 0.0068 & \textbf{9.03} & $\mathbf{p<0.05}$ \\
+oracle under intrinsic, 7 under 3 & $-0.0283$ & $-0.0027$ & 0.0073 & 0.37 & not significant \\
+\textbf{run 10 over the tool-fed loop} & $+0.0367$ & $\mathbf{+0.0640}$ & 0.0105 & \textbf{6.11} & $\mathbf{p<0.05}$ \\
+\bottomrule
+\end{tabular}
+\caption{Each comparison paired \emph{within} a replicate over the shared held-out tasks, on
+$t(4)$, so the critical values are $2.132$ and $2.776$ rather than $1.96$. Every claim the paper
+leans on survives, and every one is now carried by a replicated interval instead of a single draw
+divided by a borrowed $\sigma$. The magnitudes are the part that moves: three shrink by $35$ to
+$52\%$. Each discrepancy is within $1.84$ single-draw sd of the published value --- $0.89$, $1.84$,
+$1.12$, $0.10$, $1.52$ and $1.06$ --- so the two measurements are consistent and the shrinkage is
+what one draw does, not a systematic effect. The largest published ratio regresses the furthest,
+which is what regression to the mean looks like when a paper reports the biggest number it saw.}
+\label{tab:curvepairs}
+\end{table}
+
+Four things follow. First, \textbf{the mechanistic claim strengthens}: the perfect oracle sits
+below the tool-fed critique by $0.042$ at $t = 3.23$, replicated, where the paper had one draw of
+$0.088$ against a borrowed floor. Second, \textbf{the claim we declined to make is now the best
+supported in the group}. We reported run 10 as landing ``nominally above'' the tool-fed loop and
+refused it at $1.28\sigma$; measured, it is $+0.0640$ at $t = 6.11$. So
+\textbf{withdrawal 7 of Appendix~\ref{sec:corrections} is itself withdrawn} --- maximally
+actionable repair feedback \emph{does} beat a measurement tool, and refusing the claim was the
+right call on the evidence then available and the wrong conclusion about the world. That is the
+cost of an unmeasured denominator running in the conservative direction, and it is worth stating
+as plainly as the errors that ran the other way: three of this paper's sixteen arithmetic
+withdrawals removed claims that were too strong, and this one restores a claim that was too weak.
+Third, \textbf{the perfect-checker null holds}: against the \emph{intrinsic} critique the oracle
+moves $-0.0027$ at $t = 0.37$, so ``a perfect checker is indistinguishable from a near-random
+one'' is confirmed rather than merely unrefuted. Fourth, a control we did not design. Run 3's row
+here is the same genome and the same configuration as the unoptimized $L_1$ row of the $p_0$
+family, measured independently in two experiments: $0.0099$ against $0.0144$. At $K=5$ an sd
+estimate is itself uncertain by roughly a third, so the two agree, and a disagreement would have
+meant one of the two families was not measuring what it claimed.
+
+
 \section{When Would Loop-Level Help? Directions}
 \label{sec:directions}
 
@@ -1883,7 +1978,12 @@ help?} Only through \emph{external} signal --- a measurement tool ($+0.060$, $2.
 more refine attempts ($+0.065$, $2.28\sigma$), both paired on the same thirty held-out tasks
 (\S\ref{sec:threats}) --- never through the model grading its own draft, whose critique is a
 near-random detector (F$_1\!=\!0.11$) and whose replacement by a \emph{perfect} checker
-moves held-out by $0.99\sigma$, i.e.\ not at all. \textbf{(ii) Does GEPA lift this task?} No, at the
+moves held-out by $0.99\sigma$, i.e.\ not at all. Those three comparisons have since been
+re-scored five times each, and all three hold at $p<0.05$ on a replicated interval rather than a
+borrowed noise floor, with smaller magnitudes than one draw suggested
+(\S\ref{sec:curverepeat}). The measurement also reinstated a claim we had withdrawn for lack of
+power: maximally actionable repair feedback beats the measurement tool by $+0.0640$ at
+$t = 6.11$, so the fix side is not merely the productive lever but the better one. \textbf{(ii) Does GEPA lift this task?} No, at the
 budgets tested: its genomes gave no held-out gain and sometimes \emph{degraded} both arms. That is
 not a verdict on GEPA, which reports gains elsewhere, and it is not train-split overfitting ---
 that was our reading until the sweep varied the split from $4$ to $24$ and found no trend to
@@ -1962,7 +2062,7 @@ This paper's earlier drafts published claims it now withdraws, and two of its pr
 predictions failed. Reporting guidance for preregistered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change is collected here and the body text states only
-the surviving claim. \textbf{Twenty-one} entries follow. Substantive withdrawals give the claim as
+the surviving claim. \textbf{Twenty-two} entries follow. Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
 superseded values themselves are recoverable from the repository history released with this paper.
@@ -1997,7 +2097,11 @@ superseded values themselves are recoverable from the repository history release
     the claim, and $-0.028$ at $0.99\sigma$ against the \emph{intrinsic} loop, which does not
     (\S\ref{sec:threats}).
   \item \textbf{``Run~10 beats the tool-fed loop.''} An earlier caption called that gap decisive.
-    It is $1.28\sigma$ and we do not claim it.
+    On its single draw it is $1.28\sigma$, so we withdrew it. \textbf{That withdrawal is itself
+    withdrawn}: five replicates of both rows give $+0.0640$ at $t = 6.11$
+    (\S\ref{sec:curverepeat}), so the claim stands after all. Both movements are left on the
+    record, because a register showing only the claims that were too strong would misrepresent
+    which way this paper's errors ran.
   \item \textbf{The outcome-side half of our own mechanism.} Published: the non-accepting
     verifier loses by damaging drafts that needed no repair. Stratified on a pre-treatment
     covariate, the already-correct stratum contributes $+0.002$ (\S\ref{sec:decomp}), so that
@@ -2057,6 +2161,14 @@ superseded values themselves are recoverable from the repository history release
     partition rather than drawing a fresh sample; at six seeds of ten the measured held-out
     overlap is $6.7\%$ (Evidence~4b). The affected effect is reported without an interval
     (\S\ref{sec:bcb}).
+  \item \textbf{Six curve ratios scaled by a borrowed $\sigma$.} Every ratio in
+    Table~\ref{tab:curve} divided by a denominator measured on a different genome family, in a
+    paper that also shows $\sigma$ to be genome-specific across a $5.9\times$ range. Three of the
+    six had a margin against $2\sigma$ smaller than that spread. Now measured directly on the
+    curve's own rows (\S\ref{sec:curverepeat}): every claim survives and is upgraded from a
+    single draw to a five-replicate $t$-test, three magnitudes shrink by $35$ to $52\%$ within
+    what one draw accounts for, and the borrowed $\sigma$ turns out to have been conservative for
+    all six rows --- which is why the entry above needed reinstating rather than strengthening.
 \end{enumerate}
 
 \section{The Actuator Experiment, and the MBPP+ Attempt}

@@ -1,0 +1,125 @@
+{
+  "entries": {
+    "worker:23f08de22a629125d14889075de960f7db48011ad2db16539cc99eb978b291e0": {
+      "name": "worker",
+      "output": "- words: 26 (must be exactly 25)  \n- longest word: \"websites\" (8 letters, must be 7 or fewer)  \n- text has 2 sentences (task does not forbid multiple sentences, but shorter is better)\n\nFix word count to 25 and replace \"websites\" with a shorter word."
+    },
+    "worker:28e68e43e9d6e1ddcadb952da354f1a08efb18734b4c7a94c378a69801b9c3a1": {
+      "name": "worker",
+      "output": "Fixes needed:  \n- \"Energy\" has 6 letters (OK)  \n- \"moves\" (5), \"through\" (7) - too long (7 letters)  \n- \"called\" (6) (OK)  \n- \"waves\" (5) (OK)  \n\nThe word \"through\" has 7 letters, which violates the max 6-letter word rule.\n\nRevision needed to replace \"through\" with a word of 6 or fewer letters.\n\nRevised answer:  \nEnergy moves in space as light and heat in waves of flux; here we go.  \n\nCheck words and count:  \nEnergy (6), moves (5), in (2), space (5), as (2), light (5), and (3), heat (4), in (2), waves (5), of (2), flux (4); here (4), we (2), go (2).  \nTotal: 15 words. All words \u2264 6 letters. Ends with \"here we go.\" Includes \"flux.\"  \n\nPASS"
+    },
+    "worker:29d842512ca183c61cf134b87beb56a03b4cf2a25dd6c38fed89c6b9db5579c1": {
+      "name": "worker",
+      "output": "- rain falls down from dark clouds in the sky  \n- drops hit the earth and soak in the soil  \n- plants drink water to grow green and tall  \n- heat from sun helps water turn to steam"
+    },
+    "worker:32acd4f9b66009b63778decb98030ff010735530b6e09abcbd020d8bd03abf97": {
+      "name": "worker",
+      "output": "Energy moves in space as light and heat in waves of flux; here we go."
+    },
+    "worker:392726436599f1ce04bdedc6ad0f38bfb102e02ea36b616fe2cd247fb040deca": {
+      "name": "worker",
+      "output": "- Scientists uncovered ancient fossils beneath icy glaciers  \n- These fossils reveal unknown species from millions of years ago  \n- The discovery challenges previous assumptions about climate history  \n- Researchers plan further exploration to understand evolution better  \n- History continues unfolding through unexpected findings, so it goes."
+    },
+    "worker:563d4ef1c9f21395c0ce0079904ddff1adee674086ad317e2a162c27c9aee69f": {
+      "name": "worker",
+      "output": "- Sun warms sea and land  \n- Warm air moves up  \n- Air cools and clouds form  \n- Drops join and fall  \n- Rain feeds plants and ponds"
+    },
+    "worker:5a38433c44e2f376f24548e14086fb817722b3372fb72c4c23beccd1af51d63f": {
+      "name": "worker",
+      "output": "A new cell was found in the brain that helps fight pain and heal damage fast."
+    },
+    "worker:5e35490b218670e0d9329b8921183cabe2c682d1563ccc00456f7b1e1bc3b37c": {
+      "name": "worker",
+      "output": "html is code that builds web pages. it tells browsers how to show text, images, links, and buttons so people use sites quick and easy."
+    },
+    "worker:607bc34c44d46dd300696d275fd9041b80bada0bdf66c0d2ce55c954327092b6": {
+      "name": "worker",
+      "output": "- The response has 16 words, but it must have exactly 15 words.  \n\nPlease revise the answer to have exactly 15 words."
+    },
+    "worker:770c26a2bb2ab17c6cce54f30c19de7546c1f1dcae6cd48e4676bd652c34b538": {
+      "name": "worker",
+      "output": "- too many words (34 instead of 25)  \n- some words have more than 6 letters (example tasks, goals, fresh, sharp, stuck, ideas)  \n- use of comma not allowed  \n- the last words do not fit word limit and length constraints  \n\nRevise needed."
+    },
+    "worker:7d92914f62806b06f97d19575253317c9d73e51399738fb57fe29202008f1961": {
+      "name": "worker",
+      "output": "- words: 26 (must be exactly 25)  \n- remove one word to meet 25-word limit  \n\nFix: revise answer to have exactly 25 words.  \n\nRevised answer:  \ntry to learn small parts each day with good notes and rest breaks. ask peers or a teacher when stuck. keep calm and focus goals.\n\nwords=25  \nlongest word=7 letters  \nno \"of\"  \nall lowercase  \n\nPASS"
+    },
+    "worker:8107663452bc1cbdd7a618b75b62d90170629bcdc6cc41bce325fa92f8535630": {
+      "name": "worker",
+      "output": "- Words=32 (must be 15)  \n- \"drop\" is 4 letters, OK  \n- Use exactly 15 words (fails)  \n- Use no word longer than 7 letters (OK)  \n- No commas (OK)  \n- 5 bullets (OK)  \n- Must start each line with \"- \" (OK)  \n- Forbidden word \"of\" not used (OK)  \n\nFix:  \n- Reduce total words to exactly 15  \n- Keep 5 bullet points  \n- Follow all other rules  \n\nRevised answer:  \n- Sun warms land sea and air  \n- Warm air moves up to sky  \n- Clouds form from small drops  \n- Drops join and fall as rain  \n- Rain feeds plants and fills ponds  \n\nCount:  \nSun(1) warms(2) land(3) sea(4) and(5) air(6)  \nWarm(7) air(8) moves(9) up(10) to(11) sky(12)  \nClouds(13) form(14) from(15) small(16) drops(17) \u2192 too many words  \n\nTry again counting:\n\n- Sun warms land sea and air (6 words)  \n- Warm air moves up to sky (6 words) total 12  \n- Clouds form from small drops (5 words) total 17 too many  \n\nTry shorter lines:\n\n- Sun warms sea and land (5)  \n- Warm air goes up (4) total 9  \n- Air cools and clouds form (5) total 14  \n-"
+    },
+    "worker:83fcedd7f993bc9bf1aafaa7a4b604580cd31c41e48f58d6660c6e5382191342": {
+      "name": "worker",
+      "output": "- Scientists discovered ancient fossils beneath glaciers  \n- Fossils reveal unknown species from millions of years ago  \n- Discovery challenges current views of climate history  \n- Researchers plan more studies to understand evolution  \n- History changes constantly through discoveries, so it goes."
+    },
+    "worker:8e6bc078a1731398f68ab6c9e6f27944b5461d1c84ba7fc4198a6557024e2886": {
+      "name": "worker",
+      "output": "A wave of motivation helps students focus better study habits improve grades all is set."
+    },
+    "worker:93a25bbd1d6aed39b4f6d8c90a453755f8b49d2265e63ccb7101b9cbfefec1b4": {
+      "name": "worker",
+      "output": "- rain falls from dark clouds above  \n- soil drinks water deep below  \n- plants sip rain to grow tall  \n- sun heats earth to warm air"
+    },
+    "worker:a53443c04005f2982d1f081d3bb3c5dc22e5867586a12cd57f1d2eac39a8d7e7": {
+      "name": "worker",
+      "output": "try to learn small parts each day with good notes and rest breaks. ask peers or a teacher when stuck. keep calm and focus on goals."
+    },
+    "worker:a67a6f1a829d90e48de204a1f72163d1b7b237a732fb67e13828ee9900b08db9": {
+      "name": "worker",
+      "output": "- The response uses 42 words instead of exactly 25  \n- The last line ends with \"findings, so it goes.\" instead of \"so it goes.\" exactly  \n- The response contains the word \"and,\" which is forbidden  \n\nFix these issues to meet the requirements."
+    },
+    "worker:a69f7068c0254950a5b38cef306839d6c807b9196587c227772e99f378a4cc0c": {
+      "name": "worker",
+      "output": "Energy moves through space as light and heat in waves called flux; here we go."
+    },
+    "worker:aa09aeca6b3ea11e163cbf609b40cd2dd0d0e8c71944aee6ca6fba15fbd8cafe": {
+      "name": "worker",
+      "output": "- plan your week with small steps and clear aims  \n- rest your mind with short calm times  \n- ask friends for help when you learn new things"
+    },
+    "worker:ab6a56b77430fa6a98629041caa265c5cb19cdd8ac32b4036aaf877a3a44eacd": {
+      "name": "worker",
+      "output": "A new cell was found in the brain that helps fight pain and heal damage fast."
+    },
+    "worker:abe803b35bf0830f8871fcd8f2be8b30cd5db8b85f32586836d3420da4207075": {
+      "name": "worker",
+      "output": "- The draft answer uses 17 words, exceeding the 15-word limit.  \n- The phrase \"habits improve grades\" should be separated by a conjunction or reworded to avoid a run-on structure.  \n- The draft answer includes the word \"wave\" and ends with \"all is set,\" which is correct.  \n- No commas are used, meeting that requirement.\n\nFix needed: Reduce word count to exactly 15 words while maintaining clarity and including \"wave\" and ending with \"all is set.\"\n\nPASS cannot be given yet."
+    },
+    "worker:b1a2689e56e5bc23bdb9e0bdde466f4c89faa34082eb612d1aacb705917b340d": {
+      "name": "worker",
+      "output": "html is code that builds web pages. it tells browsers how to show text, images, links, and buttons so people can use websites easily and quickly."
+    },
+    "worker:b40a6dbe846442f353f11eb0e3b9ad68fad849bc8a3e52aff6346ef4a87179d1": {
+      "name": "worker",
+      "output": "- Learn each day with small steps  \n- Use mind maps to sort facts  \n- Ask lots of clear short questions  \n- Take short breaks to stay more sharp"
+    },
+    "worker:b7da844f334273e0968507f528223326131b27adec1e40e6d2045d1b162186b8": {
+      "name": "worker",
+      "output": "- Fix word longer than 6 letters (\"simple\")  \n- Add one more word to reach exactly 25 words total  \n- Replace \"simple\" with a shorter word to meet length rule  \n- Keep 4 bullet points starting with \"- \" exactly  "
+    },
+    "worker:bbc997aea115e4bd8f7056c99ddd6af6a7464ad1d29c3aba96081437b329cb02": {
+      "name": "worker",
+      "output": "try to learn small parts each day with good notes and rest breaks. ask peers or a teacher when stuck. keep calm and focus goals."
+    },
+    "worker:ccdcc22f2dfa93aaf641e76c61c571ccd2330f9b56a815a3d72e4902f1c8d5ce": {
+      "name": "worker",
+      "output": "- Learn each day with small steps  \n- Use mind maps to sort facts  \n- Ask lots of clear simple questions  \n- Take short breaks to stay sharp"
+    },
+    "worker:cdad9639b51412f484a95401cfdb0addce19c25fd0ab1f87ec3c20bcc0b9e071": {
+      "name": "worker",
+      "output": "- revise to exactly 25 words  \n- keep all words lowercase  \n- keep exactly 4 bullet points  \n- no word longer than 7 letters  \n\ncurrent draft has 34 words, needs to be reduced to 25 words exactly."
+    },
+    "worker:e408828e1f341b35194e4e102c0396025d4ca24ae1c08b51d58d481efd1b94d0": {
+      "name": "worker",
+      "output": "A wave of focus boosts learning skills helps students succeed in school all is set."
+    },
+    "worker:f13d3b290409405f1eb97c68dd6ba5cd5bfd69be7b10fa045828cc548f024cdd": {
+      "name": "worker",
+      "output": "- plan your day with notes to keep track of tasks and goals  \n- take short breaks to help your mind stay fresh and sharp  \n- ask for help when you feel stuck or need new ideas"
+    },
+    "worker:f3eda0c1384e5a34faf8000c2a4575cf76acdbc979b96b912f97af665778ad9c": {
+      "name": "worker",
+      "output": "- Rain falls from clouds to wet dry land  \n- Sun heats pond water and air  \n- Warm air rises and cools down  \n- Drops form and join to fall  \n- This cycle goes on and on"
+    }
+  },
+  "version": 1
+}
