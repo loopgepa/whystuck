@@ -17,7 +17,9 @@
   eprint    = {2507.19457},
   archivePrefix = {arXiv},
   primaryClass  = {cs.CL},
-  note      = {Accepted at ICLR 2026 (Oral)},
+  note      = {Accepted at ICLR 2026 (Oral). Abstract, verified 2026-07-31: outperforms GRPO
+               "by 6% on average and by up to 20%, while using up to 35x fewer rollouts", and
+               MIPROv2 "by over 10% (e.g., +12% accuracy on AIME-2025)"},
   url       = {https://arxiv.org/abs/2507.19457}
 }
 
@@ -33,7 +35,8 @@
   url       = {https://arxiv.org/abs/2310.01798},
   note      = {Key result for this study: intrinsic self-correction (no external
                feedback) fails to improve and often degrades; prior gains relied on
-               oracle stopping signals and vanish without them}
+               oracle stopping signals and vanish without them. Table 3, GPT-3.5,
+               CommonSenseQA, verified 2026-07-31: 75.8 standard -> 38.1 round 1 -> 41.8 round 2}
 }
 
 @inproceedings{madaan2023selfrefine,
@@ -48,7 +51,9 @@
   eprint    = {2303.17651},
   archivePrefix = {arXiv},
   primaryClass  = {cs.CL},
-  url       = {https://arxiv.org/abs/2303.17651}
+  url       = {https://arxiv.org/abs/2303.17651},
+  note      = {Abstract, verified 2026-07-31: "improving by ~20% absolute on average in task
+               performance" across seven diverse tasks}
 }
 
 @misc{liu2024intrinsic,
@@ -200,7 +205,10 @@
   eprint    = {2309.03409},
   archivePrefix = {arXiv},
   primaryClass  = {cs.LG},
-  url       = {https://arxiv.org/abs/2309.03409}
+  url       = {https://arxiv.org/abs/2309.03409},
+  note      = {Section 5.4, verified 2026-07-31: "our training accuracies are often 5%-20%
+               higher than our test accuracies" -- the overfitting risk this series' null is
+               read against}
 }
 
 @misc{zhang2024smallverifiers,
@@ -240,7 +248,11 @@
   eprint    = {2606.23664},
   archivePrefix = {arXiv},
   primaryClass  = {cs.LG},
-  note      = {Johns Hopkins University},
+  note      = {Johns Hopkins University. Reports GEPA improving single-agent performance across
+               all five tasks by +4.2 points on average, while its multi-agent extension ranges
+               from -16.0 to +24.0 points depending on task and workflow topology. No per-task
+               range is published for the single-agent case; an earlier draft of this series
+               attributed one},
   url       = {https://arxiv.org/abs/2606.23664}
 }
 
@@ -252,7 +264,10 @@
   eprint    = {2601.00828},
   archivePrefix = {arXiv},
   primaryClass  = {cs.CL},
-  url       = {https://arxiv.org/abs/2601.00828}
+  url       = {https://arxiv.org/abs/2601.00828},
+  note      = {Abstract, verified 2026-07-31: "Error detection rates vary dramatically across
+               architectures (10% to 82%), yet detection capability does not predict correction
+               success". Independent corroboration of Paper II's detection/repair separation}
 }
 
 @article{kamoi2024whencan,
@@ -272,7 +287,8 @@
   author = {{LangChain}},
   year   = {2026},
   note   = {Engineering blog. Sets out the four stacked loops --- agent, verification,
-            event-driven, and hill-climbing --- after Swyx's ``loopcraft'' framing},
+            event-driven, and hill-climbing --- after Swyx's ``loopcraft'' framing. Verified
+            2026-07-31: the hill-climbing loop is "the fourth (and arguably most important)"},
   url    = {https://www.langchain.com/blog/the-art-of-loop-engineering}
 }
 

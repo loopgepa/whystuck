@@ -115,8 +115,8 @@ as optimizing it}, and that the difference is invisible in exactly the number a 
 \label{sec:related}
 
 \paragraph{Reflective and evolutionary prompt optimization.}
-GEPA \citep{agrawal2025gepa} reports beating GRPO by up to $20\%$ with $35\times$
-fewer rollouts and exceeding MIPROv2 by over $10\%$. Crucially for us, GEPA
+GEPA \citep{agrawal2025gepa} reports beating GRPO by $6\%$ on average and up to $20\%$ while
+using up to $35\times$ fewer rollouts, and exceeding MIPROv2 by over $10\%$. Crucially for us, GEPA
 optimizes \emph{one or more} components and is known to plateau. The sharpest published
 instance is independent of us: optimizing a prompt with GEPA across six tasks,
 \citet{pappu2026multiagent} report that ``on GPQA Diamond and MATH-500, GEPA returned the
@@ -128,11 +128,11 @@ LLM as the optimizer, and OPRO's authors quantify the over-fitting risk directly
 
 \paragraph{More optimizable surface is not reliably better.}
 The adjacent question for multi-\emph{agent} systems has been benchmarked:
-\citet{bai2026masprompt} find that GEPA improves single-agent performance on all five of
-their tasks ($+2$ to $+14$ points) while its multi-agent extension ranges from $-16$ to
-$+14$ depending on task and workflow topology. Our contribution is orthogonal to that
+\citet{bai2026masprompt} find that GEPA improves single-agent performance across all five of
+their tasks, by $+4.2$ points on average, while its multi-agent extension ranges from $-16.0$ to
+$+24.0$ points depending on task and workflow topology. Our contribution is orthogonal to that
 variance and prior to it: before asking whether componentized optimization helps, one must
-establish that it \emph{occurred}. A spread from $-16$ to $+14$ is compatible with a
+establish that it \emph{occurred}. A spread of $40$ points is compatible with a
 mixture of real effects and silent no-ops, and nothing in a held-out score separates them.
 
 \paragraph{Loop engineering, and why this is a hazard for the practice.}
@@ -560,8 +560,10 @@ approximation whose direction depends on which genome it came from.}
 That splits the section's own $\sigma$ into two quantities that were being conflated, and it is
 worth being explicit about which belongs where. A comparison \emph{between two runs recorded on
 different dates} --- the seed-baseline curve of the companion ceiling paper --- must carry
-provider-side drift, and the cross-run estimate is the one that contains it; the ratios reported
-there are therefore the right ones and stand. A comparison \emph{between two arms
+provider-side drift, and the cross-run estimate is the one that contains it, so it is the right
+denominator \emph{of the two} for that curve. It is not the last word on it: the companion paper has
+since re-scored each of those rows five times and superseded its ratios with each row's own measured
+$\sigma$, which is better than choosing correctly between two borrowed ones. A comparison \emph{between two arms
 inside one run} carries no drift, and there the directly measured value applies: $\sigma(\dd)$
 is $0.047$ at $L_1$, $0.046$ at $L_2$ and $0.022$ at $L_3$. Two of the three exceed the
 $0.0291$ the cross-run estimate gave, because optimized arms vary more than the seed genome that
@@ -670,7 +672,7 @@ This work's earlier drafts published claims it now withdraws. Reporting guidance
 work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Nine} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Ten} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -728,6 +730,12 @@ The series' other two papers carry the entries bearing on their own claims.
     shared-error blind spot as the borrowed $\sigma$, one level down.
     It is this paper's own thesis arriving one level down, and worth stating as such: the
     diagnostic we propose catches a treatment that never applied, and would not have caught this.
+  \item \textbf{``The ratios reported there are the right ones and stand.''} Said of the
+    companion ceiling paper's borrowed-$\sigma$ ratios. Half right: the cross-run estimate is the
+    correct denominator \emph{of the two available} for a between-run curve, which is what this
+    section establishes. But that paper has since measured each row's own $\sigma$ and superseded
+    those ratios, so ``stand'' overstated a choice between two borrowed denominators as a final
+    answer.
 \end{enumerate}
 
 \end{document}

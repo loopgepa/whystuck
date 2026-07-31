@@ -129,7 +129,7 @@ literature supplied the vocabulary and the stakes, not the hypotheses.
 
 \paragraph{Self-refine and the limits of self-correction.}
 Self-Refine \citep{madaan2023selfrefine} popularized generate--critique--refine
-with a single model, reporting $\sim\!20\%$ gains on generation-quality tasks.
+with a single model, reporting ${\sim}20\%$ absolute improvement on average across seven tasks.
 Huang et al.\ \citep{huang2023cannot} show the sharp boundary: \emph{intrinsic}
 self-correction (no external feedback) fails to improve and often degrades
 (CommonSenseQA $75.8 \!\to\! 38.1$ after one round, recovering only to $41.8$ after a
@@ -139,7 +139,9 @@ not available.'' Self-correction helps only with a genuine external verification
 mechanism (a tool, a code executor, unit tests). A parallel line shows LLM
 self-verifiers are unreliable detectors --- high false-positive rates
 \citep{valmeekam2023selfcritique} and a self-enhancement bias, with cross-family
-verification outperforming self-verification. The boundary is not undisputed:
+verification outperforming self-verification; \citet{kamoi2024whencan} survey the conditions
+under which self-correction works at all and find the successful cases depend on an external
+signal the model does not supply itself. The boundary is not undisputed:
 \citet{liu2024intrinsic} report intrinsic self-correction working under narrow conditions
 (zero temperature, prompts free of leading bias), which is a condition our worker does not
 satisfy --- it samples at the provider's default temperature (\S\ref{sec:setup}), and that
@@ -326,8 +328,8 @@ verdict-equivalent given the task statement, so that F$_1$ is largely measuremen
 for judgement. The intrinsic critique (F$_1\!=\!0.11$) yields seed
 $0.765$; the tool-fed critique (F$_1\!=\!0.83$) yields $0.837$; but the
 \emph{oracle} critique (F$_1\!=\!1.0$ by construction) yields only $0.748$ --- the
-best detector gives the \emph{worst} of the three. Two of those three gaps carry that reading
-and one does not, which the noise floor sizes: the oracle sits
+best detector gives the \emph{worst} of the three. The reading rests on the oracle's two gaps,
+which differ in strength, and the noise floor sizes them: the oracle sits
 $0.088$ below the tool-fed critique at $3.04\sigma$, but only $0.028$ below the
 \emph{intrinsic} one at $0.98\sigma$, so on this evidence a perfect checker is
 \emph{indistinguishable} from a near-random one and clearly worse than a measurement tool. The
@@ -411,8 +413,9 @@ the worker unable to \emph{act} on good feedback (generator-limited), or is the 
 itself insufficiently actionable (feedback-limited)? We separate them by holding detection
 fixed at the perfect oracle ($R{=}3$) and varying only the repair text handed to the refine
 step across the three pre-registered levels of \S\ref{sec:method}. The primary contrast is
-the study's second-largest
-effect: $\dd(\text{hi}-\text{lo}) = 0.873 - 0.810 = +0.063$ on the seed held-out (arm A, no
+the second-largest effect this paper measures by magnitude --- only run 10 over the tool-fed loop is
+larger --- and the best-supported by $t$:
+$\dd(\text{hi}-\text{lo}) = 0.873 - 0.810 = +0.063$ on the seed held-out (arm A, no
 optimizer), clearing the pre-registered $+0.05$ threshold --- the fix step is partly
 \textbf{feedback-limited}. All three seeds are positive ($+0.090, +0.025, +0.075$) and an
 exact-resample $95\%$ interval is $[+0.025, +0.090]$. We do not lean on that interval:
@@ -436,11 +439,14 @@ perfect, no ceiling flag) --- so a generator-limited residual remains. The fix s
 generator-limited.
 
 \paragraph{External feedback lifts the baseline (run 4).} Adding the measurement tool to the
-critique step raised the seed loop from $0.765$ (run 3) to $0.837$, a direct confirmation of
+critique step lifts the seed loop by $+0.060$ --- run~3's first three seeds ($0.7767$) to run~4's
+($0.8367$), on the shared tasks and not the five-seed figure of Table~\ref{tab:curve}'s left
+column --- a direct confirmation of
 the external-feedback prediction \citep{huang2023cannot}: the loop pays when the signal comes
 from outside the model.
-A third \texttt{plan} module (run 5) moved nothing, so more structure
-did not help either.
+A third \texttt{plan} module (run 5) moved the baseline to $0.757$, i.e.\ by $-0.020$ against the
+same three-seed reference, under one $\sigma$ and so no evidence either way: more structure
+did not help.
 
 \subsection{The residual is one constraint, not a diffuse ceiling}
 \label{sec:residual}
@@ -455,8 +461,9 @@ maximally-actionable feedback (run 10), every ``choice'' constraint --- \texttt{
 \texttt{end\_with}, \texttt{forbidden\_word} --- is satisfied at rate $1.0$, and
 \texttt{word\_max\_length} at $0.90$. The residual is almost entirely
 \texttt{exact\_word\_count} (with a small remainder in \texttt{word\_max\_length}):
-even told exactly ``the draft has 2 words but needs exactly 20: add 18,''
-\texttt{gpt-4.1-mini} hits the exact count only $\sim\!0.50$ of the time (up from
+even told exactly ``the draft has 2 word(s) but needs exactly 20: add 18 more word(s)'' ---
+the \emph{hi} format of \S\ref{sec:method} --- \texttt{gpt-4.1-mini} hits the exact count only
+$\sim\!0.50$ of the time (up from
 $0.16$ intrinsic, $0.33$ with which-constraint feedback). This is the known
 inability of LLMs to control exact token counts during generation. So the
 generator-limited residual is not a broad capability wall --- it is a single mechanical
@@ -497,7 +504,8 @@ residual is one mechanical skill (exact counting), not a diffuse ceiling.}
 
 Nothing above is interpretable without a noise floor, and this study did not plan one: the worker
 runs at the provider's default temperature with one sample per task, so nothing was measured twice
-on purpose. It was nonetheless measured by accident. Ten released runs of the companion papers
+on purpose. It was nonetheless measured by accident. Ten released runs of the companion paper on
+the conditional lever
 evaluate the \emph{same} unoptimized seed genome on the \emph{same} thirty held-out tasks, so they
 are ten independent draws of one fixed number; from their paired differences $\sigma$ for one task
 under one draw is $0.1125$, a $\dd$ compares two independent draws so $\sigma(\dd)$ on one task is
@@ -783,7 +791,7 @@ Earlier drafts of this work published claims it now withdraws. Reporting guidanc
 preregistered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Nine} entries follow. The
+collected here and the body text states only the surviving claim. \textbf{Ten} entries follow. The
 series' other two papers carry the entries bearing on their own claims, and the full
 register across all three, with the superseded values themselves, is in the released repository.
 
@@ -846,6 +854,12 @@ register across all three, with the superseded values themselves, is in the rele
     that they \emph{do not improve} as $\mathrm{F}_1$ nearly triples --- $J$ runs $+0.286$, $-0.057$,
     $0.000$, a fall rather than an ordering. Nor is the positive value evidence of discrimination:
     at $L_1$ two held-out drafts are compliant, so it is one true positive out of two.
+  \item \textbf{An external-tool lift that invited the reading its own footnote disowns.} The
+    fix-side section reported the tool raising the seed loop ``from $0.765$ to $0.837$'', which
+    subtracts to $+0.072$ --- and $0.765$ is run~3's \emph{five}-seed mean, while every gap in this
+    paper uses its first three ($0.7767$). The dagger footnote to Table~\ref{tab:curve} says so
+    explicitly, so the paper contradicted itself across two pages with both numbers individually
+    correct. The lift is $+0.060$.
 \end{enumerate}
 
 \end{document}

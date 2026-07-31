@@ -66,9 +66,9 @@ optimizes multi-module pipelines end-to-end.
 This capability raises a concrete engineering question that, to our knowledge,
 has not been isolated experimentally for a self-refine loop's own verifier. The
 adjacent question for multi-\emph{agent} systems has since been benchmarked:
-\citet{bai2026masprompt} find that GEPA improves single-agent performance on all five of
-their tasks ($+2$ to $+14$ points) while its multi-agent extension ranges from $-16$ to
-$+14$ depending on task and workflow topology --- more optimizable surface is not reliably
+\citet{bai2026masprompt} find that GEPA improves single-agent performance across all five of
+their tasks, by $+4.2$ points on average, while its multi-agent extension ranges from $-16.0$ to
+$+24.0$ points depending on task and workflow topology --- more optimizable surface is not reliably
 better. Our question is narrower and about a different object: \emph{given a self-refine loop, does
 optimizing the loop's verification/critique component (and beyond) yield better
 held-out performance than optimizing only its generation prompt, under a matched
@@ -172,8 +172,8 @@ convergent rather than causal --- the practitioner literature supplied the vocab
 stakes, not the hypotheses.
 
 \paragraph{Reflective and evolutionary prompt optimization.}
-GEPA \citep{agrawal2025gepa} reports beating GRPO by up to $20\%$ with $35\times$
-fewer rollouts and exceeding MIPROv2 by over $10\%$. Crucially for us, GEPA
+GEPA \citep{agrawal2025gepa} reports beating GRPO by $6\%$ on average and up to $20\%$ while
+using up to $35\times$ fewer rollouts, and exceeding MIPROv2 by over $10\%$. Crucially for us, GEPA
 optimizes \emph{one or more} components and is known to plateau. The sharpest published
 instance is independent of us: optimizing a prompt with GEPA across six tasks,
 \citet{pappu2026multiagent} report that ``on GPQA Diamond and MATH-500, GEPA returned the
@@ -188,7 +188,7 @@ gain.
 
 \paragraph{Self-refine and the limits of self-correction.}
 Self-Refine \citep{madaan2023selfrefine} popularized generate--critique--refine
-with a single model, reporting $\sim\!20\%$ gains on generation-quality tasks.
+with a single model, reporting ${\sim}20\%$ absolute improvement on average across seven tasks.
 Huang et al.\ \citep{huang2023cannot} show the sharp boundary: \emph{intrinsic}
 self-correction (no external feedback) fails to improve and often degrades, and prior positive
 results relied on \emph{oracle} stopping signals that ``vanish when oracle labels are
@@ -355,7 +355,8 @@ overfit along, a \emph{smaller} split giving $+0.017$ and larger ones $+0.062$ a
 same $p_0$ and the same held-out tasks; and the noise floor (\S\ref{sec:threats}) puts this cell at
 $1.44\sigma$. So the honest summary is neither that loop-level optimization fails to help nor that
 it pays a price: this is the one configuration of four where it came out negative, by an amount
-the study cannot separate from measurement noise. The degradation runs 4 and 5 showed, and the
+the study cannot separate from measurement noise. The degradation runs 4 and 5 showed --- on the
+pre-correction harness, so read as prompt-only behaviour rather than as a contrast (Paper~III) --- and the
 reported instability of prompt optimizers on some tasks
 \citep{yang2023opro,zhou2025bbopromptscale}, remain the relevant context; what they no longer
 support is a directional claim from this cell.
@@ -730,7 +731,10 @@ costs.} Consistent with \citet{huang2023cannot}, run~4 shows the loop improving 
 external tool but the reflective optimization on top adding noise rather than signal --- the
 ``self-correction can make it worse'' regime --- and its optimized held-out scores fall below
 the seed, echoing OPRO's observation that optimized instructions can overfit a training set
-\citep{yang2023opro}. With small budgets and small splits, proposals that win on the training
+\citep{yang2023opro}. One qualification belongs with that reading: run~4 predates the harness
+correction, so its \emph{contrast} between arms is not a measurement (Paper~III). What survives is
+the one-gene arm, whose search the selector confound does not touch, and it is that arm's
+optimized score falling below its own seed. With small budgets and small splits, proposals that win on the training
 subsample lose on held-out, and this hurts B and D alike. \S\ref{sec:rerun} measures the
 effect on a harness where the two arms actually differ.
 
@@ -1151,10 +1155,12 @@ an accepted \texttt{ensure\_correct} rewrite that improves training, train-split
 does not transfer and the lever is inert on held-out. The instruction-following null recurs in a
 semantically-verified, executable-feedback domain.
 
-\paragraph{Can GEPA \emph{discover} the actionable feedback?} No. Paper~II establishes that
-concrete, measurement-shaped repair feedback is worth $+0.20$ on this benchmark, hand-designed,
-so the sharpest test of our thesis is whether the optimizer finds it when pointed
-squarely at it. We added a fourth evolvable gene, an \texttt{actuator} that turns the visible-test
+\paragraph{Can GEPA \emph{discover} the actionable feedback?} No. Paper~II measures a $+0.20$ shift on this benchmark from
+concrete, measurement-shaped repair feedback, hand-designed --- reported there without an interval,
+because a seed on this benchmark re-partitions a fixed pool rather than drawing a fresh sample, so
+read it as a large and consistent shift and not a significant one. Either way it is the one lever
+known to move this domain, so the sharpest test of our thesis is whether the optimizer finds it when
+pointed squarely at it. We added a fourth evolvable gene, an \texttt{actuator} that turns the visible-test
 signal into the repair guidance handed to refine, and let arm~D co-evolve it with
 \texttt{generate} while holding the detector fixed, so any gap isolates optimization of the
 \emph{fixer's} feedback --- the one component we know can help. Across all three configurations
@@ -1506,7 +1512,7 @@ This paper's earlier drafts published claims it now withdraws, and two of its pr
 predictions failed. Reporting guidance for preregistered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Eleven} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Twelve} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1567,6 +1573,13 @@ The series' other two papers carry the entries bearing on their own claims.
     the release: the cassette is content-addressed on a call's name and arguments, so an entry
     carries no arm label and no per-arm proposal count can be recovered from it. \S\ref{sec:rerun}
     now reports the run-level count, which is derivable and makes the same point.
+  \item \textbf{Two results of the companion papers, over-claimed here.} The $+0.20$
+    actionability lift on frontier-hard code was described as \emph{established}, which is stronger
+    than Paper~II claims for it: that paper reports it without an interval, because a seed on
+    BigCodeBench-Hard re-partitions a fixed pool rather than drawing a fresh sample. And two
+    inferences drawn from runs 4 and 5 did not say that those runs predate the harness correction,
+    so their between-arm contrast is not a measurement. Both are now stated at the strength the
+    source supports.
 \end{enumerate}
 
 \section{The Actuator Experiment, and the MBPP+ Attempt}
