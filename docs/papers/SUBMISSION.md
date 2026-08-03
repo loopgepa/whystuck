@@ -42,9 +42,25 @@ endorsement domain, and the primary category selects the domain.
 
 ## Size
 
-45 pages: 38 of main text, 7 of appendices. ~16,500 words in the main text, 16 tables, 3 figures,
-28 references. The package is ~122 kB against arXiv's 50 MB limit.
+**Three separate submissions, one per paper.** This section described the pre-split monolith (45
+pages, 16 tables, 28 references) until 2026-08-03; those figures belong to a document that no longer
+exists. Measured from the built PDFs and each paper's own source:
 
-This length is fine for arXiv and for TMLR, which sets no page limit. It is roughly three times
-over the 9-page main-text limit at NeurIPS, ICLR and ICML, so a conference submission would need
-about two thirds of the main text moved into appendices, plus that venue's style file.
+| | paper | pages | tables | figures | distinct citations | package |
+|---|---|---|---|---|---|---|
+| I | `p1-conditional-lever` | 34 | 11 | 3 | 23 | 107 kB |
+| II | `p2-repair-not-detection` | 18 | 4 | 2 | 16 | 85 kB |
+| III | `p3-silent-no-op` | 16 | 4 | 1 | 13 | 82 kB |
+
+Each package is far under arXiv's 50 MB limit. Abstract lengths against the 1920-character metadata
+field: **1912**, 1846, 1786. Paper I has 8 characters of headroom, so any edit to its abstract has to
+be re-checked by `make_arxiv_package.py` rather than assumed to fit.
+
+The three are cross-referenced as a series, so they should be posted together or in the order I, II,
+III; each abstract names its companions.
+
+These lengths are fine for arXiv and for TMLR, which sets no page limit. Papers II and III are each
+roughly twice the 9-page main-text limit at NeurIPS, ICLR and ICML and Paper I about four times, so a
+conference submission would need substantial main text moved into appendices, plus that venue's style
+file. This is the split's main practical gain: II and III are within reach of a conference cut in a
+way the 45-page monolith was not.

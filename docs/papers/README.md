@@ -5,8 +5,8 @@ questions, rest on different experiments, and are useful to different readers.
 
 | | paper | asks | uses the optimizer? | pages |
 |---|---|---|---|---|
-| **I** | [`p1-conditional-lever/`](p1-conditional-lever/) — *Whether Optimizing the Loop Beats Optimizing the Prompt Depends on One Number* | Does evolving a self-refine loop's verifier beat evolving its generation prompt? | yes, it is the subject | 33 |
-| **II** | [`p2-repair-not-detection/`](p2-repair-not-detection/) — *What a Checker Cannot Buy Is the Repair* | Where is the loop's own ceiling: detection or repair? | **no** — every run is `--arms A` on a fixed genome | 17 |
+| **I** | [`p1-conditional-lever/`](p1-conditional-lever/) — *Whether Optimizing the Loop Beats Optimizing the Prompt Depends on One Number* | Does evolving a self-refine loop's verifier beat evolving its generation prompt? | yes, it is the subject | 34 |
+| **II** | [`p2-repair-not-detection/`](p2-repair-not-detection/) — *What a Checker Cannot Buy Is the Repair* | Where is the loop's own ceiling: detection or repair? | **no** — every run is `--arms A` on a fixed genome | 18 |
 | **III** | [`p3-silent-no-op/`](p3-silent-no-op/) — *Your Loop Optimizer Is Not Optimizing Your Loop* | How can a componentized treatment silently not apply, and what catches it? | yes, as the thing that failed | 16 |
 
 ## Which paper answers your question
