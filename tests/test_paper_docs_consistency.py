@@ -13,15 +13,43 @@ remember harder.
 Page counts are compared between the two documents rather than against a built PDF, because the PDFs
 are build artifacts and are not in a clean checkout. Table, figure and citation counts *are* derived
 from source, so those are checked against it.
+
+A third instance turned up in the same sweep, and it is the worst of the three because it is the
+number a reader checks first: three documents advertised the verifier as "762 checks" while the
+script prints `788/788 paper claims match the released artifacts` on every run. The stated count is
+now compared against `len(_checks())` directly, so the advertisement and the thing advertised cannot
+part company again.
 """
 
 from __future__ import annotations
 
+import os
+import pathlib
 import re
+import subprocess
+import sys
 from pathlib import Path
 
-PAPERS = Path(__file__).resolve().parent.parent / "docs/papers"
+import pytest
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
+
+from verify_paper_claims import _checks  # noqa: E402
+
+ROOT = Path(__file__).resolve().parent.parent
+PAPERS = ROOT / "docs/papers"
 SLUGS = ("p1-conditional-lever", "p2-repair-not-detection", "p3-silent-no-op")
+
+#: Released documents that advertise how many checks the verifier runs. Not every doc has to, but
+#: any that does has to be right, and a new one is caught by the "somebody says it" assertion below.
+DOCS_STATING_CHECK_COUNT = ("docs/EXPERIMENTS.md", "docs/papers/README.md")
+CHECK_COUNT_RE = re.compile(r"(\d{2,5})\s+(?:machine-)?checks?\b")
+
+#: The README advertises the suite's size. That number goes stale on the commit that adds a test,
+#: which is how it was already wrong by four: the commit adding this very file broke it.
+TEST_COUNT_RE = re.compile(r"\*\*([\d,]+) tests\*\*")
+#: Set in the child so a collection sweep can never re-enter the guard that spawned it.
+NO_REENTER = "WHYSTUCK_SKIP_COLLECT_GUARD"
 
 
 def _readme_pages() -> dict[str, int]:
@@ -82,6 +110,53 @@ def test_submission_table_matches_the_sources_it_describes() -> None:
             assert submission[slug][key] == n, (
                 f"{slug}: SUBMISSION says {submission[slug][key]} {key}, source has {n}"
             )
+
+
+def test_every_advertised_check_count_equals_the_verifier_s_own() -> None:
+    """The number in the docs is the number the script prints, or it is a lie with a shelf life."""
+    actual = len(_checks())
+    stated: list[tuple[str, int, str]] = []
+    for rel in DOCS_STATING_CHECK_COUNT:
+        for i, line in enumerate((ROOT / rel).read_text(encoding="utf-8").splitlines(), 1):
+            for m in CHECK_COUNT_RE.finditer(line):
+                stated.append((f"{rel}:{i}", int(m.group(1)), line.strip()))
+    assert stated, "no document states the check count; this guard would pass vacuously"
+    wrong = [(where, n, line) for where, n, line in stated if n != actual]
+    assert not wrong, "\n".join(
+        f"{where} says {n} checks, verify_paper_claims runs {actual}: {line[:90]}"
+        for where, n, line in wrong
+    )
+
+
+def test_readme_test_count_equals_what_pytest_collects() -> None:
+    """Costs one collection sweep (~20 s) and belongs to the pre-push gate, not pre-commit.
+
+    Worth that: the number is the repository's main credibility signal, it moves on any commit that
+    adds a test, and it had already drifted by four before anyone noticed. When this fails, the
+    message carries the new number -- put it in the README rather than deleting the assertion.
+    """
+    if os.environ.get(NO_REENTER):
+        pytest.skip("inside a collection sweep spawned by this guard")
+    stated = TEST_COUNT_RE.search((ROOT / "README.md").read_text(encoding="utf-8"))
+    assert stated, "README no longer advertises a test count; drop this guard or restore the number"
+    claimed = int(stated.group(1).replace(",", ""))
+
+    env = {**os.environ, NO_REENTER: "1"}
+    out = subprocess.run(
+        [sys.executable, "-m", "pytest", "--collect-only", "-p", "no:cacheprovider"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        env=env,
+        check=False,
+    )
+    m = re.search(r"(\d+) tests collected", out.stdout)
+    assert m, f"could not read a collection count from pytest:\n{out.stdout[-800:]}"
+    collected = int(m.group(1))
+    assert claimed == collected, (
+        f"README advertises {claimed} tests, pytest collects {collected}. "
+        f"The README is the stale one unless a test was deleted on purpose."
+    )
 
 
 def test_submission_no_longer_states_monolith_size_as_current() -> None:
