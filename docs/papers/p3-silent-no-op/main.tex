@@ -28,8 +28,8 @@ compound LLM system at once. We report a failure mode of that capability which h
 cannot reveal: \textbf{pointing an optimizer at a component is not the same as optimizing it}.
 Our first fifteen contrast runs measured the effect of evolving a self-refine loop's verifier against
 evolving only its generation prompt. Replayed offline, the winning genome's critique gene is
-\emph{byte-identical to the seed in $15/15$ cases}; ten of the runs reported a held-out difference
-of exactly zero. The two arms whose difference the study existed to measure were, for the gene that
+\emph{byte-identical to the seed in $15/15$ cases}; ten of the runs reported held-out scores
+identical on every seed. The two arms whose difference the study existed to measure were, for the gene that
 defines the difference, the same program, and we believed those runs for months. Two ordinary wiring
 choices caused it, one a library default: a reflective dataset built without regard to which
 component it describes, so the reflector never saw a verdict the critique had returned; and a
@@ -70,7 +70,7 @@ an experiment that did not happen.
 This paper reports such a case in full, on our own artifact, because we did not catch it for
 fifteen runs. The study in question asked whether evolving a self-refine loop's
 \texttt{ensure\_correct} (verifier) gene alongside its \texttt{generate} gene beats evolving
-\texttt{generate} alone. Ten runs reported a held-out difference of exactly zero and we read the
+\texttt{generate} alone. Ten runs reported held-out scores identical on every seed and we read the
 consistency as evidence of a tight null. It was evidence of the opposite. Our contributions:
 
 \begin{enumerate}
@@ -224,8 +224,8 @@ $\dd$ and the arm variances, so a genome-against-itself contrast passes through 
 \section{How a Componentized Treatment Can Silently Not Apply}
 \label{sec:defect}
 
-Our first fifteen contrast runs reported a $\dd(D-B)$ that was exactly zero ten times and
-near-zero or moderately negative otherwise. None was a measurement of the hypothesis. Replaying the flagship run offline, arm~D's winning genome contains a critique
+Our first fifteen contrast runs produced arms whose held-out scores were identical on every seed ten times,
+and near-zero or moderately negative otherwise. None was a measurement of the hypothesis. Replaying the flagship run offline, arm~D's winning genome contains a critique
 gene \textbf{byte-identical to the seed in $15/15$ cases}: across all arms GEPA changed
 \texttt{generate} in $5/15$ winners and \texttt{ensure\_correct} in $0/15$. The two arms whose
 difference the study exists to measure were, for the gene that defines the difference, the
@@ -466,11 +466,18 @@ selector, arm~D searched \texttt{generate} about half as hard as arm~B (Evidence
 non-zeros in this column are not residual treatment effects; they are the selector confound
 measured through the shared gene, plus sampling noise, which this study can now put a number on.
 Of the
-fifteen contrast runs recorded under the pre-correction harness, ten have a mean \dd\ of
-exactly zero and four have $|\dd| \ge 0.005$, the largest being the powered actuator run at
-$-0.100$. The exact zeros are not noise measurements: B and D produced byte-identical genomes
-there, so they issued identical calls and the cassette served identical completions. The four
-non-zeros are a different matter, and must be read against the noise floor
+fifteen contrast runs recorded under the pre-correction harness, ten have arms whose held-out scores are
+identical on \emph{every} seed and four have $|\dd| \ge 0.005$, the largest being the powered actuator run at
+$-0.100$. The identities are not noise measurements: B and D produced byte-identical genomes
+there, so they issued identical calls and the cassette served identical completions.
+
+That is ten of fifteen, and the remaining one is worth naming rather than rounding into either
+group, because it is a sharper version of this paper's own point. \texttt{multihard} has per-seed
+differences $[0, +0.055, 0, 0, -0.055]$: the arms demonstrably \emph{did} differ, on two seeds, and
+the differences cancel. Its \dd\ is therefore zero without being an identity --- a zero that hides
+not one non-experiment but two offsetting effects. We previously reported this run among the exact
+zeros, which was true of the number and false of the reason. The four
+non-zeros are a different matter again, and must be read against the noise floor
 \S\ref{sec:sigma} measures. Scaled by that $\sigma(\dd)$, two of the
 four sit under $1\sigma$ --- the worker swap at $-0.014$ and the cross-family run at $+0.008$ ---
 and two do not: the powered actuator run at $\approx\!3.44\sigma$ and the discarded first four-arm
@@ -629,7 +636,7 @@ is what we mean by superseded.
 A componentized optimizer can be pointed at a component, run, accept candidates, report a
 plausible held-out number, and never touch the component. Our first fifteen contrast runs did
 exactly that: the critique gene is byte-identical to the seed in $15/15$ winning genomes, ten runs
-reported a difference of exactly zero, and we read the consistency as a tight null for months. Two
+reported held-out scores identical on every seed, and we read the consistency as a tight null for months. Two
 ordinary wiring choices sufficed --- a reflective dataset built without regard to which component
 it describes, and a selector that rewrites one component per proposal under a matched total budget,
 which is a library default and biases the comparison toward the one-gene arm. Auditing the fix
@@ -672,7 +679,7 @@ This work's earlier drafts published claims it now withdraws. Reporting guidance
 work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Ten} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Eleven} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -736,6 +743,20 @@ The series' other two papers carry the entries bearing on their own claims.
     section establishes. But that paper has since measured each row's own $\sigma$ and superseded
     those ratios, so ``stand'' overstated a choice between two borrowed denominators as a final
     answer.
+  \item \textbf{``Ten of the fifteen reported a \dd\ of exactly zero.''} Correct as a count only
+    under a summation order this paper never specified, and it was the wrong predicate regardless.
+    \S\ref{sec:defect} defines $\dd = \mathrm{mean}(D) - \mathrm{mean}(B)$; under that definition
+    \emph{eleven} of the fifteen are bit-equal to zero. Under the mean of per-seed differences ---
+    the form the released analysis code computes, and identical in real arithmetic --- ten are, and
+    the eleventh is $-2.22 \times 10^{-17}$. One run, \texttt{multihard}, sits between them because
+    its per-seed differences are $[0, +0.055, 0, 0, -0.055]$ and cancel. So the published ``ten''
+    matched the code while the published definition gave eleven, and ``exactly zero'' turned on
+    floating-point associativity.
+    What the surrounding argument needs is not a zero but an \emph{identity}, and that is invariant:
+    ten runs produced held-out scores identical on every seed. The body now claims that, and
+    \texttt{verify\_paper\_claims.py} pins both counts so a future edit cannot restore a number that
+    moves with summation order. Found by a cold reviewer, in the class of defect this series says
+    registry-matching structurally cannot reach.
 \end{enumerate}
 
 \end{document}

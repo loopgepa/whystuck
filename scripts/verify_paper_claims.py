@@ -968,8 +968,9 @@ def _reflection_models() -> tuple[set[str], set[str]]:
     return corrected, pre
 
 
-def _precorrection_counts() -> tuple[int, int, float]:
-    """(contrast runs recorded pre-correction, how many have Δ exactly 0, largest |mean Δ|).
+def _precorrection_counts() -> tuple[int, int, float, int]:
+    """(contrast runs recorded pre-correction, arms identical on every seed, largest |mean Δ|,
+    how many have a *mean* Δ of exactly 0).
 
     `meta.module_selector == "all"` is the marker the corrected harness writes, so this
     partitions the released runs by harness generation without a hand-maintained list. It
@@ -977,6 +978,20 @@ def _precorrection_counts() -> tuple[int, int, float]:
     every Δ in it was an identity when four are not: an unchanged verify gene leaves the arms
     differing through the `generate` gene they share, which the default selector made arm D
     search half as hard (Evidence 3).
+
+    **Why two counts.** Δ is defined in Paper III as mean(D) − mean(B), and this function used to
+    report "exactly zero" from `mean(delta_arm(path))`, the mean of per-seed differences. Those two
+    are the same number in real arithmetic and not in IEEE-754: on
+    `validation-study-multihard.json`, whose per-seed differences are [0, +0.055, 0, 0, -0.055],
+    difference-of-means is bit-equal to 0.0 while mean-of-differences is -2.2204460492503132e-17.
+    So "exactly zero" held for ten runs or eleven depending on a summation order the paper never
+    specified, and the papers printed ten while defining the estimator that gives eleven.
+
+    A count that moves with summation order cannot carry a claim, so the load-bearing quantity is
+    now `n_identical`: runs whose two arms produced bit-identical held-out scores on **every** seed.
+    That is invariant, it is what the surrounding prose actually argues (the arms were the same
+    program, so they issued the same calls), and it is the count the papers now state. The
+    mean-exactly-zero figure is still returned so the discrepancy stays pinned rather than latent.
     """
     import glob
     import sys
@@ -985,7 +1000,9 @@ def _precorrection_counts() -> tuple[int, int, float]:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     from analyze_deltas import delta_arm
 
-    means = []
+    means: list[float] = []
+    identical: list[bool] = []
+    by_means: list[float] = []
     for path in sorted(glob.glob(f"{DOCS}/validation-study*.json")):
         with open(path, encoding="utf-8") as fh:
             doc = json.load(fh)
@@ -993,13 +1010,24 @@ def _precorrection_counts() -> tuple[int, int, float]:
         arms = sorted(k for k in first if isinstance(first.get(k), dict))
         if arms != ["A", "B", "C", "D"] or doc["meta"].get("module_selector") == "all":
             continue
-        means.append(mean(delta_arm(path)))
+        per_seed = delta_arm(path)
+        means.append(mean(per_seed))
+        identical.append(all(d == 0.0 for d in per_seed))
+        by_means.append(
+            mean(r["D"]["opt_heldout"] for r in doc["runs"])
+            - mean(r["B"]["opt_heldout"] for r in doc["runs"])
+        )
     if not means:
         raise ValueError(
             "no pre-correction contrast runs found; the module_selector marker must have "
             "changed, and a count of zero would silently retract the paper's own caution"
         )
-    return len(means), sum(1 for m in means if m == 0.0), max(abs(m) for m in means)
+    return (
+        len(means),
+        sum(identical),
+        max(abs(m) for m in means),
+        sum(1 for m in by_means if m == 0.0),
+    )
 
 
 def _registry_counts() -> tuple[int, int]:
@@ -2679,7 +2707,12 @@ def _checks() -> list[tuple[str, float, float, float]]:
     # How many contrast runs the correction superseded, and how many of their deltas really
     # were zero. The paper said "eleven" for a set of fifteen, and called all of their zeros
     # identities when four are not zero at all.
-    n_pre, n_zero, max_abs = _precorrection_counts()
+    n_pre, n_zero, max_abs, n_zero_by_means = _precorrection_counts()
+    # The floating-point gap this whole family of claims turned on. Pinned so that a future edit
+    # cannot quietly reintroduce a count that depends on summation order: if these two ever agree,
+    # the artifact changed and the prose's careful wording needs re-reading, not preserving.
+    out.append(("precorrection identical-on-every-seed", float(n_zero), 0.0, 10.0))
+    out.append(("precorrection mean-exactly-zero", float(n_zero_by_means), 0.0, 11.0))
     for label, pattern, artifact in (
         # Three independent anchors for the retraction count, in the abstract, the conclusion and
         # the introduction. It has drifted once already (published as eleven for a set of fifteen),
@@ -2697,12 +2730,17 @@ def _checks() -> list[tuple[str, float, float, float]]:
         ("tex: intro pre-correction runs", r"Our first (\w+) contrast runs measured", n_pre),
         (
             "tex: defect appendix pre-correction runs",
-            r"Our first (\w+) contrast runs reported",
+            r"Our first (\w+) contrast runs produced arms",
             n_pre,
         ),
+        # These four used to scrape "exactly zero", a predicate that moved with summation order.
+        # They now scrape the identity claim, which does not. Rewording the prose NaN'd all four at
+        # once, which is the fragility of regex-pinned numerals in one line: a check keyed to a
+        # sentence fails when the sentence is corrected, and a NaN is only distinguishable from a
+        # pass because this script compares rather than merely running.
         (
-            "tex: defect appendix exact zeros",
-            r"was exactly zero (\w+) times",
+            "tex: defect appendix identical-on-every-seed",
+            r"identical on every seed (\w+) times",
             n_zero,
         ),
         (
@@ -2711,14 +2749,31 @@ def _checks() -> list[tuple[str, float, float, float]]:
             n_pre,
         ),
         (
-            "tex: superseded appendix exact zeros",
-            r"harness, (\w+) have a mean \\dd\\ of\s+exactly zero",
+            "tex: superseded appendix identical-on-every-seed",
+            r"harness, (\w+) have arms whose held-out scores are\s+identical",
             n_zero,
         ),
         ("tex: conclusion pre-correction runs", r"\\textbf\{(\w+)\} of them, across", n_pre),
         (
-            "tex: conclusion exact zeros",
-            r"(\w+) reported \$\\dd\(D\{-\}B\)\$ of exactly zero",
+            "tex: conclusion identical-on-every-seed",
+            r"(\w+) produced arms with held-out scores identical on every",
+            n_zero,
+        ),
+        # Three sites stated the count in prose and nothing pinned them. Found while correcting the
+        # predicate: the abstract, the introduction and Paper III's own conclusion all carried it.
+        (
+            "tex: abstract identical-on-every-seed",
+            r"(\w+) of the runs reported held-out scores\s+identical on every seed",
+            n_zero,
+        ),
+        (
+            "tex: intro identical-on-every-seed",
+            r"(\w+) runs reported held-out scores identical on every seed and we read",
+            n_zero,
+        ),
+        (
+            "tex: p3 conclusion identical-on-every-seed",
+            r"(\w+) runs\s+reported held-out scores identical on every seed, and we read",
             n_zero,
         ),
     ):
