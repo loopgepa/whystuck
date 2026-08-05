@@ -985,7 +985,14 @@ $p_0$ and not of how long the search runs. So we predict (i) the evolved critiqu
 rate remains $0.00$ on at least four of the six arm-D genes at the two deepest cells
 ($\mathrm{mmc}{=}80$ and $\mathrm{mmc}{=}160$). And we predict (ii) \textbf{no monotone trend in
 $\dd(D-B)$ across effective depth}, with no cell exceeding $2.5$ times the directly measured
-$\sigma(\dd) = 0.042$ at this level (\S\ref{sec:repeat}), i.e.\ $|\dd| < 0.105$ throughout. The
+$\sigma(\dd)$ at this level (\S\ref{sec:repeat}), i.e.\ $|\dd| < 0.105$ throughout.\footnote{The
+registered bound was computed from a $\sigma(\dd)$ transcribed as $0.042$. The measured value is
+$0.047$ (Table~\ref{tab:repeat}), which gives $0.117$. We report the bound \emph{as registered}
+rather than the one the artifact supports, because a pre-registered threshold recomputed after the
+fact is not pre-registered; the verdict is the same under either, since the largest $|\dd|$ in the
+sweep is $0.042$. That coincidence is probably the mechanism: the transcribed figure is the sweep's
+own largest $|\dd|$, sitting two lines below in this paragraph's grounds.
+Appendix~\ref{sec:corrections}.} The
 grounds: within the split sweep, depth already ranged $1.43$ to $2.22$ with no ordering
 ($+0.017$, $-0.042$, $+0.062$, $+0.023$), and five three-seed cells cannot resolve a small trend.
 
@@ -1520,7 +1527,7 @@ This paper's earlier drafts published claims it now withdraws, and two of its pr
 predictions failed. Reporting guidance for preregistered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Fourteen} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Fifteen} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1609,6 +1616,21 @@ The series' other two papers carry the entries bearing on their own claims.
     fails to generalize, and the bound was too generous. \S\ref{sec:budgetresult} now states the
     cell by its \texttt{mmc}, and all four counts are derived from the same replay that already
     reproduced the two we had right. Found independently by four of the twelve cold reviewers.
+  \item \textbf{The registered depth bound was computed from a $\sigma$ nothing measured.}
+    \S\ref{sec:budgetprereg} registered ``$2.5$ times the directly measured $\sigma(\dd) = 0.042$ at
+    this level (\S\ref{sec:repeat}), i.e.\ $|\dd| < 0.105$''. \S\ref{sec:repeat} reports $0.0468$,
+    which the paper prints as $0.047$ in the three other places it cites that section for the same
+    quantity; $0.042$ appears in no replicate. At the measured value the bound would have been
+    $0.117$. We have \emph{not} recomputed it --- a pre-registered threshold recalculated after the
+    fact is not pre-registered --- so $0.105$ stands as registered, with a footnote stating what the
+    artifact supports. The verdict is unaffected either way: the largest $|\dd|$ in the sweep is
+    $0.042$, comfortably inside both. The likely mechanism is visible in the same paragraph, whose
+    grounds list that largest $|\dd|$ two lines below the $\sigma$ slot it landed in.
+    Neither number was reachable by the prose-coverage guard, even after its repair: that guard asks
+    whether a printed decimal is in the set of \emph{values} some check derives, and $0.042$ collides
+    with this paper's own $-0.042$ headline while $0.105$ collides with a confidence bound in
+    Table~\ref{tab:p0}. A wrong number tends to collide with a related one nearby, because
+    nearby is where it was copied from. Found independently by three of the twelve cold reviewers.
 \end{enumerate}
 
 \section{The Actuator Experiment, and the MBPP+ Attempt}

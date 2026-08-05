@@ -2956,6 +2956,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_prose_orphan_checks())
     out.extend(_defect_class_count_checks())
     out.extend(_budget_false_pass_checks())
+    out.extend(_registered_depth_bound_checks())
 
     return out
 
@@ -3672,6 +3673,69 @@ def _budget_false_pass_checks() -> list[tuple[str, float, float, float]]:
         )
     )
     return out
+
+
+def _registered_depth_bound_checks() -> list[tuple[str, float, float, float]]:
+    """The pre-registered depth-sweep bound, and the slip in the sigma it was computed from.
+
+    sec:budgetprereg registered "no cell exceeding 2.5 times the directly measured sigma(dd) = 0.042
+    at this level, i.e. |dd| < 0.105". The measured value is 0.0468, printed as 0.047 in the three
+    other places the paper cites the same section for it; 0.042 appears in no replicate. The
+    registered bound is therefore 2.5 x a number nothing produced.
+
+    The bound is NOT recomputed. A pre-registered threshold recalculated after the fact is not
+    pre-registered, so 0.105 stands as what was registered and the footnote states what the artifact
+    supports. What is checked here is everything that IS derivable: the measured sigma, the bound it
+    would have given, the sweep's largest |dd|, and -- because both of the registered pair are now
+    stated in one footnote -- the arithmetic between them.
+
+    Neither 0.042 nor 0.105 was reachable by `test_paper_prose_coverage`, even repaired, and the
+    reason is worth recording: that guard tests membership in the set of pinned VALUES, and 0.042
+    collides with the paper's own -0.042 headline while 0.105 collides with a CI upper bound in
+    tab:p0. A wrong number is likeliest to collide with a related one NEARBY, because nearby
+    is usually where it was copied from, so value-set membership is the weakest form of this rule.
+    """
+    tex = _tex()
+    sigma = _repeat_results()["L1"].sd_between_replicates  # type: ignore[attr-goes-through-object]
+    largest = max((abs(_budget_delta(slug)) for _, _, slug in _BUDGET_ROWS))
+    transcribed = _scrape(tex, r"a \$\\sigma\(\\dd\)\$ transcribed as \$([\d.]+)\$")
+    registered = _scrape(tex, r"i\.e\.\\ \$\|\\dd\| < ([\d.]+)\$ throughout")
+    return [
+        (
+            "tex: registered depth bound, measured sigma",
+            _scrape(tex, r"The measured value is\s+\$([\d.]+)\$ \(Table"),
+            0.0005,
+            sigma,
+        ),
+        (
+            "tex: registered depth bound the artifact supports",
+            _scrape(tex, r"which gives \$([\d.]+)\$"),
+            0.0005,
+            2.5 * sigma,
+        ),
+        (
+            "tex: sweep largest absolute delta",
+            _scrape(tex, r"the largest \$\|\\dd\|\$ in the\s+sweep is \$([\d.]+)\$"),
+            0.0005,
+            largest,
+        ),
+        # The transcribed sigma is a historical constant, so it is pinned by the only two things
+        # that can be said about it from evidence: it is 2.5 times smaller than the bound it
+        # produced, and it is the rounded largest |dd| the sweep contains. The second is what the
+        # footnote calls the likely mechanism, and stating it in the paper obliges checking it.
+        (
+            "tex: registered bound is 2.5x the transcribed sigma",
+            registered,
+            0.0005,
+            2.5 * transcribed,
+        ),
+        (
+            "tex: transcribed sigma equals the rounded largest delta",
+            transcribed,
+            0.0005,
+            round(largest, 3),
+        ),
+    ]
 
 
 def _defect_class_count_checks() -> list[tuple[str, float, float, float]]:
