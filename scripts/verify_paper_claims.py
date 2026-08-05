@@ -1030,6 +1030,38 @@ def _precorrection_counts() -> tuple[int, int, float, int]:
     )
 
 
+def _precorrection_acceptance() -> dict[str, int]:
+    """Acceptances in the fifteen pre-correction contrast runs, derived from SCORES not fields.
+
+    Those runs predate `genes_changed`, so `arms_optimized` reads a missing key as a zero and the
+    census reports both arms accepting nothing. The released scores say otherwise, and the inference
+    is sound in one direction: an arm whose search accepts nothing returns the seed genome, which is
+    scored on the same held-out list by the same worker, so it must reproduce its own seed score.
+    Therefore `opt_heldout != seed_heldout` on any seed is an accepted proposal. The converse does
+    not hold -- an accepted proposal can score identically -- so these counts are a lower bound, and
+    the paper states them as such.
+    """
+    import glob
+
+    either = arm_b = arm_d = flat = 0
+    for path in sorted(glob.glob(f"{DOCS}/validation-study*.json")):
+        with open(path, encoding="utf-8") as fh:
+            doc = json.load(fh)
+        first = doc["runs"][0]
+        arms = sorted(k for k in first if isinstance(first.get(k), dict))
+        if arms != ["A", "B", "C", "D"] or doc["meta"].get("module_selector") == "all":
+            continue
+        moved = {
+            arm: any(r[arm]["opt_heldout"] != r[arm]["seed_heldout"] for r in doc["runs"])
+            for arm in ("B", "D")
+        }
+        arm_b += moved["B"]
+        arm_d += moved["D"]
+        either += moved["B"] or moved["D"]
+        flat += not (moved["B"] or moved["D"])
+    return {"either": either, "B": arm_b, "D": arm_d, "flat": flat}
+
+
 def _registry_counts() -> tuple[int, int]:
     """(superseded, replayable) as `verify_reproducibility.py` itself defines them."""
     import sys
@@ -2329,8 +2361,25 @@ def _checks() -> list[tuple[str, float, float, float]]:
 
     # Evidence 9's census. The paper distinguishes two shapes of the same flag and the counts
     # are the whole argument: a one-sided contrast (one arm starved, the other searched) is the
-    # new defect, while both-arms-starved is the original retraction re-derived from scores.
+    # new defect, while both-arms-zero is the original retraction re-derived from scores.
     one_sided, no_contrast = _contrast_flag_census()
+    # The correction to that sentence needs its own pins. It used to say both arms "accepted
+    # nothing on every seed" in the other fifteen, which is false in eleven of them: those files
+    # carry no `genes_changed` key at all, so the census reads an ABSENT field as a zero, and the
+    # released scores contradict it. An arm that accepts nothing returns the seed genome and
+    # reproduces its own seed score, so opt != seed on any seed is an accepted proposal.
+    acc = _precorrection_acceptance()
+    for label, pattern, artifact in (
+        (
+            "tex: precorrection any-arm acceptances",
+            r"\\textbf\{(\w+)\} of the fifteen\s+have one",
+            acc["either"],
+        ),
+        ("tex: precorrection arm B acceptances", r"arm~B in (\w+) runs", acc["B"]),
+        ("tex: precorrection arm D acceptances", r"arm~D in (\w+),", acc["D"]),
+        ("tex: precorrection flat on both arms", r"only (\w+) are flat on both arms", acc["flat"]),
+    ):
+        out.append((label, _scrape_word(tex, pattern), 0, artifact))
     for label, pattern, artifact in (
         ("tex: flagged runs total", r"(\w+) released runs trip", one_sided + no_contrast),
         (

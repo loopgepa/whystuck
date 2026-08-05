@@ -50,7 +50,7 @@ exists. Measured from the built PDFs and each paper's own source:
 |---|---|---|---|---|---|---|
 | I | `p1-conditional-lever` | 34 | 11 | 3 | 23 | 107 kB |
 | II | `p2-repair-not-detection` | 18 | 4 | 2 | 16 | 85 kB |
-| III | `p3-silent-no-op` | 16 | 4 | 1 | 13 | 82 kB |
+| III | `p3-silent-no-op` | 17 | 4 | 1 | 13 | 83 kB |
 
 Each package is far under arXiv's 50 MB limit. Abstract lengths against the 1920-character metadata
 field: **1912**, 1846, 1786. Paper I has 8 characters of headroom, so any edit to its abstract has to

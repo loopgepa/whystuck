@@ -348,10 +348,16 @@ now enforced by the analysis script: \textbf{a $\dd$ between two optimized arms 
 labelled with how many seeds each arm actually accepted on}, and flagged where either is zero.
 Sixteen released runs trip that flag. Exactly one is \emph{one-sided} in the new sense, with a
 starved comparator facing an arm that did search: the $n_{\mathrm{train}}{=}4$ row. In the other
-fifteen \emph{both} arms accepted nothing on every seed, so the flag is re-deriving the original
-retraction from the scores alone --- which is the point, since that is the diagnostic we did not
-have when we believed them. Those fifteen are reported as uninformative rather than as evidence
-of no effect.
+fifteen \emph{both} arms count zero, but by an \emph{absent} field rather than a measured one:
+those runs predate item~(iv), so no arm record carries \texttt{genes\_changed} at all and the
+census reads the missing key as a zero --- this paper's own failure mode, inside the diagnostic we
+propose as the fix. Their released scores say otherwise. An arm whose search accepts nothing
+returns the seed genome and therefore reproduces its own seed score, so any seed on which
+$\mathrm{opt} \ne \mathrm{seed}$ carries an accepted proposal: \textbf{eleven} of the fifteen
+have one, arm~B in eleven runs and arm~D in ten, and only four are flat on both arms on every
+seed. Those fifteen are reported as uninformative rather than as evidence
+of no effect --- but for the narrower reason that their acceptance record is missing, not that it
+is zero.
 Item~(iv) is the part we would urge on others: \textbf{a
 componentized-optimization result should report, per component, whether the optimizer's output
 actually differs from the seed.} Had we printed that one number, this study would have been a
@@ -679,7 +685,7 @@ This work's earlier drafts published claims it now withdraws. Reporting guidance
 work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Eleven} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Twelve} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -743,6 +749,17 @@ The series' other two papers carry the entries bearing on their own claims.
     section establishes. But that paper has since measured each row's own $\sigma$ and superseded
     those ratios, so ``stand'' overstated a choice between two borrowed denominators as a final
     answer.
+  \item \textbf{``In the other fifteen \emph{both} arms accepted nothing on every seed.''} Said of
+    the runs the acceptance flag catches, and false in eleven of them. Those files predate the
+    \texttt{genes\_changed} field, so the census reads an \emph{absent} key as a zero --- this
+    paper's own failure mode, occurring inside the diagnostic it proposes as the cure. Their released
+    scores contradict the claim directly: an arm that accepts nothing returns the seed genome and
+    reproduces its own seed score, and eleven of the fifteen have a seed where it does not. Also
+    withdrawn from the same sentence: that the flag ``re-derives the original retraction from the
+    scores alone'', which reads no score at all, and that the original retraction was about
+    acceptance --- it was about the \emph{critique} gene, unchanged in $15/15$ winning genomes while
+    \texttt{generate} changed in $5/15$. The counts in the sentence were right throughout; the
+    mechanism and the inference were not. Found by cold reviewers in seven of twelve runs.
   \item \textbf{``Ten of the fifteen reported a \dd\ of exactly zero.''} Correct as a count only
     under a summation order this paper never specified, and it was the wrong predicate regardless.
     \S\ref{sec:defect} defines $\dd = \mathrm{mean}(D) - \mathrm{mean}(B)$; under that definition
