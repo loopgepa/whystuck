@@ -78,6 +78,7 @@ SUPERSEDED: dict[str, str] = {
     "0.0410": "0.0459",  # L2 sd(draw)
     "0.0184": "0.0205",  # L2 se(mean)
     "0.0088": "0.0099",  # L3 se(mean)
+    "1.12": "1.00",  # L1 t, the one site the "corrected throughout" claim missed
     "0.0197": "0.0220 0.0205",  # L3 sd(draw); and the cross-run one-draw estimate, separately
     # --- tab:sigmagenome, sigma per genome ------------------------------------------------------
     "0.0292": "0.0326",
