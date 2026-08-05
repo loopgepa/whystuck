@@ -374,6 +374,7 @@ _WORD_NUM = {
     "twenty": 20,
     "twenty-one": 21,
     "twenty-two": 22,
+    "twenty-four": 24,
     "twenty-five": 25,
 }
 
@@ -908,6 +909,7 @@ class C1Strata:
 
     named: float
     residual: float
+    total_n: int
     caught_n: int
     caught_draft: float
     caught_final: float
@@ -990,6 +992,7 @@ def _c1_strata() -> C1Strata:
     return C1Strata(
         named=named / n_heldout,
         residual=(total - named) / n_heldout,
+        total_n=n_heldout,
         caught_n=len(caught),
         caught_draft=mean(d for d, _ in caught),
         caught_final=mean(f for _, f in caught),
@@ -1700,14 +1703,19 @@ def _checks() -> list[tuple[str, float, float, float]]:
     for i, (pattern, artifact) in enumerate(length_patterns):
         decomp_prose.append((f"tex: threats answer length {i}", pattern, 0.05, artifact))
 
-    # The C1 decomposition: the eight verdict-differing tasks account for only part of the
+    # The C1 decomposition: the eight tasks the section names account for only part of the
     # -0.033, and the paper now says how much. A partial decomposition presented as a whole
-    # one is exactly the kind of claim this file exists to keep honest.
+    # one is exactly the kind of claim this file exists to keep honest. (They are NOT "the eight
+    # verdict-differing tasks", which is how this comment and the paper both used to put it: the
+    # verdicts differ on three. See `tex: c1 stratum size` below.)
+    # Line breaks are matched as \s+ rather than a literal \n. Pinning the wrap position makes an
+    # unrelated reflow of a hard-wrapped paragraph look like drift, which trains the reader to
+    # treat a red check as noise -- the opposite of what these are for.
     verdict_share, prose_residual = _c1_decomposition()
     decomp_prose.append(
         (
             "tex: C1 eight-task share",
-            r"account for \$(-[\d.]+)\$ of the \$-0\.033\$",
+            r"account for\s+\$(-[\d.]+)\$ of the \$-0\.033\$",
             0.0005,
             verdict_share,
         )
@@ -1715,7 +1723,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     decomp_prose.append(
         (
             "tex: C1 residual on the other 24",
-            r"the\nremaining \$(-[\d.]+)\$ falls on the twenty-four",
+            r"the\s+remaining \$(-[\d.]+)\$ falls on the twenty-four",
             0.0005,
             prose_residual,
         )
@@ -3455,6 +3463,26 @@ def _prose_orphan_checks() -> list[tuple[str, float, float, float]]:
             -c1.compliant_mean,
         )
     )
+    # The three stratum SIZES, because the sentence that used to state them got one wrong: it
+    # called all eight "the only ones on which the verdicts differ" while conceding two clauses
+    # earlier that both genes demanded a fix on five of them. The verdicts differ on three. Sizes
+    # are checked, not just the means they weight, so the miscount cannot come back reworded.
+    for label, pattern, actual in (
+        (
+            "verdicts differ",
+            r"\\emph\{verdicts\} differ on exactly\s+those \\textbf\{(\w+)\}",
+            c1.caught_n,
+        ),
+        ("already compliant", r"demanded a fix on all \\textbf\{(\w+)\}", c1.compliant_n),
+        (
+            "both fixed, non-compliant",
+            r"and on the other \\textbf\{([\w-]+)\}",
+            c1.total_n - c1.caught_n - c1.compliant_n,
+        ),
+    ):
+        out.append(
+            (f"tex: c1 stratum size, {label}", _scrape_word(tex, pattern), 0.0, float(actual))
+        )
 
     # --- Pre-correction values in the corrections registers ----------------------------------
     # The estimator bug used a population sd, which divides by K rather than K-1 and so scales

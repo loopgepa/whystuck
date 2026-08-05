@@ -1516,7 +1516,7 @@ This paper's earlier drafts published claims it now withdraws, and two of its pr
 predictions failed. Reporting guidance for preregistered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Twelve} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Thirteen} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1584,6 +1584,15 @@ The series' other two papers carry the entries bearing on their own claims.
     inferences drawn from runs 4 and 5 did not say that those runs predate the harness correction,
     so their between-arm contrast is not a measurement. Both are now stated at the strength the
     source supports.
+  \item \textbf{``Those eight tasks are the only ones on which the two genes' verdicts differ.''}
+    False, and contradicted two clauses earlier in its own sentence. The verdicts differ on
+    exactly \emph{three} of the $32$ held-out tasks --- the three false passes the hand-written
+    gene caught --- because both genes returned FAIL on all five already-compliant drafts, which
+    is what ``both genes demanded fixes on all five'' says. The eight are the tasks
+    \S\ref{sec:handgene}'s decomposition \emph{names}: three where the verdict changed and five
+    where the draft needed no change. Nothing quantitative moves; the $-0.009$/$-0.023$ split and
+    every number in it stand. \texttt{verify\_paper\_claims.py} now derives all three stratum
+    sizes from the replay, so the sentence cannot be restated the old way.
 \end{enumerate}
 
 \section{The Actuator Experiment, and the MBPP+ Attempt}
@@ -1695,10 +1704,12 @@ threshold move itself bought is small and legible: on the three tasks whose fals
 correctly caught, the score rose $0.800 \to 0.867$ (one repaired to $1.0$, two unchanged),
 worth $+0.006$ on the 32-task mean; on the five tasks whose draft was already compliant the
 mean is $-0.100$, and since \emph{both} genes demanded fixes on all five, that is one damaged
-draft rather than a false-alarm difference. Those eight tasks are the only ones on which the
-two genes' \emph{verdicts} differ, and together they account for $-0.009$ of the $-0.033$: the
-remaining $-0.023$ falls on the twenty-four tasks where both genes demanded a fix and only the
-repair \emph{prose} differed. So eliminating false passes bought a real gain an order of
+draft rather than a false-alarm difference. The two genes' \emph{verdicts} differ on exactly
+those \textbf{three} tasks and nowhere else --- both demanded a fix on all \textbf{five}
+compliant drafts and on the other \textbf{twenty-four} --- so the eight are the tasks this
+decomposition names, not the tasks the genes disagreed about. Together they account for
+$-0.009$ of the $-0.033$: the remaining $-0.023$ falls on the twenty-four non-compliant drafts
+that both genes sent to a refine round, where only the repair \emph{prose} differed. So eliminating false passes bought a real gain an order of
 magnitude below the noise it sits in, and the larger part of the movement is not the threshold
 at all --- it is the rewritten repair text, which is the lever Paper~II measures
 directly.

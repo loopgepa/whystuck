@@ -74,7 +74,7 @@ does not, something regressed.
 ## Verifying
 
 ```bash
-python scripts/verify_paper_claims.py     # 816 checks against the released artifacts, $0
+python scripts/verify_paper_claims.py     # 819 checks against the released artifacts, $0
 python scripts/verify_split_coverage.py   # the split lost no quantity, $0
 python -m pytest tests/test_split_coverage.py tests/test_paper_prose_coverage.py \
     tests/test_paper_table_coverage.py tests/test_paper_sigma_coverage.py tests/test_figures.py
@@ -106,14 +106,20 @@ literals is the bare capture fragment `([\d.]+)` that the table-row patterns are
 Compiled alone it matched 3937 numbers, so the bound set *was* the document and the guard asserted
 that the papers agree with themselves.
 
-It concealed seven orphans. All seven turned out to be correct once derived, so **no published
-number changed** and the papers' corrections registers are unaffected — but they were unpinned, and
-two were the exact defect the guard's own docstring was written about, including one that sat as a
-literal inside the pattern checking its own σ quotient. The repair replaced the replay with the
-check list itself, which already records every pinned value, and added
-`test_the_guard_reports_an_injected_orphan`: it feeds in a decimal known to be underivable and
-demands a failure. The size floors in `test_coverage_is_not_vacuous` could never have caught this,
-because an over-broad bound set is *larger* than a correct one and clears every floor.
+It concealed seven orphans. All seven turned out to be correct once derived, so **none of the seven
+changed a published number** — but they were unpinned, and two were the exact defect the guard's own
+docstring was written about, including one that sat as a literal inside the pattern checking its own
+σ quotient. The repair replaced the replay with the check list itself, which already records every
+pinned value, and added `test_the_guard_reports_an_injected_orphan`: it feeds in a decimal known to
+be underivable and demands a failure. The size floors in `test_coverage_is_not_vacuous` could never
+have caught this, because an over-broad bound set is *larger* than a correct one and clears every
+floor.
+
+Pinning them did surface one false *sentence*, now Paper I's thirteenth register entry: the
+appendix called all eight C1 tasks "the only ones on which the two genes' verdicts differ" while
+conceding two clauses earlier that both genes demanded a fix on five of them. The verdicts differ on
+three. No quantity moved — the −0.009/−0.023 split stands — and all three stratum sizes are now
+derived from the replay.
 
 ## Shared across all three
 
