@@ -397,15 +397,28 @@ def _scrape_word(tex: str, pattern: str) -> float:
 _SPLIT_ROWS = (("4", "split4"), ("8", "c2b"), ("16", "split16"), ("24", "split24"))
 
 
-def _noise_estimate():
-    """The measurement-noise estimator, imported lazily like the other analyzers."""
+def _noise_estimate(exclude: str | None = None):
+    """The measurement-noise estimator, imported lazily like the other analyzers.
+
+    `exclude` drops one replicate by name. It exists for a single claim: the ten replicates behind
+    sigma include the discarded first attempt at the four-arm re-run, which the papers elsewhere
+    declare superseded and unreplayable. Enrolling it is right -- its seed column scores a fixed
+    genome and involves no optimizer, so the defect that superseded its delta does not touch this
+    measurement -- but it was undisclosed, and the paragraph now states what sigma would be without
+    it. That number needs deriving rather than typing, which is what this parameter is for.
+    """
     import sys
     from pathlib import Path
 
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     import analyze_measurement_noise as mod
 
-    return mod.noise_estimate()
+    if exclude is None:
+        return mod.noise_estimate()
+    names = [r.name for r in mod.eligible_replicates() if r.name != exclude]
+    if len(names) == len(mod.eligible_replicates()):
+        raise ValueError(f"{exclude!r} is not an eligible replicate; the estimator's set changed")
+    return mod.noise_estimate(names)
 
 
 #: The seed-baseline curve's runs, which all score the SAME thirty held-out tasks. Verified on
@@ -2413,6 +2426,17 @@ def _checks() -> list[tuple[str, float, float, float]]:
             _scrape_word(tex, r"scope note\. (\w+) released runs"),
             0,
             n_reps,
+        )
+    )
+    # The count was always right; the appositive that purported to identify the ten named nine,
+    # because the tenth is the discarded first attempt at the four-arm re-run. The paragraph now
+    # names it and states sigma without it, so that figure is derived here rather than typed there.
+    out.append(
+        (
+            "tex: noise sigma without the discarded attempt",
+            _scrape(tex, r"Without it \$\\sigma\(\\dd\)\$ is \$([\d.]+)\$"),
+            0.00005,
+            _noise_estimate("c2").sigma_delta_mean,
         )
     )
 

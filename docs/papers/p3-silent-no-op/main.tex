@@ -522,7 +522,9 @@ exists.
 No interval in this study contains within-condition sampling
 variance, because the worker runs at the provider's default temperature with one sample per
 task, so nothing was measured twice on purpose. It was nonetheless measured by accident. Ten
-released runs --- a four-arm re-run, each row of a split-size sweep and each bought row of a
+released runs --- a four-arm re-run and its discarded first attempt (defect~8; its seed column
+involves no optimizer, so excluding it from the \emph{verified} set does not exclude it here),
+each row of a split-size sweep and each bought row of a
 budget sweep --- evaluate the
 \emph{same} unoptimized seed genome on the \emph{same} thirty held-out tasks before optimizing
 anything, so they are ten independent draws of one fixed number. Their means span $0.7400$ to

@@ -1190,13 +1190,17 @@ what it costs the headline:} no interval in this study contains within-condition
 variance, because the worker runs at the provider's default temperature with one sample per
 task, so nothing was measured twice on purpose. It was nonetheless measured by accident, and we
 report it rather than leaving the omission as a scope note. Ten released runs --- the four-arm
-re-run, each row of the split sweep and each bought row of the budget sweep --- evaluate the
+re-run and its discarded first attempt (\S\ref{sec:rerun}), each row of the split sweep and
+each bought row of the budget sweep --- evaluate the
 \emph{same} unoptimized seed genome on the \emph{same} thirty held-out tasks before optimizing
 anything, so they are ten independent draws of one fixed number. Their means span $0.7400$ to
 $0.8183$: a range of $0.078$ on a quantity that is constant by construction, which is the
 plainest statement of the problem this section exists to quantify. We report the count and the
 range rather than enumerating them, because any future run at this split size enrols itself as a
-replicate and an enumeration would need editing every time.
+replicate and an enumeration would need editing every time. The discarded attempt enrols on its
+seed column alone, which scores a fixed genome and involves no optimizer, so the defect that
+superseded its \dd\ leaves this measurement intact --- the rule Paper~III applies to the superseded
+runs' seed column. Without it $\sigma(\dd)$ is $0.0295$.
 From the paired differences, $\sigma$ for one task under one draw is $0.1125$; a $\dd$ compares
 two independent draws, so $\sigma(\dd)$ on one task is $0.1591$ and on a thirty-task mean
 \[
