@@ -193,9 +193,11 @@ Huang et al.\ \citep{huang2023cannot} show the sharp boundary: \emph{intrinsic}
 self-correction (no external feedback) fails to improve and often degrades, and prior positive
 results relied on \emph{oracle} stopping signals that ``vanish when oracle labels are
 not available.'' A parallel line shows LLM
-self-verifiers are unreliable detectors --- high false-positive rates
-\citep{valmeekam2023selfcritique} and a self-enhancement bias, with cross-family
-verification outperforming self-verification. The boundary is not undisputed:
+self-verifiers are unreliable detectors: high false-positive rates
+\citep{valmeekam2023selfcritique}, and LLM judges favour their own outputs --- a
+\emph{self-enhancement} bias \citep{zheng2023judging}. Neither source compares a verifier of one
+model family against self-verification, so whether that separation holds is open, which is why we
+list it (D3) as unrun rather than as replication. The boundary is not undisputed:
 \citet{liu2024intrinsic} report intrinsic self-correction working under narrow conditions
 (zero temperature, prompts free of leading bias), which is a condition our worker does not
 satisfy --- it samples at the provider's default temperature (\S\ref{sec:setup}), and that
@@ -1527,7 +1529,7 @@ This paper's earlier drafts published claims it now withdraws, and two of its pr
 predictions failed. Reporting guidance for preregistered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Fifteen} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Sixteen} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1631,6 +1633,20 @@ The series' other two papers carry the entries bearing on their own claims.
     with this paper's own $-0.042$ headline while $0.105$ collides with a confidence bound in
     Table~\ref{tab:p0}. A wrong number tends to collide with a related one nearby, because
     nearby is where it was copied from. Found independently by three of the twelve cold reviewers.
+  \item \textbf{Two results attributed to a citation that contains neither.} \S\ref{sec:related}
+    read ``high false-positive rates \citep{valmeekam2023selfcritique} and a self-enhancement bias,
+    with cross-family verification outperforming self-verification''. Only the first clause is in
+    that source: it uses GPT-4 as both generator and verifier and compares against an external
+    \emph{sound} verifier (a symbolic plan validator), so it contains no cross-family LLM
+    comparison, and the phrase ``self-enhancement bias'' does not occur in it. The term originates
+    with \citet{zheng2023judging}, which was not in our bibliography at all; it is now cited for
+    that clause and for nothing else. The cross-family clause is \textbf{withdrawn rather than
+    re-sourced}: it may well be true, but we had read no source establishing it, and replacing one
+    unverified citation with another is not a correction. Nothing in the paper's own results
+    depended on it --- D3 argues for a cross-provider critic from our own measurements, not from
+    prior work --- so the direction stands and the borrowed support does not. Paper~II carried the
+    same sentence and a second, broader version of it. Found by three of the twelve cold reviewers,
+    all in condition~B.
 \end{enumerate}
 
 \section{The Actuator Experiment, and the MBPP+ Attempt}

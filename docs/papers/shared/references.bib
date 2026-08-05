@@ -94,8 +94,34 @@
   archivePrefix = {arXiv},
   primaryClass  = {cs.AI},
   url       = {https://arxiv.org/abs/2310.08118},
-  note      = {LLM self-verifiers are unreliable detectors (high false-positive rate);
-               motivates the cross-family critic direction}
+  note      = {Supports ONE clause and no more, re-verified 2026-08-05: the LLM verifier has a
+               high false-positive rate. It uses GPT-4 as both generator and verifier and compares
+               against an external SOUND verifier (the symbolic validator VAL), so there is no
+               cross-family LLM comparison in it, and the phrase self-enhancement bias does not
+               occur. Two papers had attached both of those to this key; see zheng2023judging}
+}
+
+% Added 2026-08-05. Three sites across two papers attributed "a self-enhancement bias, with
+% cross-family verification outperforming self-verification" to valmeekam2023selfcritique (and, at
+% one site, huang2023cannot). Neither source contains either result. The term originates here, and
+% this entry supplies the half that is real; the cross-family half was withdrawn rather than
+% re-sourced, because no source for it had been read.
+@inproceedings{zheng2023judging,
+  title     = {Judging {LLM}-as-a-Judge with {MT}-Bench and Chatbot Arena},
+  author    = {Zheng, Lianmin and Chiang, Wei-Lin and Sheng, Ying and Zhuang, Siyuan and
+               Wu, Zhanghao and Zhuang, Yonghao and Lin, Zi and Li, Zhuohan and Li, Dacheng and
+               Xing, Eric P. and Zhang, Hao and Gonzalez, Joseph E. and Stoica, Ion},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS), Datasets and
+               Benchmarks Track},
+  year      = {2023},
+  eprint    = {2306.05685},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  url       = {https://arxiv.org/abs/2306.05685},
+  note      = {Origin of the term. Abstract, verified 2026-08-05: ``We examine the usage and
+               limitations of LLM-as-a-judge, including position, verbosity, and self-enhancement
+               biases.'' Supports the bias only --- it studies judges against human preference,
+               not verifiers of one family against another}
 }
 
 @misc{zhou2023ifeval,
@@ -279,7 +305,14 @@
   year    = {2024},
   pages   = {1417--1440},
   doi     = {10.1162/tacl_a_00713},
-  url     = {https://aclanthology.org/2024.tacl-1.78/}
+  url     = {https://aclanthology.org/2024.tacl-1.78/},
+  note    = {Abstract, verified 2026-08-05: ``no prior work demonstrates successful
+             self-correction with feedback from prompted LLMs, except for studies in tasks
+             that are exceptionally suited for self-correction''; self-correction ``works
+             well in tasks that can use reliable external feedback'' and ``large-scale
+             fine-tuning enables self-correction''. TWO successful routes, not one. An
+             earlier draft cited only the external-feedback route, which understated the
+             survey by omitting the fine-tuning one}
 }
 
 @misc{langchain2026loopcraft,
@@ -338,13 +371,12 @@
   eprint    = {2602.01011v4},
   archivePrefix = {arXiv},
   url       = {https://arxiv.org/abs/2602.01011v4},
-  note      = {Quoted passage: v4, Appendix G},
-  note      = {Peer-reviewed, independent report of BOTH halves of this paper's finding:
-               optimizing a prompt with GEPA, they state ``On GPQA Diamond and MATH-500,
-               GEPA returned the original prompt essentially unchanged'' (the treatment
-               silently not applying), and on their remaining tasks GEPA converged on
-               extreme-deference prompts instructing non-experts to defer to the expert
-               by default (a degenerate policy that is optimal on the training signal)}
+  note      = {Quoted passage: v4, Appendix G. Peer-reviewed, independent report of BOTH halves
+               of this paper's finding: optimizing a prompt with GEPA, they state ``On GPQA
+               Diamond and MATH-500, GEPA returned the original prompt essentially unchanged''
+               (the treatment silently not applying), and on their remaining tasks GEPA converged
+               on extreme-deference prompts instructing non-experts to defer to the expert by
+               default (a degenerate policy that is optimal on the training signal)}
 }
 
 @inproceedings{guo2024evoprompt,
@@ -356,7 +388,11 @@
   year      = {2024},
   eprint    = {2309.08532},
   archivePrefix = {arXiv},
-  url       = {https://arxiv.org/abs/2309.08532}
+  url       = {https://arxiv.org/abs/2309.08532},
+  note      = {Abstract, verified 2026-08-05: ``EvoPrompt starts from a population of
+               prompts and iteratively generates new prompts with LLMs based on the
+               evolutionary operators''. Cited for one property only --- the optimizer is
+               itself an LLM --- which is what our null shares with this family}
 }
 
 @article{willroth2024bestlaid,
@@ -367,7 +403,13 @@
   number  = {1},
   year    = {2024},
   doi     = {10.1177/25152459231213802},
-  url     = {https://journals.sagepub.com/doi/10.1177/25152459231213802}
+  url     = {https://journals.sagepub.com/doi/10.1177/25152459231213802},
+  note    = {Verified 2026-08-05: ``To ensure that deviations are reported in a transparent
+             and standardized way, we created a Preregistration Deviations Table that
+             authors can complete and include in their manuscripts'', so that reviewers
+             need not ``decipher whether and in what ways the manuscript differs from the
+             preregistration''. Supports the one-systematic-place claim our corrections
+             register rests on}
 }
 
 @article{lakens2018equivalence,

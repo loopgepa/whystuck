@@ -137,11 +137,15 @@ second), and prior positive results
 relied on \emph{oracle} stopping signals that ``vanish when oracle labels are
 not available.'' Self-correction helps only with a genuine external verification
 mechanism (a tool, a code executor, unit tests). A parallel line shows LLM
-self-verifiers are unreliable detectors --- high false-positive rates
-\citep{valmeekam2023selfcritique} and a self-enhancement bias, with cross-family
-verification outperforming self-verification; \citet{kamoi2024whencan} survey the conditions
-under which self-correction works at all and find the successful cases depend on an external
-signal the model does not supply itself. The boundary is not undisputed:
+self-verifiers are unreliable detectors: high false-positive rates
+\citep{valmeekam2023selfcritique}, and LLM judges favour their own outputs --- a
+\emph{self-enhancement} bias \citep{zheng2023judging}. Neither source compares a verifier of one
+model family against self-verification, so whether that separation holds is
+open; \citet{kamoi2024whencan} survey the conditions
+under which self-correction works at all and find that no prior work succeeds with feedback the
+model prompts from \emph{itself}, outside tasks exceptionally suited to it --- the cases that do
+work rely on reliable external feedback, or on large-scale fine-tuning. The boundary is not
+undisputed:
 \citet{liu2024intrinsic} report intrinsic self-correction working under narrow conditions
 (zero temperature, prompts free of leading bias), which is a condition our worker does not
 satisfy --- it samples at the provider's default temperature (\S\ref{sec:setup}), and that
@@ -282,9 +286,9 @@ poor offers no reliable signal to sharpen.
 Strikingly, the \emph{same} critique fed the measurement tool (run~4) becomes a
 reliable detector (precision $1.00$, F$_1 = 0.83$) --- which is precisely why the
 tool lifts the baseline. This
-matches the documented unreliability of LLM self-verification --- high
-false-positive rates, self-enhancement bias, cross-family verifiers beating
-self-verification \citep{valmeekam2023selfcritique,huang2023cannot}.
+matches the documented unreliability of LLM self-verification: high
+false-positive rates \citep{valmeekam2023selfcritique} and the self-enhancement bias of LLM
+judges \citep{zheng2023judging}.
 
 \paragraph{$\mathrm{F}_1$ is the wrong statistic, and the $p_0$ calibration shows it.}
 Three task distributions differing only in which
@@ -791,7 +795,7 @@ Earlier drafts of this work published claims it now withdraws. Reporting guidanc
 preregistered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Ten} entries follow. The
+collected here and the body text states only the surviving claim. \textbf{Eleven} entries follow. The
 series' other two papers carry the entries bearing on their own claims, and the full
 register across all three, with the superseded values themselves, is in the released repository.
 
@@ -860,6 +864,19 @@ register across all three, with the superseded values themselves, is in the rele
     paper uses its first three ($0.7767$). The dagger footnote to Table~\ref{tab:curve} says so
     explicitly, so the paper contradicted itself across two pages with both numbers individually
     correct. The lift is $+0.060$.
+  \item \textbf{Two results attributed to citations that contain neither.} At two sites this paper
+    credited \citet{valmeekam2023selfcritique} --- once jointly with
+    \citet{huang2023cannot} --- with ``a self-enhancement bias'' and ``cross-family verifiers
+    beating self-verification''. Only the false-positive-rate clause is in either. Valmeekam et
+    al.\ use GPT-4 as both generator and verifier against an external \emph{sound} verifier, so
+    there is no cross-family LLM comparison, and the phrase ``self-enhancement bias'' does not
+    occur; Huang et al.\ study \emph{intrinsic} self-correction and compare no verifier families at
+    all. The term originates with \citet{zheng2023judging}, absent from our bibliography until now,
+    and is cited for that clause alone. The cross-family clause is \textbf{withdrawn rather than
+    re-sourced}. The over-attribution mattered here more than in Paper~I: \S\ref{sec:detector} used
+    it to say our detector findings ``match'' documented prior results, and one of the two things it
+    claimed to match was not documented anywhere we had read. Found by three of the twelve cold
+    reviewers, all in condition~B.
 \end{enumerate}
 
 \end{document}
