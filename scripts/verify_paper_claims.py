@@ -2957,6 +2957,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_defect_class_count_checks())
     out.extend(_budget_false_pass_checks())
     out.extend(_registered_depth_bound_checks())
+    out.extend(_sigma_margin_checks())
 
     return out
 
@@ -3541,6 +3542,17 @@ def _prose_orphan_checks() -> list[tuple[str, float, float, float]]:
                 res.t_stat() * inflate,  # type: ignore[attr-defined]
             )
         )
+    # The L1 five-replicate t, which Paper I's register corrected to 1.00 and Paper II's now cites
+    # by its OLD value while naming it as the first missed site. Derived the same way as the two
+    # above rather than quoted from the other register, so the two papers cannot drift apart on it.
+    out.append(
+        (
+            "register: population-sd L1 five-replicate t",
+            _scrape(tex, r"missed, after the \$([\d.]+)\$ of Paper~I's register"),
+            0.005,
+            _repeat_results()["L1"].t_stat() * inflate,  # type: ignore[attr-defined]
+        )
+    )
     return out
 
 
@@ -3673,6 +3685,37 @@ def _budget_false_pass_checks() -> list[tuple[str, float, float, float]]:
         )
     )
     return out
+
+
+def _sigma_margin_checks() -> list[tuple[str, float, float, float]]:
+    """How much sigma would have to grow for each borrowed-denominator ratio to fall under 2 sigma.
+
+    The SECOND site the population-sd correction's "corrected throughout" missed, after the 1.12 of
+    the register. sec:curverepeat printed 5, 11 and 14 percent; under the shipped sigma
+    (0.029052, the sample sd) the margins are 3.3, 9.0 and 11.9, and 5/11/14 reproduce only under
+    the retired 0.028564. The direction matters twice over: the printed figures make the ratios look
+    LESS fragile than they are, and the sentence's whole purpose is to argue they were fragile
+    enough to justify buying ninety replicate re-scorings. Correcting them strengthens the argument
+    the paragraph is making.
+
+    Derived from the same `_curve_gap` ratios the surrounding prose already pins, so a future
+    denominator change moves these with everything else instead of leaving them behind again.
+    """
+    tex = _tex()
+    sites = (
+        ("tool lift", ("run3", "run4"), r"needs only \$(\d+)\\%\$ more \$\\sigma\$"),
+        ("actionability", ("run9", "run10"), r"fall under it, actionability \$(\d+)\\%\$"),
+        ("refine budget", ("run7", "run8"), r"and the refine\s+budget \$(\d+)\\%\$"),
+    )
+    return [
+        (
+            f"tex: sigma margin to 2 sigma, {label}",
+            _scrape(tex, pattern),
+            0.0,
+            float(round(100 * (_curve_gap(*pair)[1] / 2 - 1))),
+        )
+        for label, pair, pattern in sites
+    ]
 
 
 def _registered_depth_bound_checks() -> list[tuple[str, float, float, float]]:

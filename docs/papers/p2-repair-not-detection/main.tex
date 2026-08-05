@@ -546,8 +546,8 @@ re-score one fixed genome on one fixed held-out set. That estimate was measured 
 genome at $R{=}1$ in the $p_0$ family, and $\sigma$ is a property of the genome: measured per
 genome across that family it spans $5.9\times$, from $0.0064$ to $0.0376$. Three of the ratios
 above have a margin against the $2\sigma$ line smaller than that spread: the
-tool lift needs only $5\%$ more $\sigma$ to fall under it, actionability $11\%$ and the refine
-budget $14\%$. A borrowed denominator was therefore deciding them, so we bought the direct
+tool lift needs only $3\%$ more $\sigma$ to fall under it, actionability $9\%$ and the refine
+budget $12\%$. A borrowed denominator was therefore deciding them, so we bought the direct
 measurement: each of the six curve rows re-scored $K=5$ times on the thirty held-out tasks they
 share, $90$ runs under a priced bound of \$$2.98$. As with the $p_0$ replicates this is arm~A on a fixed genome with no
 re-optimization, each replicate carries a salt so record-mode dedup cannot serve one cached draw
@@ -795,7 +795,7 @@ Earlier drafts of this work published claims it now withdraws. Reporting guidanc
 preregistered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Eleven} entries follow. The
+collected here and the body text states only the surviving claim. \textbf{Twelve} entries follow. The
 series' other two papers carry the entries bearing on their own claims, and the full
 register across all three, with the superseded values themselves, is in the released repository.
 
@@ -877,6 +877,20 @@ register across all three, with the superseded values themselves, is in the rele
     it to say our detector findings ``match'' documented prior results, and one of the two things it
     claimed to match was not documented anywhere we had read. Found by three of the twelve cold
     reviewers, all in condition~B.
+  \item \textbf{Three fragility margins left behind by the estimator correction.}
+    \S\ref{sec:curverepeat} said the borrowed-denominator ratios needed ``only $5\%$ more $\sigma$''
+    ($11\%$, $14\%$) to fall under the $2\sigma$ line. Those three reproduce only under the
+    \emph{population}-sd $\sigma = 0.0286$ the correction retired; under the $\sigma = 0.0291$ this
+    paper actually divides by, the margins are $3\%$, $9\%$ and $12\%$. This is the second site
+    ``corrected throughout'' missed, after the $1.12$ of Paper~I's register, and the two share a
+    signature: a value derived from $\sigma$ rather than printed as $\sigma$, so a search for the
+    denominator does not find it. Like the first, it erred in the flattering direction --- it made
+    the ratios look \emph{less} fragile than they are, which is the opposite of what the paragraph
+    argues, so the corrected figures strengthen the case for having bought the direct measurement.
+    All three are now derived from the same \texttt{\_curve\_gap} ratios the surrounding prose
+    pins, so a future change of denominator moves them with everything else. Found independently by
+    two of the twelve cold reviewers, reported as separate candidates because they quoted different
+    halves of the sentence.
 \end{enumerate}
 
 \end{document}
