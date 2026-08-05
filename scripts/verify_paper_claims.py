@@ -897,13 +897,36 @@ def _arm_confusion(level: int, arm: str) -> dict[str, int]:
     return total
 
 
-def _c1_decomposition() -> tuple[float, float]:
-    """(contribution of the eight tasks sec:analysis names, residual on the other 24).
+@dataclass(frozen=True)
+class C1Strata:
+    """The C1 held-out split by what the two critique genes did to each task.
 
-    The paper used to present these two as a decomposition of the whole -0.033. They are
-    not: three tasks differ in verdict and five had an already-compliant draft, and the
-    other twenty-four moved because the repair *prose* differed, not the verdict. Deriving
-    both halves here is what keeps the partial decomposition labelled as partial.
+    `named` and `residual` are the pair sec:analysis decomposes; `caught_*` describe the narrower
+    stratum inside `named` where the hand-written gene caught a false pass, which is the only
+    stratum where the threshold move can be credited with a gain.
+    """
+
+    named: float
+    residual: float
+    caught_n: int
+    caught_draft: float
+    caught_final: float
+    caught_contribution: float
+    compliant_n: int
+    compliant_mean: float
+
+
+@cache
+def _c1_strata() -> C1Strata:
+    """C1's held-out tasks partitioned by verdict change and draft compliance.
+
+    Cached because it replays the whole `study-c1` cassette twice, once per gene.
+
+    The three-task `caught` stratum is derived here for the same reason the eight-task one is: the
+    sentence that credits the threshold move quotes a draft mean, a final mean and a contribution
+    to the 32-task mean, and all three sat unpinned. They are the arithmetic the paper's own
+    conclusion rests on --- that eliminating false passes bought a gain an order of magnitude
+    below the noise --- so typing them was the wrong way to state them.
     """
     import json as _json
     import sys
@@ -942,6 +965,8 @@ def _c1_decomposition() -> tuple[float, float]:
             "a decomposition over a partial replay would silently reweight the strata"
         )
     named = 0.0
+    caught: list[tuple[float, float]] = []
+    compliant: list[float] = []
     for task, (v_seed, actual), (v_hand, _) in zip(tasks, ev_seed, ev_hand, strict=True):
         if task.id not in b_by_task:
             continue
@@ -949,8 +974,41 @@ def _c1_decomposition() -> tuple[float, float]:
         # The eight the paper names: verdicts differ, or the draft was already compliant.
         if v_seed != v_hand or actual:
             named += diff
+        # The two disjoint halves of those eight. `actual` is the draft's true compliance, so a
+        # verdict change on a NON-compliant draft is a false pass the hand-written gene caught.
+        if actual:
+            compliant.append(diff)
+        elif v_seed != v_hand:
+            caught.append((b_by_task[task.id], h_by_task[task.id]))
     total = sum(h_by_task[k] - b_by_task[k] for k in b_by_task)
-    return named / n_heldout, (total - named) / n_heldout
+    if not caught or not compliant:
+        raise ValueError(
+            f"C1 strata came out {len(caught)} caught / {len(compliant)} compliant; the paper "
+            "credits the threshold move on the first and excuses a loss on the second, so an "
+            "empty one means the replay no longer supports either statement"
+        )
+    return C1Strata(
+        named=named / n_heldout,
+        residual=(total - named) / n_heldout,
+        caught_n=len(caught),
+        caught_draft=mean(d for d, _ in caught),
+        caught_final=mean(f for _, f in caught),
+        caught_contribution=sum(f - d for d, f in caught) / n_heldout,
+        compliant_n=len(compliant),
+        compliant_mean=mean(compliant),
+    )
+
+
+def _c1_decomposition() -> tuple[float, float]:
+    """(contribution of the eight tasks sec:analysis names, residual on the other 24).
+
+    The paper used to present these two as a decomposition of the whole -0.033. They are
+    not: three tasks differ in verdict and five had an already-compliant draft, and the
+    other twenty-four moved because the repair *prose* differed, not the verdict. Deriving
+    both halves here is what keeps the partial decomposition labelled as partial.
+    """
+    strata = _c1_strata()
+    return strata.named, strata.residual
 
 
 def _reflection_models() -> tuple[set[str], set[str]]:
@@ -2621,7 +2679,11 @@ def _checks() -> list[tuple[str, float, float, float]]:
         ),
         (
             "tex: depth deepest cell sigma",
-            r"it reads \$\+0.0017\$ .*?which is \$([\d.]+)\\sigma\$",
+            # The delta itself is deliberately NOT a literal here. Writing it in cost the paper a
+            # real defect: this pattern pinned the quotient while the numerator it divides sat
+            # inside the pattern, so the quotient was checked against a value nothing verified.
+            # It is now pinned by `tex: budget deepest delta (prose)`, which reads the same site.
+            r"it reads \$\+[\d.]+\$ .*?which is \$([\d.]+)\\sigma\$",
             abs(deepest) / within["L1"],
         ),
     ):
@@ -2876,6 +2938,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_spine_checks())
     out.extend(_cross_paper_checks())
     out.extend(_corrections_count_checks())
+    out.extend(_prose_orphan_checks())
 
     return out
 
@@ -3157,11 +3220,14 @@ def _magnitude_movement_checks() -> list[tuple[str, float, float, float]]:
     # magnitude falls 90% (-0.0283 -> -0.0027), but a percentage shrinkage of a quantity that is not
     # an effect is not a magnitude changing -- it is a null becoming a cleaner null, which the
     # caption states separately. Significance at K=5 is what separates the two, so it is what
-    # partitions here: t > 2.132 is the p<0.10 threshold at 4 df.
+    # partitions here. The threshold is READ from the driver rather than typed: a partition on a
+    # hand-copied critical value decides which rows the paper calls effects, which is too much
+    # weight for a numeral no artifact backs.
+    t_crit = _repeat().T_CRIT_10[4]
     rows = _sources_curve()
-    effects = [r for r in rows if r.t_stat() > 2.132]
-    nulls = [r for r in rows if r.t_stat() <= 2.132]
-    published_effects = [p for p, r in zip(published, rows, strict=True) if r.t_stat() > 2.132]
+    effects = [r for r in rows if r.t_stat() > t_crit]
+    nulls = [r for r in rows if r.t_stat() <= t_crit]
+    published_effects = [p for p, r in zip(published, rows, strict=True) if r.t_stat() > t_crit]
     moves = sorted(abs(r.delta) / p - 1 for p, r in zip(published_effects, effects, strict=True))
     shrank = [m for m in moves if m < -0.30]
     out = [
@@ -3293,6 +3359,150 @@ def _corrections_count_checks() -> list[tuple[str, float, float, float]]:
         body = tex[start : tex.index("\\end{enumerate}", start)]
         listed = float(len(re.findall(r"^  \\item ", body, re.MULTILINE)))
         out.append((f"corrections count {src.PAPER_NUMERALS[slug]}", claimed, 0.0, listed))
+    return out
+
+
+def _split_refine_gain(index: int) -> tuple[int, int, float]:
+    """(accepted, refined, gain per refined draft) for arm D at one cell of the split sweep."""
+    mod = _decomp()
+    return mod.refine_productivity(mod.SPLIT_LEVELS[index], "D")
+
+
+def _prose_orphan_checks() -> list[tuple[str, float, float, float]]:
+    """The seven decimals that were stated in prose and derived nowhere.
+
+    All seven were exposed at once, by repairing `test_paper_prose_coverage`. That guard asks
+    whether every decimal the prose prints is one a check derives, and it had been answering yes
+    vacuously since it was written: it rebuilt the set of derived values by replaying the checker's
+    regex literals over the document, and one of those literals is the bare capture fragment
+    `([\\d.]+)` that the table-row patterns are composed from. Compiled alone it matched every
+    number in the series, so the paper was being compared with itself.
+
+    Two of the seven are the exact species the guard's own docstring warns about, arrived at
+    independently: `$+0.0017$` sat as a literal INSIDE the pattern that checks its sigma quotient,
+    so the quotient was pinned to a number nothing verified, and `$+0.055$` looked bound only
+    because it collided with an unrelated checked value while its neighbour `$+0.098$` did not.
+
+    Three are pre-correction values in the corrections registers. Those are the ones worth being
+    nervous about, because a register states a number the current artifacts deliberately no longer
+    produce, so there is nothing to notice when it is wrong --- and one already was. The population
+    sd that inflated every t by sqrt(K/(K-1)) is recomputable, so each is derived by reapplying the
+    old mistake rather than transcribed from a draft nobody can now consult.
+    """
+    src = _sources()
+    tex = _tex()
+    out: list[tuple[str, float, float, float]] = []
+
+    # --- Refine accounting on the split axis (p1 sec:threats) -------------------------------
+    # "arm D refines 30/30 held-out drafts at both n_train=4 and 16 and gains +0.055 and +0.098
+    # per refined draft." The count is the denominator of the gains, so it is pinned beside them.
+    n4, n16 = (_split_refine_gain(i) for i in (0, 1))
+    out.append(
+        (
+            "tex: split refine denominator",
+            _scrape(tex, r"arm~D refines \$(\d+)/30\$ held-out drafts"),
+            0.0,
+            float(n4[1]),
+        )
+    )
+    printed = _scrape_all(tex, r"gains \$\+([\d.]+)\$ and \$\+([\d.]+)\$ per refined draft")
+    out.append(("tex: split refine gain n=4", printed[0], 0.0005, n4[2]))
+    out.append(("tex: split refine gain n=16", printed[1], 0.0005, n16[2]))
+
+    # --- The flattest cell of the budget sweep (p1 fig:budget caption and sec:budget) --------
+    # Stated twice, and unrounded in both places because at this size the third decimal IS the
+    # claim: the registered rule required the deepest cell to clear +0.05, and it reads +0.002.
+    deepest = _budget_delta(f"mmc{max(m for m, _ in BUDGET_SWEEP)}")
+    for site, pattern in (
+        ("caption", r"the deepest cell is the flattest of the\s+six at \$\+([\d.]+)\$"),
+        ("prose", r"it reads \$\+([\d.]+)\$ \(the"),
+    ):
+        out.append((f"tex: budget deepest delta ({site})", _scrape(tex, pattern), 0.00005, deepest))
+
+    # --- How far L3 falls short of the threshold it is measured against (p1 sec:threats) -----
+    # A difference of two checked numbers is still a third number, and this one carries the
+    # "still not a result" verdict on the level whose sign the paper retracts.
+    l3 = _repeat_results()["L3"]
+    out.append(
+        (
+            "tex: L3 shortfall from the p<0.10 threshold",
+            _scrape(tex, r"fails the \$p<0.10\$ threshold by \$([\d.]+)\$"),
+            0.005,
+            _repeat().T_CRIT_10[4] - l3.t_stat(),  # type: ignore[attr-defined]
+        )
+    )
+
+    # --- What the threshold move itself bought (p1 sec:analysis) -----------------------------
+    # The three tasks whose false pass the hand-written gene caught. This arithmetic is what
+    # licenses the section's conclusion that the gain is an order of magnitude below its noise.
+    c1 = _c1_strata()
+    rose = _scrape_all(tex, r"the score rose \$([\d.]+) \\to ([\d.]+)\$")
+    out.append(("tex: c1 caught stratum draft mean", rose[0], 0.0005, c1.caught_draft))
+    out.append(("tex: c1 caught stratum final mean", rose[1], 0.0005, c1.caught_final))
+    out.append(
+        (
+            "tex: c1 caught stratum contribution",
+            _scrape(tex, r"worth \$\+([\d.]+)\$ on the 32-task mean"),
+            0.0005,
+            c1.caught_contribution,
+        )
+    )
+    out.append(
+        (
+            "tex: c1 compliant stratum mean loss",
+            _scrape(tex, r"already compliant the\s+mean is \$-([\d.]+)\$"),
+            0.0005,
+            -c1.compliant_mean,
+        )
+    )
+
+    # --- Pre-correction values in the corrections registers ----------------------------------
+    # The estimator bug used a population sd, which divides by K rather than K-1 and so scales
+    # every sd DOWN by sqrt((K-1)/K) and every t UP by its reciprocal. Both K values come from the
+    # artifacts: the replicate count for the t inflation, the paired-task count for the sigma.
+    inflate = (l3.k / (l3.k - 1)) ** 0.5  # type: ignore[attr-defined]
+    noise = _noise_estimate()
+    for slug in src.PAPERS:
+        paper = src.paper_tex(slug)
+        pair = _scrape_all(paper, r"moved \$\\sigma\(\\dd\)\$ from \$([\d.]+)\$\s+to \$([\d.]+)\$")
+        if pair[0] != pair[0]:  # NaN: this paper carries no such register entry
+            continue
+        n = src.PAPER_NUMERALS[slug]
+        out.append(
+            (f"register {n}: corrected cross-run sigma", pair[0], 0.00005, noise.sigma_delta_mean)
+        )
+        out.append(
+            (
+                f"register {n}: population-sd cross-run sigma",
+                pair[1],
+                0.00005,
+                noise.sigma_delta_mean * ((noise.n_tasks - 1) / noise.n_tasks) ** 0.5,
+            )
+        )
+    # The two t values the audit found restated from before the correction. Their corrected
+    # companions (0.33 and 8.08) are pinned by the tab:curvepairs checks; these are not, because
+    # no current artifact produces them --- which is precisely why one of the three drifted.
+    for label, pattern, pairkey in (
+        (
+            "oracle-under-intrinsic t",
+            r"oracle-under-intrinsic \$t\$ as \$([\d.]+)\$ in two places",
+            ("run3", "run7"),
+        ),
+        (
+            "actionability t",
+            r"actionability \$t\$ as \$([\d.]+)\$ in the conclusion",
+            ("run9", "run10"),
+        ),
+    ):
+        res = _curve_replicates()[1][pairkey]
+        out.append(
+            (
+                f"register: population-sd {label}",
+                _scrape(tex, pattern),
+                0.005,
+                res.t_stat() * inflate,  # type: ignore[attr-defined]
+            )
+        )
     return out
 
 
