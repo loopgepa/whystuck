@@ -368,6 +368,7 @@ _WORD_NUM = {
     "eleven": 11,
     "twelve": 12,
     "thirteen": 13,
+    "fourteen": 14,
     "fifteen": 15,
     "sixteen": 16,
     "seventeen": 17,
@@ -665,6 +666,19 @@ def _repeat_sigma() -> dict[tuple[str, str], float]:
 #: The pre-registered budget sweep: (mmc, proposal cap). n_train is fixed at 8 throughout, which
 #: is what makes it a single-knob axis where the cap does not bind.
 BUDGET_SWEEP = ((20, 6), (28, 6), (40, 6), (56, 6), (80, 6), (160, 12))
+
+#: The sweep's cells as (mmc, cap, released run slug). The mmc=28 cell is `c2b`, the four-arm
+#: re-run: it was not bought for this sweep, it *is* the cell the sweep interrogates -- the same
+#: relationship `_SPLIT_ROWS` records for the n_train=8 row. Kept here rather than rebuilt beside
+#: each consumer, because a second copy of this mapping is a second thing to get wrong.
+_BUDGET_ROWS = (
+    (20, 6, "mmc20"),
+    (28, 6, "c2b"),
+    (40, 6, "mmc40"),
+    (56, 6, "mmc56"),
+    (80, 6, "mmc80"),
+    (160, 12, "mmc160"),
+)
 BUDGET_N_TRAIN = 8
 
 
@@ -2062,14 +2076,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     # pre-registered formula, because the formula was wrong: it charges rejected proposals for a
     # valset pass they never take. Checking both columns keeps that correction honest.
     budget_res_hdr = r"\texttt{mmc} & cap & priced depth & \textbf{measured depth}"
-    budget_cells = (
-        (20, 6, "mmc20"),
-        (28, 6, "c2b"),
-        (40, 6, "mmc40"),
-        (56, 6, "mmc56"),
-        (80, 6, "mmc80"),
-        (160, 12, "mmc160"),
-    )
+    budget_cells = _BUDGET_ROWS
     accepted = []
     for mmc, cap, slug in budget_cells:
         cells = _table_row(tex, budget_res_hdr, f"{mmc}  &" if mmc < 100 else f"{mmc} &")
@@ -2948,6 +2955,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_corrections_count_checks())
     out.extend(_prose_orphan_checks())
     out.extend(_defect_class_count_checks())
+    out.extend(_budget_false_pass_checks())
 
     return out
 
@@ -3532,6 +3540,137 @@ def _prose_orphan_checks() -> list[tuple[str, float, float, float]]:
                 res.t_stat() * inflate,  # type: ignore[attr-defined]
             )
         )
+    return out
+
+
+@cache
+def _budget_pass_census() -> tuple[tuple[str, int, bool, int, int, int], ...]:
+    """Per budget-sweep cell and seed: (slug, seed, gene was evolved, n PASS, tp, fp).
+
+    Replayed under each seed's OWN winning genome, which is what makes the counts comparable to the
+    ones the paper prints: overriding `ensure_correct` alone raises a cassette miss, because the
+    drafts the critique judges came from the evolved `generate`.
+
+    Calibration is not assumed. This reproduces the two counts sec:budgetresult already states --
+    mmc=80's single false PASS and mmc=160's single true one -- so the third count it produces, the
+    one the paper got wrong, comes off the same instrument as the two it got right.
+    """
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import analyze_critique_detector as acd
+
+    out = []
+    for _mmc, _cap, slug in _BUDGET_ROWS:
+        doc = json.loads(Path(f"{DOCS}/validation-study-{slug}.json").read_text())
+        for seed, run in enumerate(doc["runs"]):
+            evolved = "ensure_correct" in (run["D"].get("genes_changed") or [])
+            events = acd.collect_events(
+                f"tests/fixtures/cassettes/study-{slug}.json",
+                [seed],
+                loop_kw={},
+                gene_overrides=run["D"].get("final_genes") or None,
+            )
+            out.append(
+                (
+                    slug,
+                    seed,
+                    evolved,
+                    sum(1 for verdict, _ in events if verdict),
+                    sum(1 for verdict, true in events if verdict and true),
+                    sum(1 for verdict, true in events if verdict and not true),
+                )
+            )
+    return tuple(out)
+
+
+def _budget_false_pass_checks() -> list[tuple[str, float, float, float]]:
+    """The false \\texttt{PASS} verdicts evolved critique genes emit across the budget sweep.
+
+    sec:budgetresult called mmc=80's single false PASS "the first false PASS from an evolved gene
+    anywhere in this study". It is neither the first nor the largest: at mmc=56 -- one table row
+    above, shallower in priced depth and at the SAME measured depth 6 -- an evolved gene emits three
+    PASS verdicts and all three are false. The sweep holds four such verdicts, not one.
+
+    Every count the corrected paragraph states is derived here, including the two it always had
+    right. A paragraph where some numbers are checked and one is not is how the wrong one survived.
+    """
+    census = _budget_pass_census()
+    evolved = [row for row in census if row[2]]
+    accepting = {row[0]: row for row in evolved if row[3]}
+    tex = _tex()
+    n_pass, tp, fp = 3, 4, 5
+    sites = (
+        ("depth 12 accepting gene tp", r"is right \(\$\\mathrm\{tp\}=(\d+)\$", "mmc160", tp),
+        (
+            "depth 12 accepting gene fp",
+            r"is right \(\$\\mathrm\{tp\}=\d+\$, \$\\mathrm\{fp\}=(\d+)\$",
+            "mmc160",
+            fp,
+        ),
+        (
+            "mmc=80 accepting gene tp",
+            r"is \\textbf\{wrong\}\s+\(\$\\mathrm\{tp\}=(\d+)\$",
+            "mmc80",
+            tp,
+        ),
+        (
+            "mmc=80 accepting gene fp",
+            r"is \\textbf\{wrong\}\s+\(\$\\mathrm\{tp\}=\d+\$,\s+\$\\mathrm\{fp\}=(\d+)\$",
+            "mmc80",
+            fp,
+        ),
+        (
+            "mmc=56 accepting gene tp",
+            r"all of them false \(\$\\mathrm\{tp\}=(\d+)\$",
+            "mmc56",
+            tp,
+        ),
+        (
+            "mmc=56 accepting gene fp",
+            r"all of them false \(\$\\mathrm\{tp\}=\d+\$, \$\\mathrm\{fp\}=(\d+)\$",
+            "mmc56",
+            fp,
+        ),
+    )
+    out = [
+        (f"tex: {label}", _scrape(tex, pattern), 0.0, float(accepting[slug][field]))
+        for label, pattern, slug, field in sites
+    ]
+    out.append(
+        (
+            "tex: mmc=56 accepting gene PASS count",
+            _scrape_word(tex, r"emits \\textbf\{(\w+)\} \\texttt\{PASS\} verdicts"),
+            0.0,
+            float(accepting["mmc56"][n_pass]),
+        )
+    )
+    out.append(
+        (
+            "tex: false PASS verdicts from evolved genes in the sweep",
+            _scrape_word(
+                tex, r"the sweep contains\s+\\textbf\{(\w+)\} false \\texttt\{PASS\} verdicts"
+            ),
+            0.0,
+            float(sum(row[fp] for row in evolved)),
+        )
+    )
+    # "Depth 6" does not identify a cell, which is half of why the claim read as narrow. The count
+    # comes from the same replay that fills tab:budgetresult's measured-depth column, not from
+    # parsing the rendered column: the column is already checked against `_search_depth`, so
+    # deriving from the replay keeps one source of truth instead of two.
+    depths = [_search_depth(slug, mmc, cap) for mmc, cap, slug in _BUDGET_ROWS]
+    if not any(d is not None for d in depths):
+        raise ValueError("no budget cell reports a measured depth; the replay path changed")
+    out.append(
+        (
+            "tex: budget cells sharing measured depth 6",
+            _scrape_word(tex, r"\\textbf\{(\w+)\} cells share measured depth"),
+            0.0,
+            float(depths.count(6)),
+        )
+    )
     return out
 
 

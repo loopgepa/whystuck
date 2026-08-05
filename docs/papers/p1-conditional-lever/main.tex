@@ -1115,9 +1115,13 @@ $\mathrm{mmc}=160$: four of six, the registered threshold exactly. The degenerat
 therefore not an artifact of shallow search any more than of a small split. But the two
 exceptions are not alike, and one of them qualifies \S\ref{sec:analysis}. At depth $12$ the
 accepting gene emits a single \texttt{PASS} and is right ($\mathrm{tp}=1$, $\mathrm{fp}=0$),
-consistent with the precision-1 acceptance reported at the $p_0$ levels. At depth $6$ the
+consistent with the precision-1 acceptance reported at the $p_0$ levels. At $\mathrm{mmc}{=}80$ the
 accepting gene emits a single \texttt{PASS} and is \textbf{wrong} ($\mathrm{tp}=0$,
-$\mathrm{fp}=1$) --- the first false \texttt{PASS} from an evolved gene anywhere in this study.
+$\mathrm{fp}=1$). It is not the study's first, and naming it by depth understates the failure:
+\textbf{three} cells share measured depth $6$, and at $\mathrm{mmc}{=}56$ --- one row above, and
+\emph{shallower} in priced depth --- an evolved gene emits \textbf{three} \texttt{PASS} verdicts,
+all of them false ($\mathrm{tp}=0$, $\mathrm{fp}=3$). Counting properly, the sweep contains
+\textbf{four} false \texttt{PASS} verdicts from evolved genes, and the earliest is that one.
 Our claim that the evolved critique ``never emits a false \texttt{PASS}'' was scoped to the $p_0$
 levels and remains true there, but it does not generalize: precision-1 acceptance is a property
 of those runs, not of the search.
@@ -1516,7 +1520,7 @@ This paper's earlier drafts published claims it now withdraws, and two of its pr
 predictions failed. Reporting guidance for preregistered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Thirteen} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Fourteen} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1593,6 +1597,18 @@ The series' other two papers carry the entries bearing on their own claims.
     where the draft needed no change. Nothing quantitative moves; the $-0.009$/$-0.023$ split and
     every number in it stand. \texttt{verify\_paper\_claims.py} now derives all three stratum
     sizes from the replay, so the sentence cannot be restated the old way.
+  \item \textbf{``The first false \texttt{PASS} from an evolved gene anywhere in this study.''}
+    Neither the first nor the only one. Replaying every budget-sweep cell under its own winning
+    genome, the $\mathrm{mmc}{=}56$ arm-D gene on seed~1 is evolved --- \texttt{genes\_changed}
+    lists \texttt{ensure\_correct}, a $4769$-character rubric against the $127$-character seed ---
+    and emits three held-out \texttt{PASS} verdicts, all false. It sits one row above
+    $\mathrm{mmc}{=}80$ in Table~\ref{tab:budgetresult} and is shallower in priced depth, so the
+    sweep holds four such verdicts and the earliest is three times the size of the one we reported.
+    Naming the cell ``depth $6$'' concealed this, because three cells share that measured depth.
+    The error ran \emph{against} us: the sentence exists to bound how far precision-1 acceptance
+    fails to generalize, and the bound was too generous. \S\ref{sec:budgetresult} now states the
+    cell by its \texttt{mmc}, and all four counts are derived from the same replay that already
+    reproduced the two we had right. Found independently by four of the twelve cold reviewers.
 \end{enumerate}
 
 \section{The Actuator Experiment, and the MBPP+ Attempt}

@@ -52,7 +52,7 @@ exists. Measured from the built PDFs and each paper's own source:
 
 | | paper | pages | tables | figures | distinct citations | package |
 |---|---|---|---|---|---|---|
-| I | `p1-conditional-lever` | 34 | 11 | 3 | 23 | 107 kB |
+| I | `p1-conditional-lever` | 35 | 11 | 3 | 23 | 107 kB |
 | II | `p2-repair-not-detection` | 18 | 4 | 2 | 16 | 85 kB |
 | III | `p3-silent-no-op` | 17 | 4 | 1 | 13 | 83 kB |
 
