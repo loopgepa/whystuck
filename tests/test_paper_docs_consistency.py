@@ -51,6 +51,12 @@ TEST_COUNT_RE = re.compile(r"\*\*([\d,]+) tests\*\*")
 #: Set in the child so a collection sweep can never re-enter the guard that spawned it.
 NO_REENTER = "WHYSTUCK_SKIP_COLLECT_GUARD"
 
+#: SUBMISSION.md's abstract-length sentence: "Abstract lengths against the 1920-character metadata
+#: field: **1912**, 1846, 1786." The limit and all three lengths, in paper order.
+ABSTRACT_LENGTHS_RE = re.compile(
+    r"Abstract lengths against the (\d+)-character metadata\s+field: \*\*(\d+)\*\*, (\d+), (\d+)"
+)
+
 
 def _readme_pages() -> dict[str, int]:
     """Slug -> page count, from the overview table's last column."""
@@ -110,6 +116,39 @@ def test_submission_table_matches_the_sources_it_describes() -> None:
             assert submission[slug][key] == n, (
                 f"{slug}: SUBMISSION says {submission[slug][key]} {key}, source has {n}"
             )
+
+
+def test_advertised_abstract_lengths_equal_the_measured_ones() -> None:
+    """SUBMISSION.md's three abstract lengths, and the limit they are measured against.
+
+    Written after finding Paper III's advertised at 1786 while the source measured 1788: an edit had
+    shortened the abstract by two characters and the document kept the old figure. Nothing looked at
+    it, because the numbers in SUBMISSION.md's *table* were guarded and this sentence's were not.
+
+    Paper I sits eight characters under the limit and the document says so, which is what makes
+    this worth a test rather than a note: a stale length there is the difference between a
+    submission that goes through and one arXiv's form rejects, and the drift direction that
+    matters -- an abstract growing while the number stays put -- is the one already observed.
+    """
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import make_arxiv_package as pkg
+
+    text = (PAPERS / "SUBMISSION.md").read_text(encoding="utf-8")
+    m = ABSTRACT_LENGTHS_RE.search(text)
+    assert m, (
+        "SUBMISSION.md no longer states abstract lengths in the form this guard reads. Restore the "
+        "sentence or update ABSTRACT_LENGTHS_RE -- do not delete the guard."
+    )
+    assert int(m.group(1)) == pkg.ABSTRACT_LIMIT, (
+        f"SUBMISSION.md cites a {m.group(1)}-character limit, make_arxiv_package uses "
+        f"{pkg.ABSTRACT_LIMIT}"
+    )
+    for slug, claimed in zip(SLUGS, m.groups()[1:], strict=True):
+        measured = len(pkg.plain_abstract(PAPERS / slug))
+        assert int(claimed) == measured, (
+            f"{slug}: SUBMISSION.md advertises a {claimed}-character abstract, the source measures "
+            f"{measured}. The document is the stale one unless the abstract was just edited."
+        )
 
 
 def test_every_advertised_check_count_equals_the_verifier_s_own() -> None:

@@ -2947,6 +2947,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_cross_paper_checks())
     out.extend(_corrections_count_checks())
     out.extend(_prose_orphan_checks())
+    out.extend(_defect_class_count_checks())
 
     return out
 
@@ -3531,6 +3532,56 @@ def _prose_orphan_checks() -> list[tuple[str, float, float, float]]:
                 res.t_stat() * inflate,  # type: ignore[attr-defined]
             )
         )
+    return out
+
+
+def _defect_class_count_checks() -> list[tuple[str, float, float, float]]:
+    """How many defects Paper III found, and how many the audit ADDED, from the table itself.
+
+    Six prose sites state one of these two counts and none was pinned. Three of the four that state
+    the increment said `seven`; \\S\\ref{sec:defect} said `six`, which is what the table supports:
+    nine rows, of which the caption assigns 1--3 to the original headline. The likely source of the
+    wrong figure is $9-2$ --- the abstract and the conclusion both introduce the original as *two*
+    ordinary wiring choices, which is true of its causes and omits the symptom the caption counts as
+    defect 1.
+
+    Both counts are derived from the table's own rows and the range its caption names, so adding a
+    tenth defect moves the expected values instead of breaking a check that then gets edited to
+    match. A count restated in an abstract is the number a reader checks first, which is the same
+    argument that put `_corrections_count_checks` here.
+    """
+    src = _sources()
+    slug = "p3-silent-no-op"
+    tex = src.paper_tex(slug)
+    label = tex.index(r"\label{tab:defects}")
+    table = tex[tex.rindex(r"\begin{table}", 0, label) : label]
+    rows = [int(n) for n in re.findall(r"^(\d+) & ", table, re.MULTILINE)]
+    named = re.search(r"Defects (\d+)--(\d+) invalidated the original headline", table)
+    if named is None or rows != list(range(1, len(rows) + 1)):
+        raise ValueError(
+            f"tab:defects has rows {rows} and "
+            f"{'no' if named is None else 'a'} caption naming the original headline's range; both "
+            "are load-bearing here, so a change to either must be made deliberately"
+        )
+    total = float(len(rows))
+    # The caption's range is inclusive and starts at 1, so its upper bound IS the original's size.
+    added = total - float(named.group(2))
+    out = [
+        (
+            "tab:defects rows against its caption's count",
+            _scrape_word(table, r"\{(\w+) ways"),
+            0.0,
+            total,
+        )
+    ]
+    for site, pattern, expected in (
+        ("abstract", r"found the same class of error (\w+) more times, including", added),
+        ("sec:defect", r"found the same class of error (\w+) more times\.\s+Table~", added),
+        ("contribution 3", r"\\item \\textbf\{(\w+) more instances of the same class\}", added),
+        ("conclusion", r"found (\w+) more errors of the same class", added),
+        ("threats", r"The (\w+) defects are not independent findings", total),
+    ):
+        out.append((f"p3 defect count, {site}", _scrape_word(tex, pattern), 0.0, expected))
     return out
 
 

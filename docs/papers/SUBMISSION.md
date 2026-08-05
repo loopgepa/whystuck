@@ -36,6 +36,10 @@ endorsement domain, and the primary category selects the domain.
 - `\pdfoutput=1` sits within the first five lines of `main.tex` — arXiv's pipeline chooses between
   `latex` (DVI) and `pdflatex` by inspection, and a DVI run cannot include the three PDF figures
 - the plain-text abstract fits arXiv's 1920-character metadata field
+- the three lengths quoted below, and that limit, equal what the sources measure
+  (`test_advertised_abstract_lengths_equal_the_measured_ones`). Added after Paper III's was found
+  advertised at 1786 while the source measured 1788: the table's numbers were guarded and this
+  sentence's were not, so an edit that shortened the abstract left the figure behind
 - the staged tree compiles with **pdflatex only, never bibtex**, with zero undefined citations —
   because arXiv does not run bibtex, and a package missing `main.bbl` posts with every citation
   rendered `[?]`
