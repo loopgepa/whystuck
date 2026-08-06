@@ -310,8 +310,15 @@ def probe_provider(provider: str, key: str, *, timeout: float = 15.0) -> tuple[b
     if provider not in _PROVIDER_PROBE:
         return True, "no probe defined; not checked"
     template, headers = _PROVIDER_PROBE[provider]
+    # An explicit User-Agent, because the default one is a liability. `urllib` sends
+    # `Python-urllib/3.x`, and on 2026-08-06 Groq's edge returned 403 to exactly that string while
+    # returning 200 to curl and to litellm from the same host, seconds apart. A preflight that
+    # false-negatives is worse than none: it blocks runs that would have worked, and it teaches the
+    # operator to reach for --skip-preflight, which disables the check that catches the real thing.
     request = urllib.request.Request(  # noqa: S310 - fixed https literals above
-        template.format(key=key), headers=headers(key), method="GET"
+        template.format(key=key),
+        headers={"User-Agent": "whystuck-validation-study/1.0", **headers(key)},
+        method="GET",
     )
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:  # noqa: S310

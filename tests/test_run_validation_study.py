@@ -551,3 +551,44 @@ def test_an_unknown_provider_is_not_silently_treated_as_broken(monkeypatch):
     cli = _load_cli()
     ok, status = cli.probe_provider("some-new-vendor", "k")
     assert ok and "not checked" in status
+
+
+def test_the_probe_does_not_identify_itself_as_python_urllib(monkeypatch):
+    """A false-negative preflight is worse than no preflight.
+
+    Measured on 2026-08-06: Groq's edge returned 403 to `Python-urllib/3.12` and 200 to curl and to
+    litellm from the same host, seconds apart. The probe therefore reported the provider unusable
+    while the run's actual client could reach it perfectly — which blocks a good run and, worse,
+    teaches the operator to pass --skip-preflight, disabling the check that catches the real thing.
+    """
+    import urllib.error
+
+    cli = _load_cli()
+    seen = {}
+
+    def _capture(request, *a, **k):
+        seen["ua"] = request.get_header("User-agent")
+        raise urllib.error.HTTPError("u", 500, "", {}, None)  # type: ignore[arg-type]
+
+    monkeypatch.setattr("urllib.request.urlopen", _capture)
+    cli.probe_provider("groq", "k")
+    assert seen["ua"] and "urllib" not in seen["ua"].lower(), (
+        f"probe identified itself as {seen['ua']!r}; edges block that string"
+    )
+
+
+def test_the_probe_sends_the_credential_each_provider_expects(monkeypatch):
+    """Anthropic takes x-api-key, not a Bearer token. Sending the wrong one reads as a dead key."""
+    import urllib.error
+
+    cli = _load_cli()
+    seen = {}
+
+    def _capture(request, *a, **k):
+        seen.update({k.lower(): v for k, v in request.header_items()})
+        raise urllib.error.HTTPError("u", 500, "", {}, None)  # type: ignore[arg-type]
+
+    monkeypatch.setattr("urllib.request.urlopen", _capture)
+    cli.probe_provider("anthropic", "secret")
+    assert seen.get("X-api-key".lower()) == "secret"
+    assert "authorization" not in seen
