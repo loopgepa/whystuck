@@ -47,6 +47,15 @@ MODEL_PRICES: dict[str, tuple[float, float]] = {
     # for the stronger follow-up (each needs that provider's API key).
     "gemini/gemini-2.5-flash-lite": (0.10, 0.40),  # cheapest true cross-family critic
     "anthropic/claude-haiku-4-5": (1.00, 5.00),  # cross-family critic (Anthropic)
+    # Added 2026-08-06 for D3. Published Groq on-demand pricing, read that day. Groq is the
+    # strongest available cross-family option because the weights are a different lineage
+    # entirely, not merely a different vendor's model trained on similar data.
+    "groq/llama-3.3-70b-versatile": (0.59, 0.79),
+    # DELIBERATELY NOT USED AS THE D3 CRITIC, and listed only so that choosing it is a
+    # decision rather than an oversight: `gpt-oss` is OpenAI's own open-weights lineage, so
+    # pairing it with an `openai/*` worker rebuilds the shared-lineage confound D3 exists to
+    # remove. It is a quarter of the price, which is exactly why the trap is worth labelling.
+    "groq/openai-gpt-oss-120b": (0.15, 0.60),
 }
 
 

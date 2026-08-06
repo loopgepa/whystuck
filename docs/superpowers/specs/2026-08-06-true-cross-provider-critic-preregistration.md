@@ -1,0 +1,161 @@
+# Pre-registration — D3, the true cross-provider critic
+
+**Registered:** 2026-08-06, *before* the paid run. At registration the run cannot be executed at
+all: see "Blocker" below. That is the point of writing this now — the configuration is frozen
+before anyone knows whether the credential will arrive, so nothing here can be tuned to a result.
+
+**Follow-up to** run 6 (`docs/validation-study-crossfamily.md`), whose own pre-registration
+(`2026-07-23-cross-family-critic-preregistration.md`) flagged its central limitation in a section
+headed "⚠ Cross-family caveat": the critic was `openai/gpt-5.6-luna` against an
+`openai/gpt-4.1-mini` worker, which is **cross-lineage, not cross-provider**. Same vendor,
+tokenizer lineage, and likely training-data and stylistic priors. Paper I lists the true test as
+D3 and marks it *blocked on a credential*.
+
+## Why this run matters more than it did a week ago
+
+On 2026-08-05 the series **withdrew** the claim that "cross-family verification outperforms
+self-verification" from Papers I and II (commit `db8065e`). Three sites attributed that result to
+`valmeekam2023selfcritique` and `huang2023cannot`; neither source contains it. The clause was
+withdrawn rather than re-sourced, because no source establishing it had been read.
+
+So the series now asserts a **gap** where it used to assert a borrowed finding. D3 is the
+experiment that would fill the gap with our own measurement instead of someone else's. A null is
+just as publishable and arguably more interesting: it would say that the self-preference story,
+which the literature is confident about and we could not source, does not reach held-out score in
+this loop.
+
+## Choice of critic, and one trap
+
+**Primary: `groq/llama-3.3-70b-versatile`** ($0.59 / $0.79 per Mtok, published pricing read
+2026-08-06). Different weights, different training lineage, different vendor. Stronger separation
+than the two options the earlier registration pre-priced, both of which are proprietary frontier
+families that may share more with the worker than their vendor labels suggest.
+
+**Not `groq/openai-gpt-oss-120b`**, at a quarter the price. It is OpenAI's own open-weights
+lineage, so pairing it with an `openai/*` worker rebuilds precisely the confound this run exists to
+remove. It is priced in `MODEL_PRICES` so that picking it is a decision on the record rather than an
+oversight.
+
+**Fallbacks, in order, if Groq stays unreachable:** `anthropic/claude-haiku-4-5` (reachable from
+this host, needs a key), then `gemini/gemini-2.5-flash-lite`. Switching to a fallback is a change of
+critic and therefore must be recorded as a deviation, with the reason, in the run log.
+
+## Blocker at registration
+
+Groq's API is unreachable from this host and the reason is diagnosed, not guessed:
+
+| endpoint | status |
+|---|---|
+| `groq.com` | 200 |
+| `console.groq.com` | 403 |
+| `api.groq.com/openai/v1/models` | 403, `server: cloudflare`, `cf-ray … -MAD` |
+
+The 403 is **identical with and without an `Authorization` header**, so it precedes
+authentication: it is not a bad key. Egress from this host is `45.134.213.202`, `AS212238 Datacamp
+Limited` (ES) — a datacenter range, which Groq blocks at its edge. **The candidate key's validity
+is therefore unknown and untested.** The fix is on the operator's side: run from a residential
+connection. No attempt was made to route around the block.
+
+The OpenAI worker key at `scratchpad/openai.key` is live (HTTP 200, verified 2026-08-06). The stale
+copy in `$OPENAI_API_KEY` returns 401 and must not be used.
+
+## Hypothesis
+
+**H1 (directional).** With the critique routed to a different-provider, different-lineage model,
+loop-level GEPA (arm D, evolves `generate` + `ensure_correct`) achieves a higher mean held-out
+`mc_score` than prompt-only GEPA (arm B, evolves only `generate`).
+**H0:** mean(D) ≤ mean(B), or any gap is within seed noise.
+
+**H2 (secondary, observational).** The cross-provider critic is a better failure detector than
+run 3's intrinsic self-critique (F₁ ≈ 0.11) and than run 6's cross-lineage critic. Measured
+post-hoc from the cassette via `scripts/analyze_critique_detector.py` on the `critic` namespace.
+Reported, never used for the verdict.
+
+**H3 (the one the withdrawal created).** If H1 is null while H2 shows the cross-provider critic IS
+the better detector, that is direct evidence for Paper II's thesis — detection is not the binding
+constraint — obtained on the exact axis the withdrawn literature claim used to cover.
+
+## Frozen configuration (do not change after registration)
+
+- **Task set:** `--task-set multi-hard` (same generator as runs 3 and 6; the metric's do-nothing
+  floor is 0.42 here against a 0.77 baseline, whereas on `ifbench` the floor sits at or above the
+  reported baselines).
+- **Critic:** `--critique-model groq/llama-3.3-70b-versatile`, critique step only; generate and
+  refine stay on the worker.
+- **Arms:** A / B / C / D, identical seed genome, matched budget.
+- **Seeds:** 0–7 (**n = 8**), as Paper I's D3 entry specifies. Run 6 used 3 and was explicitly
+  underpowered; σ(Δ) on this family is ≈ 0.029, so 8 seeds is the smallest n that puts the SESOI
+  of ±0.05 outside the noise band rather than inside it.
+- **Tasks:** n_train = 8, n_heldout = 10 per seed, disjoint.
+- **GEPA budget:** max_metric_calls = 20/arm, reflection_calls = 4, loop_max_retries = 1.
+- **Models:** worker `openai/gpt-4.1-mini` (320 output cap), critic
+  `groq/llama-3.3-70b-versatile` (320), reflection `openai/gpt-5.6-terra` (3000).
+- **Ceiling:** see the next section. The dry run is the authority; no bound is typed here by hand.
+
+## Priced, 2026-08-06, before any spend — and the registered config does not fit
+
+Every figure below is `scripts/run_validation_study.py` refusing or reporting, offline, with the
+Groq critic priced in. The registered configuration comes to **$6.52**, over the study's standing
+$5 key cap. That is a real finding of the pricing step and it is recorded rather than resolved by
+quietly shrinking the run.
+
+| configuration | bound |
+|---|---|
+| **ABCD, 8 seeds, reflection-calls 4, terra — as registered** | **$6.52** |
+| ABCD, 8 seeds, reflection-calls 2, terra | $4.76 |
+| ABD, 8 seeds, reflection-calls 4, terra (drops control C) | $6.04 |
+| ABCD, 5 seeds, reflection-calls 4, terra | $4.07 |
+| ABCD, 8 seeds, reflection-calls 4, luna | $4.41 |
+
+A first pricing attempt returned $11.80 because `--reflection-calls` defaults to **10** and the
+flag was omitted; the registered value is 4. Noted because it is the same species of error the
+series keeps finding: a number that looked like the configuration's cost and was actually the
+default's.
+
+**Recommendation: raise the ceiling to $7 and run as registered**, rather than take any of the
+cheaper rows.
+
+- 5 seeds recreates exactly what made run 6 uninformative. Paper I's D3 entry specifies ≥ 8, and
+  σ(Δ) ≈ 0.029 on this family means 8 is already the smallest n that puts the ±0.05 SESOI outside
+  the noise band.
+- reflection-calls 2 halves the optimizer's proposal budget. D4 closed the question of whether
+  search depth matters here, so this is defensible on the evidence — but it introduces a second
+  difference from run 6 and makes the comparison to it a two-variable one.
+- Dropping arm C removes the genome-blind control, which is the arm that distinguishes "the
+  treatment did nothing" from "any edit would have done the same".
+- `luna` is the cheapest row and the worst choice: it returned content-free completions on the C2
+  run, one of which was accepted as an empty gene. That is defect 8 of Paper III, and it was
+  caused by this model.
+
+The bound is an upper bound and a loose one. The measured realization on the C1 run was **23%** of
+the guard's figure ($0.043 actual against a $0.190 bound), because the guard prices every
+worker-side call at the pricier of {worker, critic} and assumes full output caps. Expected real
+spend for the registered configuration is therefore of order **$1.50**, not $6.52.
+
+## Expected seed band and flags
+
+Pre-registered band **0.2 ≤ seed ≤ 0.85**. The seed loop uses the cross-provider critic, so its
+held-out may differ from run 3's 0.765. A ceiling (≥ 0.9) or floor (≤ 0.1) flag from `report.py`
+makes H1 untestable and is reported as such.
+
+## Verdict rule (decided in advance)
+
+The unchanged `eval/report.py` rule. **SUPPORTED** iff mean(D) − mean(B) is positive and exceeds
+the summed per-arm stdev. **INCONCLUSIVE** if positive but within noise, if fewer than 2 seeds
+complete, or if a ceiling/floor flag fires. **NOT SUPPORTED** iff mean(D) ≤ mean(B). Controls A and
+C are expected flat; an arm that accepts nothing on every seed makes its contrast a
+D-vs-seed comparison wearing a D-vs-B label, and `analyze_deltas.arms_optimized` must be checked
+before the Δ is read — that is defect 1 of Paper III and defect 9 is its mirror.
+
+## Commitments
+
+- Report **as-is**, whatever it is.
+- No post-hoc change to arms, budget, seeds, task distribution, critic model, or verdict rule.
+  A forced change of critic is a recorded deviation, not an edit.
+- Outputs to separate paths: `docs/validation-study-xprovider.{json,md}`, cassette
+  `tests/fixtures/cassettes/study-xprovider.json`. Earlier runs untouched.
+- The per-seed held-out vector is released, because a seed re-partitions a fixed pool rather than
+  drawing a fresh sample on some task sets, so the unit to pair on is the task.
+- If the run is never bought, this document stays as a registered-and-unrun record. Paper I's D3
+  entry is updated to say the credential is the only remaining obstacle, with the diagnosis above,
+  rather than the vaguer "blocked on a credential".
