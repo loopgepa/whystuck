@@ -444,3 +444,110 @@ def test_seed_gene_does_not_change_the_cost_estimate(tmp_path):
         _run(["--arms", "A", "--seeds", "0", "--seed-gene", f"ensure_correct={f}"])[1]
     )
     assert base == with_override
+
+
+# --- Multi-provider pre-spend gates (D3, the cross-provider critic) --------------------
+#
+# Both were written after a near miss on 2026-08-06: the D3 critic's provider refused this
+# host at its edge, and the ONLY thing preventing a live attempt was that its key happened
+# to be unset. Had it been set, the run would have billed the worker's provider in full and
+# then died on the first critique call, leaving a partial cassette and no result.
+
+
+def _probe(status=None, error=None):
+    """A `probe_provider` stand-in, so no test touches the network."""
+    return lambda provider, key, **kw: (status == 200, error or f"HTTP {status}")
+
+
+def test_a_second_providers_missing_key_is_caught_before_spending(monkeypatch):
+    """The old gate checked OPENAI_API_KEY only, so a groq critic passed it."""
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
+    code, _, err = _run(["--yes", "--critique-model", "groq/llama-3.3-70b-versatile"])
+    assert code == 3
+    assert "GROQ_API_KEY" in err and "groq" in err
+
+
+def test_the_workers_key_alone_still_satisfies_a_single_provider_run(monkeypatch):
+    """The new gate must not start demanding keys a run will never use."""
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
+    cli = _load_cli()
+    monkeypatch.setattr(cli, "probe_provider", _probe(200))
+    monkeypatch.setattr(cli, "_run_live", lambda *a, **k: 0)
+    out, err = io.StringIO(), io.StringIO()
+    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        assert cli.main(["--yes"]) == 0
+
+
+def test_a_present_but_unusable_key_is_caught_before_spending(monkeypatch):
+    """Presence is not reachability. This is the actual near miss."""
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+    monkeypatch.setenv("GROQ_API_KEY", "gsk-test")
+    cli = _load_cli()
+    calls = []
+
+    def probe(provider, key, **kw):
+        calls.append(provider)
+        return (provider != "groq", "HTTP 200" if provider != "groq" else "HTTP 403")
+
+    monkeypatch.setattr(cli, "probe_provider", probe)
+    monkeypatch.setattr(cli, "_run_live", lambda *a, **k: pytest.fail("must not spend"))
+    out, err = io.StringIO(), io.StringIO()
+    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        code = cli.main(["--yes", "--critique-model", "groq/llama-3.3-70b-versatile"])
+    assert code == 4
+    assert "Nothing was spent" in err.getvalue()
+    assert "groq" in calls and "openai" in calls, (
+        "every provider must be probed, not just the odd one"
+    )
+
+
+def test_skip_preflight_bypasses_the_probe_and_nothing_else(monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+    cli = _load_cli()
+    monkeypatch.setattr(cli, "probe_provider", lambda *a, **k: pytest.fail("probe must not run"))
+    monkeypatch.setattr(cli, "_run_live", lambda *a, **k: 0)
+    out, err = io.StringIO(), io.StringIO()
+    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        assert cli.main(["--yes", "--skip-preflight"]) == 0
+
+
+def test_skip_preflight_does_not_bypass_the_missing_key_gate(monkeypatch):
+    """An escape hatch for the probe must not become an escape hatch for everything."""
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
+    code, _, err = _run(
+        ["--yes", "--skip-preflight", "--critique-model", "groq/llama-3.3-70b-versatile"]
+    )
+    assert code == 3 and "GROQ_API_KEY" in err
+
+
+@pytest.mark.parametrize(
+    ("code", "expected"),
+    [
+        (401, "credential rejected"),
+        (403, "refused before auth"),
+        (429, "quota or rate limit exhausted"),
+    ],
+)
+def test_the_probe_distinguishes_the_failures_you_act_on_differently(monkeypatch, code, expected):
+    """403 and 429 need opposite responses -- fix the network vs top up the account -- and a
+    mid-run exception conflates them. This distinction is the reason the probe reports a string
+    rather than a bool."""
+    import urllib.error
+
+    cli = _load_cli()
+
+    def _raise(*a, **k):
+        raise urllib.error.HTTPError("u", code, "", {}, None)  # type: ignore[arg-type]
+
+    monkeypatch.setattr("urllib.request.urlopen", _raise)
+    ok, status = cli.probe_provider("groq", "k")
+    assert not ok and expected in status
+
+
+def test_an_unknown_provider_is_not_silently_treated_as_broken(monkeypatch):
+    cli = _load_cli()
+    ok, status = cli.probe_provider("some-new-vendor", "k")
+    assert ok and "not checked" in status

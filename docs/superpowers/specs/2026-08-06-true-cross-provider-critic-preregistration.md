@@ -52,9 +52,18 @@ Groq's API is unreachable from this host and the reason is diagnosed, not guesse
 
 The 403 is **identical with and without an `Authorization` header**, so it precedes
 authentication: it is not a bad key. Egress from this host is `45.134.213.202`, `AS212238 Datacamp
-Limited` (ES) — a datacenter range, which Groq blocks at its edge. **The candidate key's validity
-is therefore unknown and untested.** The fix is on the operator's side: run from a residential
-connection. No attempt was made to route around the block.
+Limited` (ES) — a datacenter range, which Groq blocks at its edge. **The key's validity and
+remaining quota are therefore unknown and unknowable from here**: a 403 before authentication looks
+identical for a fresh key and an exhausted one. The fix is on the operator's side: run from a
+residential connection. No attempt was made to route around the block.
+
+The credential itself is settled and is *not* the obstacle. It was shared deliberately by a
+colleague on 2026-07-31 in response to a direct request, on the stated understanding that the spend
+would be small. That understanding is respected by the configuration: only the critique call routes
+to Groq, one of every three worker-side calls, so the Groq share of the bound is **$0.69** and the
+expected real spend at the measured 23% realization is **$0.16**. The remainder is on this project's
+own OpenAI account. The key is stored at `scratchpad/groq.key` (mode 600, gitignored) beside the
+OpenAI one.
 
 The OpenAI worker key at `scratchpad/openai.key` is live (HTTP 200, verified 2026-08-06). The stale
 copy in `$OPENAI_API_KEY` returns 401 and must not be used.
@@ -112,8 +121,11 @@ flag was omitted; the registered value is 4. Noted because it is the same specie
 series keeps finding: a number that looked like the configuration's cost and was actually the
 default's.
 
-**Recommendation: raise the ceiling to $7 and run as registered**, rather than take any of the
-cheaper rows.
+**Recommendation: `--max-usd 7` and run as registered**, rather than take any of the cheaper rows.
+
+A standing budget of $20 does not mean passing `--max-usd 20`. The ceiling is a *guard*, and its
+job is to stop a run that has gone wrong; set just above the priced bound it does that, and set at
+the budget it does nothing until eight times the intended spend has already gone.
 
 - 5 seeds recreates exactly what made run 6 uninformative. Paper I's D3 entry specifies ≥ 8, and
   σ(Δ) ≈ 0.029 on this family means 8 is already the smallest n that puts the ±0.05 SESOI outside
@@ -159,3 +171,30 @@ before the Δ is read — that is defect 1 of Paper III and defect 9 is its mirr
 - If the run is never bought, this document stays as a registered-and-unrun record. Paper I's D3
   entry is updated to say the credential is the only remaining obstacle, with the diagnosis above,
   rather than the vaguer "blocked on a credential".
+
+## The exact command, for when the network is open
+
+Nothing below needs editing. The pre-spend preflight refuses at zero token cost if Groq still will
+not answer, so running it while blocked is safe and costs nothing.
+
+```bash
+cd ~/whystuck
+OPENAI_API_KEY=$(tr -d '\r\n' < scratchpad/openai.key) \
+GROQ_API_KEY=$(tr -d '\r\n' < scratchpad/groq.key) \
+.venv/bin/python scripts/run_validation_study.py --yes \
+  --task-set multi-hard --arms ABCD --seeds 0,1,2,3,4,5,6,7 \
+  --n-train 8 --n-heldout 10 --max-metric-calls 20 --loop-max-retries 1 \
+  --reflection-calls 4 \
+  --worker-model openai/gpt-4.1-mini \
+  --critique-model groq/llama-3.3-70b-versatile \
+  --reflection-model openai/gpt-5.6-terra \
+  --max-usd 7 \
+  --record tests/fixtures/cassettes/study-xprovider.json \
+  --out docs/validation-study-xprovider.json \
+  --report docs/validation-study-xprovider.md
+```
+
+Read the preflight line before anything else. `HTTP 200` means the run is live. `HTTP 403` means the
+host is still blocked and nothing was spent. **`HTTP 429` means the credential works and its quota
+is gone** — which is the only way that question can be answered, and it cannot be answered from a
+blocked host at all.

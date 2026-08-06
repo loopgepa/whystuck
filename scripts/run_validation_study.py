@@ -120,6 +120,13 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         "Same call count as mid, so the cost estimate is unchanged",
     )
     p.add_argument(
+        "--skip-preflight",
+        action="store_true",
+        help="skip the zero-token provider reachability probe that runs before spending. Only "
+        "for when the probe itself is wrong (an endpoint moved, a proxy blocks GET but not POST); "
+        "it exists because a set-but-unusable key otherwise bills the OTHER provider first",
+    )
+    p.add_argument(
         "--reflection-calls",
         type=int,
         default=10,
@@ -260,6 +267,64 @@ def _parse_gene_overrides(specs: list[str], *, active: Sequence[str]) -> dict[st
             )
         overrides[gene] = text
     return overrides
+
+
+#: litellm reads each vendor's credential from its own environment variable. Kept here so the
+#: pre-spend check below covers whatever provider a run actually names, rather than assuming
+#: OpenAI. A provider absent from this map is not gated -- add it when you add its price.
+_PROVIDER_KEY_ENV = {
+    "openai": "OPENAI_API_KEY",
+    "groq": "GROQ_API_KEY",
+    "anthropic": "ANTHROPIC_API_KEY",
+    "gemini": "GEMINI_API_KEY",
+}
+
+#: A zero-token endpoint per provider that answers 200 iff the credential works AND the host can
+#: reach the API. (url_template, header_builder). Listing models bills nothing anywhere.
+_PROVIDER_PROBE: dict[str, tuple[str, Callable[[str], dict[str, str]]]] = {
+    "openai": ("https://api.openai.com/v1/models", lambda k: {"Authorization": f"Bearer {k}"}),
+    "groq": ("https://api.groq.com/openai/v1/models", lambda k: {"Authorization": f"Bearer {k}"}),
+    "anthropic": (
+        "https://api.anthropic.com/v1/models",
+        lambda k: {"x-api-key": k, "anthropic-version": "2023-06-01"},
+    ),
+    "gemini": ("https://generativelanguage.googleapis.com/v1beta/models?key={key}", lambda k: {}),
+}
+
+
+def probe_provider(provider: str, key: str, *, timeout: float = 15.0) -> tuple[bool, str]:
+    """(reachable-and-authorized, human-readable status) for one provider, at zero token cost.
+
+    WHY THIS IS NOT JUST A KEY-PRESENCE CHECK. A set-but-unusable credential is worse than a
+    missing one: the run passes the cheap gate, spends the WORKER's budget, and dies on the first
+    call to the other provider, leaving a bill and a partial cassette. That is not hypothetical --
+    on 2026-08-06 the D3 critic's provider returned 403 at its edge for this host, and only the
+    absence of the key stopped a live attempt.
+
+    It also separates failures the caller must act on differently, which a mid-run exception does
+    not: 401/403 is a credential or network refusal, 429 is a key that works and has no quota left.
+    """
+    import urllib.error
+    import urllib.request
+
+    if provider not in _PROVIDER_PROBE:
+        return True, "no probe defined; not checked"
+    template, headers = _PROVIDER_PROBE[provider]
+    request = urllib.request.Request(  # noqa: S310 - fixed https literals above
+        template.format(key=key), headers=headers(key), method="GET"
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:  # noqa: S310
+            return 200 <= response.status < 300, f"HTTP {response.status}"
+    except urllib.error.HTTPError as exc:
+        hint = {
+            401: "credential rejected",
+            403: "refused before auth (network/region block) or credential rejected",
+            429: "credential works, quota or rate limit exhausted",
+        }.get(exc.code, "")
+        return False, f"HTTP {exc.code}{f' - {hint}' if hint else ''}"
+    except Exception as exc:  # noqa: BLE001 - any transport failure is the same verdict here
+        return False, f"unreachable: {type(exc).__name__}"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -522,9 +587,48 @@ def main(argv: list[str] | None = None) -> int:
         print("\nDry run only. Re-run with --yes (and OPENAI_API_KEY set) to spend.")
         return 0
 
-    if not os.environ.get("OPENAI_API_KEY"):
-        print("ERROR: --yes given but OPENAI_API_KEY is not set.", file=sys.stderr)
+    # Every provider this run will actually call, not just OpenAI. A cross-provider critic
+    # (D3) routes one call per eval to a second vendor, and checking only OPENAI_API_KEY
+    # meant that run would spend the worker's money and THEN die on the missing second key,
+    # mid-study, with a partial cassette. Same rule as every other validation in this file:
+    # refuse at the cheap step. The check is on presence, not validity -- a live probe would
+    # cost a call and could not be done offline -- so it catches the unset key, not the
+    # expired one.
+    models = [m for m in (args.worker_model, args.reflection_model, args.critique_model) if m]
+    providers = sorted({m.split("/", 1)[0] for m in models})
+    missing = sorted(
+        {
+            var
+            for provider in providers
+            for var in [_PROVIDER_KEY_ENV.get(provider)]
+            if var and not os.environ.get(var)
+        }
+    )
+    if missing:
+        print(
+            f"ERROR: --yes given but these provider keys are not set: {', '.join(missing)}. "
+            f"This run calls {', '.join(providers)}.",
+            file=sys.stderr,
+        )
         return 3
+
+    if not args.skip_preflight:
+        unusable = []
+        for provider in providers:
+            var = _PROVIDER_KEY_ENV.get(provider)
+            ok, status = probe_provider(provider, os.environ.get(var or "", ""))
+            print(f"  preflight {provider:<10} {status}")
+            if not ok:
+                unusable.append(f"{provider} ({status})")
+        if unusable:
+            print(
+                f"ERROR: --yes given but these providers did not answer: {', '.join(unusable)}. "
+                "Nothing was spent. A run that starts here bills the reachable provider and then "
+                "dies on the first call to this one, leaving a partial cassette. "
+                "Override with --skip-preflight only if you know the probe is wrong.",
+                file=sys.stderr,
+            )
+            return 4
 
     return _run_live(args, arms, seeds, estimate, gene_overrides)
 
