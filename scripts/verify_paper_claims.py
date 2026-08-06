@@ -1420,7 +1420,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     for f in glob.glob(f"{DOCS}/validation-study*.json"):
         with open(f, encoding="utf-8") as fh:
             est.append(json.load(fh)["meta"].get("estimated_usd", 0))
-    out.append(("runs over the $5 default", 4, 0, sum(1 for u in est if u > 5.0)))
+    out.append(("runs over the $5 default", 5, 0, sum(1 for u in est if u > 5.0)))
     out.append(("largest estimate", 11.76, 0.005, max(est)))
 
     # Prose cross-checks. Everything above re-derives a number from the artifacts and
@@ -2841,18 +2841,28 @@ def _checks() -> list[tuple[str, float, float, float]]:
     # The two reflection models, asserted as a set rather than a number: the check is that the
     # paper names exactly the model each half of the study used, in the right half.
     corrected_models, pre_models = _reflection_models()
+    # Markers are whitespace-tolerant. The previous pre-correction marker embedded a literal
+    # newline, so reflowing the sentence -- which widening it necessarily did -- broke a check
+    # about the model rather than about the wrap. Same defect class as the C1 patterns fixed in
+    # c80a926, in the same file, two days apart.
     for label, want, marker in (
-        ("tex: corrected-harness reflection model", corrected_models, "on every run recorded"),
-        ("tex: pre-correction reflection model", pre_models, "which is the\nCLI default"),
+        ("tex: corrected-harness reflection model", corrected_models, r"corrected-harness\s+runs"),
+        ("tex: pre-correction reflection model", pre_models, r"which is\s+the\s+CLI default"),
     ):
-        if len(want) != 1:
-            raise ValueError(
-                f"{label}: the released runs use {sorted(want)} reflection models, so the "
-                "paper cannot name one; widen the sentence rather than the tolerance"
+        # One model per era was true of the runs that existed when this was written, and the
+        # check enforced it by refusing to run at all on a second. That refusal was right --- it
+        # caught the cross-provider run of 2026-08-06 the moment its artifact landed --- but the
+        # premise was a description mistaken for a rule. The paper must name whatever the
+        # artifacts show, so the assertion is now "every model in this era is named", and the
+        # marker anchors only the first, which is the one the sentence leads with.
+        for i, model in enumerate(sorted(want)):
+            named = model.split("/")[-1].replace("-", r"\-")
+            pattern = (
+                rf"\\texttt\{{{named}\}}[^.]*?{marker}" if i == 0 else rf"\\texttt\{{{named}\}}"
             )
-        named = want.pop().split("/")[-1].replace("-", r"\-")
-        found = 1.0 if re.search(rf"\\texttt\{{{named}\}}[^.]*?{marker}", tex, re.DOTALL) else 0.0
-        out.append((label, found, 0, 1.0))
+            found = 1.0 if re.search(pattern, tex, re.DOTALL) else 0.0
+            suffix = f" ({named})" if len(want) > 1 else ""
+            out.append((f"{label}{suffix}", found, 0, 1.0))
 
     # How many contrast runs the correction superseded, and how many of their deltas really
     # were zero. The paper said "eleven" for a set of fifteen, and called all of their zeros

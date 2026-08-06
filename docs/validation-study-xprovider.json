@@ -1,0 +1,1325 @@
+{
+  "meta": {
+    "dataset": "multi-constraint-hard (IFEval-style)",
+    "n_train": 8,
+    "n_heldout": 10,
+    "worker_model": "openai/gpt-4.1-mini",
+    "reflection_model": "openai/gpt-5.6-terra",
+    "max_metric_calls": 20,
+    "module_selector": "all",
+    "seeds_independent": true,
+    "detector_reflection": true,
+    "reflection_calls": 4,
+    "task_set": "multi-hard",
+    "temperature": null,
+    "sample": null,
+    "exclude_constraint": [],
+    "loop_max_retries": 1,
+    "plan_gene": false,
+    "feedback_stats": false,
+    "critique_model": "groq/llama-3.3-70b-versatile",
+    "oracle_critique": false,
+    "feedback_level": "mid",
+    "exec_feedback": false,
+    "actuator": false,
+    "gene_overrides": {},
+    "worker_max_output_tokens": 320,
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "estimated_usd": 6.519808,
+    "generated": "2026-08-06T11:41:01.372720+00:00"
+  },
+  "runs": [
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.775,
+        "opt_heldout": 0.775,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-36": 1.0,
+          "mc-51": 0.6,
+          "mc-21": 0.8,
+          "mc-4": 0.75,
+          "mc-43": 0.75,
+          "mc-52": 0.75,
+          "mc-9": 0.75,
+          "mc-38": 0.8,
+          "mc-34": 0.75,
+          "mc-58": 0.8
+        },
+        "opt_heldout_by_task": {
+          "mc-36": 1.0,
+          "mc-51": 0.6,
+          "mc-21": 0.8,
+          "mc-4": 0.75,
+          "mc-43": 0.75,
+          "mc-52": 0.75,
+          "mc-9": 0.75,
+          "mc-38": 0.8,
+          "mc-34": 0.75,
+          "mc-58": 0.8
+        }
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.775,
+        "opt_heldout": 0.725,
+        "delta": -0.05,
+        "variant_id": "variant-55ec5638",
+        "train_score": 0.8438,
+        "genes_changed": [
+          "generate"
+        ],
+        "final_genes": {
+          "generate": "You will receive a task prompt followed by a list of mandatory response requirements. Produce an answer to the task that satisfies every requirement exactly.\n\nTreat every listed requirement as a hard constraint. Before responding, carefully plan and verify the final text against all constraints, especially when requirements interact.\n\nUse this validation process:\n1. Identify the requested content, formatting rules, prohibited words or characters, capitalization rules, maximum word-length limits, exact word counts, and any required final phrase.\n2. Draft a response that addresses the requested task while using simple wording when word-length limits apply.\n3. Count words exactly. Count each whitespace-separated token as one word; punctuation attached to a word does not create another word.\n4. If an exact ending phrase is required, reproduce it character-for-character, including its punctuation and capitalization. Do not add text after it.\n5. Check lowercase requirements across the entire response, including the required ending phrase. If lowercase is required, the ending phrase must also be lowercase.\n6. Check every word against forbidden-word rules and maximum word-length rules. Do not use a forbidden word even incidentally.\n7. Check structural requirements exactly, such as the precise number of bullet points and required bullet prefixes.\n8. Return only the completed response, with no explanation, verification notes, headings, or extra text.\n\nCommon failure risks to avoid:\n- Do not miss an exact word count. For example, five bullet lines do not automatically guarantee fifteen words.\n- Do not omit required punctuation in a required final phrase, such as the final period in \u201call is set.\u201d or \u201cwe are done.\u201d\n- Do not capitalize a required ending phrase when the response must be entirely lowercase.\n- Do not use prohibited words such as \u201cof\u201d or \u201cthe,\u201d including while trying to make the response sound natural.\n- When a word-length limit applies, ensure every individual word meets it, including words in the final required phrase."
+        },
+        "seed_heldout_by_task": {
+          "mc-36": 1.0,
+          "mc-51": 0.6,
+          "mc-21": 0.8,
+          "mc-4": 0.75,
+          "mc-43": 0.75,
+          "mc-52": 0.75,
+          "mc-9": 0.75,
+          "mc-38": 0.8,
+          "mc-34": 0.75,
+          "mc-58": 0.8
+        },
+        "opt_heldout_by_task": {
+          "mc-36": 0.5,
+          "mc-51": 0.8,
+          "mc-21": 0.8,
+          "mc-4": 0.75,
+          "mc-43": 0.75,
+          "mc-52": 0.75,
+          "mc-9": 0.75,
+          "mc-38": 0.8,
+          "mc-34": 0.75,
+          "mc-58": 0.6
+        }
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.775,
+        "opt_heldout": 0.775,
+        "delta": 0.0,
+        "variant_id": "variant-d5b53c9c",
+        "train_score": 0.3625,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-36": 1.0,
+          "mc-51": 0.6,
+          "mc-21": 0.8,
+          "mc-4": 0.75,
+          "mc-43": 0.75,
+          "mc-52": 0.75,
+          "mc-9": 0.75,
+          "mc-38": 0.8,
+          "mc-34": 0.75,
+          "mc-58": 0.8
+        },
+        "opt_heldout_by_task": {
+          "mc-36": 1.0,
+          "mc-51": 0.6,
+          "mc-21": 0.8,
+          "mc-4": 0.75,
+          "mc-43": 0.75,
+          "mc-52": 0.75,
+          "mc-9": 0.75,
+          "mc-38": 0.8,
+          "mc-34": 0.75,
+          "mc-58": 0.8
+        }
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.775,
+        "opt_heldout": 0.745,
+        "delta": -0.03,
+        "variant_id": "variant-c11d53b8",
+        "train_score": 0.8125,
+        "genes_changed": [
+          "generate",
+          "ensure_correct"
+        ],
+        "final_genes": {
+          "generate": "You will receive a task prompt followed by a list of mandatory response requirements. Produce an answer to the task that satisfies every requirement exactly.\n\nTreat every listed requirement as a hard constraint. Before responding, carefully plan and verify the final text against all constraints, especially when requirements interact.\n\nUse this validation process:\n1. Identify the requested content, formatting rules, prohibited words or characters, capitalization rules, maximum word-length limits, exact word counts, and any required final phrase.\n2. Draft a response that addresses the requested task while using simple wording when word-length limits apply.\n3. Count words exactly. Count each whitespace-separated token as one word; punctuation attached to a word does not create another word.\n4. If an exact ending phrase is required, reproduce it character-for-character, including its punctuation and capitalization. Do not add text after it.\n5. Check lowercase requirements across the entire response, including the required ending phrase. If lowercase is required, the ending phrase must also be lowercase.\n6. Check every word against forbidden-word rules and maximum word-length rules. Do not use a forbidden word even incidentally.\n7. Check structural requirements exactly, such as the precise number of bullet points and required bullet prefixes.\n8. Return only the completed response, with no explanation, verification notes, headings, or extra text.\n\nCommon failure risks to avoid:\n- Do not miss an exact word count. For example, five bullet lines do not automatically guarantee fifteen words.\n- Do not omit required punctuation in a required final phrase, such as the final period in \u201call is set.\u201d or \u201cwe are done.\u201d\n- Do not capitalize a required ending phrase when the response must be entirely lowercase.\n- Do not use prohibited words such as \u201cof\u201d or \u201cthe,\u201d including while trying to make the response sound natural.\n- When a word-length limit applies, ensure every individual word meets it, including words in the final required phrase.",
+          "ensure_correct": "You are a strict constraint-auditing assistant.\n\nThe input will contain:\n1. A task with a list of explicit response requirements.\n2. A \u201cDraft under judgement\u201d response to evaluate.\n\nYour job is to determine whether the draft satisfies every stated requirement. Do not perform the original task unless explicitly asked to provide a corrected version.\n\nBefore answering:\n- Re-read the task, every requirement, and the draft.\n- Check every requirement independently.\n- Verify objective constraints exactly, especially word counts, exact ending phrases, capitalization, forbidden words, punctuation, formatting, bullet counts, and word-length limits.\n- Treat punctuation as separate from words when counting words or word length. For example, \u201cquestions,\u201d has 9 letters and exceeds a 7-letter limit.\n- For exact phrases, preserve and check exact spelling, capitalization, punctuation, and final period where applicable.\n- Do not invent requirements that are not stated. For example, if a task forbids \u201cof,\u201d do not report use of \u201cto\u201d as a violation.\n- Do not falsely identify compliant words as too long. For example, \u201cskills\u201d has 6 letters, \u201cagain\u201d has 5, \u201cfocus\u201d has 5, and \u201chelp\u201d has 4.\n- Do not assume \u201cor less\u201d satisfies an \u201cexactly\u201d requirement. \u201cExactly 25 words\u201d requires precisely 25 words.\n- If proposing a corrected draft, re-check it fully before presenting it; it must satisfy every original constraint.\n\nRespond in this format:\n\nVerdict: pass\n\nor\n\nVerdict: fix\nFailed requirements:\n- <requirement name>: <brief, accurate explanation>\n- <requirement name>: <brief, accurate explanation>\nSatisfied requirements:\n- <requirement name>\n- <requirement name>\n\nRules for the verdict:\n- Use \u201cpass\u201d only if every requirement is satisfied.\n- Use \u201cfix\u201d if even one requirement is violated.\n- List every failed requirement, not just one.\n- List all satisfied requirements when practical.\n- Be concise and factual.\n- Do not provide a rewritten answer unless the user explicitly asks for one.\n\nCalibration examples:\n- A five-bullet lowercase draft with 15 words that avoids \u201cof\u201d and has no word longer than 6 letters passes those constraints even if it contains \u201cto,\u201d unless \u201cto\u201d was explicitly forbidden.\n- A 24-word response fails a requirement for exactly 25 words, even if it satisfies lowercase, no-comma, forbidden-word, and required-ending constraints.\n- A draft ending \u201cWe are done.\u201d fails an exact required ending of \u201cwe are done.\u201d because capitalization differs.\n- In a 7-letter maximum-word-length task, \u201cquestions\u201d violates the limit because it has 9 letters; \u201cskills,\u201d \u201cagain,\u201d \u201cfocus,\u201d and \u201chelp\u201d do not violate it."
+        },
+        "seed_heldout_by_task": {
+          "mc-36": 1.0,
+          "mc-51": 0.6,
+          "mc-21": 0.8,
+          "mc-4": 0.75,
+          "mc-43": 0.75,
+          "mc-52": 0.75,
+          "mc-9": 0.75,
+          "mc-38": 0.8,
+          "mc-34": 0.75,
+          "mc-58": 0.8
+        },
+        "opt_heldout_by_task": {
+          "mc-36": 0.5,
+          "mc-51": 0.8,
+          "mc-21": 0.8,
+          "mc-4": 0.75,
+          "mc-43": 0.75,
+          "mc-52": 0.75,
+          "mc-9": 0.75,
+          "mc-38": 0.8,
+          "mc-34": 0.75,
+          "mc-58": 0.8
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.705,
+        "opt_heldout": 0.705,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-42": 0.75,
+          "mc-34": 0.8,
+          "mc-35": 0.6,
+          "mc-46": 0.75,
+          "mc-20": 0.6,
+          "mc-61": 0.75,
+          "mc-37": 0.75,
+          "mc-14": 0.8,
+          "mc-63": 0.5,
+          "mc-53": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 0.75,
+          "mc-34": 0.8,
+          "mc-35": 0.6,
+          "mc-46": 0.75,
+          "mc-20": 0.6,
+          "mc-61": 0.75,
+          "mc-37": 0.75,
+          "mc-14": 0.8,
+          "mc-63": 0.5,
+          "mc-53": 0.75
+        }
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.705,
+        "opt_heldout": 0.77,
+        "delta": 0.065,
+        "variant_id": "variant-dcce324b",
+        "train_score": 0.8,
+        "genes_changed": [
+          "generate"
+        ],
+        "final_genes": {
+          "generate": "For each task input, produce a response that satisfies every stated requirement simultaneously. Treat all requirements as hard constraints, including content, exact word counts, capitalization, forbidden words, maximum word lengths, required phrases, endings, and formatting.\n\nBefore responding, explicitly verify the final draft against every constraint:\n- Count words carefully and ensure exact requested totals (for example, \u201cexactly 15 words\u201d means precisely 15 whitespace-separated words).\n- If a required ending phrase is specified, include its words in the total word count.\n- Preserve required lowercase formatting: use no capital letters anywhere when requested.\n- Do not use forbidden words, including inside otherwise unnecessary phrasing.\n- Check every word against any maximum-length limit; replace words that are too long.\n- For bullet requirements, use exactly the requested number of lines, and ensure each bullet begins exactly with `- `.\n- Avoid prohibited punctuation such as commas when forbidden.\n- Include every required keyword exactly as needed.\n\nDo not add explanations, headings, validation notes, or extra text unless the task explicitly requests them. Recheck all constraints after edits, since changing wording can alter word counts, word lengths, required endings, and forbidden-word compliance."
+        },
+        "seed_heldout_by_task": {
+          "mc-42": 0.75,
+          "mc-34": 0.8,
+          "mc-35": 0.6,
+          "mc-46": 0.75,
+          "mc-20": 0.6,
+          "mc-61": 0.75,
+          "mc-37": 0.75,
+          "mc-14": 0.8,
+          "mc-63": 0.5,
+          "mc-53": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 0.75,
+          "mc-34": 0.8,
+          "mc-35": 0.6,
+          "mc-46": 0.75,
+          "mc-20": 1.0,
+          "mc-61": 0.75,
+          "mc-37": 0.75,
+          "mc-14": 0.8,
+          "mc-63": 0.75,
+          "mc-53": 0.75
+        }
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.705,
+        "opt_heldout": 0.705,
+        "delta": 0.0,
+        "variant_id": "variant-3bd5ab12",
+        "train_score": 0.225,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-42": 0.75,
+          "mc-34": 0.8,
+          "mc-35": 0.6,
+          "mc-46": 0.75,
+          "mc-20": 0.6,
+          "mc-61": 0.75,
+          "mc-37": 0.75,
+          "mc-14": 0.8,
+          "mc-63": 0.5,
+          "mc-53": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 0.75,
+          "mc-34": 0.8,
+          "mc-35": 0.6,
+          "mc-46": 0.75,
+          "mc-20": 0.6,
+          "mc-61": 0.75,
+          "mc-37": 0.75,
+          "mc-14": 0.8,
+          "mc-63": 0.5,
+          "mc-53": 0.75
+        }
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.705,
+        "opt_heldout": 0.775,
+        "delta": 0.07,
+        "variant_id": "variant-ee53ffe2",
+        "train_score": 0.7625,
+        "genes_changed": [
+          "generate",
+          "ensure_correct"
+        ],
+        "final_genes": {
+          "generate": "For each task input, produce a response that satisfies every stated requirement simultaneously. Treat all requirements as hard constraints, including content, exact word counts, capitalization, forbidden words, maximum word lengths, required phrases, endings, and formatting.\n\nBefore responding, explicitly verify the final draft against every constraint:\n- Count words carefully and ensure exact requested totals (for example, \u201cexactly 15 words\u201d means precisely 15 whitespace-separated words).\n- If a required ending phrase is specified, include its words in the total word count.\n- Preserve required lowercase formatting: use no capital letters anywhere when requested.\n- Do not use forbidden words, including inside otherwise unnecessary phrasing.\n- Check every word against any maximum-length limit; replace words that are too long.\n- For bullet requirements, use exactly the requested number of lines, and ensure each bullet begins exactly with `- `.\n- Avoid prohibited punctuation such as commas when forbidden.\n- Include every required keyword exactly as needed.\n\nDo not add explanations, headings, validation notes, or extra text unless the task explicitly requests them. Recheck all constraints after edits, since changing wording can alter word counts, word lengths, required endings, and forbidden-word compliance.",
+          "ensure_correct": "You are a strict draft-compliance reviewer and repairer.\n\nThe user will provide:\n- a `# Task` containing a writing request and explicit requirements; and\n- a `# Draft under judgement` containing a proposed answer.\n\nYour job is to determine whether the draft satisfies the task exactly. Do not assume that a draft needs improvement merely because it could be worded differently.\n\nProcess:\n1. Re-read the task and extract every explicit requirement into a checklist.\n2. Audit the draft against every requirement mechanically and independently.\n3. Pay special attention to exact constraints such as:\n   - exact word counts;\n   - forbidden words, treating them as whole words rather than substrings;\n   - required words or exact ending phrases;\n   - lowercase/capitalization rules;\n   - maximum word length;\n   - punctuation bans;\n   - exact number and syntax of bullet points, including whether every bullet line begins with `- `.\n4. Count words carefully. Do not count punctuation as words. For bullet lists, count the words in all bullet text combined.\n5. Do not invent unstated requirements or treat stylistic preferences as failures.\n6. If the draft is compliant, do not revise it, do not claim it has failures, and do not substitute a different answer. State that it is compliant and return the draft unchanged.\n7. If the draft is noncompliant:\n   - state that a fix is required;\n   - identify every failed requirement and only genuine failed requirements;\n   - identify the requirements that are satisfied when useful for clarity;\n   - provide a replacement draft that preserves the requested subject and intent where possible.\n8. Before sending a replacement draft, audit the replacement from scratch against the complete checklist. Revise it until every stated requirement is satisfied. Never provide a \u201cfixed\u201d draft that still violates any constraint.\n\nImportant examples of careful auditing:\n- A 15-word lowercase draft containing `code` and no standalone `to` is compliant if all other stated constraints are met; do not rewrite it just because another phrasing is possible.\n- A draft ending exactly with `so it goes.` may satisfy that ending requirement, including its final period.\n- For a task requiring exactly four bullets and exactly 15 total words, meeting the four-bullet requirement does not excuse an incorrect total word count.\n- If a task prohibits words longer than six letters, check every word; one word such as `learning` is a violation.\n- In a task requiring the word `cell`, an occurrence such as `Each cell works...` satisfies that requirement.\n\nUse this response format:\n\nIf compliant:\nCompliant. The draft satisfies all stated requirements.\n\n[return the draft unchanged]\n\nIf noncompliant:\nFix required.\n\nFailed requirements:\n- [requirement]: [brief, precise reason]\n\nSatisfied requirements:\n- [list the remaining requirements, when applicable]\n\nCorrected draft:\n```text\n[fully compliant replacement draft]\n```"
+        },
+        "seed_heldout_by_task": {
+          "mc-42": 0.75,
+          "mc-34": 0.8,
+          "mc-35": 0.6,
+          "mc-46": 0.75,
+          "mc-20": 0.6,
+          "mc-61": 0.75,
+          "mc-37": 0.75,
+          "mc-14": 0.8,
+          "mc-63": 0.5,
+          "mc-53": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-34": 0.8,
+          "mc-35": 0.6,
+          "mc-46": 0.5,
+          "mc-20": 0.8,
+          "mc-61": 1.0,
+          "mc-37": 0.75,
+          "mc-14": 0.8,
+          "mc-63": 0.75,
+          "mc-53": 0.75
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.8699999999999999,
+        "opt_heldout": 0.8699999999999999,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-29": 0.8,
+          "mc-46": 1.0,
+          "mc-1": 0.75,
+          "mc-48": 1.0,
+          "mc-17": 0.75,
+          "mc-41": 1.0,
+          "mc-28": 0.8,
+          "mc-34": 1.0,
+          "mc-60": 0.6,
+          "mc-32": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-29": 0.8,
+          "mc-46": 1.0,
+          "mc-1": 0.75,
+          "mc-48": 1.0,
+          "mc-17": 0.75,
+          "mc-41": 1.0,
+          "mc-28": 0.8,
+          "mc-34": 1.0,
+          "mc-60": 0.6,
+          "mc-32": 1.0
+        }
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.8699999999999999,
+        "opt_heldout": 0.8699999999999999,
+        "delta": 0.0,
+        "variant_id": "variant-474acd66",
+        "train_score": 0.75,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly."
+        },
+        "seed_heldout_by_task": {
+          "mc-29": 0.8,
+          "mc-46": 1.0,
+          "mc-1": 0.75,
+          "mc-48": 1.0,
+          "mc-17": 0.75,
+          "mc-41": 1.0,
+          "mc-28": 0.8,
+          "mc-34": 1.0,
+          "mc-60": 0.6,
+          "mc-32": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-29": 0.8,
+          "mc-46": 1.0,
+          "mc-1": 0.75,
+          "mc-48": 1.0,
+          "mc-17": 0.75,
+          "mc-41": 1.0,
+          "mc-28": 0.8,
+          "mc-34": 1.0,
+          "mc-60": 0.6,
+          "mc-32": 1.0
+        }
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.8699999999999999,
+        "opt_heldout": 0.8699999999999999,
+        "delta": 0.0,
+        "variant_id": "variant-c61775b2",
+        "train_score": 0.2812,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-29": 0.8,
+          "mc-46": 1.0,
+          "mc-1": 0.75,
+          "mc-48": 1.0,
+          "mc-17": 0.75,
+          "mc-41": 1.0,
+          "mc-28": 0.8,
+          "mc-34": 1.0,
+          "mc-60": 0.6,
+          "mc-32": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-29": 0.8,
+          "mc-46": 1.0,
+          "mc-1": 0.75,
+          "mc-48": 1.0,
+          "mc-17": 0.75,
+          "mc-41": 1.0,
+          "mc-28": 0.8,
+          "mc-34": 1.0,
+          "mc-60": 0.6,
+          "mc-32": 1.0
+        }
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.8699999999999999,
+        "opt_heldout": 0.8699999999999999,
+        "delta": 0.0,
+        "variant_id": "variant-2f9ff5b1",
+        "train_score": 0.75,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-29": 0.8,
+          "mc-46": 1.0,
+          "mc-1": 0.75,
+          "mc-48": 1.0,
+          "mc-17": 0.75,
+          "mc-41": 1.0,
+          "mc-28": 0.8,
+          "mc-34": 1.0,
+          "mc-60": 0.6,
+          "mc-32": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-29": 0.8,
+          "mc-46": 1.0,
+          "mc-1": 0.75,
+          "mc-48": 1.0,
+          "mc-17": 0.75,
+          "mc-41": 1.0,
+          "mc-28": 0.8,
+          "mc-34": 1.0,
+          "mc-60": 0.6,
+          "mc-32": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.7150000000000001,
+        "opt_heldout": 0.7150000000000001,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-10": 0.8,
+          "mc-53": 0.8,
+          "mc-51": 0.5,
+          "mc-24": 0.75,
+          "mc-33": 0.8,
+          "mc-39": 0.8,
+          "mc-47": 0.8,
+          "mc-9": 0.6,
+          "mc-25": 0.8,
+          "mc-44": 0.5
+        },
+        "opt_heldout_by_task": {
+          "mc-10": 0.8,
+          "mc-53": 0.8,
+          "mc-51": 0.5,
+          "mc-24": 0.75,
+          "mc-33": 0.8,
+          "mc-39": 0.8,
+          "mc-47": 0.8,
+          "mc-9": 0.6,
+          "mc-25": 0.8,
+          "mc-44": 0.5
+        }
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.7150000000000001,
+        "opt_heldout": 0.785,
+        "delta": 0.07,
+        "variant_id": "variant-7d0167be",
+        "train_score": 0.7875,
+        "genes_changed": [
+          "generate"
+        ],
+        "final_genes": {
+          "generate": "Solve the user\u2019s requested writing task while satisfying every stated constraint simultaneously. Treat formatting constraints as strict, testable requirements, not suggestions.\n\nBefore responding:\n1. Extract every constraint, including topic, exact word count, number of bullets, required prefixes, forbidden words, capitalization, maximum word length, and required ending text.\n2. Draft a response that addresses the requested topic simply and directly.\n3. Validate the final response against every constraint before sending it. Do not provide explanations, counts, or commentary unless explicitly requested.\n\nValidation rules:\n- For an \u201cexactly N words\u201d requirement, count every written word in the entire response, including words in any required ending phrase. Do not count bullet markers such as \u201c- \u201d as words.\n- A required exact ending phrase still contributes to the total word count. For example, \u201cwe are done.\u201d contributes three words.\n- If exactly a specified number of bullet points is required, ensure exactly that many lines begin with the required bullet marker. A separately required final phrase may appear after the bullets if the task explicitly requires both; it must not begin with a bullet unless requested.\n- If all text must be lowercase, use no capital letters anywhere.\n- If a word is forbidden, do not use that word in any capitalization or punctuation variant. Avoid related phrasing that could accidentally include it.\n- If no word may exceed a given length, check every word carefully, including topic words, headings, and any required closing phrase. Use short alternatives.\n- Preserve exact required phrases character-for-character, including punctuation when specified.\n- Avoid extra titles, blank explanatory text, numbering, or closing remarks that could violate word counts, bullet counts, or ending requirements.\n\nUse a reliable strategy for tightly constrained responses:\n- First reserve words required by any exact closing phrase.\n- Divide the remaining word budget across the required bullets.\n- Prefer simple, short words when word-length limits apply.\n- Count words manually after drafting, then revise until the count is exact.\n- Perform a final independent check of word count, bullet count, forbidden words, capitalization, word lengths, and final ending.\n\nPast failures to avoid include producing more than the required 25 words and using words longer than six letters when a six-letter maximum was required. Never assume that meeting formatting, lowercase, bullet, or forbidden-word requirements compensates for missing an exact word-count or word-length requirement."
+        },
+        "seed_heldout_by_task": {
+          "mc-10": 0.8,
+          "mc-53": 0.8,
+          "mc-51": 0.5,
+          "mc-24": 0.75,
+          "mc-33": 0.8,
+          "mc-39": 0.8,
+          "mc-47": 0.8,
+          "mc-9": 0.6,
+          "mc-25": 0.8,
+          "mc-44": 0.5
+        },
+        "opt_heldout_by_task": {
+          "mc-10": 1.0,
+          "mc-53": 0.6,
+          "mc-51": 0.75,
+          "mc-24": 0.75,
+          "mc-33": 0.8,
+          "mc-39": 0.8,
+          "mc-47": 0.8,
+          "mc-9": 0.8,
+          "mc-25": 0.8,
+          "mc-44": 0.75
+        }
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.7150000000000001,
+        "opt_heldout": 0.7150000000000001,
+        "delta": 0.0,
+        "variant_id": "variant-9e482a36",
+        "train_score": 0.3,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-10": 0.8,
+          "mc-53": 0.8,
+          "mc-51": 0.5,
+          "mc-24": 0.75,
+          "mc-33": 0.8,
+          "mc-39": 0.8,
+          "mc-47": 0.8,
+          "mc-9": 0.6,
+          "mc-25": 0.8,
+          "mc-44": 0.5
+        },
+        "opt_heldout_by_task": {
+          "mc-10": 0.8,
+          "mc-53": 0.8,
+          "mc-51": 0.5,
+          "mc-24": 0.75,
+          "mc-33": 0.8,
+          "mc-39": 0.8,
+          "mc-47": 0.8,
+          "mc-9": 0.6,
+          "mc-25": 0.8,
+          "mc-44": 0.5
+        }
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.7150000000000001,
+        "opt_heldout": 0.79,
+        "delta": 0.075,
+        "variant_id": "variant-29bbd0aa",
+        "train_score": 0.7,
+        "genes_changed": [
+          "generate",
+          "ensure_correct"
+        ],
+        "final_genes": {
+          "generate": "Solve the user\u2019s requested writing task while satisfying every stated constraint simultaneously. Treat formatting constraints as strict, testable requirements, not suggestions.\n\nBefore responding:\n1. Extract every constraint, including topic, exact word count, number of bullets, required prefixes, forbidden words, capitalization, maximum word length, and required ending text.\n2. Draft a response that addresses the requested topic simply and directly.\n3. Validate the final response against every constraint before sending it. Do not provide explanations, counts, or commentary unless explicitly requested.\n\nValidation rules:\n- For an \u201cexactly N words\u201d requirement, count every written word in the entire response, including words in any required ending phrase. Do not count bullet markers such as \u201c- \u201d as words.\n- A required exact ending phrase still contributes to the total word count. For example, \u201cwe are done.\u201d contributes three words.\n- If exactly a specified number of bullet points is required, ensure exactly that many lines begin with the required bullet marker. A separately required final phrase may appear after the bullets if the task explicitly requires both; it must not begin with a bullet unless requested.\n- If all text must be lowercase, use no capital letters anywhere.\n- If a word is forbidden, do not use that word in any capitalization or punctuation variant. Avoid related phrasing that could accidentally include it.\n- If no word may exceed a given length, check every word carefully, including topic words, headings, and any required closing phrase. Use short alternatives.\n- Preserve exact required phrases character-for-character, including punctuation when specified.\n- Avoid extra titles, blank explanatory text, numbering, or closing remarks that could violate word counts, bullet counts, or ending requirements.\n\nUse a reliable strategy for tightly constrained responses:\n- First reserve words required by any exact closing phrase.\n- Divide the remaining word budget across the required bullets.\n- Prefer simple, short words when word-length limits apply.\n- Count words manually after drafting, then revise until the count is exact.\n- Perform a final independent check of word count, bullet count, forbidden words, capitalization, word lengths, and final ending.\n\nPast failures to avoid include producing more than the required 25 words and using words longer than six letters when a six-letter maximum was required. Never assume that meeting formatting, lowercase, bullet, or forbidden-word requirements compensates for missing an exact word-count or word-length requirement.",
+          "ensure_correct": "You are a strict constraint-compliance evaluator.\n\nInput format:\n- A section labeled \u201c# Task\u201d containing a writing task and explicit requirements.\n- A section labeled \u201c# Draft under judgement\u201d containing the response to evaluate.\n\nYour job is to evaluate the draft against every stated requirement in the task. Do not attempt to answer the original writing task unless explicitly asked. Instead, determine whether the draft passes or needs fixing.\n\nProcess:\n1. Re-read the task and extract every explicit constraint.\n2. Check each constraint independently and carefully.\n3. Before responding, verify your own counts and findings again.\n4. Do not invent violations: report only requirements that actually fail.\n5. Do not treat a requirement as failed merely because the draft could be improved stylistically; evaluate only the stated constraints.\n\nImportant checking rules:\n- For \u201cexactly N words,\u201d count all ordinary text words in the draft, including text outside bullet points when present. Do not count bullet markers such as \u201c- \u201d as words. Punctuation attached to a word does not create an additional word.\n- For \u201cexactly N bullet points,\u201d count lines beginning with the required bullet marker, such as \u201c- \u201d. Additional non-bullet text does not itself change the bullet count, unless the task says every line must be a bullet.\n- For lowercase requirements, assess the actual letter case in the draft. A lowercase word such as \u201cabove\u201d is compliant; do not confuse it with a capitalized word.\n- For forbidden-word requirements, check whether the exact forbidden word occurs as a word. Do not claim a forbidden word appears when it does not.\n- For \u201cend with the exact phrase \u2026,\u201d verify that the draft\u2019s final text exactly matches the required ending phrase. This can be satisfied even when that phrase appears on a non-bullet line, unless another requirement forbids that format.\n- For maximum word-length requirements, check every word and identify whether any word exceeds the stated limit.\n- If a task includes several constraints, a draft may satisfy some and fail others. Report the precise failed constraints and do not list satisfied constraints unless useful for clarity.\n\nOutput format:\n- If every requirement is satisfied, respond:\n  `correct verdict (pass). All stated requirements are satisfied.`\n- If any requirement fails, respond:\n  `correct verdict (fix). Failed X of Y requirement(s) \u2014 fix: constraint_name_1; constraint_name_2; ... .`\n  where X is the number of failed requirements and Y is the total number of explicit requirements.\n\nUse concise, machine-readable constraint names where possible, such as:\n- `exact_word_count`\n- `num_bullets`\n- `all_lowercase`\n- `forbidden_word`\n- `end_with`\n- `word_max_length`\n\nDo not provide a revised draft unless the user explicitly asks for one. If an explanation is requested, provide only factual, checked details, such as the actual word count or the specific overlong words."
+        },
+        "seed_heldout_by_task": {
+          "mc-10": 0.8,
+          "mc-53": 0.8,
+          "mc-51": 0.5,
+          "mc-24": 0.75,
+          "mc-33": 0.8,
+          "mc-39": 0.8,
+          "mc-47": 0.8,
+          "mc-9": 0.6,
+          "mc-25": 0.8,
+          "mc-44": 0.5
+        },
+        "opt_heldout_by_task": {
+          "mc-10": 0.8,
+          "mc-53": 0.8,
+          "mc-51": 0.75,
+          "mc-24": 1.0,
+          "mc-33": 0.8,
+          "mc-39": 0.8,
+          "mc-47": 0.8,
+          "mc-9": 0.8,
+          "mc-25": 0.6,
+          "mc-44": 0.75
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.76,
+        "opt_heldout": 0.76,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-45": 0.8,
+          "mc-51": 0.75,
+          "mc-62": 0.8,
+          "mc-10": 0.8,
+          "mc-12": 0.75,
+          "mc-44": 0.8,
+          "mc-41": 0.75,
+          "mc-54": 0.6,
+          "mc-13": 0.75,
+          "mc-16": 0.8
+        },
+        "opt_heldout_by_task": {
+          "mc-45": 0.8,
+          "mc-51": 0.75,
+          "mc-62": 0.8,
+          "mc-10": 0.8,
+          "mc-12": 0.75,
+          "mc-44": 0.8,
+          "mc-41": 0.75,
+          "mc-54": 0.6,
+          "mc-13": 0.75,
+          "mc-16": 0.8
+        }
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.76,
+        "opt_heldout": 0.76,
+        "delta": 0.0,
+        "variant_id": "variant-b137c70a",
+        "train_score": 0.8,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly."
+        },
+        "seed_heldout_by_task": {
+          "mc-45": 0.8,
+          "mc-51": 0.75,
+          "mc-62": 0.8,
+          "mc-10": 0.8,
+          "mc-12": 0.75,
+          "mc-44": 0.8,
+          "mc-41": 0.75,
+          "mc-54": 0.6,
+          "mc-13": 0.75,
+          "mc-16": 0.8
+        },
+        "opt_heldout_by_task": {
+          "mc-45": 0.8,
+          "mc-51": 0.75,
+          "mc-62": 0.8,
+          "mc-10": 0.8,
+          "mc-12": 0.75,
+          "mc-44": 0.8,
+          "mc-41": 0.75,
+          "mc-54": 0.6,
+          "mc-13": 0.75,
+          "mc-16": 0.8
+        }
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.76,
+        "opt_heldout": 0.76,
+        "delta": 0.0,
+        "variant_id": "variant-50adeb75",
+        "train_score": 0.3125,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-45": 0.8,
+          "mc-51": 0.75,
+          "mc-62": 0.8,
+          "mc-10": 0.8,
+          "mc-12": 0.75,
+          "mc-44": 0.8,
+          "mc-41": 0.75,
+          "mc-54": 0.6,
+          "mc-13": 0.75,
+          "mc-16": 0.8
+        },
+        "opt_heldout_by_task": {
+          "mc-45": 0.8,
+          "mc-51": 0.75,
+          "mc-62": 0.8,
+          "mc-10": 0.8,
+          "mc-12": 0.75,
+          "mc-44": 0.8,
+          "mc-41": 0.75,
+          "mc-54": 0.6,
+          "mc-13": 0.75,
+          "mc-16": 0.8
+        }
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.76,
+        "opt_heldout": 0.76,
+        "delta": 0.0,
+        "variant_id": "variant-57488ec0",
+        "train_score": 0.8,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-45": 0.8,
+          "mc-51": 0.75,
+          "mc-62": 0.8,
+          "mc-10": 0.8,
+          "mc-12": 0.75,
+          "mc-44": 0.8,
+          "mc-41": 0.75,
+          "mc-54": 0.6,
+          "mc-13": 0.75,
+          "mc-16": 0.8
+        },
+        "opt_heldout_by_task": {
+          "mc-45": 0.8,
+          "mc-51": 0.75,
+          "mc-62": 0.8,
+          "mc-10": 0.8,
+          "mc-12": 0.75,
+          "mc-44": 0.8,
+          "mc-41": 0.75,
+          "mc-54": 0.6,
+          "mc-13": 0.75,
+          "mc-16": 0.8
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.775,
+        "opt_heldout": 0.775,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-11": 0.6,
+          "mc-17": 0.8,
+          "mc-26": 0.75,
+          "mc-13": 0.5,
+          "mc-0": 0.8,
+          "mc-43": 0.75,
+          "mc-36": 0.75,
+          "mc-6": 0.8,
+          "mc-34": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-11": 0.6,
+          "mc-17": 0.8,
+          "mc-26": 0.75,
+          "mc-13": 0.5,
+          "mc-0": 0.8,
+          "mc-43": 0.75,
+          "mc-36": 0.75,
+          "mc-6": 0.8,
+          "mc-34": 1.0
+        }
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.775,
+        "opt_heldout": 0.775,
+        "delta": 0.0,
+        "variant_id": "variant-00a49ae5",
+        "train_score": 0.8063,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly."
+        },
+        "seed_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-11": 0.6,
+          "mc-17": 0.8,
+          "mc-26": 0.75,
+          "mc-13": 0.5,
+          "mc-0": 0.8,
+          "mc-43": 0.75,
+          "mc-36": 0.75,
+          "mc-6": 0.8,
+          "mc-34": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-11": 0.6,
+          "mc-17": 0.8,
+          "mc-26": 0.75,
+          "mc-13": 0.5,
+          "mc-0": 0.8,
+          "mc-43": 0.75,
+          "mc-36": 0.75,
+          "mc-6": 0.8,
+          "mc-34": 1.0
+        }
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.775,
+        "opt_heldout": 0.775,
+        "delta": 0.0,
+        "variant_id": "variant-99453964",
+        "train_score": 0.3563,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-11": 0.6,
+          "mc-17": 0.8,
+          "mc-26": 0.75,
+          "mc-13": 0.5,
+          "mc-0": 0.8,
+          "mc-43": 0.75,
+          "mc-36": 0.75,
+          "mc-6": 0.8,
+          "mc-34": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-11": 0.6,
+          "mc-17": 0.8,
+          "mc-26": 0.75,
+          "mc-13": 0.5,
+          "mc-0": 0.8,
+          "mc-43": 0.75,
+          "mc-36": 0.75,
+          "mc-6": 0.8,
+          "mc-34": 1.0
+        }
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.775,
+        "opt_heldout": 0.775,
+        "delta": 0.0,
+        "variant_id": "variant-37b984c3",
+        "train_score": 0.8063,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-11": 0.6,
+          "mc-17": 0.8,
+          "mc-26": 0.75,
+          "mc-13": 0.5,
+          "mc-0": 0.8,
+          "mc-43": 0.75,
+          "mc-36": 0.75,
+          "mc-6": 0.8,
+          "mc-34": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-11": 0.6,
+          "mc-17": 0.8,
+          "mc-26": 0.75,
+          "mc-13": 0.5,
+          "mc-0": 0.8,
+          "mc-43": 0.75,
+          "mc-36": 0.75,
+          "mc-6": 0.8,
+          "mc-34": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.82,
+        "opt_heldout": 0.82,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-51": 1.0,
+          "mc-39": 0.8,
+          "mc-21": 0.8,
+          "mc-27": 0.75,
+          "mc-5": 0.5,
+          "mc-60": 1.0,
+          "mc-35": 1.0,
+          "mc-36": 0.75,
+          "mc-45": 0.8,
+          "mc-6": 0.8
+        },
+        "opt_heldout_by_task": {
+          "mc-51": 1.0,
+          "mc-39": 0.8,
+          "mc-21": 0.8,
+          "mc-27": 0.75,
+          "mc-5": 0.5,
+          "mc-60": 1.0,
+          "mc-35": 1.0,
+          "mc-36": 0.75,
+          "mc-45": 0.8,
+          "mc-6": 0.8
+        }
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.82,
+        "opt_heldout": 0.755,
+        "delta": -0.065,
+        "variant_id": "variant-c765adba",
+        "train_score": 0.8063,
+        "genes_changed": [
+          "generate"
+        ],
+        "final_genes": {
+          "generate": "You are a precision constraint-following writing assistant. For each task, produce a response that satisfies every stated requirement exactly, even when constraints conflict with normal writing style.\n\nProcess:\n1. Identify the requested content type and every explicit constraint.\n2. Treat requirements such as exact word count, lowercase-only text, required or forbidden words, punctuation restrictions, maximum word length, and exact ending phrases as mandatory.\n3. Draft a simple response that addresses the requested topic while minimizing unnecessary words and risky vocabulary.\n4. Audit the final response before sending it:\n   - Count words by whitespace-separated tokens and ensure an \u201cexactly N words\u201d requirement is met.\n   - Check capitalization character by character when lowercase-only is required.\n   - Confirm every required word or phrase appears exactly as required.\n   - Confirm forbidden words do not appear, including in otherwise natural phrases.\n   - Check every word\u2019s length when a maximum length is specified; punctuation does not make an overlong word acceptable.\n   - Check prohibited punctuation, such as commas, is entirely absent.\n   - If an exact ending phrase is required, make the response end with that exact phrase, including any specified punctuation.\n5. Return only the final requested response, with no explanation, counting notes, headings, or extra text.\n\nExamples of important pitfalls:\n- A response can otherwise be good but fail because it has 16 words rather than the required 15.\n- If \u201cto\u201d is forbidden, do not use it anywhere.\n- If words may be no longer than 7 letters, words such as \u201cproblems\u201d are invalid because they contain 8 letters.\n- For a required ending such as \u201call is set.\u201d, preserve the phrase exactly and ensure it is the final text."
+        },
+        "seed_heldout_by_task": {
+          "mc-51": 1.0,
+          "mc-39": 0.8,
+          "mc-21": 0.8,
+          "mc-27": 0.75,
+          "mc-5": 0.5,
+          "mc-60": 1.0,
+          "mc-35": 1.0,
+          "mc-36": 0.75,
+          "mc-45": 0.8,
+          "mc-6": 0.8
+        },
+        "opt_heldout_by_task": {
+          "mc-51": 0.6,
+          "mc-39": 0.8,
+          "mc-21": 0.8,
+          "mc-27": 0.75,
+          "mc-5": 0.75,
+          "mc-60": 0.75,
+          "mc-35": 0.75,
+          "mc-36": 0.75,
+          "mc-45": 0.8,
+          "mc-6": 0.8
+        }
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.82,
+        "opt_heldout": 0.82,
+        "delta": 0.0,
+        "variant_id": "variant-f3d4acdf",
+        "train_score": 0.3125,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-51": 1.0,
+          "mc-39": 0.8,
+          "mc-21": 0.8,
+          "mc-27": 0.75,
+          "mc-5": 0.5,
+          "mc-60": 1.0,
+          "mc-35": 1.0,
+          "mc-36": 0.75,
+          "mc-45": 0.8,
+          "mc-6": 0.8
+        },
+        "opt_heldout_by_task": {
+          "mc-51": 1.0,
+          "mc-39": 0.8,
+          "mc-21": 0.8,
+          "mc-27": 0.75,
+          "mc-5": 0.5,
+          "mc-60": 1.0,
+          "mc-35": 1.0,
+          "mc-36": 0.75,
+          "mc-45": 0.8,
+          "mc-6": 0.8
+        }
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.82,
+        "opt_heldout": 0.82,
+        "delta": 0.0,
+        "variant_id": "variant-f5569732",
+        "train_score": 0.7937,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-51": 1.0,
+          "mc-39": 0.8,
+          "mc-21": 0.8,
+          "mc-27": 0.75,
+          "mc-5": 0.5,
+          "mc-60": 1.0,
+          "mc-35": 1.0,
+          "mc-36": 0.75,
+          "mc-45": 0.8,
+          "mc-6": 0.8
+        },
+        "opt_heldout_by_task": {
+          "mc-51": 1.0,
+          "mc-39": 0.8,
+          "mc-21": 0.8,
+          "mc-27": 0.75,
+          "mc-5": 0.5,
+          "mc-60": 1.0,
+          "mc-35": 1.0,
+          "mc-36": 0.75,
+          "mc-45": 0.8,
+          "mc-6": 0.8
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.78,
+        "opt_heldout": 0.78,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-38": 0.8,
+          "mc-59": 0.8,
+          "mc-62": 0.5,
+          "mc-39": 0.8,
+          "mc-14": 0.8,
+          "mc-7": 0.8,
+          "mc-36": 1.0,
+          "mc-51": 0.8,
+          "mc-46": 0.75,
+          "mc-35": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-38": 0.8,
+          "mc-59": 0.8,
+          "mc-62": 0.5,
+          "mc-39": 0.8,
+          "mc-14": 0.8,
+          "mc-7": 0.8,
+          "mc-36": 1.0,
+          "mc-51": 0.8,
+          "mc-46": 0.75,
+          "mc-35": 0.75
+        }
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.78,
+        "opt_heldout": 0.76,
+        "delta": -0.02,
+        "variant_id": "variant-e259051e",
+        "train_score": 0.8438,
+        "genes_changed": [
+          "generate"
+        ],
+        "final_genes": {
+          "generate": "You will receive a short writing task followed by a list of mandatory output requirements. Produce an answer that fulfills the writing task while satisfying every listed requirement exactly.\n\nTreat every requirement as a hard constraint. Before responding, carefully validate the final text against all constraints, especially:\n- Exact word counts\n- Maximum word length\n- Required or forbidden words\n- Forbidden punctuation such as commas\n- Exact formatting requirements, including bullet count and bullet prefixes\n- Required keywords\n- Any limits on lines, sentences, or structure\n\nUse this validation process:\n1. Identify the requested topic and the required output format.\n2. Extract every constraint into a checklist.\n3. Draft a concise answer that addresses the topic.\n4. Count words exactly. For word-count constraints, count each whitespace-separated word as one word; bullet markers such as \"- \" are not words.\n5. Check each word\u2019s length, ignoring surrounding punctuation where appropriate.\n6. Check that banned words and punctuation do not appear anywhere.\n7. Check all formatting literally, including the exact number of bullets and required starting characters.\n8. Revise until every constraint is satisfied.\n\nDo not explain your reasoning, list the checklist, or mention the constraints unless the task explicitly requests that. Return only the requested final answer.\n\nWhen constraints conflict, prioritize explicit requirements and find wording that satisfies all of them whenever possible."
+        },
+        "seed_heldout_by_task": {
+          "mc-38": 0.8,
+          "mc-59": 0.8,
+          "mc-62": 0.5,
+          "mc-39": 0.8,
+          "mc-14": 0.8,
+          "mc-7": 0.8,
+          "mc-36": 1.0,
+          "mc-51": 0.8,
+          "mc-46": 0.75,
+          "mc-35": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-38": 0.8,
+          "mc-59": 0.8,
+          "mc-62": 0.75,
+          "mc-39": 0.8,
+          "mc-14": 0.8,
+          "mc-7": 1.0,
+          "mc-36": 0.6,
+          "mc-51": 0.8,
+          "mc-46": 0.75,
+          "mc-35": 0.5
+        }
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.78,
+        "opt_heldout": 0.78,
+        "delta": 0.0,
+        "variant_id": "variant-6f4c3842",
+        "train_score": 0.3813,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-38": 0.8,
+          "mc-59": 0.8,
+          "mc-62": 0.5,
+          "mc-39": 0.8,
+          "mc-14": 0.8,
+          "mc-7": 0.8,
+          "mc-36": 1.0,
+          "mc-51": 0.8,
+          "mc-46": 0.75,
+          "mc-35": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-38": 0.8,
+          "mc-59": 0.8,
+          "mc-62": 0.5,
+          "mc-39": 0.8,
+          "mc-14": 0.8,
+          "mc-7": 0.8,
+          "mc-36": 1.0,
+          "mc-51": 0.8,
+          "mc-46": 0.75,
+          "mc-35": 0.75
+        }
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.78,
+        "opt_heldout": 0.78,
+        "delta": 0.0,
+        "variant_id": "variant-37682630",
+        "train_score": 0.775,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-38": 0.8,
+          "mc-59": 0.8,
+          "mc-62": 0.5,
+          "mc-39": 0.8,
+          "mc-14": 0.8,
+          "mc-7": 0.8,
+          "mc-36": 1.0,
+          "mc-51": 0.8,
+          "mc-46": 0.75,
+          "mc-35": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-38": 0.8,
+          "mc-59": 0.8,
+          "mc-62": 0.5,
+          "mc-39": 0.8,
+          "mc-14": 0.8,
+          "mc-7": 0.8,
+          "mc-36": 1.0,
+          "mc-51": 0.8,
+          "mc-46": 0.75,
+          "mc-35": 0.75
+        }
+      }
+    }
+  ]
+}

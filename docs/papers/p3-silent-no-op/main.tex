@@ -205,9 +205,9 @@ We drive the official GEPA \citep{agrawal2025gepa} via a loop-genome adapter, ca
 training iterations) sees per-constraint feedback prose --- this is the standard
 optimizer signal and is identical across B and D; it is distinct from the
 in-loop critique gate. Worker \texttt{gpt-4.1-mini} (output cap 320 tokens); reflection
-\texttt{gpt-5.6-luna} on every run recorded under the corrected harness and
-\texttt{gpt-5.6-terra}, which is the CLI default, on the superseded runs that preceded it
-(output cap 1500 throughout). The reflection model is therefore \emph{not} constant across the
+\texttt{gpt-5.6-luna} on the corrected-harness runs this series' conclusions rest on, and
+\texttt{gpt-5.6-terra}, which is the CLI default, on the superseded runs that preceded it and on
+the later cross-provider critic run (output cap 1500 throughout). The reflection model is therefore \emph{not} constant across the
 superseded and corrected sets, so it is one more reason not to read a superseded number against a
 corrected one; within each set it is fixed, which is what the contrasts require.
 

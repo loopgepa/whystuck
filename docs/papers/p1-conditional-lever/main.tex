@@ -272,9 +272,10 @@ toward under-claiming.
 \label{sec:setup}
 
 \paragraph{Models.} Worker \texttt{gpt-4.1-mini} (output cap 320 tokens); reflection
-\texttt{gpt-5.6-luna} on every run recorded under the corrected harness --- the four-arm
-re-run, the $p_0$ sweep and the split-size sweep --- and \texttt{gpt-5.6-terra}, which is the
-CLI default, on the superseded runs that preceded it (output cap 1500 throughout). The
+\texttt{gpt-5.6-luna} on the corrected-harness runs this paper's conclusions rest on --- the
+four-arm re-run, the $p_0$ sweep and the split-size sweep --- and \texttt{gpt-5.6-terra}, which is
+the CLI default, on the superseded runs that preceded it and on the later cross-provider critic
+run, which takes it to match the two runs it is compared against (output cap 1500 throughout). The
 reflection model is therefore \emph{not} constant across the superseded and corrected sets, so
 it is one more reason not to read a superseded number against a corrected one; within each set
 it is fixed, which is what the contrasts require.

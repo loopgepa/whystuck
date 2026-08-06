@@ -34,6 +34,7 @@ def collect_events(
     n_heldout: int = _N_HELDOUT,
     gene_overrides: dict[str, str] | None = None,
     exclude: frozenset[str] = frozenset(),
+    separate_critic: bool = False,
 ) -> list[tuple[bool, bool]]:
     """Return (verdict_pass, actual_pass) for every first-critique event.
 
@@ -55,7 +56,14 @@ def collect_events(
     base rate of already-correct first drafts --- the axis the p₀ sweep varies. So p₀ is
     measurable from any recorded cassette rather than having to be estimated, which matters
     because the independence estimate is biased: constraint failures correlate, and on
-    multi-hard it overestimates the measured value by roughly a factor of two."""
+    multi-hard it overestimates the measured value by roughly a factor of two.
+
+    `separate_critic` is required for a run recorded with `--critique-model`. Those runs route
+    the critique to its own `critic` cassette namespace, so replaying them against the `worker`
+    surface misses every critique call --- one per held-out task, which on a `CassetteMiss` is
+    SKIPPED rather than raised, and the function then returns a short list that looks like a
+    smaller sample instead of a broken replay. The cross-provider run of 2026-08-06 is the first
+    to need it: 80 of its 80 first-critique events went missing this way."""
     include_plan = "plan_gene" in loop_kw
     # Same rule run_validation_study uses, derived rather than duplicated as a constant so
     # the two cannot drift apart and silently generate a different task pool.
@@ -74,6 +82,7 @@ def collect_events(
             mc_score,
             feedback=mc_feedback,
             max_retries=1,
+            critique_complete=cas.wrap(_unreachable, name="critic") if separate_critic else None,
             **loop_kw,
         )
         for seed in seeds:

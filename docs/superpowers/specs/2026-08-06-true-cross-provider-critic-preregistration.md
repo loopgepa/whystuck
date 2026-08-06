@@ -198,3 +198,67 @@ Read the preflight line before anything else. `HTTP 200` means the run is live. 
 host is still blocked and nothing was spent. **`HTTP 429` means the credential works and its quota
 is gone** — which is the only way that question can be answered, and it cannot be answered from a
 blocked host at all.
+
+---
+
+## RESULT — run bought and completed 2026-08-06
+
+Executed exactly as registered: ABCD, seeds 0–7, `groq/llama-3.3-70b-versatile` critic,
+`--max-usd 7`, bound $6.52. Artifacts: `docs/validation-study-xprovider.{json,md}`, cassette
+`tests/fixtures/cassettes/study-xprovider.json` (993 calls: 604 worker, 347 critic, 42 reflection).
+No deviation from the frozen configuration.
+
+**H1: INCONCLUSIVE** by the registered rule. mean(D) − mean(B) = **+0.0144**, positive but far
+inside the noise band: sd(D) + sd(B) = 0.0815. Reported as-is.
+
+**Read the acceptance census before the Δ, per Paper III defect 1.** Arm B accepted on 5 of 8
+seeds, arm D on **3 of 8**. Two independent methods agree: the `genes_changed` field, and the
+score-based check that an arm accepting nothing reproduces its own seed score.
+
+The Δ decomposes into strata that say something quite different from the headline:
+
+| stratum | seeds | mean Δ(D−B) | share of the headline |
+|---|---|---|---|
+| D moved — the treatment actually applied | 3 | +0.0100 | 26% |
+| **only B moved, D returned the seed** | **2** | **+0.0425** | **74%** |
+| neither moved | 3 | +0.0000 | 0% |
+
+**Three quarters of the positive result comes from two seeds where the treatment did not apply
+and the comparator damaged itself** (B lost 0.065 and 0.020 against its own seed genome). On those
+seeds Δ(D−B) is really Δ(seed−B), a one-sided contrast wearing a D-vs-B label — defect 1's mirror,
+arising unprompted in a fresh pre-registered run. Restricted to the seeds where arm D actually
+accepted something, Δ = +0.0100 on n = 3.
+
+**H2: the cross-provider critic is the WORST detector of the three, not the best.**
+
+| critic | n | PASS rate | tp | fp | fn | p₀ | F₁ |
+|---|---|---|---|---|---|---|---|
+| run 3, intrinsic (worker grades itself) | 50 | 0.26 | 1 | 12 | 4 | 0.100 | 0.111 |
+| run 6, cross-lineage `gpt-5.6-luna` | 30 | 0.13 | 4 | 0 | 0 | 0.133 | 1.000 |
+| **D3, cross-provider `llama-3.3-70b`** | **80** | **0.00** | **0** | **0** | **9** | 0.113 | undefined |
+
+The cross-provider critic **never emits PASS**, missing all nine already-correct drafts. It is
+behaviourally "always refine": the degenerate verifier this series keeps meeting, reached from the
+direction the self-preference literature predicts should have improved things. Crossing the
+provider boundary did not buy a better detector; crossing the *lineage* boundary did, and by a
+wide margin on a small sample (30 events, 4 positives — not overclaimed).
+
+**H3 is answered, and it is the run's real contribution.** The withdrawal in `db8065e` removed the
+claim that cross-family verification beats self-verification because no source we had read
+established it. This run supplies our own measurement, and it does not support the claim either:
+the more cross-family the critic, the more degenerate the detector, and held-out score does not
+move in any case. Paper II's thesis — detection is not the binding constraint — now has evidence on
+the exact axis the borrowed citation used to cover. Run 6 sharpens it: a critic with F₁ = 1.00 on
+its sample still produced no held-out movement, and its arm D accepted nothing on any seed.
+
+**A correction to the record for run 6.** `arms_optimized` reports `{'B': 0, 'D': 0}` for it, which
+is the absent-field-read-as-zero defect corrected in `524149c`: `validation-study-crossfamily.json`
+predates `genes_changed`. The score-based check gives the real figure — arm B accepted on 1 of 3
+seeds, arm D on **0 of 3**. Run 6's Δ was a D-vs-seed contrast throughout.
+
+**Tooling gap this exposed, now closed.** `analyze_critique_detector.collect_events` replayed only
+the `worker` surface, so a run recorded with `--critique-model` missed every critique call — and a
+`CassetteMiss` is *skipped*, so it returned a short list that reads as a smaller sample rather than
+a broken replay. All 80 of this run's first-critique events vanished that way on the first attempt.
+`separate_critic=True` wires the `critic` namespace. The earlier registration predicted this
+extension would be needed and it was.
