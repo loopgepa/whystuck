@@ -39,13 +39,13 @@ scoring) against the cached calls with no API key, and any cassette miss raises 
 after the correction in Evidence~7, per run as well, since a consumer that swallows the per-call
 error can otherwise let a replay finish with a different number. GEPA is deterministic under
 replay, so replay is bit-for-bit, and \texttt{scripts/verify\_reproducibility.py}
-registers twenty-five committed runs. Twelve are labelled \textbf{superseded} because
+registers twenty-six committed runs. Twelve are labelled \textbf{superseded} because
 the corrected harness changes every reflection prompt and therefore every cassette key, so it
 cannot replay them and the script reports them as skipped rather than verified.
-The remaining thirteen were recorded under the corrected harness and every per-arm held-out score replays
+The remaining fourteen were recorded under the corrected harness and every per-arm held-out score replays
 exactly. Output tokens are hard-capped via enforced \texttt{max\_tokens}; a pre-flight guard
 refuses any run whose conservative estimate exceeds \texttt{-{}-max-usd}, whose default is \$5.
-Four runs raised it explicitly, at three distinct values (\$6.18 twice, \$5.89, \$11.76), so \$5 is
-a default rather than a study-wide ceiling. Every experiment was pre-registered --- hypothesis,
+Five runs raised it explicitly, at four distinct values (\$6.18 twice, \$5.89, \$6.52, \$11.76), so
+\$5 is a default rather than a study-wide ceiling. Every experiment was pre-registered --- hypothesis,
 frozen configuration, expected seed band and verdict rule committed to version control
 \emph{before} spending.

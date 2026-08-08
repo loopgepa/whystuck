@@ -47,6 +47,27 @@ MODEL_PRICES: dict[str, tuple[float, float]] = {
     # for the stronger follow-up (each needs that provider's API key).
     "gemini/gemini-2.5-flash-lite": (0.10, 0.40),  # cheapest true cross-family critic
     "anthropic/claude-haiku-4-5": (1.00, 5.00),  # cross-family critic (Anthropic)
+    # Added 2026-08-06 for D3. Published Groq on-demand pricing, read that day. Groq is the
+    # strongest available cross-family option because the weights are a different lineage
+    # entirely, not merely a different vendor's model trained on similar data.
+    "groq/llama-3.3-70b-versatile": (0.59, 0.79),
+    # DELIBERATELY NOT USED AS THE D3 CRITIC, and listed only so that choosing it is a
+    # decision rather than an oversight: `gpt-oss` is OpenAI's own open-weights lineage, so
+    # pairing it with an `openai/*` worker rebuilds the shared-lineage confound D3 exists to
+    # remove. It is a quarter of the price, which is exactly why the trap is worth labelling.
+    # Against a LLAMA worker the trap does not apply and it is a genuine cross-lineage critic.
+    #
+    # The key was `groq/openai-gpt-oss-120b` until 2026-08-08, which is not a model: Groq
+    # namespaces it `openai/gpt-oss-120b`, so the litellm string carries two slashes. The price
+    # gate therefore ADMITTED a model that 404s on the first call -- a guard that passes a run
+    # it cannot serve. Every id below was verified against the live `/v1/models` on 2026-08-08.
+    "groq/openai/gpt-oss-120b": (0.15, 0.60),
+    # Added 2026-08-08 so an all-Groq study is possible on the borrowed credential. Published
+    # Groq on-demand pricing, read that day; the batch and cache-hit discounts are each 50% and
+    # neither is claimed here, so these are the ceiling rates.
+    "groq/llama-3.1-8b-instant": (0.05, 0.08),
+    "groq/openai/gpt-oss-20b": (0.075, 0.30),
+    "groq/qwen/qwen3.6-27b": (0.60, 3.00),
 }
 
 

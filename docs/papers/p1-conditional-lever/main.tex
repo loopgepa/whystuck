@@ -193,9 +193,13 @@ Huang et al.\ \citep{huang2023cannot} show the sharp boundary: \emph{intrinsic}
 self-correction (no external feedback) fails to improve and often degrades, and prior positive
 results relied on \emph{oracle} stopping signals that ``vanish when oracle labels are
 not available.'' A parallel line shows LLM
-self-verifiers are unreliable detectors --- high false-positive rates
-\citep{valmeekam2023selfcritique} and a self-enhancement bias, with cross-family
-verification outperforming self-verification. The boundary is not undisputed:
+self-verifiers are unreliable detectors: high false-positive rates
+\citep{valmeekam2023selfcritique}, and LLM judges favour their own outputs --- a
+\emph{self-enhancement} bias \citep{zheng2023judging}. Neither source compares a verifier of one
+model family against self-verification, so whether that separation holds was open when we
+registered it (D3) as an experiment rather than as a replication; we have since bought it, and
+it separates the two claims in the direction opposite to the remedy they suggest
+(\S\ref{sec:directions}). The boundary is not undisputed:
 \citet{liu2024intrinsic} report intrinsic self-correction working under narrow conditions
 (zero temperature, prompts free of leading bias), which is a condition our worker does not
 satisfy --- it samples at the provider's default temperature (\S\ref{sec:setup}), and that
@@ -270,9 +274,10 @@ toward under-claiming.
 \label{sec:setup}
 
 \paragraph{Models.} Worker \texttt{gpt-4.1-mini} (output cap 320 tokens); reflection
-\texttt{gpt-5.6-luna} on every run recorded under the corrected harness --- the four-arm
-re-run, the $p_0$ sweep and the split-size sweep --- and \texttt{gpt-5.6-terra}, which is the
-CLI default, on the superseded runs that preceded it (output cap 1500 throughout). The
+\texttt{gpt-5.6-luna} on the corrected-harness runs this paper's conclusions rest on --- the
+four-arm re-run, the $p_0$ sweep and the split-size sweep --- and \texttt{gpt-5.6-terra}, which is
+the CLI default, on the superseded runs that preceded it and on the later cross-provider critic
+run, which takes it to match the two runs it is compared against (output cap 1500 throughout). The
 reflection model is therefore \emph{not} constant across the superseded and corrected sets, so
 it is one more reason not to read a superseded number against a corrected one; within each set
 it is fixed, which is what the contrasts require.
@@ -920,7 +925,7 @@ Excluding it, two of three rows are positive.}
 training task constant does not hold search depth constant. Promotable accept cycles,
 $(\mathrm{mmc} - n_{\mathrm{train}})/(\min(3,n_{\mathrm{train}}) + n_{\mathrm{train}})$, rise
 across the sweep as $1.43,\,1.82,\,2.11,\,2.22$, while the reflection minibatch falls from
-$75\%$ of the split to $12\%$. Both move monotonically with $n_{\mathrm{train}}$ and neither
+$75\%$ of the split to $12.5\%$. Both move monotonically with $n_{\mathrm{train}}$ and neither
 was held fixed, so a larger split also means a slightly deeper search over a less
 representative minibatch. The starved arm~B at $n_{\mathrm{train}}{=}4$ is that confound
 becoming visible: $1.43$ promotable cycles is enough budget to pass the guard and not enough
@@ -947,8 +952,9 @@ used a cap of $6$ and every one was budget-bound at $1.43$ to $2.22$ cycles, so 
 bitten and no published number is affected --- but it saturates at
 $\mathrm{mmc} = 8 + 6 \times 11 = 74$, so budgets of $80$ and $160$ buy the \emph{same} six
 proposals and must return the same result. Our first draft of this sweep was
-$\mathrm{mmc} \in \{20,40,80,160\}$ at the inherited cap, which would have spent \$7.93 of priced
-bound on two cells that are one experiment and then reported a ``$12\times$ budget range'' whose
+$\mathrm{mmc} \in \{20,40,80,160\}$ at the inherited cap, which would have spent \$6.87 of priced
+bound on two cells that are one experiment and then reported a ``$12\times$ range in \emph{priced
+search depth}'' --- the metric-call budget itself spans only $8\times$ across that set --- whose
 effective range was $1.09$ to $6$. That is the same confound in a third place, which makes it a
 rule: \textbf{before sweeping a budget, check every other limit that could bind first.}
 
@@ -985,7 +991,14 @@ $p_0$ and not of how long the search runs. So we predict (i) the evolved critiqu
 rate remains $0.00$ on at least four of the six arm-D genes at the two deepest cells
 ($\mathrm{mmc}{=}80$ and $\mathrm{mmc}{=}160$). And we predict (ii) \textbf{no monotone trend in
 $\dd(D-B)$ across effective depth}, with no cell exceeding $2.5$ times the directly measured
-$\sigma(\dd) = 0.042$ at this level (\S\ref{sec:repeat}), i.e.\ $|\dd| < 0.105$ throughout. The
+$\sigma(\dd)$ at this level (\S\ref{sec:repeat}), i.e.\ $|\dd| < 0.105$ throughout.\footnote{The
+registered bound was computed from a $\sigma(\dd)$ transcribed as $0.042$. The measured value is
+$0.047$ (Table~\ref{tab:repeat}), which gives $0.117$. We report the bound \emph{as registered}
+rather than the one the artifact supports, because a pre-registered threshold recomputed after the
+fact is not pre-registered; the verdict is the same under either, since the largest $|\dd|$ in the
+sweep is $0.042$. That coincidence is probably the mechanism: the transcribed figure is the sweep's
+own largest $|\dd|$, sitting two lines below in this paragraph's grounds.
+Appendix~\ref{sec:corrections}.} The
 grounds: within the split sweep, depth already ranged $1.43$ to $2.22$ with no ordering
 ($+0.017$, $-0.042$, $+0.062$, $+0.023$), and five three-seed cells cannot resolve a small trend.
 
@@ -1115,9 +1128,13 @@ $\mathrm{mmc}=160$: four of six, the registered threshold exactly. The degenerat
 therefore not an artifact of shallow search any more than of a small split. But the two
 exceptions are not alike, and one of them qualifies \S\ref{sec:analysis}. At depth $12$ the
 accepting gene emits a single \texttt{PASS} and is right ($\mathrm{tp}=1$, $\mathrm{fp}=0$),
-consistent with the precision-1 acceptance reported at the $p_0$ levels. At depth $6$ the
+consistent with the precision-1 acceptance reported at the $p_0$ levels. At $\mathrm{mmc}{=}80$ the
 accepting gene emits a single \texttt{PASS} and is \textbf{wrong} ($\mathrm{tp}=0$,
-$\mathrm{fp}=1$) --- the first false \texttt{PASS} from an evolved gene anywhere in this study.
+$\mathrm{fp}=1$). It is not the study's first, and naming it by depth understates the failure:
+\textbf{three} cells share measured depth $6$, and at $\mathrm{mmc}{=}56$ --- one row above, and
+\emph{shallower} in priced depth --- an evolved gene emits \textbf{three} \texttt{PASS} verdicts,
+all of them false ($\mathrm{tp}=0$, $\mathrm{fp}=3$). Counting properly, the sweep contains
+\textbf{four} false \texttt{PASS} verdicts from evolved genes, and the earliest is that one.
 Our claim that the evolved critique ``never emits a false \texttt{PASS}'' was scoped to the $p_0$
 levels and remains true there, but it does not generalize: precision-1 acceptance is a property
 of those runs, not of the search.
@@ -1180,7 +1197,17 @@ scope.
 \section{Threats to Validity}
 \label{sec:threats}
 
-We state these plainly. \textbf{Power:} runs 4--10 use $n{=}3$ seeds (runs 2--3 use 5), and
+We state these plainly. \textbf{The $p_0$ axis is an operationalization, not a dial.} Our levels
+raise $p_0$ by excluding constraints, and exclusion does not only make tasks easier: it re-assigns
+which constraints the hard tier forces into every task, so a level names a slightly different
+generator. On \texttt{gpt-4.1-mini} the three levels happen to form a clean ladder
+($0.067 \to 0.267 \to 0.667$); on a \texttt{llama-3.3-70b} worker the same three give
+$0.095$, $0.905$ and $0.810$, non-monotonic and with no middle rung (D9,
+\S\ref{sec:directions}). So the swing this paper reports is a swing across \emph{these levels on
+this worker}, and the claim that it is $p_0$ doing the work rests on the mechanism argument of
+\S\ref{sec:decomp} rather than on the axis being portable. Building a level to a measured $p_0$
+target, rather than discovering one by exclusion, is the open problem and is why D9 is listed as
+such. \textbf{Power:} runs 4--10 use $n{=}3$ seeds (runs 2--3 use 5), and
 our earlier claim that the intervals were ``unusually informative despite small $n$'' is
 withdrawn as circular (Paper~III); we now report per-run tie counts alongside every
 interval and an exact sign test. At $n{=}3$ that test cannot fall below $p=0.25$ even with
@@ -1190,13 +1217,17 @@ what it costs the headline:} no interval in this study contains within-condition
 variance, because the worker runs at the provider's default temperature with one sample per
 task, so nothing was measured twice on purpose. It was nonetheless measured by accident, and we
 report it rather than leaving the omission as a scope note. Ten released runs --- the four-arm
-re-run, each row of the split sweep and each bought row of the budget sweep --- evaluate the
+re-run and its discarded first attempt (\S\ref{sec:rerun}), each row of the split sweep and
+each bought row of the budget sweep --- evaluate the
 \emph{same} unoptimized seed genome on the \emph{same} thirty held-out tasks before optimizing
 anything, so they are ten independent draws of one fixed number. Their means span $0.7400$ to
 $0.8183$: a range of $0.078$ on a quantity that is constant by construction, which is the
 plainest statement of the problem this section exists to quantify. We report the count and the
 range rather than enumerating them, because any future run at this split size enrols itself as a
-replicate and an enumeration would need editing every time.
+replicate and an enumeration would need editing every time. The discarded attempt enrols on its
+seed column alone, which scores a fixed genome and involves no optimizer, so the defect that
+superseded its \dd\ leaves this measurement intact --- the rule Paper~III applies to the superseded
+runs' seed column. Without it $\sigma(\dd)$ is $0.0295$.
 From the paired differences, $\sigma$ for one task under one draw is $0.1125$; a $\dd$ compares
 two independent draws, so $\sigma(\dd)$ on one task is $0.1591$ and on a thirty-task mean
 \[
@@ -1237,7 +1268,9 @@ a refine round moves length by under two words at every level, against a floor t
 empty answer to reach. \textbf{Single worker/reflection
 model:} results may be model-dependent \citep{huang2023cannot}. \textbf{Cross-lineage, not
 cross-provider:} run 6's critic shares a vendor and training lineage with the worker, so it
-breaks self-\emph{grading} but may retain self-preference bias (D3). \textbf{One task family:}
+breaks self-\emph{grading} but may retain self-preference bias. This limitation is now
+\emph{lifted} rather than outstanding: D3 repeats it across the vendor boundary and the null
+survives, so self-preference is not what was holding the effect down (\S\ref{sec:directions}). \textbf{One task family:}
 verifiable instruction-following may be a domain where the critique has little leverage.
 \textbf{Budget:} $\mathrm{mmc}\in[20,64]$ was small; \S\ref{sec:budgetresult} now spans $20$
 to $160$ and finds no trend in $\dd$. \textbf{Held-out generalization:} the
@@ -1285,7 +1318,7 @@ more seeds.}
 
 Three things follow, and they cut in different directions. First, \textbf{the withdrawal of the
 $L_1$ loss is confirmed by direct measurement}: averaged over five draws it halves, from
-$-0.042$ to $-0.021$, and sits $1.12$ standard errors from zero. Second, \textbf{the $L_2$ gain
+$-0.042$ to $-0.021$, and sits $1.00$ standard errors from zero. Second, \textbf{the $L_2$ gain
 survives, at $p<0.10$} --- $+0.055$ against its own five-replicate standard error, $t = 2.70$
 against a $2.776$ threshold it misses by $0.08$. This is the only inferential statement in the
 paper that does not rest on three seeds, and it is the study's best-supported loop-level effect.
@@ -1321,7 +1354,10 @@ Threat & Closable as released? & What it requires \\
   The four-arm re-run on the corrected harness changed \texttt{ensure\_correct} on $3/3$
   seeds. Every row below is now a threat to a measurement that happened \\
 Single worker/reflection model & Partly, by spend & Worker swap done pre-audit
-  ($\dd=-0.014$); needs redoing post-fix \\
+  ($\dd=-0.014$); needs redoing post-fix. A second worker on another provider corroborates
+  Paper~II's detection-versus-repair \emph{ordering} at $20$ seeds --- not its magnitudes, and
+  not the ranking of its cells --- but cannot carry this paper's lever at all: the $p_0$ ladder
+  collapses on it (see D9), so there is no middle level to measure a conditional effect at \\
 \textbf{Small train split} ($8$) & \textbf{Closed} (\S\ref{sec:splitresult}) & Bought:
   $n_{\mathrm{train}} \in \{4,8,16,24\}$ at constant epochs, held-out and seeds fixed. The
   degenerate verifier survives every size ($11/12$ genes); $\dd(D-B)$ does not, and the
@@ -1343,16 +1379,21 @@ Power, $n{=}3$; no sampling variance & Partly, as released & $\sigma(\dd) = 0.02
 \textbf{$\dd$ credits the treatment with a shared gene} (\S\ref{sec:decomp}) & \textbf{Closed}
   (\S\ref{sec:decomp}) & Both arms evolve \texttt{generate}, so $\dd$ mixes it with the
   treatment; the draft/loop split separates them offline from the released artifact \\
-Cross-lineage, not cross-provider & No --- credential & A Gemini or Anthropic key; pricing
-  already in place (D3) \\
+Cross-lineage, not cross-provider & \textbf{Closed by spend}, result inconclusive
+  (\S\ref{sec:directions}) & Bought on a
+  second vendor's key: \texttt{llama-3.3-70b} judging the same \texttt{gpt-4.1-mini} worker at
+  $8$ seeds. Crossing the provider boundary made detection \emph{worse} --- a critic that never
+  passes --- and $\dd$ did not move (D3) \\
 One task family (math) & No --- new harness & Parametric math generator plus numeric checker;
   instance-level visible/hidden split \\
 Held-out generalization & No --- generator work & Enlarged parameter pools, then re-run and
   report the gap (D8) \\
 \bottomrule
 \end{tabular}
-\caption{Threat closability against the released artifact and an OpenAI-only key. ``By
-spend'' means the harness answers it with no new code. The first row was the one that
+\caption{Threat closability against the released artifact. ``By
+spend'' means the harness answers it with no new code; every row so marked is answerable with an
+OpenAI key alone, the one exception being the cross-provider row, which was closed after the
+study on a second vendor's key. The first row was the one that
 superseded all others --- a threat to the existence of a result rather than to its
 interpretation --- and \S\ref{sec:rerun} closes it. The two remaining bolded rows came from
 the second audit; neither questions whether the measurement happened, but both change what
@@ -1365,8 +1406,9 @@ its numbers may be read to mean.}
 
 The null is not ``componentized optimization is useless''; it is ``the critique component of a
 self-refine loop is not a productive optimization target when it is an unreliable,
-self-referential detector on shallow-verification tasks.'' Five of the directions below were
-bought during the study, and what they changed is the priority: no longer \emph{get a better
+self-referential detector on shallow-verification tasks.'' Six of the directions below have been
+bought, one of them only in part --- five during the study and D3 after it --- and what they
+changed is the priority: no longer \emph{get a better
 detector}, since a perfect one does not suffice, but \emph{fix the fixer} --- which Paper~II
 shows to be partly feedback-limited and partly generator-limited. Each changes one variable.
 
@@ -1377,11 +1419,27 @@ shows to be partly feedback-limited and partly generator-limited. Each changes o
   \item[D2$'$ (feedback actionability) --- \textbf{done}, runs 9--10 (Paper~II).]
     \emph{Remaining:} whether an LLM \emph{rewriting} the measured edits adds anything over the
     raw measurement.
-  \item[D3 (true cross-family critic) --- \textbf{blocked on a credential}.] Run 6's critic
-    shares a vendor and lineage with the worker. Repeating it cross-\emph{provider}
-    (\texttt{gemini-\allowbreak 2.5-\allowbreak flash-\allowbreak lite} or
-    \texttt{claude-\allowbreak haiku-\allowbreak 4-5}, pre-priced) at $\ge 8$ seeds is the only
-    direction that separates an intrinsically unreliable detector from a self-preferring one.
+  \item[D3 (true cross-family critic) --- \textbf{done} (pre-registered and bought
+    2026-08-06).] Run 6's critic shared a vendor and lineage with the worker; this repeats it
+    cross-\emph{provider}, with the critique on \texttt{llama-\allowbreak 3.3-\allowbreak 70b}
+    over the same \texttt{gpt-4.1-mini} worker, at the $8$ seeds this entry asked for.
+    $\dd(D-B) = +0.014$, \textbf{inconclusive} against a noise band of $0.081$. The informative
+    half is the detector: crossing the vendor boundary did not produce a better critic but a
+    \emph{degenerate} one, emitting \texttt{PASS} on none of $80$ held-out drafts, where the
+    same-vendor cross-lineage critic of run~6 was the only \emph{model substitution} that
+    produced an accurate detector (Paper~II, which also reports an accurate detector obtained a
+    different way --- by feeding the same critique a measurement tool). So the question this entry existed to settle --- unreliable
+    detector or self-preferring one --- is answered against self-preference: moving off the
+    worker's weights entirely made detection worse, and loop-level optimization bought nothing
+    over prompt-only optimization under either. On the \emph{unoptimized} loop the two critics do
+    separate, and Paper~II reports that separately --- a distinction worth keeping, since the two
+    axes were briefly conflated while this entry was being written.
+    \emph{Remaining:} the same comparison with an evolved rather than a seed critique, and a
+    second cross-provider family to show the degeneracy is not one model's quirk.
+    This run also supplied the companion paper's first \emph{prospective} test of its
+    reporting minimum, and strengthened it: arm~D accepted on only $3$ of $8$ seeds, and $74\%$ of
+    the positive $\dd$ came from two seeds where the treatment never applied
+    (Paper~III).
   \item[D4 (search depth) --- \textbf{done, and closed} (\S\ref{sec:budgetresult}).] Bought at
     fixed $n_{\mathrm{train}}{=}8$ over a measured six-fold depth range: no trend, deepest cell
     flattest. That was the last configuration in which a positive finding was available, since
@@ -1416,6 +1474,21 @@ shows to be partly feedback-limited and partly generator-limited. Each changes o
     task from any cassette, so the level is built to specification rather than discovered. Under
     either, the already-correct stratum stops being two tasks wide, which is what
     \S\ref{sec:decomp} needs to estimate the damage channel instead of bounding it.
+    \emph{Measured, and it sharpens the problem:} run on a \texttt{llama-3.3-70b} worker at
+    $20$ seeds, the same three exclusion levels give
+    $p_0 = 0.095$, $0.905$ and $0.810$ --- not a ladder but one point at the floor and two at the
+    ceiling, and \emph{non-monotonic}, since excluding a second constraint \emph{lowers} $p_0$.
+    The mechanism is in the generator, not in the worker, and it is worth stating because it
+    disqualifies exclusion as a specification on \emph{any} worker. Excluding a constraint does
+    not merely drop a scoring criterion: the hard tier forces a brutal anchor constraint into
+    every task and falls back to whichever brutal id survives, so removing one re-assigns which
+    constraints are compulsory. At $L_2$ both surviving brutal constraints are forced into every
+    task; at $L_3$ only one is and the freed slot is filled from the ordinary hard pool. An
+    exclusion level therefore names a different \emph{generator} rather than a difficulty, and the
+    $p_0$ it yields depends on which of the substituted constraints a given worker finds hard.
+    That is why (ii) --- sample to a target $p_0$, measured per task --- is the candidate that can
+    specify a level at all. It says nothing for or against (i), which varies the drafting budget
+    and leaves the constraint set alone.
 \end{description}
 
 \paragraph{A pre-registered prediction for the corrected-harness re-run --- \textbf{resolved,
@@ -1486,9 +1559,9 @@ matters depends on $p_0$.
 
 Reaching this answer cost every contrast run which preceded it: \textbf{fifteen} of them, across
 instruction following, a cross-domain replication on frontier-hard code (\S\ref{sec:bcb}), an
-actuator variant and a worker-model swap. Ten reported $\dd(D{-}B)$ of exactly zero, and none of
-them tested the hypothesis, because the critique gene never changed:
-a zero replicated ten times, from an experiment that did not run. Paper~III reports that audit and
+actuator variant and a worker-model swap. Ten produced arms with held-out scores identical on every
+seed, and none of them tested the hypothesis, because the critique gene never changed:
+an identity replicated ten times, from an experiment that did not run. Paper~III reports that audit and
 the reporting minimum it argues for --- \textbf{per component, whether the optimizer's output
 differs from the seed} --- which would have ended this line of work fifteen runs earlier.
 Against that background the honest summary of what this paper contributes about componentized
@@ -1512,7 +1585,7 @@ This paper's earlier drafts published claims it now withdraws, and two of its pr
 predictions failed. Reporting guidance for preregistered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Twelve} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Sixteen} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1525,7 +1598,7 @@ The series' other two papers carry the entries bearing on their own claims.
     training-split sizes at the same $p_0$ come out positive
     (\S\ref{sec:splitresult}), the cell is $1.44\sigma$ of a measured noise floor
     (\S\ref{sec:threats}), and five independent draws of the same genomes halve it to $-0.021$,
-    $1.12$ standard errors from zero (\S\ref{sec:repeat}). What survives is the
+    $1.00$ standard errors from zero (\S\ref{sec:repeat}). What survives is the
     \emph{conditional} statement in \S\ref{sec:p0}.
   \item \textbf{``Optimization made both arms worse.''} Published from the contaminated first
     attempt, where prompt-only and loop-level both fell below baseline. On the clean re-run
@@ -1559,9 +1632,12 @@ The series' other two papers carry the entries bearing on their own claims.
     $K{=}5$ standard error divided the \emph{population} sd of the five draws by $\sqrt{5}$, and
     the result was then compared against critical values from $t(4)$ --- a distribution that
     exists \emph{because} the denominator is $n-1$. The unbiased estimator inflates $\sigma$ by
-    $\sqrt{5/4} = 1.118$, so every $t$ in earlier drafts was $10.6\%$ too large. The same
-    mistake in the cross-run estimate, over $30$ paired tasks, moved $\sigma(\dd)$ from $0.0291$
-    to $0.0286$ and every ratio scaled by it by $1.7\%$. Both are corrected throughout. The
+    $\sqrt{5/4} = 1.118$, so every $t$ in earlier drafts exceeded its corrected value by
+    $11.8\%$ (equivalently, correcting one lowers it by $10.6\%$; we state both because the
+    bare phrase ``too large by'' does not say which value is the denominator). The same
+    mistake in the cross-run estimate, over $30$ paired tasks, \emph{understated} $\sigma(\dd)$
+    as $0.0286$ where the unbiased estimator gives $0.0291$, and scaled every ratio built on it
+    by $1.7\%$. Both are corrected throughout, and $0.0291$ is the value divided by here. The
     error was invisible to \texttt{verify\_paper\_claims.py}, which checks the paper against the
     same function that computed it, so paper and checker were wrong together --- the same
     shared-error blind spot as the borrowed $\sigma$, one level down.
@@ -1580,6 +1656,56 @@ The series' other two papers carry the entries bearing on their own claims.
     inferences drawn from runs 4 and 5 did not say that those runs predate the harness correction,
     so their between-arm contrast is not a measurement. Both are now stated at the strength the
     source supports.
+  \item \textbf{``Those eight tasks are the only ones on which the two genes' verdicts differ.''}
+    False, and contradicted two clauses earlier in its own sentence. The verdicts differ on
+    exactly \emph{three} of the $32$ held-out tasks --- the three false passes the hand-written
+    gene caught --- because both genes returned FAIL on all five already-compliant drafts, which
+    is what ``both genes demanded fixes on all five'' says. The eight are the tasks
+    \S\ref{sec:handgene}'s decomposition \emph{names}: three where the verdict changed and five
+    where the draft needed no change. Nothing quantitative moves; the $-0.009$/$-0.023$ split and
+    every number in it stand. \texttt{verify\_paper\_claims.py} now derives all three stratum
+    sizes from the replay, so the sentence cannot be restated the old way.
+  \item \textbf{``The first false \texttt{PASS} from an evolved gene anywhere in this study.''}
+    Neither the first nor the only one. Replaying every budget-sweep cell under its own winning
+    genome, the $\mathrm{mmc}{=}56$ arm-D gene on seed~1 is evolved --- \texttt{genes\_changed}
+    lists \texttt{ensure\_correct}, a $4769$-character rubric against the $127$-character seed ---
+    and emits three held-out \texttt{PASS} verdicts, all false. It sits one row above
+    $\mathrm{mmc}{=}80$ in Table~\ref{tab:budgetresult} and is shallower in priced depth, so the
+    sweep holds four such verdicts and the earliest is three times the size of the one we reported.
+    Naming the cell ``depth $6$'' concealed this, because three cells share that measured depth.
+    The error ran \emph{against} us: the sentence exists to bound how far precision-1 acceptance
+    fails to generalize, and the bound was too generous. \S\ref{sec:budgetresult} now states the
+    cell by its \texttt{mmc}, and all four counts are derived from the same replay that already
+    reproduced the two we had right. Found independently by four of the twelve cold reviewers.
+  \item \textbf{The registered depth bound was computed from a $\sigma$ nothing measured.}
+    \S\ref{sec:budgetprereg} registered ``$2.5$ times the directly measured $\sigma(\dd) = 0.042$ at
+    this level (\S\ref{sec:repeat}), i.e.\ $|\dd| < 0.105$''. \S\ref{sec:repeat} reports $0.0468$,
+    which the paper prints as $0.047$ in the three other places it cites that section for the same
+    quantity; $0.042$ appears in no replicate. At the measured value the bound would have been
+    $0.117$. We have \emph{not} recomputed it --- a pre-registered threshold recalculated after the
+    fact is not pre-registered --- so $0.105$ stands as registered, with a footnote stating what the
+    artifact supports. The verdict is unaffected either way: the largest $|\dd|$ in the sweep is
+    $0.042$, comfortably inside both. The likely mechanism is visible in the same paragraph, whose
+    grounds list that largest $|\dd|$ two lines below the $\sigma$ slot it landed in.
+    Neither number was reachable by the prose-coverage guard, even after its repair: that guard asks
+    whether a printed decimal is in the set of \emph{values} some check derives, and $0.042$ collides
+    with this paper's own $-0.042$ headline while $0.105$ collides with a confidence bound in
+    Table~\ref{tab:p0}. A wrong number tends to collide with a related one nearby, because
+    nearby is where it was copied from. Found independently by three of the twelve cold reviewers.
+  \item \textbf{Two results attributed to a citation that contains neither.} \S\ref{sec:related}
+    read ``high false-positive rates \citep{valmeekam2023selfcritique} and a self-enhancement bias,
+    with cross-family verification outperforming self-verification''. Only the first clause is in
+    that source: it uses GPT-4 as both generator and verifier and compares against an external
+    \emph{sound} verifier (a symbolic plan validator), so it contains no cross-family LLM
+    comparison, and the phrase ``self-enhancement bias'' does not occur in it. The term originates
+    with \citet{zheng2023judging}, which was not in our bibliography at all; it is now cited for
+    that clause and for nothing else. The cross-family clause is \textbf{withdrawn rather than
+    re-sourced}: it may well be true, but we had read no source establishing it, and replacing one
+    unverified citation with another is not a correction. Nothing in the paper's own results
+    depended on it --- D3 argues for a cross-provider critic from our own measurements, not from
+    prior work --- so the direction stands and the borrowed support does not. Paper~II carried the
+    same sentence and a second, broader version of it. Found by three of the twelve cold reviewers,
+    all in condition~B.
 \end{enumerate}
 
 \section{The Actuator Experiment, and the MBPP+ Attempt}
@@ -1691,10 +1817,12 @@ threshold move itself bought is small and legible: on the three tasks whose fals
 correctly caught, the score rose $0.800 \to 0.867$ (one repaired to $1.0$, two unchanged),
 worth $+0.006$ on the 32-task mean; on the five tasks whose draft was already compliant the
 mean is $-0.100$, and since \emph{both} genes demanded fixes on all five, that is one damaged
-draft rather than a false-alarm difference. Those eight tasks are the only ones on which the
-two genes' \emph{verdicts} differ, and together they account for $-0.009$ of the $-0.033$: the
-remaining $-0.023$ falls on the twenty-four tasks where both genes demanded a fix and only the
-repair \emph{prose} differed. So eliminating false passes bought a real gain an order of
+draft rather than a false-alarm difference. The two genes' \emph{verdicts} differ on exactly
+those \textbf{three} tasks and nowhere else --- both demanded a fix on all \textbf{five}
+compliant drafts and on the other \textbf{twenty-four} --- so the eight are the tasks this
+decomposition names, not the tasks the genes disagreed about. Together they account for
+$-0.009$ of the $-0.033$: the remaining $-0.023$ falls on the twenty-four non-compliant drafts
+that both genes sent to a refine round, where only the repair \emph{prose} differed. So eliminating false passes bought a real gain an order of
 magnitude below the noise it sits in, and the larger part of the movement is not the threshold
 at all --- it is the rewritten repair text, which is the lever Paper~II measures
 directly.

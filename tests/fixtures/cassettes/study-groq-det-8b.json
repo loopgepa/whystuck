@@ -1,0 +1,2401 @@
+{
+  "entries": {
+    "critic:01bd8e9730606a2b16c03db00edfab4a1e3a54857b6ff4f950f402322c4da38d": {
+      "name": "critic",
+      "output": "what to fix:\n- uses a word longer than 6 letters ('pet')\n- exceeds word limit (exactly 15 words)\n- has extra items in the list (exceeds 5 items)\n- list not in order of 15 words exactly\n\ndraft answer revised\n- dog is fun\n- cat is fun\n- sun is hot\n- kid is new\n- dog is cute"
+    },
+    "critic:023c72380a76a1223d0ee5bce1a9e15e32cc5a926645f6a880bbd06d4c380700": {
+      "name": "critic",
+      "output": "Fix the following to satisfy the requirements:\n\n- Add exactly 0 more words, the response is under the required 20 words.\n- Use exactly 20 words.\n- The exact wording \"wave form\" may change the meaning, so a better option is \"wave-like form\" or similar.\n- There are more than 4 bullet points.\n- The sentence \"Ocean creates huge wave here we go.\" should be after the 4 bullet points.\n\nHere's the revised answer:\n\n- Light is energy in wave-like form everywhere\n- Particles exhibit wave properties always consistently\n- Wave crashes on shoreline strong impact\n- Ocean creates huge wave here we go."
+    },
+    "critic:02715aa0d128aa54fdeb430197de85c3949586b8af224ca40630e10893253c72": {
+      "name": "critic",
+      "output": "to revise the answer:\n\n i talk tiny bits sand fall slow down that is it.\n\nrequirements checked:\n\n- task satisfied: concept is mentioned\n- end response with exact phrase: pass\n- entire response in lowercase: pass\n- use exactly 20 words: failed (answer has 12 words)\n- use no word longer than 7 letters: failed (words \"talk\" and \"tiny\" have 4 letters, but other words don't, however, the word \"concepts\" or \"explanation\" is missing, so i added 'down')\n- use no word longer than 7 letters: failed (word \"slowdown\" has 8 letters)"
+    },
+    "critic:031a7e0ceda4a2789381b4f4ddca7070e56a6dbddec83a47e3631f9f455c7756": {
+      "name": "critic",
+      "output": "to fix: \n- 3 words are too long \n  * i'd replace \"fun things\" with a 2-word replacement (\"funny bits\")\n  * \"all\" might be too long; could keep \"all\" or change to 1-word (e.g. \"ok\")\n  * \"requirement\" is too long and must be changed \n  * and change \"things\" to \"bits\" isn't necessary but to keep to the 15-word rule this is required\n\ndraft:\ni will talk to you now and say funny bits are nice to you now ok all is set."
+    },
+    "critic:04667a73ba7171e55834ec65a6e6a49e0ef6bcb4cf8dc86246620a8c716232f8": {
+      "name": "critic",
+      "output": "- Water falls \n- Earth rotates \n- Sun sets as day ends we are done.\n\nFix:\n- The answer still has some issues with word \"and\".\n- It exceeds the exact word count limit of 20."
+    },
+    "critic:048da9ab9d668e38aaf12919298a78895af438502715bf97e53e7a338138a63a": {
+      "name": "critic",
+      "output": "fix: the answer exceeds the 20-word limit.\n\n revised answer: student learns about tiny things like atom and its simple structure every day is very important to their growth process always."
+    },
+    "critic:04e707a90eb5fb3944093c360c0b73e0f8e961ee73d826066666167df39200dd": {
+      "name": "critic",
+      "output": "# Draft answer review\n\nNot satisfied:\n- The response should use exactly 15 words, but the current answer uses only 8.\n- The response should be in exactly 5 bullet points with exactly 3 words per line, but it's not.\n- The response should not use the word \"to\".\n\nWhat to fix:\n- Increase the number of words in each bullet point to exactly 3.\n- Add more bullet points to make a total of exactly 5.\n- Reformulate the content to include the word \"gene\" and have 9 words per line (3 x 3)."
+    },
+    "critic:06b5a43dcdbf34690539b6157d6300efc6469fa730fba1b67eb7e32a1ef0ef70": {
+      "name": "critic",
+      "output": "- Fix the following:\n- The response must use 15 words\n- The response must be in exactly 5 bullet points\n- The response must not use any commas\n- The response must not include any word longer than 6 letters"
+    },
+    "critic:0744c6668121eb1788861245549ade1ba8507b39a0f16682d58813b0235e9208": {
+      "name": "critic",
+      "output": "To be PASS, the response needs to be revised. Here's why:\n\n1. The current response contains a word longer than 7 letters: \"key\", \"fast\", \"box\". \n2. The response needs to use exactly 25 words. \n3. The format must be exactly 3 bullet points per line, which the current response does not.\n\nTo fix, here's a revised answer:\n\n- Node is a part\n- Node helps run fast\n- Node is a small bit"
+    },
+    "critic:079b7a69f2cacc3442c55e2ad912842821107fe770f5b58ea763211efdeab444": {
+      "name": "critic",
+      "output": "Photosynthesis occurs when plants convert sunlight into usable energy all is set."
+    },
+    "critic:0a0a624e9900ff96d22729c81caebdcd90dfd7ff3f182963f09f41e7b774a601": {
+      "name": "critic",
+      "output": "To revise the draft answer:\n\nThe following is not satisfied:\n- exact length of 25 words (the current response is only 9 words)\n- no word longer than 6 letters (there are some 7-letter words)\n\nTo revise, here is a new draft:\n- I am a pet \n- is nice and fun \n- I like my pet \n- my pet is a nice"
+    },
+    "critic:0b3784d416e3bcacc82ff45fe68d9c4f64e5bb19f32071764fc6b1b7fcaca4cc": {
+      "name": "critic",
+      "output": "what to fix:\n- the word 'fun' is longer than 6 letters\n- there should be exactly 15 words \n    revised version \ni will teach you a new code to make fun with it now every day"
+    },
+    "critic:0cd83bb9cc55ee032f55fad1c2355e1d76da3a04996266cfce754a1d96e5f674": {
+      "name": "critic",
+      "output": "Fix list:\n- too long, 25 words required\n- use word longer than 6 letters \"big\""
+    },
+    "critic:0d590d4b70eb3e9d297ada29c00dceb9e5c9f4543da994d01e2e453ed064868c": {
+      "name": "critic",
+      "output": "to fix: \n- the response should have exactly 20 words, but it currently has 22 and then 21, including both words tiny busy tiny codes.\n- do not use the word \"in\""
+    },
+    "critic:127ee43919aba8358d013f7b2d432c343b0ef3cbd628dea927597d7690af5859": {
+      "name": "critic",
+      "output": "to fix:\n- include the word \"node\" is satisfied\n- does not use any commas - satisfied\n- exact amount of words: the draft has 24 words so we need to add one more to reach 25 \n- use no word longer than 7 letters - many words have more than 7 letters (e.g. 'small', 'basics') \n- write in entirety in lowercase - satisfied"
+    },
+    "critic:133b1b750ddb30322aea12242baaa78da8a8fa3aedcd1337755c4b70108714b8": {
+      "name": "critic",
+      "output": "to fix:\n- the response is 18 words, while the requirement was exactly 15 words.\n- the words \"hotter\" is longer than 7 letters and needs to be reduced.\n- the response can be written mostly in lowercase, but 'goes' is capitalized, so it needs to be changed.\n\nrevised answer:\nthe sun is hot and it makes the water get very warm so it goes."
+    },
+    "critic:142943755dc59c665f9e5c5b1e5250dcd6453b8413026f38faf3729f9c6f94e9": {
+      "name": "critic",
+      "output": "students need to understand main concepts and key ideas for their academic success always matters \n\n- all constraints are satisfied \n\nPASS"
+    },
+    "critic:159894fca4c6395f5c2bfa6c038144f508020c5922a297a0747445bd4fc815e3": {
+      "name": "critic",
+      "output": "- Discovery is made in science field slowly\n- experts analyze data in constant flux\n- Researchers find new evidence daily\n- flux of new ideas emerges slowly \n\nResult: FIX the following issues: \n- The answer must satisfy the \"exactly 25 words\" word limit, it has only 24 but can be adjusted by making it slightly longer and removing the need for word \"slowly\".\n- \"exactly 4 bullet points, each line starting \"- \" has been satisfied.\n- There's no word \"to\" is used.\n- Word \"flux\" is included. \n- The \"no usage of commas\" requirement seems to be satisfied. \n\nRevised answer: \n- Discovery is initiated in science field over time\n- experts analyze data in a constant state of flux\n- Researchers find new evidence daily\n- flux of new ideas emerges slowly now"
+    },
+    "critic:1701d37b1e8aba9a4ef66cda97563058c1454b8e14b0657dfcdf47c920949bf1": {
+      "name": "critic",
+      "output": "To revise the draft answer, we need to make the following adjustments:\n\n- The word \"found\" has 6 letters, which is acceptable, but some other words may exceed the 7-letter limit. \n- The exact phrase \"we are done\" is already included.\n- However, the word \"small\" has 5 letters, and \"new node\" uses \"node\" only as part of a phrase, which should be adjusted.\n\nA revised answer satisfying all constraints is:\n\nnew path is found at a small old place node we are done."
+    },
+    "critic:176757f8620458cf5e77cdd9572d7038c19253dd420378c49bd22eb13c17db98": {
+      "name": "critic",
+      "output": "To fix: \n- The response is too short; it should have exactly 15 words. \n- There is a word \"fun\" which has more than 3 letters; the maximum allowed is 7.\n\nCorrect response:\nI help you with a simple task every day with no work we are done."
+    },
+    "critic:1aa1ea96fdd2eb1381a2a8ee81a1b51d87aabd9c263e807e0a21a3bb43d3477b": {
+      "name": "critic",
+      "output": "List what to fix:\n- do not use any commas: Failed (contains words with commas, \"done\")\n- use exactly 15 words: Failed (has fewer than 15 words)\n- use no word longer than 6 letters: Failed (contains words longer than 6 letters, \"big jobs done\")\n- use no word \"of\" is not violated"
+    },
+    "critic:1b12cd12131e248539985d0a1b7b332f54f133a036ce7b042f3db217cf1e03b4": {
+      "name": "critic",
+      "output": "- to check the response, I re-read the task and constraints:\n1. \"do not use the word 'the'\" is not satisfied; needs fixing\n2. written response is in lowercase, so this is satisfied\n3. it is formatted as 5 bullet points, so this is satisfied\n4. it uses exactly 20 words, so this is satisfied\n5. it is in exactly 5 bullet points as stated, so this is also satisfied\n\nto fix the issue with the word \"the\", here is the revised response:\n\n- natural light shines \n- ocean waves move \n- earth spins slowly \n- water evaporates quickly \n- plants grow slowly on land"
+    },
+    "critic:1bb9fff8d33cc484055b89487f3f511fa2d23eb1e8e3c937bb3d3c96235eb5ce": {
+      "name": "critic",
+      "output": "To revise the answer, let's break down the requirements:\n\n1. Explain a scientific concept: The answer does explain a basic concept related to genetics.\n2. End with \"here we go\": The answer meets this requirement.\n3. Include the word \"gene\": The answer includes the word \"gene\".\n4. Use no word longer than 6 letters: The answer needs revision as it contains several words longer than 6 letters (\"code\" is fine but \"helps\" and \"make\" and \"key\" and \"form\" have more).\n5. Use exactly 25 words: The answer is shorter than 25 words and should be revised to meet this requirement.\n6. Do not use any commas: The answer meets this requirement.\n\nHere's a revised answer that meets all the requirements:\n\nGene is code in cell it helps it grows and makes new cell from old cell that has gene here we go."
+    },
+    "critic:1c5b7207e18cb2abd1f8ab4a1783195a89fe2d6575b9ed9207fd8a4f65e154c6": {
+      "name": "critic",
+      "output": "*what to fix*\n- requirement 2 is not satisfied (the text is not in lowercase) (change everything to lowercase letters)\n- requirement 3 is not satisfied (the response is not exactly 3 bullet points) (revise to exactly 3 points)\n- requirement 4 is not satisfied (the response is not exactly 15 words) (revise to exactly 15 words)\n\ndraft revised response\n- modern technology significantly impacts human life daily routines greatly everywhere now\n- modern technology improves human life daily routines greatly for everyone slowly\n- technology impacts human life greatly improving daily routines for everyone worldwide"
+    },
+    "critic:1e794bcb7f1329e8c52bf7306ede1a8bda0192b42c46d362abc0b97ce8bd664f": {
+      "name": "critic",
+      "output": "List of issues:\n\n1. The response does not end with the exact phrase \"that is it\" but rather \"that is it\" which is a part of \"that is it.\"\n\n2. The response contains commas.\n3. The response uses a non-exact 25-word count.\n4. The response includes words like \"from\" which could be removed for a more 'theless' writing style"
+    },
+    "critic:1eb1043776dbe0dc5cf0d7eec8d128a02ba2f9e3286620276057072e2ee05f4d": {
+      "name": "critic",
+      "output": "What to fix:\n- length: the total word count is 14 which is below the requirement of 20\n- word length: the word \"use\" has 3 letters which is below the 6 character limit of longer word requirement \n- word length: the word \"tech\" has only 4 letters which is below the 6 character limit of longer word requirement"
+    },
+    "critic:1f52cffb858dc222422bb0c1f46ebcbfbd3953f0442e20522bdecb3f6a85d80f": {
+      "name": "critic",
+      "output": "- \n* \n- Discovery made with great fanfare yesterday morning\n- Researchers find new species daily now freely\n- Incredible breakthroughs occurring swiftly outside world\n- Scientists eagerly want to share findings soon so it goes."
+    },
+    "critic:20119f9a6cf3a6f35b829a5ea43af7fae91c7a64d32f0f00eedc170861d44ec6": {
+      "name": "critic",
+      "output": "what to fix:\n- 'tech' is 4 letters but 'technology' is used in task meaning more than 7 letters should be used, \n- no word longer than 7 letters is broken, \n- 'new', 'fun', 'play', and 'every' are more than 7 letters and are broken, \n- the word \"of\" is used in the task but should be avoided, \n- entire response is in low caps, \n- exactly 20 words are not used. \n\n revised answer\ni talk bad about a good tool that is easy to use and play with each day now home."
+    },
+    "critic:205ad890ff2b282b780358e12b373a590c2c5f29701594ecc317bcea50466f50": {
+      "name": "critic",
+      "output": "i found a new wave in a small pond with calm blue water now\n\nrequirements that need to be fixed:\n- use exactly 15 words: this response contains 11 words. need to add 4 more.\n- use no word longer than 6 letters: some words in this response are longer than 6 letters (especially \"pond\"). need to find shorter synonyms or replace words."
+    },
+    "critic:231c55cafbed5ff12b24088e8314aa8adbd6ae2597e0a5cbc8db061f409ec2c8": {
+      "name": "critic",
+      "output": "Magnetic fields exhibit flux during electromagnetic induction processes in physics every human life forms experience.\n\nFix: \n1. The word count is under 15 words. Revising draft answer:\nMagnetic fields exhibit flux during electromagnetic induction processes in physics all day every human life forms experience daily."
+    },
+    "critic:240db51459c693844afb869659ead46ddafe006b0599a30da8770c81db81e03f": {
+      "name": "critic",
+      "output": "List of issues:\n- The draft answer does not contain exactly 5 bullet points (issue with length)\n- The draft answer does not use exactly 20 words\n- The draft answer uses the word \"Fast\" that is more than 6 letters long\n- The response format and exact ending phrase requirement are nearly satisfied"
+    },
+    "critic:2433781203c7d38c7e9b530d159623b22c4f87cf5779db649cb57d9b8aa0e84b": {
+      "name": "critic",
+      "output": "- to be rewritten in exactly 25 words\n- to avoid using the word \"and\"\n- to avoid using any words longer than 6 letters\n- to not use commas\n- to format as exactly 4 bullet points\n\nList of issues to fix before finalising the answer."
+    },
+    "critic:2473089d181bd4b5b8db846b0cb1bbe499deb60213d92582b7599dcedda42b07": {
+      "name": "critic",
+      "output": "To check the constraints let's review them:\n- format as exactly 3 bullet points, each line starting \"- \"\n  * Satisfied: Yes, response is formatted as required.\n- do not use the word \"and\"\n  * Satisfied: Yes, response does not contain the word \"and.\"\n- include the word \"wave\"\n  * Satisfied: Yes, response contains the word \"wave.\"\n- use exactly 20 words\n  * Not Satisfied: No, response is short of 4 words.\n- do not use any commas\n  * Satisfied: Yes, response does not contain commas.\n\nTo fulfill the remaining requirement, let's revise the response to exactly 20 words:\n- Topic is surfing a wave\n- Learning to ride this ocean wave takes balance, focus, strength patience every single time always\n- Feel the powerful wave now moving beneath you"
+    },
+    "critic:25e93f2ff631a4f38529a0e678104a86048ff149d378aa155961956fab1a1a67": {
+      "name": "critic",
+      "output": "what's wrong:\n\n- the word \"part\" has more than 6 letters\n- it only has 19 words and not 20"
+    },
+    "critic:2602ff1880f9a41e62560d94d260b31b2a5d1e9d5b91a48ab5752e84a264d1b2": {
+      "name": "critic",
+      "output": "to fix:\n\n* requirement 2 is not satisfied because the draft answer has 2 commas.\n* requirement 3 is not satisfied because the word \"talk\" has more than 5 letters.\n* requirement 5 is not satisfied because the draft answer contains the word \"of\".\n\nhere is revised answer:\ni say this tech is fun to use and help people with small easy tasks done very fast now."
+    },
+    "critic:2614126125554a7d1eb9908e918573d858782a50f454d6bc1e80d4223ef575ca": {
+      "name": "critic",
+      "output": "list what to fix:\n\n- use exactly 25 words (draft has 22)\n- use no word longer than 7 letters (draft uses word 'techno' which is longer than 7 letters)\n- end with the exact phrase \"we are done\" (draft has 'done' after a different sentence, not after a period, which makes the phrase not exact)"
+    },
+    "critic:278a9da9be3ef45ead73c3771e7e68a1f2df80ab09f72ca14fdfb07aef6de59f": {
+      "name": "critic",
+      "output": "Fix:\n- the length of the answer is less than 20 words, \n- the word \"bad\" is longer than 3 letters in some variations but its most common form is a 3 letter word and the variation fits but most do not \n- the word \"new\" is often more than 3 letters \n\n Revised answer: \nI am just here and I say fun is sad I am now so it goes."
+    },
+    "critic:28af17a4a8afed84f3b64f44e5f98b702ad14848fbe56539a93e7465a7223d14": {
+      "name": "critic",
+      "output": "What to fix:\n- uses 31 words instead of 25\n- contains word longer than 7 letters ('every', 'loud', 'hard') and needs revision"
+    },
+    "critic:291fd2d5940ce0bda348c8913455bc4c2ffabafc2daa59cb619e3ddc9d8270af": {
+      "name": "critic",
+      "output": "# Revision Needed\n- Use exactly 25 words: No, the current response has 28 words (exceeds the limit).\n- Include the word \"node\": Yes\n- Do not use any commas: No, the response contains a comma.\n- Do not use the word \"of\": Yes\n- End with the exact phrase \"all is set\": Yes"
+    },
+    "critic:2c25b5626a25c1ef2c2b386fb3b9cdd66cd9551d08ef65262b574d6899e5d63c": {
+      "name": "critic",
+      "output": "what to fix:\n\n- 'fast' is a word longer than 6 letters, it should be removed to satisfy the constraint\n- 'now' is also a word longer than 6 letters and should be removed as well\n\n corrected draft:\nsmall tech uses atom to make new tiny fun things for you"
+    },
+    "critic:2c9ae74f4b7cf800d439f1d5e479ed1946cc76b25e4337da00fe8f4daa49fede": {
+      "name": "critic",
+      "output": "- fix the answer length as it has only 12 words\n- revise the answer to exclude words longer than 7 letters \n- the word 'to' is still present \n\n- revise the answer as per the above points\n- re-format the response\n- adjust wording \n\nChanges are required to satisfy the requirements."
+    },
+    "critic:2d8150137d1db11509b9c4112d2316f2ac585068c9637e61a60544e4db8a3bb5": {
+      "name": "critic",
+      "output": "To fix:\n- Use exactly 15 words: current answer has only 8 words.\n- Do not use a word longer than 7 letters: words \"runs\" has 4 letters, but \"code\" and \"fast\" have more than 7 letters, 'node' has less than.\n- Format as exactly 4 bullet points, each line starting \"- \" is satisfied\n- Include the word \"node\" is satisfied \n\nCorrected answer:\n \n- Node is a fast small bit of \n- Code that runs on node is \n- Node helps with lots of work\n- Doing many small tasks now fast"
+    },
+    "critic:2d8e2dc97fd456f17d6495bb05b55c479e4189db1d417edd94e3f11dc4e01472": {
+      "name": "critic",
+      "output": "to make learning fun is a good start try a game or a quiz that's short and easy to do so it goes.\n\nrequired fixes:\n\n- 'make learning fun' does not use exactly one word, it uses 3, but i can rephrase it.\n- 'that's short and easy to do' is missing a verb to join 'short' and 'easy'.\n- the original draft used 'a fun task' but 'i have an idea for' is too long.\n- to shorten the draft, the revised version will keep only essential content.\n\nrevised 1: \ndo a simple quiz or play a fun game it's easy so it goes.\n\nrevised 2:\ndo a quiz or play a fun game it's easy so it goes.\n\nafter rephrasing it seems like this revised draft still does not meet the exact 25 word requirement.\n\nlet's try to meet the 25 word limit with more content.\nrevised 3:\ndo a quiz or play a fun game it's easy and simple to learn so you can do it so it goes."
+    },
+    "critic:2ecd176984f84c07964d609651e38a7c7842651e17ca8ed0f9b3621ef66fc366": {
+      "name": "critic",
+      "output": "- new find is fun for all men\n- old men are glad and feel happy\n- big men see what now\n- all men feel glad about new find\n\nrequirements not satisfied: \n- do not use the word \"to\"\n  * in this case, \"to\" isn't in the draft, so it's correct \n- use exactly 25 words\n  * the current draft only has 24 words, so add one more word\n- use no word longer than 7 letters\n  * some words like \"happier\" would be too long, so change \"happy\" to \"feel glad\" and find a more fitting word to keep the total word count\n- format as exactly 4 bullet points, each line starting \"- \"\n  * all lines start with a dash, so everything is correct"
+    },
+    "critic:2f1895cbe2b0a7b5b24745bebc53aea32ed06e6618fe113d720611232556dc97": {
+      "name": "critic",
+      "output": "fix: response exceeds 25-word limit. \n\n revise response: \n scientific concepts involve study of natural phenomena using systematic methods to formulate theories based evidence gathered through observation experimentation"
+    },
+    "critic:2f280026c6fb7e71e8001345e8fb317bbaa4ebe0c31cc895367fc726a03455f7": {
+      "name": "critic",
+      "output": "Fix the following:\n- The response should use exactly 20 words, but it has 16 words.\n- The word \"the\" should be included to satisfy the 20-word requirement.\n- A comma is missing after \"grows.\"\n\nCorrected Draft:\n\n- Water falls from high places in nature.\n- An atom splits into smaller particles in certain reactions.\n- Nature grows and changes over time.\n- Energy moves through various systems constantly.\n- Life flows, a cycle that repeats itself so it goes."
+    },
+    "critic:2fc3d1907bca7509a7edf252324992324e217afeaa6bec84260601ab75b65669": {
+      "name": "critic",
+      "output": "List what to fix:\n- format: not exactly 4 bullet points (extra space in \"Learn about basics \")\n- exactly 20 words: 11 words (too short)\n\nRevised answer:\n \n- Learn about basics\n- Simple examples help people learn everyday life skills easily\n- Practical knowledge has various benefits\n- Basic concepts are essential for understanding"
+    },
+    "critic:35b6bf007d399d765715374501fbc0e0f5c82f8bb205ccc48894235022af9c28": {
+      "name": "critic",
+      "output": "To fix this answer:\n\n- include the word \"code\": already included\n- do not use the word \"the\": already omitted\n- do not use any commas: already omitted\n- use no word longer than 6 letters: failed (words like \"fun\" is 3 letters and \"bad\" is 3 letters as well, however words like \"key\", \"tags\" and \"scientific\" violate this)\n- use exactly 25 words: failed\n\nRevised answer:\nCode is key to making simple dog tags mad fan runs on code box fan code is code on dog box code makes fun dog code runs."
+    },
+    "critic:36a3f2467dea9a0dbea362f86da5b403f2b77ece8f9063b251e1dad89b0d08b4": {
+      "name": "critic",
+      "output": "- The task does not specify using  exactly 20 words but does state it in the constraints.\n- The word \"a\" may not be long enough as a word.\n- The first point needs more explanation (content) to fulfill the requirement.\n- The first line should contain three words to satisfy the constraint.\n\nList of revisions needed:\n1. Use exactly 20 words: This is currently not satisfied.\n2. Include a word longer than 6 letters or use more content.\n3. Add more content to points (currently only \"node\" and \"we are done\").\n4. Increase the number of words on the first point.\n5. Ensure the first line starts with three words.\n\nTo fix this, let's revise the answer:\n\n- This is an example about a computer\n- a is a node computer part\n- we are done."
+    },
+    "critic:378b54cc57b06ffde17c326ccd129515fd562815b9c54fd649225ff543a21f7b": {
+      "name": "critic",
+      "output": "Changes to be made:\n- \"new life form\" is longer than the required 6 letters, and \"new\" itself is also longer than 6 letters.\n- \"dark cold\" is two separate words when it could be one (e.g. 'darkness') however I can rephrase it to keep it a single 2 word description.\n\nFixed Draft:\nsoft gene help make new life in dark cold wet mud and slow air"
+    },
+    "critic:37e74ef835f06585029aff351b782ab5a80786ef7bf8d41ff3303e5519bb9145": {
+      "name": "critic",
+      "output": "Fix the draft answer:\n\n- It's too long, revise to exactly 20 words.\n- Include the word \"cell\" in a more precise manner.\n- No word longer than 7 letters.\n\n \n Cell phones use small bits to send short messages, store data in small cell units very fast now."
+    },
+    "critic:3d6d59afbf78f15282ca9cc9bfb822fdd645f16b046e26371cf32c100bd229a1": {
+      "name": "critic",
+      "output": "Fix the following:\n- The word \"play\" has more than 5 letters."
+    },
+    "critic:40f8110bf42a270b6705d3a951e140beb0460f56fa15cf081e2c348feb964589": {
+      "name": "critic",
+      "output": "# Revision Needed\n\n- The word \"technology\" is not mentioned\n- There are commas in the answer - \n- Some words are longer than 7 letters (old)\n- The requirement for exactly 20 words is not satisfied\n- The format with exactly 5 bullet points is not sufficient as each point needs more content to meet the 20-word requirement\n\n# Revised Answer\n\n- New tech is fun now\n- People use it every day fast\n- They make it work good - \n- It helps them a lot now days\n- New tech is fun for many users"
+    },
+    "critic:447723a7e79107159ad762921369e52e886c5aa932cccbbbac98aa9ea1f9b9f8": {
+      "name": "critic",
+      "output": "To fix: \n- The word \"found\" is longer than 7 letters: it has 5 letters but 'found' was used but \"fun\" is 3 & other words such as 'it' & 'was' are 2 letters but \"fished\" is also an alternative for 'found' that has 6 letters.\n- The word \"bigger\" is not the word that was used (bigger is 6 letters but it was not used), but the word 'big' is, and it has 3 letters which is short than 7 letters.\n- The word \"discovery\" is not used although it is stated in the task, so one possible answer is: \n\nI made a big wave on the sea and it was fun to see my big new thing that is it."
+    },
+    "critic:454a6f4372de0591f46656998ca0ad854b532184b74442aa62b37a5c14df23cb": {
+      "name": "critic",
+      "output": "# Fix Needed\n\n* The word \"small\" is longer than 6 letters, violating the requirement that no word longer than 6 letters should be used.\n* The word \"hard\" is longer than 6 letters, violating the requirement that no word longer than 6 letters should be used.\n* The word \"discovery\" or a similar word is expected in the answer, not \"found\".\n* The exact word count requirement of exactly 15 words is not met. \n\n# Revised Draft answer\nNew cell found is little and has a big sand core inside a tiny bit"
+    },
+    "critic:46d5117c6d7be3068fae04e5f78e2847f4c503b1ed6fde62bbaae46dfb43373c": {
+      "name": "critic",
+      "output": "to fix the following:\n\n- requirement to keep the entire response in lowercase: the word 'fun' starts with an uppercase letter\n- requirement to use exactly 25 words: the current response is shorter than 25 words\n- requirement to use no word longer than 7 letters: none of the current words are longer than 7 letters, but some of the new words will be added to improve the response length\n- requirement to format as exactly 3 bullet points: all points are currently in a single line and should be a separate line each\n- requirement to end the response with \"we are done.\": the response should be exactly this phrase at the end \n\ni will revise the answer accordingly."
+    },
+    "critic:481217e669a100f6711818fad88ed481b3f9beb9dba4e1a731cb9ece8cbf39b6": {
+      "name": "critic",
+      "output": "Fix list:\n- Use no word longer than 7 letters: 'bits' (7 letters), 'small' (5 letters), but both are OK for now. However, a problem here is actually 'every' (5 letters), 'now' (3 letters) is okay so far but there is another word that we need to replace: 'easy' (4 letters) but 'bits' has no problem 'data' is fine \n- Use exactly 20 words \n\nRevised answer: \nNew tech is fast for fun and work with small bits of data each day now every time you use it always free"
+    },
+    "critic:4847b8d899131aae2b920b128210c93e9d23904f677c99054497131ae3b84446": {
+      "name": "critic",
+      "output": "- Sun sets down fast\n- Rain falls in drops slow\n- Ice forms from cool air\n- Snow comes out next here we go.\n\nFix:\n- removed word \"down\" which has more than 7 letters\n- removed word \"slow\" which has more than 7 letters\n- corrected the order for more coherent process\n- no other issues found \n\nPASS."
+    },
+    "critic:49787c50235f1412d97dcd8759103d5d4090a6a55ee1b83f225249c8d3c71822": {
+      "name": "critic",
+      "output": "List what to fix:\n- exact 15 words requirement is not satisfied. \n- no commas requirement is satisfied\n- do not use the word \"to\" requirement is not satisfied\n- format as exactly 3 bullet points, each line starting \"- \" requirement is satisfied"
+    },
+    "critic:49b29b1a75db6074f4fced8da98b7ea8b20774dae368b8a07bf4e05da4c3de18": {
+      "name": "critic",
+      "output": "Scientists make discovery about new wave crashing against shore suddenly changing everything around us now here we go.\n\nChanges: \n\n1. The sentence is missing exactly 3 words to meet the exact 20-word requirement.\n2. There was a constraint that we should not use 'the'."
+    },
+    "critic:4b709b0a24c54d3145f5f4c5dc20540f93f5fe60e029c4c419620f1d464badaa": {
+      "name": "critic",
+      "output": "**Fix Needed:**\n\n- Length of some words exceeds 6 letters: Replace words \"key\", \"code\", \"use\" to satisfy this constraint. \n- The response does not include the word \"code\" exactly: Revise the answer to meet this requirement.\n- The format is incorrect: Revise to include the word \"code\" in each line to meet this requirement.\n- Excess words: Shorten the answer to exactly 20 words by removing some phrases.\n\nCorrected Draft:\n\n- I say code\n- is code\n- code code\n- is code fun\n- code code is key"
+    },
+    "critic:4f930af63f876dfe233d66b2033054232f752362849fe37c4565f8468ebdd9c8": {
+      "name": "critic",
+      "output": "Scientists made a groundbreaking discovery about ancient civilizations and their unique practices now revealing new historical insights we are done."
+    },
+    "critic:501eb62a342d144d5fe2efa8d633d8a55611b99c1868ef75df27cf4c542bf601": {
+      "name": "critic",
+      "output": "Fix:\n- exactly 25 words are not met, the current draft has 20.\n- \"it is\" is a phrase with words longer than 7 letters; it should be replaced.\n- \"fast\" is a word longer than 7 letters; it should be replaced.\n\n Revised Draft:\nI find a new bug. It runs small. I see bug run away. I am glad I found bug now easily here we go."
+    },
+    "critic:51ed35dea969aab8ed3909302cd392ccee3abefc0f20eba3ea67d7e2a15a5381": {
+      "name": "critic",
+      "output": "To fix the following:\n\n- do not use any commas -> needs fixing, there are no commas but I need to format the text correctly\n- use no word longer than 7 letters -> needs fixing, use of word \"hotter\" is needed for this\n- use exactly 25 words -> needs fixing, the current answer is shorter than required\n- do not use the word \"of\" -> needs fixing, word \"part\" is used which includes \"of\"\n- format as exactly 5 bullet points -> needs checking for this"
+    },
+    "critic:51fe72d9b84482a25465674ce8e54e4dc958f3f59b0109c8c5226c0122e57577": {
+      "name": "critic",
+      "output": "fix:\n\n- length: the current answer has 29 words, but it needs exactly 25. \n- word \"of\"\n\nrevised answer:\nscientific concepts involve tiny particles constantly interacting everywhere always moving slowly changing forms all is set."
+    },
+    "critic:52204ebf699b7c6ecb129d4e7978288e58a70c5cc1a29d6cc23add4e2f09b527": {
+      "name": "critic",
+      "output": "The answer does not satisfy all the requirements:\n\n- The word \"every\" has more than 5 letters, it should be replaced with a shorter word.\n- The word \"always\" has more than 6 letters, it should be replaced with a shorter word.\n\nA revised answer that satisfies all the requirements is:\nStudent learns basic facts daily with help from nice folk who make learning fun and easy for young kids now.\n\nHowever, as this still has a word limit of 24, it will be revised again:\nStudent learns basic facts with help from folk who make learning fun easy for young kids now.\n\nBut still the last revised draft has word \"kids\" with 4 letters, the previous had the same 24 letters. Let's add more word 'is' so now:\nStudent learns basic facts with help from folk who make learning fun easy young kids are now is.\n\nNo this still doesn't have 25 letters, one solution is adding a short word like 'just' so the answer is:\nStudent learns basic facts with help from folk who make learning fun easy young kids are now just is.\n\nFinal Revised Draft Answer: PASS"
+    },
+    "critic:523232b6a4fda4686576ca253f3b2362b240ae74089ff5159514b303cd109ae1": {
+      "name": "critic",
+      "output": "- Basic concepts start with easy \n- Simple steps help learners fast\n- Learning is fun for everyone we are done.\n\nIssues:\n1. The original response did not use exactly 15 words as in the final version.\n2. The response still needed to be revised to ensure all constraints are met in the final form."
+    },
+    "critic:52afabac19e31835376c7bea146dc8c3f06eaddc2e547836401e44296f8f5f81": {
+      "name": "critic",
+      "output": "Fix:\n\n1. The word 'big' is used more than once, but it's shorter than 6 letters, so that's okay.\n2. However, there is a longer word 'pull', which is more than 6 letters, so 'use' or 'make' should be used instead.\n3. Also, there is the requirement to use exactly 25 words which is not met in the current draft.\n4. The word 'all' is used twice, it could be used only once to reduce the number of words used by 4 and bring the answer as per the requirement.\n\nRevised answer:\nSun is hot and large, it has a strong use on us, makes us go fast now, all is set."
+    },
+    "critic:539f15a5b160059274a5d173b3ec1dbc0734242864a1b37d9c4df51294d4881b": {
+      "name": "critic",
+      "output": "Checking the draft answer:\n\n1. Format as 4 bullet points, each line starting with '- ': PASS\n2. Do not use the word \"to\": FAIL, word \"to\" not found, but word \"help\" and \"done\" might be problematic\n3. End with the exact phrase \"we are done\": PASS\n4. Use no word longer than 7 letters: FAIL\n5. Use exactly 20 words: FAIL\n\nRevised draft answer:\n- New tech now fast\n- Big easy help us now\n- Easy use fun for us\n- Now fun we are done."
+    },
+    "critic:53a16648f9b72eae4fe0970d3bf1d001b5347ca9ba8e33472173a3baff45d38e": {
+      "name": "critic",
+      "output": "To be revised: \n- use exactly 20 words\n- the word \"air\" is more than the 6-letter limit\n\nDraft answer revised:\nLearn basic things like atom and cat are small tiny bits found daily now everywhere seen all time."
+    },
+    "critic:54e0b1d09c0666557d9e777c2700c6dfe5d22a5b8e2346365618cac7fc04499a": {
+      "name": "critic",
+      "output": "List what to fix:\n- More than 20 words\n- Word 'New' does not describe technology well\n- Word 'fun' may imply not describing a technology\n- Some words are longer than 6 letters ('technology', 'goes')"
+    },
+    "critic:54f767964722a53a0f0f820bd11483e8f403a7be00efff3188e294dcfe73b6a4": {
+      "name": "critic",
+      "output": "Fix list:\n- use no word longer than 7 letters: words 'sleep', 'fly', and 'run' are longer than 7 letters\n- exactly 20 words: 15 words used, not 20 \n- exact phrase: \"we are done\" is correctly used at end, but rest of sentence does not match the requirement of using no word longer than 7 letters and exactly 20 words.\n\n Revised answer\n\nSun sets low in sky, dark comes, man rest, bird move fast, dog goes slow, we can see, it's done, it's fine, we are done."
+    },
+    "critic:56b3433fce20dd987153f054ddd3b4483fc4c0d5091eb7a8a7e2724c9c574b13": {
+      "name": "critic",
+      "output": "- Fix:\n  - The answer contains words longer than 6 letters.\n  - The answer does not use exactly 25 words.\n\nThe task has some constraints that are not satisfied with the current draft answer. To fix it, we can try rewriting it in a new format.\n\nHere is another draft answer:\n\n- Cats play\n- I sit\n- with new\n- pet dog\n- on chair now\n\nBut still, this requires more work to satisfy the 25-word constraint, so here is the revised one:\n\n- I sit\n- with new\n- pets now\n- like me do\n- happy here play"
+    },
+    "critic:56f811d795a5bad38d35ccd576039adaadc370696bd7890d8a34e47301fcae43": {
+      "name": "critic",
+      "output": "i will revise the answer until it satisfies all requirements. \n\nlist of issues:\n1. the word 'i' is longer than 7 letters (requirement 4)\n2. the word 'exist' is longer than 7 letters (requirement 4)\n3. the answer does not include the word \"star\" twice as specified (implied requirement 5)\n\nrevised answer: i am a fan of a star and fun easy little star shine"
+    },
+    "critic:57204167606a3e7310d5e986d73966073243a28c7b9943186fa3d21a19ba7263": {
+      "name": "critic",
+      "output": "the node helps make sense of school work for a student to get good marks in a short time now today\n\nTo fix:\n- revise to remove 'good' to meet the 7-letter word constraint."
+    },
+    "critic:575181891515aa0868f8393e6386c463b1874d2a8c1b3247b7e2f29e3c9626d4": {
+      "name": "critic",
+      "output": "What to fix:\n- The answer should use exactly 15 words; 'The sun is hot it makes the air go up very fast now' has 11 words.\n- There are words longer than 7 letters: 'sun' has 3 letters; 'hot' has 3 letters; 'air' has 3 letters; no words in this sentence are longer than 7 letters, but most are longer than 3; a word to add to this list is 'makes' which has 5 letters; another is 'very' which has 4 letters.\n- The answer should not use commas.\n- The answer should not use the word 'and'."
+    },
+    "critic:585ee8427cd1298130bf60cd16aff2babeb3f6b30cc99b133dd8424220892857": {
+      "name": "critic",
+      "output": "i have a simple plan that helps you get better grades now all is set."
+    },
+    "critic:58decf2c827ec2e820d3eb12e77d80cb62685056d547637c8165708010db01bd": {
+      "name": "critic",
+      "output": "to fix: \n- the text is not in lowercase as per the task. \n- the word 'nice' has more than 7 letters.\n- the text exceeds the 20-word limit. \n- the text uses commas. \n\nhere's the revised answer: \ni am fun to talk to i want to say that is a big dog house free"
+    },
+    "critic:5a4ca181cb523cdffb07d4e355ef7887cea9f70e088c6e25f4ca322f4b155115": {
+      "name": "critic",
+      "output": "Code breaks the math and finds the pattern, that is code so it goes. \n\nThis draft satisfies all requirements but it's still being checked."
+    },
+    "critic:5a5026e5588c489d97fd2896f6a3f88034be1de748943eaa84d26bb8a5f075e1": {
+      "name": "critic",
+      "output": "Student learns concept at each node and connects ideas together quickly to understand material very well we are done.\n\nReply: FAIL\n\nTo pass the requirements, I need to revise the answer. Here's the corrected list of issues:\n\n- Remove the word \"very\" to meet the 25-word requirement.\n- The revised answer should be: Student learns concept at each node and connects ideas together quickly to understand material well we are done.\n\nRevised answer: Student learns concept at each node and connects ideas together quickly to understand material well we are done.\n\nReply: PASS"
+    },
+    "critic:5ac33384c57eaa4f749e9db8b826c3d24c41e5920471f438f8264f6f7d8860a5": {
+      "name": "critic",
+      "output": "- fix the draft:\n  - the current answer has a word that is longer than 7 letters ('natural', 'process' and 'requirements') and it doesn't strictly adhere to the 7-letter requirement \n  - the draft's last word should not repeat the phrase \"so it goes\" \n  - to meet the \"exactly 25 words\" requirement, some adjustments should be in place \n\nHere's a revised version that meets all the stated constraints:\n \n- sun sets down fast\n- rain falls from up high\n- wind blows in cold air\n- snow melts in warm sun\n- weather changes day by day so it goes."
+    },
+    "critic:5c4449bb8c3e531e6e889716c4a05e3f12a703eb16225c0281518e8f43562d0b": {
+      "name": "critic",
+      "output": "Fix:\n\n- Use exactly 25 words: Current answer has only 16 words.\n- Use no word longer than 7 letters: Current answer has word \"slow\" which is 4 letters, but it does; however, it also has word \"ponds\" which is an allowed word length.\n\nTo fix the first two, add more detail to the answer and maintain the 7-letter word limit:\n\n Draft answer\nWater falls down, flows slow, fills up small ponds, lakes, and big ones nearby so it goes."
+    },
+    "critic:5d0d3b1925e74a444ffd5c9faccc288ce3bb123e688f3356c262d4a49cfc2e4e": {
+      "name": "critic",
+      "output": "to fix:\n\n* response is exactly 25 words, but it does not entirely meet word length and content requirements.\n* the maximum word length of 6 letters is not met with words like \"every\", \"fun\", \"easily\".\n* the word \"the\" is used."
+    },
+    "critic:61022afbc8c18b4515fcd0fb6c6d12697a88b399a6efe0ba4d136cf097c94b1b": {
+      "name": "critic",
+      "output": "what to fix:\n\n- there are 5 words that should be 15 exactly in the final response\n- use exactly 5 bullet points but 7 are written"
+    },
+    "critic:61c87f2aaa989fb3e503110073dc7906f1d1287e0b5f78ef01cb5eec1a8a7048": {
+      "name": "critic",
+      "output": "# Review of the draft answer\n\n- Format is not exactly 5 bullet points; each point is incomplete.\n- Does not satisfy the 25-word requirement.\n- Uses the word \"and\" (although the request is to replace with an alternative conjunction if necessary).\n- Ends with the required phrase but uses the word \"is\" which is an issue with the word requirement.\n- Required word count is not satisfied.\n\n# Proposed revisions\n\n- Format: Change to 5 separate lines for each bullet point.\n- Word count: Use more words to satisfy the 25-word requirement.\n- Alternative conjunctions for \"and\": Replace the word \"and\" with alternatives.\n- Phrase usage: Replace the word \"is\" with an alternative.\n\n# Revised draft\n\n- Idea for students \n- becomes simple \n- to follow clearly now \n- they understand key concepts \n- well so it goes."
+    },
+    "critic:629671b69e56116c616935d1104cfbc20bf8694c4e1a2e00446a812d6b4c8071": {
+      "name": "critic",
+      "output": "too long, need to shorten.  i tell you a small idea and it is fun to see all is set."
+    },
+    "critic:62e92041884f0e5db4c610ade902594da224e46d9a2933d680e4dbdb6fbf171c": {
+      "name": "critic",
+      "output": "- to revise the response to meet the 20-word requirement\n- to rewrite the response in lowercase\n- to format as exactly 5 bullet points\n- to remove capital letters\n\nrevised draft:\n- technology is constantly evolving very fast paced\n- this field has many new innovations every year\n- many smart devices exist to improve lives daily\n- people use these devices regularly now worldwide\n- this makes tech an important part of lives\n\nPASS"
+    },
+    "critic:6301f4a481e274f35870d18f2c178206e1d8de52119e9b54edf66daf1b816e1b": {
+      "name": "critic",
+      "output": "To fix:\n\n1. length: the current answer is 24 words, but it needs to be exactly 25 words. Add one word, for example '- i say sun is hot all the time' to satisfy this requirement.\n\n2. word length: the word \"satisfy\" has 7 letters, \"warm\" has 4 letters, and some of the other words in the answer have more than 6 letters. This means the answer does not satisfy this requirement. Some of the problematic words will need to be replaced with shorter alternatives.\n\nHere is the revised answer that addresses these problems:\n\n- i say sun is hot all the time\n- it makes us feel warm now\n- we feel good always now"
+    },
+    "critic:63eac3560c2d7124b09a86f1dfa314b616985932bd663d8e38d11b2bd795387b": {
+      "name": "critic",
+      "output": "Fix the following:\n- Use no word longer than 7 letters: \n  - 'men' is more than 3 letters and 5 is the maximum allowed. \n  - 'big' is just right but 'things' is more than 5 letters.\n  - 'just' is more than 4 letters.\n  - 'so' is more than 2 letters.\n  - 'know' is more than 3 letters and 4 is the maximum for shorter. \n  - We have to fix 'know', 'get', 'just' so and a few other longer words to fit this rule.\n\n- Use exactly 25 words: \n  The current response has much fewer than 25 words, we need to add words like 'a', 'in', 'to', 'for' to reach 25 words."
+    },
+    "critic:64134ec6cb2ba6641af2b2bab7ffae80d0a5b7f376d89275a018cb5042c33559": {
+      "name": "critic",
+      "output": "To be accurate, let me analyze the constraints on the given draft answer:\n\n- Use no word longer than 7 letters: \n  The draft answer fails this. There are words longer than 7 letters ('fun' has 3 letters, 'sun' has 3, 'is' has 2 letters, and the rest are either short or fine - so this seems to be ok but not a problem. However a word \"big\" is not an issue but there's a bigger one).\n\n- Use exactly 20 words: \n  The draft answer has 5 words, which is short of the required 20 words. More content is needed to make it satisfy this requirement.\n\n- Do not use the word \"and\": \n  The draft answer uses the word \"and\" multiple times. No other words are used to convey this meaning which means no issue here - but this sentence still doesn't pass, so we'll revise that below.\n\n- End your response with the exact phrase \"all is set.\" \n  The draft answer ends with this phrase, so this requirement is satisfied for now."
+    },
+    "critic:64753ac8fc2b83c711e7090aee5a71201afc25c86b31d754bfbbd276ecc15d45": {
+      "name": "critic",
+      "output": "to fix:\n1. use exactly 25 words: the current response has 21 words. it needs an additional 4 words to meet the requirement.\n2. write entire response in lowercase: the current response already meets this requirement.\n3. use no word longer than 6 letters: the word \"outside\" has 7 letters. it needs to be revised to meet this requirement.\n4. do not use the word \"and\": the current response already meets this requirement.\n\nrevised answer:\ni found a new bug in the mud by the old log with my pet dog on the fun day now i play here"
+    },
+    "critic:650347e05ef8f3031c583d4c7e16550a5706f3507154b8a1ba0103dc3af25343": {
+      "name": "critic",
+      "output": "- the requirements are not met, here's what to fix:\n  1. the word \"thing\" has 5 letters, but it is less than 7 letters; however this is okay according to the task.\n  2. the draft has 20 words but the task requires exactly 25 words\n  3. the answer does not have exactly 5 bullet points, but it almost satisfies this requirement.\n\n  the two main issues to fix are adding exactly 5 more words to the answer and making sure each bullet point is exactly as required.\n\n- revised draft in progress\n  the goal is to add exactly 5 more words without using any word longer than 7 letters."
+    },
+    "critic:66c7b6bb5c15b7f506d8947a78920e49a116eeec0e39bfa06274d7131dc444a1": {
+      "name": "critic",
+      "output": "- The requirements do not match the current draft answer.\n- Excess words longer than 7 letters are needed to revise the answer.\n- Fewer words are needed to revise the answer to exactly 25 words.\n- The draft answer requires revision to meet the new constraints.\n\n Fix list:\n\n1. Use a more suitable topic name: replace \"topic\" with something more beginner-friendly.\n2. Word list review and replace any word with 7 letters or more.\n3. Add words to meet the 25-word requirement.\n4. Revise word choice to exactly 5 bullet points starting with a \"dash\".\n5. Use exactly 25 words.\n\nHere is the revised draft.\n\n- Hello new\n- friends, I talk\n- to you\n- on a fun\n- subject so it goes."
+    },
+    "critic:6728b640866d4259acc7c04ed8fe722e7f1198f185ec7fdc9e3c66d655b631a2": {
+      "name": "critic",
+      "output": "To revise the answer, let's check each requirement:\n\n- do not use the word \"of\"  (pass)\n- use no word longer than 7 letters  (fail: \"key\" is 3 letters, but \"new\" and \"flux\" could potentially be considered more than 3 or \"new\" can be considered as 3 but \"Find\" can be as 4 in some contexts but others it is not so this requirement requires careful interpretation but for simplicity we will mark it to fix)\n- use exactly 15 words  (fail: only 12 words currently)\n- include the word \"flux\"  (pass)\n- format as exactly 4 bullet points  (fail: requires each line to start with dash, but also requires exact 4 bullet points which we have but will need to ensure it stays this way throughout revisions) \n\nBased on the issues, the draft answer needs to be revised as follows:\n\n1. Change the word lengths: Replace longer words with shorter ones like 'find' instead with 'see' or use a word that fits within a 7 letters constraint but in other places like 'now' instead with something more generic like 'time' \n2. Increase the word count to exactly 15 words.\n3. The format will be adhered to for exact 4 points starting with a - each time"
+    },
+    "critic:689229104601e0aa4ba2d5cebdc57ada23862ef9e5791cde0edeba242ed3b2d3": {
+      "name": "critic",
+      "output": "to fix:\n- response is not in lowercase\n- response has more than 15 words\n- response uses commas\n- response contains words longer than 7 letters"
+    },
+    "critic:6a16c14f5506b5614a68e2bf5cfbcd08f820c84f9202efe0d19bcf5d8e577cef": {
+      "name": "critic",
+      "output": "To be PASSED, I need to check if every requirement is satisfied.\n\n- The requirements mention including the word \"wave\" and using exactly 15 words. My current answer does not meet the 15-word requirement.\n- I will revise the answer.\n\n- New wave hits sandy beach\n- Big news makes people happy all \n- Fun comes next time surely now"
+    },
+    "critic:6e5d7242493755fafa7afa79dd6a9ab132de83497a0d12482a155e537745680d": {
+      "name": "critic",
+      "output": "to fix:\n\n- use no word longer than 7 letters: fail (example: \"new\" is longer than 7 letters)\n- write your entire response in lowercase (no capital letters): fail (first letter of each sentence is in capital)\n- use exactly 20 words: fail (response has less than 20 words)"
+    },
+    "critic:6fc5563b97dc4bf1dd6d05ca661b5da28dedba2bae2899f72fc32d83a53642bd": {
+      "name": "critic",
+      "output": "to fix:\n\n- response contains a word longer than 7 letters (\"bright\")\n- response is not in exactly 20 words\n- response is not exactly 20 words"
+    },
+    "critic:734587796e3eb1e8dec2b2ddf280b82d6fa1432ea37ed5466f11b1faad5165a7": {
+      "name": "critic",
+      "output": "to fix: \n\n- current count of words: 16 (not exactly 20)\n- word \"of\" is used (contradicts constraint)\n\none revised answer could be:\n\nscientists made a new groundbreaking discovery that will change our lives forever with exciting new possibilities and great potential exists freely"
+    },
+    "critic:7411e90dc8f3720c3c2938fd3e826cf24f7854cf4d6c6c8ea6c9505987d7b59f": {
+      "name": "critic",
+      "output": "the draft answer is incorrect.\n\nto fix:\n- the last two words of the response ('its always in steady gentle' can't be reduced to just 15 words) \n  so change to: 'introducing beginners to constant flux in learning new things each day so it goes.'\n\nrevised response:\nintroducing beginners to constant flux in learning new things each day so it goes."
+    },
+    "critic:752dd5625a0b60d5c854e3bd9e31f96236d4aca8f8fd1860d135fc3850cf4c84": {
+      "name": "critic",
+      "output": "Draft answer issues:\n\n- The response should end with \"all is set\" exactly, but the word \"fast\" and other words are in the phrase.\n- The word \"play\" is longer than 6 letters.\n- The response uses more than 26 words, exceeding the 25-word limit.\n\nHere's the revised answer:\n\nTech is fun to use. Many people use it now. It helps work fast easy now all is set."
+    },
+    "critic:76b43be13bd3d42bb471d673226f04027c8532f8a8a1c8c76f2a7dd5a8d871b5": {
+      "name": "critic",
+      "output": "Fix the following:\n- The draft answer uses fewer than 25 words.\n- The draft answer ends with \"that is it,\" but \"technology innovations are rapidly changing our daily lives with new gadgets\" seems to be an essential part, rather than just a separate phrase.\n- Here's rewritten draft satisfying constraints:\n Advanced star technology innovations are rapidly changing our daily lives in many fields with new, improved, and innovative gadgets that is it. \n\nHowever, rewriting one word to better fit in 25 word constraint gives this result:\n Advanced star technology innovations are rapidly changing many daily lives in various fields with new, improved, innovative gadgets that is it."
+    },
+    "critic:77001d714fb24bd383e6c825b29235aa1cf16d95a7fd269dacf47b102f0aa7e7": {
+      "name": "critic",
+      "output": "list what to fix:\n- word length: the words 'big of', 'what to', and some others exceed 7 letters\n- exact 20 words: the draft is short by several words\n- format: the task requires bullet points, but the draft has numbers\n- no word 'the': some words in the draft are capitalized or use 'the' \n- lowercase response: the task requires a lowercase response, but the draft has capitalized words"
+    },
+    "critic:7958d193fa076ca15e35a8dc516d19171f0e832cea7f705fc93c290ddf751b2c": {
+      "name": "critic",
+      "output": "to fix:\n- the given answer has more than 20 words."
+    },
+    "critic:7b20f6279c71241f0ec9da5aa9fd98a601b9fd4dbc93ae434616906a9ac1495d": {
+      "name": "critic",
+      "output": "# Revision needed\n- The answer has 18 words which is below the 20 word limit.\n- The word \"box\" has 3 letters which is above the 7-letter limit.\n\nChanges needed:\n\n- Increase the number of words to at least 20.\n- Replace the word \"box\" with a 7-letter word or less.\n\n# Draft answer revised\n- I found a new pretty item\n- in my small old trunk\n- it is very very cool now"
+    },
+    "critic:7ca0e744293f3193814f9c3261a883479d52df05200e14f1072b5708fd753f00": {
+      "name": "critic",
+      "output": "What to fix: \n- The word \"box\" has more than 3 letters, which is not allowed.\n- The answer exceeds 20 words.\n- Using the word \"now\" is okay, but it would be better to keep the answer brief and concise for 20 words.\n\nRevised answer:\nA node is a small part in a net, with small bits and a few big box sets in it made."
+    },
+    "critic:7d2fe6f62514af2b77d7779c10cc0f75e5912d3b2e0101d89cf44f95ffa8a6ea": {
+      "name": "critic",
+      "output": "what to fix:\n- use exactly 25 words: the given response is short (16 words) so add 9 more words to meet the 25-word requirement.\n\n revised response:\n i can help students learn basic math skills like add big numbers in simple ways every day is fun easy too always i will try and i hope they like."
+    },
+    "critic:7d41ba6b4e98477942eb20338c2cfab085e33a74621ecbfccceb26a1698e0732": {
+      "name": "critic",
+      "output": "fix the following:\n- add a word to make the response 15 words long\n- 'new' 'tech' 'helps' 'people' 'work' 'fast' 'and' 'easy' are all more than 7 letters so change them\n- add a period at the end"
+    },
+    "critic:7f0a73ed5227af728ce951955d83b069037739783c8a6189d3940a48febc9160": {
+      "name": "critic",
+      "output": "natural processes follow a hidden code in the earth's system with complex rules governing every single tiny little change daily."
+    },
+    "critic:7fa46887983dc9392a330e1d24ba7d8cc18eb9fc9c01770f15d4c5a89c7676b1": {
+      "name": "critic",
+      "output": "Student learning is like riding a wave of new knowledge every single day always all is set.\n\nFix the following to satisfy the requirements:\n- Remove the duplicate words \"every single day\" for brevity; \n- Replace the word \"new\" for clarity on a requirement of exactly 15 words;  \n  \"Knowledge every single day is not 15 words.\"\n\nHere's a revised draft:\n  Student learning is like riding a wave of continuous knowledge every single day always now.\n\nHowever, this reply is more than 15 words:\n- knowledge every day now has 4 more words than the requirement states.\nA better answer with correct word count is:\n Student learning is like riding a wave of continuous every single learning day always now all is set"
+    },
+    "critic:802865b75f3806fb23056d6bca06ba2e162fdc4d56e942919cf1dd56a4283f8f": {
+      "name": "critic",
+      "output": "fix the following:\n\n- exact word count is 24, needs to be 20\n- use no word longer than 6 letters, 'fun' is a 3-letter word, but 'new', 'tiny' are not under 6 letters\n\n draft revised note:\n i found a new bug in my box it has little legs on it we see it now we are done."
+    },
+    "critic:80fec4cfdd68f2daa56ca0868923d2677d8da2041a3b67ed24a3ff6ecbda1a19": {
+      "name": "critic",
+      "output": "the list of what to fix:\n\n- exactly 15 words is not satisfied, the current response has only 8 words.\n- exactly 4 bullet points, each line starting \"-\" is satisfied, but the current response will be rewritten to add more points.\n- no word longer than 6 letters is not satisfied, the words \"new\", \"fun\", and \"here\" have more than 3 letters.\n- format as exactly 4 bullet points is satisfied.\n- write entire response in lowercase is satisfied.\n\ni will revise the answer to address the above issues. here is the revised draft:\n\n- i am new\n- to this\n- life is not\n- fun to me here we go."
+    },
+    "critic:81321b48c70ee02d2b3d52c3d35db978da562d34560df5c3242037e26ea5ab31": {
+      "name": "critic",
+      "output": "# Review of the draft answer\n- use no word longer than 7 letters (failed): words like 'fun' in the third point exceed 7 letters\n- use exactly 25 words (failed): the answer has only 24 words\n- format as exactly 4 bullet points, each line starting \"- \" (passed)\n- write your entire response in lowercase (passed)\n \n# Revised response\n- i am a student\n- i read a lot of books\n- it is very nice\n- i like to read much"
+    },
+    "critic:8151611c2a7d8937ed6f86ab41d04a0eedd46aef92bdef70a9ec29cabe29f4ee": {
+      "name": "critic",
+      "output": "To revise the answer, I will check each requirement and make the necessary changes.\n\n1. Use no word longer than 6 letters: 'big' is longer than 6 letters, so we need to change it.\n2. End with the exact phrase \"so it goes\": This requirement is already satisfied.\n3. Use exactly 25 words: Our current answer has 23 words. We need to add two more words.\n4. Format as exactly 5 bullet points: This requirement is already satisfied.\n\nHere is the revised answer:\n\n- I find\n- a new rock\n- in the sand\n- is quite old\n- now I know so it goes."
+    },
+    "critic:83ee4e9d2e93d37a636110a8d655f2e2f59e26f1702b260316732e8677dba3a7": {
+      "name": "critic",
+      "output": "to fix (4 points):\n 1. \"longer\" is a word with more than 7 letters; use a shorter version instead.\n 2. the word \"of\" is not allowed; find a different phrase to use its meaning.\n 3. the answer exceeds the exact 25-word limit; reduce it accordingly.\n 4. the answer is not entirely written in lowercase.\n\n revised answer:\n i can help with a fun plan to make a good job with new tips and easy tasks to do each day here now.\n\n let me know if this satisfies all requirements."
+    },
+    "critic:85009aef927726781f5cd7f24f70635597af249e6adc11079741bdef968638d5": {
+      "name": "critic",
+      "output": "To fix: \n\n- Use exactly 20 words: The draft has 17 words.\n- Include the word \"star\" multiple times: The draft has only one instance.\n- Do not use commas: The draft uses a comma.\n- Do not use the word \"and\": The draft does not use this word but the requirement to revise if it's not met isn't applicable. \n- Use no word longer than 6 letters: The words \"fun\" and \"happy\" have more than 6 letters.\n\nRevised answer: The big star is fun to see big star in dark night sky with pet dog runs round star."
+    },
+    "critic:8947b68b62c77096c8ae1ca6eeca4a6808f0a5ca94809fa678d7553009df4f01": {
+      "name": "critic",
+      "output": "fix list:\n- missing space between features and and\n- missing space between day for and people\n- needs to have a comma, not \"and\" after \"tools\""
+    },
+    "critic:8b0ebdfccf101ac3a232c3881697e951dea3d4d07fdecea72c8819227c3b6e3d": {
+      "name": "critic",
+      "output": "Fix these requirements:\n- format as exactly 5 bullet points, each line starting with \"- \", not starting with \"- \"\n- use exactly 25 words\n\nRevised answer:\n- New discovery was made about an old location.\n- It was hidden and not seen for long time period.\n- Scientists found out important information from this area.\n- This information can be used to help many people.\n- we are done."
+    },
+    "critic:8bf377aaedf9ca95fc2edab08397d2086aa0b280f199728e4471bd73be7202d2": {
+      "name": "critic",
+      "output": "What to fix:\n- do not use the word \"of\" : the word \"of\" is included in \"every single day\".\n- use exactly 20 words: the current answer has 19 words.\n- include the word \"wave\" and also: the word \"a\" comes twice.\n\n Revised answer \nIntroduction to surfing starts with riding big wave on surfboard every single morning is very exciting surfing experience always"
+    },
+    "critic:8c0159e0ffe21d7b95461d56d53e26de43f5d295227453efce2fa5675606619a": {
+      "name": "critic",
+      "output": "-  fix the following \n  - use exactly 25 words \n  - lowercase \n  - no capital letters \n  - exactly 5 bullet points \n  - no word 'of' \n  - no commas"
+    },
+    "critic:8c208b8656043a88e140607ca937acc4e4d0046aeb0bf7822bbe9a603ee2d117": {
+      "name": "critic",
+      "output": "What to fix:\n- Requirement 1: The word \"requirement\" itself has more than 6 letters. \n- Requirement 3: Use exactly 15 words, which is not satisfied, as there are only 4 words in the total response.\n\nDraft 2:\n- Sun is hot in bright light of day and makes it very hot fast now\n- Air feels wet and makes person feel wet too fast every time now\n- Dog acts mad and people try to calm it down that is it."
+    },
+    "critic:8c8bb1090f3b84e112b349918e437225f00c13a1bcf325147f4e5e67001b1ce9": {
+      "name": "critic",
+      "output": "- Natural processes follow a genetic code\n- Code determines growth patterns exactly\n- Evolution is a complex code\n\nPASS \nThe draft answer exactly meets all requirements stated in the task and does not require any changes."
+    },
+    "critic:9084be7b2dbaa334cfed76b2108967d7e4ea25ce4e0e2454815fbc674f32ac76": {
+      "name": "critic",
+      "output": "# Revision needed\n- do not use any commas: draft answer includes a comma (no comma was included in the original draft but the task said \"do not use any commas\") so it is in violation\n- use exactly 15 words: the draft has only 10 words so it is in violation\n- write your entire response in lowercase (no capital letters): the draft is in lowercase, so it satisfies this requirement\n- include the word \"wave\": the draft includes this word so it satisfies this requirement\n- use no word longer than 6 letters: some words exceed this length, so it is in violation\n\n# Revised answer\ni saw a big brown wave hit the sand on the dark cold sea\n\n- this revised answer includes the word \"wave\" and does not exceed 6-letter words \n- i corrected the total words count to meet the 15 word requirement and it is \n- there remain no comma to violate the task\n- the entire response is in lowercase"
+    },
+    "critic:9196600451dcbccd744c230884fa065be26216af5327574232ceee2bc7f9ef8c": {
+      "name": "critic",
+      "output": "- The word \"code\" is included.\n- The word \"to\" is used, violating the constraint.\n- Contains 20 words.\n- Format is not exactly 3 bullet points, each line starting \"- \" but rather 3 bullet points; the format is already correct but could be better if there are spaces between each \"- \" bullet point \n\nFix the answer:\n\n- Brief tech overview uses code.\n- Simplifies tasks with minimal code requirement.\n- Executes functions with complex algorithm code."
+    },
+    "critic:94db3345623647f0ec939ce4b5fdbf6a2d95ea2336e466772e8ffec5d7db93e5": {
+      "name": "critic",
+      "output": "i can help a student with a fun code to learn and play with easy we are done.\n\n* fixed: used more adjectives in response, and word length requirements"
+    },
+    "critic:9545ac75d4f6fb8c5287a4d787bca76703c629d2eb780f3e3568fd49de68192f": {
+      "name": "critic",
+      "output": "- Fix: The draft answer doesn't include exactly 25 words.\n- Fix: A word \"the\" is used, but the word \"of\" should be avoided.\n- Fix: The word \"patterns\" does not satisfy exactly 5, and the word count. \n\n Draft revised to: \n- New discovery made\n- Using special equipment\n- Found unique wave now\n- Results show repeating wave sequences\n- Further research is still needed"
+    },
+    "critic:954c97e51d3483a2db635515c3e74c797194376f2e5203ce4a217ec082884726": {
+      "name": "critic",
+      "output": "- Cell biology explains processes within cell itself\n- Cell contains many complex molecules naturally occurring\n- Molecular structure is found inside living cell naturally\n\nPASS"
+    },
+    "critic:9747668efdbf3983a9f23fe65c05472e6c664b3bdba4949dab2815f2f2d56602": {
+      "name": "critic",
+      "output": "- sun sets in the west at night with a big cloud and some people get rain\n- the cloud makes a nice sound and people run to play\n- people feel happy we are done."
+    },
+    "critic:99693c9e2e696587fec9104bdbbebc7fe19915cc93230fb23e0f4cc34932cbff": {
+      "name": "critic",
+      "output": "To fix: \n- 'now' is only 3 letters, which is below the 6-letter limit, but 'simple' is 6 letters and exceeds it.\n \nTo fix: revise to use shorter words \n- 'I am' can be shortened to 'I'\n- 'fun pets' or 'pets' can be used\n- 'like' and 'and' can be retained\n- 'dogs cats birds' can be shortened to 'dogs cats birds'\n- 'easy terms' or 'terms' can be used"
+    },
+    "critic:9998753d3b5f8cfc9365af95e88af09e1cc00f5ed559722096eb624e34da7524": {
+      "name": "critic",
+      "output": "- natural process gradually forms new landscapes over millions of years in constantly shifting environments\n- slowly changing environments shape the earth with no end in sight always\n- geological features emerge from the ground without any human intervention slowly\n- constantly evolving landscapes alter earth's features over a long period of time"
+    },
+    "critic:99e51b338a92efd2e61f34efa49debf92d2c0032a01b119b6f1e37ac02976cd1": {
+      "name": "critic",
+      "output": "fix the following:\n\n- use no word longer than 6 letters: \"calm\" is 4 letters, but \"quiet\" is 5 and \"always\" is 6 letters \n- exact word count: 15, current has 14 words."
+    },
+    "critic:9bab507f19f023ebba10e38d0b936a137933bf03350362166e562322d8522ffb": {
+      "name": "critic",
+      "output": "PASS"
+    },
+    "critic:9d6f84399e328a5c5ff130e79a6331ebd3755fecdfb8c2a387fc8585150d3dc5": {
+      "name": "critic",
+      "output": "list what to fix\n- the response uses more than 25 words \n- the response does not exactly match the requirements in every detail."
+    },
+    "critic:9f01981de3dcaed6b3dea8566e9be9704a4a3c893d6f8c16fd76680386d0e140": {
+      "name": "critic",
+      "output": "# Revision Needed\n\n* the response has 30 words but it needs exactly 25\n* the formatting does not exactly match as required\n* one of the words 'slow', 'ground', 'deep' are longer than 7 letters\n\n# Revised Response\n\n- sand falls\n- down fast\n- to the\n- sea low"
+    },
+    "critic:a378f4e3fb9d912d9fbb140526d858f299e2c4879213dd6415d2b70768de2124": {
+      "name": "critic",
+      "output": "the following items must be fixed:\n\n- use of word longer than 6 letters: (\"under\", \"sun\", and \"found\")\n- exact count of 25 words: (\"i found a fun box with bad bugs and old pens and sad men\" has 19 words)\n\nrevision (25 words, lowercase, short words):\ni got a fun box with bad bugs old pens sad men mad men ran round small dogs and made big run in rain today."
+    },
+    "critic:a572c85050435239916514e0c2e633c5e0e4f32932e57890939434886aadb074": {
+      "name": "critic",
+      "output": "- Fix: answer contains a 7-letter word (\"slowly\" is not in draft  but \"slow\" is; 'slow' is indeed shorter than seven however it is less than required number of letters  that a sentence needs which is six). \n- Fix: exactly 3 bullet points are listed and each line starts with \"- \" but word count is shorter than requested.\n- Fix: a 6-letter word was used to fix one requirement ('clouds' is 6 letters) and 6 letters is the max word length requested which is good. \n\nRevised draft:\n\n- Sun sets slow\n- Clouds form fast\n- Wet earth smells \n\nThis revised answer contains exactly 20 words"
+    },
+    "critic:a6c473cbcb81b49a7938174ff4fbe55eca8968db49fad727c26bf8df95851f8f": {
+      "name": "critic",
+      "output": "List what to fix\n- do not use commas: (Draft answer contains no commas but the task requires this to be double checked)\n- use exactly 25 words: (Draft answer is 13 words short of the required 25 words)\n- do not use the word \"and\": (Draft answer contains this word)\n- use no word longer than 7 letters: (Some words in the draft answer are longer than 7 letters e.g. 'learned')"
+    },
+    "critic:a83060fef40fbaff49b8cdd800bf93f1a125a4cbba1caa0ac4496d073ee49bcc": {
+      "name": "critic",
+      "output": "To be PASSED, the requirements are: \n1. Use no word longer than 6 letters\n2. Include the word \"node\"\n3. Use exactly 25 words\n4. End the response with \"here we go.\"\n\nThe draft answer does not follow requirement 3, using only 20 words. \n\nHere is the revised answer:\nWater flows down to a small node, then on to a small bend, down to a low spot and out here we go."
+    },
+    "critic:a94596ba6a9370761ff2e8df766a70e16dfa7a6bcbf1c1fbe6bc45f449b65656": {
+      "name": "critic",
+      "output": "What to fix:\n1. the first requirement states not to use commas but in the draft answer, there are a few instances of commas (e.g., 'with fast cold air', 'big old sun hits the gene').\n2. the second requirement states to use exactly 25 words, but the draft answer uses fewer than 25 words.\n3. the sixth requirement states to use no word longer than 6 letters but in the draft answer, there are several words longer than 6 letters (e.g., 'cold', 'big', 'warm', 'wet', 'forms')."
+    },
+    "critic:ac0a512ab78e87ecbeaa926a6c574553ea2e579d9ff4c501e2de14fe009260da": {
+      "name": "critic",
+      "output": "List what to fix:\n- format as exactly 3 bullet points -> Not satisfied (missing bullets)\n- use exactly 20 words -> Not satisfied (too short)\n- use no word longer than 7 letters -> Not satisfied (words \"New\", \"Fun\", \"Done\" have more than 3 letters)\n\nTo fix:\n- Use the correct bullet points: \u2022 \n- Expand to exactly 20 words\n- Replace words longer than 7 letters"
+    },
+    "critic:ac49483e0d69d1c0b68618a7955c994ac132c28589df3f1cef72d78d753ab2b9": {
+      "name": "critic",
+      "output": "To fix, I found the following issues:\n- use no word longer than 7 letters: \"satisfied\" has 9 letters, and \"summarize\" has 9 letters, and \"student\" has 7 letters, so this requirement could be satisfied but not perfectly, however I will revise my answer to strictly follow the limit.\n- format as exactly 4 bullet points: My current answer has only 3 bullet points. \n- use exactly 25 words: My current answer has fewer than 25 words.\n- do not use word \"the\": My current answer uses this word.\n\nHere's a revised version:\n- I say we\n- do it now\n- we all go\n- it is fun here now"
+    },
+    "critic:ad1d98347a3610eec0481ca369def74f64fd6ff80d3cb92fc56c8484f975a500": {
+      "name": "critic",
+      "output": "# Draft answer analysis\n\n- incorrect number of bullet points: 4 required, 4 given but each line is not a complete sentence\n- no word longer than 7 letters: some words in the given answer exceed the limit (e.g. \"kid\", \"we\", \"done\")\n- exact phrase at the end: correct\n- entire response in lowercase: correct\n- exact number of words: 9 given, 20 required\n\n# Changes to make\n- add complete sentence to each bullet point\n- replace words that exceed the 7 letter limit\n- increase the word count to 20"
+    },
+    "critic:add04f699ce75e1dba0159a2042454675c5e0381dc39776be94cf71c1a3a7240": {
+      "name": "critic",
+      "output": "- to fix: \n  - format as exactly 4 bullet points each line starting \" \u2022 \" (not \"- \")\n  - use exactly 25 words (draft has 15 words)\n  - do not use any commas \n\n rewritten draft (to fix the above issues)\n \n \u2022 i will introduce a simple topic it is easy to learn this topic is very basic this \n \u2022 topic has few simple concepts that are easy to understand and can be mastered quickly anytime \n \u2022 the concepts are simple to grasp and require minimum prior knowledge \n \u2022 this simplicity makes the topic suitable for beginners with no prior background"
+    },
+    "critic:b08c3675f97480e5cffc3d0b411360a13796efa5080c3a144693d0ceadee80af": {
+      "name": "critic",
+      "output": "To be PASS, I must satisfy all the requirements. Here's the review:\n\n1. Include the word \"atom\" - Draft answer satisfied this requirement.\n2. Use no word longer than 6 letters - The draft answer contains the word \"technology\" which has more than 6 letters, and some other words may not meet the criteria. To fix this, I need to choose simpler vocabulary.\n3. Format as exactly 5 bullet points, each line starting \"- \" - The draft answer is in the correct format.\n4. Use exactly 20 words - The draft answer exceeds the word limit. I need to rewrite it with 20 words.\n\nHere's the revised answer:\n- New tech uses a small atom\n- It makes some things easy fast\n- Now we make more each day\n- It is very good I say\n- Helps many people in many ways"
+    },
+    "critic:b19e326bca4152585dd5b5c5ae45002769c6a799440a83517edc544b5f01962c": {
+      "name": "critic",
+      "output": "fix the following:\n- too long words: change to shorter words\n- include space for 20-word requirement \n\nHere is a revised draft:\n\nI say fun is atom made of little bits that make up all things in our big world now everyday."
+    },
+    "critic:b2e8b1f449e92779e270a96856b2075f4be1c256b9f8fd048a77a2b4217648b5": {
+      "name": "critic",
+      "output": "- i am a kid i go home now\n- i am a kid i run\n- i run fast now home"
+    },
+    "critic:b70c70b0236347de31084d47d5c9da280e7841639693c2a84e60381109036071": {
+      "name": "critic",
+      "output": "List what to fix:\n- The draft answer has more than 5 bullet points. It should be revised to exactly 5 points.\n- The words \"satisfied\" and \"dirt\" and \"dealt\" and \"luck\" contain more than 7 letters and \"dealt\" and \"satisfied\" have to be fixed because of word constraints."
+    },
+    "critic:b9b84df946f90899a28dabcae0e42561fef95c41c440f375be7c78a336817d85": {
+      "name": "critic",
+      "output": "- Gene is key point.\n- Simple code is found.\n- Basic gene works well each time.\n\nRequirements satisfied:\n1. Format as exactly 3 bullet points\n    - Correct (each line starts with \"- \")\n2. Include the word \"gene\"\n    - Correct\n3. Use exactly 25 words\n    - Not correct: the response contains 24 words (the maximum is 25). Add one more word to satisfy this constraint:\n    - Revisions: '- Gene is key point always.'\n        or '- Gene is key point really.'\n    Let me revise the response: '- Gene is key point really.'\n        '- Simple code is found.'\n        '- Basic gene works well each time.'\nPASS"
+    },
+    "critic:ba21755a738a81ae117e7a6fc21b1f29415ab6a05ef32a2fd8dc9eec622d7b69": {
+      "name": "critic",
+      "output": "I found a big wave on the sand near my dog house today outside\n\nThe requirements that need fixing are:\n\n1. The length of the word \"outside\" is more than 6 letters.\n2. The answer is not exactly 15 words; it has 7 words. It needs to be expanded to 15 words."
+    },
+    "critic:ba54fc08100fd76f02d981684162424643d935300dabb64c8533ec64b5121ed7": {
+      "name": "critic",
+      "output": "here's the result of checking the draft answer:\n- includes the word \"code\"  PASS\n- written entirely in lowercase  PASS\n- exactly 25 words  FAIL (needs revision to meet the word count requirement)\n- does not use the word \"to\"  PASS\n- does not use commas  PASS\n\nfix: revise the response to meet the 25-word requirement.\n\n# Revised draft\nnatural processes involve complex systems that follow a hidden code governing growth and development of living things every single day unfolding slowly always everywhere without pause constantly changing"
+    },
+    "critic:bc83345d6d524258c326e2339d66925341cadbc9540f18054ee2b4b0640226f1": {
+      "name": "critic",
+      "output": "not pass - requirements to fix:\n- the draft answer has exactly 11 words, not 15.\n- the draft answer does not explicitly exclude the use of \"and\" (although it appears to be avoided in the given sentence, there should be a guarantee).\n- to meet the lower-case requirement, the response can be left as it is, so no changes needed here.\n\n revised answer:\n scientific concepts explain complex phenomena in simple terms using clear logical reasoning that is it."
+    },
+    "critic:bd7913509bd29d451cfbaaed375351b3fd67e5b88e6b95d19d17804b6686be4d": {
+      "name": "critic",
+      "output": "To be PASS, the following needs to be revised:\n\n1. Use exactly 20 words: The current answer is short of 10 words. \n2. Use no word longer than 7 letters: The word \"daily\" contains 5 letters is okay, but the word \"formations\" has 10 letters which exceeds the limit.\n3. Do not use any commas: The current answer is fine without commas.\n\n Revised answer: \n Basic rules of life form in hot small dark areas of old rock every day is hot wet."
+    },
+    "critic:bf582ee74680adc9049a9e308b2cb70b95dc073e525c37913dae1ce08efde03f": {
+      "name": "critic",
+      "output": "I find a new bug in mud by small pond with old nets and big fish in it every day now is a fun thing to do \n\n- use no word longer than 7 letters: Satisfied\n- do not use any commas: Satisfied\n- do not use the word \"the\": Satisfied\n- use exactly 25 words: Not Satisfied (only 20 words)\n\nTo fix: \n- Add more details to reach 25 words while not exceeding the 7-letter word limit.\n\n Revised answer:\n I find a new bug in mud by small pond with old nets and big fish in it every day now is a fun thing to do all time."
+    },
+    "critic:c0bd567a40681bbc42953fcda58c362539ef109752c26cdb7f61227dd7aae2c5": {
+      "name": "critic",
+      "output": "To revise the answer to match all requirements:\n\n- What I am I \n- I am a kid \n- I go home now all is set.\n\nThe requirements that are not met in the draft answer are:\n- The draft contains a comma.\n- The answer contains a word longer than 7 letters (\"revision\") has been removed and \"am I\" and \"now\" meet requirements so all is good however the word 'am' isn't longer than six letters and 'I' is only two but 'I am I' uses a 2 and a 3 lettered word but it meets the 20 word criteria and the word limit.\n\nTo further revise for word length:\n- I am a kid\n- I go home now\n- All set here all is set.\n\nNo issues left to address"
+    },
+    "critic:c1eec344e155d0fed7c69b15ecb6bbeead7271bc962dec8f0cd16536ae730c5e": {
+      "name": "critic",
+      "output": "Errors:\n- The response must end with exactly 20 words, but the current response is short.\n- The response must use exactly 20 words, but the current response is short.\n- The words \"process,\" \"natural,\" and \"describe\" are longer than 7 letters and should be avoided.\n\nTo Fix:\n\nThe rewritten response should contain exactly 3 bullet points, each starting with a hyphen, use no words longer than 7 letters, and end with \"we are done.\" It should also describe a natural process.\n\nReply draft (with modifications): PASS\n \n Draft answer \n- Clouds fall\n- Sun goes down fast\n- Rain comes now we are done."
+    },
+    "critic:c33b9f7ba98cdfea48163726e44257975b0d678c05ce4466a202c4f91603e383": {
+      "name": "critic",
+      "output": "i find a new thing it is fun to see and know and feel happy it is good so it goes"
+    },
+    "critic:c3b1fcd5536ce0b0a890fe716ce1b683775a6daf9ec6b806f265d864720e26bb": {
+      "name": "critic",
+      "output": "Fix:\n\n- the word \"faster\" must be included in the correct grammar form since the rest of the answer is written in present tense.\n- word \"each\" should replace the word \"every\"\n\n Revised answer: \nNew technology uses advanced wave systems creating faster processing speeds each day always now now."
+    },
+    "critic:c40e1048d1f09f891ed5f46b341f707326b488bae7c8c845be39f3f3178cb708": {
+      "name": "critic",
+      "output": "- i will revise the answer to satisfy the word length constraint.\n- i will add more content to the answer to satisfy the 25-word requirement.\n- the answer is currently in lowercase, so nothing needs to be changed there.\n- the answer is in a bullet point format, so nothing needs to be changed there.\n\nthings to fix: \n- use more words (answer has only 5 words)\n- use no word longer than 6 letters (words like \"fun\" have 3 letters, but words like \"am\" have 2 - a shorter word than 6 letters, whereas \"kid\" has more, it has 3 letters and meets the requirements)\n\nrevised draft answer:\n- i\n- am\n- a\n- happy\n- kid"
+    },
+    "critic:c6acebd1c8d294e06e55880e49e0aa329cb51162e320e2d357e24130f6c3e454": {
+      "name": "critic",
+      "output": "To revise the draft answer, I noted the following issues:\n\n1. Not exactly 15 words\n2. Included word longer than 6 letters (\"big\")\n3. Included word \"the\" (although it was not in the main response, I assume it was excluded from the rest of the text but present in the original statement of requirements)\n\nHere is the revised answer:\nFast flux moves fast up down with mud flows all around here we go.\n\nThis revised answer uses exactly 15 words, does not use the word \"the\", includes the word \"flux\", uses no word longer than 6 letters, and ends with \"here we go.\""
+    },
+    "critic:c7a319bf158370ef51f1302ebfc9add6fa52a727cbbed5076f9f5c3e9671d9d2": {
+      "name": "critic",
+      "output": "What to fix:\n- word count exceeds 25 words.\n- use of words longer than 7 letters (\"single\", \"bright\", \"happy\", \"big\").\n- extra word \"always\" and unnecessary phrases (\"own big warm and happy\", \"with its own\") are more than necessary.\n\nTo rewrite the answer I would try to shorten it, remove the long words, and rephrase: \nSun is hot it gives us light and heat every day with its face."
+    },
+    "critic:c8a3acd1c2894a0a4a8b7adcb2480de10ad4b17b00b1241c96cbff15e46cf025": {
+      "name": "critic",
+      "output": "what to fix:\n\n* format: more than 5 bullet points, not exactly 5\n* word length: \"pet\" and \"dog\" have more than 7 letters\n* word count: not exactly 20 words\n* lowercase: not consistent (only first word is lowercase)\n* specific phrases: \"is bed\" is not relevant \n* specific phrases: \"has dog\" is not a complete sentence"
+    },
+    "critic:c8a6b2967023772688e72ffaccd139d51c68d74cf9f975d9b637789321c3d12e": {
+      "name": "critic",
+      "output": "the following are the issues with the draft answer:\n- the answer has a total of 21 words, not 25.\n- the word \"and\" is being used which is not allowed.\n- the entire response is not in lowercase.\n\nto fix these issues, the following revisions can be made:\n# Task\nWrite a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 25 words\n- write your entire response in lowercase (no capital letters)\n- do not use the word \"and\"\n- format as exactly 3 bullet points, each line starting \"- \"\n\n# Revised answer\n- scientists made a new discovery recently \n- they are studying it carefully every day to learn more about it now\n- researchers found something very interesting or unique in the world"
+    },
+    "critic:cc96032f8783711a8318c587040051aea57ae4b6ecd447c4d3a3497c6ea17377": {
+      "name": "critic",
+      "output": "fix \n- write entire response in lowercase (not satisfied): \"small\" is capitalized \n- use exactly 25 words (not satisfied): currently 19 words \n- do not use the word \"and\" (not satisfied): still using \"&\"\n- include word \"atom\" (satisfied)\n \nto pass the requirements: revise draft answer to \nsmall computer chips rely on tiny atom structures to process information quickly with low power consumption in various electronic devices daily operation"
+    },
+    "critic:cdfdaac81fe87ea6c5d2483987fc3ceb6df2a4a16e748c5978f4a843f1ad0cb4": {
+      "name": "critic",
+      "output": "it is a slow move down the hill and it goes on all day all is set.\n\nfix these:\n- exceeds the 20-word limit\n- \"goes on and on\" is more than a single word"
+    },
+    "critic:cf34abdf0f31c5b4a69ffd307b5e76e6ac98ca84480c18eabbec4ddaa760fef0": {
+      "name": "critic",
+      "output": "# Draft answer errors\n- The response uses a vocabulary longer than 7 letters (e.g., \"fun\", \"tech\").\n- The sentence does not end exactly after 15 words as requested.\n- There is no guarantee for exactly 3 bullet points since lines starting with a single dash (-) are not used for bullet points usually in a list.\n\n# Revised answer\n- I see new toys \n- They help me so much now every day I go\n- Always work for me here we go."
+    },
+    "critic:cfbb46f8b8e18b9aeb6eba6075e4ab561298b22019f819b073eb00b3bc5c74ca": {
+      "name": "critic",
+      "output": "i have a pet dog and cat fun to play with them at home so it goes.\n\nhere's what to fix for draft answer:\n\n- response length is not exactly 20 words\n- some words have more than 7 letters"
+    },
+    "critic:d05a4125c6f06f4f2804cf62afd8527f71a7e8329d29ff6145e0e23aab300f98": {
+      "name": "critic",
+      "output": "fix:\n\n- write the entire response in lowercase (but the current response has \"every single day all we\")\n- use a 15-word response (but the current response has more than 15 words)\n- end the response with the exact phrase \"we are done\" (but the current response has the phrase in the middle)"
+    },
+    "critic:d2da7ad35d8d8a9ca2471b3f168ff4e86df65e327a0201ace0b978b90f7b0675": {
+      "name": "critic",
+      "output": "To revise the draft, I will first identify areas needing improvement. \n\n1. Include the word \"atom\" but in revised form: the word is already included however it is used in the form of 'atom' only once, the word has been included but it would be good to use more variation.\n2. Use exactly 25 words: The current response has 23 words. \n\nRevised draft: Water evaporates into air as molecules break down into single atom forming vapor that rises slowly upwards in continuous natural process cycling over long periods of time daily."
+    },
+    "critic:d4875aa200ed50ffcd562b591d21233b97e2434dbac34b5236d99c2bdad43f2f": {
+      "name": "critic",
+      "output": "- Fix the following: the answer must end with \"here we go\" exactly and is less than 20 words.\n- Also fix that the answer must not use the word \"of\" and the bullet points must be exactly in 3.\n\n Reply: PASS is incorrect.\n\nTo Fix:\n1. Word count must be exactly 20.\n2. The last phrase must be \"here we go\" exactly.\n3. The word \"of\" is used."
+    },
+    "critic:d5d30a0bc9d20e1b14a9d646add2a44c3d70aad421637052db84f0cd3b3811cc": {
+      "name": "critic",
+      "output": "list what to fix:\n\n- the 6th word \"brown\" has more than 5 letters\n- the 9th word \"very\" has more than 4 letters\n- the 12th word \"deep\" might be interpreted in different ways but is too vague"
+    },
+    "critic:d9407ccaf54a6a46226ce677402c914a387d7a1007de1d4e8872e0197d4688d3": {
+      "name": "critic",
+      "output": "- Snow falls on a cold day is a slow wet natural process.\n- The task requires a change so it will not PASS.\n- What to fix:\n  - Add more bullets\n  - Shorten long words ('natural' and 'process' are 7 letters and need shortening)\n  - Add no word with 8 letters (like 'process')\n  - No commas\n  - Exactly 15 words\n  - Remove the word \"of\"\n  - Use exactly 5 bullet points\n\nRevised Answer:\n \n- Snow is falling slow on cold wet days\n- The sun makes rain fall on us\n- It gets cold and snow will fall\n- This makes the world wet fast\n- This makes a slow wet thing"
+    },
+    "critic:db4698676c3523653d3411658886ecd384bda5b10714e1d0b64943682ce1ca9e": {
+      "name": "critic",
+      "output": "The sun is a massive star that undergoes nuclear fusion reactions constantly producing light we are done.\n\nRequirements not satisfied:\n\n- The response has 22 words, not 25: add 3 words for a total of 25 words.\n- The response does not include \"star\" correctly: it can be revised to include it correctly in a 25-word response.\n- The word \"a\" is missing from the sentence.\n\nRevised answer:\nThe sun is a massive beautiful star that undergoes nuclear fusion reactions constantly producing light energy always we are done."
+    },
+    "critic:ddeb031fa7e1c4c8e39d6f96e9ecb947b99f6b11050467244b971f58979a4e52": {
+      "name": "critic",
+      "output": "# Issues with the current draft:\n- The word \"good\" is longer than 7 letters. Replace with a shorter word.\n- Format requirement is not satisfied because there are more than one line starting with a dash; also, there is no space before each line starting with a dash.\n- The requirement for exactly 15 words is not met.\n \nFix the issues."
+    },
+    "critic:df6b176b00d5eb740f9ac4dfa31ad1fd68e9542b75d84afb9233890e14801b89": {
+      "name": "critic",
+      "output": "The following need to be revised:\n- The word count is 30 which is above 25 words.\n- The answer contains commas that do not satisfy the requirement.\n- The answer format needs to use exactly 4 bullet points starting with \"- \".\n- Bullet points start with hyphen \"-\" which is correct but the requirement also mentioned the hyphen to start all bullet points which it does.\n\nTo fix:\n- Limit the response length to 25 words.\n- Rewrite the response without commas.\n- Keep each point of the response starting with \"- \"\n\nHere is the revised answer:\n- Student learns new concept\n- Gains knowledge every day\n- Applies new skills in projects\n- Becomes more confident slowly always"
+    },
+    "critic:e0d4bb04d9741ead2c4a6f7f3875bd1c329dcc46d8c4f515444a544427beafa3": {
+      "name": "critic",
+      "output": "- I am\n- I see thing\n- I find yes\n- I say it now yes\n\n Fix the following:\n- The task requires exactly 15 words but the draft has 7.\n- The task requires exactly 4 bullet points but the first and last bullet points have extra words making only 3."
+    },
+    "critic:e12ce4d15d813ae44194b0418cf5fe7e2ab8bc0c591c96fa8f2443ecee5a7eef": {
+      "name": "critic",
+      "output": "Fix the following:\n- The word \"now\" has 3 letters, but the task requires words no longer than 7 letters; it needs to be changed to a 4-letter word such as \"new\" won't work because it's already used.\n- \"New\" can be replaced."
+    },
+    "critic:e156668a373fc7517d6b9e6343b44286371ad00ab7ef768d5cf0d0aa68800d41": {
+      "name": "critic",
+      "output": "the draft answer has some issues:\n\n- it should be in exactly 4 bullet points, but the current response has only 4 lines, so it's correct - pass\n- the entire response should be in lowercase, but the words \"Natural\" and \"Rocks\" are capitalized - rewrite\n- the response should be exactly 25 words, but it's 23 words - add 2 more words\n- the response should not use the word \"to\", but the word \"over\" implies this, so this constraint is partially satisfied - rewrite with a synonym for \"over\"\n\nthe revised response should address these issues."
+    },
+    "critic:e21219a207b1f8672f30ba07fd100c93cfe48407c5bfd684e91e7947a1c69602": {
+      "name": "critic",
+      "output": "what to fix:\n- does not use exactly 20 words\n- does not start each line with a bullet, but a dash \n- some words have more than 7 letters\n- does not use the word in lowercase (no capital letters)\n\nI will revise the answer until it meets the requirements. \n\nRevised draft:\n  - small clouds fall soft rain\n  - slow sun sets in the west\n  - cold snow melts down the hill\n  - warm air rises gently now"
+    },
+    "critic:e62c026ff5fccc3a9c3be0cada9453c6646eeb5d55226cd2a22f1286e895f9e7": {
+      "name": "critic",
+      "output": "# Draft answer critique\n- word count requirement (exactly 25 words) is not met (17 words)\n- format (5 bullet points, each line starting \"- \") is met\n- there is no requirement to exclude a word, so it's okay that \"and\" is used\n- case requirement (write in lowercase) is met\n- what to fix:\n  - add 8 words to meet the 25-word requirement\n  - revise the last line to meet the word count requirement\n\n# Revised answer\n- technology is rapidly evolving now\n- new innovations are emerging constantly today\n- machines are learning quickly every day\n- robots are becoming smarter faster\n- artificial intelligence is progressing slowly gradually still"
+    },
+    "critic:e81a2e69f1bc273aa7686253e132e8f5bd43b6e7f54611e47b913d1130ef408f": {
+      "name": "critic",
+      "output": "list what to fix:\n\n1. the draft exceeds the word limit of 20 in the task.\n2. \"found\" is a bit too long, a revised 20-word answer will have to use shorter words. \n3. the draft does not exactly follow the task by not being in all-lowercase as per the original requirements."
+    },
+    "critic:e82d73b888584c8e70ae3c6b6f28d01cf8608cdc16e096d7de0c46179f5ab46a": {
+      "name": "critic",
+      "output": "- Introduction \n- Topic easy for beginners \n- Simple concept easy learn \n- Basic knowledge to begin \n- Starting now here we go."
+    },
+    "critic:e98115bd766c1ae96584cdd52898c233e26084f30fc3db2ee0fcb24ee1032a20": {
+      "name": "critic",
+      "output": "fix:\n- use exactly 25 words: current response has 28 words\n- include the word \"code\" in a way that makes sense scientifically (at the moment, it's unclear what the \"code\" refers to)\n- use no word longer than 7 letters: words like \"make\" are more than 7 letters"
+    },
+    "critic:eac00e1e2ac1d942af0e74b62bd80dd601a3b96417279e3f8d10696afe719f1c": {
+      "name": "critic",
+      "output": "to fix: \n- use exactly 15 words: the current draft has 8 words\n- do not exceed word length of 6 letters: some words in the current draft exceed 6 letters\n\n revised draft: \nthe code is used to make a box work easy now fast each day"
+    },
+    "critic:ead5c064fc99c4c79d051e5969baddeccc3bf8e1909dd83ca3a3de6cce529072": {
+      "name": "critic",
+      "output": "List of constraints not satisfied:\n- format of 4 bullet points starting with \"- \" is not exactly as required: the draft is 4 lines but they are paragraphs not bullet points\n- does not use exactly 20 words and needs rephrasing to do so\n- contains commas, which is not allowed \n- does not end with the exact phrase \"all is set\""
+    },
+    "critic:eb1a187fb2d029fa2bd1e0aac67796946e2d76a4f419c3333df8aada688313fe": {
+      "name": "critic",
+      "output": "tiny atom is basic building block in chemistry with protons and electrons surrounding nucleus closely placed together."
+    },
+    "critic:ec56aec5dbb8537ffd783e25381e121a0f2f261a309d384e190b1cc58f574547": {
+      "name": "critic",
+      "output": "to fix:\n- the task states to \"write your entire response in lowercase (no capital letters)\" but the draft answer has an initial \"i\" which is capitalized.\n- the task states to \"use no word longer than 7 letters\" but the draft answer contains many longer words.\n- the task states to \"use exactly 25 words\" but the draft answer is much shorter. \n- the task does not state any requirement for using a word that starts with a capital letter (\"a\")"
+    },
+    "critic:ed1bdc007eec100369c95f9588ff95e955b97f694f5f9fcb76e533ea5c011150": {
+      "name": "critic",
+      "output": "Fix:\n\n- Format: There should be exactly 5 bullet points. The current format is 5 separate lines, but in correct bullet point format, it should include dashes at the same level, or use asterisks, dashes or plus signs.\n- Word length: The word \"and\" was used, but also, the word \"Big\" is more than 3 letters. \n- Word count: The total word count is 6 words, while exactly 25 is needed.\n- No specific words: No requirement is broken here."
+    },
+    "critic:edcd7e9e55ee849859ef7f33826a6f7ec9f9b6c9de1d0c49b79aaa61362fa984": {
+      "name": "critic",
+      "output": "To fix the draft answer:\n\n- The answer needs to be exactly 5 bullet points, but it currently has 4.\n- The answer should not include any word longer than 6 letters, but some may exceed this.\n- The answer should include the word 'fun' in addition to 'atom,' as 'fun' is a suitable replacement for the word that was to be the 6th word in the sentence.\n- The total number of words is less than 25, so we need to expand on the answer while meeting the given limitations.\n\nHere's a revised draft:\n\n- I\n- see\n- atom\n- is\n- fun\n- easy\n- to\n- learn"
+    },
+    "critic:f1c171c2c278992046796cf077b7f2016ad01107cd91e03dc7b007d07aa8fe81": {
+      "name": "critic",
+      "output": "i will tell you about pets and kids and fun things they play every day at home\n\nfix: \n\n- 'home' is not less than 7 letters; should be changed to e.g 'room'\n- response is shorter than required to be 25 words so revise to 25 words and still under 7 letter limit"
+    },
+    "critic:f25ed513c008212de9cc54c04a953d0886fc6d49c287c07bab4cb073d75faeaa": {
+      "name": "critic",
+      "output": "fix the following: \n- the word count is below the 20 word requirement. \n- the response does not include the word \"or\".\n\n revised response: \nwater flows through small node slowly changing surroundings completely before eventually reaching a new stable condition or we are done."
+    },
+    "critic:f2a4a92d3a591843a06f8968e187a11ce53f9a7347072306473470c29ec265d0": {
+      "name": "critic",
+      "output": "# Review\n\n- format as exactly 3 bullet points: PASS\n- entire response in lowercase: PASS\n- use exactly 15 words: FAIL (has 10 words)\n- use no word longer than 6 letters: FAIL (has words longer than 6)\n\n# To fix:\n1. expand the response to include a total of 15 words.\n2. shorten words longer than 6 letters (like 'comes' and 'falls')"
+    },
+    "critic:f38b2b86919f2c6f0d922c44591735907012172bcdce952f784e4f6047c7fc21": {
+      "name": "critic",
+      "output": "To revise the answer, I've identified a few issues:\n\n1. The response uses the word \"and\", which is not allowed.\n2. Some words have more than 6 letters.\n3. The response does not exactly use 25 words.\n4. The requirement to format as exactly 4 bullet points, each line starting with a hyphen, is satisfied, but there's an issue with the last line.\n\nThe original last line has an additional phrase before \"all is set.\" To fix it, I will revise the response.\n\nHere's the corrected response:\n\n- Sun sets \n- Rain falls down soft\n- Cold snow melts slow\n- Ice melts cold calm all is set."
+    },
+    "critic:f3b523ee79e16d8c5b0235e251aeae84296f42e59da5ee03b7980a0bc9f564d4": {
+      "name": "critic",
+      "output": "fix list:\n- do not use any commas: not satisfied\n- use no word longer than 7 letters: satisfied\n- use exactly 25 words: not satisfied\n- do not use the word \"the\": satisfied\n\nRevised answer:\nI will help you with fun ideas make good sense for kids to know feel happy now always have fun every day each week all year long"
+    },
+    "critic:f412407ab1fa7bb416df0cd9ca3d2be8f9d751f77165a98312f36aa097262a80": {
+      "name": "critic",
+      "output": "# Revision needed\n\n1. the response has 30 words (too long) - needs to be cut down to 20\n2. the response has a word that is all capital letters\n3. the response uses the word \"and\"\n4. there's a comma"
+    },
+    "critic:f764f48df9c8bc9a1a18d486ab902b7e4ebaed5c293bf9a613f2c2fb005c8ca2": {
+      "name": "critic",
+      "output": "To satisfy the task, I'll make some revisions to the draft answer.\n\n- sun is hot\n- water flows down\n- it is wet\n- dogs like water\n- they have fun now\n\nThe original draft needs revision on the following:\n- 'satisfy ALL of the following requirements': I have revised the answer to satisfy all requirements.\n- No word longer than 6 letters: I have reviewed the revised answer and have used only words with 6 letters or less.\n- Exactly 15 words: I have reviewed the revised answer and have ensured that it still has exactly 15 words.\n- Write entire response in lowercase: I have ensured that the entire response is written in lowercase.\n- Format as exactly 5 bullet points, each line starting '- ': I have revised the answer to format it with exactly 5 bullet points. \n\nPASS"
+    },
+    "critic:f772476215fbd1ae7c4fddcc3e49775751a816da0305e7030d51775bc0074df3": {
+      "name": "critic",
+      "output": "fix the following:\n- there are words longer than 6 letters (\"pet\")\n- the task requires exactly 25 words but this draft has too few\n- the answer should use no commas but this draft has no commas"
+    },
+    "critic:fb1c69de678fba7414476da0a3b520a41efc0c011f09942e7dddb80b886baccb": {
+      "name": "critic",
+      "output": "to fix: \n- answer must be exactly 15 words\n- some words are longer than 7 letters (\"very\" is 4 but \"satisfy\" isn't a problem in this case however \"scientific\" and \"concept\" have 8 and 7 letters respectively in another context)\n\nhere is a revised draft:\n\nday is warm and makes cold air go up fast every single day time"
+    },
+    "critic:fe11d27c824ee0ba2864dd5e5cb8d6988bafc237493874e4d3bf08fd0c6022ae": {
+      "name": "critic",
+      "output": "To fix:\n- exceed word limit: use exactly 20 words is not satisfied as the word limit exceeds it \n- word length: use no word longer than 6 letters is not satisfied for words 'every' and 'now' \n\nRevised answer: Water falls down hits the sand very fast each day always now time"
+    },
+    "critic:fe7442a481d2bb09c07a8f14670f4fe2efc1d3b8f50d4ed3da90d56efefd03e8": {
+      "name": "critic",
+      "output": "there are several things to fix\n- the response is under 25 words and does not satisfy the word limit.\n- it includes a word longer than 7 letters ('fun', 'every', 'easier', and 'always').\n- the response includes capital letters.\n- the response includes commas.\n\nto fix these things the answer should be revised to include a 25-word response, only use words of 7 letters or less, write in lower case, and not use commas.\n\nhere's a revised answer:\n\ni use a phone to make calls with my friends at home or on the go with ease now all the time it is my best friend"
+    },
+    "critic:fee94198fbbd69fe33191a6c792de4672499d691c84f977fc8b6c9ba9be82e11": {
+      "name": "critic",
+      "output": "list what to fix\n- response should be in 15 exact words but the current draft is under the limit.\n- a revised version would be 'a small star is fun to see every night so it goes.'"
+    },
+    "worker:005d296dee1e88ccfd1bbc37b3cfdc3d653ae055dcaff653265a920daba07269": {
+      "name": "worker",
+      "output": "- i am \n- a cat\n- is fun\n- i run\n- i sit"
+    },
+    "worker:011e8112884068e5ee1446ca3b12ea0c5524c9b7c5b137edd7a4a8d225efd790": {
+      "name": "worker",
+      "output": "Fun code is used by me to see it in a box for a fun code to say it to me here we go."
+    },
+    "worker:0133e477a7ebde2c2e2490ee473fd3a600c317637094225915c62f48abf70f3e": {
+      "name": "worker",
+      "output": "- sand\n- down\n- to the\n- sea low"
+    },
+    "worker:017731f017edba0aed7910cc3dcf28f590d32b193bf9d1ca80ff6832ff039729": {
+      "name": "worker",
+      "output": "- New wave hits\n- Big news is\n- Fun comes next"
+    },
+    "worker:01d744c887adcc730fca8dc358146aa38dde284571c8bed3d2651d376ea8594b": {
+      "name": "worker",
+      "output": "scientific concepts involve tiny particles interacting constantly everywhere always moving slowly changing forms all is set."
+    },
+    "worker:01d7729f338326b9e9c4df4f01648e2eb4277f14dfb0b7fd48431536c23f6f6a": {
+      "name": "worker",
+      "output": "Water evaporates into air as molecules break down into single atomic atom forming vapor rising slowly upwards in natural process cycling over time daily always"
+    },
+    "worker:0453b72d5557f70348cda4b19869937646f1fb9faf60fe2755de73c7db05adda": {
+      "name": "worker",
+      "output": "- i am \n- a pet\n- is fun\n- has dog\n- is bed"
+    },
+    "worker:05155b058fccfd056b5652c41469af91e3d92ecbb73e46703b3343d2e9649ea3": {
+      "name": "worker",
+      "output": "Code is key part of fun tech so it goes."
+    },
+    "worker:054adcac05de81f0538247cc6ff04f8912adc42d4ceeea8c5310e1f197e7406a": {
+      "name": "worker",
+      "output": "New cell is new and has a big sand core bit by bit now"
+    },
+    "worker:065c92ffb2f3e43b271e3e5bbac570ce3c9af9d6a22530f24e74a61e00a379dd": {
+      "name": "worker",
+      "output": "i will teach you a new code to make fun and play with it now"
+    },
+    "worker:06aea8028a6238a445976ec9b4dd2d0c9d9a63462bc8374b2a03602fc11910c4": {
+      "name": "worker",
+      "output": "Student learns concept at each node and connects ideas together quickly to understand material very well we are done."
+    },
+    "worker:077afa612a957071d5acfc90ee2396362db89158c80d1d9b8573d3c36586b28a": {
+      "name": "worker",
+      "output": "- sun sets down\n- rain falls from\n- wind blows cold\n- snow falls slow\n- cold comes fast so it goes."
+    },
+    "worker:07de380249830eb0e22c4dfdbe6dea4a43d26e3c369cd903e0e6583eb746c346": {
+      "name": "worker",
+      "output": "- Water falls \n- Earth rotates \n- Sun sets we are done."
+    },
+    "worker:08b27029b5d9c0059baf0422f777c538aebe4db1499c5dbcbb32b1823b3d035f": {
+      "name": "worker",
+      "output": "- Brief tech overview uses code\n- Simplifies tasks with minimal code\n- Executes functions using complex code"
+    },
+    "worker:09b7b4a0246c08cf104f6d1cb9b09d9bf209f6f064b4b008b037e157ba452008": {
+      "name": "worker",
+      "output": "Learn basic things like atom and cat are small tiny bits in air we all can see daily now"
+    },
+    "worker:0c0e6e060358354369eabe95c02cb591fdc527ebdf850254091aeec10b54ffb3": {
+      "name": "worker",
+      "output": "Natural process of water evaporation from earth into air forms clouds which produce rain that falls back to earth that is it."
+    },
+    "worker:0c46b3a7523f626ffcc914a77d1cbe253132d9173bdecf0c0aed8327a836fcab": {
+      "name": "worker",
+      "output": "- Discovery is made in science field\n- Flux of new ideas emerges slowly\n- Researchers find new evidence daily\n- Experts analyze data in flux"
+    },
+    "worker:0cf739c4be7c2191be31323a30681156e372524d13b028ff5552ffec26761a9e": {
+      "name": "worker",
+      "output": "- Water falls\n- Atom splits\n- Nature grows\n- Energy moves\n- Life flows so it goes."
+    },
+    "worker:0d0844fbc90179590b286065dd9394ff1d0e5b065877a1f1a4913bf07f54b5b8": {
+      "name": "worker",
+      "output": "- i am a boy\n- i go to school\n- i read a book\n- i am ok we are done."
+    },
+    "worker:0ddc70959715bee66e08a57b3e4076404d4b7c5b6ee57b776af413099da86c4e": {
+      "name": "worker",
+      "output": "- New flux is fun\n- Flux is a key\n- It has big codes\n- Helps in bad flux"
+    },
+    "worker:0e2deffd2c315b2d8cb5cf3f379def12cc1ea837d8487a213cfbb2b622df5d6e": {
+      "name": "worker",
+      "output": "\u2022 i will introduce a simple topic it is easy\n\u2022 topic has few simple concepts that are easy\n\u2022 the concepts are simple to grasp and require\n\u2022 this simplicity makes topic suitable for beginners always"
+    },
+    "worker:0e92bc240b9e6059e0b13db535fcc41922debba797f6a443cae3bd8d0feba3e5": {
+      "name": "worker",
+      "output": "\u2022 I see \n\u2022 No big \n\u2022 Yes now"
+    },
+    "worker:0ef5c52dbb06f3a481d7ed18bbe190fcbb81beeb7f104e85b900ada36bc05498": {
+      "name": "worker",
+      "output": "i talk tiny bits of sand fall down slow that is it."
+    },
+    "worker:0f3e4d6e9aa03ba37e78a235438cc9e46ba3a8311862f2eb385ce1137b2330f9": {
+      "name": "worker",
+      "output": "i say sand fall down slow down now fast that is it."
+    },
+    "worker:14234cc1473b2ba001608077297f15ea5ad0a69a96b906c9c4ebbc7818cf8ef7": {
+      "name": "worker",
+      "output": "i found a new bug in my box with fun tiny legs on it we see it now we are done."
+    },
+    "worker:1782d02eb775b4ad17c75c8dfc59690db303d99cd59b7318d4d2e76866878ff3": {
+      "name": "worker",
+      "output": "small bits of code run fast on little computers with fun apps and good data make life easy to use every day"
+    },
+    "worker:18bd1f50d6af6ff816a218e2479ca2d23395d6c855e236b6a7fe70e7fcf07812": {
+      "name": "worker",
+      "output": "- Water falls \n- An atom splits\n- Nature grows, \n- The energy moves \n- Life flows so it goes."
+    },
+    "worker:18c45c7d21243ba3c5682ded2d05aab26c9b646c5f70e118a71ce141376823ed": {
+      "name": "worker",
+      "output": "I find a new bug in mud by a small pond with old nets and big fish in it every day now is fun"
+    },
+    "worker:1977c99566d7658cdef50268695915b6c632369755727e6a4bdc8c966c263325": {
+      "name": "worker",
+      "output": "- I found a new\n- thing in my box\n- it is very cool"
+    },
+    "worker:19bf8718ef10f470e52f9f2ee3731312c849dc9d670ae28bd57fd08d2518e3b9": {
+      "name": "worker",
+      "output": "- i find it\n- i like it\n- i see now we are done."
+    },
+    "worker:1a7558d9411e6cca3527fcb90c7490a9041e4cfc09671a3dfe07585dac166971": {
+      "name": "worker",
+      "output": "- New tech\n- Fast now\n- Big help\n- Fun we are done."
+    },
+    "worker:1a7e1b9c1b4b6d34a67f13ee5568c5fd314e2af8036cc9c2ff489ff3938e3651": {
+      "name": "worker",
+      "output": "- natural light shines \n- ocean waves move \n- earth spins slowly \n- water evaporates quickly \n- plants grow slowly"
+    },
+    "worker:1bcda76fabbb6cbcf37e40f39694387082f42e2a6d3b3669f227cc4abfc0378d": {
+      "name": "worker",
+      "output": "- i am a kid\n- i read a book\n- it is nice\n- i like to read now"
+    },
+    "worker:1c82718c7d7225fe8ed92a961f927cf7c6a819af73338314a92597ff07459b77": {
+      "name": "worker",
+      "output": "the node is key to school work for a student to get good marks in a short time now today"
+    },
+    "worker:1cb9a587f61ea9938c3011eb4eb26cf25a1e8351288f6bf7db8c7d0118a48327": {
+      "name": "worker",
+      "output": "- Technology\n- is growing\n- very fast now\n- all is set."
+    },
+    "worker:1e07396b9cf82a79ec6a9bfcbd51b5e9f1ff61afa4ec1a8356a8bb54c6aec846": {
+      "name": "worker",
+      "output": "students need to understand main concepts and key ideas for their academic success always matters"
+    },
+    "worker:1e8a38b3422ec62674e921fb693742e3fe022893b9dbd836ec9498b169def284": {
+      "name": "worker",
+      "output": "- I say\n- You go\n- We do\n- It is fun"
+    },
+    "worker:1fd48960bcfe0ce41fc5cb0ff5526e91661c3b1df1d81a1e58eab071f9a5bb91": {
+      "name": "worker",
+      "output": "- Node is a\n- Small bit of\n- Code runs on\n- Node is fast"
+    },
+    "worker:211456ca90318e91d7d6ad41e8aaddc84ca78f72f9c1c3c72b4429f759757155": {
+      "name": "worker",
+      "output": "scientific concepts explain complex phenomena in simple terms using clear logical detailed reasoning that is it."
+    },
+    "worker:2248be7a2a7ce49230a52c99fe607e0db0685119ba34558cfdf16e263fe2a9fd": {
+      "name": "worker",
+      "output": "- New find\n- Old mud\n- Fun news\n- Big day\n- Good dog"
+    },
+    "worker:22dcac7aaa6b8c1754de37ed81cf72fb933a4d87bd338387e63c5902ed4bc8d7": {
+      "name": "worker",
+      "output": "- i am\n- new to\n- it is\n- fun here we go."
+    },
+    "worker:231e8db67d9d4e4a8de29f373c3f1b1c55425ab51fce411e6fc5f149d66b90a1": {
+      "name": "worker",
+      "output": "- i am a student\n- i read a book\n- it is very fun\n- i like to read"
+    },
+    "worker:238bdba94d180943325067f6a6a1d8b2a531f8933dd8938ac40662de65d4093f": {
+      "name": "worker",
+      "output": "day is warm and makes cold air go up fast every day time now"
+    },
+    "worker:239fc867f378bb7adfaeee6524bbc1e931d1c7a5ff0704eae186b2dd5db2a5e4": {
+      "name": "worker",
+      "output": "introducing beginners to constant flux and learning new things is always in steady gentle so it goes."
+    },
+    "worker:23a43da9414bf2449e3fe8fe6a57e094b4e37c6828a10a2bca5bb7273255aefe": {
+      "name": "worker",
+      "output": "i talk about a new tech it is fun to use and help people with small easy tasks done fast"
+    },
+    "worker:23c205d44ad6dbbb1db190bb18ee2dcc0dafea3c7e824c920d836819aff98fc1": {
+      "name": "worker",
+      "output": "it is slow cold snow falls down on the old brown earth very deep now"
+    },
+    "worker:242c0071bdafa99c078363fc3336ab232f0228d406fad4bd4efda6ea834ae06e": {
+      "name": "worker",
+      "output": "i am fun to talk to and i want to say that is a nice big dog house free"
+    },
+    "worker:2552869e638d550caaf9d1f76b3b9b75c41194c22f7fdf099cde0a6090a9e88a": {
+      "name": "worker",
+      "output": "- New\n- node\n- fun so it goes."
+    },
+    "worker:25e2d5baad0ea8a1fb875a1fd84ad41e923c3ff1243ba29c8aa2ce16aa66c4c6": {
+      "name": "worker",
+      "output": "- Sun sets\n- Rain falls\n- Ice forms\n- Snow comes here we go."
+    },
+    "worker:2794a36994783ddaf75be7a56870d99943e6d4b90d637b135498f7d8de3448b9": {
+      "name": "worker",
+      "output": "the sun is a star and it makes the day hot with its warm light and a small sun spot"
+    },
+    "worker:27a9342df78b23ed5aa5a984e36942e31f9b04662ed965945d7af290c1d1b851": {
+      "name": "worker",
+      "output": "- Scientific\n- Concepts\n- Explain here we go."
+    },
+    "worker:294bd441928785ba6c54502348067e7be06999c989f6463ec077fe7eb6e25839": {
+      "name": "worker",
+      "output": "New tech is fast and easy to use for fun and work with small bits of data every day now"
+    },
+    "worker:298092b9e08b0de673bc9c7f3d4cfd3c8f75d7520eb84e1502abdc4d402d17d4": {
+      "name": "worker",
+      "output": "- Natural \n- Gene \n- Process \n- Occurs \n- Naturally that is it."
+    },
+    "worker:29d912683b17407e6599ad070363b3cf60fc4aea15b7c0a7cd3828f7e7bb61e5": {
+      "name": "worker",
+      "output": "technology is rapidly evolving with new innovations being developed every single day to solve various complex problems slowly"
+    },
+    "worker:2a6aa937e77ac7154731bc60b7eeb61d7aa2609908a00593645111839b9315e6": {
+      "name": "worker",
+      "output": "- small fun is new\n- fast chips are made\n- good code is fast\n- fun code is small now"
+    },
+    "worker:2abacb6bcf9de250fa54e2b295c500a31a7ee4fdfcb44ecdec70b042178f6917": {
+      "name": "worker",
+      "output": "I will help you with fun ideas make good sense for kids to know feel happy now always have fun every day all year"
+    },
+    "worker:2ae3583a461b2fc2e3efb5a06209d483f0ef6ca009a04abd91cf4d72fbd97443": {
+      "name": "worker",
+      "output": "- Gene is key \n- Simple code is \n- Basic gene works"
+    },
+    "worker:2afe0dd4a5cc7eac4c3a48a6f093b7b95a9012b898f4796d135008ffa5548cd6": {
+      "name": "worker",
+      "output": "The student will read a book then write a short paper to show what they have seen from it every day now is fun to read books every day to get good marks now"
+    },
+    "worker:2be05ddc51d2f16c67bcc0554937a5da3ef39c5dad7c435d42222e7224b67daa": {
+      "name": "worker",
+      "output": "Sun is hot, it has a use on us, makes us go fast now, and we run and jump, all is set."
+    },
+    "worker:2d5b03146616a202ba9c708cb2d4c1c8f2e21fe8c35e1510d87a0a6dbfe897a2": {
+      "name": "worker",
+      "output": "- I am a kid\n- I go home now\n- All set here all is set."
+    },
+    "worker:2d76ca6d87b6cc8547cc6515b9e12bf2c9893b521486e291156a2e7e24cb0622": {
+      "name": "worker",
+      "output": "- sun sets\n- rain falls\n- wind blows\n- snow melts\n- cold comes so it goes."
+    },
+    "worker:2dfeabc9dc21c3ada9b01c92b062198583fa267c7fdd871c6f3d1052150c9eed": {
+      "name": "worker",
+      "output": "- soft rain falls\n- slow sun sets\n- cold snow melts\n- warm air rises"
+    },
+    "worker:2e2ea5585530728e6bc441ed6bdb40f0e1852dcae1ab0642d02310de53978e1c": {
+      "name": "worker",
+      "output": "Natural process of water evaporation forms clouds which produce rain that falls back to earth slowly and silently that is it"
+    },
+    "worker:2e977519867274cce3b761b3ce91f7553e0bce2e824ffd3cf12d9daf93775be5": {
+      "name": "worker",
+      "output": "scientists made a new discovery that will change our lives forever with exciting new possibilities and great potential exists"
+    },
+    "worker:2ebe61e366867150f12a1d3db879f0d2204af9d148233b611b4dbeadf654eb6d": {
+      "name": "worker",
+      "output": "* soft rain falls slow\n* sun sets cold\n* snow melts warm\n* air rises slow"
+    },
+    "worker:2f5fe9f46f895ba1bec876ac9d84ce9fb1b94cb77a972674c8dd541d65f3f3d6": {
+      "name": "worker",
+      "output": "- i\n- am\n- a\n- fun\n- kid"
+    },
+    "worker:305863b43c4fa7e3388eb98195d51e87b909c632571a5e52ab6023ded5b4eca8": {
+      "name": "worker",
+      "output": "- Sun is hot\n- It is big\n- It has mass\n- It pulls hard\n- It is fast now"
+    },
+    "worker:32f8814edb117dc016d218e9204d62efd47f019f363ab9b6173d948fdb330735": {
+      "name": "worker",
+      "output": "- Student learns\n- Gains knowledge\n- Applies new skills\n- Becomes more confident"
+    },
+    "worker:3318bac65e4e5bf18e5b2b3097d19a62a7ff4a1c38bba80756d4f1d68254de93": {
+      "name": "worker",
+      "output": "- Gene is a key\n- Of new tech used\n- To help people live\n- With bad body art\n- Made with gene code"
+    },
+    "worker:3389b31f7a61b0807abea327ab7bedb70e76b8e13528279cc14457b4f2b5f9ae": {
+      "name": "worker",
+      "output": "Cell units hold data in small cell to send short bits very fast now to cell users quick."
+    },
+    "worker:349324925599437056da6adac5f751bbe9d29b218f34538b245b17fc60458322": {
+      "name": "worker",
+      "output": "scientific concepts involve study of natural phenomena using systematic methods to formulate theories based on evidence gathered through observation experimentation every single day"
+    },
+    "worker:34e535f99450045e152d0c5edfda6daf02006ea2e9cc0021d50dcd8bcee3c677": {
+      "name": "worker",
+      "output": "Water flows down to a node, then on to a bend, down to a low spot and out to a new node here we go."
+    },
+    "worker:3564d8be7691ce80def5cadd58b50600a8f017d65232de146d206aed6026d28f": {
+      "name": "worker",
+      "output": "i like a node it is fun to use at home or on a pad with a node it is a nice node to see"
+    },
+    "worker:35e59cae4ebb97a3797ead0991a081f5b4cc0f573655840bc56107b18dc5c2bf": {
+      "name": "worker",
+      "output": "i will tell you about pets and kids and fun things they play every day at room with big kids and happy pets too vivastreet"
+    },
+    "worker:35f4f487f5220eb1f3e9e5b8aad0fd3fe0aa017aa490d81442aaa324fac91274": {
+      "name": "worker",
+      "output": "i will teach you a new code to make run with it now every day"
+    },
+    "worker:36dd90540d21eb950f863ea19e0b56b1eee2d689035169a12450f80efa1cb51a": {
+      "name": "worker",
+      "output": "the code is used to make a box work easy now fast each day soon"
+    },
+    "worker:37ae5f168ae020af4393be4edc9bcc1fd8d531a1f692a09feb0b639127046bd7": {
+      "name": "worker",
+      "output": "Photosynthesis occurs when plants convert sunlight into energy all is set."
+    },
+    "worker:38765bd6262689228a9fa287e9ccf90beba6b2d2a52c50a17e0478e628e190ff": {
+      "name": "worker",
+      "output": "student learns about tiny things like atom and its simple structure every day is very important always"
+    },
+    "worker:395074950fd8a5e34c236e068544437680e2011b0761bb4a326e7951eaabd87f": {
+      "name": "worker",
+      "output": "- Pets run fast\n- Dogs jump high\n- Cats are pets\n- Dogs are fun\n- Pets jump fast"
+    },
+    "worker:3b52c80ab926416fe825df1ecb49c3619467c1066f77df3edbb081ca545931b7": {
+      "name": "worker",
+      "output": "Student learns basic facts every day with help from nice people who make learning fun and easy for young kids always"
+    },
+    "worker:3bb494ce4e20e9625139f83768d75f4eff9125088deaa96c26fdbbaf2dbfe72d": {
+      "name": "worker",
+      "output": "water flows through small node slowly changing surroundings completely before eventually reaching new stable condition or point we are done."
+    },
+    "worker:3c2f5c97e1a6098378aaea05c58d50cab9f2e68ca3d4cef8c9fab8e5aedf9934": {
+      "name": "worker",
+      "output": "i found a new wave in a small pond with calm blue water now"
+    },
+    "worker:3d2a184baf99eaa80b1c1e01643cd9b831cd4e573c4ca186973a5ba867ba99c4": {
+      "name": "worker",
+      "output": "Gene is code in cell it helps make new life it is key to new form here we go."
+    },
+    "worker:3d3e028b3c7eee1f14c9fd7b1d2c6d42bf44e67718d3325abe6b307cd9771bf8": {
+      "name": "worker",
+      "output": "i have a plan that aids you get it now all is set."
+    },
+    "worker:3ebb697cba7e0087bb7c9f31292de919165caf9a9818fbc34498ca9e4b238d8d": {
+      "name": "worker",
+      "output": "- Sun is big\n- It is fast\n- It has mass\n- It pulls me\n- It is hot now today"
+    },
+    "worker:40cfe9131403d3185f1b932002a2b9c157def13571bc7766003828edcfd158a7": {
+      "name": "worker",
+      "output": "- I say\n- fun things\n- to you\n- and my\n- friends so it goes."
+    },
+    "worker:4185338dcd535863f021c9d07109f7a169199a8e669b9e978c067bf7d9f1e871": {
+      "name": "worker",
+      "output": "i can help students learn basic math skills like add big numbers in simple ways every day is fun easy too always i will try and i hope they like it"
+    },
+    "worker:419d8f84998b96137c360240687428066016a0e6cf041bcc9c99181b3617f9ac": {
+      "name": "worker",
+      "output": "- It has\n- An atom\n- Is new\n- Fun to\n- Use it"
+    },
+    "worker:424c45e9d640b1ba58ceea814dad16143aeae2d1f69de1d827358ddb85e27e79": {
+      "name": "worker",
+      "output": "it is slow cold snow falls on old mud now so low down so fast"
+    },
+    "worker:4262048217cc3656d9dfbf7f10d3662e1ea5863005b86755cfc2c6d9a8ad5075": {
+      "name": "worker",
+      "output": "Student learns concept at each node and connects ideas together quickly to understand material well we are done."
+    },
+    "worker:428d68a514f0d29ddc70700af0071045e5c112b2d543f3d6b285564c3fc791af": {
+      "name": "worker",
+      "output": "the sun is hot and it makes the water get warm so it goes."
+    },
+    "worker:43863e1941a03d0edd35d0e7c35bf5c2f87e48804c4e8dcaac24dac161601089": {
+      "name": "worker",
+      "output": "- Sun\n- Hot\n- Big\n- Red\n- Fun"
+    },
+    "worker:438a596051dd16b8cfc45d3201d3b3023617fbe1840452139fd2f1403713bbf5": {
+      "name": "worker",
+      "output": "- New flux \n- Is key \n- To new \n- Find flux now fast"
+    },
+    "worker:43fcbb2c7c8f79ac4d5e28a8e265afc91c4a046070c4c119113e50eca2c334d9": {
+      "name": "worker",
+      "output": "- Sun\n- Sets\n- Fast\n- Runs\n- Done we are done."
+    },
+    "worker:44317ada832c991ba84a12f2baeffcd4af7f0c833050081337c32365991105c4": {
+      "name": "worker",
+      "output": "i can help a student with a code to make it fun we are done."
+    },
+    "worker:45dfc40b4db78ad600a3430a97288ad05c99761eb85c8c4af00088ce787e260f": {
+      "name": "worker",
+      "output": "- New tech is fun now\n- People use it every day\n- They make it work fast\n- It helps them a lot\n- New tech is fun for us"
+    },
+    "worker:46fafc5412ca2a0ef7bf89ae32523867942717107a907d83d1e86d3575ee2941": {
+      "name": "worker",
+      "output": "small bits make code run fast and help men get job done with ease and make new fun things now every day"
+    },
+    "worker:47106d61bed16098d209b0aa93efbf93432715bc868f6e23bedbd7c3cd057dff": {
+      "name": "worker",
+      "output": "i see a bug in mud by kid with fun and big eyes"
+    },
+    "worker:4783adb25a4df392629994d9b811aba4e6467d027302e485971bfd91f2700748": {
+      "name": "worker",
+      "output": "I find a new bug in mud by small pond with old nets and big fish in it every day now is fun to do all time"
+    },
+    "worker:478be865073ecfe4ad1aea5045029ea47340704e0bbefe2c7920bafc904971af": {
+      "name": "worker",
+      "output": "- Pets\n- Run\n- Fast\n- Dogs\n- Jump"
+    },
+    "worker:48bc722d8e16eea186de0dc8ddec9b191e7ed33538f892c11c1b8384da48e782": {
+      "name": "worker",
+      "output": "Water falls down and hits the sand very fast every day now"
+    },
+    "worker:49e0259a54613bd0b995643a9523e0616d32aa48cd714e20c5b4c9186f41575b": {
+      "name": "worker",
+      "output": "the node is a key part of a fun idea for a small game to help a student learn new basic things fast"
+    },
+    "worker:4ba8fab90f92962cd35444f4b3de4774af6e56d1dd24d41d7fbe3b1b2cf9661a": {
+      "name": "worker",
+      "output": "- Sun\n- Rain\n- Snow\n- Cold\n- Wet"
+    },
+    "worker:4bc2c1a412b064cbe1e01813689aa9199d7fd13966745a49758631c1ea235042": {
+      "name": "worker",
+      "output": "- Scientists made new discovery\n- This finding is very significant\n- People are excited about knowledge now always"
+    },
+    "worker:4ddeeeaec2a6282de560e9d6bd2983d5a124a6f601bfd5e6739934ac197d762d": {
+      "name": "worker",
+      "output": "i found a new bug in the mud by the old log with my pet dog on the fun day outside now"
+    },
+    "worker:4eda793ef3b8bd686e5e9a496cd05baf345d416520f85df96f99250258874249": {
+      "name": "worker",
+      "output": "- Idea \n- is \n- clear \n- to \n- student so it goes."
+    },
+    "worker:4eff9223039050c5aa7080343417f310616911026cb16b00c9fe80d0ce17d2ab": {
+      "name": "worker",
+      "output": "- i\n- am\n- a\n- kid we are done."
+    },
+    "worker:500398df17b369ab74208196d28b74cd6ccb7326370c6770b24953dbdcf29a78": {
+      "name": "worker",
+      "output": "sun goes down slow and sets behind dark hills very calm and quiet now always"
+    },
+    "worker:50a5a295d5de3893ab8dcd36907065d2a34b9d72c865f8b13b79590b78f3c516": {
+      "name": "worker",
+      "output": "I am here and I say fun is sad I am now fun is mad so it goes."
+    },
+    "worker:50fceafbb6700ea828f63f49cfe7d8441dcfac7eb80059541b7e68dc3cebcad2": {
+      "name": "worker",
+      "output": "small tech uses atom to make new tiny fun things for you"
+    },
+    "worker:51803c7e9eae12c259b39d2243650c09fb487c489418957e970080c9330c4ee2": {
+      "name": "worker",
+      "output": "natural processes involve complex systems that follow a hidden code governing growth and development of living things every single day always slowly unfolding"
+    },
+    "worker:5310e7fa33057669191f411ee6474225f209162c392be2858dc1e5b02bd650fd": {
+      "name": "worker",
+      "output": "- I am\n- I see\n- I find\n- I say yes now"
+    },
+    "worker:53d754bdd49296e5a0f54d42f869137086b0b7924366761ad6304883df4666d2": {
+      "name": "worker",
+      "output": "small computer chips rely on tiny atom structures to process information quickly with low power consumption in various electronic devices every day somehow always"
+    },
+    "worker:541cd2ba65991eba85256548f662fa8b14f049a023d13af9d949e1ac9695a061": {
+      "name": "worker",
+      "output": "Sun is hot, sun is cold, it is up, down, hot, cold, fun, bad, mad, sad, hot, fun, cold, set, no, it, is, all is set."
+    },
+    "worker:5440d04b7f413644da7129a72ca1571d507184fcf4ac9265510094648c04b649": {
+      "name": "worker",
+      "output": "New tech helps people send fast code home with old computers now all is set."
+    },
+    "worker:5512e34ce55048b98d35daac71a9fac050fd1c9f72e3453bd3bf332a7f7bc995": {
+      "name": "worker",
+      "output": "Sun goes up, sun goes down, it is hot, cold, big, fun, all is set."
+    },
+    "worker:560b6d9323c9c390ca5ede7715e8441a8ff0fc13aea15201cbc0cd4dee459373": {
+      "name": "worker",
+      "output": "natural processes involve complex systems that follow a hidden code governing growth and development of living things every day unfolding slowly always everywhere constantly"
+    },
+    "worker:561acadd0510c4f9d5a9a937b300ad99891457dc7b48ed2003936095336e24d3": {
+      "name": "worker",
+      "output": "Scientists made a groundbreaking discovery about ancient civilizations and their unique practices now revealing new historical insights we are done."
+    },
+    "worker:564041d19ce1fb73674820330693862bd8e2be8c43ce4bf64da5ca73fd034eb5": {
+      "name": "worker",
+      "output": "- Clouds fall\n- Sun goes down\n- Rain comes now we are done."
+    },
+    "worker:5678b5d974a16623cb3502c070ef387d5611b1d60ad9f3436f0a98aaa4c62dfe": {
+      "name": "worker",
+      "output": "- Discovery is made in science field\n- Flux of new ideas emerges now\n- Researchers find new evidence daily\n- Experts analyze data in flux"
+    },
+    "worker:57419a09d9add0596ded6dc25d1b75a179eca745e9a77b1e778b254ca21fa84f": {
+      "name": "worker",
+      "output": "the sun is hot and it makes the water get very hot so it goes."
+    },
+    "worker:5aa8016d7404f600a4c9da33d5ca437c6a8ff833da35ab483dfc4941a2030ddf": {
+      "name": "worker",
+      "output": "Fun tech helps people send fast code home with old computers soon all is set."
+    },
+    "worker:5b7f54139fe677635ca59d2467e86dd2811f510b46368653113fedf1487f4f43": {
+      "name": "worker",
+      "output": "scientists made a new groundbreaking discovery that will change our lives forever with exciting new possibilities and great potential exists freely always"
+    },
+    "worker:5bd6a80b050cbf640d2369ca14a6bbc6fc61ca9271f8b933aa2d561e6f981323": {
+      "name": "worker",
+      "output": "Scientists made a discovery about ancient civilizations revealing new historical insights and practices now we are done."
+    },
+    "worker:5c330ded563e09c3fba48a60ac16035d7862f18f0443a1e577816b46ddfdf87a": {
+      "name": "worker",
+      "output": "- This is an example \n- node is a computer\n- node is done now we are done."
+    },
+    "worker:5ccdda4107411396bc95f02c9ee0687f93a71b5cf43092046fe30e2b93507f27": {
+      "name": "worker",
+      "output": "- i found a new\n- fun to see it\n- is very cool to\n- know it is fun\n- to see and know"
+    },
+    "worker:5dc231e401b7fd7caf9b90c23f1635d3cc62d4f8413daf089b9094ec896b25ed": {
+      "name": "worker",
+      "output": "- Idea for students \n- becomes simple \n- to follow clearly now \n- they understand key concepts \n- well so it goes."
+    },
+    "worker:5de873a0d0a1524796e40d2abf6ea9b7340a4260828b5b91d39a4938521c2ac1": {
+      "name": "worker",
+      "output": "- simple topic is learning\n- basic concepts are easy\n- new skills are gained\n- every day is fun\n- learning is very good"
+    },
+    "worker:5edd6b4fb7754bc8a6037c64c03539ac45ddc86771021e8656af7c8416c54fdc": {
+      "name": "worker",
+      "output": "- New discovery made\n- Using special equipment\n- Found unique wave now\n- Results show wave\n- Research is still"
+    },
+    "worker:5f17611847f3f005e7eb05e831fb4e2d8949b6d668962674b24b741c33d34788": {
+      "name": "worker",
+      "output": "i am a fan of a small star and fun easy little things exist"
+    },
+    "worker:5ffa43164c4b30059223410f09efc447c955ebc8f140705a52b99d770f672f54": {
+      "name": "worker",
+      "output": "Water falls down hits sand very fast each day always now time is not right. \nRevised answer: Water falls down hits sand fast each day always of is not right.\nRevised answer: Water falls down hits sand fast each day pet cat runs \n\nFinal answer: Water falls down hits sand fast pet cat runs each day fast"
+    },
+    "worker:5ffdea3f0e39b7284c7b2cedd272ec582f81cd02d9364a6de148de5c62d12f8f": {
+      "name": "worker",
+      "output": "I made a big wave on the sea and it was fun to see my new thing that is it."
+    },
+    "worker:616e91fc51f7980577baf54b111b4a9a1e14c69124956ae825416d0a5e305cd2": {
+      "name": "worker",
+      "output": "- scientists made a new discovery recently \n- they are studying it carefully every day to learn more about it now\n- researchers found something very interesting or unique in the world"
+    },
+    "worker:626b3b7c056008b1a1d8eb6cef45381bd9450333c5de85c6e315cb6548d95c66": {
+      "name": "worker",
+      "output": "- New tech is fun\n- Flux is a key\n- It has big use\n- Helps in bad flux"
+    },
+    "worker:6272ffa4d2c1ffc719ac8ae33c8b72a3cb18be93e6cf4a144beb2df1b304b113": {
+      "name": "worker",
+      "output": "- Fast flux \n- Is fun \n- To see \n- Flux is fun time now"
+    },
+    "worker:628a2c11f170104d4ea1d34c44f3f9cdae745df56386d4a57bf30ff046d7260e": {
+      "name": "worker",
+      "output": "i tell you it is fun to see all is set."
+    },
+    "worker:6291ce0232c0f70186662ba8a9f6eef6cc4e397b56a50e1719fdd109135f4549": {
+      "name": "worker",
+      "output": "- Node is a bit \n- Of fun on node \n- Node has a nod \n- Node is mad now"
+    },
+    "worker:62c2414853def7a88b484c537cb7b90d62abf803d0606e9ddb35fa7ae2267959": {
+      "name": "worker",
+      "output": "New cell found is small and has a big hard core made of sand bits"
+    },
+    "worker:62f49b2742c1a96ba5066216ab9dfaac46cb78cf6f621d57fb05b96ab26ba1a7": {
+      "name": "worker",
+      "output": "- Sun sets\n- Rain falls\n- Cold snow\n- Ice melts all is set."
+    },
+    "worker:6388443bbf29b9016e40327c923a9e611cc556ef4d1290f2912f49fb11875d15": {
+      "name": "worker",
+      "output": "- I am a kid\n- I go home\n- I eat food all is set."
+    },
+    "worker:6416c54d0dc31315f2c276126efa866cc2d6e421027d1f270247104f890b2cb4": {
+      "name": "worker",
+      "output": "- I am\n- I see\n- I find\n- I say yes now today yes"
+    },
+    "worker:64c68c38086dcca610ffe6caa1c94eb1b08f9561e1dcd999dc56343a91bdc4de": {
+      "name": "worker",
+      "output": "New technology uses advanced wave systems creating faster processing speeds every single day always now"
+    },
+    "worker:65d75d1581bed170dd392378fc901382e2f1e1dedec9c28a3164acb9283307d9": {
+      "name": "worker",
+      "output": "- natural process occurs \n- slowly over time\n- changing environments constantly\n- shaping earth slowly"
+    },
+    "worker:66c477932f15e7adc93c0075b08eb9da7a6e2ef11aea9e917cd58ab4d173fb6c": {
+      "name": "worker",
+      "output": "i will talk to you now and say fun things are nice all is set."
+    },
+    "worker:67bfcdb5043a2c7fe0a7657871a4c372c3aef6529c64472c4f30f14f28ceeca7": {
+      "name": "worker",
+      "output": "- i am a kid\n- i go home\n- i run fast now"
+    },
+    "worker:67f53baef4e1fd17bd4a14b483670231899a945f0c1821d728aa236cb774be73": {
+      "name": "worker",
+      "output": "I say fun wave hits sand fast and loud with much splash and fun wave is fast and loud now"
+    },
+    "worker:68cd39be333eac750316a0eb64dc7004334b3ecf919e79e83db57d5b2dcdf159": {
+      "name": "worker",
+      "output": "Tech is fun to use. It helps people do work fast. Many people use it now. It is very fun to play with fast all is set."
+    },
+    "worker:6a76618968f567ffcdb11197f3098b85e5ca1b9e5eeae5718a4b387df84cbe46": {
+      "name": "worker",
+      "output": "- Sun is hot\n- Air is wet\n- Dog is mad that is it."
+    },
+    "worker:6aa5be20e8ff77efbdb4b311be12b7062f58d64534b9a0b9d621560770acf960": {
+      "name": "worker",
+      "output": "- I say code\n- is key\n- to it\n- code is\n- fun to use"
+    },
+    "worker:6b207104e0df6b549e9f46e96d7de879d140f7e2a9050a59d26278242317d287": {
+      "name": "worker",
+      "output": "i got a fun box with bad bugs old pens sad men mad men ran round small dogs and made big run in rain now"
+    },
+    "worker:6b9efc90101d758128ad2272cfc12608623f0da13c3a8c12ea615b134b6acace": {
+      "name": "worker",
+      "output": "new tech is fun and easy use it now and see how it works we are done."
+    },
+    "worker:6cdc928ddc8cb181e9bd41d7187b08c0b351a435ea6d9066806fd5dad6ba7024": {
+      "name": "worker",
+      "output": "- Water falls \n- Earth rotates \n- Sun sets we are done."
+    },
+    "worker:6d147a9d6e90ba5dddc86296510361f8e404d02ee86ba0fe31d01ce7c0a5d8f9": {
+      "name": "worker",
+      "output": "- natural process occurs \n- slowly over time \n- with water flowing \n- forming rocks slowly"
+    },
+    "worker:6f0fd1ab1cd2ba746329871adcfb60551d27649b3df8625c6f3ba53999655c3c": {
+      "name": "worker",
+      "output": "i found a fun box with bad bugs and old pens and sad men made a big run under sun with few mad dogs"
+    },
+    "worker:6f5a4e90711ce3db240a99455a1c9ca5c1408ad0742ebadf33943171099dcd0a": {
+      "name": "worker",
+      "output": "small fun tech is easy to use and helps me do bad and nice acts every day now fast too"
+    },
+    "worker:6fbc46b6b626c1286b0fd2bbac2e06ad52d30b09f6be182a2202767b04f2010e": {
+      "name": "worker",
+      "output": "- I am a pet \n- is nice and fun \n- I like my pet \n- my pet is nice"
+    },
+    "worker:705fd235241123dba9ad14d00d85985b08930ba28276dc61f62bcf71775e13fb": {
+      "name": "worker",
+      "output": "i am fun to say i want a dog to be in a home now free"
+    },
+    "worker:70e4ad6214336e66062dc832ae251dd1425354505e13be250d9d6a0e8e1efb3b": {
+      "name": "worker",
+      "output": "it is fun to sit and run and jump and play with dog and cat and dog is my pet here we go"
+    },
+    "worker:7102a7ddcd39805b8bb929fba900e83665d82b5689761ca820127168c6222628": {
+      "name": "worker",
+      "output": "- I see it\n- I use it\n- I go here we go."
+    },
+    "worker:72080aa16d3031a1a8fcb4900cd60034f8b6cf6f2394a6f05f86e7e1271638d2": {
+      "name": "worker",
+      "output": "tiny atom is basic building block in chemistry with protons and electrons surrounding nucleus closely"
+    },
+    "worker:72ae47c454346810bcc001215d33adfe2a3f13d7f78ed19a8b04cc80d834f822": {
+      "name": "worker",
+      "output": "- Science \n- Explain concepts \n- Exactly here we go."
+    },
+    "worker:730434cab755df9e65fd369367085640af4d4a2f8b7df777f7f459bae298b451": {
+      "name": "worker",
+      "output": "- Discovery made with great fanfare yesterday\n- Researchers find new species daily now\n- Incredible breakthroughs occurring swiftly outside\n- Scientists eager to share findings soon\n- New world unfolding slowly so it goes."
+    },
+    "worker:74a643b935d3784a8923011cd33d981dde0b3c3e92154379e0b6b04a316778a9": {
+      "name": "worker",
+      "output": "The big star is fun to see in the dark sky at night with my pet dog is happy"
+    },
+    "worker:74fac426aa7cb94287fc01ec842b9c6c4af3b0e5b39f3606d2ad4c689902b8f9": {
+      "name": "worker",
+      "output": "Advanced star technology innovations are rapidly changing many daily lives in various fields with new, improved, innovative gadgets that is it."
+    },
+    "worker:7555b683463e90cde563e4acfdf9a145240cb71bcc3d0becd3ce4d33f0103537": {
+      "name": "worker",
+      "output": "sun is hot and makes cold air go up very fast every single day"
+    },
+    "worker:75952a5684b3a89b2f1b39aa18c2417d687b3f0e65652f58a6c390c879311322": {
+      "name": "worker",
+      "output": "- sun sets\n- rain falls\n- snow comes"
+    },
+    "worker:77427f3838df36f43704475cf18d4ecb0b6b089a71bb55380adf91922f903c46": {
+      "name": "worker",
+      "output": "- new find is fun\n- old men are glad\n- big men see now\n- all men feel happy"
+    },
+    "worker:7844d7840316486e8587a47e9ef822fb6f44cf22f470aed0a22e5d0a7dca82db": {
+      "name": "worker",
+      "output": "i will tell you about dogs and cats and fun things they do every day at home with kids"
+    },
+    "worker:7845f75732f878a7c79c6a535bbc5ca659164ef24bbba1013c1c825ee6cfaa72": {
+      "name": "worker",
+      "output": "The student will read a book then write a short paper to show what they have learned from it every day now"
+    },
+    "worker:78ec4388f65862ba8543ca99a1b27e83177aee6f52d6cb5174f9974bf02ea98b": {
+      "name": "worker",
+      "output": "Water falls down, flows slow, fills up small ponds, lakes, and big ones nearby, and runs deep, cold, and calm so it goes."
+    },
+    "worker:7b4845f925e095a2e4729ff347218a7a9c946586c20c590cecb63b52c7286f7f": {
+      "name": "worker",
+      "output": "i saw a big wave hit the low sand on the dark cold sea"
+    },
+    "worker:7c81decbd9e6d04e8ac32aa5e379f3a174cab31af975b2373c4e5f42c3b4b35e": {
+      "name": "worker",
+      "output": "- New tech is fun\n- It is very old\n- People use it now\n- They make it fast\n- It helps them work"
+    },
+    "worker:7c988c5370bd74f4766d863b19c64a6639d521e0d3bdd5f01d347964cfb31d17": {
+      "name": "worker",
+      "output": "- I am\n- a new\n- fun pet\n- is nice"
+    },
+    "worker:7d13bf8cbcd4d458544e4600f4e7c5bbb3259ee074dbf16497a7bd5e30132e37": {
+      "name": "worker",
+      "output": "- sun is hot\n- rain falls down\n- it is wet\n- dogs go out\n- mud is fun"
+    },
+    "worker:7d535e7018f2c56dc056c86db53ef83a5865bb2c1aea5a9a0be02b0a42779c33": {
+      "name": "worker",
+      "output": "- Fun\n- I am\n- new to\n- pet is\n- dog runs"
+    },
+    "worker:7f7cce1874c7810afc6bc3587d5440d60eeb608aeb718fe71b318facc0f4e1e4": {
+      "name": "worker",
+      "output": "Fun code is used by men to know big things. It helps them get it just so they can say here we go."
+    },
+    "worker:7fc4d601b999143f38651aa26536ebcde613f36993035f685f947d4bd978a9af": {
+      "name": "worker",
+      "output": "i am fun to play with my dog and cat so it goes."
+    },
+    "worker:80533ec43676a2a924c215e6437118367965fe4f6103c6812f603990eaa67df2": {
+      "name": "worker",
+      "output": "- scientists made a new discovery recently \n- and is being studied carefully every day \n- researchers found something very interesting or unique"
+    },
+    "worker:8062dd6a1d994ea83a048b16a9286340a60acb955b5be1d37fba5580a93bb18f": {
+      "name": "worker",
+      "output": "scientists study various natural phenomena every single day all we are done."
+    },
+    "worker:8254e65a426def112f89d4a807b8f3edcdc584844e3104960fe8b672ebc4ec75": {
+      "name": "worker",
+      "output": "i tell you a small idea now and it is fun to know all is set."
+    },
+    "worker:82c014599b09c06747ede5a01b8c02e059e543fbafb22e896bb7382c6a680388": {
+      "name": "worker",
+      "output": "Student learning is like riding a wave of knowledge every single every day always all is set."
+    },
+    "worker:82ea66b4e599bd53f677e9af2c584fb52cecc200085e1a713df5e2cae21e0830": {
+      "name": "worker",
+      "output": "- New find\n- Old dirt\n- Fun news\n- Big deal\n- Good luck"
+    },
+    "worker:831905730e98e8ca3b989441897bc96f5d83690ad8fafe8df1f1c55752e92f29": {
+      "name": "worker",
+      "output": "- natural light shines \n- ocean waves move \n- earth spins slowly \n- water evaporates quickly \n- plants grow slowly on land"
+    },
+    "worker:831f6026b66151cc2293abba91c2f4b2e0fdf1f2b68f3c8204e97908a68e00a4": {
+      "name": "worker",
+      "output": "Sun is hot and it gives us light and heat every single day with its own big warm and happy bright face always"
+    },
+    "worker:837cb08040af84a349138f17e8dac07ddcfcb5c83510d2a39fe4311549fceadf": {
+      "name": "worker",
+      "output": "- Sun is hot\n- Dog is mad\n- Cat is wet that is it."
+    },
+    "worker:8388c75fea7f06d035d31c22a656a1625333d6da2d7cf57643dd4b9e11a63b36": {
+      "name": "worker",
+      "output": "i use a phone to make calls with my friends at home or on the go with ease now all the time it is my best"
+    },
+    "worker:84123bcdb4ca5866e08a582c9a71147c3acdce873b6590fd5ebb9b0607195b33": {
+      "name": "worker",
+      "output": "- Basic concepts \n- Simple examples help people \n- Everyday life has skills \n- Basic knowledge is essential"
+    },
+    "worker:8452f6caf549430c245d314603ddecdb31d19cdc44e85793663d23225de32b9d": {
+      "name": "worker",
+      "output": "Student learning is like riding a wave of knowledge every single learning day always now all is set."
+    },
+    "worker:846671bde4cead9b8b28d0ddfa6ea659b162028b9ad357ecceb7273749d01004": {
+      "name": "worker",
+      "output": "- natural process occurs\n- slowly over time\n- changing environments constantly\n- shaping earth slowly"
+    },
+    "worker:84acc240d09e9eeaf23cf8321f4546387125a021124de2b472be7ea832e05aaa": {
+      "name": "worker",
+      "output": "Water falls down, flows slow, and fills up ponds so it goes."
+    },
+    "worker:854bb48567fe2367436aa442d6299c98d3c4846795aac36a0336d551b576e8ef": {
+      "name": "worker",
+      "output": "- sun sets\n- rain falls\n- snow melts\n- wind blows"
+    },
+    "worker:860ded4f82e526fcf2770bbe33e556cf8c3ee4d06b0e6720527332fb9bea47e4": {
+      "name": "worker",
+      "output": "i can help students learn basic math skills like add big numbers simple ways every day is fun easy too always"
+    },
+    "worker:863a2de8e01989f6203393b768658245788327311c24371c57e413cf8044f66c": {
+      "name": "worker",
+      "output": "- technology is rapidly evolving\n- new innovations are emerging constantly\n- machines are learning quickly\n- robots are becoming smarter\n- artificial intelligence is progressing slowly"
+    },
+    "worker:869da227c70f47867f03ff76652429e217f8aa423b0f95d44af966c5692bcac5": {
+      "name": "worker",
+      "output": "I find a new bug. Bug runs small. I see bug run away. I am glad I found bug now easy and glad here we go."
+    },
+    "worker:87019357a8e294ee22650bb48b6687ae2fe8e3708904e2a435879856226d2764": {
+      "name": "worker",
+      "output": "- Natural gene affects \n- Gene expression occurs \n- Naturally every time \n- Gene influences every \n- Process happens naturally that is it."
+    },
+    "worker:87466475fc55168567a1b3030ba90681f54f2503e01853da05264a7df0d3c7b4": {
+      "name": "worker",
+      "output": "New tech is fast and easy to use every day for big jobs done"
+    },
+    "worker:875c951512bc564a1f7721fda3acefa76fd087b27e0d5bef5daf15fa700f0e65": {
+      "name": "worker",
+      "output": "small tech is fun to use and helps me do many new and nice things every single day now"
+    },
+    "worker:877b31b38bad5ecd7f55a47ef9362143b686c1757ae5d6ffadb0e82dfd729bad": {
+      "name": "worker",
+      "output": "- tech evolves quickly\n- new innovations emerge\n- smart devices exist\n- people use devices\n- tech is very important"
+    },
+    "worker:8833db77914b783677bc4b796e92fcace839da69ae97b95aca7d8f0767f6ec4a": {
+      "name": "worker",
+      "output": "a small star is fun to see so it goes."
+    },
+    "worker:88a3e20a2eaf5519ed21fea6ac65370c29f11aaa0dfa1dfef54a0ec3e5f20f5b": {
+      "name": "worker",
+      "output": "I say fun is atom made of tiny bits that make up all things in our big bad world now"
+    },
+    "worker:89ba32fbf530ce3b6a43544989b900c4ad30d21b30bd4fe9ab4c68dfe1fcf97a": {
+      "name": "worker",
+      "output": "Scientists found a crucial node that connects entire networks now everything is ready and systems are functioning properly all is set"
+    },
+    "worker:89f789292348ca2b3d8b79650940b8474dba8df69f2f9fd2efd8d5bb8a73d57d": {
+      "name": "worker",
+      "output": "the sun is a star and it makes earth hot every day with a big star"
+    },
+    "worker:8a43a46e7c82899651aa1abbf426362208dc89a891acd013ac9b09c9a37dd607": {
+      "name": "worker",
+      "output": "small birds fly code with simple rules every day making new homes fast like tiny busy codes every day now"
+    },
+    "worker:8b4ba08d3c0c0150619d800be08e767c9e17d3d6b322e4b76c567b9b98a6912b": {
+      "name": "worker",
+      "output": "- New \n- Fun \n- Done"
+    },
+    "worker:8b86b6c65489061335f060a49659453ed8865225c7430b3a6ad65203cc53b301": {
+      "name": "worker",
+      "output": "I found a big wave on the sand near my old dog house today"
+    },
+    "worker:8c1e792b6f75fbc4ede180fc73454233968a7e9b78cf9aac24fef90c2a45e8f1": {
+      "name": "worker",
+      "output": "i will talk to you now and say funny bits are nice to you now ok all is set."
+    },
+    "worker:8c213b30800dddb658c0fb625c95714acf1ac913e719de6aaece0730f7c563ea": {
+      "name": "worker",
+      "output": "- Gene is key \n- Code is \n- Gene is fun"
+    },
+    "worker:8c42429881629d4cc12bf3bba0fb8dcf6a1b417d73efb92af46b624da0aa1120": {
+      "name": "worker",
+      "output": "- Gene is a key part\n- Of new tech used\n- To help people live\n- With good body art\n- Made with gene code"
+    },
+    "worker:8db208fbf71b3c0b48b19f0a4612073241b3c9475a623d9c31fc340fd899a1b9": {
+      "name": "worker",
+      "output": "- I am\n- a node\n- we are done."
+    },
+    "worker:8dbe6f8486e1eab9ffbde6d35e896afcb4812c0e09b7a249992db879858a450f": {
+      "name": "worker",
+      "output": "- Cell biology explains processes within cell\n- Cell contains many complex molecules\n- Molecular structure is cell naturally"
+    },
+    "worker:90a8205f664bfceb0b5a1e0fb336abb8e4b706ea51cac65d06458c9ef1b6e6a7": {
+      "name": "worker",
+      "output": "Sun is hot it gives us light and heat every day with its face"
+    },
+    "worker:913145da40ca01fc37148149ca245692bd2b29161eca9a55ded8a64e1de7d904": {
+      "name": "worker",
+      "output": "i say bad on a good thing that is easy to use and sit with each day now at home"
+    },
+    "worker:917fb5204a05558f682b64f5d92b3a49a3120a8fdb0a58bf3feb90b36051995a": {
+      "name": "worker",
+      "output": "- Basic concepts start easy\n- Simple steps help learners fast\n- Learning is fun we are done."
+    },
+    "worker:91efbd8c1ba3daeef71412bae24e8ac852c8b908166719daf488cac737b04cf7": {
+      "name": "worker",
+      "output": "- Basic concepts are easy \n- Simple steps help learners \n- Learning is fun we are done."
+    },
+    "worker:9220695164ac41bedacf29f21b9a2a3f8815fd59d1e972cfa05ff8ae48c67c05": {
+      "name": "worker",
+      "output": "- It is\n- New tech\n- Has an atom\n- Is very bad\n- No fun now"
+    },
+    "worker:9290b82fed68845860b909d300109b673ef4d8d5ef6469e29a9f6bcf3b0be21e": {
+      "name": "worker",
+      "output": "- science is key to nature\n- and its laws govern world\n- with simple basic rules always\n- applied in many different ways\n- helping us understand everything slowly"
+    },
+    "worker:929768d16f31a56ad7f67c484149d660517f0e76300103ea2c619b7e7f2ff471": {
+      "name": "worker",
+      "output": "- i am\n- i do\n- it is\n- i go now here we go."
+    },
+    "worker:929952f12a39a68fb2acdc86f16fc34981f80ab81703c23603a20a638c049a31": {
+      "name": "worker",
+      "output": "A node is a part of a net with many small bits and a few big cube box sets now"
+    },
+    "worker:9331f656551f3c83a0bbbb9772f63d5df98ad3dc210715c8eb555eff75c936c4": {
+      "name": "worker",
+      "output": "soft gene help make new life form in dark cold wet mud and slow air"
+    },
+    "worker:94b9a0f2b03549fcefc729007413e67880d280e597b1a63fee60bffe0678d683": {
+      "name": "worker",
+      "output": "- i see\n- it is\n- no big\n- it is"
+    },
+    "worker:94f1fd8f9bf9670a98a8e047ac94cbc7815c129296591aff34b539de3b0e8972": {
+      "name": "worker",
+      "output": "Tech is fun. It helps work fast. Many use it now easy all is set."
+    },
+    "worker:954fc251d7463ea846b0bca488da8b236a1c6545b0e1dde2cd90085598ae72a9": {
+      "name": "worker",
+      "output": "- Sun is hot\n- Hot is fun\n- Fun is red\n- Red is hot\n- Hot is fun"
+    },
+    "worker:95a4536934d7c2a9de88a2e127b58d9172ee9edfa547ac3d19e09fcfb57d96a4": {
+      "name": "worker",
+      "output": "The sun is a massive star that undergoes nuclear fusion reactions constantly producing light we are done."
+    },
+    "worker:95c383b950dc4784c734038e2a6b542f5d6f9c09cb6a451e956d240e11ca7f4b": {
+      "name": "worker",
+      "output": "Scientists found a crucial node that connects entire networks together now everything is ready and all systems are functioning properly all is set"
+    },
+    "worker:95f220bfa37ac5c7d2b6f0ca6ace7a02386af1d96879a52dec12e3255a1cb1ee": {
+      "name": "worker",
+      "output": "I found a big wave on the sand near my dog house today is fun now"
+    },
+    "worker:978c36d35955051e799a28eb3a8170a28f818488a395f58f00e805a7a080a06d": {
+      "name": "worker",
+      "output": "- New \n- found \n- something \n- old \n- we are done."
+    },
+    "worker:986a68feba01fd492e946c69b5cbcc6ded95eb9964c98ae7475c6a4008ca0d4d": {
+      "name": "worker",
+      "output": "Photosynthesis occurs when plants convert sunlight into energy all is set."
+    },
+    "worker:98f8bc8d596f233c802727b955392fe89a1c84827b4826d3d31236dac36b3ee9": {
+      "name": "worker",
+      "output": "I will help you with fun ideas and new acts that make good sense for kids to know and feel happy now always"
+    },
+    "worker:995be1485908c90950f5cf644e14b4331a482e3784a47e1c4750fd24be93b989": {
+      "name": "worker",
+      "output": "- technology is constantly evolving\n- very fast paced field\n- new innovations every year\n- many smart devices exist\n- people use them regularly"
+    },
+    "worker:99bac40fd8716f51cf131d395d5778b092565ef1f3b32feeed2940ea9367be64": {
+      "name": "worker",
+      "output": "i find a new pet it is fun to see and know and feel so it is fun so it goes"
+    },
+    "worker:9b4eae7e5204644626339e385bf8ba81b958d9219caf64d22c38e4864d4dab2f": {
+      "name": "worker",
+      "output": "Water falls from sky to earth in big drops making loud noise hitting hard rocks and sand very fast every day"
+    },
+    "worker:9d7113b3527e894c99e37685d7b056e8790df8828be28bc194a39baa1aab4e39": {
+      "name": "worker",
+      "output": "scientific concepts involve study of natural phenomena using systematic methods to formulate theories based evidence gathered through observation"
+    },
+    "worker:9eee30b7d1daf357eb1a605928c0bfc557cee4f61a1b5ddcf70319184310ac26": {
+      "name": "worker",
+      "output": "I use code to make fun apps or play with code here we go."
+    },
+    "worker:9fa43be3e51b9ddbbe09f01cb7c4db12ebab729a22f5d74c72e85ebaf27b7f11": {
+      "name": "worker",
+      "output": "- sun is hot\n- and it is\n- hot and mad\n- it is bad\n- hot now is sourceMapping<|python_tag|><|start_header_id|>assistant<|end_header_id|>\n\n- sun is hot\n- and it is\n- hot and mad\n- it is bad\n- hot now is"
+    },
+    "worker:a088433b872bbf2926126a6b265590ac820c428669c4706ae445b497a5de775f": {
+      "name": "worker",
+      "output": "- i will introduce a simple topic \n- it is easy to learn \n- this topic is very basic \n- it has few simple concepts"
+    },
+    "worker:a110659ef2fa240e65c24a780f7b94927a8e25a477b634cc1833a10c30e5d095": {
+      "name": "worker",
+      "output": "i talk about a new tech that is fun to use and play with every day at home now"
+    },
+    "worker:a126f7a2c53f1ceb4ee5049ec6fac6383ea6ff822969d6a4f7d1d1b4263a0225": {
+      "name": "worker",
+      "output": "- Sun sets\n- Clouds fall\n- Rain comes we are done."
+    },
+    "worker:a2d27f7cab8f2a7a02eacfaa47720f15ff4fef78574cf6e7c726677bb3a546d9": {
+      "name": "worker",
+      "output": "Introduction to surfing starts with riding a big wave on a surfboard every single day is very exciting always"
+    },
+    "worker:a3afb497c9e7176fc3c8099f22a1a842504fb09bb87bae1c08aa80ded24152d1": {
+      "name": "worker",
+      "output": "- Node is a part\n- Node helps run now\n- Node is a bit"
+    },
+    "worker:a3f7a8a97883c90825d0d687ea061e2afbb32958393a46f0c035540836eec0a7": {
+      "name": "worker",
+      "output": "the sun is a big star and it makes the earth hot every single day always"
+    },
+    "worker:a4ca9ce572d143658f65937d729c0e881ca9d3acf7840208f0abc0c7176466ad": {
+      "name": "worker",
+      "output": "- sun is\n- hot and\n- big of is bad so \n- it is \n- hot now"
+    },
+    "worker:a50929b95cca732c66aa0d5232206b5bb2fb037be5cb0833b9f4d04cdd1e5920": {
+      "name": "worker",
+      "output": "scientists study natural phenomena daily always learning new things slowly we are done"
+    },
+    "worker:a5e1c4196c694256fec67ea11d834da7dd69804ad788ac37647cea7ca7673f98": {
+      "name": "worker",
+      "output": "i have an idea for a fun task so it is easy and fun to do so it goes."
+    },
+    "worker:a6092fc859fe6f9caa44475737c39bc07a2cfe09017245b229c3bc1cffe58494": {
+      "name": "worker",
+      "output": "Fast flux moves up and down with big mud flows here we go."
+    },
+    "worker:a65be3c516d192b6d7b2836df492a9744e5cad5ed8d101858908c7d04c2867e3": {
+      "name": "worker",
+      "output": "i found a new bug in old mud by a small kid with fun and big happy eyes now"
+    },
+    "worker:a6d24f2dfc90dffbebd45d438a8069aa11abcefd5836efeda58b08c5544d32d0": {
+      "name": "worker",
+      "output": "- I\n- see\n- atom\n- is\n- fun"
+    },
+    "worker:a6f7377dd050cfa30e0285181b201a8c9abe7d62c797acbb04e6cab14a9d1f43": {
+      "name": "worker",
+      "output": "scientific concepts involve tiny particles constantly interacting everywhere always moving slowly changing all is set."
+    },
+    "worker:a8065d88d9e03fc121137fae4dba3c83bf4d667c092681c681ada77edf48210a": {
+      "name": "worker",
+      "output": "Magnetic fields exhibit flux during electromagnetic induction processes in physics all day every human life forms experience daily"
+    },
+    "worker:a8f3c1b8aacf9be16fce9086f21ed5e3c57d841d919a6f2c78da9941d0b5393a": {
+      "name": "worker",
+      "output": "i help a kid with a code to play fun we are done."
+    },
+    "worker:a943fa794b8b1efdf1668b772ce32b59ed25e7d1bad00dca4be25817ea3eb485": {
+      "name": "worker",
+      "output": "- I sit\n- with pet\n- on mat\n- I am\n- happy now"
+    },
+    "worker:a9d21c2b4e1105abda09acbc2b77ffb21f311c263743abce7e88d130a1bfa4ca": {
+      "name": "worker",
+      "output": "- small tech is new\n- fun gadgets are made\n- fast chips are used\n- good code is key"
+    },
+    "worker:aa6c6843eed651ac3375b2744692e1e020dd0cdabf167ec031d11302c3089e43": {
+      "name": "worker",
+      "output": "Basic rules of life form in hot small dark wet areas of old deep cold rock formations daily"
+    },
+    "worker:aaf30d0eefb12a667123f52cdb1b49fa5dcbd110a24de5cb9a08484d0633d011": {
+      "name": "worker",
+      "output": "Water flows down a gene pool with fast cold air and big old sun hits the gene with new warm wet mud forms"
+    },
+    "worker:ab4fc51a02751625cb96451448a221dd90500a7a9d21aa73fe2994889c7c4779": {
+      "name": "worker",
+      "output": "small birds fly in code with simple rules every day making new homes fast like tiny busy tiny codes"
+    },
+    "worker:ac3d03cf72b6dc6396e89fe793b1aeb5d636b28feed25a824bb691b997b1cbf0": {
+      "name": "worker",
+      "output": "do a quiz or play fun games it is easy and fun to do and learn so it goes."
+    },
+    "worker:acc2e427d865cd4eef05e4df55c8c94cd719bd4393c40f576927b8918349d771": {
+      "name": "worker",
+      "output": "Water flows down a gene pool with fast air and sun hits gene with new mud and mud and mud and sun hits gene now"
+    },
+    "worker:ad7513d1f830e262699b187b1a3a2fc3351b1463970d2669d9e2129278930a9c": {
+      "name": "worker",
+      "output": "- Node\n- Pet\n- No so it goes."
+    },
+    "worker:ad77961447e8b626ae4127fd1780970c297b6f65eb4709bf823c66364d1fdd07": {
+      "name": "worker",
+      "output": "I help you with a simple task every day with no work we are done."
+    },
+    "worker:ae62153d38406f3751da2df5a4565206b55dc75c136042245a6d7d819fa2959c": {
+      "name": "worker",
+      "output": "Sun sets low, dark comes, man rest, bird go, dog go, we see it, it is fun, all is well, we are done."
+    },
+    "worker:aea1af46623e5e18ca92ed33d7db64fc9fb01ab5b1b09c973f1a20a074eda6ce": {
+      "name": "worker",
+      "output": "i find a new thing it is fun to see and know and feel happy so it is good so it goes"
+    },
+    "worker:b0120eb894e76601054ed987473856d57530bd96d8f2717266d6e089008ebd5c": {
+      "name": "worker",
+      "output": "New tech is fast and easy to use every day for fun of is bad\nFixing it: New tech is fast and easy to use every day for fun bad now \nFinal fix: New tech is fast and easy to use every day for fun bad now today"
+    },
+    "worker:b0a5604bb19cdd3f4bb36d47aed364f34279e1ba2d8a5dd872e3d4222cb291f1": {
+      "name": "worker",
+      "output": "New technology uses advanced wave systems creating fastest processing speeds each day always now"
+    },
+    "worker:b0cb1a763f76c0ae6db03be28faa265284740da780cd0d8725975d5a5490c390": {
+      "name": "worker",
+      "output": "natural processes follow a hidden code with complex rules governing every tiny little earth change slowly always"
+    },
+    "worker:b1ca10f5fb728f6298b4340170aeadf3cac18c644e97d141cdc5e44d800728dc": {
+      "name": "worker",
+      "output": "water flows through a small node slowly changing its surroundings completely we are done."
+    },
+    "worker:b21b1b3614761086765f2692469a46c9ab4e2f1bca40fc9cf2dde905259b7442": {
+      "name": "worker",
+      "output": "I found a big wave on the sea and it was fun to see that is it."
+    },
+    "worker:b3105f448876d741efd9f4eb097fac36845043c2f0e8023b5c9f72a15254e95b": {
+      "name": "worker",
+      "output": "- Sun sets\n- Rain falls\n- Ice forms\n- Snow comes here we go."
+    },
+    "worker:b32a36654e83e5104d81755d8c38db03d1e2fa312a098019333af4ffe26c030c": {
+      "name": "worker",
+      "output": "small bits form code run fast help men get job done with ease and fun bits run code now every day is fun"
+    },
+    "worker:b4237221c658989caa98449121838e0af3e1e989f7694fa1fd4aad50dc7e17cd": {
+      "name": "worker",
+      "output": "student learns about tiny things like atom and its structure in simple terms every single day is very important"
+    },
+    "worker:b429a3ad584f2babba2870f87563674f0158265d959e077450faadfa7724dcdf": {
+      "name": "worker",
+      "output": "The sun is a massive beautiful star that undergoes nuclear fusion reactions constantly producing light energy always we are done."
+    },
+    "worker:b5808a20709d48c7299bcefeec82c499c1c96b9d8b67ce39dbb7e6a98b5bad52": {
+      "name": "worker",
+      "output": "Small atom works fast with new tech tools every day so it goes."
+    },
+    "worker:b58871951642ac13ebf97e51cb7fa3019855828ab5c3d13dd26c48c44aa5b8d4": {
+      "name": "worker",
+      "output": "- i say sun is hot\n- it makes us run\n- we feel good now fast"
+    },
+    "worker:b59251159d315e848087dbf1d77d0e21b297a4ef3028595d8fb26ec66d13ad88": {
+      "name": "worker",
+      "output": "- New discovery was made \n- about an old location\n- It was hidden and \n- not seen for long \n- we are done."
+    },
+    "worker:b6f6bccd7a3aea8ff996968f355dac2beafa90bd71c58184b34fa808807b1413": {
+      "name": "worker",
+      "output": "- Light is energy \n- in wave-like \n- form with wave \n- properties wave here we go."
+    },
+    "worker:b80376fd6341db8f555bbb1fc8931ae9369c736f85fe570c2f80f7c150a55b9f": {
+      "name": "worker",
+      "output": "- Brief tech overview uses code.\n \n- Simplifies tasks with minimal code requirement.\n \n- Executes functions with complex algorithm code."
+    },
+    "worker:b8492499972c55c847626ed0ad2f263cab1bfec154c922a27446b837b8c07757": {
+      "name": "worker",
+      "output": "discovery made today in science labs by researchers studying tiny cells very carefully now so it goes."
+    },
+    "worker:b8bb4eb8f83e1a2ab4c018d1ffc3afb574968cf1919889434572920b902799ae": {
+      "name": "worker",
+      "output": "Student learns basic facts with help from folk who make learning fun easy young kids are now just is"
+    },
+    "worker:b988944977823e881e0527082da3910a9693fbbb8fa44541dad57c78c35adb7e": {
+      "name": "worker",
+      "output": "- i am a kid\n- i go home\n- i run now fast"
+    },
+    "worker:ba78d989c550ba1b29d4edbf37c8d29d83228bd1802b5d18d1c68e8f0d9fc66d": {
+      "name": "worker",
+      "output": "New tech is fast for fun and work with bits of data each day now you use it always free today"
+    },
+    "worker:ba7d77713d2feca8350a176a97d18a5c27a5390fb653dbad4fd5e69d43b9728c": {
+      "name": "worker",
+      "output": "i can help you with a fun plan to make a good job with new tips and easy tasks to do each day now"
+    },
+    "worker:ba999fde38cc03e3550e636a84fc70587f4137f634119d9a4c1bd886f4f613ae": {
+      "name": "worker",
+      "output": "Sun sets low in sky, dark comes, man sleep, bird fly, dog run, we see it, we are done."
+    },
+    "worker:bac53dab254de533f274c9fd9367d79574d6b5e24d8e4252c2b45ece0bd56b7a": {
+      "name": "worker",
+      "output": "advanced technology shines like a star with innovative features, tools making life easier every day, for people all over world slowly always"
+    },
+    "worker:bad06197867dcf8a723b4e9d6cb4dbcdf8dc8ae78437ea5d217c0b4ad0c31f1c": {
+      "name": "worker",
+      "output": "i help a kid learn of a gene and its part in a fun way is easy now for them"
+    },
+    "worker:bb1c35f607f3130cad4a68d1176d9ba2705a23a8cdcba272c6a4bfe9e21a842f": {
+      "name": "worker",
+      "output": "- dog is fun\n- cat is pet\n- sun is hot\n- kid is new\n- pet is fun"
+    },
+    "worker:bbc35a20e922395591a0079beda82a284983393efd2ce1ef7a682266428fa26c": {
+      "name": "worker",
+      "output": "students need to understand main concepts and key ideas for their academic success always matters"
+    },
+    "worker:bbcf1b8a2b505213b4d9b53b03c66a818c0c4452d6c9550d4e3e993b1b0faa01": {
+      "name": "worker",
+      "output": "small bits of code run on little pads with good data make life easy to use daily now with fast apps"
+    },
+    "worker:bca44f8e7a965a92ec7d5ff845e88305817b5b645375a6d3a0a3254b8eb85a34": {
+      "name": "worker",
+      "output": "Basic rules of life form in hot small dark areas of old rock every day is hot wet now"
+    },
+    "worker:bcf47cc26f314a550880113b39df7ca9393e94463d0709893213204b7ee83041": {
+      "name": "worker",
+      "output": "- Sun sets slow\n- Clouds form fast\n- Rain falls down"
+    },
+    "worker:bd42d654736533c43145f2c50704e9af6030a1006f6cf1ae5eca0a082b58e63d": {
+      "name": "worker",
+      "output": "i can help with a fun plan to make a job with new tips and easy tasks to do each day here now always"
+    },
+    "worker:bd502f5a0a246511b657b0b0484aeb83dcddcf8093637fe9504fb319f8636510": {
+      "name": "worker",
+      "output": "Water evaporates into air as molecules break down into single atom forming vapor that rises slowly upwards in a continuous natural process cycle"
+    },
+    "worker:bd674fc67482094be911152a58171255712a46ae023c08c927c577b5c618313d": {
+      "name": "worker",
+      "output": "- Topic is surfing a wave\n- Learning to ride this ocean wave takes balance focus strength\n- Feel the powerful wave now moving beneath you"
+    },
+    "worker:bd7513592d6458bc3e8f526d6c9be8f823b322b6ebc5fb2d538cbd73859e4922": {
+      "name": "worker",
+      "output": "- Sun sets \n- Rain falls down \n- Cold snow melts \n- Ice melts cold all is set."
+    },
+    "worker:bdf760b48f58ed1e946feda2665cca1e6b3859821f7bedef735b587a98d65dc7": {
+      "name": "worker",
+      "output": "A node is a part in a net with bits and few sets in it made now"
+    },
+    "worker:be8d90b84d3ef4877ba7afadce4c37e629a4a737ebc5a2238871d1341f87104a": {
+      "name": "worker",
+      "output": "- Discovery made with great fanfare\n- Researchers found new species daily\n- Incredible breakthroughs occurring swiftly\n- Scientists eager to share findings\n- New world unfolding slowly so it goes."
+    },
+    "worker:beda5765f900b8640ed533f564fa04ddf68ec53aa9043272b731a5f121e93b6d": {
+      "name": "worker",
+      "output": "Water flow to a node and down to a spot, then it runs on to a bend, and jumps out here we go."
+    },
+    "worker:beeae779160ae060cf3284221971c7acb1a51d203c3000a46e15447afbaa474f": {
+      "name": "worker",
+      "output": "I say fun wave is big and fast and hits sand hard every day with big noise and much splash always"
+    },
+    "worker:bf518e451cbda0aed9b598819e58eb9eafcc64409fcff139474fce99dd66accd": {
+      "name": "worker",
+      "output": "- I say code\n- is code\n- code is\n- code no \n- code is"
+    },
+    "worker:bf8ade3570567f044f23d80914dafb7bc8dca01d9f4a0e7427f0118d2d50cb9d": {
+      "name": "worker",
+      "output": "Cell phones use small bits of tech to send fast short messages to other cell users very quick now today"
+    },
+    "worker:c158cd1adad20422dab024e402f8a2142c04143af588ebb5a421c5f492c20e0b": {
+      "name": "worker",
+      "output": "- Technology is\n- growing fast\n- very quickly now\n- all is set."
+    },
+    "worker:c1b2fc085f7ac2f433882851819a63c3f027637b5bd7e40e2d594b5a3e8cc9ab": {
+      "name": "worker",
+      "output": "- Sun\n- Sets\n- Run\n- Fun\n- Done we are done."
+    },
+    "worker:c1cabb86e49b2dacdfb54842bba2cadbae4c3c52aa096050bd719b51533e52df": {
+      "name": "worker",
+      "output": "- I talk\n- to you\n- on a\n- new topic\n- so it goes."
+    },
+    "worker:c284424d4aaee9771d6494c21927cc25f8520e63bb74753b8703da3a9eb49ba8": {
+      "name": "worker",
+      "output": "a fan of a star and fun easy little star is fun"
+    },
+    "worker:c2db7242b0a5b385500331e2e4f4fc9466a096612d180761b1f3f0cedbb8a18f": {
+      "name": "worker",
+      "output": "a small star is fun to see every night so it goes."
+    },
+    "worker:c39514765e603b6b1c6716a6e7bfc9650c6a8014931d7074b7706b742f9f7e8e": {
+      "name": "worker",
+      "output": "- Natural processes follow a genetic code\n- Code determines growth patterns exactly\n- Evolution is a complex code"
+    },
+    "worker:c3f62d132da9ebae68f48b861002fa98335f6428822fbf8c1a0f951b2020b95b": {
+      "name": "worker",
+      "output": "technology is evolving with new innovations to solve complex problems slowly every day"
+    },
+    "worker:c409c4982498d15c48a7969fa05087ec313f86efe847a3741a79e06471b1b975": {
+      "name": "worker",
+      "output": "- Sun sets slow\n- Water falls down\n- Rain hits hard\n- Snow falls deep"
+    },
+    "worker:c5804efdad8a4ed02374b2721e023bbb230d5c28667865886b604734e3cbb26c": {
+      "name": "worker",
+      "output": "tiny atom is basic building block with protons and electrons surrounding nucleus very closely always"
+    },
+    "worker:c61912111daee9f815966056011c87693d3306ef96339ddc7268ac3f030010a5": {
+      "name": "worker",
+      "output": "it is fun to sit and run and jump and play with dog and cat and dog is my bud and fun to run here we go"
+    },
+    "worker:c6b2de1808f60d36f7cd1a09f61b620405f2736f04ef30b1cdd9bf44f460b6f6": {
+      "name": "worker",
+      "output": "i found a new bug in the mud by the old log with my pet dog on the fun day now i play here free"
+    },
+    "worker:c6b59db0eff603ef73c2ed0874908fb7b516a0763cb2158820487faf2f1edb0e": {
+      "name": "worker",
+      "output": "Code has a fun math code so it goes."
+    },
+    "worker:c8421d6c44ca73306856cbc3214fd3aa8596a6577b7c9a6472553f1a0b377ca1": {
+      "name": "worker",
+      "output": "- New wave hits sandy\n- Big news is fun\n- Fun comes next now"
+    },
+    "worker:c875482558d62b6996919b3eb7ef8dc6f1ef6622f944783d54957b9206f8b809": {
+      "name": "worker",
+      "output": "- New now\n- Fun is\n- Big new\n- Fun we are done."
+    },
+    "worker:c95a72ed175e06400692a4e4a53e5546add585404789993d98c5c99bc0f8596b": {
+      "name": "worker",
+      "output": "it is a slow move down the hill and it goes on all day is set all is set"
+    },
+    "worker:c95cab6b15eae0ed544dc86e4e70bb247b87709cbac7e43f4709449ace7a8584": {
+      "name": "worker",
+      "output": "- i find\n- it is\n- fun now we are done."
+    },
+    "worker:cae59248007980c5ac17055cc29745b2cc27f6d6b85b772386913b7a144d2892": {
+      "name": "worker",
+      "output": "- I found a new pretty item\n- in my small old trunk\n- it is very very cool now"
+    },
+    "worker:caf056b20a546bfc784549e24a712e791296e2a492312497123a89b6d0b26b53": {
+      "name": "worker",
+      "output": "- i found a\n- new thing is\n- fun to see\n- it is very\n- cool to know"
+    },
+    "worker:cb4a976df4a28a508121296b96d5d6c9ca2f6ccf11e08f1bc98d795f54e8b8d9": {
+      "name": "worker",
+      "output": "i found a new wave in a small pit with calm blue water now bad wet cold"
+    },
+    "worker:cbd9fc026a878fb8f497b872c12940dc2043581a3cab6a342009af8b84fcaee8": {
+      "name": "worker",
+      "output": "- new find is fun\n- old men are glad\n- big men see now\n- all men feel glad yes"
+    },
+    "worker:cc9912df60e6ddb3932dcabb345829b2d14cf442fc1f4c070356b801aea00600": {
+      "name": "worker",
+      "output": "the code is used to make a simple fun easy box work fast now"
+    },
+    "worker:ccdb2c883db66748a28638f3c0d147360211af5e1064dcff6356bd329bc44ee6": {
+      "name": "worker",
+      "output": "i have a pet dog and cat fun to play with them at home now so it goes."
+    },
+    "worker:ccf3d5920ef1272790831da05cd3f98582de52515719c1cf3b0d60f8470ec9d6": {
+      "name": "worker",
+      "output": "Gene is code in cell it goes and makes new cell from old cell that has gene and it is new here we go."
+    },
+    "worker:cfdca03bb5984a3145ded644c5bc224c7da9d4d17256ea297f5aad626746b08e": {
+      "name": "worker",
+      "output": "sun goes down slow and sets behind dark hills very calm and quiet now fast too"
+    },
+    "worker:cfe0ad32578643e2bea6a0e6dca5be76331b58f66e5014841c67053463a8a15a": {
+      "name": "worker",
+      "output": "I talk about pets like dogs and cats birds with easy terms for you"
+    },
+    "worker:d093611147f61d8cb486e2868ba56cb9a6576ab17beffcef17d42f0a9a988a04": {
+      "name": "worker",
+      "output": "I find a new bug. It is small and fast. I see it run away. I am glad I found it now here we go."
+    },
+    "worker:d10a650335a917c109bb5fa8f732bf40adb020e0a70f9a93fa55690125099712": {
+      "name": "worker",
+      "output": "small computer chips rely on tiny atom structures to process information quickly with low power consumption in various electronic devices daily operation always somehow every day"
+    },
+    "worker:d11bdf8740ce0259d5ec5fe3e48347a7ece3bbfeb7724dc4b508a3bdc2dcdecf": {
+      "name": "worker",
+      "output": "scientific concepts explain complex phenomena in simple terms using logic that is it."
+    },
+    "worker:d194eaf8198fb55f38c31c1e11a94f4e1b2fa602408d878753cf5f67ec8bcf25": {
+      "name": "worker",
+      "output": "the sun is a star and it makes the day hot and bright with its warm light always free"
+    },
+    "worker:d365a89ea242ba360396cbf39c2e2ca8e5110581dbe101444aa0eb7b18581b30": {
+      "name": "worker",
+      "output": "the node is a key part of a fun idea for a game to help a student learn new fast now"
+    },
+    "worker:d43893f97c65d8176197c00c398df397343c475baf5edca35b9a8cddea3541d4": {
+      "name": "worker",
+      "output": "I help you with a fun task we are done."
+    },
+    "worker:d48c5767b4480dc41d65f07cb88eca1b45002213b41e459d5943cc7000bfde6b": {
+      "name": "worker",
+      "output": "- science is key\n- to understanding nature\n- and its many laws\n- that govern our world\n- with simple basic rules"
+    },
+    "worker:d4d0e1947411ad96d9b0073a3da1caceaa66dce85acd28cb43848d16947e4a6c": {
+      "name": "worker",
+      "output": "natural processes follow a hidden code in the earth's system with complex rules governing every single tiny little change"
+    },
+    "worker:d601dd7ea6d8785496808538dfc4a9550da18db0ed38e2f71bc596bdb8af108d": {
+      "name": "worker",
+      "output": "- Topic is surfing a wave\n- Learning to ride wave\n- Feel the wave now"
+    },
+    "worker:d625f1d1f397ec842d975242654d675e00ef3142c9d5dd70bc57413db206a2f6": {
+      "name": "worker",
+      "output": "Magnetic fields exhibit flux during electromagnetic induction processes in physics every single human life form."
+    },
+    "worker:d62e16e4fe6df1a326b6d5a31cdb22bea523bd19e804e4330f6d8d5a0317052f": {
+      "name": "worker",
+      "output": "- sun\n- sets\n- rain we are done."
+    },
+    "worker:d6520bc7921bcc9b5e94dfebfc23d90b3b5c01825c4d1bab8adb863c61405dc2": {
+      "name": "worker",
+      "output": "- New discovery made\n- Using special equipment\n- Found unique wave\n- Patterns are emerging\n- Research is ongoing"
+    },
+    "worker:d6a42e3c65efbd9b6d4cdbc1964d7fe1f3f05ddd885e7527e9a98c75ee05e799": {
+      "name": "worker",
+      "output": "- Introduction \n- Simple topic \n- Easy learn \n- Basic knowledge \n- Starting now here we go."
+    },
+    "worker:d87e821888634a986285d3b581be414a8ccfed539987fbdc89636f62f2c04a7f": {
+      "name": "worker",
+      "output": "i say this tech is fun to use and help people with small tasks done fast now very fast daily"
+    },
+    "worker:d8f230b4832f523b364e0390e4da0e62adc1da0c412f779b0d576a023b55f955": {
+      "name": "worker",
+      "output": "- Sun is up\n- Rain is wet\n- Snow is cold\n- Cold is wet\n- Wet is bad"
+    },
+    "worker:d9a4f63a9ddefbcb341810e707d30bfae9c7c7846128fa0e9c57ea0087b18612": {
+      "name": "worker",
+      "output": "- Student learns new concept\n- Gains knowledge every day\n- Applies skills in projects\n- Becomes more confident slowly"
+    },
+    "worker:d9e356d945bb45dbbe12257af9f5733e5d99957e577eb068d3cd0230a0ad3602": {
+      "name": "worker",
+      "output": "Scientists make discovery about new wave crashing against shore suddenly changing everything around us now very fast here we go."
+    },
+    "worker:da0782f19f593225197c7c40ef41042aff789f14316bc26cd8e133540018a89a": {
+      "name": "worker",
+      "output": "Introduction to surfing starts with riding big wave on surfboard daily is very exciting surfing experience always of is removed"
+    },
+    "worker:daa9fbaaff94127ff3f581d7226e092f8c21449b2eb282847c050958d60408f5": {
+      "name": "worker",
+      "output": "- modern technology impacts human life daily\n- modern technology improves life greatly for\n- technology impacts life greatly everyday now"
+    },
+    "worker:dad40896cf81876b003eeda0a5dc003207895a98d60e500938f82094afbc33b4": {
+      "name": "worker",
+      "output": "Learn basic things like atom and cat are small tiny bits found daily now seen all time every day."
+    },
+    "worker:dcebe9c34ba0c8f8a1f73c58f462cdead761970727da0a2057b3024cf424fb65": {
+      "name": "worker",
+      "output": "i use a phone to send text and make fun calls with my friends every day at home or on the go with ease always"
+    },
+    "worker:de830b96a26b2eecd53ff501565da65f9034f53ca86c1ed9310d50eb877ec52a": {
+      "name": "worker",
+      "output": "- Scientists made a new discovery\n- This finding is very significant now\n- People are excited about new knowledge"
+    },
+    "worker:de8738b7e8deb52d96cb7e63d3ce25e6e71e5ed98cc2f9e4914682575ae18e15": {
+      "name": "worker",
+      "output": "The big star is pet to see big star in dark night sky with pet dog runs round star now"
+    },
+    "worker:df3edc6cc3479c574ba36ddf558c5b702cc0612981562b0a175d6995b59c9508": {
+      "name": "worker",
+      "output": "- technology is\n- very complex\n- helps people daily"
+    },
+    "worker:df7b5887c7e65dad6632fbeee78e58f8d69b27eeb3db63813a0a59868fbf92ce": {
+      "name": "worker",
+      "output": "- Sun sets fast\n- Clouds form wet\n- Rain falls down"
+    },
+    "worker:dfcbcfab5451f39ab08973b4ba2477a252e0902fc904273b9f6c1f13c46f0c45": {
+      "name": "worker",
+      "output": "soft gene help make kid in cold wet mud and slow air"
+    },
+    "worker:dff13b32b9cd24671c87c94372fe0b315f9aafa1f780f6a729f42e00b2b769ea": {
+      "name": "worker",
+      "output": "small tech uses atom to make new tiny fun things for you now fast"
+    },
+    "worker:e0103af3981d399f2a8fe3b027bb64507b31477b4234fbc2d53246b11aeb70a9": {
+      "name": "worker",
+      "output": "new tech helps people work fast and easy so it goes"
+    },
+    "worker:e02808020d1cfc9aab1665004f41fbfa0ed261d7a8e315063c2a94e06c75ec87": {
+      "name": "worker",
+      "output": "new node is found at a small old site we are done."
+    },
+    "worker:e1971fb8d2426e26af73bc961a2fb178724cde4f94e42144b6bf23b5c3520026": {
+      "name": "worker",
+      "output": "Code is mad to dog code fan runs on code box fan code is code on dog box code makes dog code runs fast now"
+    },
+    "worker:e250ad79d09f9f0dda80074e9f5e8f4709838e853d9aeb5d91773349c779bc42": {
+      "name": "worker",
+      "output": "- sun is hot\n- rain is wet\n- it is fun\n- dog is mad\n- dog runs now"
+    },
+    "worker:e37685aba4eb4be27793aeec16466829b4a865b9257a041cc3ca7d829f301f5d": {
+      "name": "worker",
+      "output": "Advanced star technology innovations are rapidly changing our daily lives with new gadgets that is it."
+    },
+    "worker:e3838a0257ac73b5195604826056be7116deae92b0c6959c6cfcdb32055ad5f1": {
+      "name": "worker",
+      "output": "Scientists make discovery about new wave crashing against shore suddenly changing everything around us now here we go."
+    },
+    "worker:e43c0aeec28d240d8c4284e1cd26ddd8c309b7fa9983ca0ab2bdbffd6d11e674": {
+      "name": "worker",
+      "output": "- sun\n- sets\n- rain we are done."
+    },
+    "worker:e45c39d10edabcbe99e5dc8001eaa7703b3cb7543e1e3db55d471acddd47c26d": {
+      "name": "worker",
+      "output": "i see a node it is fun to use on a pad with a node it is fun to use node at home every day now"
+    },
+    "worker:e46010b9b42fbd521fb028a127f444b51f37088c6d77167e542f9caa688bc012": {
+      "name": "worker",
+      "output": "I am going to talk about fun pets like dogs and cats and birds now with simple easy terms for you"
+    },
+    "worker:e4eebb153f7f5bc857d9138c582683e106a704f2cf7dcc5e5da378778d523db2": {
+      "name": "worker",
+      "output": "i have a plan that works well for you all is set."
+    },
+    "worker:e57be8952e59b57bef0ca4efe82669cb4f328f5f89e477b84d12a4b9ed97b791": {
+      "name": "worker",
+      "output": "Fast flux moves fast up down with mud flows all around here we go."
+    },
+    "worker:e6e812793ca729d2af494c0ff50af5f2a8f06b8ec5a603541bc247d85c29cb33": {
+      "name": "worker",
+      "output": "- Sun sets\n- Water falls\n- Rain hits\n- Snow falls slowly down now"
+    },
+    "worker:e7051ebcb34d04f3d885edede2c9f78eadcb5083bc78b47dbf51d2e5fadf28ac": {
+      "name": "worker",
+      "output": "- I find\n- a new rock\n- in the sand\n- is quite old now\n- I know so it goes."
+    },
+    "worker:e7749444420b16172cba48969ee7ca93bcd7bbca999673256bb548bb52db8450": {
+      "name": "worker",
+      "output": "- Learn about basics \n- Simple examples help \n- Everyday life has \n- Basic concepts are"
+    },
+    "worker:e78536a2aa65596739efb25d910f540a9a566f595b2ab0dccdeef570c583687d": {
+      "name": "worker",
+      "output": "- technology is rapidly evolving now\n- new innovations are emerging constantly today\n- machines are learning quickly every day\n- robots are becoming smarter faster every\n- artificial intelligence is progressing slowly still"
+    },
+    "worker:e9368a6102f0aeaa550779f73a1722b571cf480412a4c349f0cef0c3c57d53e9": {
+      "name": "worker",
+      "output": "I am new here and I say fun is bad so it goes."
+    },
+    "worker:ea17f86205bb6369084fac791a83ce6a139e014801bd4413003329caefacd3ab": {
+      "name": "worker",
+      "output": "The sun is hot it makes the air go up very fast now"
+    },
+    "worker:ea347e5881b0d7e540da6cbc6b3ce4af1c30ca4ceab898a503212d76b1ba69c8": {
+      "name": "worker",
+      "output": "I use code to make fun apps or run code now here we go."
+    },
+    "worker:eaa6ed02779dd9ded75f96a12e9520b0d02e60ae39005916585f1627184a62d4": {
+      "name": "worker",
+      "output": "- Node is a key \n- Node helps run fast\n- Node is a box"
+    },
+    "worker:eac20ebbe13381e3c4c64f34909de9761ba934f55c38db6b762cab69fb3d7c77": {
+      "name": "worker",
+      "output": "i saw a big brown wave hit the sand on the dark cold sea now"
+    },
+    "worker:ebad23143f45d58b0b8b0a91fdafe51ed25d9f585c5b03e5adaac4dcfddbb332": {
+      "name": "worker",
+      "output": "- natural process occurs \n- slowly during time \n- with water flowing \n- forming rocks slowly now again"
+    },
+    "worker:ec5e3744a426d6c9fdc1ad4b6be434540cf797dfd628707357694f3d36f41bf1": {
+      "name": "worker",
+      "output": "new fun is easy use it now and see how it works fast and easy we are done."
+    },
+    "worker:ec7fecf1c8bfa452020d828b303c8a440bc437e29bc0d9c2b2923433b4984655": {
+      "name": "worker",
+      "output": "a new discovery was made today in science labs by researchers studying tiny cells and molecules very carefully so it goes."
+    },
+    "worker:ed4d8288a2c4055a221e4b29ff26de4cbe5bef67608704e738f8e3fd18793bfc": {
+      "name": "worker",
+      "output": "introducing beginners to constant flux in learning new things each day so it goes."
+    },
+    "worker:ed5e41b7bbc91c43c70066ae7975d7e9cb0e4eb683be27d7ff523e675831f55d": {
+      "name": "worker",
+      "output": "- i say sun is hot\n- it makes us warm\n- we feel good now"
+    },
+    "worker:edfee3d1ef5e6c29a0dfaceb9e8d6d66dc92df2d603411c624ff3c2ff7c478b8": {
+      "name": "worker",
+      "output": "The sun is hot it is hot up high now very fast it goes up"
+    },
+    "worker:eef40929482ad3efbc23e240a4bbe7784f6cd8b959443e4f94f2ca8bfb21fd36": {
+      "name": "worker",
+      "output": "I say fun is atom made of little bits that make up all fun things in our big world now everyday"
+    },
+    "worker:ef33136c59ac71be30f6518fa2d6334294746040e3dc8dd2bde952c73e6993c0": {
+      "name": "worker",
+      "output": "- I see\n- atom is\n- fun to\n- learn now\n- I am"
+    },
+    "worker:efb66badde01446d323c1bb3b8788a3424566f3b88687ee6549d12971d90514d": {
+      "name": "worker",
+      "output": "- It is fun\n- New tech is\n- I use it here we go."
+    },
+    "worker:efd0cbde4c1abf5febf579106d5f769a2acd8a23f3672c7358f6dd8ee54978a7": {
+      "name": "worker",
+      "output": "- Light is energy in wave form\n- Particles exhibit wave properties always\n- Wave crashes on shoreline strong\n- Ocean creates huge wave here we go."
+    },
+    "worker:f01f94668ed8b630bd295c30a81345f88d4a3e94de78aab5ab74b1dc5063a71d": {
+      "name": "worker",
+      "output": "old kit aids men run free now very easy so it goes."
+    },
+    "worker:f0b4d7160d4b4133f1857915f49f1aeffa74fe5059e6f97a91ce69b6119c7db6": {
+      "name": "worker",
+      "output": "- I say we\n- do it now\n- we go home\n- it is fun"
+    },
+    "worker:f13521de3da2d4124f152de1aec61240b5805642d684082baf0f29617c90bb59": {
+      "name": "worker",
+      "output": "i found a bug in my box it has legs on it we see it now we are done."
+    },
+    "worker:f16569f934d5acc8e3bc6bb5fa9078dad629eda02de6f46218d20e4141e18066": {
+      "name": "worker",
+      "output": "- I find\n- a new\n- big rock\n- in the\n- box so it goes."
+    },
+    "worker:f257478027e4dd5857e4bca9b68fc8ae3267d636fe6aae12ea0a6314af36fa93": {
+      "name": "worker",
+      "output": "the node helps make sense of school work for a student to get marks in a short time now today"
+    },
+    "worker:f29a93f78448eb2d186b9c0290de3b5eef1cf702beb9bd4a0f8069c11fa5aa8d": {
+      "name": "worker",
+      "output": "- Natural processes follow genetic code\n- Code determines growth patterns exactly\n- Evolution is complex genetic code"
+    },
+    "worker:f36bddc95e841363bf278386387eb848e18b4f7298f4c255c0dfc1eaf51fad01": {
+      "name": "worker",
+      "output": "i help a kid learn of a gene and its fun way is easy now for them all time"
+    },
+    "worker:f3c107f2f172749d0f24e4cb1487e5830af1d3b8ac15e63a26d41a605e5ec375": {
+      "name": "worker",
+      "output": "- i\n- am\n- a\n- fun\n- kid"
+    },
+    "worker:f3cb001110675bb0d7b5cdeab0afddb15fec8a7624c112d8f312b533ffdc4552": {
+      "name": "worker",
+      "output": "- sand falls\n- down slow\n- to the\n- ground deep"
+    },
+    "worker:f463944f894f6417524e39606a0b495f13d90ea3b741f3466a03163aba6488d1": {
+      "name": "worker",
+      "output": "advanced technology shines like a star with innovative features and tools making life easier every day for people all over world slowly"
+    },
+    "worker:f5b301f325c74ed1433c28e46ab01dd3b0c06cd961ff41ec1043cae1f9b09a5e": {
+      "name": "worker",
+      "output": "- sun sets slow\n- rain falls down\n- snow goes now"
+    },
+    "worker:f604755ff8dfbfcc07f175d95acc88c9f3e1337b589b4c3f7a531104aa1edd35": {
+      "name": "worker",
+      "output": "Water falls from sky to earth in big drops making noise hitting rocks and sand very fast daily"
+    },
+    "worker:f6278c3441f42e2299ba8f82b794e504191aa8164cd190871d521e731cbd871c": {
+      "name": "worker",
+      "output": "Code is key to fun dog tags no bad cat sits on code box mad fan runs no fan code is fun bad"
+    },
+    "worker:f69a5e327a0a2d88bdabc31aac23cca0651ffaafcaa8d463f54ede9f8b3ab832": {
+      "name": "worker",
+      "output": "it is a slow move down the hill and it goes on and on all day all is set."
+    },
+    "worker:f7c51c68735c1509d458cd982e3d059a362c4d1546e0a29b2e2e408183dfb245": {
+      "name": "worker",
+      "output": "- Scientific concept explains cell biology\n- Cell contains many complex molecules\n- Molecular structure is inside cell naturally"
+    },
+    "worker:f8da65073f1a7a1bbb026c14ee9ae41c9efc1b2a0290296d1f3f633c092a2f83": {
+      "name": "worker",
+      "output": "- Topic easy \n- Simple concept \n- Easy learn \n- Basic knowledge \n- Starting now here we go."
+    },
+    "worker:fa21f30280efb9bfcfa02daf15808ff56309fc60f4fd6604bfa6352241c62167": {
+      "name": "worker",
+      "output": "- dog is\n- cat is\n- sun is\n- kid is\n- fun is"
+    },
+    "worker:fc1346438425673351d248ad7b0c7539ddabb76d5340795bf6a5fb77af1b8d1d": {
+      "name": "worker",
+      "output": "new path is at node old node we are done."
+    },
+    "worker:fe135a22bc9439efad83f56c17900f5362ab85af9013ab9ac27109f4a22ced43": {
+      "name": "worker",
+      "output": "Sun is hot and big, it has a big pull on us, makes us run fast, all is set."
+    },
+    "worker:ff1edc87655a5ed570fc5a2ead61db65b16e2e5ba20f96a72defb505ad306ac2": {
+      "name": "worker",
+      "output": "- simple topic is learning\n- basic concepts are easy\n- new skills are gained\n- every day is fun\n- learning is good now"
+    }
+  },
+  "version": 1
+}

@@ -105,6 +105,15 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         "same provider; a true cross-provider critic needs that provider's key",
     )
     p.add_argument(
+        "--verdict-model",
+        default=None,
+        help="verdict/prose splice (E1): route ONLY the PASS/FAIL decision to this model, "
+        "leaving the repair text to --critique-model (or the worker). Both see the identical "
+        "critique prompt. Exists because a plain model swap moves detection and feedback at "
+        "once, so neither half can be credited; this separates them. Adds one LLM call per "
+        "critique step. Incompatible with --oracle-critique, whose gate makes no LLM call",
+    )
+    p.add_argument(
         "--oracle-critique",
         action="store_true",
         help="ceiling lever (run 7): the critique gate uses the true metric, not an LLM "
@@ -118,6 +127,13 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         "repair text fed to the refine step. lo=verdict only; mid=which constraints failed "
         "(default, identical to run 8); hi=concrete measured edits (multi task sets only). "
         "Same call count as mid, so the cost estimate is unchanged",
+    )
+    p.add_argument(
+        "--skip-preflight",
+        action="store_true",
+        help="skip the zero-token provider reachability probe that runs before spending. Only "
+        "for when the probe itself is wrong (an endpoint moved, a proxy blocks GET but not POST); "
+        "it exists because a set-but-unusable key otherwise bills the OTHER provider first",
     )
     p.add_argument(
         "--reflection-calls",
@@ -262,9 +278,86 @@ def _parse_gene_overrides(specs: list[str], *, active: Sequence[str]) -> dict[st
     return overrides
 
 
+#: litellm reads each vendor's credential from its own environment variable. Kept here so the
+#: pre-spend check below covers whatever provider a run actually names, rather than assuming
+#: OpenAI. A provider absent from this map is not gated -- add it when you add its price.
+_PROVIDER_KEY_ENV = {
+    "openai": "OPENAI_API_KEY",
+    "groq": "GROQ_API_KEY",
+    "anthropic": "ANTHROPIC_API_KEY",
+    "gemini": "GEMINI_API_KEY",
+}
+
+#: A zero-token endpoint per provider that answers 200 iff the credential works AND the host can
+#: reach the API. (url_template, header_builder). Listing models bills nothing anywhere.
+_PROVIDER_PROBE: dict[str, tuple[str, Callable[[str], dict[str, str]]]] = {
+    "openai": ("https://api.openai.com/v1/models", lambda k: {"Authorization": f"Bearer {k}"}),
+    "groq": ("https://api.groq.com/openai/v1/models", lambda k: {"Authorization": f"Bearer {k}"}),
+    "anthropic": (
+        "https://api.anthropic.com/v1/models",
+        lambda k: {"x-api-key": k, "anthropic-version": "2023-06-01"},
+    ),
+    "gemini": ("https://generativelanguage.googleapis.com/v1beta/models?key={key}", lambda k: {}),
+}
+
+
+def probe_provider(provider: str, key: str, *, timeout: float = 15.0) -> tuple[bool, str]:
+    """(reachable-and-authorized, human-readable status) for one provider, at zero token cost.
+
+    WHY THIS IS NOT JUST A KEY-PRESENCE CHECK. A set-but-unusable credential is worse than a
+    missing one: the run passes the cheap gate, spends the WORKER's budget, and dies on the first
+    call to the other provider, leaving a bill and a partial cassette. That is not hypothetical --
+    on 2026-08-06 the D3 critic's provider returned 403 at its edge for this host, and only the
+    absence of the key stopped a live attempt.
+
+    It also separates failures the caller must act on differently, which a mid-run exception does
+    not: 401/403 is a credential or network refusal, 429 is a key that works and has no quota left.
+    """
+    import urllib.error
+    import urllib.request
+
+    if provider not in _PROVIDER_PROBE:
+        return True, "no probe defined; not checked"
+    template, headers = _PROVIDER_PROBE[provider]
+    # An explicit User-Agent, because the default one is a liability. `urllib` sends
+    # `Python-urllib/3.x`, and on 2026-08-06 Groq's edge returned 403 to exactly that string while
+    # returning 200 to curl and to litellm from the same host, seconds apart. A preflight that
+    # false-negatives is worse than none: it blocks runs that would have worked, and it teaches the
+    # operator to reach for --skip-preflight, which disables the check that catches the real thing.
+    request = urllib.request.Request(  # noqa: S310 - fixed https literals above
+        template.format(key=key),
+        headers={"User-Agent": "whystuck-validation-study/1.0", **headers(key)},
+        method="GET",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:  # noqa: S310
+            return 200 <= response.status < 300, f"HTTP {response.status}"
+    except urllib.error.HTTPError as exc:
+        hint = {
+            401: "credential rejected",
+            403: "refused before auth (network/region block) or credential rejected",
+            429: "credential works, quota or rate limit exhausted",
+        }.get(exc.code, "")
+        return False, f"HTTP {exc.code}{f' - {hint}' if hint else ''}"
+    except Exception as exc:  # noqa: BLE001 - any transport failure is the same verdict here
+        return False, f"unreachable: {type(exc).__name__}"
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv if argv is not None else sys.argv[1:])
     arms = tuple(args.arms)
+
+    # The oracle gate makes no critique LLM call, so there is no verdict to route.
+    # Accepting the pair would ignore one flag and record metadata claiming a splice
+    # that never ran -- this paper series' own failure mode, as a CLI slip.
+    if args.verdict_model and args.oracle_critique:
+        print(
+            "ERROR: --verdict-model cannot be combined with --oracle-critique: the oracle "
+            "gate decides by the true metric and issues no critique LLM call, so no verdict "
+            "would be routed and the recorded run would not be the spliced one.",
+            file=sys.stderr,
+        )
+        return 2
 
     # Validate config at the cheap dry-run step, not mid-spend. Unknown arm
     # letters would otherwise plan to $0 (silent footgun) and only KeyError later.
@@ -282,6 +375,8 @@ def main(argv: list[str] | None = None) -> int:
     ]
     if args.critique_model:
         model_args.append(("--critique-model", args.critique_model))
+    if args.verdict_model:
+        model_args.append(("--verdict-model", args.verdict_model))
     for label, model in model_args:
         if model not in MODEL_PRICES:
             print(
@@ -443,21 +538,30 @@ def main(argv: list[str] | None = None) -> int:
         per_retry_calls = 1
     elif args.actuator:
         per_retry_calls = 3
+    elif args.verdict_model:
+        # Splice (E1): the verdict and the prose are two calls on the same prompt,
+        # so a retry costs verdict + prose + refine.
+        per_retry_calls = 3
     else:
         per_retry_calls = 2
     worker_calls_per_task = (2 if args.plan_gene else 1) + per_retry_calls * args.loop_max_retries
-    # Conservative pricing: a cross-family critic runs some worker-side calls on a
-    # different (often pricier) model. We price ALL worker-side calls at the pricier
-    # of {worker, critic} so the guard's estimate stays an upper bound (the true
-    # split is cheaper). Irrelevant under --oracle-critique (no critique call).
+    # Conservative pricing: a cross-family critic, and under the splice a separate
+    # verdict model, run some worker-side calls on a different (often pricier) model.
+    # We price ALL worker-side calls at the priciest model any of them can route to, so
+    # the guard's estimate stays an upper bound (the true split is cheaper). Irrelevant
+    # under --oracle-critique (no critique call, hence no verdict call either).
+    #
+    # The verdict model belongs in this max for the same reason the critic does, and it
+    # was missed once: a cheap-prose / expensive-verdict cell then priced every call at
+    # the cheap worker and the ceiling silently sat below the true cost.
     pricing_worker_model = args.worker_model
-    if args.critique_model and not args.oracle_critique:
+    if not args.oracle_critique:
         # Pick the pricier model by TRUE cost at the real worker call shape (input-heavy),
         # not by unweighted sum(in,out) — a future entry with an unusual in/out ratio
         # could flip a sum-based comparison and silently under-price the guard.
         cost_at_shape = lambda m: CallGroup(m, 1, *WORKER_TOKENS).usd()  # noqa: E731
-        if cost_at_shape(args.critique_model) > cost_at_shape(args.worker_model):
-            pricing_worker_model = args.critique_model
+        routed = [m for m in (args.critique_model, args.verdict_model) if m]
+        pricing_worker_model = max([args.worker_model, *routed], key=cost_at_shape)
 
     # Code solutions are longer than IFBench text on both axes, so the guard must price
     # the code worker with its larger (in, out) shape or it under-counts a paid run.
@@ -522,9 +626,48 @@ def main(argv: list[str] | None = None) -> int:
         print("\nDry run only. Re-run with --yes (and OPENAI_API_KEY set) to spend.")
         return 0
 
-    if not os.environ.get("OPENAI_API_KEY"):
-        print("ERROR: --yes given but OPENAI_API_KEY is not set.", file=sys.stderr)
+    # Every provider this run will actually call, not just OpenAI. A cross-provider critic
+    # (D3) routes one call per eval to a second vendor, and checking only OPENAI_API_KEY
+    # meant that run would spend the worker's money and THEN die on the missing second key,
+    # mid-study, with a partial cassette. Same rule as every other validation in this file:
+    # refuse at the cheap step. The check is on presence, not validity -- a live probe would
+    # cost a call and could not be done offline -- so it catches the unset key, not the
+    # expired one.
+    models = [m for m in (args.worker_model, args.reflection_model, args.critique_model) if m]
+    providers = sorted({m.split("/", 1)[0] for m in models})
+    missing = sorted(
+        {
+            var
+            for provider in providers
+            for var in [_PROVIDER_KEY_ENV.get(provider)]
+            if var and not os.environ.get(var)
+        }
+    )
+    if missing:
+        print(
+            f"ERROR: --yes given but these provider keys are not set: {', '.join(missing)}. "
+            f"This run calls {', '.join(providers)}.",
+            file=sys.stderr,
+        )
         return 3
+
+    if not args.skip_preflight:
+        unusable = []
+        for provider in providers:
+            var = _PROVIDER_KEY_ENV.get(provider)
+            ok, status = probe_provider(provider, os.environ.get(var or "", ""))
+            print(f"  preflight {provider:<10} {status}")
+            if not ok:
+                unusable.append(f"{provider} ({status})")
+        if unusable:
+            print(
+                f"ERROR: --yes given but these providers did not answer: {', '.join(unusable)}. "
+                "Nothing was spent. A run that starts here bills the reachable provider and then "
+                "dies on the first call to this one, leaving a partial cassette. "
+                "Override with --skip-preflight only if you know the probe is wrong.",
+                file=sys.stderr,
+            )
+            return 4
 
     return _run_live(args, arms, seeds, estimate, gene_overrides)
 
@@ -676,20 +819,30 @@ def _run_live(
         complete = cassette.wrap(
             litellm_complete(args.worker_model, max_tokens=worker_max_out), name="worker"
         )
-        if args.temperature is not None or args.sample is not None:
-            # Add the kwargs at the call site, OUTSIDE the cassette wrapper, so they land in
-            # the hashed kwargs. Absent both flags the call is unchanged and every existing
-            # cassette key still resolves. `sample` is a salt: it never reaches the provider,
-            # it only stops record mode from serving one cached draw to K replicates.
-            _untempered = complete
-            _extra: dict[str, object] = {}
-            if args.temperature is not None:
-                _extra["temperature"] = args.temperature
-            if args.sample is not None:
-                _extra["sample"] = args.sample
+        # Add the kwargs at the call site, OUTSIDE the cassette wrapper, so they land in
+        # the hashed kwargs. Absent both flags the call is unchanged and every existing
+        # cassette key still resolves. `sample` is a salt: it never reaches the provider,
+        # it only stops record mode from serving one cached draw to K replicates.
+        _extra: dict[str, object] = {}
+        if args.temperature is not None:
+            _extra["temperature"] = args.temperature
+        if args.sample is not None:
+            _extra["sample"] = args.sample
 
-            def complete(prompt: str) -> str:  # type: ignore[misc]
-                return _untempered(prompt, **_extra)
+        def _sampled(fn: Callable[..., str]) -> Callable[[str], str]:
+            """Apply the run's sampling kwargs to one wrapped model callable.
+
+            Every sampled surface goes through this. It used to be inlined on the worker
+            alone, so `--temperature 0` pinned the worker and left the critique and verdict
+            calls at the provider default while the run metadata recorded a temperature --
+            a flag reported as applied that was not. It surfaced only because two calls on
+            one prompt at temperature 0 came back different 30 times out of 30.
+            """
+            if not _extra:
+                return fn
+            return lambda prompt: fn(prompt, **_extra)
+
+        complete = _sampled(complete)
 
         reflection = cassette.wrap(
             litellm_complete(args.reflection_model, max_tokens=REFLECTION_MAX_OUTPUT_TOKENS),
@@ -699,9 +852,23 @@ def _run_live(
         # Skipped under --oracle-critique (the gate makes no critique LLM call).
         critique_complete = None
         if args.critique_model and not args.oracle_critique:
-            critique_complete = cassette.wrap(
-                litellm_complete(args.critique_model, max_tokens=WORKER_MAX_OUTPUT_TOKENS),
-                name="critic",
+            critique_complete = _sampled(
+                cassette.wrap(
+                    litellm_complete(args.critique_model, max_tokens=WORKER_MAX_OUTPUT_TOKENS),
+                    name="critic",
+                )
+            )
+        # Verdict/prose splice (E1). Its own cassette namespace: the verdict call shares the
+        # critique call's prompt exactly, so a shared namespace would collide the two whenever
+        # both route to the same model -- returning the prose model's text as the verdict and
+        # silently un-splicing the experiment.
+        verdict_complete = None
+        if args.verdict_model and not args.oracle_critique:
+            verdict_complete = _sampled(
+                cassette.wrap(
+                    litellm_complete(args.verdict_model, max_tokens=WORKER_MAX_OUTPUT_TOKENS),
+                    name="verdict",
+                )
             )
         for seed in seeds:
             train = load_split("train", seed, args.n_train)
@@ -726,6 +893,7 @@ def _run_live(
                     stats_fn=text_stats if args.feedback_stats else None,
                     exec_feedback=exec_feedback,
                     critique_complete=critique_complete,
+                    verdict_complete=verdict_complete,
                     oracle_critique=args.oracle_critique,
                     oracle_feedback=oracle_feedback,
                     use_actuator=args.actuator,
@@ -763,6 +931,7 @@ def _run_live(
         "plan_gene": args.plan_gene,
         "feedback_stats": args.feedback_stats,
         "critique_model": args.critique_model if not args.oracle_critique else None,
+        "verdict_model": args.verdict_model if not args.oracle_critique else None,
         "oracle_critique": args.oracle_critique,
         "feedback_level": args.feedback_level,
         "exec_feedback": exec_feedback is not None,

@@ -9,7 +9,9 @@ from __future__ import annotations
 import contextlib
 import importlib.util
 import io
+import json
 import pathlib
+import re
 
 import pytest
 
@@ -444,3 +446,359 @@ def test_seed_gene_does_not_change_the_cost_estimate(tmp_path):
         _run(["--arms", "A", "--seeds", "0", "--seed-gene", f"ensure_correct={f}"])[1]
     )
     assert base == with_override
+
+
+# --- Multi-provider pre-spend gates (D3, the cross-provider critic) --------------------
+#
+# Both were written after a near miss on 2026-08-06: the D3 critic's provider refused this
+# host at its edge, and the ONLY thing preventing a live attempt was that its key happened
+# to be unset. Had it been set, the run would have billed the worker's provider in full and
+# then died on the first critique call, leaving a partial cassette and no result.
+
+
+def _probe(status=None, error=None):
+    """A `probe_provider` stand-in, so no test touches the network."""
+    return lambda provider, key, **kw: (status == 200, error or f"HTTP {status}")
+
+
+def test_a_second_providers_missing_key_is_caught_before_spending(monkeypatch):
+    """The old gate checked OPENAI_API_KEY only, so a groq critic passed it."""
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
+    code, _, err = _run(["--yes", "--critique-model", "groq/llama-3.3-70b-versatile"])
+    assert code == 3
+    assert "GROQ_API_KEY" in err and "groq" in err
+
+
+def test_the_workers_key_alone_still_satisfies_a_single_provider_run(monkeypatch):
+    """The new gate must not start demanding keys a run will never use."""
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
+    cli = _load_cli()
+    monkeypatch.setattr(cli, "probe_provider", _probe(200))
+    monkeypatch.setattr(cli, "_run_live", lambda *a, **k: 0)
+    out, err = io.StringIO(), io.StringIO()
+    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        assert cli.main(["--yes"]) == 0
+
+
+def test_a_present_but_unusable_key_is_caught_before_spending(monkeypatch):
+    """Presence is not reachability. This is the actual near miss."""
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+    monkeypatch.setenv("GROQ_API_KEY", "gsk-test")
+    cli = _load_cli()
+    calls = []
+
+    def probe(provider, key, **kw):
+        calls.append(provider)
+        return (provider != "groq", "HTTP 200" if provider != "groq" else "HTTP 403")
+
+    monkeypatch.setattr(cli, "probe_provider", probe)
+    monkeypatch.setattr(cli, "_run_live", lambda *a, **k: pytest.fail("must not spend"))
+    out, err = io.StringIO(), io.StringIO()
+    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        code = cli.main(["--yes", "--critique-model", "groq/llama-3.3-70b-versatile"])
+    assert code == 4
+    assert "Nothing was spent" in err.getvalue()
+    assert "groq" in calls and "openai" in calls, (
+        "every provider must be probed, not just the odd one"
+    )
+
+
+def test_skip_preflight_bypasses_the_probe_and_nothing_else(monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+    cli = _load_cli()
+    monkeypatch.setattr(cli, "probe_provider", lambda *a, **k: pytest.fail("probe must not run"))
+    monkeypatch.setattr(cli, "_run_live", lambda *a, **k: 0)
+    out, err = io.StringIO(), io.StringIO()
+    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        assert cli.main(["--yes", "--skip-preflight"]) == 0
+
+
+def test_skip_preflight_does_not_bypass_the_missing_key_gate(monkeypatch):
+    """An escape hatch for the probe must not become an escape hatch for everything."""
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
+    code, _, err = _run(
+        ["--yes", "--skip-preflight", "--critique-model", "groq/llama-3.3-70b-versatile"]
+    )
+    assert code == 3 and "GROQ_API_KEY" in err
+
+
+@pytest.mark.parametrize(
+    ("code", "expected"),
+    [
+        (401, "credential rejected"),
+        (403, "refused before auth"),
+        (429, "quota or rate limit exhausted"),
+    ],
+)
+def test_the_probe_distinguishes_the_failures_you_act_on_differently(monkeypatch, code, expected):
+    """403 and 429 need opposite responses -- fix the network vs top up the account -- and a
+    mid-run exception conflates them. This distinction is the reason the probe reports a string
+    rather than a bool."""
+    import urllib.error
+
+    cli = _load_cli()
+
+    def _raise(*a, **k):
+        raise urllib.error.HTTPError("u", code, "", {}, None)  # type: ignore[arg-type]
+
+    monkeypatch.setattr("urllib.request.urlopen", _raise)
+    ok, status = cli.probe_provider("groq", "k")
+    assert not ok and expected in status
+
+
+def test_an_unknown_provider_is_not_silently_treated_as_broken(monkeypatch):
+    cli = _load_cli()
+    ok, status = cli.probe_provider("some-new-vendor", "k")
+    assert ok and "not checked" in status
+
+
+def test_the_probe_does_not_identify_itself_as_python_urllib(monkeypatch):
+    """A false-negative preflight is worse than no preflight.
+
+    Measured on 2026-08-06: Groq's edge returned 403 to `Python-urllib/3.12` and 200 to curl and to
+    litellm from the same host, seconds apart. The probe therefore reported the provider unusable
+    while the run's actual client could reach it perfectly — which blocks a good run and, worse,
+    teaches the operator to pass --skip-preflight, disabling the check that catches the real thing.
+    """
+    import urllib.error
+
+    cli = _load_cli()
+    seen = {}
+
+    def _capture(request, *a, **k):
+        seen["ua"] = request.get_header("User-agent")
+        raise urllib.error.HTTPError("u", 500, "", {}, None)  # type: ignore[arg-type]
+
+    monkeypatch.setattr("urllib.request.urlopen", _capture)
+    cli.probe_provider("groq", "k")
+    assert seen["ua"] and "urllib" not in seen["ua"].lower(), (
+        f"probe identified itself as {seen['ua']!r}; edges block that string"
+    )
+
+
+def test_the_probe_sends_the_credential_each_provider_expects(monkeypatch):
+    """Anthropic takes x-api-key, not a Bearer token. Sending the wrong one reads as a dead key."""
+    import urllib.error
+
+    cli = _load_cli()
+    seen = {}
+
+    def _capture(request, *a, **k):
+        seen.update({k.lower(): v for k, v in request.header_items()})
+        raise urllib.error.HTTPError("u", 500, "", {}, None)  # type: ignore[arg-type]
+
+    monkeypatch.setattr("urllib.request.urlopen", _capture)
+    cli.probe_provider("anthropic", "secret")
+    assert seen.get("X-api-key".lower()) == "secret"
+    assert "authorization" not in seen
+
+
+# --- verdict/prose splice (E1): pricing and the incompatible-flag refusal ---------
+
+
+def test_verdict_model_prices_the_extra_critique_call():
+    # The splice issues TWO LLM calls per critique step (one for the verdict, one for
+    # the prose) on the same prompt. If the planner keeps charging one, the pre-flight
+    # guard stops being a ceiling -- which is the only property it has.
+    from whystuck.eval.cost import estimate_usd, plan_study_calls
+
+    common = _BASE + ["--loop-max-retries", "1"]
+    _, plain, _ = _run(common)
+    _, spliced, _ = _run([*common, "--verdict-model", "openai/gpt-4.1-mini"])
+    assert _estimate_from(spliced) > _estimate_from(plain)
+
+    expected = estimate_usd(
+        plan_study_calls(
+            arms=("A", "B"),
+            n_train=5,
+            n_heldout=5,
+            max_metric_calls=20,
+            reflection_calls=3,
+            worker_model="openai/gpt-4.1-mini",
+            reflection_model="openai/gpt-5.6-terra",
+            worker_calls_per_task=1 + 3 * 1,  # generate + (verdict + prose + refine)
+        )
+    )
+    assert f"${expected:.4f}" in spliced
+
+
+def test_verdict_model_is_refused_with_the_oracle_gate():
+    # The oracle gate makes no critique LLM call at all, so there is no verdict to
+    # route anywhere. Accepting the pair would silently ignore one of the two flags
+    # and record a run whose metadata claims a splice that never happened.
+    code, _, err = _run(
+        [
+            "--arms",
+            "A",
+            "--seeds",
+            "0",
+            "--verdict-model",
+            "openai/gpt-4.1-mini",
+            "--oracle-critique",
+        ]  # fmt: skip
+    )
+    assert code == 2
+    assert "verdict-model" in err and "oracle-critique" in err
+
+
+def test_unknown_verdict_model_rejected():
+    code, _, err = _run(["--arms", "A", "--seeds", "0", "--verdict-model", "openai/nope"])
+    assert code == 2
+    assert "MODEL_PRICES" in err
+
+
+def test_an_expensive_verdict_model_raises_the_estimate_even_with_a_cheap_critic():
+    # The conservative rule prices every worker-side call at the priciest model any of
+    # them can route to. The verdict model is one of those routes, so leaving it out of
+    # the max makes the guard an UNDER-estimate for a cheap-prose / expensive-verdict
+    # cell -- and an under-estimating ceiling is not a ceiling.
+    common = _BASE + ["--loop-max-retries", "1"]
+    _, cheap, _ = _run([*common, "--verdict-model", "openai/gpt-4.1-mini"])
+    _, pricey, _ = _run([*common, "--verdict-model", "openai/gpt-5.6-luna"])
+    assert _estimate_from(pricey) > _estimate_from(cheap)
+
+
+# --- --temperature must reach EVERY sampled surface, not just the worker ---------
+
+
+def _wire_and_capture(argv, tmp_path, monkeypatch):
+    """Run main() with the provider and the study faked, returning run_study's kwargs.
+
+    Nothing here touches the network: `litellm_complete` is replaced by a factory whose
+    callables record the kwargs they are handed, and `run_study` is replaced by a capture.
+    """
+    cli = _load_cli()
+    recorded: dict[str, list] = {}
+
+    def fake_litellm_complete(model, **_factory_kw):
+        def call(prompt, **kw):
+            recorded.setdefault(model, []).append(kw)
+            return "PASS"
+
+        return call
+
+    captured: dict[str, object] = {}
+
+    def fake_run_study(_store, **kw):
+        captured.update(kw)
+        raise SystemExit(0)
+
+    # Both names are imported INSIDE main(), so the patch has to land on the defining
+    # modules rather than on the CLI module's namespace.
+    import whystuck.eval.llm_worker as lw
+    import whystuck.eval.study as st
+
+    monkeypatch.setattr(lw, "litellm_complete", fake_litellm_complete)
+    monkeypatch.setattr(st, "run_study", fake_run_study)
+    # Record mode, not replay: the cassette wrapper must actually reach the fake provider
+    # for its kwargs to be observable. No network is possible -- the provider is a stub --
+    # and the preflight probe is skipped so nothing dials out.
+    monkeypatch.setenv("OPENAI_API_KEY", "test-not-a-real-key")
+    monkeypatch.setenv("GROQ_API_KEY", "test-not-a-real-key")
+    with contextlib.suppress(SystemExit), contextlib.redirect_stdout(io.StringIO()):
+        cli.main([
+            *argv, "--yes", "--skip-preflight",
+            "--record", str(tmp_path / "c.json"),
+            "--out", str(tmp_path / "o.json"),
+            "--report", str(tmp_path / "r.md"),
+        ])  # fmt: skip
+    return captured, recorded
+
+
+def test_temperature_reaches_the_critique_and_verdict_calls_not_only_the_worker(
+    tmp_path, monkeypatch
+):
+    # --temperature was wired onto the worker callable alone. The critique and verdict
+    # calls therefore ran at the provider default while the run's metadata recorded a
+    # pinned temperature -- a flag reported as applied that was not, which is this
+    # series' own subject matter appearing in its harness. It was caught only because
+    # two calls on one prompt at temperature 0 returned different text 30 times out of 30.
+    captured, recorded = _wire_and_capture(
+        [
+            "--arms",
+            "A",
+            "--seeds",
+            "0",
+            "--n-heldout",
+            "2",
+            "--n-train",
+            "2",
+            "--temperature",
+            "0",
+            "--worker-model",
+            "openai/gpt-4.1-mini",
+            "--critique-model",
+            "openai/gpt-5.6-luna",
+            "--verdict-model",
+            "openai/gpt-4.1-nano",
+        ],  # fmt: skip
+        tmp_path,
+        monkeypatch,
+    )
+    for role in ("critique_complete", "verdict_complete"):
+        fn = captured.get(role)
+        assert fn is not None, f"{role} was not wired at all"
+        fn("a prompt")
+    assert recorded, "no calls were recorded"
+    for model, calls in recorded.items():
+        assert calls, f"{model} never called"
+        assert all(kw.get("temperature") == 0.0 for kw in calls), (
+            f"{model} was called without the pinned temperature: {calls}"
+        )
+
+
+def test_without_temperature_no_sampling_kwargs_are_added_anywhere(tmp_path, monkeypatch):
+    # The invariant that keeps every recorded cassette replayable: absent the flags, the
+    # call is unchanged, so its hashed kwargs are empty and existing keys still resolve.
+    captured, recorded = _wire_and_capture(
+        [
+            "--arms",
+            "A",
+            "--seeds",
+            "0",
+            "--n-heldout",
+            "2",
+            "--n-train",
+            "2",
+            "--worker-model",
+            "openai/gpt-4.1-mini",
+            "--critique-model",
+            "openai/gpt-5.6-luna",
+        ],  # fmt: skip
+        tmp_path,
+        monkeypatch,
+    )
+    captured["critique_complete"]("a prompt")
+    assert all(kw == {} for calls in recorded.values() for kw in calls)
+
+
+def test_the_pre_fix_exhibit_shows_the_flag_never_reached_the_two_surfaces():
+    """Paper III's defect 10 claims two calls on one prompt at temperature 0 differed 30/30.
+
+    Derived from the exhibit rather than asserted. The cassette cannot be replayed under HEAD --
+    the fix puts the sampling kwargs into the hashed key, so every key in it is stale -- but the
+    claim does not need a replay: if NO `critic` completion equals ANY `verdict` completion, then
+    a fortiori none matched its own pair, and 30 requested-deterministic prompts produced 60
+    distinct answers.
+    """
+    exhibit = pathlib.Path("tests/fixtures/evidence/study-splice-G1-pre-tempfix.json")
+    entries = json.loads(exhibit.read_text(encoding="utf-8"))["entries"]
+    critic = [v["output"] for v in entries.values() if v.get("name") == "critic"]
+    verdict = [v["output"] for v in entries.values() if v.get("name") == "verdict"]
+    assert len(critic) == len(verdict) == 30, (
+        f"the exhibit should hold 30 completions per surface, found {len(critic)}/{len(verdict)}"
+    )
+    assert not set(critic) & set(verdict), (
+        "a critic completion matches a verdict completion, so the paper's 30-of-30 claim is no "
+        "longer supported by this exhibit"
+    )
+    assert len(set(critic) | set(verdict)) == 60, "the 60 completions are not all distinct"
+
+    claimed = re.search(
+        r"returned different text thirty times out of thirty",
+        pathlib.Path("docs/papers/p3-silent-no-op/main.tex").read_text(encoding="utf-8"),
+    )
+    assert claimed, "Paper III no longer states the 30-of-30 claim this exhibit backs"

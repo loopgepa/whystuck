@@ -146,6 +146,7 @@ def make_self_refine_run_task(
     stats_fn: Callable[[str], str] | None = None,
     exec_feedback: Feedback | None = None,
     critique_complete: Complete | None = None,
+    verdict_complete: Complete | None = None,
     oracle_critique: bool = False,
     oracle_feedback: Feedback | None = None,
     actuator_gene: str | None = None,
@@ -278,13 +279,29 @@ def make_self_refine_run_task(
                 exec_block = (
                     f"\n\n# Test results\n{exec_feedback(draft, task)}" if exec_feedback else ""
                 )
-                critique = critic(
+                critique_prompt = (
                     f"{ver}\n\n# Task\n{task_text}\n\n# Draft answer\n{draft}"
                     f"{stats_block}{exec_block}\n\n"
                     "Reply exactly PASS if every requirement is satisfied; "
                     "otherwise list what to fix."
                 )
-                passed = critique.strip().upper().startswith("PASS")
+                critique = critic(critique_prompt)
+                if verdict_complete is None:
+                    passed = critique.strip().upper().startswith("PASS")
+                else:
+                    # Splice lever (E1): the gate and the repair text come from DIFFERENT
+                    # models given the IDENTICAL prompt. A model swap otherwise moves both
+                    # halves of the loop at once, which is why the cross-lineage critic's
+                    # lift cannot be attributed to detection or to feedback as measured.
+                    passed = verdict_complete(critique_prompt).strip().upper().startswith("PASS")
+                    if not passed and critique.strip().upper().startswith("PASS"):
+                        # The prose source saw nothing to fix, so it has no repair text to
+                        # give. Passing refine the literal token "PASS" as guidance would be
+                        # nonsense; it gets the same generic directive the oracle path uses
+                        # when no feedback function is supplied. This is not noise in the
+                        # experiment -- it is the prose source having nothing to say, and a
+                        # bare "revise" is already this series' low-actionability baseline.
+                        critique = "not all requirements are satisfied; revise"
             steps.append(
                 LoopStepTrace(
                     step_id=f"critique-{i}",

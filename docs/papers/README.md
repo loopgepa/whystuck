@@ -5,9 +5,9 @@ questions, rest on different experiments, and are useful to different readers.
 
 | | paper | asks | uses the optimizer? | pages |
 |---|---|---|---|---|
-| **I** | [`p1-conditional-lever/`](p1-conditional-lever/) — *Whether Optimizing the Loop Beats Optimizing the Prompt Depends on One Number* | Does evolving a self-refine loop's verifier beat evolving its generation prompt? | yes, it is the subject | 33 |
-| **II** | [`p2-repair-not-detection/`](p2-repair-not-detection/) — *What a Checker Cannot Buy Is the Repair* | Where is the loop's own ceiling: detection or repair? | **no** — every run is `--arms A` on a fixed genome | 17 |
-| **III** | [`p3-silent-no-op/`](p3-silent-no-op/) — *Your Loop Optimizer Is Not Optimizing Your Loop* | How can a componentized treatment silently not apply, and what catches it? | yes, as the thing that failed | 16 |
+| **I** | [`p1-conditional-lever/`](p1-conditional-lever/) — *Whether Optimizing the Loop Beats Optimizing the Prompt Depends on One Number* | Does evolving a self-refine loop's verifier beat evolving its generation prompt? | yes, it is the subject | 38 |
+| **II** | [`p2-repair-not-detection/`](p2-repair-not-detection/) — *What a Checker Cannot Buy Is the Repair* | Where is the loop's own ceiling: detection or repair? | **no** — every run of ours is `--arms A` on a fixed genome | 22 |
+| **III** | [`p3-silent-no-op/`](p3-silent-no-op/) — *Your Loop Optimizer Is Not Optimizing Your Loop* | How can a componentized treatment silently not apply, and what catches it? | yes, as the thing that failed | 19 |
 
 ## Which paper answers your question
 
@@ -74,7 +74,7 @@ does not, something regressed.
 ## Verifying
 
 ```bash
-python scripts/verify_paper_claims.py     # 762 checks against the released artifacts, $0
+python scripts/verify_paper_claims.py     # 953 checks against the released artifacts, $0
 python scripts/verify_split_coverage.py   # the split lost no quantity, $0
 python -m pytest tests/test_split_coverage.py tests/test_paper_prose_coverage.py \
     tests/test_paper_table_coverage.py tests/test_paper_sigma_coverage.py tests/test_figures.py
@@ -97,13 +97,41 @@ silently narrowed its own scope is precisely the defect Paper III is about.
   are carried by at least one paper, or superseded by a replacement that is *verified present*, or
   explicitly dropped with a reason. Zero are dropped.
 
+### One of those four guards was inert until 2026-08-05
+
+`test_paper_prose_coverage` asks whether every decimal the papers state in prose is one a check
+derives from an artifact. It answered yes vacuously for its whole life: it rebuilt the set of
+derived values by replaying the checker's regex literals over the document, and one of those
+literals is the bare capture fragment `([\d.]+)` that the table-row patterns are composed from.
+Compiled alone it matched 3937 numbers, so the bound set *was* the document and the guard asserted
+that the papers agree with themselves.
+
+It concealed seven orphans. All seven turned out to be correct once derived, so **none of the seven
+changed a published number** — but they were unpinned, and two were the exact defect the guard's own
+docstring was written about, including one that sat as a literal inside the pattern checking its own
+σ quotient. The repair replaced the replay with the check list itself, which already records every
+pinned value, and added `test_the_guard_reports_an_injected_orphan`: it feeds in a decimal known to
+be underivable and demands a failure. The size floors in `test_coverage_is_not_vacuous` could never
+have caught this, because an over-broad bound set is *larger* than a correct one and clears every
+floor.
+
+Pinning them did surface one false *sentence*, now Paper I's thirteenth register entry: the
+appendix called all eight C1 tasks "the only ones on which the two genes' verdicts differ" while
+conceding two clauses earlier that both genes demanded a fix on five of them. The verdicts differ on
+three. No quantity moved — the −0.009/−0.023 split stands — and all three stratum sizes are now
+derived from the replay.
+
 ## Shared across all three
 
-- **One artifact release.** 33 study runs, 225 replicate scorings, 257 cassettes.
+- **One artifact release.** 43 study runs, 225 replicate scorings, 267 cassettes. **34 of the runs
+  are the papers' own**; the other **9** are a second-worker replication line bought on a Groq
+  credential (`validation-study-groq-*`, `validation-study-splice-*`). No paper cites that line
+  yet, and it deliberately runs a different worker, so none of its numbers extends a released
+  curve. It is committed rather than held back because its cassettes are what make it checkable.
 - **One corrections register, split three ways.** Each paper carries the withdrawals bearing on its
   own claims and states its own count; the full register across all three is the union. Every count
   is derived from the entries actually listed, because it drifted twice during the study.
-- **One reproducibility guarantee.** 13 corrected-harness runs replay bit-for-bit from cassette at
+- **One reproducibility guarantee.** 14 corrected-harness runs replay bit-for-bit from cassette at
   `$0`; 12 earlier runs are labelled superseded and reported as skipped, never silently verified.
 
 ## Status

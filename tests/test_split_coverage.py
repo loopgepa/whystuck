@@ -95,6 +95,16 @@ def test_every_spelled_out_count_survives():
     assert not vsc.missing_spelled()
 
 
+def test_every_spelled_supersession_holds_in_both_directions():
+    """A spelled count may change, but only on the record and only if the replacement landed.
+
+    Without this, `SPELLED_SUPERSEDED` would be a plain exemption list: an entry could sit there
+    naming a replacement that never made it into any paper, and the count would be gone with a
+    note claiming otherwise.
+    """
+    assert not vsc.broken_spelled_supersessions()
+
+
 def test_the_check_is_not_vacuous():
     """Dropping a paper's worth of text must be reported as loss.
 
@@ -181,7 +191,7 @@ def test_shared_inputs_are_expanded_not_skipped():
     and the shared harness section's claims would silently stop being checked.
     """
     shared = pathlib.Path("docs/papers/shared/loop.tex").read_text(encoding="utf-8")
-    marker = "registers twenty-five committed runs"
+    marker = "registers twenty-six committed runs"
     assert marker in shared
     for slug in paper_sources.PAPERS:
         tex = paper_sources.paper_tex(slug)

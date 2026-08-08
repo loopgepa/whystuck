@@ -25,8 +25,9 @@ and actionable repair feedback gives it its best}
 \begin{abstract}
 A generate--critique--refine loop is usually improved by improving its critique, on the reasoning
 that the loop can only repair what it detects. We measure the two halves separately on a
-verifiable instruction-following family, with \emph{no} optimizer anywhere in the design: every
-number below scores a fixed, hand-written genome, so nothing here depends on a search. Detection
+verifiable instruction-following family, with \emph{no} optimizer in the design: every number we
+measure scores a fixed, hand-written genome, so nothing here depends on a search, except two
+figures quoted from the companion papers. Detection
 turns out not to be the binding constraint. Replacing the loop's near-random self-critique
 (F$_1 = 0.11$) with the true metric as a \emph{perfect} inference-time gate moves held-out score by
 $-0.0027$ ($t = 0.33$ over five replicates): a perfect checker is statistically indistinguishable
@@ -137,11 +138,15 @@ second), and prior positive results
 relied on \emph{oracle} stopping signals that ``vanish when oracle labels are
 not available.'' Self-correction helps only with a genuine external verification
 mechanism (a tool, a code executor, unit tests). A parallel line shows LLM
-self-verifiers are unreliable detectors --- high false-positive rates
-\citep{valmeekam2023selfcritique} and a self-enhancement bias, with cross-family
-verification outperforming self-verification; \citet{kamoi2024whencan} survey the conditions
-under which self-correction works at all and find the successful cases depend on an external
-signal the model does not supply itself. The boundary is not undisputed:
+self-verifiers are unreliable detectors: high false-positive rates
+\citep{valmeekam2023selfcritique}, and LLM judges favour their own outputs --- a
+\emph{self-enhancement} bias \citep{zheng2023judging}. Neither source compares a verifier of one
+model family against self-verification, so whether that separation holds is
+open; \citet{kamoi2024whencan} survey the conditions
+under which self-correction works at all and find that no prior work succeeds with feedback the
+model prompts from \emph{itself}, outside tasks exceptionally suited to it --- the cases that do
+work rely on reliable external feedback, or on large-scale fine-tuning. The boundary is not
+undisputed:
 \citet{liu2024intrinsic} report intrinsic self-correction working under narrow conditions
 (zero temperature, prompts free of leading bias), which is a condition our worker does not
 satisfy --- it samples at the provider's default temperature (\S\ref{sec:setup}), and that
@@ -227,8 +232,12 @@ rather than a prompt that learned to detect better.
 \label{sec:setup}
 
 \paragraph{Models.} Worker \texttt{gpt-4.1-mini} (output cap 320 tokens). No reflection model is
-involved in any measurement in this paper, since no run optimizes anything; the reflection field
-recorded in each run's metadata is the CLI default and is inert.
+involved in any measurement \emph{we make} here, since none of our configurations optimizes
+anything; the reflection field recorded in each run's metadata is the CLI default and is inert.
+Two figures in \S\ref{sec:detector} are exceptions, and are quoted rather than measured: the
+held-out movements loop-level optimization buys over prompt-only optimization with a substituted
+critic, which come from the companion runs of Paper~I and were produced under
+\texttt{gpt-5.6-terra} reflection, as were the runs they are compared against.
 
 \paragraph{What is held constant across the curve.} Runs 3, 4 and 7--10 issue byte-identical
 first-draft prompts on $54$ calls each --- three seeds of ten held-out and eight training tasks
@@ -259,7 +268,7 @@ cancels and the differences are two independent draws (\S\ref{sec:curverepeat}).
 the fix side is held at one refine round and only the critique changes. A \emph{perfect} oracle
 checker (ringed) gives the \emph{lowest} of the three scores --- $0.088$, or $3.04\sigma$, below a
 mere text-statistics tool, which is the gap the mechanistic claim rests on. Against the
-near-random intrinsic critique the same oracle is $0.028$ better, $0.98\sigma$, which we do not
+near-random intrinsic critique the same oracle is $0.028$ lower, $0.98\sigma$, which we do not
 claim. \emph{Lower group:} the checker is now fixed perfect and the fix side varies instead, where
 the same budget buys real gains. Read together: what a checker cannot buy is the repair. The rule
 at the foot is $\sigma(\dd)$ to scale, so any gap in the panel can be sized by eye; it is the
@@ -282,9 +291,69 @@ poor offers no reliable signal to sharpen.
 Strikingly, the \emph{same} critique fed the measurement tool (run~4) becomes a
 reliable detector (precision $1.00$, F$_1 = 0.83$) --- which is precisely why the
 tool lifts the baseline. This
-matches the documented unreliability of LLM self-verification --- high
-false-positive rates, self-enhancement bias, cross-family verifiers beating
-self-verification \citep{valmeekam2023selfcritique,huang2023cannot}.
+matches the documented unreliability of LLM self-verification: high
+false-positive rates \citep{valmeekam2023selfcritique} and the self-enhancement bias of LLM
+judges \citep{zheng2023judging}.
+
+\paragraph{Does a critic from another family detect better? Measured, on three lineages.}
+The self-enhancement result invites an obvious remedy --- have a \emph{different} model judge the
+draft --- and an earlier version of this paragraph asserted that cross-family verification
+outperforms self-verification, on citations that turn out to contain no such finding
+(Appendix~\ref{sec:corrections}). We withdrew the claim rather than re-source it, and then
+measured it. Scoring the same seed critique as a detector on the same held-out split, with only
+the model behind the critique step changed:
+
+\begin{center}\small
+\begin{tabular}{lcccccc}
+\toprule
+critique model & relation to worker & $n$ & \texttt{PASS} rate & tp & fp & F$_1$ \\
+\midrule
+\texttt{gpt-4.1-mini} & \emph{is} the worker & $50$ & $0.26$ & $1$ & $12$ & $0.11$ \\
+\texttt{gpt-5.6-luna} & same vendor, other lineage & $30$ & $0.13$ & $4$ & $0$ & $\mathbf{1.00}$ \\
+\texttt{llama-3.3-70b} & other vendor, other lineage & $80$ & $\mathbf{0.00}$ & $0$ & $0$ & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+The ordering is not the one the remedy predicts. Moving off the worker's own weights does help:
+the same-vendor, other-lineage critic is the only accurate detector of the three. Moving
+\emph{further}, to another vendor entirely, does not help more --- it produces a critic that
+\textbf{never emits \texttt{PASS} at all}, missing all nine already-correct drafts in $80$ events.
+That is not a better verifier but a degenerate one, behaviourally identical to \emph{always
+refine}, and it is the same degeneracy the companion paper on the silent no-op reports the
+optimizer converging to. Two caveats hold the reading down: the perfect row rests on $30$ events
+with four positives, and every row scores the \emph{seed} rubric, so this measures the model
+behind the critique and not an evolved one. The three base rates are comparable: the
+already-correct drafts number $5/50$, $4/30$ and $9/80$.
+
+The result matters here because of what it did \emph{not} buy, and seeing that requires keeping
+two axes apart. On the \emph{unoptimized} loop, paired on the thirty held-out tasks these runs
+share, changing only the critique moves the seed genome's held-out score by $+0.060$ for run~4's
+measurement tool, $+0.048$ for the accurate cross-lineage critic, $+0.007$ for the degenerate
+cross-provider one and $-0.028$ for the perfect oracle, against a noise floor of
+$\sigma(\dd) = 0.029$. On the \emph{optimization} axis, evolving the loop on top of either
+substituted critic buys nothing over evolving the prompt alone: $+0.008$ and $+0.014$, both inside
+that same noise. Those two are the only optimizer-derived figures in this paper, quoted from
+Paper~I rather than measured here (\S\ref{sec:setup}). The two axes answer different questions,
+and a number from one is not a comparison for a number from the other.
+
+The first list is the one to resist over-reading. Swapping the critique model is \emph{not} a
+detection-only intervention: a different model rewrites the critique's \emph{prose} as well as its
+verdict, so it changes what the refine step is told at the same time as what the verdict is --- the
+same two-at-once change the measurement tool makes, and the two land within $0.012$ of each other.
+The released critiques make the prose difference plain: across every complaint each of them
+recorded, the cross-lineage critic answers in a median of $53$ characters (``\emph{add one word;
+all other rules pass}'') and the cross-provider one in $210$. So this run
+cannot say which half bought the $+0.048$, and we do not claim it does; separating them --- one
+model's verdict carried by another model's prose --- is the experiment this result calls for.
+
+What the list does establish is a negative and an ordering. The negative: a judge from somewhere
+else is not, on its own, the remedy --- pushed to a second vendor it yields a critic that never
+passes, and the seed loop is no better for it. The ordering: the one intervention here that changes
+the verdict and \emph{nothing} else is the oracle, whose judgement is perfect and whose feedback
+carries nothing to act on, and it is the worst of the four. Detection quality alone does not order
+these loops, which is the claim this section makes and the model swaps do not disturb.
 
 \paragraph{$\mathrm{F}_1$ is the wrong statistic, and the $p_0$ calibration shows it.}
 Three task distributions differing only in which
@@ -542,8 +611,8 @@ re-score one fixed genome on one fixed held-out set. That estimate was measured 
 genome at $R{=}1$ in the $p_0$ family, and $\sigma$ is a property of the genome: measured per
 genome across that family it spans $5.9\times$, from $0.0064$ to $0.0376$. Three of the ratios
 above have a margin against the $2\sigma$ line smaller than that spread: the
-tool lift needs only $5\%$ more $\sigma$ to fall under it, actionability $11\%$ and the refine
-budget $14\%$. A borrowed denominator was therefore deciding them, so we bought the direct
+tool lift needs only $3\%$ more $\sigma$ to fall under it, actionability $9\%$ and the refine
+budget $12\%$. A borrowed denominator was therefore deciding them, so we bought the direct
 measurement: each of the six curve rows re-scored $K=5$ times on the thirty held-out tasks they
 share, $90$ runs under a priced bound of \$$2.98$. As with the $p_0$ replicates this is arm~A on a fixed genome with no
 re-optimization, each replicate carries a salt so record-mode dedup cannot serve one cached draw
@@ -676,12 +745,108 @@ executable-code benchmarks, not of our harness. (The instruction-following runs,
 execute model code, do replay bit-for-bit.) We normalize the string-level non-determinism we
 can: object ids, addresses, and temp paths in failure messages.
 
+\subsection{Cross-worker corroboration: a second worker, twenty seeds, and a prediction we lost}
+\label{sec:secondworker}
+
+Every result above runs one worker, \texttt{gpt-4.1-mini}, which \S\ref{sec:threats} lists as this
+paper's broadest limitation. We bought the detector comparison again on an unrelated worker:
+\texttt{llama-3.3-70b-versatile} served by a different provider, at \textbf{twenty} seeds rather
+than three, every cell \texttt{-{}-arms A} so no optimizer runs anywhere. Nothing here extends a
+curve above --- a different worker is a different baseline --- so this is corroboration on an
+independent stack, reported as such.
+
+We pre-registered the prediction that \emph{the perfect oracle would not be the best cell}, since
+that is what the ordering above says. \textbf{We lost that prediction}, and the way we lost it is
+the finding. The oracle is the best cell, by $+0.0437$ at $t = 5.80$ over twenty seeds and
+$t = 4.70$ over the two hundred held-out tasks paired individually. Taken at face value it reverses
+this paper's headline on a second worker.
+
+It does not, and the reason is a confound we had documented one section earlier without applying it
+to our own registration. \textbf{The oracle cell is not a detection-only intervention}: it replaces
+the verdict with the true metric \emph{and} the repair text with the metric's feedback. It moves
+both halves of the loop at once, exactly as a critique-model swap does
+(\S\ref{sec:detector}). Holding the gate perfect and varying only the repair text --- the same
+\texttt{lo}/\texttt{mid}/\texttt{hi} ladder as \S\ref{sec:fixside} --- separates them:
+
+\begin{center}\small
+\begin{tabular}{lcccr}
+\toprule
+critique & held-out & $\dd$ vs.\ intrinsic & s.e. & $t$ \\
+\midrule
+intrinsic, its own prose (\texttt{PASS} on $1\%$) & 0.7895 & --- & --- & --- \\
+same-lineage smaller critic (8B) & 0.7860 & $-0.0035$ & 0.0093 & $-0.38$ \\
+cross-lineage critic (\texttt{qwen3.6-27b}) & 0.7973 & $+0.0077$ & 0.0095 & $+0.82$ \\
+\midrule
+perfect oracle, \texttt{lo} prose (verdict only) & 0.8005 & $+0.0110$ & 0.0080 & $+1.37$ \\
+perfect oracle, \texttt{mid} prose & 0.8333 & $+0.0437$ & 0.0075 & $\mathbf{+5.80}$ \\
+perfect oracle, \texttt{hi} prose (measured edits) & 0.8688 & $+0.0792$ & 0.0082 & $\mathbf{+9.68}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+A \emph{perfect verdict carrying no actionable text buys $+0.0110$ at $t = 1.37$}, which is
+nothing. The cell that beat the intrinsic loop is the oracle at the \texttt{mid} prose level, so
+that is the cell to decompose: of its $+0.0437$, the perfect verdict contributes $+0.0110$ and the
+repair text $+0.0327$ ($t = 4.94$), a $25/75$ split. Pushing the prose one level further, to
+measured edits, moves it to $+0.0682$ at $t = 9.40$ --- but \texttt{hi} was never the cell under
+test, so we decompose \texttt{mid} and report \texttt{hi} as the ladder's next rung rather than
+as the effect. Either way the ordering is the same: the verdict is the minority share and never
+reaches significance, and the repair text is the majority share at every level of it.
+
+The decomposition itself was \emph{not} pre-registered --- only the prediction it rescues was ---
+so we label it exploratory, and note that it reuses the \texttt{lo}/\texttt{mid}/\texttt{hi}
+ladder this paper already runs rather than a contrast invented after seeing the result.
+
+That is this paper's thesis, measured on a worker it was not derived from. We do \emph{not} claim
+it is measured more strongly here: the original's $t = 8.08$ is over five replicates of a fixed
+thirty-task set and carries no task-draw term, while these $t$ values are over twenty seeds
+redrawing an of\-ten-overlapping pool, so the two are not a like-for-like comparison and this
+paper elsewhere refuses exactly that kind of pooling. The apparent reversal was the bundle, and the
+lesson we take from losing the prediction is that a registered prediction about a cell that moves
+two things tests neither.
+
+The detector substitutions agree with \S\ref{sec:detector} as well. Neither a smaller
+same-lineage critic ($-0.0035$) nor a genuinely cross-lineage one ($+0.0077$) moves the loop.
+\texttt{qwen3.6-27b} is the third lineage we have put in the critique seat after
+\texttt{gpt-5.6-luna} and \texttt{llama-3.3-70b}, and it is the second to move nothing; the
+exception remains \texttt{gpt-5.6-luna}, whose $+0.048$ on the seed loop is real and, as
+\S\ref{sec:detector} says, unattributable between its verdict and its prose. One further observation belongs to the companion
+paper on the silent no-op: this worker's intrinsic critique emits \texttt{PASS} on $1\%$ of drafts
+and demands fixes on $178$ of the $181$ already-correct ones, a false-\emph{alarm} machine where
+\texttt{gpt-4.1-mini}'s was a false-\emph{pass} machine at precision $0.08$. Both are degenerate;
+neither is a usable detector.
+
+\paragraph{What this run cost us in confidence, and what it bought.} Two defects in our own
+instruments surfaced while buying these cells, and both are reported in the companion paper on
+the silent no-op as its defects~10 and~11: a \texttt{-{}-temperature} flag that reached the
+worker call and not the critique or verdict calls, and a pooled-$\sigma$ estimator that admitted
+a run from another worker as a replicate. The first was found here and fixed before these numbers
+were recorded; the second never reached a released value. We mention them in this section rather
+than only in that one because they were caught \emph{in} this experiment, and a reader entitled
+to weigh these results is entitled to know what the instrument was doing while they were taken.
+
+\paragraph{What this does not corroborate.} \emph{The raw cell ranking is inverted between the
+two workers}, and no decomposition makes that go away: on \texttt{gpt-4.1-mini} the oracle is the
+worst of the three critiques and here it is the best. What replicates is the
+detection-versus-repair \emph{attribution}, recovered by splitting a cell that moves two things;
+the ordering of the cells themselves does not. A reader who wants the ranking to travel should
+treat that as unsupported. The two workers also do not face the same difficulty. Under
+identical task generation this worker's first-draft pass rate is $p_0 = 0.095$ against
+\texttt{gpt-4.1-mini}'s $0.067$, but relaxing one constraint takes it to $0.905$ where the other
+reaches $0.267$, so the two stacks are not matched on the axis the companion paper's headline turns
+on. Twenty seeds is also not twenty independent task draws: the pool holds $64$ tasks and each seed
+draws $18$. We claim a replication of the detection-versus-repair ordering, not of any magnitude.
+
 \section{Threats to Validity}
 \label{sec:threats}
 
 \textbf{Power.} Runs 4--10 use $n{=}3$ seeds (run 3 uses 5). At $n{=}3$ an exact sign test cannot
-fall below $p=0.25$ even with unanimous seeds, so no seed-level interval in this paper is
-significant and we do not present one as such: the actionability effect,
+fall below $p=0.25$ even with unanimous seeds, so no seed-level interval \emph{on those runs} is
+significant and we do not present one as such. The exception is
+\S\ref{sec:secondworker}, whose cells carry $20$ seeds and do report significant seed-level
+$t$ values; that section is a corroboration on a different worker and none of the claims below
+rest on it. What follows concerns the $n{=}3$ runs: the actionability effect,
 $\dd(\text{hi}-\text{lo})=+0.063$ with interval $[+0.025,+0.090]$, rested on magnitude rather than
 replication when first reported --- $+0.063$ at $2.18\sigma$ of the cross-run floor.
 What carries every claim now is the five-replicate
@@ -791,7 +956,7 @@ Earlier drafts of this work published claims it now withdraws. Reporting guidanc
 preregistered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Ten} entries follow. The
+collected here and the body text states only the surviving claim. \textbf{Twelve} entries follow. The
 series' other two papers carry the entries bearing on their own claims, and the full
 register across all three, with the superseded values themselves, is in the released repository.
 
@@ -830,9 +995,12 @@ register across all three, with the superseded values themselves, is in the rele
     $K{=}5$ standard error divided the \emph{population} sd of the five draws by $\sqrt{5}$, and
     the result was then compared against critical values from $t(4)$ --- a distribution that
     exists \emph{because} the denominator is $n-1$. The unbiased estimator inflates $\sigma$ by
-    $\sqrt{5/4} = 1.118$, so every $t$ in earlier drafts was $10.6\%$ too large. The same
-    mistake in the cross-run estimate, over $30$ paired tasks, moved $\sigma(\dd)$ from $0.0291$
-    to $0.0286$ and every ratio scaled by it by $1.7\%$. Both are corrected throughout. The
+    $\sqrt{5/4} = 1.118$, so every $t$ in earlier drafts exceeded its corrected value by
+    $11.8\%$ (equivalently, correcting one lowers it by $10.6\%$; we state both because the
+    bare phrase ``too large by'' does not say which value is the denominator). The same
+    mistake in the cross-run estimate, over $30$ paired tasks, \emph{understated} $\sigma(\dd)$
+    as $0.0286$ where the unbiased estimator gives $0.0291$, and scaled every ratio built on it
+    by $1.7\%$. Both are corrected throughout, and $0.0291$ is the value divided by here. The
     error was invisible to \texttt{verify\_paper\_claims.py}, which checks the paper against the
     same function that computed it, so paper and checker were wrong together --- the same
     shared-error blind spot as the borrowed $\sigma$, one level down.
@@ -860,6 +1028,33 @@ register across all three, with the superseded values themselves, is in the rele
     paper uses its first three ($0.7767$). The dagger footnote to Table~\ref{tab:curve} says so
     explicitly, so the paper contradicted itself across two pages with both numbers individually
     correct. The lift is $+0.060$.
+  \item \textbf{Two results attributed to citations that contain neither.} At two sites this paper
+    credited \citet{valmeekam2023selfcritique} --- once jointly with
+    \citet{huang2023cannot} --- with ``a self-enhancement bias'' and ``cross-family verifiers
+    beating self-verification''. Only the false-positive-rate clause is in either. Valmeekam et
+    al.\ use GPT-4 as both generator and verifier against an external \emph{sound} verifier, so
+    there is no cross-family LLM comparison, and the phrase ``self-enhancement bias'' does not
+    occur; Huang et al.\ study \emph{intrinsic} self-correction and compare no verifier families at
+    all. The term originates with \citet{zheng2023judging}, absent from our bibliography until now,
+    and is cited for that clause alone. The cross-family clause is \textbf{withdrawn rather than
+    re-sourced}. The over-attribution mattered here more than in Paper~I: \S\ref{sec:detector} used
+    it to say our detector findings ``match'' documented prior results, and one of the two things it
+    claimed to match was not documented anywhere we had read. Found by three of the twelve cold
+    reviewers, all in condition~B.
+  \item \textbf{Three fragility margins left behind by the estimator correction.}
+    \S\ref{sec:curverepeat} said the borrowed-denominator ratios needed ``only $5\%$ more $\sigma$''
+    ($11\%$, $14\%$) to fall under the $2\sigma$ line. Those three reproduce only under the
+    \emph{population}-sd $\sigma = 0.0286$ the correction retired; under the $\sigma = 0.0291$ this
+    paper actually divides by, the margins are $3\%$, $9\%$ and $12\%$. This is the second site
+    ``corrected throughout'' missed, after the $1.12$ of Paper~I's register, and the two share a
+    signature: a value derived from $\sigma$ rather than printed as $\sigma$, so a search for the
+    denominator does not find it. Like the first, it erred in the flattering direction --- it made
+    the ratios look \emph{less} fragile than they are, which is the opposite of what the paragraph
+    argues, so the corrected figures strengthen the case for having bought the direct measurement.
+    All three are now derived from the same \texttt{\_curve\_gap} ratios the surrounding prose
+    pins, so a future change of denominator moves them with everything else. Found independently by
+    two of the twelve cold reviewers, reported as separate candidates because they quoted different
+    halves of the sentence.
 \end{enumerate}
 
 \end{document}

@@ -59,8 +59,9 @@ SUPERSEDED = frozenset(
         "C2 four-arm corrected harness",
     }
 )
-EXPECTED_RUNS = 13  # corrected harness: two C1 conditions, C2b, p0 L2/L3, the three rows of
-# the split-size sweep, and the five bought rows of the budget sweep (D4).
+EXPECTED_RUNS = 14  # corrected harness: two C1 conditions, C2b, p0 L2/L3, the three rows of
+# the split-size sweep, the five bought rows of the budget sweep (D4), and the cross-provider
+# critic run (D3), which is the only run in the set with a critique on a second vendor.
 # C2 is NOT among them. Auditing it found that two reflection completions came back empty and
 # GEPA accepted one as the verify gene, so `genome_from_candidate` now refuses blank gene text
 # -- and that guard makes C2's own cassette unreplayable, because replaying it re-serves the
@@ -102,6 +103,42 @@ RUNS = [
             "all",
             "--reflection-model",
             "openai/gpt-5.6-luna",
+        ],
+    ),
+    # D3: the cross-provider critic. Registered here because all three papers quote it, and a
+    # run whose numbers carry an argument while sitting outside the reproducibility guarantee is
+    # the gap this script exists to close. It is also the only run whose critique surface is a
+    # second vendor, so it is the one row that would notice a replay silently falling back to the
+    # worker's provider -- the exact defect the `critic` cassette namespace was added to catch.
+    (
+        "D3 cross-provider critic",
+        "docs/validation-study-xprovider.json",
+        f"{CASSETTES}/study-xprovider.json",
+        [
+            "--task-set",
+            "multi-hard",
+            "--arms",
+            "ABCD",
+            "--seeds",
+            "0,1,2,3,4,5,6,7",
+            "--n-train",
+            "8",
+            "--n-heldout",
+            "10",
+            "--max-metric-calls",
+            "20",
+            "--reflection-calls",
+            "4",
+            "--loop-max-retries",
+            "1",
+            "--module-selector",
+            "all",
+            "--worker-model",
+            "openai/gpt-4.1-mini",
+            "--critique-model",
+            "groq/llama-3.3-70b-versatile",
+            "--reflection-model",
+            "openai/gpt-5.6-terra",
         ],
     ),
     # The p0 sweep: the runs that turned the null into a conditional result. L1 IS the
