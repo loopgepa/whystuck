@@ -708,3 +708,89 @@ def test_exec_feedback_is_ignored_on_the_oracle_path():
         exec_feedback=lambda draft, task: "EXEC_SHOULD_NOT_APPEAR",
     )(_two_gene("g", "v"), _nw_task())
     assert not any("EXEC_SHOULD_NOT_APPEAR" in c for c in calls)
+
+
+# --- verdict/prose splice lever (E1): one model gates, another writes the repair -
+
+
+def _splice_task(verdict, prose, **kw):
+    """Run the no-whitespace task with the verdict and prose on different models.
+
+    Returns (worker_prompts, verdict_prompts, prose_prompts).
+    """
+    worker_calls, verdict_calls, prose_calls = [], [], []
+
+    def worker(p):
+        worker_calls.append(p)
+        return "x x"  # always fails no_whitespace
+
+    def verdict_model(p):
+        verdict_calls.append(p)
+        return verdict
+
+    def prose_model(p):
+        prose_calls.append(p)
+        return prose
+
+    make_self_refine_run_task(
+        worker,
+        ifbench_score,
+        max_retries=1,
+        critique_complete=prose_model,
+        verdict_complete=verdict_model,
+        **kw,
+    )(_two_gene("write it", "CHECK"), _nw_task())
+    return worker_calls, verdict_calls, prose_calls
+
+
+def test_verdict_comes_from_the_verdict_model_and_prose_from_the_critique_model():
+    # The whole point of the splice: the PASS/FAIL bit and the repair text come from
+    # DIFFERENT models on the SAME prompt. If either leaks from the other, the
+    # experiment measures nothing -- it is the two-at-once confound it exists to break.
+    worker, verdicts, prose = _splice_task("FAIL: something", "PROSE_MARKER")
+    assert verdicts and prose, "both models must be called"
+    assert verdicts == prose, "both must see the identical critique prompt"
+    refine = [c for c in worker if "# Problems to fix" in c]
+    assert refine, "a FAIL verdict must trigger refinement"
+    assert all("PROSE_MARKER" in c for c in refine), "refine must be told the PROSE model's text"
+
+
+def test_the_verdict_model_alone_decides_whether_to_refine():
+    # Prose says PASS, verdict says FAIL -> the loop must refine. The reverse of the
+    # unspliced loop, where the prose text IS the gate.
+    worker, _, _ = _splice_task("FAIL: fix it", "PASS")
+    assert [c for c in worker if "# Problems to fix" in c], "the verdict model gates, not the prose"
+
+    # Verdict says PASS, prose complains -> the loop must stop.
+    worker, _, _ = _splice_task("PASS", "FAIL: still broken")
+    assert not [c for c in worker if "# Problems to fix" in c], "a PASS verdict must stop the loop"
+
+
+def test_a_passing_prose_source_falls_back_to_the_generic_revise_directive():
+    # When the verdict says FAIL but the prose model said PASS, the prose model has
+    # no repair text to give. Handing refine the literal token "PASS" as guidance
+    # would be nonsense, so it gets the same generic directive the oracle path uses
+    # when no feedback function is supplied. That case is not a defect of the splice:
+    # it is the prose source having nothing to say, made explicit.
+    worker, _, _ = _splice_task("FAIL: fix it", "PASS")
+    refine = [c for c in worker if "# Problems to fix" in c]
+    assert refine and all("not all requirements are satisfied" in c for c in refine)
+    assert not any("# Problems to fix\nPASS" in c for c in refine)
+
+
+def test_the_splice_is_off_by_default_so_every_recorded_run_replays_unchanged():
+    # verdict_complete=None must leave the loop byte-identical: the critique text is
+    # both gate and prose, exactly as every cassette in the release recorded it.
+    calls = []
+
+    def worker(p):
+        calls.append(p)
+        return "x x"
+
+    def critic(p):
+        return "PASS"
+
+    make_self_refine_run_task(worker, ifbench_score, max_retries=1, critique_complete=critic)(
+        _two_gene("write it", "CHECK"), _nw_task()
+    )
+    assert not [c for c in calls if "# Problems to fix" in c], "critique PASS must still gate"

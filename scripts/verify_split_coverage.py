@@ -96,6 +96,11 @@ SUPERSEDED: dict[str, str] = {
     "0.0149": "0.0166",  # R=1 mean
     "0.0162": "0.0181",  # R=3 mean
     "0.35": "0.38",
+    # Missing until 2026-08-08, and it passed for months by coincidence: the papers stopped
+    # printing the ratio 0.44 when the sd behind it went 0.0127 -> 0.0142 (recorded above), but
+    # `p{0.44\\textwidth}` in tab:closability's column spec still matched the scan, so a real
+    # superseded value looked present. Stripping LaTeX geometry from the scan exposed it.
+    "0.44": "0.49",
     "0.48": "0.53",
     "0.51": "0.56",
     # --- tab:curvepairs, the six paired standard errors and t statistics ------------------------
@@ -137,6 +142,19 @@ SPELLED_CLAIMS: tuple[str, ...] = (
     "sixteen",
 )
 
+#: A spelled count that a later run legitimately changed, mapped to what replaced it. The same
+#: two-directional discipline as `SUPERSEDED`: the old word must be gone, the new one present.
+#: Deleting the entry from `SPELLED_CLAIMS` would have been one edit and would have left no record
+#: that the count ever moved, which is the practice these papers exist to argue against.
+#:
+#: Both entries are the cross-provider critic run (D3) being added to the reproducibility registry
+#: on 2026-08-06. It was bought after the study, replays bit-for-bit, and is quoted by all three
+#: papers, so leaving it outside the registry would have understated the guarantee.
+SPELLED_SUPERSEDED: dict[str, str] = {
+    "thirteen": "fourteen",  # runs that replay from cassette
+    "twenty-five": "twenty-six",  # runs the registry covers at all
+}
+
 
 def _strip_comments(tex: str) -> str:
     """Drop LaTeX comments so a number mentioned only in a source comment is not counted as a claim.
@@ -160,8 +178,19 @@ def _strip_comments(tex: str) -> str:
     return "\n".join(out)
 
 
+#: LaTeX geometry, not data. A `p{0.02\\textwidth}` column width tokenises exactly like a claim,
+#: so widening a column to fit a two-digit row label reads as a quantity vanishing from the papers.
+#: Stripped from BOTH sides of the comparison, so the pre- and post-split sets stay symmetric --
+#: stripping one side only would turn every layout numeral into a permanent false loss.
+_TYPOGRAPHY = re.compile(
+    r"\\(?:setlength|addtolength|hspace|vspace|tabcolsep|arraystretch|includegraphics)\b[^\n]*"
+    r"|[pmb]\{[\d.]+\\(?:text|line|column)width\}"
+    r"|width=[\d.]+\\(?:text|line|column)width"
+)
+
+
 def quantities(tex: str) -> set[str]:
-    return set(_QUANTITY.findall(_strip_comments(tex)))
+    return set(_QUANTITY.findall(_TYPOGRAPHY.sub(" ", _strip_comments(tex))))
 
 
 def frozen_tex() -> str:
@@ -230,7 +259,25 @@ def stale_drops() -> list[str]:
 
 def missing_spelled() -> list[str]:
     after = paper_sources.all_tex()
-    return [w for w in SPELLED_CLAIMS if w not in after]
+    return [w for w in SPELLED_CLAIMS if w not in after and w not in SPELLED_SUPERSEDED]
+
+
+def broken_spelled_supersessions() -> list[str]:
+    """Spelled supersessions that do not hold, in either direction.
+
+    The old count must be gone -- otherwise the papers still make the superseded claim somewhere
+    and the entry is licensing a contradiction rather than recording a correction. The new one
+    must be present -- otherwise the quantity was deleted under cover of a replacement, which is
+    the failure this whole script exists to catch.
+    """
+    after = paper_sources.all_tex()
+    broken = []
+    for old, new in sorted(SPELLED_SUPERSEDED.items()):
+        if old in after:
+            broken.append(f"{old!r}: still stated in the papers, so it was not superseded")
+        if new not in after:
+            broken.append(f"{old!r} -> {new!r}: the replacement is nowhere in the papers")
+    return broken
 
 
 def coverage_by_paper() -> dict[str, int]:
@@ -247,7 +294,7 @@ def main() -> int:  # pragma: no cover - CLI convenience
     before = quantities(frozen_tex())
     after = quantities(paper_sources.all_tex())
     gone = missing_quantities()
-    stale = stale_drops() + broken_supersessions()
+    stale = stale_drops() + broken_supersessions() + broken_spelled_supersessions()
     unspelled = missing_spelled()
 
     print(f"pre-split quantities:      {len(before)}")
@@ -281,7 +328,8 @@ def main() -> int:  # pragma: no cover - CLI convenience
         f"\nOK: every one of the {len(before)} pre-split quantities is carried by at least one "
         f"paper,\nor is one of the {len(SUPERSEDED)} values a corrected statistic replaced "
         f"(each replacement verified present),\nor is one of the {len(DELIBERATE_DROPS)} listed "
-        f"deliberate drops."
+        f"deliberate drops.\nThe {len(SPELLED_CLAIMS)} spelled-out counts are checked separately: "
+        f"{len(SPELLED_SUPERSEDED)} have been superseded on the record, the rest are present."
     )
     return 0
 

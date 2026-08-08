@@ -52,13 +52,13 @@ exists. Measured from the built PDFs and each paper's own source:
 
 | | paper | pages | tables | figures | distinct citations | package |
 |---|---|---|---|---|---|---|
-| I | `p1-conditional-lever` | 36 | 11 | 3 | 24 | 107 kB |
-| II | `p2-repair-not-detection` | 19 | 4 | 2 | 17 | 85 kB |
-| III | `p3-silent-no-op` | 17 | 4 | 1 | 13 | 83 kB |
+| I | `p1-conditional-lever` | 37 | 11 | 3 | 24 | 107 kB |
+| II | `p2-repair-not-detection` | 21 | 4 | 2 | 17 | 85 kB |
+| III | `p3-silent-no-op` | 19 | 4 | 1 | 13 | 83 kB |
 
 Each package is far under arXiv's 50 MB limit. Abstract lengths against the 1920-character metadata
-field: **1912**, 1846, 1786. Paper I has 8 characters of headroom, so any edit to its abstract has to
-be re-checked by `make_arxiv_package.py` rather than assumed to fit.
+field: **1912**, **1895**, 1788. Paper I has 8 characters of headroom and Paper II has 25, so any
+edit to either abstract has to be re-checked by `make_arxiv_package.py` rather than assumed to fit.
 
 The three are cross-referenced as a series, so they should be posted together or in the order I, II,
 III; each abstract names its companions.

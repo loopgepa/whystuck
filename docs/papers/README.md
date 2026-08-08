@@ -5,9 +5,9 @@ questions, rest on different experiments, and are useful to different readers.
 
 | | paper | asks | uses the optimizer? | pages |
 |---|---|---|---|---|
-| **I** | [`p1-conditional-lever/`](p1-conditional-lever/) — *Whether Optimizing the Loop Beats Optimizing the Prompt Depends on One Number* | Does evolving a self-refine loop's verifier beat evolving its generation prompt? | yes, it is the subject | 36 |
-| **II** | [`p2-repair-not-detection/`](p2-repair-not-detection/) — *What a Checker Cannot Buy Is the Repair* | Where is the loop's own ceiling: detection or repair? | **no** — every run is `--arms A` on a fixed genome | 19 |
-| **III** | [`p3-silent-no-op/`](p3-silent-no-op/) — *Your Loop Optimizer Is Not Optimizing Your Loop* | How can a componentized treatment silently not apply, and what catches it? | yes, as the thing that failed | 17 |
+| **I** | [`p1-conditional-lever/`](p1-conditional-lever/) — *Whether Optimizing the Loop Beats Optimizing the Prompt Depends on One Number* | Does evolving a self-refine loop's verifier beat evolving its generation prompt? | yes, it is the subject | 37 |
+| **II** | [`p2-repair-not-detection/`](p2-repair-not-detection/) — *What a Checker Cannot Buy Is the Repair* | Where is the loop's own ceiling: detection or repair? | **no** — every run of ours is `--arms A` on a fixed genome | 21 |
+| **III** | [`p3-silent-no-op/`](p3-silent-no-op/) — *Your Loop Optimizer Is Not Optimizing Your Loop* | How can a componentized treatment silently not apply, and what catches it? | yes, as the thing that failed | 19 |
 
 ## Which paper answers your question
 
@@ -74,7 +74,7 @@ does not, something regressed.
 ## Verifying
 
 ```bash
-python scripts/verify_paper_claims.py     # 843 checks against the released artifacts, $0
+python scripts/verify_paper_claims.py     # 948 checks against the released artifacts, $0
 python scripts/verify_split_coverage.py   # the split lost no quantity, $0
 python -m pytest tests/test_split_coverage.py tests/test_paper_prose_coverage.py \
     tests/test_paper_table_coverage.py tests/test_paper_sigma_coverage.py tests/test_figures.py
@@ -123,11 +123,15 @@ derived from the replay.
 
 ## Shared across all three
 
-- **One artifact release.** 33 study runs, 225 replicate scorings, 257 cassettes.
+- **One artifact release.** 43 study runs, 225 replicate scorings, 267 cassettes. **34 of the runs
+  are the papers' own**; the other **9** are a second-worker replication line bought on a Groq
+  credential (`validation-study-groq-*`, `validation-study-splice-*`). No paper cites that line
+  yet, and it deliberately runs a different worker, so none of its numbers extends a released
+  curve. It is committed rather than held back because its cassettes are what make it checkable.
 - **One corrections register, split three ways.** Each paper carries the withdrawals bearing on its
   own claims and states its own count; the full register across all three is the union. Every count
   is derived from the entries actually listed, because it drifted twice during the study.
-- **One reproducibility guarantee.** 13 corrected-harness runs replay bit-for-bit from cassette at
+- **One reproducibility guarantee.** 14 corrected-harness runs replay bit-for-bit from cassette at
   `$0`; 12 earlier runs are labelled superseded and reported as skipped, never silently verified.
 
 ## Status

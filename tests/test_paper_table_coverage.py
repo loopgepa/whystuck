@@ -36,6 +36,13 @@ PAPERS_TEX = paper_sources.all_tex
 #: could read. The lookbehind keeps LaTeX subscripts ($L_1$) from reading as data.
 _NUM = re.compile(r"[+-]?\d+\.\d+|(?<![_\d])[+-]?\d+(?!\d)")
 
+#: A model identifier is a name, not a measurement, and `llama-3.3-70b` tokenizes as -3.3 and 70
+#: while `gpt-4.1-mini` tokenizes as -4.1. Demanding an artifact for those would push a tester
+#: toward exempting real values to silence the noise, which is the one way this guard can be made
+#: worse. Every `\texttt` span in the three papers holds an identifier, a path or quoted verbatim
+#: output -- no data number lives inside one -- so the whole span is dropped before tokenizing.
+_VERBATIM = re.compile(r"\\texttt\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}")
+
 #: value -> why no artifact can produce it. Keys are rounded to 4dp, matching the comparison.
 _EXEMPT: dict[float, str] = {
     160.0: (
@@ -67,7 +74,7 @@ def _tables() -> list[tuple[str, list[float]]]:
         if end < 0:
             continue
         label = re.search(r"\\label\{(tab:[^}]+)\}", tex[end : end + 2500])
-        body = tex[tex.find(r"\midrule", m.end()) : end]
+        body = _VERBATIM.sub(" ", tex[tex.find(r"\midrule", m.end()) : end])
         out.append(
             (
                 label.group(1) if label else "(unlabelled)",
@@ -75,6 +82,22 @@ def _tables() -> list[tuple[str, list[float]]]:
             )
         )
     return out
+
+
+def test_no_exemption_has_gone_dead():
+    """Every entry in `_EXEMPT` must still name a number some table prints.
+
+    A dead exemption is a silent widening: it stops describing the paper and starts standing
+    ready to excuse whatever value happens to collide with it next. This caught nothing when
+    written -- it exists so that narrowing the tokenizer, which is how `_VERBATIM` arrived,
+    cannot orphan an entry without saying so.
+    """
+    printed = {n for _, nums in _tables() for n in nums}
+    dead = sorted(value for value in _EXEMPT if value not in printed)
+    assert not dead, (
+        f"these exemptions no longer match any printed table number: {dead}. Delete them, or "
+        "find out why the value stopped being printed."
+    )
 
 
 def _checked_values() -> set[float]:

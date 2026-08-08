@@ -36,7 +36,7 @@ component it describes, so the reflector never saw a verdict the critique had re
 component selector that rewrites one component per proposal, so under a matched \emph{total} budget
 the two-gene arm searched the shared productive gene half as hard as the one-gene arm --- a confound
 that flatters the one-gene arm exactly where an effect was being sought. Auditing the fix, and then
-auditing the audit, found the same class of error six more times, including a ground-truth signal
+auditing the audit, found the same class of error eight more times, including a ground-truth signal
 that was silently constant and an empty completion accepted as a gene, which deletes a step of the
 loop and thereby \emph{improves} the training score. We propose a reporting minimum that costs one
 integer per component --- whether the optimizer's output differs from the seed --- and would have
@@ -83,16 +83,22 @@ consistency as evidence of a tight null. It was evidence of the opposite. Our co
     component-agnostic reflective dataset, and a one-component-per-proposal selector under a
     matched total budget. Neither is exotic, neither is visible in a held-out score, and the second
     biases the comparison in the direction that manufactures a null.
-  \item \textbf{Six more instances of the same class} (\S\ref{sec:defect},
-    Table~\ref{tab:defects}), found by auditing the fix and then auditing the audit. Three
+  \item \textbf{Eight more instances of the same class} (\S\ref{sec:defect},
+    Table~\ref{tab:defects}), found by auditing the fix and then auditing the audit. Five
     generalize past our code: a ground-truth signal that is silently \emph{constant} still trains;
     a replay advertised as strict can swallow a cache miss and exit $0$ while reporting a different
-    number; and an empty LLM completion accepted as a gene deletes that step of the loop, which
-    \emph{improves} the training score whenever the deleted step is worse than useless.
+    number; an empty LLM completion accepted as a gene deletes that step of the loop, which
+    \emph{improves} the training score whenever the deleted step is worse than useless; a sampling
+    flag reached one of three sampled surfaces while the metadata recorded it as set; and a pooled
+    variance estimator screened every dimension of its regime except which model produced the
+    draws.
   \item \textbf{A reporting minimum} (\S\ref{sec:fix}): per component, whether the optimizer's
     output differs from the seed. One integer. Plus a presentation rule for the comparison itself
     --- label a difference between two optimized arms with how many seeds \emph{each} arm accepted
     on --- which catches the mirror-image defect where the \emph{comparator} is the starved arm.
+    A later pre-registered run shows that flagging the zero case is not enough and the contrast
+    has to be \emph{stratified} by that count: neither of its arms was starved, yet $74\%$ of its
+    positive $\dd$ came from the two seeds where the treatment never applied.
   \item \textbf{A positive control, as a requirement rather than a nicety}
     (\S\ref{sec:posctrl}). An instrument never shown to register a signal cannot be trusted to
     report its absence. On a landscape where the verify gene is the only path to a passing answer,
@@ -244,18 +250,39 @@ and searched the shared productive gene half as hard as the one-gene arm. A matc
 \emph{total} budget is not a matched budget per component, and the confound flatters the
 one-gene arm exactly where we were looking for an effect.
 
-Auditing the fix, and then auditing the audit, found the same class of error six more times.
-Table~\ref{tab:defects} is the record. Three are worth the reader's attention because they
-generalize past our code: a ground-truth signal that is silently \emph{constant} still trains
+Auditing the fix, and then auditing the audit, found the same class of error eight more times.
+Table~\ref{tab:defects} is the record. Five are worth the reader's attention because they
+generalize past our code, three from the audits and two from the tooling below: a ground-truth signal that is silently \emph{constant} still trains
 (defect~6); a replay advertised as strict can swallow a cache miss and exit zero while
 reporting a different number (defect~7); and an empty LLM completion accepted as a gene
 deletes that step of the loop, which \emph{improves} the training score whenever the step it
 deletes is worse than useless (defect~8).
 
+Two arrived later than the rest and are worth attention for a different reason: they were found in
+the \emph{instruments}, not in the optimizer, while replicating the companion detector result on a
+second worker. A \texttt{-{}-temperature} flag was applied where the sampling was assembled for the
+worker call and nowhere else, so the critique and verdict calls kept the provider default while the
+run's metadata recorded a pinned temperature (defect~10). It surfaced only because two calls issued
+on one byte-identical prompt at temperature zero returned different text thirty times out of thirty,
+which is not a thing anyone checks unless the answer is supposed to be identical. And the estimator
+that supplies this paper's $\sigma$ screened candidate replicates on task set, seed count, levers,
+exclusions and gene overrides --- every dimension except the \emph{worker} that executed them --- so a run on
+another model, dropped into the release directory for an unrelated experiment, enrolled as an
+eleventh replicate (defect~11). Nothing reached a reader: the claim checker failed on the same
+commit and the screen went in before publication, so what follows is a counterfactual, measured
+by re-running the checker with the screen removed. It moves $48$ of this paper's published
+values, and only $29$ of the $48$ move far enough to breach the tolerance that guards them; the
+remaining $19$ shift with nothing objecting. That is the part worth keeping, and it is the same
+threshold problem as defect~6 wearing different clothes: a contamination does not have to be
+large to be real, only larger than whatever is watching. Both are the paper's own
+subject arriving in its tooling: a setting reported as applied that a surface never received, and a
+guard reporting agreement about a dimension it never looked at. Neither needed an optimizer to
+happen, and each was caught by a machine rather than by reading.
+
 \begin{table}[h]
 \centering
 \small
-\begin{tabular}{p{0.02\textwidth}p{0.36\textwidth}p{0.50\textwidth}}
+\begin{tabular}{p{0.035\textwidth}p{0.35\textwidth}p{0.49\textwidth}}
 \toprule
 \# & Defect & Why held-out scores could not reveal it \\
 \midrule
@@ -280,14 +307,23 @@ deletes is worse than useless (defect~8).
 9 & The \emph{comparator} arm accepted nothing on $3/3$ seeds, so $\dd(D-B)$ was really
   $\dd(D-\mathrm{seed})$ & Both arms report a genome and a score; a genome equal to the seed is
   indistinguishable from one the search chose to keep \\
+10 & \texttt{-{}-temperature} reached only the \emph{worker} call; critique and verdict kept
+  sampling at the provider default & The metadata records the pinned temperature, so the artifact
+  asserts a setting two of its three sampled surfaces never got \\
+11 & The pooled-$\sigma$ estimator screened task set, seeds, levers, exclusions and gene
+  overrides --- but not the \emph{worker}, so a run enrolled from another model & A pooled sd moves
+  smoothly when a foreign draw joins: every ratio on it shifts a little and none looks wrong \\
 \bottomrule
 \end{tabular}
-\caption{Nine ways a componentized-optimization result can be confidently wrong while every
+\caption{Eleven ways a componentized-optimization result can be confidently wrong while every
 number it prints looks reasonable. Defects 1--3 invalidated the original headline; 4--5 change
 what the intervals may be read to mean; 6--8 were caught before spending on the re-run, 8 only
 after it had already corrupted one seed of a paid run; 9 was caught after spending, in a later
 sweep, and is defect~1's mirror image --- the same one-sided contrast with the starvation on the
-control side instead of the treatment side.}
+control side instead of the treatment side. 10--11 arrived while replicating on a second worker
+and are this paper's own thesis turned on its instruments: a switch reported as set that a
+surface never received, and a guard reporting agreement about a dimension it never compared.
+Neither is specific to an optimizer. 11 was caught before publication; removing its screen again moves $48$ of this paper's values, only $29$ of them past the tolerance that guards them.}
 \label{tab:defects}
 \end{table}
 
@@ -358,17 +394,58 @@ have one, arm~B in eleven runs and arm~D in ten, and only four are flat on both 
 seed. Those fifteen are reported as uninformative rather than as evidence
 of no effect --- but for the narrower reason that their acceptance record is missing, not that it
 is zero.
+
+\paragraph{The rule, applied prospectively, and found too coarse.}
+Everything above is retrospective: a rule derived from runs that had already gone wrong. A later
+pre-registered run applied it in advance, and the result argues that the rule as stated is not
+enough. The run is a cross-provider critic study (Paper~I, D3) over \textbf{eight} seeds; its
+acceptance census reads arm~B on \textbf{five} seeds and arm~D on \textbf{three}, cross-checked
+against the seed-score identity. Neither count is zero, so \emph{the flag does not fire}. Its
+$\dd(D-B) = +0.014$ would be read as a small positive.
+Stratifying the same contrast by which arms actually accepted says something else:
+
+\begin{center}\small
+\begin{tabular}{lccr}
+\toprule
+stratum & seeds & mean $\dd(D-B)$ & share of the total \\
+\midrule
+arm~D accepted --- the treatment applied & 3 & $+0.0100$ & $26\%$ \\
+\textbf{only arm~B accepted, D returned the seed} & \textbf{2} & $\mathbf{+0.0425}$ & $\mathbf{74\%}$ \\
+neither accepted & 3 & $+0.0000$ & $0\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+\textbf{Three quarters of the positive contrast comes from two seeds on which the treatment did not
+apply and the comparator damaged itself}, losing $0.065$ and $0.020$ against its own seed genome.
+On those seeds $\dd(D-B)$ is $\dd(\mathrm{seed}-B)$: the same one-sided contrast as
+Evidence~9, at the level of the individual seed rather than the run, and therefore invisible to a
+flag that asks only whether an arm's count is zero. Restricted to the seeds where arm~D accepted
+something, $\dd = +0.0100$ on $n = 3$.
+
+So the presentation rule needs strengthening, and this is the form we now propose: \textbf{report
+the per-arm acceptance count per seed, and stratify the contrast by it} --- not merely flag the
+case where a count is zero. A binary flag catches the run that never searched; it does not catch
+the run that searched on some seeds and not others, which is the ordinary case once a budget is
+tight enough to matter. The cost is the same one integer item~(iv) already demands, printed per
+seed instead of per run.
+
 Item~(iv) is the part we would urge on others: \textbf{a
-componentized-optimization result should report, per component, whether the optimizer's output
-actually differs from the seed.} Had we printed that one number, this study would have been a
-different study fifteen runs earlier. Because
+componentized-optimization result should report, per component and per seed, whether the
+optimizer's output actually differs from the seed.} Had we printed that one number, this study
+would have been a different study fifteen runs earlier --- and, as the stratification above
+shows, per component alone would have been enough to catch the retraction but not the
+cross-provider run. Because
 the corrected wiring changes every reflection prompt, it changes every cassette key, so the
 released cassettes cannot replay under it; they are retained and labelled superseded. The
 first runs recorded under the corrected harness are two hand-written-gene conditions reported in
 the companion paper on the conditional lever; they replay bit-for-bit, so \texttt{verify\_reproducibility.py}
-verifies thirteen runs rather than reporting that nothing has been proven --- those two
-conditions, the four-arm re-run, the two new $p_0$ levels, and the bought rows of the split and
-budget sweeps.
+verifies fourteen runs rather than reporting that nothing has been proven --- those two
+conditions, the four-arm re-run, the two new $p_0$ levels, the bought rows of the split and
+budget sweeps, and the cross-provider critic run, which is the only one of them whose critique
+was served by a second vendor and therefore the only one that would notice a replay quietly
+falling back to the worker's provider.
 The \emph{discarded first attempt} at the four-arm re-run is not among them,
 for a reason worth recording: the blank-gene guard that attempt motivated (Evidence~8) makes
 its own cassette unreplayable, since a replay re-serves the empty completion and the guard
@@ -623,7 +700,7 @@ needs its own screen, and the cheap one there is a \texttt{PASS} rate of zero. N
 distinguish a semantically meaningful rewrite from a cosmetic one; it is a floor on evidence, not
 a measure of treatment strength.
 
-\textbf{The nine defects are not independent findings.} They were found by auditing one codebase
+\textbf{The eleven defects are not independent findings.} They were found by auditing one codebase
 in sequence, so their number reflects how long we looked rather than a density. What we claim is
 the \emph{class}, and that its members share a signature: the failure leaves the reported number
 plausible.
@@ -648,7 +725,7 @@ reported held-out scores identical on every seed, and we read the consistency as
 ordinary wiring choices sufficed --- a reflective dataset built without regard to which component
 it describes, and a selector that rewrites one component per proposal under a matched total budget,
 which is a library default and biases the comparison toward the one-gene arm. Auditing the fix
-found six more errors of the same class, whose common signature is that the number they produce
+found eight more errors of the same class, whose common signature is that the number they produce
 looks reasonable.
 
 The generalizable output is one integer: \textbf{per component, whether the optimizer's output

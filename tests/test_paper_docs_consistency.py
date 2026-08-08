@@ -52,9 +52,12 @@ TEST_COUNT_RE = re.compile(r"\*\*([\d,]+) tests\*\*")
 NO_REENTER = "WHYSTUCK_SKIP_COLLECT_GUARD"
 
 #: SUBMISSION.md's abstract-length sentence: "Abstract lengths against the 1920-character metadata
-#: field: **1912**, 1846, 1786." The limit and all three lengths, in paper order.
+#: field: **1912**, **1895**, 1786." The limit and all three lengths, in paper order. Bold marks
+#: the ones close enough to the limit that the document calls out their headroom, so which entries
+#: carry it changes as abstracts grow; the guard reads the numbers and ignores the emphasis.
 ABSTRACT_LENGTHS_RE = re.compile(
-    r"Abstract lengths against the (\d+)-character metadata\s+field: \*\*(\d+)\*\*, (\d+), (\d+)"
+    r"Abstract lengths against the (\d+)-character metadata\s+field: "
+    r"\*{0,2}(\d+)\*{0,2}, \*{0,2}(\d+)\*{0,2}, \*{0,2}(\d+)\*{0,2}"
 )
 
 
@@ -204,3 +207,34 @@ def test_submission_no_longer_states_monolith_size_as_current() -> None:
     text = (PAPERS / "SUBMISSION.md").read_text(encoding="utf-8")
     assert "45 pages: 38 of main text" not in text
     assert "pre-split monolith" in text, "the withdrawal should stay on the record"
+
+
+#: docs/papers/README.md's one-line summary of the artifact release: "34 study runs, 225 replicate
+#: scorings, 258 cassettes."
+RELEASE_SIZE_RE = re.compile(r"(\d+) study runs, (\d+) replicate scorings, (\d+) cassettes")
+
+
+def test_advertised_release_size_equals_what_is_committed() -> None:
+    """The three release counts, against the files actually in the tree.
+
+    Found stale by exactly one on each of two of the three: the cross-provider run added a study
+    JSON and a cassette, and the sentence kept saying 33 and 257. That is the drift direction a
+    reader cannot detect -- an artifact release that quietly grows while its advertisement stands
+    still -- and it is the same restated-statistic class as the page and check counts above, so it
+    gets the same treatment rather than a note.
+
+    Runs are counted from `docs/`, cassettes from the fixture tree, so the two sides of the
+    sentence come from different places and cannot be made to agree by editing one of them.
+    """
+    text = (PAPERS / "README.md").read_text(encoding="utf-8")
+    m = RELEASE_SIZE_RE.search(text)
+    assert m, (
+        "docs/papers/README.md no longer states the release size in the form this guard reads. "
+        "Restore the sentence or update RELEASE_SIZE_RE -- do not delete the guard."
+    )
+    runs, replicates, cassettes = (int(g) for g in m.groups())
+    cassette_dir = ROOT / "tests/fixtures/cassettes"
+
+    assert runs == len(list((ROOT / "docs").glob("validation-study*.json")))
+    assert replicates == len(list((cassette_dir / "repeat").glob("*.json")))
+    assert cassettes == len(list(cassette_dir.rglob("*.json")))

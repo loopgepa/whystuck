@@ -1,0 +1,797 @@
+{
+  "meta": {
+    "dataset": "multi-constraint-hard (IFEval-style)",
+    "n_train": 8,
+    "n_heldout": 10,
+    "worker_model": "groq/llama-3.3-70b-versatile",
+    "reflection_model": "groq/llama-3.3-70b-versatile",
+    "max_metric_calls": 20,
+    "module_selector": "all",
+    "seeds_independent": true,
+    "detector_reflection": true,
+    "reflection_calls": 4,
+    "task_set": "multi-hard",
+    "temperature": null,
+    "sample": null,
+    "exclude_constraint": [
+      "exact_word_count"
+    ],
+    "loop_max_retries": 1,
+    "plan_gene": false,
+    "feedback_stats": false,
+    "critique_model": null,
+    "verdict_model": null,
+    "oracle_critique": false,
+    "feedback_level": "mid",
+    "exec_feedback": false,
+    "actuator": false,
+    "gene_overrides": {},
+    "worker_max_output_tokens": 320,
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "estimated_usd": 0.57648,
+    "generated": "2026-08-08T10:33:50.750303+00:00"
+  },
+  "runs": [
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 1.0,
+        "opt_heldout": 1.0,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-36": 1.0,
+          "mc-51": 1.0,
+          "mc-21": 1.0,
+          "mc-4": 1.0,
+          "mc-43": 1.0,
+          "mc-52": 1.0,
+          "mc-9": 1.0,
+          "mc-38": 1.0,
+          "mc-34": 1.0,
+          "mc-58": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-36": 1.0,
+          "mc-51": 1.0,
+          "mc-21": 1.0,
+          "mc-4": 1.0,
+          "mc-43": 1.0,
+          "mc-52": 1.0,
+          "mc-9": 1.0,
+          "mc-38": 1.0,
+          "mc-34": 1.0,
+          "mc-58": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.9550000000000001,
+        "opt_heldout": 0.9550000000000001,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-34": 1.0,
+          "mc-35": 1.0,
+          "mc-46": 1.0,
+          "mc-20": 0.8,
+          "mc-61": 1.0,
+          "mc-37": 1.0,
+          "mc-14": 1.0,
+          "mc-63": 0.75,
+          "mc-53": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-34": 1.0,
+          "mc-35": 1.0,
+          "mc-46": 1.0,
+          "mc-20": 0.8,
+          "mc-61": 1.0,
+          "mc-37": 1.0,
+          "mc-14": 1.0,
+          "mc-63": 0.75,
+          "mc-53": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.9800000000000001,
+        "opt_heldout": 0.9800000000000001,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-29": 1.0,
+          "mc-46": 1.0,
+          "mc-1": 1.0,
+          "mc-48": 1.0,
+          "mc-17": 1.0,
+          "mc-41": 1.0,
+          "mc-28": 1.0,
+          "mc-34": 0.8,
+          "mc-60": 1.0,
+          "mc-32": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-29": 1.0,
+          "mc-46": 1.0,
+          "mc-1": 1.0,
+          "mc-48": 1.0,
+          "mc-17": 1.0,
+          "mc-41": 1.0,
+          "mc-28": 1.0,
+          "mc-34": 0.8,
+          "mc-60": 1.0,
+          "mc-32": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.9800000000000001,
+        "opt_heldout": 0.9800000000000001,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-10": 1.0,
+          "mc-53": 1.0,
+          "mc-51": 1.0,
+          "mc-24": 1.0,
+          "mc-33": 1.0,
+          "mc-39": 0.8,
+          "mc-47": 1.0,
+          "mc-9": 1.0,
+          "mc-25": 1.0,
+          "mc-44": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-10": 1.0,
+          "mc-53": 1.0,
+          "mc-51": 1.0,
+          "mc-24": 1.0,
+          "mc-33": 1.0,
+          "mc-39": 0.8,
+          "mc-47": 1.0,
+          "mc-9": 1.0,
+          "mc-25": 1.0,
+          "mc-44": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 1.0,
+        "opt_heldout": 1.0,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-45": 1.0,
+          "mc-51": 1.0,
+          "mc-62": 1.0,
+          "mc-10": 1.0,
+          "mc-12": 1.0,
+          "mc-44": 1.0,
+          "mc-41": 1.0,
+          "mc-54": 1.0,
+          "mc-13": 1.0,
+          "mc-16": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-45": 1.0,
+          "mc-51": 1.0,
+          "mc-62": 1.0,
+          "mc-10": 1.0,
+          "mc-12": 1.0,
+          "mc-44": 1.0,
+          "mc-41": 1.0,
+          "mc-54": 1.0,
+          "mc-13": 1.0,
+          "mc-16": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.96,
+        "opt_heldout": 0.96,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-42": 0.8,
+          "mc-11": 1.0,
+          "mc-17": 1.0,
+          "mc-26": 1.0,
+          "mc-13": 0.8,
+          "mc-0": 1.0,
+          "mc-43": 1.0,
+          "mc-36": 1.0,
+          "mc-6": 1.0,
+          "mc-34": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 0.8,
+          "mc-11": 1.0,
+          "mc-17": 1.0,
+          "mc-26": 1.0,
+          "mc-13": 0.8,
+          "mc-0": 1.0,
+          "mc-43": 1.0,
+          "mc-36": 1.0,
+          "mc-6": 1.0,
+          "mc-34": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.975,
+        "opt_heldout": 0.975,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-51": 1.0,
+          "mc-39": 1.0,
+          "mc-21": 1.0,
+          "mc-27": 1.0,
+          "mc-5": 1.0,
+          "mc-60": 0.75,
+          "mc-35": 1.0,
+          "mc-36": 1.0,
+          "mc-45": 1.0,
+          "mc-6": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-51": 1.0,
+          "mc-39": 1.0,
+          "mc-21": 1.0,
+          "mc-27": 1.0,
+          "mc-5": 1.0,
+          "mc-60": 0.75,
+          "mc-35": 1.0,
+          "mc-36": 1.0,
+          "mc-45": 1.0,
+          "mc-6": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.925,
+        "opt_heldout": 0.925,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-38": 1.0,
+          "mc-59": 1.0,
+          "mc-62": 1.0,
+          "mc-39": 1.0,
+          "mc-14": 1.0,
+          "mc-7": 0.75,
+          "mc-36": 1.0,
+          "mc-51": 0.5,
+          "mc-46": 1.0,
+          "mc-35": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-38": 1.0,
+          "mc-59": 1.0,
+          "mc-62": 1.0,
+          "mc-39": 1.0,
+          "mc-14": 1.0,
+          "mc-7": 0.75,
+          "mc-36": 1.0,
+          "mc-51": 0.5,
+          "mc-46": 1.0,
+          "mc-35": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.975,
+        "opt_heldout": 0.975,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-26": 1.0,
+          "mc-33": 1.0,
+          "mc-17": 0.75,
+          "mc-47": 1.0,
+          "mc-14": 1.0,
+          "mc-42": 1.0,
+          "mc-55": 1.0,
+          "mc-49": 1.0,
+          "mc-58": 1.0,
+          "mc-36": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-26": 1.0,
+          "mc-33": 1.0,
+          "mc-17": 0.75,
+          "mc-47": 1.0,
+          "mc-14": 1.0,
+          "mc-42": 1.0,
+          "mc-55": 1.0,
+          "mc-49": 1.0,
+          "mc-58": 1.0,
+          "mc-36": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.9800000000000001,
+        "opt_heldout": 0.9800000000000001,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-46": 0.8,
+          "mc-4": 1.0,
+          "mc-53": 1.0,
+          "mc-63": 1.0,
+          "mc-7": 1.0,
+          "mc-3": 1.0,
+          "mc-15": 1.0,
+          "mc-40": 1.0,
+          "mc-56": 1.0,
+          "mc-27": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-46": 0.8,
+          "mc-4": 1.0,
+          "mc-53": 1.0,
+          "mc-63": 1.0,
+          "mc-7": 1.0,
+          "mc-3": 1.0,
+          "mc-15": 1.0,
+          "mc-40": 1.0,
+          "mc-56": 1.0,
+          "mc-27": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.95,
+        "opt_heldout": 0.95,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-11": 1.0,
+          "mc-57": 1.0,
+          "mc-16": 1.0,
+          "mc-18": 1.0,
+          "mc-54": 1.0,
+          "mc-24": 1.0,
+          "mc-22": 1.0,
+          "mc-38": 0.75,
+          "mc-8": 0.75,
+          "mc-26": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-11": 1.0,
+          "mc-57": 1.0,
+          "mc-16": 1.0,
+          "mc-18": 1.0,
+          "mc-54": 1.0,
+          "mc-24": 1.0,
+          "mc-22": 1.0,
+          "mc-38": 0.75,
+          "mc-8": 0.75,
+          "mc-26": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 1.0,
+        "opt_heldout": 1.0,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-4": 1.0,
+          "mc-33": 1.0,
+          "mc-0": 1.0,
+          "mc-10": 1.0,
+          "mc-44": 1.0,
+          "mc-25": 1.0,
+          "mc-38": 1.0,
+          "mc-2": 1.0,
+          "mc-34": 1.0,
+          "mc-5": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-4": 1.0,
+          "mc-33": 1.0,
+          "mc-0": 1.0,
+          "mc-10": 1.0,
+          "mc-44": 1.0,
+          "mc-25": 1.0,
+          "mc-38": 1.0,
+          "mc-2": 1.0,
+          "mc-34": 1.0,
+          "mc-5": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.96,
+        "opt_heldout": 0.96,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-48": 1.0,
+          "mc-32": 1.0,
+          "mc-4": 1.0,
+          "mc-12": 1.0,
+          "mc-3": 1.0,
+          "mc-13": 1.0,
+          "mc-21": 0.8,
+          "mc-10": 1.0,
+          "mc-54": 1.0,
+          "mc-28": 0.8
+        },
+        "opt_heldout_by_task": {
+          "mc-48": 1.0,
+          "mc-32": 1.0,
+          "mc-4": 1.0,
+          "mc-12": 1.0,
+          "mc-3": 1.0,
+          "mc-13": 1.0,
+          "mc-21": 0.8,
+          "mc-10": 1.0,
+          "mc-54": 1.0,
+          "mc-28": 0.8
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.9349999999999999,
+        "opt_heldout": 0.9349999999999999,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-28": 0.75,
+          "mc-16": 1.0,
+          "mc-5": 0.8,
+          "mc-60": 1.0,
+          "mc-17": 1.0,
+          "mc-0": 1.0,
+          "mc-38": 1.0,
+          "mc-48": 1.0,
+          "mc-27": 1.0,
+          "mc-1": 0.8
+        },
+        "opt_heldout_by_task": {
+          "mc-28": 0.75,
+          "mc-16": 1.0,
+          "mc-5": 0.8,
+          "mc-60": 1.0,
+          "mc-17": 1.0,
+          "mc-0": 1.0,
+          "mc-38": 1.0,
+          "mc-48": 1.0,
+          "mc-27": 1.0,
+          "mc-1": 0.8
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.9800000000000001,
+        "opt_heldout": 0.9800000000000001,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-34": 1.0,
+          "mc-56": 1.0,
+          "mc-10": 1.0,
+          "mc-9": 1.0,
+          "mc-58": 1.0,
+          "mc-23": 1.0,
+          "mc-50": 1.0,
+          "mc-22": 1.0,
+          "mc-20": 0.8,
+          "mc-14": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-34": 1.0,
+          "mc-56": 1.0,
+          "mc-10": 1.0,
+          "mc-9": 1.0,
+          "mc-58": 1.0,
+          "mc-23": 1.0,
+          "mc-50": 1.0,
+          "mc-22": 1.0,
+          "mc-20": 0.8,
+          "mc-14": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 1.0,
+        "opt_heldout": 1.0,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-63": 1.0,
+          "mc-32": 1.0,
+          "mc-19": 1.0,
+          "mc-39": 1.0,
+          "mc-20": 1.0,
+          "mc-40": 1.0,
+          "mc-13": 1.0,
+          "mc-14": 1.0,
+          "mc-54": 1.0,
+          "mc-16": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-63": 1.0,
+          "mc-32": 1.0,
+          "mc-19": 1.0,
+          "mc-39": 1.0,
+          "mc-20": 1.0,
+          "mc-40": 1.0,
+          "mc-13": 1.0,
+          "mc-14": 1.0,
+          "mc-54": 1.0,
+          "mc-16": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.9800000000000001,
+        "opt_heldout": 0.9800000000000001,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-33": 1.0,
+          "mc-29": 0.8,
+          "mc-36": 1.0,
+          "mc-43": 1.0,
+          "mc-39": 1.0,
+          "mc-51": 1.0,
+          "mc-48": 1.0,
+          "mc-1": 1.0,
+          "mc-52": 1.0,
+          "mc-38": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-33": 1.0,
+          "mc-29": 0.8,
+          "mc-36": 1.0,
+          "mc-43": 1.0,
+          "mc-39": 1.0,
+          "mc-51": 1.0,
+          "mc-48": 1.0,
+          "mc-1": 1.0,
+          "mc-52": 1.0,
+          "mc-38": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 1.0,
+        "opt_heldout": 1.0,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-21": 1.0,
+          "mc-13": 1.0,
+          "mc-54": 1.0,
+          "mc-9": 1.0,
+          "mc-12": 1.0,
+          "mc-63": 1.0,
+          "mc-3": 1.0,
+          "mc-35": 1.0,
+          "mc-8": 1.0,
+          "mc-25": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-21": 1.0,
+          "mc-13": 1.0,
+          "mc-54": 1.0,
+          "mc-9": 1.0,
+          "mc-12": 1.0,
+          "mc-63": 1.0,
+          "mc-3": 1.0,
+          "mc-35": 1.0,
+          "mc-8": 1.0,
+          "mc-25": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.95,
+        "opt_heldout": 0.95,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-13": 1.0,
+          "mc-54": 1.0,
+          "mc-38": 1.0,
+          "mc-32": 0.75,
+          "mc-36": 1.0,
+          "mc-63": 1.0,
+          "mc-48": 1.0,
+          "mc-41": 1.0,
+          "mc-10": 0.75,
+          "mc-58": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-13": 1.0,
+          "mc-54": 1.0,
+          "mc-38": 1.0,
+          "mc-32": 0.75,
+          "mc-36": 1.0,
+          "mc-63": 1.0,
+          "mc-48": 1.0,
+          "mc-41": 1.0,
+          "mc-10": 0.75,
+          "mc-58": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.96,
+        "opt_heldout": 0.96,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-24": 1.0,
+          "mc-29": 1.0,
+          "mc-34": 1.0,
+          "mc-59": 1.0,
+          "mc-62": 1.0,
+          "mc-4": 0.8,
+          "mc-61": 1.0,
+          "mc-36": 0.8,
+          "mc-1": 1.0,
+          "mc-19": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-24": 1.0,
+          "mc-29": 1.0,
+          "mc-34": 1.0,
+          "mc-59": 1.0,
+          "mc-62": 1.0,
+          "mc-4": 0.8,
+          "mc-61": 1.0,
+          "mc-36": 0.8,
+          "mc-1": 1.0,
+          "mc-19": 1.0
+        }
+      }
+    }
+  ]
+}

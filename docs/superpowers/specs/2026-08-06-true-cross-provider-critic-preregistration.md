@@ -262,3 +262,87 @@ the `worker` surface, so a run recorded with `--critique-model` missed every cri
 a broken replay. All 80 of this run's first-critique events vanished that way on the first attempt.
 `separate_critic=True` wires the `critic` namespace. The earlier registration predicted this
 extension would be needed and it was.
+
+## Post-hoc, NOT registered — the seed-genome axis, and what it forces
+
+Everything below was computed after the run landed, while checking that the three papers'
+neighbouring paragraphs still fitted. It is reported as post-hoc analysis and no verdict rests on
+it. It is here because it changed how Paper II states its own result.
+
+The closing argument of Paper II's detector section had been comparing run 4's `+0.060` against
+this run's `+0.014` and run 6's `+0.008` as though the three were the same quantity. **They are
+not.** `+0.060` is a *seed-genome* between-run gap — no optimizer anywhere — while the other two
+are Δ(D−B) between *optimized* arms. Set side by side they read as "the tool bought four times what
+a model swap bought", which is not a comparison anyone made deliberately.
+
+Both substituted-critic runs turn out to be eligible for the curve's paired comparison: each
+carries all 54 of the byte-identical first-draft worker calls runs 3, 4 and 7–10 share, so their
+seed-genome scores pair with run 3's on the same thirty held-out tasks. Measured that way, over the
+three seeds the curve shares:
+
+| critique | seed-genome held-out gap vs run 3 | detector |
+|---|---|---|
+| run 4, measurement tool | **+0.060** | precision 1.00, F₁ 0.83 |
+| run 6, cross-lineage `gpt-5.6-luna` | **+0.048** | F₁ 1.000 (n=30) |
+| D3, cross-provider `llama-3.3-70b` | **+0.007** | never passes (n=80) |
+| run 7, perfect oracle | **−0.028** | perfect by construction |
+
+against σ(Δ) = 0.029. The cross-lineage critic lifts the *unoptimized* loop by nearly as much as
+the measurement tool, which is not what the section previously implied, and is a fact the paper now
+states.
+
+It does not overturn the thesis, and the reason is a confound the run cannot resolve: **a model
+swap is not a detection-only intervention.** A different model rewrites the critique's prose as
+well as its verdict. The released `critic` cassettes make that visible — the cross-lineage critic
+answers in a median of 53 characters ("add one word; all other rules pass."), the cross-provider one
+in 210, usually with a rewritten answer attached. A proxy for "does the critique quote a measured
+quantity" (contains a digit) does **not** separate them, 73% against 82%, so the prose difference is
+in form rather than in whether a number is present. The only clean verdict-only intervention we have
+is the oracle, and it is the worst of the four.
+
+**What this forces: E1, the verdict/prose splice.** Two `--arms A` cells at the curve's three seeds,
+carrying one model's verdict with another model's prose:
+
+- (a) cross-lineage **verdict**, intrinsic **prose**
+- (b) intrinsic **verdict**, cross-lineage **prose**
+
+If (b) carries the `+0.048` and (a) does not, the lift is feedback and Paper II's thesis gains its
+cleanest confirmation on the one data point that currently looks like a counterexample. If (a)
+carries it, the thesis needs qualifying, and it needs qualifying *before* submission rather than
+after. Cost is small — the c1 conditions show a single-seed `--arms A` cell at ≈ $0.10 — but it is
+**not free**: the refine step's prompt changes, so its worker calls are new. It also needs a harness
+change, since no flag today separates the verdict from the prose of one critique step.
+
+**Remaining from the registered list, unchanged:** the same comparison with an evolved rather than
+a seed critique, and a second cross-provider family to show the degeneracy is not one model's quirk.
+
+## Actual Groq spend, measured 2026-08-08
+
+The `estimated_usd` of `$6.5198` recorded in the run's meta is the pre-flight **ceiling for the
+whole run**, dominated by the OpenAI worker and the `gpt-5.6-terra` reflection. It says nothing
+about the borrowed Groq credential's share, which is the only figure that matters for repaying it.
+
+Measured by replaying D3 offline with the `critic` wrap instrumented (prompts are stored as
+hashes, so input tokens are not readable from the cassette; replay reconstructs each prompt
+byte-for-byte, which is why the replay matches at all):
+
+| quantity | value |
+|---|---|
+| billed critic calls | **347** (unique prompts; equals the cassette's critic-entry count) |
+| input tokens | 95 937 |
+| output tokens | 22 193 |
+| input cost, at $0.59/10⁶ | $0.0566 |
+| output cost, at $0.79/10⁶ | $0.0175 |
+| **total** | **≈ $0.074** |
+
+1124 critic calls fire during a replay but only 347 are distinct; during the original recording a
+repeated prompt is served from the cassette and never billed, so 347 is the billed count.
+
+Counted with `cl100k_base`, which Llama 3.3's 128k tiktoken-style BPE extends but does not equal.
+A chars/4 estimate gives $0.084, so the honest range is **$0.07–0.08**. On-demand tier: the probe
+response records `service_tier: on_demand`, so neither the batch nor the prompt-caching 50%
+discount applies. A failed-and-retried call would have been billed without leaving a cassette
+entry, so this is a floor; the run log shows no retries.
+
+An earlier estimate in conversation put this at ≈ $0.26. That was scaled off the run's dollar
+bound and is **superseded** by the count above.

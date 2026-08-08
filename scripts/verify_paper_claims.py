@@ -43,7 +43,7 @@ import re
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
-from statistics import mean, pstdev
+from statistics import mean, pstdev, stdev
 
 DOCS = "docs"
 
@@ -377,6 +377,8 @@ _WORD_NUM = {
     "twenty-two": 22,
     "twenty-four": 24,
     "twenty-five": 25,
+    "twenty-six": 26,
+    "two hundred": 200,
 }
 
 
@@ -438,7 +440,14 @@ _CURVE_RUNS = {
 _CURVE_SHARED_SEEDS = 3
 
 
-def _shared_first_draft_calls() -> int:
+def _worker_keys(slug: str) -> set[str]:
+    """The worker-surface cassette keys of one study, i.e. its first-draft prompts."""
+    entries = json.loads(Path(f"tests/fixtures/cassettes/study-{slug}.json").read_text())["entries"]
+    return {k for k, v in entries.items() if v.get("name") == "worker"}
+
+
+@cache
+def _curve_shared_worker_keys() -> frozenset[str]:
     """Worker calls common to every run of the curve. Should be 3 x (10 heldout + 8 train).
 
     This is the licence for omitting a task-draw term from the between-run comparisons: if the
@@ -446,16 +455,34 @@ def _shared_first_draft_calls() -> int:
     edit breaks it, the paired standard errors in sec:threats become anti-conservative, so it is
     checked rather than remembered.
     """
-    from pathlib import Path
-
     shared: set[str] | None = None
     for slug in _CURVE_RUNS.values():
-        entries = json.loads(Path(f"tests/fixtures/cassettes/study-{slug}.json").read_text())[
-            "entries"
-        ]
-        keys = {k for k, v in entries.items() if v.get("name") == "worker"}
+        keys = _worker_keys(slug)
         shared = keys if shared is None else (shared & keys)
-    return len(shared or ())
+    return frozenset(shared or ())
+
+
+def _shared_first_draft_calls() -> int:
+    return len(_curve_shared_worker_keys())
+
+
+def _critique_swap_gap(slug: str) -> float:
+    """Seed-genome held-out gap against run 3, on the three seeds the curve's runs share.
+
+    The substituted-critic runs are not members of the curve, so their eligibility for the same
+    paired comparison is asserted here rather than assumed: they must carry every one of the
+    curve's byte-identical first-draft calls. Without that the difference would carry a
+    task-draw term and the pairing would be fiction -- the exact error `_curve_seed_mean`
+    records having been made once already, by pooling run 3's five seeds.
+    """
+    missing = _curve_shared_worker_keys() - _worker_keys(slug)
+    if missing:
+        raise AssertionError(
+            f"study-{slug} is missing {len(missing)} of the curve's first-draft calls, so its "
+            "seed-genome score is not paired with run 3's"
+        )
+    runs = _runs(f"validation-study-{slug}.json")[:_CURVE_SHARED_SEEDS]
+    return mean(r["A"]["seed_heldout"] for r in runs) - _curve_seed_mean("run3")
 
 
 def _curve_seed_mean(label: str, *, shared_seeds_only: bool = True) -> float:
@@ -1028,6 +1055,117 @@ def _c1_decomposition() -> tuple[float, float]:
     return strata.named, strata.residual
 
 
+@dataclass(frozen=True)
+class Stratum:
+    """One acceptance stratum of a two-optimized-arm contrast."""
+
+    seeds: int
+    mean_delta: float
+    share: float
+
+
+@cache
+def _xprovider_strata() -> dict[str, Stratum]:
+    """D3's Delta(D-B), split by which arms actually accepted a proposal.
+
+    The run that made Paper III's presentation rule prospective rather than retrospective. Both
+    arms accepted on at least one seed, so the rule's binary flag stays silent -- and the contrast
+    is still dominated by seeds where the treatment did not apply and the COMPARATOR damaged
+    itself. Deriving the split here is what lets the paper state that without typing a number.
+    """
+    doc = json.loads(Path(f"{DOCS}/validation-study-xprovider.json").read_text())
+    runs = doc["runs"]
+    buckets: dict[str, list[float]] = {"treated": [], "comparator only": [], "neither": []}
+    for run in runs:
+        delta = run["D"]["opt_heldout"] - run["B"]["opt_heldout"]
+        moved_d = bool(run["D"].get("genes_changed"))
+        moved_b = bool(run["B"].get("genes_changed"))
+        key = "treated" if moved_d else ("comparator only" if moved_b else "neither")
+        buckets[key].append(delta)
+    total = sum(d for v in buckets.values() for d in v)
+    if not total:
+        raise ValueError("xprovider Delta sums to zero; the share denominator is undefined")
+    return {
+        k: Stratum(len(v), mean(v) if v else 0.0, sum(v) / total) for k, v in buckets.items() if v
+    }
+
+
+@cache
+def _xprovider_acceptance() -> tuple[int, int, int]:
+    """(seeds, seeds arm B accepted on, seeds arm D accepted on) for D3.
+
+    Cross-checked two ways, because the one-way version is a defect this series shipped: an arm
+    that accepts nothing returns the seed genome and so reproduces its own seed score, and reading
+    `genes_changed` alone turned an ABSENT field into a measured zero (register entry, Paper III).
+    """
+    doc = json.loads(Path(f"{DOCS}/validation-study-xprovider.json").read_text())
+    runs = doc["runs"]
+    out = []
+    for arm in ("B", "D"):
+        by_field = sum(1 for r in runs if r[arm].get("genes_changed"))
+        by_score = sum(
+            1 for r in runs if abs(r[arm]["opt_heldout"] - r[arm]["seed_heldout"]) > 1e-9
+        )
+        if by_field != by_score:
+            raise ValueError(
+                f"D3 arm {arm}: genes_changed says {by_field} seeds accepted, the seed-score "
+                f"check says {by_score}. One of the two is wrong and the Delta cannot be read "
+                "until it is known which."
+            )
+        out.append(by_field)
+    return len(runs), out[0], out[1]
+
+
+@cache
+def _critique_median_length(slug: str) -> int:
+    """Median character length of one run's non-empty critique completions.
+
+    Read off the `critic` cassette namespace, which exists only for runs whose critique was
+    routed to a separate model -- the two substituted-critic runs. It is the evidence for the
+    paper's claim that a model swap changes the critique's PROSE and not only its verdict, and
+    that claim is load-bearing: without it the swap reads as a detection-only intervention and
+    its lift would contradict the section. An empty completion is the critic declining to
+    complain, which is a verdict rather than prose, so it is excluded.
+    """
+    entries = json.loads(Path(f"tests/fixtures/cassettes/study-{slug}.json").read_text())["entries"]
+    lengths = sorted(
+        len(v["output"])
+        for v in entries.values()
+        if v.get("name") == "critic" and v["output"].strip()
+    )
+    if not lengths:
+        raise AssertionError(f"study-{slug} has no non-empty critic completions to measure")
+    return lengths[len(lengths) // 2]
+
+
+@cache
+def _detector_row(cassette: str, seeds: tuple[int, ...], separate_critic: bool) -> dict[str, float]:
+    """Confusion counts for one critique acting as a detector, replayed from its cassette.
+
+    `separate_critic` is required for any run recorded with `--critique-model`: those route the
+    critique to its own cassette namespace, and replaying them against the worker surface silently
+    yields an empty event list rather than an error.
+    """
+    import sys
+    from pathlib import Path as _Path
+
+    sys.path.insert(0, str(_Path(__file__).resolve().parent))
+    import analyze_critique_detector as acd
+
+    events = acd.collect_events(
+        f"tests/fixtures/cassettes/{cassette}",
+        list(seeds),
+        loop_kw={},
+        n_heldout=10,
+        separate_critic=separate_critic,
+    )
+    if not events:
+        raise ValueError(f"{cassette}: replay produced no critique events; the surface is wrong")
+    stats = acd.detector_stats(events)
+    stats["pass_rate"] = (stats["tp"] + stats["fp"]) / stats["n"]
+    return stats
+
+
 def _reflection_models() -> tuple[set[str], set[str]]:
     """(reflection models on corrected-harness runs, on pre-correction runs).
 
@@ -1420,8 +1558,43 @@ def _checks() -> list[tuple[str, float, float, float]]:
     for f in glob.glob(f"{DOCS}/validation-study*.json"):
         with open(f, encoding="utf-8") as fh:
             est.append(json.load(fh)["meta"].get("estimated_usd", 0))
-    out.append(("runs over the $5 default", 5, 0, sum(1 for u in est if u > 5.0)))
+    over = [u for u in est if u > 5.0]
+    out.append(("runs over the $5 default", 5, 0, len(over)))
     out.append(("largest estimate", 11.76, 0.005, max(est)))
+    # The same two facts as the shared harness section states them. Both sides of the two checks
+    # above are this file's own: a literal typed here against the artifacts, with the paper read
+    # by neither. That is how the sentence came to say "four runs ... three distinct values" while
+    # the literal above was updated to five -- the guard and the prose drifted in opposite
+    # directions and nothing compared them. Every figure in the sentence is now scraped.
+    shared = _tex()
+    out.append(
+        (
+            "tex: runs over the $5 default",
+            _scrape_word(shared, r"(\w+) runs raised it explicitly"),
+            0,
+            len(over),
+        )
+    )
+    out.append(
+        (
+            "tex: distinct over-default estimates",
+            _scrape_word(shared, r"explicitly, at (\w+) distinct values"),
+            0,
+            len({round(u, 2) for u in over}),
+        )
+    )
+    printed_over = _scrape_all(
+        shared, r"distinct values \(\\\$([\d.]+) twice, \\\$([\d.]+), \\\$([\d.]+), \\\$([\d.]+)\)"
+    )
+    for i, value in enumerate(sorted(printed_over)):
+        out.append(
+            (
+                f"tex: over-default estimate {i}",
+                value,
+                0.005,
+                sorted({round(u, 2) for u in over})[i],
+            )
+        )
 
     # Prose cross-checks. Everything above re-derives a number from the artifacts and
     # compares it to a number typed into *this file*; nothing above reads the paper. That
@@ -2968,6 +3141,9 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_budget_false_pass_checks())
     out.extend(_registered_depth_bound_checks())
     out.extend(_sigma_margin_checks())
+    out.extend(_xprovider_checks())
+    out.extend(_oracle_gap_direction_checks())
+    out.extend(_groq_second_worker_checks())
 
     return out
 
@@ -3789,6 +3965,539 @@ def _registered_depth_bound_checks() -> list[tuple[str, float, float, float]]:
             round(largest, 3),
         ),
     ]
+
+
+_SENTENCE_BREAK = re.compile(r"(?<=\.)\s+(?=[A-Z\\])")
+
+
+def _sentence_at(text: str, index: int) -> str:
+    """The sentence containing `index`.
+
+    Split on a period followed by whitespace and a capital or a control sequence, which never
+    matches a decimal point (`0.088` has no space after the period) and errs toward splitting
+    too often -- a shorter window can only make a guard that searches it stricter.
+    """
+    start = 0
+    for match in _SENTENCE_BREAK.finditer(text, 0, index):
+        start = match.end()
+    end = _SENTENCE_BREAK.search(text, index)
+    return text[start : end.start() if end else len(text)]
+
+
+def _oracle_gap_direction_checks() -> list[tuple[str, float, float, float]]:
+    """Both oracle gaps are negative, so every site printing one must say which way it points.
+
+    The figure caption read ``the same oracle is $0.028$ better'' two lines below calling that
+    same point the lowest of the three scores. The magnitude was pinned to the artifact and the
+    direction was not, so a self-contradicting caption passed every check in this file. A site
+    satisfies the guard by carrying an explicit minus sign or a downward word nearby.
+    """
+    p2 = _sources().paper_tex("p2-repair-not-detection")
+    out: list[tuple[str, float, float, float]] = []
+    for magnitude, gap in (
+        ("0.088", _curve_gap("run4", "run7")[0]),
+        ("0.028", _curve_gap("run3", "run7")[0]),
+    ):
+        if gap >= 0:
+            raise AssertionError(f"the {magnitude} oracle gap is no longer negative")
+        for i, m in enumerate(re.finditer(rf"{re.escape(magnitude)}(?!\d)", p2)):
+            signed = p2[max(0, m.start() - 2) : m.start()].endswith("-")
+            downward = re.search(
+                r"\b(below|lowest|lower|worse|beneath)\b", _sentence_at(p2, m.start())
+            )
+            out.append(
+                (
+                    f"tex: {magnitude} oracle gap site {i} points down",
+                    1.0,
+                    0.0,
+                    float(bool(signed or downward)),
+                )
+            )
+    if len(out) < 6:
+        raise AssertionError(f"expected both oracle gaps at several sites each, found {len(out)}")
+    return out
+
+
+@cache
+def _groq_cell(slug: str) -> tuple[float, ...]:
+    """Arm A's per-seed seed-genome held-out scores for one second-worker cell."""
+    doc = json.loads(Path(f"{DOCS}/validation-study-groq-{slug}.json").read_text())
+    return tuple(r["A"]["seed_heldout"] for r in doc["runs"])
+
+
+def _groq_paired(a: str, b: str) -> tuple[float, float, float]:
+    """(mean difference b-a, paired s.e., t) over the seeds the two cells share.
+
+    Paired because every cell runs the same seed list, so seed i draws the same tasks in both
+    and task difficulty cancels. Unpaired standard errors here would be roughly four times
+    larger and would hide every effect this subsection reports.
+    """
+    x, y = _groq_cell(a), _groq_cell(b)
+    if len(x) != len(y):
+        raise AssertionError(f"{a} has {len(x)} seeds, {b} has {len(y)}; the pairing is fiction")
+    diffs = [q - p for p, q in zip(x, y, strict=True)]
+    se = stdev(diffs) / len(diffs) ** 0.5
+    return mean(diffs), se, mean(diffs) / se
+
+
+def _groq_second_worker_checks() -> list[tuple[str, float, float, float]]:
+    """Paper II's cross-worker corroboration table, every figure derived from the runs.
+
+    The subsection exists because a registered prediction failed, so its numbers carry more
+    weight than usual: they are the evidence that the failure was a confounded cell rather than
+    a refuted thesis. Each is re-derived here from the released artifacts, including the two
+    the prose states only as a decomposition (the 14/86 split).
+    """
+    p2 = _sources().paper_tex("p2-repair-not-detection")
+    out: list[tuple[str, float, float, float]] = []
+
+    # The table body: held-out mean, delta, s.e. and t for each cell against the intrinsic one.
+    rows = (
+        ("intrinsic", "p0cal-L1", r"its own prose \(\\texttt\{PASS\} on \$1\\%\$\) & ([\d.]+)"),
+        (
+            "8b",
+            "det-8b",
+            r"smaller critic \(8B\) & ([\d.]+) & \$-([\d.]+)\$ & ([\d.]+) & \$-([\d.]+)\$",
+        ),
+        (
+            "qwen",
+            "det-qwen",
+            r"\\texttt\{qwen3\.6-27b\}\) & ([\d.]+) & \$\+([\d.]+)\$ & ([\d.]+) & \$\+([\d.]+)\$",
+        ),
+        (
+            "oracle-lo",
+            "det-oracle-lo",
+            r"\\texttt\{lo\} prose \(verdict only\) & ([\d.]+) & \$\+([\d.]+)\$ & ([\d.]+) & "
+            r"\$\+([\d.]+)\$",
+        ),
+        (
+            "oracle-mid",
+            "det-oracle",
+            r"\\texttt\{mid\} prose & ([\d.]+) & \$\+([\d.]+)\$ & ([\d.]+) & "
+            r"\$\\mathbf\{\+([\d.]+)\}\$",
+        ),
+        (
+            "oracle-hi",
+            "det-oracle-hi",
+            r"\\texttt\{hi\} prose \(measured edits\) & ([\d.]+) & \$\+([\d.]+)\$ & ([\d.]+) & "
+            r"\$\\mathbf\{\+([\d.]+)\}\$",
+        ),
+    )
+    for name, slug, pattern in rows:
+        printed = _scrape_all(p2, pattern)
+        out.append(
+            (f"tab:secondworker {name} held-out", printed[0], 0.00005, mean(_groq_cell(slug)))
+        )
+        if name == "intrinsic":
+            continue
+        delta, se, t = _groq_paired("p0cal-L1", slug)
+        # Signed, not absolute: the 8b row prints a negative delta and a negative t, and the
+        # table-coverage guard reads the minus sign as part of the number. Pinning |x| left both
+        # of that row's figures uncovered while every check still passed.
+        sign = -1.0 if name == "8b" else 1.0
+        out.append((f"tab:secondworker {name} delta", sign * printed[1], 0.00005, delta))
+        out.append((f"tab:secondworker {name} se", printed[2], 0.00005, se))
+        out.append((f"tab:secondworker {name} t", sign * printed[3], 0.005, t))
+
+    # The decomposition, on the cell that actually reversed the prediction. An earlier draft
+    # decomposed the `hi` cell instead, whose total is nearly twice as large, which inflated the
+    # prose share from 75% to 86% by substituting a condition that was never under test.
+    verdict_only = _groq_paired("p0cal-L1", "det-oracle-lo")[0]
+    mid_total = _groq_paired("p0cal-L1", "det-oracle")[0]
+    mid_prose, _mid_se, mid_prose_t = _groq_paired("det-oracle-lo", "det-oracle")
+    hi_prose, _hi_se, hi_prose_t = _groq_paired("det-oracle-lo", "det-oracle-hi")
+    out.append(
+        (
+            "tex: second-worker verdict contribution",
+            _scrape(p2, r"the perfect verdict contributes \$\+([\d.]+)\$"),
+            0.00005,
+            verdict_only,
+        )
+    )
+    out.append(
+        (
+            "tex: second-worker mid prose contribution",
+            _scrape(p2, r"and the\s*\n?repair text \$\+([\d.]+)\$"),
+            0.00005,
+            mid_prose,
+        )
+    )
+    out.append(
+        (
+            "tex: second-worker mid prose t",
+            _scrape(p2, r"repair text \$\+[\d.]+\$ \(\$t = ([\d.]+)\$\)"),
+            0.005,
+            mid_prose_t,
+        )
+    )
+    shares = _scrape_all(p2, r"a \$(\d+)/(\d+)\$ split")
+    out.append(("tex: second-worker verdict share", shares[0], 0.5, 100 * verdict_only / mid_total))
+    out.append(("tex: second-worker prose share", shares[1], 0.5, 100 * mid_prose / mid_total))
+    out.append(
+        (
+            "tex: second-worker hi prose rung",
+            _scrape(p2, r"measured edits, moves it to \$\+([\d.]+)\$"),
+            0.00005,
+            hi_prose,
+        )
+    )
+    out.append(
+        (
+            "tex: second-worker hi prose t",
+            _scrape(p2, r"moves it to \$\+[\d.]+\$ at \$t = ([\d.]+)\$"),
+            0.005,
+            hi_prose_t,
+        )
+    )
+    # The task-level pairing of the headline contrast, over 20 seeds x 10 held-out tasks.
+    by_task: dict[str, list[float]] = {}
+    for slug in ("p0cal-L1", "det-oracle"):
+        doc = json.loads(Path(f"{DOCS}/validation-study-groq-{slug}.json").read_text())
+        vals: list[float] = []
+        for run in doc["runs"]:
+            per = run["A"]["seed_heldout_by_task"]
+            vals += [per[k] for k in sorted(per)] if isinstance(per, dict) else list(per)
+        by_task[slug] = vals
+    diffs = [b - a for a, b in zip(by_task["p0cal-L1"], by_task["det-oracle"], strict=True)]
+    task_t = mean(diffs) / (stdev(diffs) / len(diffs) ** 0.5)
+    out.append(
+        (
+            "tex: second-worker task-level t",
+            _scrape(p2, r"\$t = ([\d.]+)\$ over the two hundred held-out tasks"),
+            0.005,
+            task_t,
+        )
+    )
+    out.append(
+        (
+            "tex: second-worker task-level n",
+            _scrape_word(p2, r"over the (\w+ \w+) held-out tasks"),
+            0.0,
+            float(len(diffs)),
+        )
+    )
+    # The two p0 figures the limitation paragraph turns on, and the false-alarm counts.
+    import analyze_critique_detector as acd
+
+    seeds = tuple(range(20))
+    for label, slug, pattern in (
+        ("p0 at L1", "p0cal-L1", r"pass rate is \$p_0 = ([\d.]+)\$ against"),
+        ("p0 at L2", "p0cal-L2", r"takes it to \$([\d.]+)\$ where the other"),
+    ):
+        exclude = frozenset({"exact_word_count"}) if slug.endswith("L2") else frozenset()
+        events = acd.collect_events(
+            f"tests/fixtures/cassettes/study-groq-{slug}.json",
+            list(seeds),
+            loop_kw={},
+            n_heldout=10,
+            exclude=exclude,
+        )
+        out.append(
+            (f"tex: second-worker {label}", _scrape(p2, pattern), 0.0005, acd.base_rate_p0(events))
+        )
+    # Paper I quotes the same three p0 figures in D9, and the series' rule is that a number two
+    # papers state must be the same number in both. Pinned per paper rather than cross-checked
+    # against each other, so a drift in one does not validate itself against the other.
+    p1 = _sources().paper_tex("p1-conditional-lever")
+    printed_ladder = _scrape_all(
+        p1, r"give\s*\n?\s*\$p_0 = ([\d.]+)\$, \$([\d.]+)\$ and \$([\d.]+)\$"
+    )
+    for i, (slug, exclude) in enumerate(
+        (
+            ("p0cal-L1", frozenset()),
+            ("p0cal-L2", frozenset({"exact_word_count"})),
+            ("p0cal-L3", frozenset({"exact_word_count", "word_max_length"})),
+        )
+    ):
+        events = acd.collect_events(
+            f"tests/fixtures/cassettes/study-groq-{slug}.json",
+            list(seeds),
+            loop_kw={},
+            n_heldout=10,
+            exclude=exclude,
+        )
+        out.append(
+            (f"tex: D9 p0 ladder {slug} (p1)", printed_ladder[i], 0.0005, acd.base_rate_p0(events))
+        )
+    l2 = acd.collect_events(
+        "tests/fixtures/cassettes/study-groq-p0cal-L2.json",
+        list(seeds),
+        loop_kw={},
+        n_heldout=10,
+        exclude=frozenset({"exact_word_count"}),
+    )
+    correct = [true for _verdict, true in l2 if true]
+    alarms = [true for verdict, true in l2 if not verdict and true]
+    printed = _scrape_all(p2, r"demands fixes on \$(\d+)\$ of the \$(\d+)\$ already-correct ones")
+    out.append(("tex: second-worker false alarms", printed[0], 0.0, float(len(alarms))))
+    out.append(("tex: second-worker already-correct", printed[1], 0.0, float(len(correct))))
+    return out
+
+
+def _xprovider_checks() -> list[tuple[str, float, float, float]]:
+    """Every number the D3 cross-provider run put into the three papers.
+
+    The run is reported in three places for three different reasons -- Paper I's decision list
+    (it was the last entry marked blocked), Paper II's detector section (its H2 result is that
+    paper's thesis), and Paper III's reporting minimum (it is the first PROSPECTIVE application
+    of that rule, and the one that showed the rule too coarse). Three papers quoting one run is
+    exactly the shape that produced this series' restatement defects, so every figure is derived
+    once here and checked at each site.
+    """
+    tex = _tex()
+    src = _sources()
+    seeds, b_seeds, d_seeds = _xprovider_acceptance()
+    strata = _xprovider_strata()
+    out: list[tuple[str, float, float, float]] = []
+
+    # --- Paper III: the acceptance census and the stratification -----------------------------
+    for label, pattern, actual in (
+        ("seeds", r"cross-provider critic study \(Paper~I, D3\) over \\textbf\{(\w+)\}", seeds),
+        ("arm B accepted", r"arm~B on \\textbf\{(\w+)\} seeds", b_seeds),
+        ("arm D accepted", r"and arm~D on \\textbf\{(\w+)\}", d_seeds),
+    ):
+        out.append((f"tex: D3 {label}", _scrape_word(tex, pattern), 0.0, float(actual)))
+
+    rows = (
+        ("treated", r"the treatment applied & (\d+) & \$\+([\d.]+)\$ & \$(\d+)\\%\$"),
+        (
+            "comparator only",
+            r"D returned the seed\}? & \\textbf\{(\d+)\} & \$\\mathbf\{\+([\d.]+)\}\$ & "
+            r"\$\\mathbf\{(\d+)\\%\}\$",
+        ),
+        ("neither", r"neither accepted & (\d+) & \$\+([\d.]+)\$ & \$(\d+)\\%\$"),
+    )
+    for key, pattern in rows:
+        printed = _scrape_all(tex, pattern)
+        stratum = strata[key]
+        out.append((f"tab:D3strata {key} seeds", printed[0], 0.0, float(stratum.seeds)))
+        out.append((f"tab:D3strata {key} delta", printed[1], 0.00005, abs(stratum.mean_delta)))
+        out.append((f"tab:D3strata {key} share", printed[2], 0.5, 100 * stratum.share))
+
+    # The headline the stratification reinterprets, and the treated-only figure it leaves.
+    doc = json.loads(Path(f"{DOCS}/validation-study-xprovider.json").read_text())
+    runs = doc["runs"]
+    delta = [r["D"]["opt_heldout"] - r["B"]["opt_heldout"] for r in runs]
+    out.append(
+        (
+            "tex: D3 headline delta (p3)",
+            _scrape(tex, r"Its\s+\$\\dd\(D-B\) = \+([\d.]+)\$ would be read"),
+            0.0005,
+            mean(delta),
+        )
+    )
+    out.append(
+        (
+            "tex: D3 treated-only delta",
+            _scrape(tex, r"something, \$\\dd = \+([\d.]+)\$ on \$n = 3\$"),
+            0.0005,
+            strata["treated"].mean_delta,
+        )
+    )
+    # The comparator's self-inflicted losses, which are the whole of the 74%.
+    damage = sorted(
+        (
+            r["B"]["opt_heldout"] - r["B"]["seed_heldout"]
+            for r in runs
+            if not r["D"].get("genes_changed") and r["B"].get("genes_changed")
+        ),
+    )
+    printed_damage = _scrape_all(tex, r"losing \$([\d.]+)\$ and \$([\d.]+)\$ against its own seed")
+    for i, value in enumerate(sorted(printed_damage, reverse=True)):
+        out.append((f"tex: D3 comparator damage {i}", value, 0.0005, abs(damage[i])))
+
+    # --- Paper I: the decision list's own count of bought directions ------------------------
+    # It said "five" and went to six the moment D3 landed, with nothing checking it. The count is
+    # derived from the list a reader actually counts: entries whose label says done.
+    p1 = src.paper_tex("p1-conditional-lever")
+    # The end delimiter must be searched *from* the opening one. An earlier `\end{description}`
+    # arrives with an expanded `\input`, and a backwards slice is the empty string rather than an
+    # error, so the naive form counted zero items and agreed with nothing.
+    start = p1.index(r"\begin{description}\itemsep1pt")
+    listing = p1[start : p1.index(r"\end{description}", start)]
+    labels = re.findall(r"\\item\[(D[^\]]*?)\]", listing, re.DOTALL)
+    if not labels:
+        raise AssertionError("Paper I's decision list has no D-labelled entries to count")
+    done = sum(1 for label in labels if "done" in label)
+    out.append(
+        (
+            "tex: bought directions",
+            _scrape_word(p1, r"(\w+) of the directions below have been\s+bought"),
+            0.0,
+            float(done),
+        )
+    )
+    # D3's figures as Paper I restates them. Three papers quote this run; each site is pinned.
+    for label, pattern, actual in (
+        (
+            "D3 delta (p1)",
+            r"\$\\dd\(D-B\) = \+([\d.]+)\$, \\textbf\{inconclusive\}",
+            mean([r["D"]["opt_heldout"] - r["B"]["opt_heldout"] for r in runs]),
+        ),
+        (
+            "D3 noise band (p1)",
+            r"against a noise band of \$([\d.]+)\$",
+            stdev([r["D"]["opt_heldout"] for r in runs])
+            + stdev([r["B"]["opt_heldout"] for r in runs]),
+        ),
+        ("D3 seeds (p1)", r"at the \$(\d+)\$ seeds this entry asked for", float(seeds)),
+        ("D3 arm D accepted (p1)", r"accepted on only \$(\d+)\$ of \$\d+\$ seeds", float(d_seeds)),
+        (
+            "D3 share (p1)",
+            r"seeds, and \$(\d+)\\%\$ of\s+the positive",
+            100 * strata["comparator only"].share,
+        ),
+    ):
+        out.append(
+            (f"tex: {label}", _scrape(p1, pattern), 0.5 if "share" in label else 0.0005, actual)
+        )
+    out.append(
+        (
+            "tex: D3 held-out drafts judged (p1)",
+            _scrape(p1, r"\\texttt\{PASS\} on none of \$(\d+)\$ held-out drafts"),
+            0.0,
+            _detector_row("study-xprovider.json", tuple(range(8)), True)["n"],
+        )
+    )
+
+    # --- Paper II: the three-lineage detector table ------------------------------------------
+    detectors = (
+        ("intrinsic", "study-multihard.json", (0, 1, 2, 3, 4), False),
+        ("cross-lineage", "study-crossfamily.json", (0, 1, 2), True),
+        ("cross-provider", "study-xprovider.json", tuple(range(8)), True),
+    )
+    p2 = src.paper_tex("p2-repair-not-detection")
+    num = r"\$(\d+)\$"
+    dec = r"\$([\d.]+)\$"
+    bold = r"\$\\mathbf\{([\d.]+)\}\$"
+    patterns = (
+        rf"\\emph\{{is\}} the worker & {num} & {dec} & {num} & {num} & {dec}",
+        rf"same vendor, other lineage & {num} & {dec} & {num} & {num} & {bold}",
+        rf"other vendor, other lineage & {num} & {bold} & {num} & {num}",
+    )
+    for (name, cassette, seed_tuple, sep), pattern in zip(detectors, patterns, strict=True):
+        stats = _detector_row(cassette, seed_tuple, sep)
+        printed = _scrape_all(p2, pattern)
+        out.append((f"tab:detectors {name} n", printed[0], 0.0, stats["n"]))
+        out.append((f"tab:detectors {name} pass rate", printed[1], 0.005, stats["pass_rate"]))
+        out.append((f"tab:detectors {name} tp", printed[2], 0.0, stats["tp"]))
+        out.append((f"tab:detectors {name} fp", printed[3], 0.0, stats["fp"]))
+        if len(printed) > 4:
+            out.append((f"tab:detectors {name} f1", printed[4], 0.005, stats["f1"]))
+    # The base rates the caveat leans on, stated in the paper as exact counts rather than a
+    # 3-dp decimal: 9/80 is 0.1125, which sits exactly on a rounding boundary, and a check whose
+    # pass depends on which way a tie rounds is a check about float repr, not about the paper.
+    counts = _scrape_all(p2, r"\$5/50\$, \$4/30\$ and \$(\d+)/(\d+)\$")
+    xp_row = _detector_row("study-xprovider.json", tuple(range(8)), True)
+    out.append(("tex: detector p0 numerator", counts[0], 0.0, xp_row["tp"] + xp_row["fn"]))
+    out.append(("tex: detector p0 denominator", counts[1], 0.0, xp_row["n"]))
+    # The closing argument runs on two axes, and an earlier draft pooled them: it set run 4's
+    # +0.060, which is a SEED-GENOME between-run gap, beside two Delta(D-B) contrasts between
+    # OPTIMIZED arms, as though the three were commensurable. They are not. The paragraph now
+    # states each axis separately, so both sets are pinned here -- the seed-genome gaps against
+    # the paired curve comparison, the optimization deltas against the run artifacts.
+    swaps = _scrape_all(
+        p2,
+        r"score by \$\+([\d.]+)\$ for run~4's\s*\n?measurement tool, \$\+([\d.]+)\$ for the "
+        r"accurate cross-lineage critic, \$\+([\d.]+)\$ for the degenerate\s*\n?cross-provider "
+        r"one and \$-([\d.]+)\$ for the perfect oracle",
+    )
+    for i, (name, actual) in enumerate(
+        (
+            ("tool-fed", _curve_gap("run3", "run4")[0]),
+            ("cross-lineage", _critique_swap_gap("crossfamily")),
+            ("cross-provider", _critique_swap_gap("xprovider")),
+            ("oracle", abs(_curve_gap("run3", "run7")[0])),
+        )
+    ):
+        out.append((f"tex: seed-genome critique swap, {name}", swaps[i], 0.0005, actual))
+    # The prose difference between the two substituted critics, which is what licenses reading a
+    # model swap as a two-at-once intervention rather than a detection-only one.
+    # The critique the paper quotes verbatim. A quotation is a claim about an artifact like any
+    # other, and it is the one kind a reader cannot re-derive without opening the cassette.
+    quoted = re.search(r"characters \(``\\emph\{([^}]+)\}''\)", p2)
+    if not quoted:
+        raise AssertionError("Paper II no longer quotes a critique where this guard expects one")
+    crit = json.loads(Path("tests/fixtures/cassettes/study-crossfamily.json").read_text())[
+        "entries"
+    ]
+    # Both sides are whitespace-normalised: the quotation wraps across a source line, so its
+    # captured text carries a newline the completion never had, and a raw containment test would
+    # report the paper misquoting an artifact it quotes correctly.
+    needle = " ".join(quoted.group(1).split())
+    outputs = [" ".join(v["output"].split()) for v in crit.values() if v.get("name") == "critic"]
+    out.append(
+        (
+            "tex: quoted cross-lineage critique is in the cassette",
+            1.0,
+            0.0,
+            float(any(needle in o for o in outputs)),
+        )
+    )
+    lengths = _scrape_all(
+        p2, r"median of \$(\d+)\$ characters.*?the cross-provider one in \$(\d+)\$"
+    )
+    for i, slug in enumerate(("crossfamily", "xprovider")):
+        out.append(
+            (f"tex: critique median length, {slug}", lengths[i], 0.0, _critique_median_length(slug))
+        )
+    # The distance between the two interventions that move both halves of the loop at once. It is
+    # the sentence's whole argument, so it is derived rather than subtracted by hand.
+    out.append(
+        (
+            "tex: tool vs cross-lineage separation",
+            _scrape(p2, r"land within \$([\d.]+)\$\s*\n?of each other"),
+            0.0005,
+            abs(_curve_gap("run3", "run4")[0] - _critique_swap_gap("crossfamily")),
+        )
+    )
+    restated = _scrape_all(p2, r"prompt alone: \$\+([\d.]+)\$ and \$\+([\d.]+)\$")
+    for label, printed, actual in (
+        (
+            "cross-lineage held-out move",
+            restated[0],
+            mean(
+                [
+                    r["D"]["opt_heldout"] - r["B"]["opt_heldout"]
+                    for r in json.loads(
+                        Path(f"{DOCS}/validation-study-crossfamily.json").read_text()
+                    )["runs"]
+                ]
+            ),
+        ),
+        (
+            "cross-provider held-out move",
+            restated[1],
+            mean(
+                [
+                    r["D"]["opt_heldout"] - r["B"]["opt_heldout"]
+                    for r in json.loads(
+                        Path(f"{DOCS}/validation-study-xprovider.json").read_text()
+                    )["runs"]
+                ]
+            ),
+        ),
+    ):
+        out.append((f"tex: {label}", printed, 0.0005, actual))
+
+    xp = _detector_row("study-xprovider.json", tuple(range(8)), True)
+    out.append(
+        (
+            "tex: cross-provider missed positives",
+            _scrape_word(p2, r"missing all (\w+) already-correct drafts"),
+            0.0,
+            xp["fn"],
+        )
+    )
+    out.append(
+        (
+            "tex: cross-provider events",
+            _scrape(p2, r"already-correct drafts in \$(\d+)\$ events"),
+            0.0,
+            xp["n"],
+        )
+    )
+    return out
 
 
 def _defect_class_count_checks() -> list[tuple[str, float, float, float]]:

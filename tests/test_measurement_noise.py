@@ -18,6 +18,7 @@ recorded exclusions can.
 
 from __future__ import annotations
 
+import json
 import pathlib
 import sys
 
@@ -26,6 +27,7 @@ import pytest
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
 
 from analyze_measurement_noise import (  # noqa: E402
+    WORKER_MODEL,
     IncompatibleReplicates,
     eligible_replicates,
     noise_estimate,
@@ -141,3 +143,116 @@ def test_uniform_drift_cancels_but_task_specific_drift_does_not():
     # And the uniform component is still reported, just elsewhere.
     est = noise_estimate(names)
     assert abs(est.mean_signed) < 0.05, "a re-measurement's mean signed difference should be small"
+
+
+def test_a_run_on_a_different_worker_is_not_a_replicate():
+    """The regime includes the WORKER, and eligibility did not check it.
+
+    Noise here is a property of a genome executed by a particular model: sigma is measured by
+    re-scoring one fixed seed genome, so a run whose worker is a different model is measuring a
+    different quantity entirely. Eligibility screened task set, seed count, exclusions, levers
+    and gene overrides -- and not the worker -- so a three-seed `llama-3.1-8b` study dropped into
+    `docs/` silently enrolled as an eleventh replicate and moved every published sigma. The
+    claim checker caught it, 29 checks at once, which is the only reason it is a test and not a
+    correction.
+    """
+    for r in eligible_replicates():
+        meta = json.loads(pathlib.Path(r.path).read_text())["meta"]
+        assert meta.get("worker_model") == WORKER_MODEL, (
+            f"{r.name} runs on {meta.get('worker_model')!r}, not the regime's {WORKER_MODEL!r}; "
+            "its noise is not this genome's noise"
+        )
+
+
+def test_a_spliced_run_is_not_a_replicate():
+    """A verdict/prose splice issues two critique calls, so its loop is not the seed loop."""
+    for r in eligible_replicates():
+        meta = json.loads(pathlib.Path(r.path).read_text())["meta"]
+        assert not meta.get("verdict_model"), f"{r.name} is spliced; its loop differs"
+        assert not meta.get("critique_model"), f"{r.name} routes the critique elsewhere"
+
+
+def test_the_contamination_moved_exactly_the_number_of_values_the_paper_claims():
+    """Paper III's defect 11 states that the un-screened estimator moved 29 published values.
+
+    That figure is in a caption and in the body, so it is a claim like any other and it rots like
+    any other. It is derived here by re-running the claim checker with the screens removed and
+    counting which checks change, rather than by remembering what the failure output said.
+    """
+    import functools
+    import re
+
+    import analyze_measurement_noise as amn
+    import verify_paper_claims as vpc
+
+    def clear_caches():
+        for mod in (vpc, amn):
+            for obj in vars(mod).values():
+                if callable(obj) and hasattr(obj, "cache_clear"):
+                    obj.cache_clear()
+
+    def actuals():
+        clear_caches()
+        return {c[0]: (c[1], c[2], c[3]) for c in vpc._checks()}
+
+    before = actuals()
+
+    original = amn.eligible_replicates
+
+    @functools.wraps(original)
+    def unscreened():
+        out = []
+        for path in sorted(amn.glob.glob(f"{amn.DOCS}/validation-study*.json")):
+            doc = amn.json.loads(amn.Path(path).read_text())
+            meta, runs = doc["meta"], doc["runs"]
+            if meta.get("task_set") != amn._TASK_SET or meta.get("n_heldout") != amn._N_HELDOUT:
+                continue
+            if len(runs) != amn._N_SEEDS:
+                continue
+            arm = next((a for a in "ABCD" if isinstance(runs[0].get(a), dict)), None)
+            if arm is None or runs[0][arm].get("seed_heldout_by_task") is None:
+                continue
+            if frozenset(meta.get("exclude_constraint") or ()):
+                continue
+            if tuple(k for k in amn._LEVERS if meta.get(k)):
+                continue
+            if tuple(sorted(meta.get("gene_overrides") or ())):
+                continue
+            out.append(amn.Replicate(amn._name_of(path), path, frozenset(), (), ()))
+        return out
+
+    amn.eligible_replicates = unscreened
+    try:
+        contaminated = unscreened()
+        assert any("splice" in r.name for r in contaminated), (
+            "the contaminating run is no longer in docs/, so this test measures nothing; "
+            "it lived at docs/validation-study-splice-G1.json"
+        )
+        after = actuals()
+    finally:
+        amn.eligible_replicates = original
+        clear_caches()
+
+    moved = [k for k in before if k in after and before[k][2] != after[k][2]]
+    # Of those, the ones that moved FAR ENOUGH for their own tolerance to notice. The gap between
+    # the two counts is the point: the rest shifted silently inside tolerance.
+    caught = [k for k in moved if abs(after[k][2] - after[k][0]) > after[k][1]]
+
+    tex = pathlib.Path("docs/papers/p3-silent-no-op/main.tex").read_text(encoding="utf-8")
+    m = re.search(
+        r"It moves \$(\d+)\$ of this paper's published\s+values, and only \$(\d+)\$ of the",
+        tex,
+    )
+    assert m, "Paper III no longer states the two contamination counts in the form this guard reads"
+    claimed_moved, claimed_caught = int(m.group(1)), int(m.group(2))
+    assert len(moved) == claimed_moved, (
+        f"the paper says {claimed_moved} values moved; re-deriving gives {len(moved)}"
+    )
+    assert len(caught) == claimed_caught, (
+        f"the paper says {claimed_caught} of them breached tolerance; re-deriving gives "
+        f"{len(caught)}"
+    )
+    assert len(caught) < len(moved), (
+        "if every moved value breached tolerance the sentence loses its point, which is that "
+        "some shifted without any guard noticing"
+    )

@@ -49,6 +49,18 @@ _TASK_SET = "multi-hard"
 _N_HELDOUT = 10
 _N_SEEDS = 3
 
+#: The worker whose genome this sigma describes. Part of the regime, and it was MISSING from
+#: eligibility until 2026-08-08: noise is measured by re-scoring one fixed seed genome, so a run
+#: executed by a different model measures a different quantity. A three-seed `llama-3.1-8b` study
+#: added to `docs/` for an unrelated experiment therefore enrolled as an eleventh replicate and
+#: shifted every published sigma at once. Exported so a test can assert the screen exists.
+WORKER_MODEL = "openai/gpt-4.1-mini"
+
+#: Routing the critique or the verdict to another model changes the seed loop, so such a run is
+#: not a re-measurement either. Checked separately from `_LEVERS` because these carry a model
+#: name rather than a boolean.
+_ROUTING_KEYS = ("critique_model", "verdict_model")
+
 
 class IncompatibleReplicates(RuntimeError):
     """Raised rather than pooling runs that do not measure the same thing."""
@@ -111,6 +123,10 @@ def eligible_replicates() -> list[Replicate]:
         doc = json.loads(Path(path).read_text())
         meta, runs = doc["meta"], doc["runs"]
         if meta.get("task_set") != _TASK_SET or meta.get("n_heldout") != _N_HELDOUT:
+            continue
+        if meta.get("worker_model") != WORKER_MODEL:
+            continue
+        if any(meta.get(k) for k in _ROUTING_KEYS):
             continue
         if len(runs) != _N_SEEDS:
             continue

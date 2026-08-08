@@ -30,23 +30,54 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from analyze_critique_detector import base_rate_p0, collect_events, detector_stats  # noqa: E402
 
 CASSETTES = "tests/fixtures/cassettes"
-SEEDS = [0, 1, 2]
 N_HELDOUT = 10
 
-#: (label, cassette, excluded constraints). The base level is the four-arm re-run's own
-#: cassette, so it costs nothing; the others come from the calibration passes.
-LEVELS: list[tuple[str, str, frozenset[str]]] = [
-    ("L1  none (four-arm re-run)", f"{CASSETTES}/study-c2b.json", frozenset()),
-    ("L2  -exact_word_count", f"{CASSETTES}/study-p0cal-L2.json", frozenset({"exact_word_count"})),
-    (
-        "L3  -exact_word_count -word_max_length",
-        f"{CASSETTES}/study-p0cal-L3.json",
-        frozenset({"exact_word_count", "word_max_length"}),
+_L2_EXCLUDE = frozenset({"exact_word_count"})
+_L3_EXCLUDE = frozenset({"exact_word_count", "word_max_length"})
+
+#: stack -> (seeds, [(label, cassette, excluded constraints)]).
+#:
+#: p0 is a property of the WORKER, so a study on a different worker needs its own calibration:
+#: reading the openai stack's numbers for a llama worker would assert a base rate nobody
+#: measured. The base level of each stack is a run bought for another purpose, so it is free;
+#: the other two come from cheap arm-A calibration passes.
+STACKS: dict[str, tuple[list[int], list[tuple[str, str, frozenset[str]]]]] = {
+    "openai": (
+        [0, 1, 2],
+        [
+            ("L1  none (four-arm re-run)", f"{CASSETTES}/study-c2b.json", frozenset()),
+            ("L2  -exact_word_count", f"{CASSETTES}/study-p0cal-L2.json", _L2_EXCLUDE),
+            (
+                "L3  -exact_word_count -word_max_length",
+                f"{CASSETTES}/study-p0cal-L3.json",
+                _L3_EXCLUDE,
+            ),
+        ],
     ),
-]
+    "groq": (
+        list(range(20)),
+        [
+            ("L1  none", f"{CASSETTES}/study-groq-p0cal-L1.json", frozenset()),
+            ("L2  -exact_word_count", f"{CASSETTES}/study-groq-p0cal-L2.json", _L2_EXCLUDE),
+            (
+                "L3  -exact_word_count -word_max_length",
+                f"{CASSETTES}/study-groq-p0cal-L3.json",
+                _L3_EXCLUDE,
+            ),
+        ],
+    ),
+}
+SEEDS, LEVELS = STACKS["openai"]
 
 
-def main() -> int:  # pragma: no cover - CLI convenience
+def main(argv: list[str] | None = None) -> int:  # pragma: no cover - CLI convenience
+    import argparse
+
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--stack", choices=sorted(STACKS), default="openai")
+    args = ap.parse_args(argv)
+    seeds, levels = STACKS[args.stack]
+    globals()["SEEDS"], globals()["LEVELS"] = seeds, levels
     print(f"{'level':40} {'n':>4} {'p0':>7}  {'PASS rate':>9}  seed-rubric detector")
     rows = []
     for label, cassette, exclude in LEVELS:

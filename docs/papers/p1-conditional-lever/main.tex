@@ -196,8 +196,10 @@ not available.'' A parallel line shows LLM
 self-verifiers are unreliable detectors: high false-positive rates
 \citep{valmeekam2023selfcritique}, and LLM judges favour their own outputs --- a
 \emph{self-enhancement} bias \citep{zheng2023judging}. Neither source compares a verifier of one
-model family against self-verification, so whether that separation holds is open, which is why we
-list it (D3) as unrun rather than as replication. The boundary is not undisputed:
+model family against self-verification, so whether that separation holds was open when we
+registered it (D3) as an experiment rather than as a replication; we have since bought it, and
+it separates the two claims in the direction opposite to the remedy they suggest
+(\S\ref{sec:directions}). The boundary is not undisputed:
 \citet{liu2024intrinsic} report intrinsic self-correction working under narrow conditions
 (zero temperature, prompts free of leading bias), which is a condition our worker does not
 satisfy --- it samples at the provider's default temperature (\S\ref{sec:setup}), and that
@@ -1255,7 +1257,9 @@ a refine round moves length by under two words at every level, against a floor t
 empty answer to reach. \textbf{Single worker/reflection
 model:} results may be model-dependent \citep{huang2023cannot}. \textbf{Cross-lineage, not
 cross-provider:} run 6's critic shares a vendor and training lineage with the worker, so it
-breaks self-\emph{grading} but may retain self-preference bias (D3). \textbf{One task family:}
+breaks self-\emph{grading} but may retain self-preference bias. This limitation is now
+\emph{lifted} rather than outstanding: D3 repeats it across the vendor boundary and the null
+survives, so self-preference is not what was holding the effect down (\S\ref{sec:directions}). \textbf{One task family:}
 verifiable instruction-following may be a domain where the critique has little leverage.
 \textbf{Budget:} $\mathrm{mmc}\in[20,64]$ was small; \S\ref{sec:budgetresult} now spans $20$
 to $160$ and finds no trend in $\dd$. \textbf{Held-out generalization:} the
@@ -1339,7 +1343,10 @@ Threat & Closable as released? & What it requires \\
   The four-arm re-run on the corrected harness changed \texttt{ensure\_correct} on $3/3$
   seeds. Every row below is now a threat to a measurement that happened \\
 Single worker/reflection model & Partly, by spend & Worker swap done pre-audit
-  ($\dd=-0.014$); needs redoing post-fix \\
+  ($\dd=-0.014$); needs redoing post-fix. A second worker on another provider corroborates
+  Paper~II's detection-versus-repair \emph{ordering} at $20$ seeds --- not its magnitudes, and
+  not the ranking of its cells --- but cannot carry this paper's lever at all: the $p_0$ ladder
+  collapses on it (see D9), so there is no middle level to measure a conditional effect at \\
 \textbf{Small train split} ($8$) & \textbf{Closed} (\S\ref{sec:splitresult}) & Bought:
   $n_{\mathrm{train}} \in \{4,8,16,24\}$ at constant epochs, held-out and seeds fixed. The
   degenerate verifier survives every size ($11/12$ genes); $\dd(D-B)$ does not, and the
@@ -1361,16 +1368,20 @@ Power, $n{=}3$; no sampling variance & Partly, as released & $\sigma(\dd) = 0.02
 \textbf{$\dd$ credits the treatment with a shared gene} (\S\ref{sec:decomp}) & \textbf{Closed}
   (\S\ref{sec:decomp}) & Both arms evolve \texttt{generate}, so $\dd$ mixes it with the
   treatment; the draft/loop split separates them offline from the released artifact \\
-Cross-lineage, not cross-provider & No --- credential & A Gemini or Anthropic key; pricing
-  already in place (D3) \\
+Cross-lineage, not cross-provider & \textbf{Closed} (\S\ref{sec:directions}) & Bought on a
+  second vendor's key: \texttt{llama-3.3-70b} judging the same \texttt{gpt-4.1-mini} worker at
+  $8$ seeds. Crossing the provider boundary made detection \emph{worse} --- a critic that never
+  passes --- and $\dd$ did not move (D3) \\
 One task family (math) & No --- new harness & Parametric math generator plus numeric checker;
   instance-level visible/hidden split \\
 Held-out generalization & No --- generator work & Enlarged parameter pools, then re-run and
   report the gap (D8) \\
 \bottomrule
 \end{tabular}
-\caption{Threat closability against the released artifact and an OpenAI-only key. ``By
-spend'' means the harness answers it with no new code. The first row was the one that
+\caption{Threat closability against the released artifact. ``By
+spend'' means the harness answers it with no new code; every row so marked is answerable with an
+OpenAI key alone, the one exception being the cross-provider row, which was closed after the
+study on a second vendor's key. The first row was the one that
 superseded all others --- a threat to the existence of a result rather than to its
 interpretation --- and \S\ref{sec:rerun} closes it. The two remaining bolded rows came from
 the second audit; neither questions whether the measurement happened, but both change what
@@ -1383,8 +1394,9 @@ its numbers may be read to mean.}
 
 The null is not ``componentized optimization is useless''; it is ``the critique component of a
 self-refine loop is not a productive optimization target when it is an unreliable,
-self-referential detector on shallow-verification tasks.'' Five of the directions below were
-bought during the study, and what they changed is the priority: no longer \emph{get a better
+self-referential detector on shallow-verification tasks.'' Six of the directions below have been
+bought, one of them only in part --- five during the study and D3 after it --- and what they
+changed is the priority: no longer \emph{get a better
 detector}, since a perfect one does not suffice, but \emph{fix the fixer} --- which Paper~II
 shows to be partly feedback-limited and partly generator-limited. Each changes one variable.
 
@@ -1395,11 +1407,27 @@ shows to be partly feedback-limited and partly generator-limited. Each changes o
   \item[D2$'$ (feedback actionability) --- \textbf{done}, runs 9--10 (Paper~II).]
     \emph{Remaining:} whether an LLM \emph{rewriting} the measured edits adds anything over the
     raw measurement.
-  \item[D3 (true cross-family critic) --- \textbf{blocked on a credential}.] Run 6's critic
-    shares a vendor and lineage with the worker. Repeating it cross-\emph{provider}
-    (\texttt{gemini-\allowbreak 2.5-\allowbreak flash-\allowbreak lite} or
-    \texttt{claude-\allowbreak haiku-\allowbreak 4-5}, pre-priced) at $\ge 8$ seeds is the only
-    direction that separates an intrinsically unreliable detector from a self-preferring one.
+  \item[D3 (true cross-family critic) --- \textbf{done} (pre-registered and bought
+    2026-08-06).] Run 6's critic shared a vendor and lineage with the worker; this repeats it
+    cross-\emph{provider}, with the critique on \texttt{llama-\allowbreak 3.3-\allowbreak 70b}
+    over the same \texttt{gpt-4.1-mini} worker, at the $8$ seeds this entry asked for.
+    $\dd(D-B) = +0.014$, \textbf{inconclusive} against a noise band of $0.081$. The informative
+    half is the detector: crossing the vendor boundary did not produce a better critic but a
+    \emph{degenerate} one, emitting \texttt{PASS} on none of $80$ held-out drafts, where the
+    same-vendor cross-lineage critic of run~6 was the only \emph{model substitution} that
+    produced an accurate detector (Paper~II, which also reports an accurate detector obtained a
+    different way --- by feeding the same critique a measurement tool). So the question this entry existed to settle --- unreliable
+    detector or self-preferring one --- is answered against self-preference: moving off the
+    worker's weights entirely made detection worse, and loop-level optimization bought nothing
+    over prompt-only optimization under either. On the \emph{unoptimized} loop the two critics do
+    separate, and Paper~II reports that separately --- a distinction worth keeping, since the two
+    axes were briefly conflated while this entry was being written.
+    \emph{Remaining:} the same comparison with an evolved rather than a seed critique, and a
+    second cross-provider family to show the degeneracy is not one model's quirk.
+    This run also supplied the companion paper's first \emph{prospective} test of its
+    reporting minimum, and strengthened it: arm~D accepted on only $3$ of $8$ seeds, and $74\%$ of
+    the positive $\dd$ came from two seeds where the treatment never applied
+    (Paper~III).
   \item[D4 (search depth) --- \textbf{done, and closed} (\S\ref{sec:budgetresult}).] Bought at
     fixed $n_{\mathrm{train}}{=}8$ over a measured six-fold depth range: no trend, deepest cell
     flattest. That was the last configuration in which a positive finding was available, since
@@ -1434,6 +1462,21 @@ shows to be partly feedback-limited and partly generator-limited. Each changes o
     task from any cassette, so the level is built to specification rather than discovered. Under
     either, the already-correct stratum stops being two tasks wide, which is what
     \S\ref{sec:decomp} needs to estimate the damage channel instead of bounding it.
+    \emph{Measured, and it sharpens the problem:} run on a \texttt{llama-3.3-70b} worker at
+    $20$ seeds, the same three exclusion levels give
+    $p_0 = 0.095$, $0.905$ and $0.810$ --- not a ladder but one point at the floor and two at the
+    ceiling, and \emph{non-monotonic}, since excluding a second constraint \emph{lowers} $p_0$.
+    The mechanism is in the generator, not in the worker, and it is worth stating because it
+    disqualifies exclusion as a specification on \emph{any} worker. Excluding a constraint does
+    not merely drop a scoring criterion: the hard tier forces a brutal anchor constraint into
+    every task and falls back to whichever brutal id survives, so removing one re-assigns which
+    constraints are compulsory. At $L_2$ both surviving brutal constraints are forced into every
+    task; at $L_3$ only one is and the freed slot is filled from the ordinary hard pool. An
+    exclusion level therefore names a different \emph{generator} rather than a difficulty, and the
+    $p_0$ it yields depends on which of the substituted constraints a given worker finds hard.
+    That is why (ii) --- sample to a target $p_0$, measured per task --- is the candidate that can
+    specify a level at all. It says nothing for or against (i), which varies the drafting budget
+    and leaves the constraint set alone.
 \end{description}
 
 \paragraph{A pre-registered prediction for the corrected-harness re-run --- \textbf{resolved,
