@@ -42,7 +42,20 @@ from statistics import mean, stdev
 DOCS = "docs"
 OUT_DIR = f"{DOCS}/repeat"
 CASSETTE_DIR = "tests/fixtures/cassettes/repeat"
+#: Same resolution as `analyze_search_depth`: the dedicated eval venv when present, else an
+#: interpreter that actually exists. Hardcoding the gitignored path here was the second site of
+#: the same bug and it survived the first fix, because CI could not get far enough to reach it.
 EVAL_PY = "scratchpad/evalvenv/bin/python"
+
+
+def eval_python() -> str:
+    """The interpreter that can run the study CLI. See `analyze_search_depth.eval_python`."""
+    for candidate in (EVAL_PY, ".venv/bin/python"):
+        if Path(candidate).exists():
+            return candidate
+    return sys.executable
+
+
 CLI = "scripts/run_validation_study.py"
 
 #: (level, released run slug, exclusions) — the p0 sweep, where the sign flip lives.
@@ -186,7 +199,7 @@ def curve_argv_for(job: CurveJob, *, execute: bool) -> list[str]:
     """
     meta = released_meta(job.run.slug)
     argv = [
-        EVAL_PY,
+        eval_python(),
         CLI,
         "--task-set",
         "multi-hard",
@@ -300,7 +313,7 @@ def argv_for(job: Job, gene_files: dict[str, str], *, execute: bool) -> list[str
     `--max-metric-calls` only has to exceed the held-out count.
     """
     argv = [
-        EVAL_PY,
+        eval_python(),
         CLI,
         "--task-set",
         "multi-hard",
