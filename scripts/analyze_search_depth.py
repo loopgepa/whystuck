@@ -111,7 +111,14 @@ def measured_depth(slug: str, mmc: int, cap: int) -> int | None:
             text=True,
         )
     if proc.returncode != 0:
-        return None
+        # Loud, not None. A failed replay used to return the same value as an absent cassette, so
+        # a CI runner missing the `eval` extra reported "no depth measured" and the caller raised
+        # a message pointing at the replay path rather than at the missing dependency. Two
+        # different causes must not share one silent return.
+        raise RuntimeError(
+            f"replaying study-{slug} to measure depth exited {proc.returncode}. This is a broken "
+            f"environment, not a missing measurement.\nstderr tail:\n{proc.stderr[-1500:]}"
+        )
     found = [int(m) for m in _ITER.findall(proc.stdout)]
     return max(found) if found else None
 

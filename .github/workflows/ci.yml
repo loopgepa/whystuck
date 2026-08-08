@@ -27,7 +27,12 @@ jobs:
         run: uv python install 3.12
 
       - name: Sync
-        run: uv sync --dev --frozen
+        # `--extra eval` is required, not optional: gepa and litellm live in that extra, and the
+        # claim checks replay recorded runs through the study CLI, which imports both. Without it
+        # every replay subprocess exits non-zero, `measured_depth` returns None for every cell,
+        # and pytest dies during COLLECTION because the checks are parametrized over `_checks()`.
+        # No API key is needed and nothing is spent -- replay serves committed cassettes.
+        run: uv sync --dev --extra eval --frozen
 
       - name: Lint
         run: uv run ruff check .
