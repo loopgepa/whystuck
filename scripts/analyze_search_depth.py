@@ -21,9 +21,16 @@ from __future__ import annotations
 
 import re
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
+#: The dedicated eval venv, where the optimizer extras are installed locally. It lives under
+#: `scratchpad/`, which is GITIGNORED, so it does not exist on a CI runner: hardcoding it made
+#: every claim check die at collection time with FileNotFoundError, and CI stayed red on main
+#: from 2026-07-31 to 2026-08-08 for that reason alone. Resolved at call time now, with
+#: fallbacks. The interpreter cannot change the answer -- this is an offline replay of a
+#: committed cassette -- and both paths were verified to return identical depths.
 EVAL_PY = "scratchpad/evalvenv/bin/python"
 CLI = "scripts/run_validation_study.py"
 CASSETTES = "tests/fixtures/cassettes"
@@ -47,6 +54,18 @@ def priced_cycles(mmc: int, n_train: int = 8) -> float:
     return (mmc - n_train) / (min(3, n_train) + n_train)
 
 
+def eval_python() -> str:
+    """The interpreter that can run the replay CLI, preferring the dedicated eval venv.
+
+    Falls back to the repo venv, then to the interpreter running this process, which is what CI
+    has after `uv sync`. Exposed so a test can assert the fallback exists rather than trusting it.
+    """
+    for candidate in (EVAL_PY, ".venv/bin/python"):
+        if Path(candidate).exists():
+            return candidate
+    return sys.executable
+
+
 def measured_depth(slug: str, mmc: int, cap: int) -> int | None:
     """Highest GEPA iteration index reached, replayed from the cassette. None if absent.
 
@@ -60,7 +79,7 @@ def measured_depth(slug: str, mmc: int, cap: int) -> int | None:
     with tempfile.TemporaryDirectory() as d:
         proc = subprocess.run(
             [
-                EVAL_PY,
+                eval_python(),
                 CLI,
                 "--task-set",
                 "multi-hard",
