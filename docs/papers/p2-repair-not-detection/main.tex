@@ -794,6 +794,10 @@ test, so we decompose \texttt{mid} and report \texttt{hi} as the ladder's next r
 as the effect. Either way the ordering is the same: the verdict is the minority share and never
 reaches significance, and the repair text is the majority share at every level of it.
 
+The decomposition itself was \emph{not} pre-registered --- only the prediction it rescues was ---
+so we label it exploratory, and note that it reuses the \texttt{lo}/\texttt{mid}/\texttt{hi}
+ladder this paper already runs rather than a contrast invented after seeing the result.
+
 That is this paper's thesis, measured on a worker it was not derived from. We do \emph{not} claim
 it is measured more strongly here: the original's $t = 8.08$ is over five replicates of a fixed
 thirty-task set and carries no task-draw term, while these $t$ values are over twenty seeds
@@ -813,6 +817,15 @@ and demands fixes on $178$ of the $181$ already-correct ones, a false-\emph{alar
 \texttt{gpt-4.1-mini}'s was a false-\emph{pass} machine at precision $0.08$. Both are degenerate;
 neither is a usable detector.
 
+\paragraph{What this run cost us in confidence, and what it bought.} Two defects in our own
+instruments surfaced while buying these cells, and both are reported in the companion paper on
+the silent no-op as its defects~10 and~11: a \texttt{-{}-temperature} flag that reached the
+worker call and not the critique or verdict calls, and a pooled-$\sigma$ estimator that admitted
+a run from another worker as a replicate. The first was found here and fixed before these numbers
+were recorded; the second never reached a released value. We mention them in this section rather
+than only in that one because they were caught \emph{in} this experiment, and a reader entitled
+to weigh these results is entitled to know what the instrument was doing while they were taken.
+
 \paragraph{What this does not corroborate.} \emph{The raw cell ranking is inverted between the
 two workers}, and no decomposition makes that go away: on \texttt{gpt-4.1-mini} the oracle is the
 worst of the three critiques and here it is the best. What replicates is the
@@ -829,8 +842,11 @@ draws $18$. We claim a replication of the detection-versus-repair ordering, not 
 \label{sec:threats}
 
 \textbf{Power.} Runs 4--10 use $n{=}3$ seeds (run 3 uses 5). At $n{=}3$ an exact sign test cannot
-fall below $p=0.25$ even with unanimous seeds, so no seed-level interval in this paper is
-significant and we do not present one as such: the actionability effect,
+fall below $p=0.25$ even with unanimous seeds, so no seed-level interval \emph{on those runs} is
+significant and we do not present one as such. The exception is
+\S\ref{sec:secondworker}, whose cells carry $20$ seeds and do report significant seed-level
+$t$ values; that section is a corroboration on a different worker and none of the claims below
+rest on it. What follows concerns the $n{=}3$ runs: the actionability effect,
 $\dd(\text{hi}-\text{lo})=+0.063$ with interval $[+0.025,+0.090]$, rested on magnitude rather than
 replication when first reported --- $+0.063$ at $2.18\sigma$ of the cross-run floor.
 What carries every claim now is the five-replicate
@@ -979,9 +995,12 @@ register across all three, with the superseded values themselves, is in the rele
     $K{=}5$ standard error divided the \emph{population} sd of the five draws by $\sqrt{5}$, and
     the result was then compared against critical values from $t(4)$ --- a distribution that
     exists \emph{because} the denominator is $n-1$. The unbiased estimator inflates $\sigma$ by
-    $\sqrt{5/4} = 1.118$, so every $t$ in earlier drafts was $10.6\%$ too large. The same
-    mistake in the cross-run estimate, over $30$ paired tasks, moved $\sigma(\dd)$ from $0.0291$
-    to $0.0286$ and every ratio scaled by it by $1.7\%$. Both are corrected throughout. The
+    $\sqrt{5/4} = 1.118$, so every $t$ in earlier drafts exceeded its corrected value by
+    $11.8\%$ (equivalently, correcting one lowers it by $10.6\%$; we state both because the
+    bare phrase ``too large by'' does not say which value is the denominator). The same
+    mistake in the cross-run estimate, over $30$ paired tasks, \emph{understated} $\sigma(\dd)$
+    as $0.0286$ where the unbiased estimator gives $0.0291$, and scaled every ratio built on it
+    by $1.7\%$. Both are corrected throughout, and $0.0291$ is the value divided by here. The
     error was invisible to \texttt{verify\_paper\_claims.py}, which checks the paper against the
     same function that computed it, so paper and checker were wrong together --- the same
     shared-error blind spot as the borrowed $\sigma$, one level down.

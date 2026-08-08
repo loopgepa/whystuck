@@ -130,6 +130,13 @@ SUPERSEDED: dict[str, str] = {
     "3.50": "3.44",
     "3.29": "3.24",
     "1.4": "1.3",
+    # --- the discarded first-draft budget sweep's priced bound -----------------------------------
+    # Not part of the 2026-07-31 sd fix. $7.93 was a bound for a configuration that was never
+    # bought, and it reconciled to nothing the cost model produces under any natural reading of
+    # the config the sentence names (arms, cap and seed count all tried). Replaced 2026-08-08 by
+    # the figure the model actually gives for the two redundant cells, and pinned so it cannot
+    # drift again. Found by a cold reviewer who tried to reproduce it.
+    "7.93": "6.87",
 }
 
 #: Spelled-out counts the papers use as claims. Checked separately from the numeric scan because

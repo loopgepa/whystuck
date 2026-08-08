@@ -52,8 +52,8 @@ exists. Measured from the built PDFs and each paper's own source:
 
 | | paper | pages | tables | figures | distinct citations | package |
 |---|---|---|---|---|---|---|
-| I | `p1-conditional-lever` | 37 | 11 | 3 | 24 | 107 kB |
-| II | `p2-repair-not-detection` | 21 | 4 | 2 | 17 | 85 kB |
+| I | `p1-conditional-lever` | 38 | 11 | 3 | 24 | 107 kB |
+| II | `p2-repair-not-detection` | 22 | 4 | 2 | 17 | 85 kB |
 | III | `p3-silent-no-op` | 19 | 4 | 1 | 13 | 83 kB |
 
 Each package is far under arXiv's 50 MB limit. Abstract lengths against the 1920-character metadata

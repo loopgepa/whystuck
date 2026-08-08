@@ -475,7 +475,10 @@ draft no matter how well it optimizes, and arm~D can. Running the real four-arm 
 real GEPA on this landscape (no stubbed optimizer, no network, no spend) gives
 A~$0.000$, B~$0.000$, C~$0.000$, D~$\mathbf{1.000}$, i.e.\ $\dd(D-B) = +1.000$. The harness
 detects a loop-level advantage when one exists, so the near-zero $\dd$ reported on real tasks
-is a property of those tasks and that optimizer, not of the measurement path
+is a property of those tasks and that optimizer, not of the measurement path. The control is a
+saturating one, $0.000$ against $1.000$, so it establishes that the path is not \emph{dead}; it
+says nothing about sensitivity at the $0.01$--$0.04$ scale the real contrasts live at, against a
+$\sigma(\dd)$ near $0.03$. A canary is not a calibration
 (\texttt{scripts/positive\_control.py}).
 
 We state this as a requirement rather than a courtesy. The control is cheap --- it needs no
@@ -562,7 +565,7 @@ not one non-experiment but two offsetting effects. We previously reported this r
 zeros, which was true of the number and false of the reason. The four
 non-zeros are a different matter again, and must be read against the noise floor
 \S\ref{sec:sigma} measures. Scaled by that $\sigma(\dd)$, two of the
-four sit under $1\sigma$ --- the worker swap at $-0.014$ and the cross-family run at $+0.008$ ---
+four sit under $1\sigma$ --- the worker swap at $-0.014$ and the cross-\emph{lineage} run at $+0.008$ ---
 and two do not: the powered actuator run at $\approx\!3.44\sigma$ and the discarded first four-arm
 attempt at $-0.094$, $\approx\!3.24\sigma$. The caveat is that $\sigma$ was estimated on
 multi-hard while the largest of these is a code run, so its transfer is an assumption and not a
@@ -696,7 +699,12 @@ one integer per component is cheap enough that it does not need one.
 \textbf{The diagnostic is necessary, not sufficient.} A per-component change count catches a
 treatment that never applied. It does not catch a treatment that applied and did something
 degenerate --- our companion paper's non-accepting verifier changes the gene on every seed. That
-needs its own screen, and the cheap one there is a \texttt{PASS} rate of zero. Nor does the count
+needs its own screen, and the cheap one there is a \texttt{PASS} rate of zero. Worse, it reports
+the \emph{reassuring} answer on defect~8: an empty completion accepted as a gene \emph{does}
+differ from the seed, so the count says ``changed'' on precisely the run where the change deleted
+a step of the loop and won on the training subsample by doing so. The blank-gene guard covers that
+case and the count does not, which is why we present the two together rather than the integer
+alone. Nor does the count
 distinguish a semantically meaningful rewrite from a cosmetic one; it is a floor on evidence, not
 a measure of treatment strength.
 
@@ -814,9 +822,12 @@ The series' other two papers carry the entries bearing on their own claims.
     $K{=}5$ standard error divided the \emph{population} sd of the five draws by $\sqrt{5}$, and
     the result was then compared against critical values from $t(4)$ --- a distribution that
     exists \emph{because} the denominator is $n-1$. The unbiased estimator inflates $\sigma$ by
-    $\sqrt{5/4} = 1.118$, so every $t$ in earlier drafts was $10.6\%$ too large. The same
-    mistake in the cross-run estimate, over $30$ paired tasks, moved $\sigma(\dd)$ from $0.0291$
-    to $0.0286$ and every ratio scaled by it by $1.7\%$. Both are corrected throughout. The
+    $\sqrt{5/4} = 1.118$, so every $t$ in earlier drafts exceeded its corrected value by
+    $11.8\%$ (equivalently, correcting one lowers it by $10.6\%$; we state both because the
+    bare phrase ``too large by'' does not say which value is the denominator). The same
+    mistake in the cross-run estimate, over $30$ paired tasks, \emph{understated} $\sigma(\dd)$
+    as $0.0286$ where the unbiased estimator gives $0.0291$, and scaled every ratio built on it
+    by $1.7\%$. Both are corrected throughout, and $0.0291$ is the value divided by here. The
     error was invisible to \texttt{verify\_paper\_claims.py}, which checks the paper against the
     same function that computed it, so paper and checker were wrong together --- the same
     shared-error blind spot as the borrowed $\sigma$, one level down.
@@ -853,14 +864,18 @@ The series' other two papers carry the entries bearing on their own claims.
     \texttt{verify\_paper\_claims.py} pins both counts so a future edit cannot restore a number that
     moves with summation order. Found by a cold reviewer, in the class of defect this series says
     registry-matching structurally cannot reach.
-  \item \textbf{``Seven more instances of the same class.''} Six. Table~\ref{tab:defects} lists nine
-    defects and its caption assigns $1$--$3$ to the original headline --- the unchanged critique gene
-    and the two wiring choices that caused it --- so the instances the audit added are $4$--$9$.
+  \item \textbf{``Seven more instances of the same class.''} Six, at the time of this correction.
+    Table~\ref{tab:defects} then listed nine defects and its caption assigned $1$--$3$ to the
+    original headline --- the unchanged critique gene and the two wiring choices that caused it ---
+    so the instances the audit had added were $4$--$9$.
     \S\ref{sec:defect} always said six; the abstract, contribution~3 and the conclusion said seven,
     which would require a tenth row no table supports. The likely arithmetic is $9-2$: the abstract
     and the conclusion both introduce the original as \emph{two} ordinary wiring choices, which is
     true of its causes and leaves out the symptom the caption counts as defect~1. The count is now
-    derived from the table's own row count and the range its caption names, at all four sites.
+    derived from the table's own row count and the range its caption names, at all four sites,
+    which is why the table's later growth to eleven rows moved every site with it instead of
+    stranding four numbers at nine. That is the difference between a count that is checked and a
+    count that was once correct.
     Found by a cold reviewer. Three of the twelve runs reported it independently, and it is a
     number restated in an abstract --- the one place a reader checks first.
 \end{enumerate}

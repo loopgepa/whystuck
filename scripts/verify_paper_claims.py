@@ -3687,23 +3687,108 @@ def _prose_orphan_checks() -> list[tuple[str, float, float, float]]:
     # artifacts: the replicate count for the t inflation, the paired-task count for the sigma.
     inflate = (l3.k / (l3.k - 1)) ** 0.5  # type: ignore[attr-defined]
     noise = _noise_estimate()
+    # The entry states which value is the buggy one IN WORDS, because printing both numbers and
+    # letting the reader infer the direction is what made two independent reviewers read the
+    # earlier phrasing backwards. Group 1 is the population-sd value, group 2 the corrected one.
+    #
+    # `carried` exists because the previous version skipped a paper whose pattern did not match,
+    # on the theory that not every paper carries the entry. All three do. When a rewording broke
+    # the pattern, the six checks did not fail -- they ceased to exist, and the total silently
+    # fell from 948 to 942. A guard that can evaporate is the defect this series is about.
+    carried = 0
     for slug in src.PAPERS:
         paper = src.paper_tex(slug)
-        pair = _scrape_all(paper, r"moved \$\\sigma\(\\dd\)\$ from \$([\d.]+)\$\s+to \$([\d.]+)\$")
+        pair = _scrape_all(
+            paper,
+            r"\\emph\{understated\} \$\\sigma\(\\dd\)\$\s*\n?\s*as \$([\d.]+)\$ where the "
+            r"unbiased estimator gives \$([\d.]+)\$",
+        )
         if pair[0] != pair[0]:  # NaN: this paper carries no such register entry
             continue
+        carried += 1
         n = src.PAPER_NUMERALS[slug]
         out.append(
-            (f"register {n}: corrected cross-run sigma", pair[0], 0.00005, noise.sigma_delta_mean)
+            (f"register {n}: corrected cross-run sigma", pair[1], 0.00005, noise.sigma_delta_mean)
         )
         out.append(
             (
                 f"register {n}: population-sd cross-run sigma",
-                pair[1],
+                pair[0],
                 0.00005,
                 noise.sigma_delta_mean * ((noise.n_tasks - 1) / noise.n_tasks) ** 0.5,
             )
         )
+    if carried != len(src.PAPERS):
+        raise AssertionError(
+            f"only {carried} of {len(src.PAPERS)} papers state the cross-run sigma correction in "
+            "the form this check reads; it is in all three, so a non-match means the wording "
+            "drifted and these checks were about to disappear rather than fail"
+        )
+    # The discarded first draft of the budget sweep: its priced bound, and the two ratios the
+    # sentence contrasts. The dollar figure was $7.93 and reconciled to no configuration the cost
+    # model can produce; it is now derived from the two redundant cells at the config the text
+    # names. The "12x" was a ratio of priced CYCLES sitting next to the words "budget range",
+    # which reads as the metric-call ratio and is 8x, so both are pinned separately.
+    from whystuck.eval.cost import WORKER_TOKENS, estimate_usd, plan_study_calls
+
+    def _first_draft_cell(mmc: int) -> float:
+        return estimate_usd(
+            plan_study_calls(
+                arms=("B", "D"),
+                n_train=8,
+                n_heldout=10,
+                max_metric_calls=mmc,
+                reflection_calls=6,
+                worker_model="openai/gpt-4.1-mini",
+                reflection_model="openai/gpt-5.6-luna",
+                n_seeds=3,
+                worker_calls_per_task=3,
+                worker_tokens=WORKER_TOKENS,
+            )
+        )
+
+    p1_tex = src.paper_tex("p1-conditional-lever")
+    import analyze_search_depth as _asd
+
+    out.append(
+        (
+            "tex: discarded first-draft sweep bound",
+            _scrape(p1_tex, r"would have spent \\\$([\d.]+) of priced"),
+            0.005,
+            _first_draft_cell(80) + _first_draft_cell(160),
+        )
+    )
+    out.append(
+        (
+            "tex: first-draft priced-depth ratio",
+            _scrape(p1_tex, r"``\$(\d+)\\times\$ range in \\emph\{priced"),
+            0.75,
+            _asd.priced_cycles(160) / _asd.priced_cycles(20),
+        )
+    )
+    out.append(
+        (
+            "tex: first-draft metric-call ratio",
+            _scrape(p1_tex, r"budget itself spans only \$(\d+)\\times\$"),
+            0.0,
+            160 / 20,
+        )
+    )
+    # The two ways the same t inflation can be quoted. Stated both ways in the register precisely
+    # because "too large by" does not name its denominator.
+    for label, pattern, expected in (
+        (
+            "t excess over corrected",
+            r"exceeded its corrected value by\s*\n?\s*\$([\d.]+)\\%\$",
+            100 * (inflate - 1),
+        ),
+        (
+            "t reduction from correcting",
+            r"correcting one lowers it by \$([\d.]+)\\%\$",
+            100 * (1 - 1 / inflate),
+        ),
+    ):
+        out.append((f"register: {label}", _scrape(tex, pattern), 0.05, expected))
     # The two t values the audit found restated from before the correction. Their corrected
     # companions (0.33 and 8.08) are pinned by the tab:curvepairs checks; these are not, because
     # no current artifact produces them --- which is precisely why one of the three drifted.

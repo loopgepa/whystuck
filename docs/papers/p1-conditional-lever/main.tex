@@ -925,7 +925,7 @@ Excluding it, two of three rows are positive.}
 training task constant does not hold search depth constant. Promotable accept cycles,
 $(\mathrm{mmc} - n_{\mathrm{train}})/(\min(3,n_{\mathrm{train}}) + n_{\mathrm{train}})$, rise
 across the sweep as $1.43,\,1.82,\,2.11,\,2.22$, while the reflection minibatch falls from
-$75\%$ of the split to $12\%$. Both move monotonically with $n_{\mathrm{train}}$ and neither
+$75\%$ of the split to $12.5\%$. Both move monotonically with $n_{\mathrm{train}}$ and neither
 was held fixed, so a larger split also means a slightly deeper search over a less
 representative minibatch. The starved arm~B at $n_{\mathrm{train}}{=}4$ is that confound
 becoming visible: $1.43$ promotable cycles is enough budget to pass the guard and not enough
@@ -952,8 +952,9 @@ used a cap of $6$ and every one was budget-bound at $1.43$ to $2.22$ cycles, so 
 bitten and no published number is affected --- but it saturates at
 $\mathrm{mmc} = 8 + 6 \times 11 = 74$, so budgets of $80$ and $160$ buy the \emph{same} six
 proposals and must return the same result. Our first draft of this sweep was
-$\mathrm{mmc} \in \{20,40,80,160\}$ at the inherited cap, which would have spent \$7.93 of priced
-bound on two cells that are one experiment and then reported a ``$12\times$ budget range'' whose
+$\mathrm{mmc} \in \{20,40,80,160\}$ at the inherited cap, which would have spent \$6.87 of priced
+bound on two cells that are one experiment and then reported a ``$12\times$ range in \emph{priced
+search depth}'' --- the metric-call budget itself spans only $8\times$ across that set --- whose
 effective range was $1.09$ to $6$. That is the same confound in a third place, which makes it a
 rule: \textbf{before sweeping a budget, check every other limit that could bind first.}
 
@@ -1196,7 +1197,17 @@ scope.
 \section{Threats to Validity}
 \label{sec:threats}
 
-We state these plainly. \textbf{Power:} runs 4--10 use $n{=}3$ seeds (runs 2--3 use 5), and
+We state these plainly. \textbf{The $p_0$ axis is an operationalization, not a dial.} Our levels
+raise $p_0$ by excluding constraints, and exclusion does not only make tasks easier: it re-assigns
+which constraints the hard tier forces into every task, so a level names a slightly different
+generator. On \texttt{gpt-4.1-mini} the three levels happen to form a clean ladder
+($0.067 \to 0.267 \to 0.667$); on a \texttt{llama-3.3-70b} worker the same three give
+$0.095$, $0.905$ and $0.810$, non-monotonic and with no middle rung (D9,
+\S\ref{sec:directions}). So the swing this paper reports is a swing across \emph{these levels on
+this worker}, and the claim that it is $p_0$ doing the work rests on the mechanism argument of
+\S\ref{sec:decomp} rather than on the axis being portable. Building a level to a measured $p_0$
+target, rather than discovering one by exclusion, is the open problem and is why D9 is listed as
+such. \textbf{Power:} runs 4--10 use $n{=}3$ seeds (runs 2--3 use 5), and
 our earlier claim that the intervals were ``unusually informative despite small $n$'' is
 withdrawn as circular (Paper~III); we now report per-run tie counts alongside every
 interval and an exact sign test. At $n{=}3$ that test cannot fall below $p=0.25$ even with
@@ -1368,7 +1379,8 @@ Power, $n{=}3$; no sampling variance & Partly, as released & $\sigma(\dd) = 0.02
 \textbf{$\dd$ credits the treatment with a shared gene} (\S\ref{sec:decomp}) & \textbf{Closed}
   (\S\ref{sec:decomp}) & Both arms evolve \texttt{generate}, so $\dd$ mixes it with the
   treatment; the draft/loop split separates them offline from the released artifact \\
-Cross-lineage, not cross-provider & \textbf{Closed} (\S\ref{sec:directions}) & Bought on a
+Cross-lineage, not cross-provider & \textbf{Closed by spend}, result inconclusive
+  (\S\ref{sec:directions}) & Bought on a
   second vendor's key: \texttt{llama-3.3-70b} judging the same \texttt{gpt-4.1-mini} worker at
   $8$ seeds. Crossing the provider boundary made detection \emph{worse} --- a critic that never
   passes --- and $\dd$ did not move (D3) \\
@@ -1620,9 +1632,12 @@ The series' other two papers carry the entries bearing on their own claims.
     $K{=}5$ standard error divided the \emph{population} sd of the five draws by $\sqrt{5}$, and
     the result was then compared against critical values from $t(4)$ --- a distribution that
     exists \emph{because} the denominator is $n-1$. The unbiased estimator inflates $\sigma$ by
-    $\sqrt{5/4} = 1.118$, so every $t$ in earlier drafts was $10.6\%$ too large. The same
-    mistake in the cross-run estimate, over $30$ paired tasks, moved $\sigma(\dd)$ from $0.0291$
-    to $0.0286$ and every ratio scaled by it by $1.7\%$. Both are corrected throughout. The
+    $\sqrt{5/4} = 1.118$, so every $t$ in earlier drafts exceeded its corrected value by
+    $11.8\%$ (equivalently, correcting one lowers it by $10.6\%$; we state both because the
+    bare phrase ``too large by'' does not say which value is the denominator). The same
+    mistake in the cross-run estimate, over $30$ paired tasks, \emph{understated} $\sigma(\dd)$
+    as $0.0286$ where the unbiased estimator gives $0.0291$, and scaled every ratio built on it
+    by $1.7\%$. Both are corrected throughout, and $0.0291$ is the value divided by here. The
     error was invisible to \texttt{verify\_paper\_claims.py}, which checks the paper against the
     same function that computed it, so paper and checker were wrong together --- the same
     shared-error blind spot as the borrowed $\sigma$, one level down.
