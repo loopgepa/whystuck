@@ -129,3 +129,76 @@ for CELL in "$W $W G1" "$W $O G2" "$O $W G3" "$O $O G4"; do
     --report docs/validation-study-splice-$3.md
 done
 ```
+
+## RESULT — G1 bought and both gates passed; G2–G4 CANCELLED (2026-08-08)
+
+Recorded late, on 2026-08-09, after an audit found this file had no outcome section while its G1
+artifact sat in `docs/`. That is the omission this registration's own preamble warns about — a
+registered design whose result is written down somewhere else is a design whose result can be
+chosen after the fact. The cancellation was recorded in
+`2026-08-08-groq-second-worker-replication-preregistration.md`; it belongs here too.
+
+**G1 bought. G2, G3 and G4 never bought. Spend: G1's bound of $0.0103.**
+
+### The two registered gates, read in the registered order
+
+**Fallback check (INVALID rule) — PASSES, and passes for the wrong reason.** The observed
+fallback rate on the diagonal is **0 of 30**, as required. But the rule was written to detect
+whether the two calls disagree, and it cannot: the fallback fires only when the verdict says FAIL
+while the prose source said PASS, and this critic emits `PASS` on **0 of 30** drafts. With a prose
+source that never passes, the fallback rate is 0 whatever the verdict does. **The check is
+vacuous on this worker** — it reports the answer the design wanted without having tested the
+thing the design cared about. Registering it was right; reading it as evidence the mechanism is
+inert would not be.
+
+**What the direct check says instead.** Comparing the recorded completions rather than the
+fallback counter: the 60 diagonal completions hold **31 distinct** values, so 29 of the 30 prompts
+returned byte-identical text on both surfaces and **one did not**. Against the pre-fix exhibit's
+**60 distinct of 60**, `--temperature 0` reaching the critique and verdict surfaces is what moved
+0/30 agreement to 29/30. It did not reach 30/30. This registration claimed the diagonal would be
+"inert by construction rather than by hope"; at 1/30 that claim is **too strong** and is withdrawn.
+Temperature 0 is not a determinism guarantee at the provider — batching and kernel scheduling can
+still move a token — so a diagonal cell is inert *in practice and by measurement*, not by
+construction. Any future splice must measure it rather than assume it.
+
+**p₀ gate — PASSES, does not trip.** G1's seed-genome held-out mean is **0.7033** (per seed
+0.6800, 0.6750, 0.7550), inside the registered `[0.15, 0.95]` band, so the 8B worker leaves room
+for a critic to matter. `--arms A` runs no optimizer, so `opt_heldout` equals `seed_heldout`
+exactly on all three seeds, as it should.
+
+### Why G2–G4 were still not bought
+
+Both gates passed, so the cancellation is **not** a gate trip. Two independent reasons, both of
+which post-date this registration and neither of which is a number from G1:
+
+1. **The cross-lineage critic this design names does not work.** `groq/openai/gpt-oss-120b` is a
+   reasoning model: at the 320-token cap it spends the whole allowance on reasoning and returns an
+   empty completion, which Paper III's blank-completion guard correctly refuses. Measured 0
+   characters at `max_tokens=320` even at `reasoning_effort=low`. G2–G4 all route to it. Recorded
+   in the second-worker registration's model table.
+2. **There is no lift left to decompose.** The splice exists to attribute a cross-lineage lift.
+   On the `llama-3.3-70b` line the cross-lineage critic's *total* effect is $+0.0077$ at
+   $t = +0.82$ — nothing — so the 2×2 would be partitioning zero. The oracle `lo`/`mid`/`hi` ladder
+   answers the same verdict-versus-prose question better: it holds the verdict perfectly fixed
+   while only the prose varies, with no second sampled call, no fallback rule, and no mechanism
+   artifact of the kind that moved the OpenAI V1 cell by $+0.027$.
+
+### What G1 is kept for
+
+Not for its contrast values, which the commitments above forbid using. It is kept because it is
+the run whose foreign worker enrolled as an eleventh σ replicate — **Paper III's defect 11** — and
+the artifact behind a published guard has to be re-derivable or the guard's evidence is a claim
+about a file nobody can check. It is registered in `verify_reproducibility.RUNS` as
+`splice G1 (diagonal)` and replays bit-for-bit at $0. The numbers in this section are derived
+from that artifact and its cassette by
+`tests/test_run_validation_study.py::test_the_g1_diagonal_is_inert_by_measurement_not_construction`,
+so they cannot drift from what was recorded.
+
+### Standing commitments, discharged
+
+- The observed fallback rate is reported: **0 of 30**, together with the reason it is
+  uninformative here.
+- No cell was dropped after seeing its number: G2–G4 were dropped on a model-capability fact and
+  on a result from a different line, not on G1's contrast.
+- No paper sentence claims this run explains the `+0.048`. Paper II keeps its sentence declining
+  to attribute it.

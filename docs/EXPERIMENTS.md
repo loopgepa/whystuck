@@ -12,21 +12,21 @@ claim to the command that produced it.
 2. **Every paid call is recorded, so every paid run replays for free.** Calls go to a
    content-addressed cassette (`sha256` of name + arguments). `--replay` re-executes the whole
    pipeline against the cache with no API key, and a cassette miss raises rather than falling
-   through to the network. That is why the 13 corrected-harness runs can be re-verified by anyone
+   through to the network. That is why the 25 corrected-harness runs can be re-verified by anyone
    who clones the repository.
 
 ## Quick start: reproduce the papers without spending anything
 
 ```bash
 # 1. every machine-checkable number in all three papers, against the released artifacts
-python scripts/verify_paper_claims.py            # 953 checks, offline, $0
+python scripts/verify_paper_claims.py            # 970 checks, offline, $0
 
 # 2. the three-way split lost no quantity
-python scripts/verify_split_coverage.py          # 322 pre-split quantities accounted for, $0
+python scripts/verify_split_coverage.py          # 318 pre-split quantities accounted for, $0
 
 # 3. every corrected-harness paid run replays bit-for-bit from its cassette
 #    (needs the eval extra: pip install -e '.[eval]')
-python scripts/verify_reproducibility.py         # 13 verified, 12 skipped as superseded, $0
+python scripts/verify_reproducibility.py         # 25 verified, 13 skipped as superseded, $0
 
 # 4. the figures, redrawn from the artifacts
 python scripts/make_figures.py                   # writes docs/papers/shared/figures/*.pdf, $0
@@ -135,8 +135,8 @@ to stop computing depth and measure it.
 
 | script | asserts |
 |---|---|
-| `verify_paper_claims.py` | 953 checks: every machine-checkable number in the three papers against the artifacts, plus per-paper spine numbers, cross-paper agreement, and each paper's corrections count |
-| `verify_split_coverage.py` | all 322 quantities in the pre-split draft are carried by some paper, superseded by a verified replacement, or explicitly dropped with a reason |
+| `verify_paper_claims.py` | 970 checks: every machine-checkable number in the three papers against the artifacts, plus per-paper spine numbers, cross-paper agreement, and each paper's corrections count |
+| `verify_split_coverage.py` | all 318 quantities in the pre-split draft are carried by some paper, superseded by a verified replacement, or explicitly dropped with a reason |
 | `verify_reproducibility.py` | every corrected-harness run replays bit-for-bit; superseded runs are **skipped and reported**, never silently "verified" |
 | `verify_stdio.py` | the MCP console script speaks stdio (product, not paper) |
 | `check_public_claims.sh` | the README's test-count claim is not an overstatement |
@@ -163,9 +163,9 @@ code-domain cassette key changes with it.
 
 | path | contents |
 |---|---|
-| `docs/validation-study-*.json` | 33 study runs, per-arm and **per-task** held-out vectors, evolved gene text, per-gene accepted-change counts, and the pre-flight cost estimate |
+| `docs/validation-study-*.json` | 43 study runs, per-arm and **per-task** held-out vectors, evolved gene text, per-gene accepted-change counts, and the pre-flight cost estimate |
 | `docs/repeat/*.json` | 225 replicate scorings (135 p₀ + 90 curve) |
-| `tests/fixtures/cassettes/**` | 257 cassettes; this is what makes replay free |
+| `tests/fixtures/cassettes/**` | 267 cassettes; this is what makes replay free |
 | `docs/papers/PRE-SPLIT-SOURCE.tex` | the 46-page pre-split draft, frozen at `fe628ed`, **never built**. Provenance for the split proof |
 
 Each run JSON records a pre-flight **bound** on spend, not an invoice. Bounds are labelled as

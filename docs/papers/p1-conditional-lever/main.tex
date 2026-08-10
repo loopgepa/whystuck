@@ -1434,8 +1434,15 @@ shows to be partly feedback-limited and partly generator-limited. Each changes o
     over prompt-only optimization under either. On the \emph{unoptimized} loop the two critics do
     separate, and Paper~II reports that separately --- a distinction worth keeping, since the two
     axes were briefly conflated while this entry was being written.
+    The degeneracy is \emph{not} one model's quirk: a third lineage, \texttt{qwen3.6-27b},
+    put in the critique seat over a \texttt{llama-3.3-70b} worker emits \texttt{PASS} on none
+    of $200$ first drafts, $20$ of which were already correct (Paper~II's
+    cross-worker section). That was this entry's \emph{Remaining} item and it is
+    discharged, with one qualification we keep rather than round off: \texttt{qwen} is a second
+    \emph{lineage} but not a second \emph{provider}, since it and its worker are served by the
+    same vendor.
     \emph{Remaining:} the same comparison with an evolved rather than a seed critique, and a
-    second cross-provider family to show the degeneracy is not one model's quirk.
+    genuinely second serving provider.
     This run also supplied the companion paper's first \emph{prospective} test of its
     reporting minimum, and strengthened it: arm~D accepted on only $3$ of $8$ seeds, and $74\%$ of
     the positive $\dd$ came from two seeds where the treatment never applied

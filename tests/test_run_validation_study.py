@@ -802,3 +802,61 @@ def test_the_pre_fix_exhibit_shows_the_flag_never_reached_the_two_surfaces():
         pathlib.Path("docs/papers/p3-silent-no-op/main.tex").read_text(encoding="utf-8"),
     )
     assert claimed, "Paper III no longer states the 30-of-30 claim this exhibit backs"
+
+
+#: The Groq splice registration's RESULT section. Pre-registrations are not scraped by
+#: `verify_paper_claims`, which reads the papers, so a number written into a deviation record has
+#: nothing pinning it -- and a deviation record is exactly where a convenient number would do the
+#: most damage. These four are derived here instead.
+_G1_SPEC = pathlib.Path(
+    "docs/superpowers/specs/2026-08-08-groq-verdict-prose-splice-preregistration.md"
+)
+
+
+def test_the_g1_diagonal_is_inert_by_measurement_not_construction():
+    """G1's four recorded facts, against the artifact and the words claiming them.
+
+    The registration predicted the diagonal would be inert *by construction* once
+    `--temperature 0` reached both surfaces. It is not: one prompt of thirty still returns
+    different text on the two surfaces, because temperature 0 is a sampling setting and not a
+    provider determinism guarantee. That withdrawal is the point of the section, so the test
+    asserts the number is 29 rather than asserting agreement -- a guard written as
+    `assert all_identical` would have to be deleted to record the truth, and a guard you delete
+    to tell the truth is a guard that was pushing you to tell something else.
+    """
+    entries = json.loads(
+        pathlib.Path("tests/fixtures/cassettes/study-splice-G1.json").read_text(encoding="utf-8")
+    )["entries"]
+    critic = [v["output"] for v in entries.values() if v.get("name") == "critic"]
+    verdict = [v["output"] for v in entries.values() if v.get("name") == "verdict"]
+    assert len(critic) == len(verdict) == 30
+
+    # 30 distinct prompts per surface, so a shared completion is a matched pair and the union
+    # size counts them: 31 distinct means 29 of 30 pairs agreed.
+    assert len(set(critic)) == len(set(verdict)) == 30, "a surface repeated a completion"
+    agreed = 60 - len(set(critic) | set(verdict))
+    spec = _G1_SPEC.read_text(encoding="utf-8")
+
+    assert "**31 distinct**" in spec and "29 of the 30 prompts" in spec, (
+        "the G1 registration no longer states the diagonal agreement in the form this guard "
+        "reads; update both together rather than letting the record and the artifact part"
+    )
+    assert agreed == 29, f"the recorded diagonal now agrees on {agreed} of 30, not 29"
+
+    # The registered INVALID rule reports 0 fallbacks -- because the prose source never passes,
+    # not because the surfaces agree. Both halves are asserted, since the section's claim is
+    # that the first is true and uninformative.
+    passes = [t for t in critic if t.strip().upper().startswith("PASS")]
+    assert not passes, "the 8B critic now emits PASS, so the vacuity argument needs rewriting"
+    assert "**0 of 30**" in spec and "vacuous on this worker" in spec
+
+    runs = json.loads(
+        pathlib.Path("docs/validation-study-splice-G1.json").read_text(encoding="utf-8")
+    )["runs"]
+    seeds = [r["A"]["seed_heldout"] for r in runs]
+    assert [r["A"]["opt_heldout"] for r in runs] == seeds, "--arms A optimized something"
+    assert f"{sum(seeds) / len(seeds):.4f}" == "0.7033", "G1's p0-gate mean moved"
+    assert "**0.7033**" in spec, "the registration no longer states the mean it was gated on"
+    assert 0.15 < sum(seeds) / len(seeds) < 0.95, (
+        "the gate would now trip; the record says it did not"
+    )

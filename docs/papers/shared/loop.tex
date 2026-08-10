@@ -39,11 +39,17 @@ scoring) against the cached calls with no API key, and any cassette miss raises 
 after the correction in Evidence~7, per run as well, since a consumer that swallows the per-call
 error can otherwise let a replay finish with a different number. GEPA is deterministic under
 replay, so replay is bit-for-bit, and \texttt{scripts/verify\_reproducibility.py}
-registers twenty-six committed runs. Twelve are labelled \textbf{superseded} because
-the corrected harness changes every reflection prompt and therefore every cassette key, so it
-cannot replay them and the script reports them as skipped rather than verified.
-The remaining fourteen were recorded under the corrected harness and every per-arm held-out score replays
-exactly. Output tokens are hard-capped via enforced \texttt{max\_tokens}; a pre-flight guard
+registers thirty-eight committed runs. Thirteen are labelled \textbf{superseded} and each
+carries its own reason: eleven because the corrected harness changes every reflection prompt and
+therefore every cassette key, and two because replaying them re-serves an empty reflection
+completion that the blank-gene guard now refuses. The script reports them as skipped rather than
+verified.
+The remaining twenty-five were recorded under the corrected harness and every per-arm held-out score replays
+exactly. The five remaining runs of the forty-three released are the
+BigCodeBench ones, listed as unreplayable because executing model code re-rolls unseeded
+randomness and so shifts the content-addressed prompt key. Those three states partition the
+release with nothing left over, and a test asserts they do: a run that supplies a number in
+these pages cannot hold no reproducibility status at all. Output tokens are hard-capped via enforced \texttt{max\_tokens}; a pre-flight guard
 refuses any run whose conservative estimate exceeds \texttt{-{}-max-usd}, whose default is \$5.
 Five runs raised it explicitly, at four distinct values (\$6.18 twice, \$5.89, \$6.52, \$11.76), so
 \$5 is a default rather than a study-wide ceiling. Every experiment was pre-registered --- hypothesis,

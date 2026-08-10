@@ -5,6 +5,15 @@ the two properties that keep it honest: it declares success only after verifying
 every registered run, and its score comparison actually discriminates. (Full
 replay of the real cassettes needs gepa+litellm and lives in the eval venv, run
 via `scripts/verify_reproducibility.py`; these are the gepa-free logic guards.)
+
+A third property arrived later and is the one this file exists for now: SCOPE. Every
+released run backs at least one published number -- instrumenting the claim checker shows it
+reads all 43 -- but for a long while only 26 were registered here, so 17 runs supplied paper
+values while holding no replay status at all. Nothing was wrong with them; eleven of them
+replay bit-for-bit, which is precisely the point. Their status was unstated, and an unstated
+status reads to a reader as the guarantee covering everything it does not disclaim. That is
+this study's own subject applied to its release, so it gets a machine check rather than
+diligence: the partition below must stay total.
 """
 
 from __future__ import annotations
@@ -15,6 +24,16 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
 
 import verify_reproducibility as vr  # noqa: E402
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+
+
+def _released() -> set[str]:
+    return {f"docs/{p.name}" for p in (ROOT / "docs").glob("validation-study*.json")}
+
+
+def _registered() -> set[str]:
+    return {committed for _label, committed, *_ in vr.RUNS}
 
 
 def test_every_registered_run_is_marked_superseded():
@@ -35,6 +54,60 @@ def test_every_registered_run_is_marked_superseded():
         f"EXPECTED_RUNS={vr.EXPECTED_RUNS} but {len(live)} run(s) are not superseded: "
         f"{sorted(live)}; a stale count lets a lost run pass unnoticed"
     )
+
+
+def test_every_released_run_has_a_recorded_replay_status():
+    """No released run may hold no status. This is the scope guard.
+
+    Three states, and the union must be everything in `docs/`: registered in `RUNS` (it
+    replays, or it is `SUPERSEDED` with a stated reason), or listed in `UNREPLAYABLE` with a
+    stated reason. A run that is in neither is not "known to be fine" -- it is a run whose
+    reproducibility nobody has claimed either way, while its numbers sit in a paper.
+    """
+    unaccounted = sorted(_released() - _registered() - set(vr.UNREPLAYABLE))
+    assert not unaccounted, (
+        f"these released runs back paper numbers but hold no replay status: {unaccounted}. "
+        "Register them in verify_reproducibility.RUNS (with frozen CLI args), or add them to "
+        "UNREPLAYABLE with a reason no replay can be produced. Do not leave them silent."
+    )
+
+
+def test_no_run_is_claimed_both_replayable_and_unreplayable():
+    """The two lists must be disjoint, or a run's status depends on which one you read."""
+    both = sorted(_registered() & set(vr.UNREPLAYABLE))
+    assert not both, f"registered as replayable AND listed unreplayable: {both}"
+
+
+def test_no_unreplayable_entry_names_a_run_that_does_not_exist():
+    """A dead exclusion stops describing the release and starts excusing whatever collides
+    with its path next -- the same rot `test_paper_table_coverage._EXEMPT` is guarded against.
+
+    `RUNS` is deliberately NOT held to this: a row may be registered before it is bought, which
+    is how the exact args get committed ahead of the numbers. An exclusion has no such excuse.
+    """
+    dead = sorted(p for p in vr.UNREPLAYABLE if not (ROOT / p).exists())
+    assert not dead, f"UNREPLAYABLE excuses runs that are not in the release: {dead}"
+
+
+def test_every_stated_reason_is_an_actual_reason():
+    """Guard against the escape hatch: satisfying the partition with an empty string.
+
+    A one-word reason passes the letter of the scope guard and defeats its purpose, so the
+    floor is a sentence's worth of text. This is a crude proxy and is meant to be -- it cannot
+    tell a good reason from a bad one, only a stated one from a placeholder.
+    """
+    thin = sorted(
+        k for d in (vr.SUPERSEDED, vr.UNREPLAYABLE) for k, v in d.items() if len(v.strip()) < 40
+    )
+    assert not thin, f"these entries state a placeholder rather than a reason: {thin}"
+
+
+def test_the_scope_guard_is_not_vacuous():
+    """If `_released()` ever returned nothing, the partition test above passes forever."""
+    released = _released()
+    assert len(released) >= 40, f"expected the full release, found {len(released)} run JSONs"
+    assert vr.UNREPLAYABLE, "no exclusions listed; delete the guard or restore the entries"
+    assert _registered() & released, "no registered run names a released artifact"
 
 
 def test_all_superseded_does_not_claim_reproduction(monkeypatch, capsys):
@@ -90,7 +163,7 @@ def test_a_registered_but_unbought_run_is_pending_not_a_failure(monkeypatch, cap
         "RUNS",
         [("future run", "docs/does-not-exist-yet.json", "tests/fixtures/nope.json", [])],
     )
-    monkeypatch.setattr(vr, "SUPERSEDED", frozenset())
+    monkeypatch.setattr(vr, "SUPERSEDED", {})
     rc = vr.main()
     out = capsys.readouterr().out
     assert "PENDING" in out, out

@@ -158,8 +158,19 @@ SPELLED_CLAIMS: tuple[str, ...] = (
 #: on 2026-08-06. It was bought after the study, replays bit-for-bit, and is quoted by all three
 #: papers, so leaving it outside the registry would have understated the guarantee.
 SPELLED_SUPERSEDED: dict[str, str] = {
-    "thirteen": "fourteen",  # runs that replay from cassette
-    "twenty-five": "twenty-six",  # runs the registry covers at all
+    # Emptied 2026-08-09, and the reason is worth keeping because it is a limit of this guard
+    # rather than a change in the papers. The two entries were `thirteen -> fourteen` (runs that
+    # replay from cassette) and `twenty-five -> twenty-six` (runs the registry covers at all).
+    # Registering eleven more runs moved those counts again: replay went to twenty-five and the
+    # registry to thirty-eight, while thirteen came back as the number of SUPERSEDED runs. So
+    # both retired words are stated in the papers once more, attached to different quantities.
+    #
+    # This guard matches spelled words, not quantities-in-context, so it cannot tell one
+    # `thirteen` from another, and leaving the entries in would have had it assert that a word
+    # the papers do state is absent. Neither word is missing now, so neither needs an exemption
+    # and both entries are dead: `missing_spelled` only excuses words that VANISHED. Deleting
+    # them is the honest move, and the reason they cannot simply be re-pointed is recorded here
+    # so the next person does not rediscover it as a puzzle.
 }
 
 

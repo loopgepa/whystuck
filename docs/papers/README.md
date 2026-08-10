@@ -74,7 +74,7 @@ does not, something regressed.
 ## Verifying
 
 ```bash
-python scripts/verify_paper_claims.py     # 953 checks against the released artifacts, $0
+python scripts/verify_paper_claims.py     # 970 checks against the released artifacts, $0
 python scripts/verify_split_coverage.py   # the split lost no quantity, $0
 python -m pytest tests/test_split_coverage.py tests/test_paper_prose_coverage.py \
     tests/test_paper_table_coverage.py tests/test_paper_sigma_coverage.py tests/test_figures.py
@@ -93,7 +93,7 @@ silently narrowed its own scope is precisely the defect Paper III is about.
 - **Per-paper view** (`paper_tex(slug)`): the spine checks (each paper still carries its own
   headline numbers), the cross-paper agreement checks (a number quoted by two papers must be the
   same number in both), and each paper's corrections count.
-- **Split proof** (`verify_split_coverage.py`): all 322 quantities in the frozen pre-split draft
+- **Split proof** (`verify_split_coverage.py`): all 318 quantities in the frozen pre-split draft
   are carried by at least one paper, or superseded by a replacement that is *verified present*, or
   explicitly dropped with a reason. Zero are dropped.
 
@@ -123,16 +123,30 @@ derived from the replay.
 
 ## Shared across all three
 
-- **One artifact release.** 43 study runs, 225 replicate scorings, 267 cassettes. **34 of the runs
-  are the papers' own**; the other **9** are a second-worker replication line bought on a Groq
-  credential (`validation-study-groq-*`, `validation-study-splice-*`). No paper cites that line
-  yet, and it deliberately runs a different worker, so none of its numbers extends a released
-  curve. It is committed rather than held back because its cassettes are what make it checkable.
+- **One artifact release.** 43 study runs, 225 replicate scorings, 267 cassettes. Four workers,
+  and the split is the thing to know before reading any of them: **33** runs are on
+  `openai/gpt-4.1-mini`, the worker every released curve is measured on; **1** is the
+  `openai/gpt-4.1-nano` worker swap (Paper I's run 11); **8** are on
+  `groq/llama-3.3-70b-versatile` and **1** on `groq/llama-3.1-8b-instant`. Those last **9** are a
+  second-worker replication line bought on a Groq credential (`validation-study-groq-*`,
+  `validation-study-splice-*`). A different worker is a different baseline, so **none of that
+  line's numbers extends a released curve** — it corroborates rather than continues. All three
+  papers draw on it, and each says which part it is entitled to: Paper II
+  builds its cross-worker section on the six detector cells, Paper I cites the collapse of the
+  `p₀` ladder on that worker as evidence for an open design problem and explicitly declines to
+  carry its own lever there, and Paper III takes defects 10–11 from the instruments that broke
+  while it was being bought.
 - **One corrections register, split three ways.** Each paper carries the withdrawals bearing on its
   own claims and states its own count; the full register across all three is the union. Every count
   is derived from the entries actually listed, because it drifted twice during the study.
-- **One reproducibility guarantee.** 14 corrected-harness runs replay bit-for-bit from cassette at
-  `$0`; 12 earlier runs are labelled superseded and reported as skipped, never silently verified.
+- **One reproducibility guarantee, and it now covers the whole release.** Every one of the 43 runs
+  holds a recorded status, and the three states partition it: **25** replay bit-for-bit from
+  cassette at `$0`, **13** are registered with frozen CLI args and labelled superseded — each with
+  its own stated reason, never a blanket one — and **5** BigCodeBench runs are listed as
+  unreplayable because executing model code re-rolls unseeded randomness and shifts the
+  content-addressed prompt key. `tests/test_verify_reproducibility.py` asserts that partition is
+  total, so a run cannot supply a published number while holding no status at all. It reached 25
+  from 14 by registration alone: eleven runs were already replaying and nothing said so.
 
 ## Status
 
