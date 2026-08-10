@@ -1,7 +1,13 @@
 #!/usr/bin/env python
-"""Replay the SUPERSEDED paid runs from their cassettes (offline, $0).
+"""Replay every released paid run from its cassette (offline, $0), or say why it cannot.
 
-STATUS — read this before quoting any number this script prints. The eleven runs listed
+Each released run reaches exactly one of three states, and the point of the script is that
+none of them is silence: it REPLAYS bit-for-bit, or it is registered with frozen args and
+SUPERSEDED with a stated reason, or it is listed in `UNREPLAYABLE` with a stated reason.
+`tests/test_verify_reproducibility.py` asserts the partition is total, so a run cannot back a
+published number while quietly holding no replay status at all.
+
+STATUS — read this before quoting any number this script prints. Eleven of the runs listed
 below were recorded under a harness with three defects that a later audit established:
 
   1. the reflective dataset was component-agnostic (`adapter.py` handed every gene the
@@ -37,37 +43,75 @@ from pathlib import Path
 import run_validation_study as cli
 
 CASSETTES = "tests/fixtures/cassettes"
-# Every entry below predates the harness correction, so none of them can replay under the
-# current code. Listing them explicitly (rather than deleting them) keeps the record of
-# what was run, and makes the count of still-verifiable runs honest: zero, until a run is
-# recorded under the corrected wiring.
-SUPERSEDED = frozenset(
-    {
-        "run1 single-constraint",
-        "run2 easy-multi",
-        "run3 hard-multi",
-        "run4 feedback",
-        "run5 plan",
-        "run6 cross-lineage",
-        "run7 oracle",
-        "run8 fix-budget",
-        "run9 fb-actionability lo",
-        "run10 fb-actionability hi",
-        "D5-code MBPP+ (saturated)",
-        # Not superseded by the wiring correction like the eleven above, but by the
-        # blank-gene guard the run itself motivated. See EXPECTED_RUNS below.
-        "C2 four-arm corrected harness",
-    }
+#: label -> why this registered run cannot replay under HEAD. A dict rather than a set because
+#: the reasons are NOT the same, and printing one reason for all of them was itself a small
+#: instance of this study's subject: for eleven entries "recorded under the pre-correction
+#: harness" is true, and for `C2` it is false -- C2 was recorded under the corrected wiring and
+#: is unreplayable for an unrelated reason (the blank-gene guard it motivated). The skip line
+#: now states each entry's own reason, so a reader cannot be told a true-sounding falsehood
+#: about why a number is not verifiable.
+_WIRING = "recorded under the pre-correction harness (component-agnostic reflective dataset)"
+SUPERSEDED: dict[str, str] = {
+    "run1 single-constraint": _WIRING,
+    "run2 easy-multi": _WIRING,
+    "run3 hard-multi": _WIRING,
+    "run4 feedback": _WIRING,
+    "run5 plan": _WIRING,
+    "run6 cross-lineage": _WIRING,
+    "run7 oracle": _WIRING,
+    "run8 fix-budget": _WIRING,
+    "run9 fb-actionability lo": _WIRING,
+    "run10 fb-actionability hi": _WIRING,
+    "D5-code MBPP+ (saturated)": _WIRING,
+    # Not superseded by the wiring correction like the eleven above, but by the
+    # blank-gene guard the run itself motivated. See EXPECTED_RUNS below.
+    "C2 four-arm corrected harness": (
+        "blank-gene guard refuses the empty reflection completion this cassette re-serves"
+    ),
+    # Same guard, a different run: replaying run11 raises on a blank `generate` gene. That is
+    # informative rather than incidental -- Paper I quotes run11's worker swap, and the reader
+    # is entitled to know its recording contains an accepted empty completion of exactly the
+    # kind Paper III's defect 8 describes. The measured numbers stand; the replay does not.
+    "run11 worker swap (nano)": (
+        "blank-gene guard refuses an empty `generate` completion accepted at record time"
+    ),
+}
+
+#: Released run -> why it is not registered as a replay row at all. Distinct from SUPERSEDED,
+#: which holds runs that ARE registered (exact args frozen) and cannot replay. This was a prose
+#: paragraph naming one BCB run; the release holds five, so the note covered a fifth of what a
+#: reader would have taken it to cover. Machine-readable so `tests/test_verify_reproducibility.py`
+#: can assert that every released run appears in exactly one of the two.
+_BCB_NONDETERMINISM = (
+    "BigCodeBench-Hard executes model code in a Docker sandbox. Model solutions may use "
+    "unseeded randomness, so re-execution yields run-to-run variation that shifts the "
+    "content-addressed prompt key -- an intrinsic property of executable-code benchmarks, not "
+    "an oversight. Per-execution grading is deterministic and the headline reproduced "
+    "identically across two independent paid runs (see Paper I, 'Reproducibility scope')."
 )
-EXPECTED_RUNS = 14  # corrected harness: two C1 conditions, C2b, p0 L2/L3, the three rows of
-# the split-size sweep, the five bought rows of the budget sweep (D4), and the cross-provider
-# critic run (D3), which is the only run in the set with a critique on a second vendor.
-# C2 is NOT among them. Auditing it found that two reflection completions came back empty and
-# GEPA accepted one as the verify gene, so `genome_from_candidate` now refuses blank gene text
-# -- and that guard makes C2's own cassette unreplayable, because replaying it re-serves the
-# empty completion and the guard (correctly) raises. Its numbers stand as measured but are not
-# verifiable under HEAD, which is exactly the state SUPERSEDED exists to record. C2b is the
-# re-run under the guard and the raised reflection cap, and it does replay bit-for-bit.
+UNREPLAYABLE: dict[str, str] = {
+    "docs/validation-study-bcb.json": _BCB_NONDETERMINISM,
+    "docs/validation-study-bcb-actuator.json": _BCB_NONDETERMINISM,
+    "docs/validation-study-bcb-actuator-big.json": _BCB_NONDETERMINISM,
+    "docs/validation-study-bcb-acthi.json": _BCB_NONDETERMINISM,
+    "docs/validation-study-bcb-actlo.json": _BCB_NONDETERMINISM,
+}
+
+EXPECTED_RUNS = 25  # corrected harness: two C1 conditions, C2b, p0 L2/L3, the two OpenAI p0
+# CALIBRATION passes (L2/L3, arms A -- these supply the p0 ladder Paper I's headline turns on
+# and had been backing it from outside the guarantee), the three rows of the split-size sweep,
+# the five bought rows of the budget sweep (D4), the cross-provider critic run (D3), and the
+# eleven-run Groq second-worker line: three p0 calibration passes, five detector cells, and the
+# verdict/prose splice G1. That line is registered for the same reason D3 is -- Paper II's
+# `tab:secondworker` is built on it, so a run carrying an argument must not sit outside the
+# replay guarantee.
+# C2 and run11 are NOT among the 25. Auditing C2 found that two reflection completions came back
+# empty and GEPA accepted one as the verify gene, so `genome_from_candidate` now refuses blank
+# gene text -- and that guard makes C2's own cassette unreplayable, because replaying it
+# re-serves the empty completion and the guard (correctly) raises. Its numbers stand as measured
+# but are not verifiable under HEAD, which is exactly the state SUPERSEDED exists to record. C2b
+# is the re-run under the guard and the raised reflection cap, and it does replay bit-for-bit.
+# run11 fails the same guard on `generate`.
 
 # (label, committed results JSON, cassette, exact CLI args). reflection_calls and
 # task-set come from each run's pre-registration (not stored in the older metas).
@@ -746,15 +790,200 @@ RUNS = [
             "openai/gpt-5.6-luna",
         ],
     ),
+    # The two OpenAI p0 CALIBRATION passes. Distinct from the `p0 sweep L2/L3` rows above:
+    # those are the four-arm contrast runs, these are the single-arm passes that MEASURE p0
+    # itself, and every p0 value in Paper I's headline axis is read off their cassettes. They
+    # had been supplying that axis from outside the replay guarantee.
+    (
+        "p0 calibration L2 (arms A)",
+        "docs/validation-study-p0cal-L2.json",
+        f"{CASSETTES}/study-p0cal-L2.json",
+        [
+            "--task-set",
+            "multi-hard",
+            "--arms",
+            "A",
+            "--seeds",
+            "0,1,2",
+            "--n-train",
+            "8",
+            "--n-heldout",
+            "10",
+            "--max-metric-calls",
+            "28",
+            "--reflection-calls",
+            "6",
+            "--loop-max-retries",
+            "1",
+            "--module-selector",
+            "all",
+            "--reflection-model",
+            "openai/gpt-5.6-luna",
+            "--exclude-constraint",
+            "exact_word_count",
+        ],  # fmt: skip
+    ),
+    (
+        "p0 calibration L3 (arms A)",
+        "docs/validation-study-p0cal-L3.json",
+        f"{CASSETTES}/study-p0cal-L3.json",
+        [
+            "--task-set",
+            "multi-hard",
+            "--arms",
+            "A",
+            "--seeds",
+            "0,1,2",
+            "--n-train",
+            "8",
+            "--n-heldout",
+            "10",
+            "--max-metric-calls",
+            "28",
+            "--reflection-calls",
+            "6",
+            "--loop-max-retries",
+            "1",
+            "--module-selector",
+            "all",
+            "--reflection-model",
+            "openai/gpt-5.6-luna",
+            "--exclude-constraint",
+            "exact_word_count",
+            "--exclude-constraint",
+            "word_max_length",
+        ],  # fmt: skip
+    ),
+    # --- the Groq second-worker replication line (Paper II, sec:secondworker) -------------
+    # Eleven runs on `groq/llama-3.3-70b-versatile`, every cell `--arms A` so no optimizer runs
+    # anywhere. Registered for the reason given on D3 above: Paper II's `tab:secondworker` is
+    # built on them, Paper I's closability table cites their p0 collapse, and Paper III's
+    # defects 10-11 were found while buying them. A run that carries an argument does not get
+    # to sit outside the guarantee.
+    *[
+        (
+            label,
+            f"docs/validation-study-groq-{slug}.json",
+            f"{CASSETTES}/study-groq-{slug}.json",
+            [
+                "--task-set",
+                "multi-hard",
+                "--arms",
+                "A",
+                "--seeds",
+                ",".join(str(i) for i in range(20)),
+                "--n-train",
+                "8",
+                "--n-heldout",
+                "10",
+                "--max-metric-calls",
+                "20",
+                "--reflection-calls",
+                "4",
+                "--loop-max-retries",
+                "1",
+                "--module-selector",
+                "all",
+                "--worker-model",
+                "groq/llama-3.3-70b-versatile",
+                "--reflection-model",
+                "groq/llama-3.3-70b-versatile",
+                *extra,
+            ],  # fmt: skip
+        )
+        for label, slug, extra in (
+            # L1 is also Phase 1's INTRINSIC detector cell -- the worker judging its own prose
+            # -- reused rather than re-bought, which is why one artifact carries two roles.
+            ("groq p0 L1 / intrinsic", "p0cal-L1", ()),
+            ("groq p0 L2", "p0cal-L2", ("--exclude-constraint", "exact_word_count")),
+            (
+                "groq p0 L3",
+                "p0cal-L3",
+                (
+                    "--exclude-constraint",
+                    "exact_word_count",
+                    "--exclude-constraint",
+                    "word_max_length",
+                ),  # fmt: skip
+            ),
+            ("groq det 8b", "det-8b", ("--critique-model", "groq/llama-3.1-8b-instant")),
+            ("groq det qwen", "det-qwen", ("--critique-model", "groq/qwen/qwen3.6-27b")),
+            ("groq oracle mid", "det-oracle", ("--oracle-critique",)),
+            ("groq oracle lo", "det-oracle-lo", ("--oracle-critique", "--feedback-level", "lo")),
+            ("groq oracle hi", "det-oracle-hi", ("--oracle-critique", "--feedback-level", "hi")),
+        )
+    ],
+    # The verdict/prose splice, G1 only: the diagonal cell, both roles on one model. G2-G4 were
+    # never bought (see the Groq splice pre-registration's DEVIATION section). It is registered
+    # because it is the run whose foreign worker enrolled as an eleventh sigma replicate, which
+    # is Paper III's defect 11 -- the artifact that motivates a published guard has to be
+    # verifiable, or the guard's evidence is a claim about a file nobody can re-derive.
+    (
+        "splice G1 (diagonal)",
+        "docs/validation-study-splice-G1.json",
+        f"{CASSETTES}/study-splice-G1.json",
+        [
+            "--task-set",
+            "multi-hard",
+            "--arms",
+            "A",
+            "--seeds",
+            "0,1,2",
+            "--n-train",
+            "8",
+            "--n-heldout",
+            "10",
+            "--max-metric-calls",
+            "20",
+            "--reflection-calls",
+            "4",
+            "--loop-max-retries",
+            "1",
+            "--module-selector",
+            "all",
+            "--temperature",
+            "0",
+            "--worker-model",
+            "groq/llama-3.1-8b-instant",
+            "--critique-model",
+            "groq/llama-3.1-8b-instant",
+            "--verdict-model",
+            "groq/llama-3.1-8b-instant",
+            "--reflection-model",
+            "groq/llama-3.1-8b-instant",
+        ],  # fmt: skip
+    ),
+    # Registered and SUPERSEDED: Paper I quotes its worker swap, and replaying it raises on a
+    # blank `generate` gene accepted at record time. Registering it is what makes that fact
+    # visible; leaving it unregistered would have hidden a defect-8 instance inside a cited run.
+    (
+        "run11 worker swap (nano)",
+        "docs/validation-study-multihard-nano.json",
+        f"{CASSETTES}/study-multihard-nano.json",
+        [
+            "--task-set",
+            "multi-hard",
+            "--arms",
+            "ABCD",
+            "--seeds",
+            "0,1,2",
+            "--n-train",
+            "16",
+            "--n-heldout",
+            "16",
+            "--max-metric-calls",
+            "64",
+            "--reflection-calls",
+            "10",
+            "--loop-max-retries",
+            "1",
+            "--worker-model",
+            "openai/gpt-4.1-nano",
+            "--reflection-model",
+            "openai/gpt-5.6-terra",
+        ],  # fmt: skip
+    ),
 ]
-
-# The cross-domain BigCodeBench-Hard run (D5, docs/validation-study-bcb.json) is
-# INTENTIONALLY NOT verified here: it is not bit-for-bit replayable. Model solutions may
-# use unseeded randomness, so re-executing them in the Docker sandbox yields run-to-run
-# variation that shifts the content-addressed prompt key — an intrinsic property of
-# executable-code benchmarks. Per-execution grading is deterministic and the headline
-# reproduced identically across two independent paid runs (see the paper, "Reproducibility
-# scope"); strict LLM-call replay is out of scope for it by construction, not oversight.
 
 
 def _scores(runs: list[dict]) -> list[tuple]:
@@ -806,7 +1035,7 @@ def main() -> int:
     for label, committed, cassette, args in RUNS:
         if label in SUPERSEDED:
             skipped += 1
-            print(f"[SKIP] {label:22} recorded under the pre-correction harness")
+            print(f"[SKIP] {label:26} {SUPERSEDED[label]}")
             continue
         # A row can be registered BEFORE it is bought: the point of committing the exact args
         # ahead of the numbers is that the configuration cannot be edited to fit the result. An
@@ -815,7 +1044,7 @@ def main() -> int:
         # verified, so `complete` below stays false until the run actually lands.
         if not Path(committed).exists():
             pending += 1
-            print(f"[PENDING] {label:22} registered, not yet bought ({committed} absent)")
+            print(f"[PENDING] {label:26} registered, not yet bought ({committed} absent)")
             continue
         try:
             ok, detail = verify_one(committed, cassette, args)
@@ -824,7 +1053,7 @@ def main() -> int:
             ok, detail = False, traceback.format_exc().strip().splitlines()[-1]
         verified += 1
         all_ok &= ok
-        print(f"[{'OK ' if ok else 'FAIL'}] {label:22} {detail}")
+        print(f"[{'OK ' if ok else 'FAIL'}] {label:26} {detail}")
     pending_note = f"; {pending} registered but not yet bought" if pending else ""
     print(
         f"\n{skipped} run(s) skipped as superseded{pending_note}; "

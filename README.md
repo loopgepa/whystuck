@@ -159,7 +159,7 @@ and tested.
 | LLM worker + output→apply→verify wiring (real-repo scoring) | 🟡 v0.2-alpha |
 | Optimize + frontier MCP tools (gated on the extra) | 🟡 v0.2-alpha |
 
-**1784 tests**, all local and offline; `ruff` + `mypy --strict` (on `src/`) + docs `--strict` clean.
+**1811 tests**, all local and offline; `ruff` + `mypy --strict` (on `src/`) + docs `--strict` clean.
 
 ## Configure
 

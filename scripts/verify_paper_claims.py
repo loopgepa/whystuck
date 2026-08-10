@@ -378,6 +378,8 @@ _WORD_NUM = {
     "twenty-four": 24,
     "twenty-five": 25,
     "twenty-six": 26,
+    "thirty-eight": 38,
+    "forty-three": 43,
     "two hundred": 200,
 }
 
@@ -1297,6 +1299,26 @@ def _registry_counts() -> tuple[int, int]:
     import verify_reproducibility as vr
 
     return len(vr.SUPERSEDED), vr.EXPECTED_RUNS
+
+
+def _unreplayable() -> int:
+    """Runs the registry declares it cannot replay at all, as the registry lists them."""
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import verify_reproducibility as vr
+
+    return len(vr.UNREPLAYABLE)
+
+
+def _released() -> int:
+    """Study runs actually in `docs/`. Counted from the tree, never from the registry: the
+    paragraph's claim is that the three registry states cover the release, and a total taken
+    from the registry would make that claim true by construction."""
+    from pathlib import Path
+
+    return len(list(Path(DOCS).glob("validation-study*.json")))
 
 
 #: (claim, expected, tolerance, thunk). Tolerance matches the precision the paper prints at.
@@ -3002,12 +3024,31 @@ def _checks() -> list[tuple[str, float, float, float]]:
     # These counts are spelled out in the prose, so they need the word scraper.
     superseded, replayable = _registry_counts()
     for label, pattern, artifact in (
-        # [\w-] not \w: the count is spelled out, and past twenty that means a hyphen.
+        # [\w-] not \w in EVERY row, not just the one that needed it first. `\w` was widened
+        # here once, on the single count that had crossed twenty, and the other four kept the
+        # narrow class -- so the next count to cross twenty stopped matching instead of
+        # mismatching. That is survivable only because a no-match returns NaN and NaN fails
+        # every comparison; had `_scrape_word` skipped on miss, four checks would have gone
+        # quiet at exactly the moment they had something to say.
         ("tex: registry total", r"registers ([\w-]+) committed runs", superseded + replayable),
-        ("tex: registry superseded", r"(\w+) are\s+labelled \\textbf\{superseded\}", superseded),
-        ("tex: registry replayable", r"The remaining (\w+) were recorded", replayable),
-        ("tex: registry verifies N", r"verifies (\w+) runs rather than", replayable),
-        ("tex: retraction superseded count", r"script registers (\w+) superseded runs", superseded),
+        (
+            "tex: registry superseded",
+            r"([\w-]+) are\s+labelled \\textbf\{superseded\}",
+            superseded,
+        ),
+        ("tex: registry replayable", r"The remaining ([\w-]+) were recorded", replayable),
+        ("tex: registry verifies N", r"verifies ([\w-]+) runs rather than", replayable),
+        (
+            "tex: retraction superseded count",
+            r"script registers ([\w-]+) superseded runs",
+            superseded,
+        ),
+        # The third state. Registered + superseded is not the release: five BigCodeBench runs
+        # supply numbers and cannot replay at all, and the paragraph now says so. Checked
+        # against the registry's own list and against the tree, so the sentence's two halves
+        # come from different places and cannot be reconciled by editing one.
+        ("tex: registry unreplayable", r"The ([\w-]+) remaining runs of the", _unreplayable()),
+        ("tex: registry release total", r"remaining runs of the ([\w-]+) released", _released()),
     ):
         out.append((label, _scrape_word(tex, pattern), 0, artifact))
 
@@ -4138,7 +4179,14 @@ def _groq_second_worker_checks() -> list[tuple[str, float, float, float]]:
 
     # The table body: held-out mean, delta, s.e. and t for each cell against the intrinsic one.
     rows = (
-        ("intrinsic", "p0cal-L1", r"its own prose \(\\texttt\{PASS\} on \$1\\%\$\) & ([\d.]+)"),
+        # The pass rate here is an ANCHOR, not a checked value, and it carried a wrong number
+        # for as long as it existed: the row said 1% where L1 measures 0.5% (1 of 200). A
+        # literal inside a locator is the one kind of number a scraping checker structurally
+        # cannot check -- get it wrong and the check does not fail, it stops matching, and a
+        # non-matching row here raised only because the tuple unpack below needs the groups.
+        # The rate is now pinned as a value of its own by `_groq_detector_degeneracy_checks`,
+        # so the same numeral is both the key and a claim, and moving one moves the other.
+        ("intrinsic", "p0cal-L1", r"its own prose \(\\texttt\{PASS\} on \$0\.5\\%\$\) & ([\d.]+)"),
         (
             "8b",
             "det-8b",
@@ -4313,9 +4361,169 @@ def _groq_second_worker_checks() -> list[tuple[str, float, float, float]]:
     )
     correct = [true for _verdict, true in l2 if true]
     alarms = [true for verdict, true in l2 if not verdict and true]
-    printed = _scrape_all(p2, r"demands fixes on \$(\d+)\$ of the \$(\d+)\$ already-correct ones")
-    out.append(("tex: second-worker false alarms", printed[0], 0.0, float(len(alarms))))
-    out.append(("tex: second-worker already-correct", printed[1], 0.0, float(len(correct))))
+    printed = _scrape_all(
+        p2,
+        r"the relaxed level where \$(\d+)\$ of \$200\$ first drafts are\s*\n?"
+        r"already correct it demands a fix on \$(\d+)\$ of them",
+    )
+    out.append(("tex: second-worker already-correct", printed[0], 0.0, float(len(correct))))
+    out.append(("tex: second-worker false alarms", printed[1], 0.0, float(len(alarms))))
+    out.extend(_groq_detector_degeneracy_checks())
+    return out
+
+
+def _groq_detector_degeneracy_checks() -> list[tuple[str, float, float, float]]:
+    """Every cell in Paper II's second-worker table, scored AS A DETECTOR.
+
+    Written because a wrong number survived here for as long as the section existed, in the one
+    position a scraping checker cannot see: the intrinsic row's pass rate sat inside the regex
+    that LOCATES the row. `1\\%` was the anchor, so it was never compared to anything; L1
+    actually passes 1 draft of 200, which is 0.5%. A literal used as a key is a literal nothing
+    checks, and the repair is not to be more careful with anchors but to pin the same numeral as
+    a value, which is what the first three entries below do.
+
+    The prose error came from the same rounding. The calibration table printed all three levels
+    at 2 dp, so 0.005, 0.015 and 0.010 all read as `0.01`, and the paper drew one worker-level
+    fact ("PASS on 1%") out of a column where three different rates had been made to look equal.
+    All three rates are pinned here, at the precision that distinguishes them.
+
+    The `tp=0` entries matter for a different reason: they are what licenses the section's
+    reading of its own nulls. A critic that never passes an already-correct draft is degenerate,
+    so "swapping the critic buys nothing" is a statement about two bad detectors rather than
+    about detection. Nothing in the artifacts forces the paper to say that; this check forces
+    the numbers it says it on to be the measured ones.
+    """
+    import analyze_critique_detector as acd
+
+    p2 = _sources().paper_tex("p2-repair-not-detection")
+    seeds = list(range(20))
+    out: list[tuple[str, float, float, float]] = []
+
+    def _events(slug: str, exclude: frozenset[str], separate: bool):
+        return acd.collect_events(
+            f"tests/fixtures/cassettes/study-groq-{slug}.json",
+            seeds,
+            loop_kw={},
+            n_heldout=10,
+            exclude=exclude,
+            separate_critic=separate,
+        )
+
+    # The three calibration levels' pass rates, as percentages, at the precision that keeps them
+    # apart. The paper prints them in one sentence precisely to record that they are not equal.
+    printed_rates = _scrape_all(
+        p2, r"rates are in fact \$([\d.]+)\\%\$, \$([\d.]+)\\%\$ and \$([\d.]+)\\%\$"
+    )
+    for i, (slug, exclude) in enumerate(
+        (
+            ("p0cal-L1", frozenset()),
+            ("p0cal-L2", frozenset({"exact_word_count"})),
+            ("p0cal-L3", frozenset({"exact_word_count", "word_max_length"})),
+        )
+    ):
+        ev = _events(slug, exclude, False)
+        rate = 100 * sum(1 for verdict, _true in ev if verdict) / len(ev)
+        out.append((f"tex: intrinsic PASS rate {slug} (%)", printed_rates[i], 0.005, rate))
+
+    # The same L1 rate where it is printed as the table row's own label -- the position that
+    # carried the error. Pinned as a value now, so the anchor and the claim move together.
+    l1 = _events("p0cal-L1", frozenset(), False)
+    out.append(
+        (
+            "tex: intrinsic row label PASS rate (%)",
+            _scrape(p2, r"its own prose \(\\texttt\{PASS\} on \$([\d.]+)\\%\$\)"),
+            0.005,
+            100 * sum(1 for verdict, _true in l1 if verdict) / len(l1),
+        )
+    )
+    out.append(
+        (
+            "tex: intrinsic L1 passes, count",
+            _scrape(p2, r"it emits \\texttt\{PASS\} on \$(\d+)\$ of \$200\$ drafts"),
+            0.0,
+            float(sum(1 for verdict, _true in l1 if verdict)),
+        )
+    )
+    out.append(
+        (
+            "tex: intrinsic L1 event count",
+            _scrape(p2, r"emits \\texttt\{PASS\} on \$\d+\$ of \$(\d+)\$ drafts"),
+            0.0,
+            float(len(l1)),
+        )
+    )
+
+    # The substituted critics, scored as detectors. `separate_critic` is required: both were
+    # recorded with --critique-model, and replaying them against the worker surface returns an
+    # empty list rather than raising.
+    out.append(
+        (
+            "tex: second-worker first-critique events",
+            _scrape(p2, r"over the \$(\d+)\$\s*\n?first-critique events"),
+            0.0,
+            float(len(_events("det-8b", frozenset(), True))),
+        )
+    )
+    for label, slug, tp_expected in (("8b", "det-8b", 0.0), ("qwen", "det-qwen", 0.0)):
+        stats = acd.detector_stats(_events(slug, frozenset(), True))
+        out.append((f"tex: {label} critic true positives", tp_expected, 0.0, stats["tp"]))
+    # "the 8B critic emits PASS once and qwen never" -- both stated as words, both derived.
+    eight = acd.detector_stats(_events("det-8b", frozenset(), True))
+    qwen = acd.detector_stats(_events("det-qwen", frozenset(), True))
+    out.append(
+        (
+            "tex: 8b critic passes (word 'once')",
+            1.0 if re.search(r"the 8B critic emits \\texttt\{PASS\} once", p2) else -1.0,
+            0.0,
+            eight["tp"] + eight["fp"],
+        )
+    )
+    out.append(
+        (
+            "tex: qwen critic passes (word 'never')",
+            0.0 if re.search(r"\\texttt\{qwen3\.6-27b\} never", p2) else -1.0,
+            0.0,
+            qwen["tp"] + qwen["fp"],
+        )
+    )
+    # The two substituted cells' already-correct counts. They differ (24 and 20) and differ from
+    # L1's 19, because these runs were recorded at the provider's default temperature and so do
+    # not share a draft set. Stating one number for all three would have been the tidier
+    # sentence and a false one, so both are printed and both are pinned.
+    printed_correct = _scrape_all(
+        p2, r"against \$(\d+)\$ and \$(\d+)\$ already-correct first drafts"
+    )
+    for i, slug in enumerate(("det-8b", "det-qwen")):
+        out.append(
+            (
+                f"tex: already-correct first drafts, {slug}",
+                printed_correct[i],
+                0.0,
+                float(sum(1 for _v, true in _events(slug, frozenset(), True) if true)),
+            )
+        )
+
+    # Paper I closes D3's Remaining item on the same measurement, so it restates two of these
+    # numbers. Both are re-derived here against Paper I's own text rather than compared with
+    # Paper II's, on the series' rule that a cross-paper agreement checked paper-against-paper
+    # can be satisfied by two matching errors.
+    p1 = _sources().paper_tex("p1-conditional-lever")
+    out.append(
+        (
+            "tex: D9/D3 qwen drafts judged (p1)",
+            _scrape(p1, r"emits \\texttt\{PASS\} on none\s*\n?\s*of \$(\d+)\$ first drafts"),
+            0.0,
+            float(len(_events("det-qwen", frozenset(), True))),
+        )
+    )
+    out.append(
+        (
+            "tex: D9/D3 qwen already-correct (p1)",
+            _scrape(p1, r"first drafts, \$(\d+)\$ of which were already correct"),
+            0.0,
+            float(sum(1 for _v, true in _events("det-qwen", frozenset(), True) if true)),
+        )
+    )
     return out
 
 

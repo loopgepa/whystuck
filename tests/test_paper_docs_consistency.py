@@ -23,6 +23,7 @@ part company again.
 
 from __future__ import annotations
 
+import json
 import os
 import pathlib
 import re
@@ -238,3 +239,150 @@ def test_advertised_release_size_equals_what_is_committed() -> None:
     assert runs == len(list((ROOT / "docs").glob("validation-study*.json")))
     assert replicates == len(list((cassette_dir / "repeat").glob("*.json")))
     assert cassettes == len(list(cassette_dir.rglob("*.json")))
+
+
+#: The same two release counts, restated in `docs/EXPERIMENTS.md`'s artifact table. The guard
+#: above covered `docs/papers/README.md` alone, and the sibling document that states the SAME
+#: quantities was found at 33 runs and 257 cassettes against a tree holding 43 and 267 -- stale by
+#: exactly ten on both. Guarding one of two documents that restate a statistic is not guarding the
+#: statistic; it just moves the drift somewhere nothing looks.
+EXPERIMENTS_RUNS_RE = re.compile(r"\| `docs/validation-study-\*\.json` \| (\d+) study runs")
+EXPERIMENTS_CASSETTES_RE = re.compile(r"\| `tests/fixtures/cassettes/\*\*` \| (\d+) cassettes")
+
+
+def test_experiments_md_release_counts_equal_what_is_committed() -> None:
+    text = (ROOT / "docs/EXPERIMENTS.md").read_text(encoding="utf-8")
+    cassette_dir = ROOT / "tests/fixtures/cassettes"
+    for label, pattern, actual in (
+        (
+            "study runs",
+            EXPERIMENTS_RUNS_RE,
+            len(list((ROOT / "docs").glob("validation-study*.json"))),
+        ),
+        ("cassettes", EXPERIMENTS_CASSETTES_RE, len(list(cassette_dir.rglob("*.json")))),
+    ):
+        m = pattern.search(text)
+        assert m, (
+            f"docs/EXPERIMENTS.md no longer states its {label} count in the form this guard "
+            "reads. Restore the row or update the pattern -- do not delete the guard."
+        )
+        assert int(m.group(1)) == actual, (
+            f"docs/EXPERIMENTS.md advertises {m.group(1)} {label}, the tree holds {actual}"
+        )
+
+
+#: The release's worker census, as `docs/papers/README.md` states it. Worth its own guard because
+#: the sentence it replaced said "34 of the runs are the papers' own" -- a category, not a
+#: measurement, and wrong by one the moment you ask which worker: 33 are on `gpt-4.1-mini` and the
+#: 34th is the `gpt-4.1-nano` worker swap. Aggregating a category with an exception in it is how
+#: every restated statistic in this register went stale, so the census is now four counts against
+#: four model ids read out of the run metadata.
+WORKER_CENSUS_RE = re.compile(
+    r"\*\*(\d+)\*\* runs are on\s+`(\S+)`.*?"
+    r"\*\*(\d+)\*\* is the\s+`(\S+)` worker swap.*?"
+    r"\*\*(\d+)\*\* are on\s+`(\S+)`.*?"
+    r"and \*\*(\d+)\*\* on `(\S+)`",
+    re.DOTALL,
+)
+
+
+def test_advertised_worker_census_equals_the_run_metadata() -> None:
+    import collections
+
+    census = collections.Counter(
+        json.loads(p.read_text(encoding="utf-8"))["meta"]["worker_model"]
+        for p in (ROOT / "docs").glob("validation-study*.json")
+    )
+    m = WORKER_CENSUS_RE.search((PAPERS / "README.md").read_text(encoding="utf-8"))
+    assert m, (
+        "docs/papers/README.md no longer states the worker census in the form this guard reads. "
+        "Restore the sentence or update WORKER_CENSUS_RE -- do not delete the guard."
+    )
+    claimed = {m.group(i + 1): int(m.group(i)) for i in (1, 3, 5, 7)}
+    assert claimed == dict(census), (
+        f"README advertises the worker census as {claimed}, the run metadata says {dict(census)}"
+    )
+    assert sum(census.values()) == len(list((ROOT / "docs").glob("validation-study*.json")))
+
+
+#: The split proof's size, restated in two documents and derived in neither. It read 322 against a
+#: script printing 318 -- and unlike the counts above it had no guard at all, in either document,
+#: because the number lives in `verify_split_coverage` rather than in a file listing.
+SPLIT_QUANTITY_PATTERNS = (
+    ("docs/papers/README.md", r"all (\d+) quantities in the frozen pre-split draft"),
+    ("docs/EXPERIMENTS.md", r"# (\d+) pre-split quantities accounted for"),
+    ("docs/EXPERIMENTS.md", r"all (\d+) quantities in the pre-split draft"),
+)
+
+
+def test_advertised_pre_split_quantity_count_is_the_measured_one() -> None:
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import verify_split_coverage as vsc
+
+    actual = len(vsc.quantities(vsc.frozen_tex()))
+    assert actual > 100, "the frozen draft yielded almost no quantities; the guard would be empty"
+    for rel, pattern in SPLIT_QUANTITY_PATTERNS:
+        m = re.search(pattern, (ROOT / rel).read_text(encoding="utf-8"))
+        assert m, (
+            f"{rel} no longer states the pre-split quantity count in the form this guard reads. "
+            "Restore the sentence or update SPLIT_QUANTITY_PATTERNS -- do not delete the guard."
+        )
+        assert int(m.group(1)) == actual, (
+            f"{rel} advertises {m.group(1)} pre-split quantities, the frozen draft yields {actual}"
+        )
+
+
+#: Every document that states how much of the release replays. Three numbers, one registry.
+#: `docs/EXPERIMENTS.md` printed "13 verified, 12 skipped" while the script printed 14 and 12 --
+#: a comment beside the command whose output contradicts it, which is the worst place for a stale
+#: number because a reader checks it by eye against a run they have just done.
+REPLAY_COUNT_PATTERNS: dict[str, tuple[tuple[str, str], ...]] = {
+    "docs/EXPERIMENTS.md": (
+        ("replayed", r"# (\d+) verified, \d+ skipped as superseded"),
+        ("superseded", r"# \d+ verified, (\d+) skipped as superseded"),
+    ),
+    "docs/papers/README.md": (
+        ("replayed", r"\*\*(\d+)\*\* replay bit-for-bit"),
+        ("superseded", r"\*\*(\d+)\*\* are registered with frozen CLI args and labelled superse"),
+        ("unreplayable", r"\*\*(\d+)\*\* BigCodeBench runs are listed as\s+unreplayable"),
+    ),
+}
+
+
+def test_advertised_replay_counts_equal_the_registry() -> None:
+    """The replay guarantee's size, wherever a document states it, against the registry itself.
+
+    Not against a literal: `verify_reproducibility` is imported and its lists are counted, so the
+    advertisement and the thing advertised cannot part company. The three counts must also sum to
+    the release, which is the property that makes the guarantee meaningful -- a partition that
+    does not cover everything is a guarantee with an unstated remainder.
+    """
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import verify_reproducibility as vr
+
+    actual = {
+        "replayed": len({label for label, *_ in vr.RUNS} - set(vr.SUPERSEDED)),
+        "superseded": len(vr.SUPERSEDED),
+        "unreplayable": len(vr.UNREPLAYABLE),
+    }
+    released = len(list((ROOT / "docs").glob("validation-study*.json")))
+    assert sum(actual.values()) == released, (
+        f"the three replay states cover {sum(actual.values())} runs but the release holds "
+        f"{released}; the partition has a remainder nothing accounts for"
+    )
+
+    seen = 0
+    for rel, patterns in REPLAY_COUNT_PATTERNS.items():
+        text = (ROOT / rel).read_text(encoding="utf-8")
+        for key, pattern in patterns:
+            m = re.search(pattern, text)
+            assert m, (
+                f"{rel} no longer states its {key} count in the form this guard reads. Restore "
+                "the sentence or update REPLAY_COUNT_PATTERNS -- a guard that stops matching "
+                "does not fail, it vanishes, which is how six checks once disappeared silently."
+            )
+            assert int(m.group(1)) == actual[key], (
+                f"{rel} says {m.group(1)} {key} run(s), the registry has {actual[key]}"
+            )
+            seen += 1
+    assert seen == sum(len(p) for p in REPLAY_COUNT_PATTERNS.values()) >= 5

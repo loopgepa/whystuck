@@ -773,7 +773,7 @@ both halves of the loop at once, exactly as a critique-model swap does
 \toprule
 critique & held-out & $\dd$ vs.\ intrinsic & s.e. & $t$ \\
 \midrule
-intrinsic, its own prose (\texttt{PASS} on $1\%$) & 0.7895 & --- & --- & --- \\
+intrinsic, its own prose (\texttt{PASS} on $0.5\%$) & 0.7895 & --- & --- & --- \\
 same-lineage smaller critic (8B) & 0.7860 & $-0.0035$ & 0.0093 & $-0.38$ \\
 cross-lineage critic (\texttt{qwen3.6-27b}) & 0.7973 & $+0.0077$ & 0.0095 & $+0.82$ \\
 \midrule
@@ -811,11 +811,28 @@ same-lineage critic ($-0.0035$) nor a genuinely cross-lineage one ($+0.0077$) mo
 \texttt{qwen3.6-27b} is the third lineage we have put in the critique seat after
 \texttt{gpt-5.6-luna} and \texttt{llama-3.3-70b}, and it is the second to move nothing; the
 exception remains \texttt{gpt-5.6-luna}, whose $+0.048$ on the seed loop is real and, as
-\S\ref{sec:detector} says, unattributable between its verdict and its prose. One further observation belongs to the companion
-paper on the silent no-op: this worker's intrinsic critique emits \texttt{PASS} on $1\%$ of drafts
-and demands fixes on $178$ of the $181$ already-correct ones, a false-\emph{alarm} machine where
-\texttt{gpt-4.1-mini}'s was a false-\emph{pass} machine at precision $0.08$. Both are degenerate;
-neither is a usable detector.
+\S\ref{sec:detector} says, unattributable between its verdict and its prose.
+
+\emph{What those two nulls do and do not license.} Both substituted critics are themselves
+degenerate on this worker, and we scored them as detectors rather than assuming: over the $200$
+first-critique events, the 8B critic emits \texttt{PASS} once and \texttt{qwen3.6-27b} never,
+and \emph{neither ever passes a draft that was already correct} ($\mathrm{tp}=0$ for both,
+against $24$ and $20$ already-correct first drafts respectively --- the cells were recorded at
+the provider's default temperature, so they do not share a draft set, which is why the paired
+tests above pair on seeds and not on tasks). So every non-oracle cell in the table above is a degenerate
+detector, and the right reading of the two nulls is \emph{another bad detector does not help},
+not \emph{a decent detector does not help}. The claim that a good detector is not the binding
+constraint rests here on the oracle rows, where the gate is perfect by construction, and not on
+these two.
+
+One further observation belongs to the companion paper on the silent no-op. This worker's
+intrinsic critique is a false-\emph{alarm} machine where \texttt{gpt-4.1-mini}'s was a
+false-\emph{pass} machine at precision $0.08$: it emits \texttt{PASS} on $1$ of $200$ drafts at
+the level the table above uses, and at the relaxed level where $181$ of $200$ first drafts are
+already correct it demands a fix on $178$ of them. We give the two levels separately because
+they are separate runs; an earlier draft stated a single $1\%$ pass rate for both, which is the
+rounding of a three-row table whose rates are in fact $0.5\%$, $1.5\%$ and $1.0\%$. Both critics
+are degenerate; neither is a usable detector.
 
 \paragraph{What this run cost us in confidence, and what it bought.} Two defects in our own
 instruments surfaced while buying these cells, and both are reported in the companion paper on
@@ -956,7 +973,7 @@ Earlier drafts of this work published claims it now withdraws. Reporting guidanc
 preregistered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Twelve} entries follow. The
+collected here and the body text states only the surviving claim. \textbf{Thirteen} entries follow. The
 series' other two papers carry the entries bearing on their own claims, and the full
 register across all three, with the superseded values themselves, is in the released repository.
 
@@ -975,6 +992,10 @@ register across all three, with the superseded values themselves, is in the rele
   \item \textbf{The oracle-checker ordering.} Published as an ordering only. It splits into two
     gaps of unequal strength: $-0.088$ at $3.04\sigma$ against the tool-fed loop, which carries
     the claim, and $-0.028$ at $0.98\sigma$ against the \emph{intrinsic} loop, which does not.
+    Both ratios are stated here in their \emph{post}-correction form, against the curve's own
+    $\sigma = 0.0291$ rather than the borrowed denominator entry~4 retired; we say so because a
+    register that quietly restates a corrected figure asks the reader to check which vintage
+    each entry is written in.
   \item \textbf{Six curve ratios scaled by a borrowed $\sigma$.} Every ratio in
     Table~\ref{tab:curve} divided by a denominator measured on a different genome family, in a
     study that also shows $\sigma$ to be genome-specific across a $5.9\times$ range. Three of the
@@ -1055,6 +1076,20 @@ register across all three, with the superseded values themselves, is in the rele
     pins, so a future change of denominator moves them with everything else. Found independently by
     two of the twelve cold reviewers, reported as separate candidates because they quoted different
     halves of the sentence.
+  \item \textbf{The second worker's intrinsic \texttt{PASS} rate, given as $1\%$ in two places.}
+    It is $0.5\%$: one draft of $200$ at the level \S\ref{sec:secondworker} reports. The
+    source of the error is a calibration table printed at two decimal places, where the three
+    levels' true rates of $0.005$, $0.015$ and $0.010$ all render as \texttt{0.01}; we read one
+    worker-level fact out of a column that had been rounded until three different numbers looked
+    like one. A single sentence then combined that rate with a false-alarm count from a
+    \emph{different} level. Both are now stated per level (\S\ref{sec:secondworker}).
+    \textbf{This one is in the register for how it survived, not for its size.} The rate sat
+    inside the regular expression the claim checker uses to \emph{locate} that table row, so the
+    numeral was a search key and not a compared value --- the checker read straight past it on
+    every one of its runs, and reported all-pass while doing so. A literal used to find a claim
+    cannot also test it. Every rate here is now pinned as a value in its own right, so the anchor
+    and the assertion move together, and this paper's own thesis --- that a check can report
+    agreement about something it never compared --- is the reason the entry exists.
 \end{enumerate}
 
 \end{document}

@@ -191,8 +191,19 @@ def test_shared_inputs_are_expanded_not_skipped():
     and the shared harness section's claims would silently stop being checked.
     """
     shared = pathlib.Path("docs/papers/shared/loop.tex").read_text(encoding="utf-8")
-    marker = "registers twenty-six committed runs"
-    assert marker in shared
+    # A marker with a COUNT in it was the obvious choice and the wrong one: this was
+    # "registers twenty-six committed runs", and registering eleven more runs broke the canary
+    # for a reason that has nothing to do with `\input` expansion, which is all it tests. A
+    # canary that fires on unrelated edits gets read as noise and then edited without thought.
+    # So the marker is now a sentence with no quantity in it -- still distinctive, still only in
+    # loop.tex, but stable under every change this guard is not about.
+    # Must not span a line break: these sources are compared as literal text, wrapping included.
+    marker = "The script reports them as skipped rather than"
+    assert marker in shared, (
+        "the canary sentence is gone from shared/loop.tex. Point `marker` at another sentence "
+        "unique to that file -- preferably one without a number in it -- rather than deleting "
+        "the guard: it is the only thing asserting the shared input is expanded at all."
+    )
     for slug in paper_sources.PAPERS:
         tex = paper_sources.paper_tex(slug)
         assert marker in tex, f"{slug} did not expand shared/loop.tex"
