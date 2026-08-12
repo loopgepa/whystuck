@@ -75,9 +75,12 @@ consistency as evidence of a tight null. It was evidence of the opposite. Our co
 
 \begin{enumerate}
   \item \textbf{The failure mode, established on a released artifact} (\S\ref{sec:defect}).
-    Arm~D's winning genome contains a critique gene byte-identical to the seed in $15/15$ cases;
-    across all arms the optimizer changed \texttt{generate} in $5/15$ winners and
-    \texttt{ensure\_correct} in $0/15$. Every reported difference is a comparison of a genome
+    Across the fifteen runs, the winning genome's critique gene is byte-identical to the seed in
+    $15/15$; and within the flagship run, whose five seeds and three evolvable arms give fifteen
+    arm-runs, the optimizer changed \texttt{generate} in $5/15$ winners and
+    \texttt{ensure\_correct} in $0/15$ ($2/5$ and $0/5$ for arm~D alone). \emph{Two different
+    fifteens}, and we name the unit of each because they are numerically equal and were merged in
+    an earlier draft. Every reported difference is a comparison of a genome
     against itself, which is why it was so stable.
   \item \textbf{Two ordinary causes, one of them a library default} (\S\ref{sec:defect}): a
     component-agnostic reflective dataset, and a one-component-per-proposal selector under a
@@ -231,9 +234,13 @@ $\dd$ and the arm variances, so a genome-against-itself contrast passes through 
 \label{sec:defect}
 
 Our first fifteen contrast runs produced arms whose held-out scores were identical on every seed ten times,
-and near-zero or moderately negative otherwise. None was a measurement of the hypothesis. Replaying the flagship run offline, arm~D's winning genome contains a critique
-gene \textbf{byte-identical to the seed in $15/15$ cases}: across all arms GEPA changed
-\texttt{generate} in $5/15$ winners and \texttt{ensure\_correct} in $0/15$. The two arms whose
+and near-zero or moderately negative otherwise. None was a measurement of the hypothesis. Replayed
+offline, the winning genome's critique gene is \textbf{byte-identical to the seed in $15/15$} of
+those runs. Within the flagship run --- five seeds by three evolvable arms, so fifteen arm-runs,
+a second fifteen that we distinguish from the first because the two are equal by coincidence and an
+earlier draft ran them together --- GEPA changed
+\texttt{generate} in $5/15$ winners and \texttt{ensure\_correct} in $0/15$; for arm~D alone that
+is $2/5$ and $0/5$. The two arms whose
 difference the study exists to measure were, for the gene that defines the difference, the
 same program. Every $\dd$ in Table~\ref{tab:results} is therefore a comparison of a genome
 against itself, which is why it was so stable.
