@@ -167,10 +167,46 @@ code-domain cassette key changes with it.
 | `docs/repeat/*.json` | 225 replicate scorings (135 p₀ + 90 curve) |
 | `tests/fixtures/cassettes/**` | 267 cassettes; this is what makes replay free |
 | `docs/papers/PRE-SPLIT-SOURCE.tex` | the 46-page pre-split draft, frozen at `fe628ed`, **never built**. Provenance for the split proof |
+| `docs/actual-spend.json` | measured spend per run and per provider, from an instrumented replay. See below |
 
 Each run JSON records a pre-flight **bound** on spend, not an invoice. Bounds are labelled as
 bounds throughout the papers; an earlier draft reported one as a measured spend, and that is in the
 corrections register.
+
+### What it actually cost, and why the bounds are ~10× high
+
+```bash
+python scripts/measure_actual_spend.py   # ~40 min, offline, $0; writes docs/actual-spend.json
+```
+
+Prompts are stored as hashes, so a cassette cannot price its own input tokens — but a replay
+reconstructs every prompt byte-for-byte, which is what makes replay match at all. The script
+replays each run with all four call surfaces instrumented, counts **distinct** (surface, prompt)
+pairs, and prices them from `MODEL_PRICES`. Distinct, not fired: during the original recording a
+repeated prompt was served from the cassette and never billed, so D3 bills 347 calls where a
+replay fires 1124.
+
+| | runs | USD |
+|---|---|---|
+| measured, both sides | 25 | **$4.97** |
+| estimated, outputs measured and inputs modelled from the measured per-surface ratio | 18 | **$4.73** |
+| the replicate loop, same basis | 225 scorings | **$1.39** |
+| **floor for the whole study** | | **$11.08** |
+| sum of the pre-flight bounds, all 43 runs | | $114.61 |
+
+Of that, **$0.73** is the borrowed Groq credential, against $400 authorised.
+
+A **floor**, not an invoice, and the three reasons are worth knowing before quoting it: a call
+that failed and was retried was billed and left no cassette entry; `cl100k_base` is neither
+Llama's tokenizer nor gpt-4.1's, and on D3 a chars/4 cross-check spanned $0.074–$0.084; and the 18
+unreplayable runs have a modelled input side, which is why they are never summed into the measured
+figure.
+
+The measurement also tests something no guard tested before: **the pre-flight bound is supposed to
+be a ceiling, and nothing had ever compared one to an outcome.** It held on all 43 runs, with the
+tightest margin at 3.1× and the loosest at 14.9×. `tests/test_actual_spend.py` asserts it keeps
+holding, and asserts the method still reproduces the D3 figure that was measured by hand two days
+before the script existed — 347 calls, 95 937 input tokens, 22 193 output, to the token.
 
 ## Reading a `genes_changed` field before you read a score
 

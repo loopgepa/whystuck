@@ -1,0 +1,1326 @@
+{
+  "measured": [
+    {
+      "label": "C2b four-arm corrected harness",
+      "run": "docs/validation-study-c2b.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-luna"
+      },
+      "bound_usd": 2.059776,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 510,
+          "tin": 204013,
+          "tout": 40824
+        },
+        "reflection": {
+          "calls": 32,
+          "tin": 23988,
+          "tout": 12289
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 973448,
+          "cout": 153886
+        },
+        "reflection": {
+          "cin": 106498,
+          "cout": 64176
+        }
+      },
+      "usd_by_provider": {
+        "openai": 0.24464560000000002
+      },
+      "usd": 0.24464560000000002
+    },
+    {
+      "label": "D3 cross-provider critic",
+      "run": "docs/validation-study-xprovider.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-terra",
+        "critic": "groq/llama-3.3-70b-versatile"
+      },
+      "bound_usd": 6.519808,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 604,
+          "tin": 186337,
+          "tout": 18066
+        },
+        "critic": {
+          "calls": 347,
+          "tin": 95937,
+          "tout": 22193
+        },
+        "reflection": {
+          "calls": 42,
+          "tin": 27839,
+          "tout": 15570
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 917274,
+          "cout": 84616
+        },
+        "critic": {
+          "cin": 453945,
+          "cout": 87902
+        },
+        "reflection": {
+          "cin": 125560,
+          "cout": 80241
+        }
+      },
+      "usd_by_provider": {
+        "openai": 0.4065879,
+        "groq": 0.07413529999999999
+      },
+      "usd": 0.4807232
+    },
+    {
+      "label": "p0 sweep L2 (p0=0.267)",
+      "run": "docs/validation-study-p0-L2.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-luna"
+      },
+      "bound_usd": 1.791936,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 410,
+          "tin": 184280,
+          "tout": 32877
+        },
+        "reflection": {
+          "calls": 13,
+          "tin": 13273,
+          "tout": 7899
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 868307,
+          "cout": 123125
+        },
+        "reflection": {
+          "cin": 59374,
+          "cout": 39778
+        }
+      },
+      "usd_by_provider": {
+        "openai": 0.18698220000000002
+      },
+      "usd": 0.18698220000000002
+    },
+    {
+      "label": "p0 sweep L3 (p0=0.667)",
+      "run": "docs/validation-study-p0-L3.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-luna"
+      },
+      "bound_usd": 1.791936,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 419,
+          "tin": 169408,
+          "tout": 30502
+        },
+        "reflection": {
+          "calls": 11,
+          "tin": 9424,
+          "tout": 5053
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 860146,
+          "cout": 149337
+        },
+        "reflection": {
+          "cin": 45621,
+          "cout": 26526
+        }
+      },
+      "usd_by_provider": {
+        "openai": 0.15630840000000001
+      },
+      "usd": 0.15630840000000001
+    },
+    {
+      "label": "C1 verifier ablation (seed rubric)",
+      "run": "docs/validation-study-c1-base.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-terra"
+      },
+      "bound_usd": 0.09523200000000001,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 93,
+          "tin": 15630,
+          "tout": 7225
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 66746,
+          "cout": 28941
+        }
+      },
+      "usd_by_provider": {
+        "openai": 0.017812
+      },
+      "usd": 0.017812
+    },
+    {
+      "label": "C1 verifier ablation (hand rubric)",
+      "run": "docs/validation-study-c1-hand.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-terra"
+      },
+      "bound_usd": 0.09523200000000001,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 96,
+          "tin": 28150,
+          "tout": 11870
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 117016,
+          "cout": 41354
+        }
+      },
+      "usd_by_provider": {
+        "openai": 0.030252
+      },
+      "usd": 0.030252
+    },
+    {
+      "label": "split sweep n_train=4 (mmc=14)",
+      "run": "docs/validation-study-split4.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-luna"
+      },
+      "bound_usd": 1.4705279999999998,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 275,
+          "tin": 101158,
+          "tout": 24376
+        },
+        "reflection": {
+          "calls": 8,
+          "tin": 6215,
+          "tout": 3369
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 473410,
+          "cout": 92013
+        },
+        "reflection": {
+          "cin": 27119,
+          "cout": 17202
+        }
+      },
+      "usd_by_provider": {
+        "openai": 0.10589380000000001
+      },
+      "usd": 0.10589380000000001
+    },
+    {
+      "label": "split sweep n_train=16 (mmc=56)",
+      "run": "docs/validation-study-split16.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-luna"
+      },
+      "bound_usd": 2.434752,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 758,
+          "tin": 315056,
+          "tout": 62689
+        },
+        "reflection": {
+          "calls": 28,
+          "tin": 24584,
+          "tout": 13912
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 1507073,
+          "cout": 235224
+        },
+        "reflection": {
+          "cin": 106277,
+          "cout": 72323
+        }
+      },
+      "usd_by_provider": {
+        "openai": 0.33438080000000003
+      },
+      "usd": 0.33438080000000003
+    },
+    {
+      "label": "split sweep n_train=24 (mmc=84)",
+      "run": "docs/validation-study-split24.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-luna"
+      },
+      "bound_usd": 3.077568,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 1259,
+          "tin": 580419,
+          "tout": 98836
+        },
+        "reflection": {
+          "calls": 29,
+          "tin": 26810,
+          "tout": 15441
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 2793759,
+          "cout": 375662
+        },
+        "reflection": {
+          "cin": 121979,
+          "cout": 79248
+        }
+      },
+      "usd_by_provider": {
+        "openai": 0.5097612
+      },
+      "usd": 0.5097612
+    },
+    {
+      "label": "budget sweep mmc=20 (cap 6, depth 1.09)",
+      "run": "docs/validation-study-mmc20.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-luna"
+      },
+      "bound_usd": 1.6490879999999999,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 368,
+          "tin": 126787,
+          "tout": 28370
+        },
+        "reflection": {
+          "calls": 8,
+          "tin": 5999,
+          "tout": 3302
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 587710,
+          "cout": 105019
+        },
+        "reflection": {
+          "cin": 26378,
+          "cout": 16946
+        }
+      },
+      "usd_by_provider": {
+        "openai": 0.1219178
+      },
+      "usd": 0.1219178
+    },
+    {
+      "label": "budget sweep mmc=40 (cap 6, depth 2.91)",
+      "run": "docs/validation-study-mmc40.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-luna"
+      },
+      "bound_usd": 2.006208,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 547,
+          "tin": 237562,
+          "tout": 41560
+        },
+        "reflection": {
+          "calls": 29,
+          "tin": 28216,
+          "tout": 15912
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 1127844,
+          "cout": 160114
+        },
+        "reflection": {
+          "cin": 120939,
+          "cout": 79701
+        }
+      },
+      "usd_by_provider": {
+        "openai": 0.2852088
+      },
+      "usd": 0.2852088
+    },
+    {
+      "label": "budget sweep mmc=56 (cap 6, depth 4.36)",
+      "run": "docs/validation-study-mmc56.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-luna"
+      },
+      "bound_usd": 2.291904,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 714,
+          "tin": 344422,
+          "tout": 55187
+        },
+        "reflection": {
+          "calls": 43,
+          "tin": 51002,
+          "tout": 27695
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 1654465,
+          "cout": 209281
+        },
+        "reflection": {
+          "cin": 226132,
+          "cout": 140600
+        }
+      },
+      "usd_by_provider": {
+        "openai": 0.44324
+      },
+      "usd": 0.44324
+    },
+    {
+      "label": "budget sweep mmc=80 (cap 6, depth 6.00)",
+      "run": "docs/validation-study-mmc80.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-luna"
+      },
+      "bound_usd": 2.720448,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 786,
+          "tin": 403137,
+          "tout": 64149
+        },
+        "reflection": {
+          "calls": 47,
+          "tin": 50272,
+          "tout": 26478
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 1907026,
+          "cout": 238825
+        },
+        "reflection": {
+          "cin": 221795,
+          "cout": 133131
+        }
+      },
+      "usd_by_provider": {
+        "openai": 0.4730332
+      },
+      "usd": 0.4730332
+    },
+    {
+      "label": "budget sweep mmc=160 (cap 12, depth 12.00)",
+      "run": "docs/validation-study-mmc160.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-luna"
+      },
+      "bound_usd": 4.940928,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 1249,
+          "tin": 682881,
+          "tout": 106447
+        },
+        "reflection": {
+          "calls": 96,
+          "tin": 110489,
+          "tout": 58267
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 3307284,
+          "cout": 384720
+        },
+        "reflection": {
+          "cin": 492278,
+          "cout": 298686
+        }
+      },
+      "usd_by_provider": {
+        "openai": 0.9035586
+      },
+      "usd": 0.9035586
+    },
+    {
+      "label": "p0 calibration L2 (arms A)",
+      "run": "docs/validation-study-p0cal-L2.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-luna"
+      },
+      "bound_usd": 0.08928,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 70,
+          "tin": 10390,
+          "tout": 3893
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 44416,
+          "cout": 15107
+        }
+      },
+      "usd_by_provider": {
+        "openai": 0.0103848
+      },
+      "usd": 0.0103848
+    },
+    {
+      "label": "p0 calibration L3 (arms A)",
+      "run": "docs/validation-study-p0cal-L3.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-luna"
+      },
+      "bound_usd": 0.08928,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 72,
+          "tin": 10140,
+          "tout": 3498
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 48908,
+          "cout": 18553
+        }
+      },
+      "usd_by_provider": {
+        "openai": 0.0096528
+      },
+      "usd": 0.0096528
+    },
+    {
+      "label": "groq p0 L1 / intrinsic",
+      "run": "docs/validation-study-groq-p0cal-L1.json",
+      "models": {
+        "worker": "groq/llama-3.3-70b-versatile",
+        "reflection": "groq/llama-3.3-70b-versatile"
+      },
+      "bound_usd": 0.57648,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 599,
+          "tin": 72795,
+          "tout": 19427
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 316835,
+          "cout": 77534
+        }
+      },
+      "usd_by_provider": {
+        "groq": 0.058296379999999995
+      },
+      "usd": 0.058296379999999995
+    },
+    {
+      "label": "groq p0 L2",
+      "run": "docs/validation-study-groq-p0cal-L2.json",
+      "models": {
+        "worker": "groq/llama-3.3-70b-versatile",
+        "reflection": "groq/llama-3.3-70b-versatile"
+      },
+      "bound_usd": 0.57648,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 597,
+          "tin": 87599,
+          "tout": 32267
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 364443,
+          "cout": 115652
+        }
+      },
+      "usd_by_provider": {
+        "groq": 0.07717434
+      },
+      "usd": 0.07717434
+    },
+    {
+      "label": "groq p0 L3",
+      "run": "docs/validation-study-groq-p0cal-L3.json",
+      "models": {
+        "worker": "groq/llama-3.3-70b-versatile",
+        "reflection": "groq/llama-3.3-70b-versatile"
+      },
+      "bound_usd": 0.57648,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 598,
+          "tin": 118230,
+          "tout": 66233
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 581694,
+          "cout": 347730
+        }
+      },
+      "usd_by_provider": {
+        "groq": 0.12207976999999999
+      },
+      "usd": 0.12207976999999999
+    },
+    {
+      "label": "groq det 8b",
+      "run": "docs/validation-study-groq-det-8b.json",
+      "models": {
+        "worker": "groq/llama-3.3-70b-versatile",
+        "reflection": "groq/llama-3.3-70b-versatile",
+        "critic": "groq/llama-3.1-8b-instant"
+      },
+      "bound_usd": 0.57648,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 399,
+          "tin": 53696,
+          "tout": 8057
+        },
+        "critic": {
+          "calls": 200,
+          "tin": 25703,
+          "tout": 18355
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 231628,
+          "cout": 33506
+        },
+        "critic": {
+          "cin": 115087,
+          "cout": 75838
+        }
+      },
+      "usd_by_provider": {
+        "groq": 0.04079922
+      },
+      "usd": 0.04079922
+    },
+    {
+      "label": "groq det qwen",
+      "run": "docs/validation-study-groq-det-qwen.json",
+      "models": {
+        "worker": "groq/llama-3.3-70b-versatile",
+        "reflection": "groq/llama-3.3-70b-versatile",
+        "critic": "groq/qwen/qwen3.6-27b"
+      },
+      "bound_usd": 1.008,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 400,
+          "tin": 97053,
+          "tout": 8461
+        },
+        "critic": {
+          "calls": 200,
+          "tin": 25769,
+          "tout": 61717
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 386887,
+          "cout": 34741
+        },
+        "critic": {
+          "cin": 115453,
+          "cout": 230270
+        }
+      },
+      "usd_by_provider": {
+        "groq": 0.26455786
+      },
+      "usd": 0.26455786
+    },
+    {
+      "label": "groq oracle mid",
+      "run": "docs/validation-study-groq-det-oracle.json",
+      "models": {
+        "worker": "groq/llama-3.3-70b-versatile",
+        "reflection": "groq/llama-3.3-70b-versatile"
+      },
+      "bound_usd": 0.38432,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 382,
+          "tin": 40272,
+          "tout": 7609
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 173007,
+          "cout": 31423
+        }
+      },
+      "usd_by_provider": {
+        "groq": 0.02977159
+      },
+      "usd": 0.02977159
+    },
+    {
+      "label": "groq oracle lo",
+      "run": "docs/validation-study-groq-det-oracle-lo.json",
+      "models": {
+        "worker": "groq/llama-3.3-70b-versatile",
+        "reflection": "groq/llama-3.3-70b-versatile"
+      },
+      "bound_usd": 0.38432,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 378,
+          "tin": 34434,
+          "tout": 7012
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 153429,
+          "cout": 28853
+        }
+      },
+      "usd_by_provider": {
+        "groq": 0.025855539999999996
+      },
+      "usd": 0.025855539999999996
+    },
+    {
+      "label": "groq oracle hi",
+      "run": "docs/validation-study-groq-det-oracle-hi.json",
+      "models": {
+        "worker": "groq/llama-3.3-70b-versatile",
+        "reflection": "groq/llama-3.3-70b-versatile"
+      },
+      "bound_usd": 0.38432,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 378,
+          "tin": 44822,
+          "tout": 8500
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 187918,
+          "cout": 34570
+        }
+      },
+      "usd_by_provider": {
+        "groq": 0.03315998
+      },
+      "usd": 0.03315998
+    },
+    {
+      "label": "splice G1 (diagonal)",
+      "run": "docs/validation-study-splice-G1.json",
+      "models": {
+        "worker": "groq/llama-3.1-8b-instant",
+        "reflection": "groq/llama-3.1-8b-instant",
+        "critic": "groq/llama-3.1-8b-instant",
+        "verdict": "groq/llama-3.1-8b-instant"
+      },
+      "bound_usd": 0.010272,
+      "basis": "replayed, both sides measured",
+      "surfaces": {
+        "worker": {
+          "calls": 60,
+          "tin": 9060,
+          "tout": 2401
+        },
+        "critic": {
+          "calls": 30,
+          "tin": 4480,
+          "tout": 3100
+        },
+        "verdict": {
+          "calls": 30,
+          "tin": 4480,
+          "tout": 3104
+        }
+      },
+      "chars": {
+        "worker": {
+          "cin": 40030,
+          "cout": 11682
+        },
+        "critic": {
+          "cin": 20713,
+          "cout": 13144
+        },
+        "verdict": {
+          "cin": 20713,
+          "cout": 13154
+        }
+      },
+      "usd_by_provider": {
+        "groq": 0.0015894
+      },
+      "usd": 0.0015894
+    }
+  ],
+  "partial": [
+    {
+      "label": "C2 four-arm corrected harness",
+      "run": "docs/validation-study-c2.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-luna"
+      },
+      "bound_usd": 1.735776,
+      "basis": "outputs measured, inputs unknown (no replay)",
+      "surfaces": {
+        "reflection": {
+          "calls": 31,
+          "tout": 11310,
+          "cout": 58983
+        },
+        "worker": {
+          "calls": 430,
+          "tout": 32899,
+          "cout": 124307
+        }
+      },
+      "usd_by_provider_est": {
+        "openai": 0.21056892985271425
+      },
+      "usd_est": 0.21056892985271425
+    },
+    {
+      "label": "run1 single-constraint",
+      "run": "docs/validation-study.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-terra"
+      },
+      "bound_usd": 4.537888000000001,
+      "basis": "outputs measured, inputs unknown (no replay)",
+      "surfaces": {
+        "reflection": {
+          "calls": 14,
+          "tout": 6713,
+          "cout": 31542
+        },
+        "worker": {
+          "calls": 515,
+          "tout": 106533,
+          "cout": 437659
+        }
+      },
+      "usd_by_provider_est": {
+        "openai": 0.5262497913363066
+      },
+      "usd_est": 0.5262497913363066
+    },
+    {
+      "label": "run2 easy-multi",
+      "run": "docs/validation-study-multi.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-terra"
+      },
+      "bound_usd": 6.1759200000000005,
+      "basis": "outputs measured, inputs unknown (no replay)",
+      "surfaces": {
+        "reflection": {
+          "calls": 5,
+          "tout": 1383,
+          "cout": 7347
+        },
+        "worker": {
+          "calls": 297,
+          "tout": 13124,
+          "cout": 72445
+        }
+      },
+      "usd_by_provider_est": {
+        "openai": 0.07573139270682994
+      },
+      "usd_est": 0.07573139270682994
+    },
+    {
+      "label": "run3 hard-multi",
+      "run": "docs/validation-study-multihard.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-terra"
+      },
+      "bound_usd": 6.1759200000000005,
+      "basis": "outputs measured, inputs unknown (no replay)",
+      "surfaces": {
+        "reflection": {
+          "calls": 22,
+          "tout": 8833,
+          "cout": 46354
+        },
+        "worker": {
+          "calls": 566,
+          "tout": 33353,
+          "cout": 131634
+        }
+      },
+      "usd_by_provider_est": {
+        "openai": 0.2967368391677215
+      },
+      "usd_est": 0.2967368391677215
+    },
+    {
+      "label": "run4 feedback",
+      "run": "docs/validation-study-feedback.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-terra"
+      },
+      "bound_usd": 3.0298560000000005,
+      "basis": "outputs measured, inputs unknown (no replay)",
+      "surfaces": {
+        "reflection": {
+          "calls": 5,
+          "tout": 1687,
+          "cout": 9054
+        },
+        "worker": {
+          "calls": 285,
+          "tout": 16414,
+          "cout": 66323
+        }
+      },
+      "usd_by_provider_est": {
+        "openai": 0.09387899106874846
+      },
+      "usd_est": 0.09387899106874846
+    },
+    {
+      "label": "run5 plan",
+      "run": "docs/validation-study-plan.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-terra"
+      },
+      "bound_usd": 3.779808,
+      "basis": "outputs measured, inputs unknown (no replay)",
+      "surfaces": {
+        "reflection": {
+          "calls": 7,
+          "tout": 2036,
+          "cout": 10976
+        },
+        "worker": {
+          "calls": 262,
+          "tout": 14926,
+          "cout": 60492
+        }
+      },
+      "usd_by_provider_est": {
+        "openai": 0.0952098252607503
+      },
+      "usd_est": 0.0952098252607503
+    },
+    {
+      "label": "run6 cross-lineage",
+      "run": "docs/validation-study-crossfamily.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-terra",
+        "critic": "openai/gpt-5.6-luna"
+      },
+      "bound_usd": 4.31808,
+      "basis": "outputs measured, inputs unknown (no replay)",
+      "surfaces": {
+        "critic": {
+          "calls": 110,
+          "tout": 998,
+          "cout": 3750
+        },
+        "reflection": {
+          "calls": 7,
+          "tout": 2932,
+          "cout": 15492
+        },
+        "worker": {
+          "calls": 180,
+          "tout": 5558,
+          "cout": 25838
+        }
+      },
+      "usd_by_provider_est": {
+        "openai": 0.08550253757921858
+      },
+      "usd_est": 0.08550253757921858
+    },
+    {
+      "label": "run7 oracle",
+      "run": "docs/validation-study-oracle.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-terra"
+      },
+      "bound_usd": 2.279904,
+      "basis": "outputs measured, inputs unknown (no replay)",
+      "surfaces": {
+        "reflection": {
+          "calls": 5,
+          "tout": 1975,
+          "cout": 10450
+        },
+        "worker": {
+          "calls": 183,
+          "tout": 5823,
+          "cout": 27520
+        }
+      },
+      "usd_by_provider_est": {
+        "openai": 0.060293695135411524
+      },
+      "usd_est": 0.060293695135411524
+    },
+    {
+      "label": "run8 fix-budget",
+      "run": "docs/validation-study-fixbudget.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-terra"
+      },
+      "bound_usd": 3.779808,
+      "basis": "outputs measured, inputs unknown (no replay)",
+      "surfaces": {
+        "reflection": {
+          "calls": 7,
+          "tout": 2895,
+          "cout": 15396
+        },
+        "worker": {
+          "calls": 291,
+          "tout": 9722,
+          "cout": 46584
+        }
+      },
+      "usd_by_provider_est": {
+        "openai": 0.09277505815666226
+      },
+      "usd_est": 0.09277505815666226
+    },
+    {
+      "label": "run9 fb-actionability lo",
+      "run": "docs/validation-study-fbactlo.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-terra"
+      },
+      "bound_usd": 3.779808,
+      "basis": "outputs measured, inputs unknown (no replay)",
+      "surfaces": {
+        "reflection": {
+          "calls": 5,
+          "tout": 1710,
+          "cout": 9033
+        },
+        "worker": {
+          "calls": 307,
+          "tout": 9480,
+          "cout": 44344
+        }
+      },
+      "usd_by_provider_est": {
+        "openai": 0.06864443590343786
+      },
+      "usd_est": 0.06864443590343786
+    },
+    {
+      "label": "run10 fb-actionability hi",
+      "run": "docs/validation-study-fbacthi.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-terra"
+      },
+      "bound_usd": 3.779808,
+      "basis": "outputs measured, inputs unknown (no replay)",
+      "surfaces": {
+        "reflection": {
+          "calls": 5,
+          "tout": 1826,
+          "cout": 9692
+        },
+        "worker": {
+          "calls": 324,
+          "tout": 9387,
+          "cout": 43896
+        }
+      },
+      "usd_by_provider_est": {
+        "openai": 0.07057433862718931
+      },
+      "usd_est": 0.07057433862718931
+    },
+    {
+      "label": "D5-code MBPP+ (saturated)",
+      "run": "docs/validation-study-code.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-terra"
+      },
+      "bound_usd": 4.343244800000001,
+      "basis": "outputs measured, inputs unknown (no replay)",
+      "surfaces": {
+        "worker": {
+          "calls": 60,
+          "tout": 1895,
+          "cout": 6093
+        }
+      },
+      "usd_by_provider_est": {
+        "openai": 0.007019620579095474
+      },
+      "usd_est": 0.007019620579095474
+    },
+    {
+      "label": "run11 worker swap (nano)",
+      "run": "docs/validation-study-multihard-nano.json",
+      "models": {
+        "worker": "openai/gpt-4.1-nano",
+        "reflection": "openai/gpt-5.6-terra"
+      },
+      "bound_usd": 2.5571040000000003,
+      "basis": "outputs measured, inputs unknown (no replay)",
+      "surfaces": {
+        "reflection": {
+          "calls": 17,
+          "tout": 8490,
+          "cout": 44046
+        },
+        "worker": {
+          "calls": 837,
+          "tout": 40264,
+          "cout": 164917
+        }
+      },
+      "usd_by_provider_est": {
+        "openai": 0.20374997895438268
+      },
+      "usd_est": 0.20374997895438268
+    },
+    {
+      "label": "bcb-acthi",
+      "run": "docs/validation-study-bcb-acthi.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-terra"
+      },
+      "bound_usd": 2.4514560000000003,
+      "basis": "outputs measured, inputs unknown (unreplayable by construction)",
+      "surfaces": {
+        "worker": {
+          "calls": 190,
+          "tout": 88731,
+          "cout": 378755
+        }
+      },
+      "usd_by_provider_est": {
+        "openai": 0.32868493593863873
+      },
+      "usd_est": 0.32868493593863873
+    },
+    {
+      "label": "bcb-actlo",
+      "run": "docs/validation-study-bcb-actlo.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-terra"
+      },
+      "bound_usd": 2.4514560000000003,
+      "basis": "outputs measured, inputs unknown (unreplayable by construction)",
+      "surfaces": {
+        "worker": {
+          "calls": 145,
+          "tout": 61989,
+          "cout": 269413
+        }
+      },
+      "usd_by_provider_est": {
+        "openai": 0.22962493935490733
+      },
+      "usd_est": 0.22962493935490733
+    },
+    {
+      "label": "bcb-actuator-big",
+      "run": "docs/validation-study-bcb-actuator-big.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-terra"
+      },
+      "bound_usd": 11.755824,
+      "basis": "outputs measured, inputs unknown (unreplayable by construction)",
+      "surfaces": {
+        "reflection": {
+          "calls": 14,
+          "tout": 7828,
+          "cout": 41851
+        },
+        "worker": {
+          "calls": 698,
+          "tout": 360525,
+          "cout": 1567398
+        }
+      },
+      "usd_by_provider_est": {
+        "openai": 1.4889703163254044
+      },
+      "usd_est": 1.4889703163254044
+    },
+    {
+      "label": "bcb-actuator",
+      "run": "docs/validation-study-bcb-actuator.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-terra"
+      },
+      "bound_usd": 4.1886912,
+      "basis": "outputs measured, inputs unknown (unreplayable by construction)",
+      "surfaces": {
+        "reflection": {
+          "calls": 9,
+          "tout": 4811,
+          "cout": 25448
+        },
+        "worker": {
+          "calls": 150,
+          "tout": 73405,
+          "cout": 327460
+        }
+      },
+      "usd_by_provider_est": {
+        "openai": 0.36624189124950857
+      },
+      "usd_est": 0.36624189124950857
+    },
+    {
+      "label": "bcb",
+      "run": "docs/validation-study-bcb.json",
+      "models": {
+        "worker": "openai/gpt-4.1-mini",
+        "reflection": "openai/gpt-5.6-terra"
+      },
+      "bound_usd": 5.893036800000001,
+      "basis": "outputs measured, inputs unknown (unreplayable by construction)",
+      "surfaces": {
+        "reflection": {
+          "calls": 10,
+          "tout": 5731,
+          "cout": 28898
+        },
+        "worker": {
+          "calls": 171,
+          "tout": 84707,
+          "cout": 376354
+        }
+      },
+      "usd_by_provider_est": {
+        "openai": 0.4261460780950568
+      },
+      "usd_est": 0.4261460780950568
+    }
+  ],
+  "replicates": {
+    "label": "225 replicate scorings",
+    "basis": "outputs measured, inputs estimated from the measured worker ratio",
+    "calls": 6252,
+    "tout": 375086,
+    "est_tin": 1973220,
+    "usd_est": 1.389425543287918,
+    "model": "openai/gpt-4.1-mini"
+  },
+  "surface_in_out_ratios": {
+    "worker": 5.260713165033606,
+    "reflection": 1.842762943071442,
+    "critic": 1.4415507996013857,
+    "verdict": 1.443298969072165
+  },
+  "totals": {
+    "measured_by_provider": {
+      "openai": 4.239619899999999,
+      "groq": 0.7274193799999998
+    },
+    "estimated_by_provider": {
+      "openai": 6.116029138579902
+    },
+    "measured_usd": 4.967039279999999,
+    "estimated_usd": 6.116029138579902,
+    "bounds_measured_runs_usd": 37.601056
+  }
+}

@@ -1592,7 +1592,7 @@ This paper's earlier drafts published claims it now withdraws, and two of its pr
 predictions failed. Reporting guidance for preregistered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Sixteen} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Seventeen} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1651,6 +1651,23 @@ The series' other two papers carry the entries bearing on their own claims.
     It ran in the flattering direction and it moved one verdict: the $L_2$ gain was published at
     $p<0.05$ ($t = 3.02$) and is $p<0.10$ ($t = 2.70$). \S\ref{sec:repeat} states it that way, and
     the paper no longer claims any effect at $p<0.05$.
+  \item \textbf{The one site ``corrected throughout'' missed: a $t$ of $1.12$.} The entry above
+    says the population-sd error is ``corrected throughout''. It was not. This register, and the
+    body of \S\ref{sec:repeat}, still printed the $L_1$ five-replicate mean as sitting ``$1.12$
+    standard errors from zero'' --- nineteen lines below a table printing $1.00$ for the same row.
+    Recomputed from the $135$ released re-scorings: mean $-0.021000$, sample sd $0.046765$,
+    standard error $0.020914$, $|t(4)| = 1.0041$. The population sd gives $0.041828$, a standard
+    error of $0.018706$ and $|t| = 1.1226$, so the published $1.12$ was exactly the withdrawn
+    estimator, $1.0041 \times \sqrt{5/4}$, surviving in prose while the whole of
+    Table~\ref{tab:repeat} had moved to the sample-sd convention. The verdict is unaffected ---
+    $1.00$ and $1.12$ are both far under $t(4) = 2.132$ --- and that is why it survived: nothing
+    turned on it, so nothing checked it. \textbf{A register that certifies its own correction as
+    complete is making a claim, and this one falsified itself.} Both sites now print $1.00$.
+    Paper~II's register cites this entry as the first of two sites with one signature: a value
+    derived from $\sigma$ rather than printed as $\sigma$, so searching for the denominator does
+    not find it. This entry was added on 2026-08-12, a week after the fix, having been found by
+    following that citation back and discovering it pointed at nothing --- which is one more
+    instance of the class, and is recorded as one rather than tidied away.
   \item \textbf{Arm~C's per-arm proposal count.} An earlier draft reported that GEPA proposed
     ``four candidates on every seed'' for the genome-blind control. Withdrawn as not derivable from
     the release: the cassette is content-addressed on a call's name and arguments, so an entry
