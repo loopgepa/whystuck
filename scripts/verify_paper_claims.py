@@ -78,6 +78,81 @@ def _runs(name: str) -> list[dict]:
         return json.load(fh)["runs"]
 
 
+def _tex_without_registers() -> str:
+    r"""The papers' prose with each corrections appendix's `enumerate` body removed.
+
+    For sweeps that check EVERY site stating a fact. A corrections register quotes the value a
+    paper used to print --- that is what a register is for --- so a sweep over the whole source
+    reads the quotation as a live claim and fails on the very entry that records the fix.
+
+    Only for sweeps. The registers are not exempt from checking in general, and most of their
+    numbers are pinned: where a register states a superseded statistic, `_restated_statistic_checks`
+    derives it by REAPPLYING the old mistake rather than transcribing it, which is stronger than an
+    exemption. What cannot be derived is a value that was simply wrong, and those are the ones this
+    strips.
+    """
+    return re.sub(
+        r"entries follow.*?\\end\{enumerate\}", "", _tex(), flags=re.DOTALL | re.MULTILINE
+    )
+
+
+def _abs_mean_delta(name: str) -> float:
+    """|mean of the per-seed D-B held-out differences| for one released run.
+
+    Exists so a sigma multiple is never computed from a figure the paper already rounded for
+    display. A check fed the paper's own rounded delta compares the paper to itself: it agrees by
+    construction and stays agreeing while the artifact moves underneath it.
+    """
+    return abs(mean(r["D"]["opt_heldout"] - r["B"]["opt_heldout"] for r in _runs(name)))
+
+
+def _arm_a_inertness() -> tuple[int, int]:
+    """(arm-A seed entries across the release, how many are not inert).
+
+    Backs Paper II's licence to read arm A out of four-arm artifacts. Inert means the arm declares
+    no evolvable genes, changed none, and scored identically before and after the search that ran
+    on its siblings. Paper II used to justify that licence by claiming every run was invoked with
+    `--arms A`, which is false for the seven runs behind its own curve table: they carry all four
+    arms and six of them recorded a real search on B and D. The invariant below is what actually
+    holds, and unlike a claim about a CLI invocation it is visible in the released artifact.
+    """
+    import glob
+
+    entries = violations = 0
+    for path in sorted(glob.glob(f"{DOCS}/validation-study*.json")):
+        with open(path, encoding="utf-8") as fh:
+            doc = json.load(fh)
+        for run in doc["runs"]:
+            arm = run.get("A")
+            if not isinstance(arm, dict):
+                continue
+            entries += 1
+            if (
+                arm.get("evolvable_genes") != []
+                or arm.get("genes_changed")
+                or arm.get("seed_heldout") != arm.get("opt_heldout")
+            ):
+                violations += 1
+    return entries, violations
+
+
+def _vacuous_ifbench_verifiers() -> tuple[int, int]:
+    """(verifiers in the vendored IFBench slice, how many the empty string satisfies).
+
+    Paper I's do-nothing-floor threat said five of eleven. Six of the eleven return True on `""`:
+    the sub-bullet check reduces to `all([])`, and the vowel and consonant checks quantify over no
+    words. Derived by calling them, because a hand-counted subset of a ported checker suite is
+    exactly the claim that rots when the port gains a verifier.
+    """
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from whystuck.eval.ifbench import VERIFIERS
+
+    return len(VERIFIERS), sum(1 for fn in VERIFIERS.values() if fn(""))
+
+
 def _tex() -> str:
     """Every paper's source, concatenated, shared inputs expanded.
 
@@ -372,6 +447,8 @@ _WORD_NUM = {
     "fifteen": 15,
     "sixteen": 16,
     "seventeen": 17,
+    "eighteen": 18,
+    "nineteen": 19,
     "twenty": 20,
     "twenty-one": 21,
     "twenty-two": 22,
@@ -2751,12 +2828,40 @@ def _checks() -> list[tuple[str, float, float, float]]:
         out.append((label, _scrape(tex, pattern), 0.0005, want))
 
     # The headline effects restated in sigma units, in both the abstract and sec:threats.
-    for label, pattern, delta in (
-        ("tex: sigma units L1", r"\$L_1\$ loss\s+\$-0.042\$ at \$([\d.]+)\\sigma\$", -0.0417),
-        ("tex: sigma units L2", r"\$\+0.060\$ at \$([\d.]+)\\sigma\$", 0.0600),
-        ("tex: sigma units L3", r"\$-0.002\$ at \$([\d.]+)\\sigma\$", -0.0017),
-    ):
-        out.append((label, _scrape(tex, pattern), 0.005, noise.in_sigma(delta)))
+    #
+    # The deltas are read from the decomposition, not typed. Until 2026-08-13 they were the
+    # literals -0.0417, 0.0600 and -0.0017 -- the paper's own four-decimal displays -- and L1's
+    # rounding mattered: 0.0417/sigma is 1.4354 while the exact -0.0416667 gives 1.4342. Six prose
+    # sites printed 1.44, which agreed with the rounded quotient to 0.0047 and passed this
+    # tolerance, while tab:splitresults printed 1.43 for the same cell from the same data. A check
+    # that divides a display value cannot distinguish the paper being right from the paper and the
+    # check having rounded the same way, which is how a table and its own prose disagreed for the
+    # paper's whole life without failing anything.
+    #
+    # The deltas are also captured now rather than anchored: each pattern used to embed the printed
+    # delta as locator text, so the number that selects the sentence was never compared to the run.
+    # Each level is located by its own WORD label -- `$L_1$ loss`, `$L_2$ gain`, `$L_3$ null` --
+    # so no numeral does the locating and every numeral is compared.
+    for level, word, sign in ((0, "loss", "-"), (1, "gain", r"\+"), (2, "null", "-")):
+        name = f"L{level + 1}"
+        stem = rf"\$L_{level + 1}\$ {word}\s+\$"
+        delta = _decomposition(level)["delta"]
+        out.append(
+            (
+                f"tex: sigma units {name}",
+                _scrape(tex, stem + rf"{sign}[\d.]+\$ at \$([\d.]+)\\sigma\$"),
+                0.005,
+                noise.in_sigma(delta),
+            )
+        )
+        out.append(
+            (
+                f"tex: sigma units {name} delta",
+                _scrape(tex, stem + rf"({sign}[\d.]+)\$ at"),
+                0.0005,
+                delta if sign == "-" else abs(delta),
+            )
+        )
 
     # EVERY OTHER PLACE A GAP IS RESTATED IN SIGMA UNITS. The five checks above and the curve
     # block pinned one sentence each, and the paper restates the same six gaps in the abstract,
@@ -2942,10 +3047,14 @@ def _checks() -> list[tuple[str, float, float, float]]:
     # `validation-study-*.json` silently misses it.
     from analyze_deltas import delta_arm as _delta_arm
 
+    # The locating phrase changed on 2026-08-13. It read "attempt at", from a sentence that called
+    # this "the discarded first four-arm attempt" -- a phrase the same paper uses twice elsewhere
+    # for C2, whose delta is -0.015 and which the pre-correction partition excludes outright. The
+    # run carrying -0.094 is run 1, the single-constraint one, and the sentence now says so.
     out.append(
         (
             "tex: superseded first-attempt delta",
-            _scrape(tex, r"attempt at \$-([\d.]+)\$, \$\\approx"),
+            _scrape(tex, r"verify gene inert, at \$-([\d.]+)\$"),
             0.0005,
             abs(mean(_delta_arm(f"{DOCS}/validation-study.json"))),
         )
@@ -3005,19 +3114,32 @@ def _checks() -> list[tuple[str, float, float, float]]:
     # The two superseded-run deltas sec:superseded scales by the same floor. These were quoted as
     # "5 sigma" and "3.5 sigma" for 0.100 and 0.094, which are 3.50 and 3.29 -- the first is what
     # you get from a sigma of 0.020, a value this study never estimated.
-    for label, pattern, delta in (
+    #
+    # Both deltas are now READ FROM their run files. Until 2026-08-13 the second was the literal
+    # 0.094 -- the value the paper prints -- so both sides of that comparison descended from the
+    # same rounded display and the check passed by repeating the paper's own rounding: 0.094/sigma
+    # is 3.2356, which sits 0.0044 from the published 3.24 and inside this tolerance, while the
+    # artifact's exact -0.09375 gives 3.2270, which is 0.0130 away and fails it. Dividing a number
+    # the paper already rounded for display gives an answer that depends on the display, which is
+    # the anti-pattern this file warns about elsewhere and had committed here.
+    #
+    # The second sentence also named the wrong run. It called this "the discarded first four-arm
+    # attempt", a phrase sec:reproduce and sec:sigma both use for C2 -- whose mean delta is -0.015,
+    # and which `module_selector == "all"` excludes from the pre-correction fifteen altogether. The
+    # run that carries -0.094 is run 1, the single-constraint one. The paper now names it.
+    for label, pattern, run in (
         (
             "tex: superseded actuator sigma",
             r"powered actuator run at \$\\approx\\!([\d.]+)\\sigma\$",
-            0.100,
+            "validation-study-bcb-actuator-big.json",
         ),
         (
             "tex: superseded first-attempt sigma",
-            r"attempt at \$-0.094\$, \$\\approx\\!([\d.]+)\\sigma\$",
-            0.094,
+            r"verify gene inert, at \$-[\d.]+\$, \$\\approx\\!([\d.]+)\\sigma\$",
+            "validation-study.json",
         ),
     ):
-        out.append((label, _scrape(tex, pattern), 0.005, noise.in_sigma(delta)))
+        out.append((label, _scrape(tex, pattern), 0.005, noise.in_sigma(_abs_mean_delta(run))))
 
     # The reproducibility registry's composition, which drifted once already: the paper said
     # "seventeen ... the eleven below plus the two hand-written conditions", which is 13.
@@ -3185,6 +3307,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_xprovider_checks())
     out.extend(_oracle_gap_direction_checks())
     out.extend(_groq_second_worker_checks())
+    out.extend(_paraphrase_drift_checks())
 
     return out
 
@@ -4680,10 +4803,26 @@ def _xprovider_checks() -> list[tuple[str, float, float, float]]:
     # The base rates the caveat leans on, stated in the paper as exact counts rather than a
     # 3-dp decimal: 9/80 is 0.1125, which sits exactly on a rounding boundary, and a check whose
     # pass depends on which way a tie rounds is a check about float repr, not about the paper.
-    counts = _scrape_all(p2, r"\$5/50\$, \$4/30\$ and \$(\d+)/(\d+)\$")
-    xp_row = _detector_row("study-xprovider.json", tuple(range(8)), True)
-    out.append(("tex: detector p0 numerator", counts[0], 0.0, xp_row["tp"] + xp_row["fn"]))
-    out.append(("tex: detector p0 denominator", counts[1], 0.0, xp_row["n"]))
+    #
+    # All THREE pairs are captured. Until 2026-08-13 the pattern read
+    # `\$5/50\$, \$4/30\$ and \$(\d+)/(\d+)\$`: the first two pairs were locator text, so four of
+    # the six numerals in this sentence were never compared to anything. That is the same species
+    # as the defect this file fixed at `tex: intrinsic p0cal-L1`, where a PASS rate of 1% was
+    # printed against an artifact measuring 0.5% because the 1 sat inside the anchor.
+    counts = _scrape_all(
+        p2, r"already-correct drafts number \$(\d+)/(\d+)\$, \$(\d+)/(\d+)\$ and \$(\d+)/(\d+)\$"
+    )
+    for i, (name, cassette, seeds, sep) in enumerate(
+        (
+            ("intrinsic", "study-multihard.json", tuple(range(5)), False),
+            ("cross-lineage", "study-crossfamily.json", tuple(range(3)), True),
+            ("cross-provider", "study-xprovider.json", tuple(range(8)), True),
+        )
+    ):
+        row = _detector_row(cassette, seeds, sep)
+        already = row["tp"] + row["fn"]
+        out.append((f"tex: detector p0 numerator, {name}", counts[2 * i], 0.0, already))
+        out.append((f"tex: detector p0 denominator, {name}", counts[2 * i + 1], 0.0, row["n"]))
     # The closing argument runs on two axes, and an earlier draft pooled them: it set run 4's
     # +0.060, which is a SEED-GENOME between-run gap, beside two Delta(D-B) contrasts between
     # OPTIMIZED arms, as though the three were commensurable. They are not. The paragraph now
@@ -4790,6 +4929,154 @@ def _xprovider_checks() -> list[tuple[str, float, float, float]]:
             xp["n"],
         )
     )
+    return out
+
+
+def _paraphrase_drift_checks() -> list[tuple[str, float, float, float]]:
+    r"""Four claims a cross-audit found wrong on 2026-08-13, grouped by the mechanism that hid them.
+
+    Each was either a fact the papers state in more than one wording, or a floor nobody derived.
+
+    `_scrape` uses `re.search`, which returns the FIRST match. So a fact restated in different
+    words is guarded at one site and free to rot at every other. That is how Paper III came to
+    print "four runs overrode" the \$5 default while the shared harness section it `\input`s says
+    "Five runs raised it explicitly": the guard read the shared file, agreed with it, and never saw
+    the paraphrase two papers away. The ceiling count is therefore checked at EVERY site that
+    states it, through `finditer`, and the number of sites is floored so that rewording one out of
+    reach fails here instead of quietly reducing coverage.
+
+    The other three are numbers that were simply never derived from anything: Paper I's L1 sigma
+    multiple (printed 1.44 at six sites while its own table printed 1.43), Paper I's count of
+    vacuously-satisfiable IFBench verifiers (five claimed, six real), and Paper II's licence to
+    read arm A out of a four-arm artifact, which used to rest on a false claim about the CLI.
+    """
+    import glob
+
+    out: list[tuple[str, float, float, float]] = []
+    tex = _tex()
+
+    # --- the $5 ceiling override count, at every wording that states it ------------------------
+    over = []
+    for path in sorted(glob.glob(f"{DOCS}/validation-study*.json")):
+        with open(path, encoding="utf-8") as fh:
+            est = json.load(fh)["meta"].get("estimated_usd")
+        if est is not None and est > 5:
+            over.append(est)
+    # Over the prose only: Paper III's register quotes the withdrawn "Four runs overrode" verbatim,
+    # which is the entry recording this very fix, and a sweep that read it would fail on it.
+    sites = list(
+        re.finditer(r"(\w+) runs (?:raised it explicitly|overrode)", _tex_without_registers())
+    )
+    for i, match in enumerate(sites):
+        out.append(
+            (
+                f"tex: ceiling override count, site {i}",
+                float(_WORD_NUM.get(match.group(1).lower(), float("nan"))),
+                0,
+                len(over),
+            )
+        )
+    # A floor, not a measurement: if a rewording puts one site out of this pattern's reach, the
+    # loop above would emit fewer checks and nothing would notice the loss of coverage. The
+    # expected number is derived -- the shared harness section states it once and is expanded into
+    # each of the three papers, and Paper III restates it in its own words -- so adding a paper
+    # does not require editing a literal here.
+    out.append(
+        (
+            "tex: ceiling override restatement sites",
+            float(len(sites)),
+            0,
+            float(len(_sources().PAPERS) + 1),
+        )
+    )
+
+    # --- Paper I's L1 sigma multiple, at all six prose sites ------------------------------------
+    # Six sites printed 1.44 while tab:splitresults printed 1.43 for the same cell, because the
+    # check that existed divided the paper's rounded -0.0417 (see `tex: sigma units L1`). These
+    # patterns locate each site by its surrounding WORDS, never by the multiple itself.
+    l1_sigma = _noise_estimate().in_sigma(_decomposition(0)["delta"])
+    for i, pattern in enumerate(
+        (
+            r"is \$([\d.]+)\\sigma\$ of measurement noise and three other",
+            r"puts this cell at\s+\$([\d.]+)\\sigma\$\. So the honest summary",
+            r"and \$([\d.]+)\\sigma\$ of measurement noise\. What survives",
+            r"It rests on a single \$([\d.]+)\\sigma\$ cell",
+            r"the cell is \$([\d.]+)\\sigma\$ of a measured noise floor",
+        )
+    ):
+        out.append((f"tex: L1 sigma multiple, site {i}", _scrape(tex, pattern), 0.005, l1_sigma))
+
+    # --- Paper I's do-nothing floor -------------------------------------------------------------
+    n_verifiers, n_vacuous = _vacuous_ifbench_verifiers()
+    out.append(
+        (
+            "tex: vacuously satisfiable verifiers",
+            _scrape_word(tex, r"and ([\w-]+) of eleven IFBench verifiers are vacuously"),
+            0,
+            float(n_vacuous),
+        )
+    )
+    out.append(
+        (
+            "tex: IFBench verifier count",
+            _scrape_word(tex, r"of ([\w-]+) IFBench verifiers are vacuously"),
+            0,
+            float(n_verifiers),
+        )
+    )
+
+    # --- Paper II's arm-A licence ---------------------------------------------------------------
+    entries, violations = _arm_a_inertness()
+    out.append(
+        (
+            "tex: arm-A seed entries",
+            _scrape(tex, r"\$(\d+)\$\s*\narm-\\textbf\{A\} seed entries across the release"),
+            0,
+            float(entries),
+        )
+    )
+    # The claim is "with no exception", so the artifact side must be zero. Compared against a
+    # literal 0 deliberately: this is the one number whose correct value is not read from the
+    # release but asserted about it, and a non-zero here retracts the paper's sentence.
+    out.append(("arm-A inertness violations", 0.0, 0, float(violations)))
+
+    # --- the wrong values these corrections withdraw, each derived by REAPPLYING its mistake -----
+    # A register entry has to print the number the paper used to carry, or a reader cannot tell what
+    # was fixed. That leaves a decimal in the prose no artifact produces, which
+    # `test_paper_prose_coverage` correctly refuses. The route out is not an exemption: every one of
+    # these is reproducible by rounding exactly where the original rounded, so each is derived, and
+    # a change to the underlying data moves the withdrawn value with it. Same principle as
+    # `_restated_statistic_checks`, which recomputes the population-sd t values by reapplying that
+    # estimator rather than transcribing them.
+    sigma = _noise_estimate().sigma_delta_mean
+    l1 = _decomposition(0)["delta"]
+    run1 = _abs_mean_delta("validation-study.json")
+    for label, pattern, tol, want in (
+        # What the exact arithmetic gives, quoted in the entry as the right answer.
+        ("register: L1 sigma exact", r"is \$([\d.]+)\$, and \$1.44\$ is", 0.0001, abs(l1) / sigma),
+        # What the check computed: the delta rounded to the four decimals the paper displayed.
+        (
+            "register: L1 sigma from a 4-dp delta",
+            r"\$([\d.]+)\$ and agreed with the wrong value",
+            0.0001,
+            abs(round(l1, 4)) / sigma,
+        ),
+        # What the prose printed: a 3-dp delta over a 4-dp sigma, both already rounded for display.
+        (
+            "register: L1 sigma double-rounded",
+            r"and \$([\d.]+)\$ is\s+what the paper's own displayed",
+            0.005,
+            round(abs(l1), 3) / round(sigma, 4),
+        ),
+        # Paper III's, the same double rounding one decimal coarser.
+        (
+            "register: run-1 sigma double-rounded",
+            r"which gives \$3.23\$, and \$([\d.]+)\$ is what the paper's own",
+            0.005,
+            round(run1, 3) / round(sigma, 3),
+        ),
+    ):
+        out.append((label, _scrape(tex, pattern), tol, want))
     return out
 
 

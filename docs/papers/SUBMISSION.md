@@ -21,7 +21,7 @@ endorsement domain, and the primary category selects the domain.
 
 Two structural facts decide this, and neither is about the papers' quality.
 
-**Main-text length is 27 / 17 / 14 pages** (references begin on p.28 / 18 / 15 of 38 / 22 / 19).
+**Main-text length is 27 / 17 / 14 pages** (references begin on p.28 / 18 / 15 of 38 / 23 / 20).
 **All three papers are de-anonymised by their own reproducibility apparatus**: the title block
 prints author, affiliation and repository URL, and each abstract names the repository again.
 
@@ -119,8 +119,8 @@ exists. Measured from the built PDFs and each paper's own source:
 | | paper | pages | tables | figures | distinct citations | package |
 |---|---|---|---|---|---|---|
 | I | `p1-conditional-lever` | 38 | 11 | 3 | 24 | 107 kB |
-| II | `p2-repair-not-detection` | 22 | 4 | 2 | 17 | 85 kB |
-| III | `p3-silent-no-op` | 19 | 4 | 1 | 13 | 83 kB |
+| II | `p2-repair-not-detection` | 23 | 4 | 2 | 17 | 85 kB |
+| III | `p3-silent-no-op` | 20 | 4 | 1 | 13 | 83 kB |
 
 Each package is far under arXiv's 50 MB limit. Abstract lengths against the 1920-character metadata
 field: **1912**, **1895**, 1788. Paper I has 8 characters of headroom and Paper II has 25, so any

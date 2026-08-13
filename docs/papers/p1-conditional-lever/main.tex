@@ -329,7 +329,7 @@ D & \texttt{generate} $+$ \texttt{ensure\_correct} & 0.788 & 0.747 & $\mathbf{-0
 \end{tabular}
 \caption{The corrected-harness re-run, held-out means over three seeds. Prompt-only
 optimization is a wash; arm~D comes out $0.042$ lower, which carries no directional claim --- it
-is $1.44\sigma$ of measurement noise and three other training-split sizes at the same $p_0$ come
+is $1.43\sigma$ of measurement noise and three other training-split sizes at the same $p_0$ come
 out positive (\S\ref{sec:splitresult}). Note what the controls do and do not establish: arm~A re-scores the seed genome,
 which under a deterministic replay path must reproduce its first measurement, so it is a
 determinism check rather than a flatness control; and arm~C's worker ignores the genome, so no
@@ -358,7 +358,7 @@ quietly absorbed. \S\ref{sec:decomp} attributes $-0.025$ of the $-0.042$ to the 
 evolve; the pre-registered split sweep (\S\ref{sec:splitresult}) finds no split-size trend to
 overfit along, a \emph{smaller} split giving $+0.017$ and larger ones $+0.062$ and $+0.023$ at the
 same $p_0$ and the same held-out tasks; and the noise floor (\S\ref{sec:threats}) puts this cell at
-$1.44\sigma$. So the honest summary is neither that loop-level optimization fails to help nor that
+$1.43\sigma$. So the honest summary is neither that loop-level optimization fails to help nor that
 it pays a price: this is the one configuration of four where it came out negative, by an amount
 the study cannot separate from measurement noise. The degradation runs 4 and 5 showed --- on the
 pre-correction harness, so read as prompt-only behaviour rather than as a contrast (Paper~III) --- and the
@@ -530,7 +530,7 @@ is how much that discrimination is worth.
 depends on $p_0$, and the condition is the one the mechanism named. An earlier draft put this
 more strongly --- \emph{conditionally harmful} --- and that word is withdrawn in
 \S\ref{sec:splitresult}, because the low-$p_0$ cell it rested on is one configuration of four
-and $1.44\sigma$ of measurement noise. What survives the withdrawal is the \emph{contrast}
+and $1.43\sigma$ of measurement noise. What survives the withdrawal is the \emph{contrast}
 between the levels, which is stronger than either cell alone and can be stated in the same
 units. Treating the two levels as independent draws,
 \[
@@ -1233,12 +1233,12 @@ two independent draws, so $\sigma(\dd)$ on one task is $0.1591$ and on a thirty-
 \[
 \sigma(\dd) \;=\; 0.1591/\sqrt{30} \;=\; 0.0291 .
 \]
-In those units the study's effects are: the $L_1$ loss $-0.042$ at $1.44\sigma$, the $L_2$ gain
+In those units the study's effects are: the $L_1$ loss $-0.042$ at $1.43\sigma$, the $L_2$ gain
 $+0.060$ at $2.07\sigma$ and the $L_3$ null $-0.002$ at $0.06\sigma$. Paper~III shows this
 single study-wide $\sigma$ is an approximation --- measured per genome it spans $5.9\times$ ---
 and \S\ref{sec:repeat} supersedes it here with five-replicate standard errors wherever the two
 overlap. \textbf{We therefore withdraw the unconditional claim that evolving
-the verifier costs held-out performance at low $p_0$.} It rests on a single $1.44\sigma$ cell
+the verifier costs held-out performance at low $p_0$.} It rests on a single $1.43\sigma$ cell
 that three other training-split sizes do not reproduce (\S\ref{sec:splitresult}). What survives
 is narrower and better supported: the verifier reliably degenerates to non-acceptance at low
 $p_0$ ($11/12$ genes across four split sizes), and the $+0.060$ gain at higher $p_0$ is the
@@ -1253,9 +1253,9 @@ replicate sampling (D7) is the fix, needs no re-optimization, and has since been
 \textbf{A do-nothing floor in the
 metric:} the fraction-of-constraints-satisfied score is not anchored at zero for an empty
 answer --- the empty string scores $0.548$ on the vendored IFBench slice and $0.420$ on
-generated multi-hard, and five of eleven IFBench verifiers are vacuously satisfied by text
-containing no whitespace, quotes or bullets (\texttt{\_sub\_bullets("")} reduces to
-\texttt{all([]) = True}). These are faithful ports of the upstream checkers and the floor
+generated multi-hard, and six of eleven IFBench verifiers are vacuously satisfied by the empty
+string itself (\texttt{\_sub\_bullets("")} reduces to \texttt{all([]) = True}, and the vowel and
+consonant checks quantify over no words at all). These are faithful ports of the upstream checkers and the floor
 applies to every arm equally, so it does not bias \dd, but it compresses the scale: on IFBench
 the floor sits at or above our reported seed baselines. It also makes the metric a poor
 instrument for this loop, since a metric that partly rewards saying less is exposed to a
@@ -1592,7 +1592,7 @@ This paper's earlier drafts published claims it now withdraws, and two of its pr
 predictions failed. Reporting guidance for preregistered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Seventeen} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Nineteen} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1603,7 +1603,7 @@ The series' other two papers carry the entries bearing on their own claims.
   \item \textbf{The cost of evolving the verifier at low $p_0$.} Published: evolving the verifier
     alongside the generator \emph{costs} $0.042$ held-out. Withdrawn. Three further
     training-split sizes at the same $p_0$ come out positive
-    (\S\ref{sec:splitresult}), the cell is $1.44\sigma$ of a measured noise floor
+    (\S\ref{sec:splitresult}), the cell is $1.43\sigma$ of a measured noise floor
     (\S\ref{sec:threats}), and five independent draws of the same genomes halve it to $-0.021$,
     $1.00$ standard errors from zero (\S\ref{sec:repeat}). What survives is the
     \emph{conditional} statement in \S\ref{sec:p0}.
@@ -1730,6 +1730,28 @@ The series' other two papers carry the entries bearing on their own claims.
     prior work --- so the direction stands and the borrowed support does not. Paper~II carried the
     same sentence and a second, broader version of it. Found by three of the twelve cold reviewers,
     all in condition~B.
+  \item \textbf{The $L_1$ cell was printed at $1.44\sigma$ in the prose and $1.43\sigma$ in the
+    table.} One quantity, two values, six prose sites against
+    Table~\ref{tab:splitresults}'s column, for the whole life of this paper. $1.43$ is right:
+    the exact $-0.041\overline{6}$ over the unrounded $\sigma = 0.029052$ is $1.4342$, and $1.44$ is
+    what the paper's own displayed $-0.042$ gives. The cause was not a typo but the check: it
+    divided the literal $-0.0417$, a four-decimal display of the same number, so it computed
+    $1.4354$ and agreed with the wrong value to within its tolerance while disagreeing with the
+    table it was printed beside. A check that divides a rounded display cannot tell the paper being
+    right from the paper and the check having rounded the same way. Both deltas are now read from
+    the decomposition, and every site is located by its surrounding words rather than by the
+    multiple, so no numeral in these sentences does the locating. This one sits in the paragraph
+    that withdraws the unconditional low-$p_0$ claim, so the digit is not load-bearing --- the
+    withdrawal is --- but a table and its own prose disagreeing is exactly what a reader is
+    entitled to assume cannot happen.
+  \item \textbf{``Five of eleven IFBench verifiers are vacuously satisfied.''} Six of eleven, and
+    the empty string satisfies all six: the sub-bullet check reduces to
+    \texttt{all([]) = True}, the newline, whitespace and quote checks are trivially met, and the
+    vowel and consonant checks quantify over no words. The count was hand-made and read nowhere, so
+    it could not move when the ported suite did. It ran against us --- the threat is that the
+    metric's floor is exploitable, and $6/11$ is a wider floor than $5/11$ --- and the paragraph's
+    conclusion is untouched, since the floor applies to every arm equally and so does not bias
+    $\dd$. The count is now derived by calling the verifiers.
 \end{enumerate}
 
 \section{The Actuator Experiment, and the MBPP+ Attempt}

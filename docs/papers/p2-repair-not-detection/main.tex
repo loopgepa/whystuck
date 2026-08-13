@@ -170,11 +170,15 @@ the loop's structure --- drive self-repair gains \citep{feedbackoverform2026,how
 
 \paragraph{No optimizer, and why that matters here.}
 Every configuration in this paper is scored on arm~\textbf{A} of the underlying study: a fixed
-genome, evolved by nothing. Concretely each run is invoked with \texttt{-{}-arms A}, which scores
-the seed genome and runs no search, so no result below can be produced or contaminated by a prompt
-optimizer, a search budget, or the wiring that connects one to a component. What varies between
-runs is the harness: which signal the critique receives, how many refine rounds it may gate, and
-what repair text the refine step is handed.
+genome, evolved by nothing. Arm~\textbf{A} declares no evolvable genes, so its pre- and
+post-search held-out scores are identical on every seed of every released run --- $242$
+arm-\textbf{A} seed entries across the release, with no exception. The cells introduced for this
+paper were additionally invoked with \texttt{-{}-arms A}, which runs no search at all. The earlier
+configurations are arm~\textbf{A} read out of a four-arm artifact in which search did run, on arms
+\textbf{B} and \textbf{D}, where it cannot reach a genome that has nothing to evolve. Either way no
+result below can be produced by a prompt optimizer, a search budget, or the wiring that connects
+one to a component. What varies between runs is the harness: which signal the critique receives,
+how many refine rounds it may gate, and what repair text the refine step is handed.
 
 \paragraph{The two detector interventions.}
 (i) A non-oracle \emph{measurement tool}: the critique step is optionally given
@@ -973,7 +977,7 @@ Earlier drafts of this work published claims it now withdraws. Reporting guidanc
 preregistered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Thirteen} entries follow. The
+collected here and the body text states only the surviving claim. \textbf{Fourteen} entries follow. The
 series' other two papers carry the entries bearing on their own claims, and the full
 register across all three, with the superseded values themselves, is in the released repository.
 
@@ -1090,6 +1094,21 @@ register across all three, with the superseded values themselves, is in the rele
     cannot also test it. Every rate here is now pinned as a value in its own right, so the anchor
     and the assertion move together, and this paper's own thesis --- that a check can report
     agreement about something it never compared --- is the reason the entry exists.
+  \item \textbf{``Concretely each run is invoked with \texttt{-{}-arms A}.''} True of the cells
+    bought for this paper, false of the earlier configurations its curve table is built from. Those
+    seven runs carry all four arms, and six of them recorded a real optimizer search on arms
+    \textbf{B} and \textbf{D} in the same invocation; this paper reads arm~\textbf{A} out of that
+    shared artifact rather than having commissioned an arm-\textbf{A}-only run. No reported number
+    moves, and the reason is the same one that makes the claim recoverable: arm~\textbf{A} declares
+    no evolvable genes, so a search on its siblings cannot reach it, and its two scores are
+    identical on every seed of all $242$ arm-\textbf{A} seed entries in the release. So the
+    conclusion stood on a false warrant. The paragraph now states the invariant instead of the
+    invocation, which has the additional merit of being checkable: a claim about how a command was
+    typed leaves no trace in the artifact, and \texttt{verify\_paper\_claims.py} now asserts the
+    inertness directly. Registered because ``no optimizer anywhere'' is the premise the whole paper
+    is built to license, and a premise supported by an unverifiable procedural claim is weaker than
+    one supported by a property of the released data, even when both happen to yield the same
+    results.
 \end{enumerate}
 
 \end{document}

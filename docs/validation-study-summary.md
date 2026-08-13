@@ -351,7 +351,8 @@ experiments are exhausted; the two remaining paid ideas are low-value:
     (Executor note: a memory-hog model draft that OOMs its container is scored a failure, not an
     infra abort — surfaced + fixed during the powered run; genuine host faults still abort loudly.)
 
-**Recommendation: write this up as the arXiv paper now (`docs/paper/main.tex`) and treat D5
+**Recommendation: write this up as the arXiv paper now (then `docs/paper/main.tex`, since
+2026-08-03 the three papers under `docs/papers/`) and treat D5
 as the scoped v2 / follow-up.** Don't spend on D7 or D1′. Optional cheap armor: re-run *only*
 run 3 at n=10 (~$1) to preempt the reflexive "n is small" note, though the CI is already tight.
 
@@ -460,4 +461,6 @@ released; strict call-replay is out of scope for it deliberately.
 A pre-print draft consolidating all ten runs, the method, the oracle taxonomy, this
 mechanism, threats to validity, and a boundary-mapping agenda (remaining fix-side
 interventions, budget/worker sweeps, cross-domain replication) lives in
-`docs/paper/main.tex` (references in `docs/references.bib`).
+`docs/papers/p1-conditional-lever/`, `p2-repair-not-detection/` and `p3-silent-no-op/`
+(references in `docs/papers/shared/references.bib`). This log said `docs/paper/main.tex`,
+the single draft that path held before the 2026-08-03 three-way split.
