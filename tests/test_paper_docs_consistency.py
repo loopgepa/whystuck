@@ -346,6 +346,15 @@ REPLAY_COUNT_PATTERNS: dict[str, tuple[tuple[str, str], ...]] = {
         ("superseded", r"\*\*(\d+)\*\* are registered with frozen CLI args and labelled superse"),
         ("unreplayable", r"\*\*(\d+)\*\* BigCodeBench runs are listed as\s+unreplayable"),
     ),
+    # Added 2026-08-13. This file states the same three counts and no test read it, so when the
+    # registry moved from 5/12 to 25/13 the two guarded documents were updated and this one was
+    # not. It is the reproduction instructions, which makes it the document a reader most likely
+    # runs against -- it told them to expect `ALL 5 RUNS` from a script that prints 25.
+    "docs/papers/REPRODUCE.md": (
+        ("replayed", r"should print `ALL (\d+) RUNS REPRODUCE FROM CASSETTE`"),
+        ("superseded", r"A further \*\*(\d+)\*\* runs are reported as skipped as superseded"),
+        ("unreplayable", r"The remaining \*\*(\d+)\*\* of the 43 released runs"),
+    ),
 }
 
 
@@ -386,3 +395,81 @@ def test_advertised_replay_counts_equal_the_registry() -> None:
             )
             seen += 1
     assert seen == sum(len(p) for p in REPLAY_COUNT_PATTERNS.values()) >= 5
+
+
+def test_the_ceiling_override_count_agrees_everywhere_it_is_stated():
+    r"""The `$5` default was raised by five runs. Three documents and two papers say so.
+
+    `verify_paper_claims.py` checks every site inside the papers, but its corpus is
+    `paper_sources.all_tex()`, so a restatement in Markdown is outside it. `docs/EXPERIMENTS.md`
+    said "Four runs raised it explicitly" until 2026-08-13 -- the fifth site of one fact, and the
+    second to carry the wrong number after Paper III's.
+
+    The count comes from the release, and the sites are found rather than listed, so a new
+    restatement is covered the moment it is written in either of these two phrasings.
+    """
+    over = [
+        est
+        for path in sorted((ROOT / "docs").glob("validation-study*.json"))
+        for est in [json.loads(path.read_text(encoding="utf-8"))["meta"].get("estimated_usd")]
+        if est is not None and est > 5
+    ]
+    words = {"four": 4, "five": 5, "six": 6, "seven": 7, "three": 3, "two": 2}
+    sites = []
+    for rel in ("docs/EXPERIMENTS.md", "docs/papers/README.md", "docs/papers/REPRODUCE.md"):
+        path = ROOT / rel
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8")
+        for m in re.finditer(r"(\w+) runs? (?:raised it explicitly|overrode)", text):
+            word = m.group(1).lower()
+            assert word in words, f"{rel}: unrecognised count word {word!r} in {m.group(0)!r}"
+            sites.append((rel, m.group(0), words[word]))
+    assert sites, (
+        "no document states the ceiling-override count in a form this guard reads; it was "
+        "stated in three, and a guard that stops matching vanishes rather than failing"
+    )
+    wrong = [(rel, phrase, n) for rel, phrase, n in sites if n != len(over)]
+    assert not wrong, f"{len(over)} runs exceeded the default; these say otherwise: {wrong}"
+
+
+#: Documents that together are expected to account for the release in prose. Not every document:
+#: the point is that a released run is explained SOMEWHERE a reader will look, not that each file
+#: mentions all of them.
+_PROSE_DOCS = (
+    "docs/EXPERIMENTS.md",
+    "docs/papers/README.md",
+    "docs/papers/REPRODUCE.md",
+    "docs/validation-study-summary.md",
+    "README.md",
+)
+
+
+def test_every_released_run_is_named_in_prose():
+    """A released run nobody explains is a published artifact with no account of what it is.
+
+    Five were in that state until 2026-08-13: the budget sweep's `mmc20/40/56/80/160`. They carry
+    committed JSON and cassettes, they replay, and Paper I's budget table is built from them, so
+    nothing was wrong with the data -- but no prose document named them, and they are also the five
+    runs with no generated `.md` report, so there was no page anywhere describing them.
+
+    A run's own generated report counts as naming it: that is a document a reader can find. The
+    check is therefore "named in some prose document OR has its own report", and the five had
+    neither.
+    """
+    docs = "\n".join(
+        (ROOT / rel).read_text(encoding="utf-8") for rel in _PROSE_DOCS if (ROOT / rel).is_file()
+    )
+    unexplained = []
+    for path in sorted((ROOT / "docs").glob("validation-study*.json")):
+        stem = path.stem  # e.g. validation-study-mmc20
+        slug = stem.removeprefix("validation-study").lstrip("-") or "baseline"
+        if path.with_suffix(".md").is_file():
+            continue
+        if slug != "baseline" and slug not in docs:
+            unexplained.append(path.name)
+    assert not unexplained, (
+        "released runs with no generated report and named in no prose document: "
+        f"{unexplained}. Either name them in one of {list(_PROSE_DOCS)} or generate their report; "
+        "a run cited only by a LaTeX table is one a reader cannot look up."
+    )

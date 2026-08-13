@@ -203,9 +203,12 @@ genomes are already released.
 
 ### The pre-registered split-size sweep (§"Is the loss a small-split artifact?")
 
-Designed, guarded, priced, and pinned by `tests/test_split_size_sweep.py`; **not run** — the
-credential available at the time authenticated against neither model. One command per row,
-none of which needs the `$5` ceiling raised:
+Designed, guarded, priced, and pinned by `tests/test_split_size_sweep.py`, and since **run**: all
+three rows are released as `docs/validation-study-split{4,16,24}.json`, registered in
+`verify_reproducibility.py`, and they replay. This section read "**not run** — the credential
+available at the time authenticated against neither model" until 2026-08-13, which was true when
+written and stayed on the page after the credential worked. The commands are kept because they are
+the record of what was run, and none of them needs the `$5` ceiling raised:
 
 ```bash
 for cfg in "4 14" "16 56" "24 84"; do set -- $cfg
@@ -245,11 +248,26 @@ Two things will bite anyone who varies `--n-train` without reading that section:
 | `docs/papers/shared/` | preamble, harness section, bibliography, figures, CC BY licence |
 | `docs/papers/PRE-SPLIT-SOURCE.tex` | the pre-split draft, frozen at `fe628ed`, never built |
 | `docs/validation-study-*.json` | per-run results, including per-task held-out vectors |
-| `docs/validation-study-*.md` | the generated report for each run |
+| `docs/validation-study-*.md` | the generated report, for 38 of the 43 runs (see below) |
 | `tests/fixtures/cassettes/` | recorded LLM calls, content-addressed, prompts not stored |
 | `docs/genes/` | hand-written genes used in the C1 ablation, with rationale |
 | `scripts/` | the study runner and every offline analysis |
 | `src/whystuck/eval/` | harness: adapter, study, cassette, cost guard, benchmarks |
+
+### The five runs with no generated report
+
+`docs/validation-study-mmc{20,40,56,80,160}.json` are the five bought rows of the pre-registered
+budget sweep (D4). They carry committed JSON and cassettes, they are registered in
+`verify_reproducibility.py`, they replay, and Paper I's budget-sweep table is built from them — but
+the report writer was not run for them, so they have no `.md` companion.
+
+That is worth stating rather than leaving as an arithmetic puzzle. Counting `.json` against `.md`
+gives 43 against 39 and suggests four are missing; the real figure is five, because
+`docs/validation-study-summary.md` is a hand-written running log with no `.json` sibling and it
+masks one of them. This row of the table above claimed a report for every run until 2026-08-13.
+`tests/test_paper_docs_consistency.py::test_every_released_run_is_named_in_prose` now requires each
+released run to be named somewhere in the documentation, which is what was actually missing: these
+five were released, cited by a paper table, and named in no prose at all.
 
 ## Gates
 
@@ -289,8 +307,22 @@ Stated here rather than discovered:
 
 ## Which runs verify
 
-`verify_reproducibility.py` should print `ALL 5 RUNS REPRODUCE FROM CASSETTE`: the two C1
-verifier-ablation conditions and the C2b four-arm re-run. Twelve further runs are reported as
-skipped — eleven recorded under the pre-correction wiring (whose reflection prompts, and
-therefore whose cassette keys, no longer exist) and C2 as above. The script exits non-zero if
-it would otherwise claim success without having replayed anything.
+`verify_reproducibility.py` should print `ALL 25 RUNS REPRODUCE FROM CASSETTE`. Those are the
+corrected-harness runs: the two C1 verifier-ablation conditions, the C2b four-arm re-run, the p0
+levels and the two OpenAI calibration passes, the split-size sweep, the five bought rows of the
+budget sweep, the cross-provider critic run, and the eleven-run Groq second-worker line.
+
+A further **13** runs are reported as skipped as superseded, each carrying its own reason in the
+registry: eleven recorded under the pre-correction wiring (whose reflection prompts, and therefore
+whose cassette keys, no longer exist) and two the blank-gene guard now refuses, because replay
+re-serves the empty completion that motivated the guard. The remaining **5** of the 43 released runs
+are listed as unreplayable — the BigCodeBench ones, whose scoring executes model code in a Docker
+sandbox and is not bit-reproducible offline. 25 + 13 + 5 = 43.
+
+The script exits non-zero if it would otherwise claim success without having replayed anything.
+
+This paragraph said `ALL 5 RUNS` and "Twelve further runs" until 2026-08-13. Eleven runs had been
+replaying for some time without being registered, so the counts moved to 25/13 in
+`docs/EXPERIMENTS.md` and `docs/papers/README.md` — both of which a test pins — and this file, which
+no test read, kept the old numbers. It is now in the same guard
+(`tests/test_paper_docs_consistency.py::test_advertised_replay_counts_equal_the_registry`).

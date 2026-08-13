@@ -6,8 +6,8 @@ questions, rest on different experiments, and are useful to different readers.
 | | paper | asks | uses the optimizer? | pages |
 |---|---|---|---|---|
 | **I** | [`p1-conditional-lever/`](p1-conditional-lever/) — *Whether Optimizing the Loop Beats Optimizing the Prompt Depends on One Number* | Does evolving a self-refine loop's verifier beat evolving its generation prompt? | yes, it is the subject | 38 |
-| **II** | [`p2-repair-not-detection/`](p2-repair-not-detection/) — *What a Checker Cannot Buy Is the Repair* | Where is the loop's own ceiling: detection or repair? | **no** — every run of ours is `--arms A` on a fixed genome | 22 |
-| **III** | [`p3-silent-no-op/`](p3-silent-no-op/) — *Your Loop Optimizer Is Not Optimizing Your Loop* | How can a componentized treatment silently not apply, and what catches it? | yes, as the thing that failed | 19 |
+| **II** | [`p2-repair-not-detection/`](p2-repair-not-detection/) — *What a Checker Cannot Buy Is the Repair* | Where is the loop's own ceiling: detection or repair? | **no** — every measurement is arm A, which declares no evolvable genes | 23 |
+| **III** | [`p3-silent-no-op/`](p3-silent-no-op/) — *Your Loop Optimizer Is Not Optimizing Your Loop* | How can a componentized treatment silently not apply, and what catches it? | yes, as the thing that failed | 20 |
 
 ## Which paper answers your question
 
@@ -74,7 +74,7 @@ does not, something regressed.
 ## Verifying
 
 ```bash
-python scripts/verify_paper_claims.py     # 970 checks against the released artifacts, $0
+python scripts/verify_paper_claims.py     # 995 checks against the released artifacts, $0
 python scripts/verify_split_coverage.py   # the split lost no quantity, $0
 python -m pytest tests/test_split_coverage.py tests/test_paper_prose_coverage.py \
     tests/test_paper_table_coverage.py tests/test_paper_sigma_coverage.py tests/test_figures.py

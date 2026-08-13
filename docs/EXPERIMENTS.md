@@ -19,7 +19,7 @@ claim to the command that produced it.
 
 ```bash
 # 1. every machine-checkable number in all three papers, against the released artifacts
-python scripts/verify_paper_claims.py            # 970 checks, offline, $0
+python scripts/verify_paper_claims.py            # 995 checks, offline, $0
 
 # 2. the three-way split lost no quantity
 python scripts/verify_split_coverage.py          # 318 pre-split quantities accounted for, $0
@@ -62,7 +62,7 @@ python scripts/run_validation_study.py ... --replay tests/fixtures/cassettes/x.j
 | `--n-train` / `--n-heldout` | split sizes. Train and held-out never share a task id |
 | `--max-metric-calls` | GEPA's budget. A configuration that cannot fund one accept cycle is **refused** at the dry-run step, because such a run bills in full and reports a flat Δ with `genes_changed=[]` |
 | `--reflection-calls` | hard cap on proposals per arm. Effective search depth is `min(budget, cap)`, and forgetting the second one invalidated a sweep |
-| `--max-usd` | pre-flight ceiling, default `$5`. Four runs raised it explicitly (up to `$11.76`) |
+| `--max-usd` | pre-flight ceiling, default `$5`. Five runs raised it explicitly (up to `$11.76`) |
 | `--oracle-critique` | replaces the in-loop gate with the true metric. **Deliberate oracle contamination**, admissible only as a ceiling experiment |
 | `--feedback-stats` | gives the critique `text_stats(draft)`, a non-oracle measurement |
 | `--feedback-level` | `lo` / `mid` / `hi` repair text. The Paper II actionability lever |
@@ -135,7 +135,7 @@ to stop computing depth and measure it.
 
 | script | asserts |
 |---|---|
-| `verify_paper_claims.py` | 970 checks: every machine-checkable number in the three papers against the artifacts, plus per-paper spine numbers, cross-paper agreement, and each paper's corrections count |
+| `verify_paper_claims.py` | 995 checks: every machine-checkable number in the three papers against the artifacts, plus per-paper spine numbers, cross-paper agreement, and each paper's corrections count |
 | `verify_split_coverage.py` | all 318 quantities in the pre-split draft are carried by some paper, superseded by a verified replacement, or explicitly dropped with a reason |
 | `verify_reproducibility.py` | every corrected-harness run replays bit-for-bit; superseded runs are **skipped and reported**, never silently "verified" |
 | `verify_stdio.py` | the MCP console script speaks stdio (product, not paper) |
@@ -168,6 +168,17 @@ code-domain cassette key changes with it.
 | `tests/fixtures/cassettes/**` | 267 cassettes; this is what makes replay free |
 | `docs/papers/PRE-SPLIT-SOURCE.tex` | the 46-page pre-split draft, frozen at `fe628ed`, **never built**. Provenance for the split proof |
 | `docs/actual-spend.json` | measured spend per run and per provider, from an instrumented replay. See below |
+
+38 of the 43 runs also carry a generated `docs/validation-study-*.md` report. The five without one
+are the bought rows of the pre-registered budget sweep (D4), where the suffix is the
+`--max-metric-calls` value: `validation-study-mmc20.json`, `validation-study-mmc40.json`,
+`validation-study-mmc56.json`, `validation-study-mmc80.json` and
+`validation-study-mmc160.json`. They carry
+committed cassettes, they replay, and Paper I's `tab:budgetresult` is built from them; only the
+report writer was never run over them. Named here because until 2026-08-13 no prose document in the
+repository mentioned them at all, so five released runs feeding a published table had no page
+describing them. `tests/test_paper_docs_consistency.py::test_every_released_run_is_named_in_prose`
+now refuses that state.
 
 Each run JSON records a pre-flight **bound** on spend, not an invoice. Bounds are labelled as
 bounds throughout the papers; an earlier draft reported one as a measured spend, and that is in the
