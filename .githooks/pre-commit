@@ -2,7 +2,7 @@
 # Fast gates, on every commit. The slow one (the full pytest suite) runs in pre-push.
 #
 # Why the paper check belongs HERE rather than only in a habit: every number in
-# docs/paper/main.tex is derived from docs/*.json and the committed cassettes, and the two
+# docs/papers/*/main.tex is derived from docs/*.json and the committed cassettes, and the two
 # have drifted before -- a transposed seed count survived several readings, a $5 ceiling
 # claim survived four runs overriding it, and an interval was published as "excludes zero"
 # when it brackets it. Those are not typos a reader catches; they are arithmetic that only a
@@ -26,7 +26,17 @@ $PY -m mypy
 # Only when something the paper's numbers depend on is staged. Scoped rather than
 # unconditional because it replays cassettes and takes a few seconds, and a hook that is
 # slow on unrelated commits gets disabled -- which is the failure mode that matters.
-if git diff --cached --name-only | grep -qE '^(docs/paper/|docs/.*\.json$|scripts/|tests/fixtures/cassettes/|src/whystuck/eval/)'; then
+#
+# `docs/papers/` -- plural -- covers all three papers and their shared inputs. It read
+# `docs/paper/` until 2026-08-13: the path of the single 46-page draft, deleted when the draft
+# was split. So for the whole life of the split tree, a commit editing ONLY paper prose matched
+# nothing here and skipped the claim check, while the hook still printed "all green". That is
+# the shape of commit that published a PASS rate of 1% against an artifact measuring 0.5%.
+# `scripts/paper_sources.py` exists because every other checker had to be migrated off that
+# same dead path; this gate was the one left behind, and it is the gate that decides whether
+# any of the others run. tests/test_commit_gate_scope.py now pins the pattern against the
+# paper paths `paper_sources` reports, so a future move breaks a test instead of a guarantee.
+if git diff --cached --name-only | grep -qE '^(docs/papers/|docs/.*\.json$|scripts/|tests/fixtures/cassettes/|src/whystuck/eval/)'; then
   echo "pre-commit: verify_paper_claims (paper vs released artifacts)"
   # grep the verdict rather than tailing: the script ends with a list of what it CANNOT
   # check, so `tail` would print the caveats and hide the result.
