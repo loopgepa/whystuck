@@ -160,9 +160,17 @@ def test_build_bbl_removes_the_old_file_before_regenerating():
 def test_an_unsubmittable_paper_produces_no_package():
     """A tarball that cannot be submitted is worse than none: it looks like a finished artifact."""
     src = inspect.getsource(ap.main)
-    assert src.index("preflight(paper)") < src.index("build_bbl(paper)"), (
-        "preflight must gate the build"
+    # Matched on the call PREFIX, not the exact string. This read `preflight(paper)` and broke
+    # when the call gained keyword arguments for `--anonymous` -- a guard failing on a change that
+    # cannot affect what it guards. The ordering is the property; the argument list is not.
+    # `.find` with an explicit assertion rather than `.index`, so a rename reports which name went
+    # missing instead of raising a bare ValueError from inside the comparison.
+    gate, build = src.find("preflight(paper"), src.find("build_bbl(paper")
+    assert gate != -1, "main() no longer calls preflight(paper...); the build is ungated"
+    assert build != -1, (
+        "main() no longer calls build_bbl(paper...); this guard has lost its subject"
     )
+    assert gate < build, "preflight must gate the build"
     assert "NOT SUBMITTABLE" in src
 
 
