@@ -8,7 +8,7 @@ the reader learns to merge past red. That reflex is not hypothetical: four of th
 seven workflows failed on *every* run for weeks, and the habit of stepping over them nearly put an
 `--admin` bypass on a pull request that needed no bypass at all.
 
-The four causes were not one family, which is why each is pinned separately below:
+The causes were not one family, which is why each is pinned separately below:
 
 * `codeql` -- the analysis itself succeeded; only the SARIF upload was rejected, because uploading
   to code scanning needs a public repository or GitHub Advanced Security.
@@ -22,9 +22,16 @@ The four causes were not one family, which is why each is pinned separately belo
 * `docs` -- `actions/deploy-pages` returns `404 Ensure GitHub Pages has been enabled`.
 * `secret-scan` -- passed on pull requests and failed on its weekly schedule, because the action
   passes an empty `--since-commit`/`--branch` pair for `schedule` and `workflow_dispatch` only.
-  Those are the runs that scan all history, where every cassette's sha256 key trips a detector
-  whose pattern is bare 64-hex, and BigCodeBench task text containing
-  `ftp://{ftp_user}:{ftp_password}@{ftp_server}` trips the FTP detector.
+  Those are the runs that scan all history, where three detectors fire on non-secrets: every
+  cassette's sha256 key trips one whose pattern is bare 64-hex; BigCodeBench task text containing
+  `ftp://{ftp_user}:{ftp_password}@{ftp_server}` trips FTP; and `Lob`, whose pattern accepts
+  `test_` plus 35 word characters, trips on this repository's own long test names -- 28 of them,
+  which is exactly the count the failing run reported.
+
+  `Lob` was missed on the first attempt, and the reason generalises: it was verified locally with
+  `--no-verification`, which is NOT a superset of a verified scan, because a detector that only
+  emits once verification succeeds is invisible to it. The local run reported zero findings while
+  the dispatched run still failed with 28. Trust the dispatch, not the local dry run.
 
 None of the fixes here changes the repository's visibility or its settings: the capability probe
 reads what is actually available and the dependent steps skip with a reason, so the same workflows
@@ -35,6 +42,7 @@ from __future__ import annotations
 
 import pathlib
 import re
+import subprocess
 
 import pytest
 import yaml
@@ -63,15 +71,22 @@ _NEEDS_PUBLIC = (
 #: ungated keeps the site build verified on every push.
 _NEEDS_PAGES = ("actions/deploy-pages",)
 
-#: Detector name -> the fixture shape that trips it. The exclusion list in `secret-scan.yml` is
-#: checked against what these actually match in the tracked fixtures, in both directions, so the
-#: list cannot quietly grow into a blanket suppression and cannot go stale if the fixtures change.
+#: Detector name -> the pattern that trips it, copied from the detector's own source at the pinned
+#: trufflehog version. The exclusion list in `secret-scan.yml` is checked against what these
+#: actually match in the tracked tree, in both directions, so the list cannot quietly grow into a
+#: blanket suppression and cannot go stale.
+#:
+#: The corpus is every tracked file, not just the fixtures: `Lob` is tripped by test *names*, in
+#: `tests/*.py`, and a fixtures-only sweep would have reported it as unjustified.
 _TRIPWIRES = {
+    # `\b((live|test)_[a-zA-Z0-9_]{35})\b` -- any test name with exactly 35 characters after
+    # `test_`. 28 of them, over 19 files, which is exactly what the failing scan reported.
+    "Lob": re.compile(r"\b(live|test)_[a-zA-Z0-9_]{35}\b"),
+    # Bare 64-hex: every cassette is keyed by the sha256 of its request.
     "PhraseAccessToken": re.compile(r"\b[0-9a-f]{64}\b"),
+    # BigCodeBench task text, whose credentials are f-string placeholders.
     "FTP": re.compile(r"ftp://[^\s\"'\\]*:[^\s\"'\\]*@"),
 }
-
-_FIXTURES = ROOT / "tests" / "fixtures" / "cassettes"
 
 
 def _load(path: pathlib.Path) -> dict:
@@ -143,12 +158,37 @@ def _excluded_detectors() -> set[str]:
 
 
 def _tripped_detectors() -> set[str]:
-    """Which detectors the tracked fixtures actually trip, measured rather than asserted."""
-    text = "\n".join(
-        p.read_text(encoding="utf-8", errors="replace") for p in sorted(_FIXTURES.rglob("*.json"))
+    """Which detectors the tracked tree actually trips, measured rather than asserted.
+
+    Scans the files trufflehog would see, read from `git ls-files` rather than a directory list, so
+    adding a fixture or a test file cannot leave this sweep behind. The working tree is the
+    boundary: trufflehog scans git *history*, so a detector tripped only by a since-deleted file
+    would not show up here. The authoritative check is the dispatched run, which is why
+    `workflow_dispatch` exists.
+    """
+    listed = subprocess.run(
+        ["git", "ls-files", "-z"], cwd=ROOT, capture_output=True, text=True, check=True
     )
-    assert text, f"no fixtures under {_FIXTURES}"
-    return {name for name, pattern in _TRIPWIRES.items() if pattern.search(text)}
+    paths = [p for p in listed.stdout.split("\0") if p]
+    assert len(paths) > 100, f"git ls-files gave only {len(paths)} paths; the sweep is vacuous"
+
+    remaining = dict(_TRIPWIRES)
+    tripped: set[str] = set()
+    read = 0
+    for rel in paths:
+        if not remaining:
+            break
+        try:
+            text = (ROOT / rel).read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        read += 1
+        for name, pattern in list(remaining.items()):
+            if pattern.search(text):
+                tripped.add(name)
+                del remaining[name]
+    assert read, "read no tracked files; the sweep checked nothing"
+    return tripped
 
 
 # --------------------------------------------------------------------------------------------
