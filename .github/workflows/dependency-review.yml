@@ -1,7 +1,10 @@
 name: Dependency Review
 
-# Actions are SHA-pinned (`# vX` marks the version). Flags vulnerable/newly-added
-# dependencies on PRs. (Requires a public repo or GitHub Advanced Security.)
+# Actions are SHA-pinned (`# vX` marks the version). Flags vulnerable/newly-added dependencies on
+# PRs. The action needs a public repository or GitHub Advanced Security and otherwise refuses with
+# `Dependency review is not supported on this repository`, so it is gated on the capability rather
+# than left to fail on every pull request. It resumes automatically if the repository is made
+# public; until then `uv.lock` is pinned and the audit is the reviewer's job.
 
 on:
   pull_request:
@@ -14,6 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v4
+      - id: caps
+        uses: ./.github/actions/repo-capabilities
+      - if: steps.caps.outputs.public == 'true'
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v4
         with:
           fail-on-severity: high

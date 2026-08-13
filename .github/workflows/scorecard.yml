@@ -1,7 +1,14 @@
 name: Scorecard
 
 # Actions are SHA-pinned; the trailing `# vX` marks the human-readable version.
-# Advisory only — feeds the README badge, not a merge gate.
+# Advisory only -- feeds the README badge, not a merge gate.
+#
+# Two separate reasons this failed on every run. First, `contents: read` was missing: a job-level
+# `permissions:` block REPLACES the workflow-level `read-all` rather than extending it, so the token
+# could not clone and `actions/checkout` reported `fatal: repository ... not found` -- a 404, because
+# a private repository does not admit its own existence to an unauthorised caller. Second, Scorecard
+# scores public-repository hygiene, and both publishing the result and uploading the SARIF need a
+# public repository, so the analysis itself is gated on that.
 
 on:
   branch_protection_rule:
@@ -16,17 +23,22 @@ jobs:
   analysis:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       security-events: write
       id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
-      - uses: ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a  # v2.4.3
+      - id: caps
+        uses: ./.github/actions/repo-capabilities
+      - if: steps.caps.outputs.public == 'true'
+        uses: ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a  # v2.4.3
         with:
           results_file: results.sarif
           results_format: sarif
           publish_results: true
-      - uses: github/codeql-action/upload-sarif@7188fc363630916deb702c7fdcf4e481b751f97a  # v4.37.1
+      - if: steps.caps.outputs.public == 'true'
+        uses: github/codeql-action/upload-sarif@7188fc363630916deb702c7fdcf4e481b751f97a  # v4.37.1
         with:
           sarif_file: results.sarif
