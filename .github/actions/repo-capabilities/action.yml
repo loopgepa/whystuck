@@ -1,0 +1,40 @@
+name: Repo capabilities
+description: >-
+  Reports which GitHub features this repository can actually use, so a dependent job skips with a
+  reason instead of failing on every run. Uploading to code scanning, dependency review and
+  Scorecard publishing all require a public repository or GitHub Advanced Security; creating a
+  Pages deployment requires Pages to be enabled. Both answers are read from the API rather than
+  written down here, so the dependent steps start working the moment the setting changes.
+
+outputs:
+  public:
+    description: >-
+      'true' when the repository is public, which is what makes code scanning uploads, dependency
+      review and Scorecard publishing available without Advanced Security.
+    value: ${{ steps.probe.outputs.public }}
+  pages:
+    description: "'true' when GitHub Pages is enabled, so a deployment can be created."
+    value: ${{ steps.probe.outputs.pages }}
+
+runs:
+  using: composite
+  steps:
+    - id: probe
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+
+        visibility=$(gh api "repos/${GITHUB_REPOSITORY}" --jq .visibility)
+        if [ "${visibility}" = "public" ]; then public=true; else public=false; fi
+
+        # A 404 here means Pages has never been enabled. That is a capability answer, not an
+        # error, so it must not fail the step -- the whole point is to stop reporting a settings
+        # gap as a broken build.
+        if gh api "repos/${GITHUB_REPOSITORY}/pages" >/dev/null 2>&1; then pages=true; else pages=false; fi
+
+        printf 'public=%s\n' "${public}" >> "${GITHUB_OUTPUT}"
+        printf 'pages=%s\n' "${pages}" >> "${GITHUB_OUTPUT}"
+        printf '`%s` is **%s**; Pages enabled: **%s**.\n' \
+          "${GITHUB_REPOSITORY}" "${visibility}" "${pages}" >> "${GITHUB_STEP_SUMMARY}"

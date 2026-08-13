@@ -1,6 +1,12 @@
 name: CodeQL
 
 # Actions are SHA-pinned; the trailing `# vX` marks the human-readable version.
+#
+# The analysis runs unconditionally. Only the upload to code scanning is conditional, because that
+# endpoint needs a public repository or Advanced Security and answers everything else with
+# `Advanced Security must be enabled for this repository to use code scanning`. Gating the whole
+# job instead would trade a red check for no scan at all, so when the results cannot be uploaded
+# they are kept as a build artifact and the queries still run on every push.
 
 on:
   push:
@@ -19,8 +25,18 @@ jobs:
       actions: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - id: caps
+        uses: ./.github/actions/repo-capabilities
       - uses: github/codeql-action/init@7188fc363630916deb702c7fdcf4e481b751f97a  # v4.37.1
         with:
           languages: python
           build-mode: none
       - uses: github/codeql-action/analyze@7188fc363630916deb702c7fdcf4e481b751f97a  # v4.37.1
+        with:
+          output: codeql-sarif
+          upload: ${{ steps.caps.outputs.public == 'true' && 'always' || 'never' }}
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: steps.caps.outputs.public != 'true'
+        with:
+          name: codeql-sarif
+          path: codeql-sarif
