@@ -52,6 +52,10 @@ _NEEDS_PUBLIC = (
     "actions/dependency-review-action",
     "ossf/scorecard-action",
     "github/codeql-action/upload-sarif",
+    # Attestations are available in public repositories on every plan, but in a private one only
+    # under GitHub Enterprise Cloud. `release.yml` has never run, so this one was not red anywhere:
+    # it would have failed on the first real tag, after the build and before the publish.
+    "actions/attest-build-provenance",
 )
 
 #: Steps that cannot succeed unless GitHub Pages is enabled. `upload-pages-artifact` is
@@ -246,6 +250,25 @@ def test_unuploadable_codeql_results_are_kept_as_an_artifact() -> None:
 # --------------------------------------------------------------------------------------------
 # The scorecard bug: job-level `permissions` replaces, it does not extend
 # --------------------------------------------------------------------------------------------
+
+
+def test_a_job_that_attests_declares_the_permission_the_upload_needs() -> None:
+    """`id-token: write` signs the attestation; `attestations: write` is what stores it."""
+    checked = 0
+    for name, wf in _workflows():
+        for job_name, job in wf.get("jobs", {}).items():
+            if not any(_action(s).startswith("actions/attest") for s in job.get("steps", [])):
+                continue
+            effective = job["permissions"] if "permissions" in job else wf.get("permissions")
+            granted = effective == "write-all" or (
+                isinstance(effective, dict) and effective.get("attestations") == "write"
+            )
+            assert granted, (
+                f"{name}:{job_name} attests a build with permissions {effective!r}, which does "
+                f"not grant `attestations: write`"
+            )
+            checked += 1
+    assert checked, "no job attests a build; the action prefix is stale"
 
 
 def test_every_job_that_checks_out_can_read_a_private_repository() -> None:

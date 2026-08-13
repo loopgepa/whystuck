@@ -13,6 +13,7 @@ on:
 permissions:
   contents: write # create the GitHub release
   id-token: write # build-provenance attestation
+  attestations: write # upload it; actions/attest-build-provenance fails without this
 
 concurrency:
   group: release-${{ github.ref }}
@@ -24,6 +25,9 @@ jobs:
     environment: pypi
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - id: caps
+        uses: ./.github/actions/repo-capabilities
 
       - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         with:
@@ -49,7 +53,15 @@ jobs:
         with:
           artifact-name: whystuck-sbom.spdx.json
 
+      # Artifact attestations are available in public repositories on every plan, but in a private
+      # one only under GitHub Enterprise Cloud, so this step cannot succeed here. It sits before
+      # `uv publish`, so leaving it ungated means the first real tag fails after the build and
+      # before anything is published -- a fail-closed break, but a break, and this workflow has
+      # never run, so nothing would have caught it. No document claims provenance for releases, so
+      # skipping it while private withdraws no published guarantee, and it starts attesting on its
+      # own once the repository is public.
       - name: Attest build provenance
+        if: steps.caps.outputs.public == 'true'
         uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         with:
           subject-path: "dist/*"
