@@ -15,7 +15,7 @@ classifiers = [
     "Topic :: Software Development :: Quality Assurance",
 ]
 dependencies = [
-    "fastmcp>=3,<4",
+    "fastmcp>=3.4.6,<4",
     "pydantic>=2.7",
     "ruamel.yaml>=0.18",
 ]
@@ -44,13 +44,13 @@ packages = ["src/whystuck"]
 # numpy is required by the v2 code study's held-out scorer: the vendored MBPP+
 # plus-test harnesses import it (np.allclose float comparisons). Pinned to one BLAS
 # thread at execution time (eval/code_exec.py) for determinism.
-eval = ["gepa>=0.1,<0.2", "litellm>=1.83,<2", "numpy>=1.26"]
+eval = ["gepa>=0.1,<0.2", "litellm>=1.95.0,<2", "numpy>=1.26"]
 
 [dependency-groups]
 dev = [
     "pytest>=8",
     "pytest-cov>=5",
-    "ruff>=0.6",
+    "ruff>=0.16.1",
     "mypy>=1.11",
     # The code-exec / code_bench tests execute vendored MBPP+ plus-test harnesses,
     # which import numpy in the sandboxed subprocess (== this interpreter under pytest).
