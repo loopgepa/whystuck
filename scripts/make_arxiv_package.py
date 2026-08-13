@@ -87,7 +87,9 @@ def build_bbl(paper: Path = PAPER) -> Path:
     return bbl
 
 
-def stage(dest: Path, paper: Path = PAPER) -> Path:
+def stage(
+    dest: Path, paper: Path = PAPER, *, anonymous: bool = False, anon_url: str | None = None
+) -> Path:
     """Copy what arXiv needs into a flat tree, with every `\\input` inlined.
 
     The inlining is load-bearing since the split. Each paper `\\input`s three files from
@@ -98,9 +100,15 @@ def stage(dest: Path, paper: Path = PAPER) -> Path:
     `rehearse()` would catch it, but inlining means there is nothing to catch.
     """
     dest.mkdir(parents=True, exist_ok=True)
-    (dest / "main.tex").write_text(paper_sources.paper_tex(paper.name), encoding="utf-8")
+    tex = paper_sources.paper_tex(paper.name)
+    if anonymous:
+        tex = anonymise_tex(tex, anon_url)
+    (dest / "main.tex").write_text(tex, encoding="utf-8")
     for name in (*SOURCES, "main.bbl"):
         shutil.copy2(paper / name, dest / name)
+    if anonymous:
+        bib = dest / "references.bib"
+        bib.write_text(anonymise_bib(bib.read_text(encoding="utf-8")), encoding="utf-8")
     shutil.copytree(paper / FIGURES, dest / FIGURES, dirs_exist_ok=True)
     return dest
 
@@ -174,6 +182,43 @@ def plain_abstract(paper: Path = PAPER) -> str:
 #: reminder disappears when it is satisfied instead of standing there falsely.
 _PLACEHOLDERS = ("TBD", "TODO", "Anonymous", "XXX", "FIXME", "Author list")
 
+#: The subset that stays forbidden even in `--anonymous` mode. `Anonymous` is the whole point of
+#: that mode, so it has to leave the list -- but dropping the entire check there would turn a
+#: double-blind build into the one build that ships `TODO` in its author block. Split explicitly
+#: rather than by suppressing the guard.
+_PLACEHOLDERS_EVEN_WHEN_ANONYMOUS = tuple(p for p in _PLACEHOLDERS if p != "Anonymous")
+
+#: The author block a double-blind submission carries. TMLR, ICLR and NeurIPS are all
+#: double-blind, and every paper in this series prints the author's name, affiliation and the
+#: repository URL, so a submission built from `main.tex` unchanged is de-anonymised by its own
+#: reproducibility apparatus.
+ANONYMOUS_AUTHOR = r"Anonymous authors \\ Paper under double-blind review"
+
+#: What the release sentence points at when the real URL would name the author. Left as a visible
+#: placeholder rather than silently deleted: a paper whose abstract claims a release and then
+#: cites nothing is worse than one that says where the anonymous mirror is. `preflight` REFUSES
+#: to package while this string is present, so it cannot be shipped by forgetting `--anon-url`.
+ANON_URL_PLACEHOLDER = "[anonymised repository URL]"
+
+#: Strings that identify the author or the repository, scanned case-insensitively over every byte
+#: of the staged tree. Not just `main.tex`: `references.bib` opened with the comment
+#: "% Bibliography for the WhyStuck GEPA validation study", which renders as nothing and ships in
+#: the tarball anyway, and a figure's PDF metadata can carry a name the source never mentions.
+#: A byte scan reads all of it without needing a parser per format.
+#:
+#: `whystuck` earns its place: the repository is `<org>/whystuck`, so the bare project name is a
+#: search away from the author. The scan is a floor, not a proof -- a token inside a compressed
+#: PDF stream would not appear in the bytes -- and it is written to fail loudly rather than to
+#: certify anonymity.
+IDENTIFYING = (
+    "Rotariu",
+    "Vladimir",
+    "vladimirrott",
+    "loopgepa",
+    "whystuck",
+    "Independent researcher",
+)
+
 
 def author_block(paper: Path = PAPER) -> str:
     m = re.search(r"\\author\{(.*?)\}\s*\n\\date", (paper / "main.tex").read_text(), re.DOTALL)
@@ -182,9 +227,64 @@ def author_block(paper: Path = PAPER) -> str:
     return " ".join(m.group(1).split())
 
 
-def unresolved_placeholders(paper: Path = PAPER) -> list[str]:
-    block = author_block(paper)
-    return [w for w in _PLACEHOLDERS if w.lower() in block.lower()]
+def unresolved_placeholders(paper: Path = PAPER, *, anonymous: bool = False) -> list[str]:
+    block = ANONYMOUS_AUTHOR if anonymous else author_block(paper)
+    wanted = _PLACEHOLDERS_EVEN_WHEN_ANONYMOUS if anonymous else _PLACEHOLDERS
+    return [w for w in wanted if w.lower() in block.lower()]
+
+
+def anonymise_tex(tex: str, anon_url: str | None = None) -> str:
+    """Strip the two sites that name the author, and nothing else.
+
+    Two, verified by scanning all three papers: the `\\author` block, and one sentence in the
+    abstract ending in the repository URL. Both are rewritten rather than deleted -- a reviewer
+    should still see that an artifact exists and that the omission is deliberate.
+
+    Raises if either site is missing. A silent no-op here produces a tarball that looks
+    anonymised and is not, which is the failure this whole function exists to prevent, and it is
+    the failure mode the companion papers are about.
+    """
+    url = anon_url or ANON_URL_PLACEHOLDER
+    tex, n_author = re.subn(
+        r"\\author\{.*?\}(\s*\n\\date)",
+        lambda m: r"\author{" + ANONYMOUS_AUTHOR + "}" + m.group(1),
+        tex,
+        flags=re.DOTALL,
+    )
+    if n_author != 1:
+        raise RuntimeError(f"expected exactly one author block to rewrite, rewrote {n_author}")
+    tex, n_url = re.subn(r"\\texttt\{github\.com/[^}]*\}", rf"\\texttt{{{url}}}", tex)
+    if n_url < 1:
+        raise RuntimeError(
+            "no repository URL found to anonymise; the release sentence may have been reworded, "
+            "in which case this function is now silently shipping it"
+        )
+    return tex
+
+
+def anonymise_bib(bib: str) -> str:
+    """Drop the leading comment naming the project. Comments ship in the tarball."""
+    return "\n".join(
+        line for line in bib.splitlines() if not re.match(r"^%.*whystuck", line, re.IGNORECASE)
+    )
+
+
+def identifying_leaks(staged: Path) -> list[tuple[str, str]]:
+    """(file, token) for every identifying string surviving in the staged tree.
+
+    Byte-level and case-insensitive, over every file that would be uploaded. Returns pairs rather
+    than a bool so the failure names what to fix.
+    """
+    found: list[tuple[str, str]] = []
+    needles = [(t, t.lower().encode()) for t in IDENTIFYING]
+    for path in sorted(staged.rglob("*")):
+        if not path.is_file():
+            continue
+        blob = path.read_bytes().lower()
+        for token, needle in needles:
+            if needle in blob:
+                found.append((str(path.relative_to(staged)), token))
+    return found
 
 
 def _author_year(paper: Path) -> dict[str, str]:
@@ -219,16 +319,25 @@ def pdfoutput_line(paper: Path = PAPER) -> int | None:
     return None
 
 
-def preflight(paper: Path = PAPER) -> list[str]:
+def preflight(
+    paper: Path = PAPER, *, anonymous: bool = False, anon_url: str | None = None
+) -> list[str]:
     """Everything the script can decide for itself. Returns blocking problems, empty if clean.
 
     Checked BEFORE anything is written, because a tarball that cannot be submitted is worse than no
     tarball: it looks like a finished artifact.
     """
     problems = []
-    stale = unresolved_placeholders(paper)
+    stale = unresolved_placeholders(paper, anonymous=anonymous)
     if stale:
-        problems.append(f"the author block still contains {stale}: {author_block(paper)!r}")
+        shown = ANONYMOUS_AUTHOR if anonymous else author_block(paper)
+        problems.append(f"the author block still contains {stale}: {shown!r}")
+    if anonymous and not anon_url:
+        problems.append(
+            f"--anonymous without --anon-url would ship {ANON_URL_PLACEHOLDER!r} in the abstract's "
+            "release sentence. Stand up an anonymous mirror of the artifact and pass its URL; the "
+            "abstract claims a release, so a double-blind build still has to point somewhere"
+        )
     if pdfoutput_line(paper) is None:
         problems.append(
             r"no \pdfoutput=1 in the first five lines of main.tex. This submission has PDF "
@@ -278,14 +387,28 @@ def main() -> int:
         choices=paper_sources.PAPERS,
         help="which paper of the series to package (each is submitted separately)",
     )
+    ap.add_argument(
+        "--anonymous",
+        action="store_true",
+        help="build a double-blind variant: no author, no affiliation, no repository URL. "
+        "TMLR, ICLR and NeurIPS are all double-blind and these papers name the repository in "
+        "their title block and abstract, so the default build cannot be submitted to any of them",
+    )
+    ap.add_argument(
+        "--anon-url",
+        default=None,
+        help="URL of an anonymous mirror of the artifact, for --anonymous. Required there: the "
+        "abstract claims a release and a claim pointing nowhere is worse than a named one",
+    )
     args = ap.parse_args()
     paper = paper_sources.paper_dir(args.paper)
     print(
         f"packaging {paper_sources.PAPER_NUMERALS[args.paper]}: "
-        f"{paper_sources.PAPER_TITLES[args.paper]}\n"
+        f"{paper_sources.PAPER_TITLES[args.paper]}"
+        f"{'  [DOUBLE-BLIND VARIANT]' if args.anonymous else ''}\n"
     )
 
-    problems = preflight(paper)
+    problems = preflight(paper, anonymous=args.anonymous, anon_url=args.anon_url)
     if problems:
         print("NOT SUBMITTABLE, so no package was written:")
         for pr in problems:
@@ -296,7 +419,21 @@ def main() -> int:
     out = Path(args.outdir)
     out.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:
-        staged = stage(Path(tmp) / "arxiv", paper)
+        staged = stage(Path(tmp) / "arxiv", paper, anonymous=args.anonymous, anon_url=args.anon_url)
+        # After staging and before the tarball: the check that makes --anonymous mean something.
+        # Run here rather than on the sources, because what matters is what would be UPLOADED --
+        # `references.bib` named the project in a comment that renders as nothing and ships anyway.
+        if args.anonymous:
+            leaks = identifying_leaks(staged)
+            if leaks:
+                print("STILL IDENTIFYING, so no package was written:")
+                for where, token in leaks:
+                    print(f"  - {where}: {token!r}")
+                return 1
+            print(
+                "OK  no identifying string survives in the staged tree "
+                f"({len(IDENTIFYING)} scanned)"
+            )
         result = rehearse(staged)
         bad = (
             result["undefined_citations"]
@@ -310,7 +447,8 @@ def main() -> int:
                 if result[k]:
                     print(f"  {k}: {result[k]}")
             return 1
-        tar = out / f"arxiv-{args.paper}.tar.gz"
+        prefix = "anon-" if args.anonymous else ""
+        tar = out / f"{prefix}arxiv-{args.paper}.tar.gz"
         with tarfile.open(tar, "w:gz") as t:
             for item in sorted(staged.iterdir()):
                 if item.name.startswith("main.") and item.suffix not in (".tex", ".bbl"):
@@ -329,7 +467,8 @@ def main() -> int:
 
     print("\n--- plain-text abstract for the submission form ---")
     print(plain_abstract(paper))
-    print(f"\n--- author block ---\n    {author_block(paper)}")
+    shown = ANONYMOUS_AUTHOR if args.anonymous else author_block(paper)
+    print(f"\n--- author block ---\n    {shown}")
     print(f"    abstract: {len(plain_abstract(paper))} characters of {ABSTRACT_LIMIT}")
     print(f"    \\pdfoutput=1 on line {pdfoutput_line(paper)} (must be <= 5)")
     print("\n--- decisions the form will ask for ---")
