@@ -292,6 +292,40 @@ def test_unuploadable_codeql_results_are_kept_as_an_artifact() -> None:
 # --------------------------------------------------------------------------------------------
 
 
+def test_the_launch_checklist_action_counts_match_the_workflows() -> None:
+    """A count written into prose is a claim, and this one had rotted.
+
+    `LAUNCH_CHECKLIST.md` said "all 11 pinned" while the workflows carried 12, and adding the
+    SARIF artifact upload made it 13. Nothing read that number, so nothing noticed. Both figures
+    are recomputed here from the workflow files, so the claim moves with the tree or fails.
+    """
+    stated = re.search(
+        r"\((\d+) distinct actions, (\d+) usages\)",
+        (ROOT / "LAUNCH_CHECKLIST.md").read_text(encoding="utf-8"),
+    )
+    assert stated, "the checklist no longer states pinned-action counts; restore them or drop this"
+
+    pinned = re.findall(
+        r"uses:\s*([a-zA-Z0-9_.-]+/[a-zA-Z0-9_./-]+)@[0-9a-f]{40}",
+        "\n".join(p.read_text(encoding="utf-8") for p in sorted(_WORKFLOWS.glob("*.yml"))),
+    )
+    assert pinned, "no SHA-pinned action found; the pattern is stale"
+    assert (len(set(pinned)), len(pinned)) == (int(stated[1]), int(stated[2])), (
+        f"checklist claims {stated[1]} distinct actions over {stated[2]} usages; the workflows "
+        f"carry {len(set(pinned))} over {len(pinned)}"
+    )
+
+
+def test_every_remote_action_is_pinned_to_a_full_sha() -> None:
+    """A tag or branch ref is mutable, so pinning by `# vX` comment alone is not pinning."""
+    for name, wf in _workflows():
+        for job_name, _job, step in _steps(wf):
+            ref = str(step.get("uses", ""))
+            if not ref or ref.startswith("./"):
+                continue
+            assert re.search(r"@[0-9a-f]{40}$", ref), f"{name}:{job_name} uses unpinned {ref}"
+
+
 def test_a_job_that_attests_declares_the_permission_the_upload_needs() -> None:
     """`id-token: write` signs the attestation; `attestations: write` is what stores it."""
     checked = 0

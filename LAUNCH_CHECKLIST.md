@@ -27,10 +27,13 @@ _80 tests, ruff + mypy strict, docs build --strict, demo + stdio verified green.
 - [x] `codeql.yml` (python), `scorecard.yml`, `secret-scan.yml` (TruffleHog
       `--results=verified`)
 - [x] `scripts/check_public_claims.sh` verifies README test count vs reality
-- [x] SHA-pin every GitHub Action with `# vX` comment (all 11 pinned)
+- [x] SHA-pin every GitHub Action with `# vX` comment (13 distinct actions, 24 usages).
+      `./.github/actions/repo-capabilities` is local, so there is nothing to pin
 - [ ] split fast gate vs `workflow_dispatch` LLM-behavior tests (add when LLM
       tests exist)
-- [ ] dependency-review on PRs
+- [x] dependency-review on PRs — `dependency-review.yml` exists and is gated on the
+      capability probe. It **skips** while the repository is private, because the action
+      needs a public repo or Advanced Security; it starts running the day that changes
 
 **Docs**
 - [x] `mkdocs-material` site (`mkdocs.yml`) builds `--strict`; `docs.yml` Pages deploy
@@ -41,7 +44,9 @@ _80 tests, ruff + mypy strict, docs build --strict, demo + stdio verified green.
 - [x] `release.yml`: tag-triggered, preflight (token + version drift), idempotent
       (check-then-skip if version exists), SBOM + provenance attestation
 - [x] version-drift check (`scripts/check_versions.sh`: pyproject vs plugin.json)
-- [ ] `release-rehearsal.yml` (dispatch, builds + packages without publishing)
+- [x] `release-rehearsal.yml` (dispatch, builds + packages without publishing) — exists,
+      but has never been dispatched, so the release path is still unexercised. It does not
+      attest, so it cannot cover `release.yml`'s attestation step either
 
 **Virality assets**
 - [x] README badge row wired (CI, license, PyPI version)
@@ -54,8 +59,13 @@ _80 tests, ruff + mypy strict, docs build --strict, demo + stdio verified green.
 - [ ] register PyPI name `whystuck`; `uv publish`
 - [x] create `loopgepa/whystuck` repo (as vladimirrott) + push — done (private)
 - [ ] enable branch protection on `main` — `scripts/setup_branch_protection.sh`
-      (PR + 1 review + CI "test" required, admins enforced, no force-push/delete)
-- [ ] enable GitHub Pages, Discussions, Dependabot, code scanning
+      (PR + 1 review + CI "test" required, admins enforced, no force-push/delete).
+      **Blocked, not merely undone**: the API answers `403 Upgrade to GitHub Pro or make
+      this repository public`, so the script cannot succeed on the current plan. Until
+      then `main` has no required checks and every merge is on trust
+- [ ] enable GitHub Pages, Discussions, code scanning (all need public or a paid plan;
+      each is already wired and gated, so enabling the setting is the whole change)
+- [x] Dependabot enabled — first batch (8 PRs) applied and closed in #44
 - [x] manifests ready: `server.json` (MCP registry) + `.claude-plugin/marketplace.json`
 - [ ] submit (publish-day, needs public repo + PyPI): official MCP registry →
       auto-feeds mcp.directory/Glama; Anthropic directory; Claude Code marketplace
