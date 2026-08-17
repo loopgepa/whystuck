@@ -44,7 +44,7 @@ packages = ["src/whystuck"]
 # numpy is required by the v2 code study's held-out scorer: the vendored MBPP+
 # plus-test harnesses import it (np.allclose float comparisons). Pinned to one BLAS
 # thread at execution time (eval/code_exec.py) for determinism.
-eval = ["gepa>=0.1,<0.2", "litellm>=1.95.0,<2", "numpy>=1.26"]
+eval = ["gepa>=0.1,<0.2", "litellm>=1.95.0,<2", "numpy>=2.5.2"]
 
 [dependency-groups]
 dev = [
@@ -54,7 +54,7 @@ dev = [
     "mypy>=1.11",
     # The code-exec / code_bench tests execute vendored MBPP+ plus-test harnesses,
     # which import numpy in the sandboxed subprocess (== this interpreter under pytest).
-    "numpy>=1.26",
+    "numpy>=2.5.2",
 ]
 docs = [
     "mkdocs-material>=9.5",
