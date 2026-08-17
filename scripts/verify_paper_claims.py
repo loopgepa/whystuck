@@ -936,6 +936,52 @@ def _sweep_pass_zero() -> dict[str, int]:
     return out
 
 
+#: How Paper III's prose enumerates the replayable registry, as name prefixes. The eight groups
+#: must partition it exactly: every replayable run lands in one, and the sizes sum to the total.
+_REPLAYABLE_GROUPS: dict[str, tuple[str, ...]] = {
+    "hand-written-gene conditions": ("C1 ",),
+    "four-arm re-run": ("C2b",),
+    "p0 levels": ("p0 sweep",),
+    "p0 calibration passes": ("p0 calibration",),
+    "split sweep": ("split sweep",),
+    "budget sweep": ("budget sweep",),
+    "cross-provider critic": ("D3 ",),
+    "second-worker line": ("groq ",),
+    "diagonal splice control": ("splice ",),
+}
+
+
+def _replayable_partition() -> dict[str, int]:
+    """The replayable registry, bucketed the way Paper III's prose enumerates it.
+
+    Paper III lists the twenty-five replayable runs as a sequence of groups. The *total* was
+    pinned against the registry and the *parts* were prose, so the sentence summed to twenty-seven
+    for the life of the split while every check passed: it credited the second-worker line with
+    eleven runs when the registry holds eight of them plus a splice control on a third model.
+    Bucketing by name and asserting the buckets partition the registry makes the list and the
+    total fail together, and any run added to the release lands in a group or fails as unbucketed.
+    """
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import verify_reproducibility as vr
+
+    names = [run[0] for run in vr.RUNS if run[0] not in vr.SUPERSEDED]
+    sizes: dict[str, int] = {}
+    claimed: list[str] = []
+    for group, prefixes in _REPLAYABLE_GROUPS.items():
+        hit = [n for n in names if n.startswith(prefixes)]
+        sizes[group] = len(hit)
+        claimed.extend(hit)
+    unbucketed = sorted(set(names) - set(claimed))
+    if unbucketed:
+        raise LookupError(f"replayable runs in no group of Paper III's enumeration: {unbucketed}")
+    if len(claimed) != len(set(claimed)):
+        raise LookupError("Paper III's enumeration groups overlap; they must partition")
+    return sizes
+
+
 def _decomp():
     """The component-decomposition module, imported lazily like the other analyzers."""
     import sys
@@ -5006,22 +5052,78 @@ def _paraphrase_drift_checks() -> list[tuple[str, float, float, float]]:
     ):
         out.append((f"tex: L1 sigma multiple, site {i}", _scrape(tex, pattern), 0.005, l1_sigma))
 
-    # --- Paper I's do-nothing floor -------------------------------------------------------------
+    # --- The do-nothing floor, at every site that states it --------------------------------------
+    # Both Papers I and II carry this sentence. It was checked with `re.search`, which returns the
+    # first match, so the concatenated corpus yielded Paper I's `six`, agreed with the six the
+    # verifiers actually produce, and never read Paper II's `five` -- a value Paper I's own
+    # register had formally withdrawn. Swept with `finditer` and the site count asserted, so a
+    # third restatement fails instead of going unread. Registers are stripped: they quote the
+    # withdrawn count on purpose.
     n_verifiers, n_vacuous = _vacuous_ifbench_verifiers()
+    floor_tex = _tex_without_registers()
+    vacuous_sites = list(
+        re.finditer(r"([\w-]+) of ([\w-]+) IFBench verifiers are vacuously", floor_tex)
+    )
+    # The expected site count is derived from a *different* phrase in the same paragraph, so a
+    # reworded count sentence makes the two disagree instead of quietly reducing coverage.
     out.append(
         (
-            "tex: vacuously satisfiable verifiers",
-            _scrape_word(tex, r"and ([\w-]+) of eleven IFBench verifiers are vacuously"),
+            "tex: do-nothing floor, sites stating the counts",
+            float(len(vacuous_sites)),
             0,
-            float(n_vacuous),
+            float(len(re.findall(r"A do-nothing floor in the", floor_tex))),
+        )
+    )
+    for i, site in enumerate(vacuous_sites):
+        out.append(
+            (
+                f"tex: vacuously satisfiable verifiers, site {i}",
+                float(_WORD_NUM[site.group(1).lower()]),
+                0,
+                float(n_vacuous),
+            )
+        )
+        out.append(
+            (
+                f"tex: IFBench verifier count, site {i}",
+                float(_WORD_NUM[site.group(2).lower()]),
+                0,
+                float(n_verifiers),
+            )
+        )
+
+    # --- Paper III's enumeration of the replayable runs, and Paper I's replicate count -----------
+    # Two numbers that were wrong because nothing derived them: an enumeration whose parts summed
+    # to twenty-seven against a total of twenty-five, and a registered `5 -> 9` where five plus
+    # five is ten. Both are inert -- no result moves either way -- which is precisely why they
+    # survived. They are derived here so inertness stops being protection.
+    groups = _replayable_partition()
+    out.append(
+        (
+            "tex: enumeration parts sum to the replayable total",
+            float(sum(groups.values())),
+            0,
+            float(_registry_counts()[1]),
+        )
+    )
+    # Read from the register-stripped corpus: both registers quote the withdrawn wording verbatim,
+    # and `\s+` rather than a literal space because the body wraps mid-phrase -- a first-match
+    # scrape over the full corpus reads the register's `eleven` and calls the fix a regression.
+    body = _tex_without_registers()
+    out.append(
+        (
+            "tex: second-worker line, runs enumerated",
+            _scrape_word(body, r"the\s+([\w-]+)\s+runs of the second-worker line"),
+            0,
+            float(groups["second-worker line"]),
         )
     )
     out.append(
         (
-            "tex: IFBench verifier count",
-            _scrape_word(tex, r"of ([\w-]+) IFBench verifiers are vacuously"),
+            "tex: cross-run sigma replicate count",
+            _scrape(body, r"plus these five is \$(\d+)\$, not \$9\$"),
             0,
-            float(n_verifiers),
+            float(_noise_estimate().n_replicates),
         )
     )
 

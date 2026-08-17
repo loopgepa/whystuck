@@ -433,6 +433,46 @@ def test_the_ceiling_override_count_agrees_everywhere_it_is_stated():
     assert not wrong, f"{len(over)} runs exceeded the default; these say otherwise: {wrong}"
 
 
+def test_the_vacuous_verifier_count_agrees_in_the_markdown_too() -> None:
+    r"""Six of eleven IFBench verifiers pass on the empty string. Two papers and one doc say so.
+
+    `verify_paper_claims.py` now sweeps every site inside the papers, but its corpus is
+    `paper_sources.all_tex()`, so a restatement in Markdown is outside it -- the same corpus gap
+    that let `docs/EXPERIMENTS.md` carry the wrong ceiling-override count.
+    `docs/validation-study-summary.md` carried the withdrawn `five` from the split until
+    2026-08-16, the third site of one fact and the second to be corrected in the papers alone.
+
+    The count is derived by calling the verifiers, and the sites are found rather than listed, so
+    a new restatement is covered the moment it is written. `PRE-SPLIT-SOURCE.tex` is excluded by
+    construction: it is the frozen pre-split draft, never built, and its `five` is the historical
+    record the register cites.
+    """
+    sys.path.insert(0, str(ROOT / "src"))
+    from whystuck.eval.ifbench import VERIFIERS
+
+    vacuous = sum(1 for fn in VERIFIERS.values() if fn(""))
+    words = {"four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8}
+
+    sites = []
+    for path in sorted(ROOT.glob("docs/**/*.md")):
+        text = path.read_text(encoding="utf-8")
+        # `[\s>]+` because the sentence wraps inside a blockquote, so the continuation carries a
+        # `>` marker: the Markdown twin of never reflowing a LaTeX line that contains a number.
+        for m in re.finditer(r"(\w+) of eleven[\s>]+IFBench verifiers", text):
+            word = m.group(1).lower()
+            assert word in words, f"{path.name}: unrecognised count word {word!r}"
+            sites.append((path.name, m.group(0), words[word]))
+    assert sites, (
+        "no Markdown document states the vacuous-verifier count in a form this guard reads; it "
+        "was stated in one, and a guard that stops matching vanishes rather than failing"
+    )
+    wrong = [(f, phrase, n) for f, phrase, n in sites if n != vacuous]
+    assert not wrong, (
+        f"{vacuous} of {len(VERIFIERS)} verifiers pass on the empty string; these say "
+        f"otherwise: {wrong}"
+    )
+
+
 #: Documents that together are expected to account for the release in prose. Not every document:
 #: the point is that a released run is explained SOMEWHERE a reader will look, not that each file
 #: mentions all of them.
