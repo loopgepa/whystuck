@@ -95,7 +95,7 @@ contributions:
     verified to have reached the gene on every seed. Holding harness, optimizer, budget and
     seeds fixed and changing only which constraints the task generator may use raises $p_0$ from
     $0.067$ to $0.267$, and the comparison turns to $+0.060$ with all three seeds agreeing
-    (\S\ref{sec:p0}). That is the study's largest loop-level effect and the one that replicates.
+    (\S\ref{sec:p0}). That is the largest loop-level effect the study replicates.
     A first draft of this paper also reported the low-$p_0$ cell as a \emph{cost} of $0.042$;
     a pre-registered split-size sweep and an offline estimate of the study's own measurement
     noise together withdraw that, and \S\ref{sec:splitresult} reports the withdrawal rather than
@@ -291,7 +291,8 @@ on it, and \S\ref{sec:decomp} separates the part of that contrast which is actua
 treatment from the part contributed by the gene both arms share. \S\ref{sec:analysis} gives the
 mechanism, \S\ref{sec:posctrl} the positive control, and two pre-registered sweeps
 (\S\ref{sec:prereg}, \S\ref{sec:budgetprereg}) close the alternative readings. A cross-domain
-replication on frontier-hard code follows (\S\ref{sec:bcb}). Fifteen earlier contrast runs are
+replication on frontier-hard code follows (\S\ref{sec:bcb}), then a critic moved off the worker's
+weights entirely (\S\ref{sec:xprovider}), which closes the last of them. Fifteen earlier contrast runs are
 superseded and reported, with the reason, in Paper~III.
 
 \subsection{The four-arm re-run on the corrected harness}
@@ -540,7 +541,7 @@ units. Treating the two levels as independent draws,
 and this is a lower bound on the ratio, since $\sigma$ was estimated on the unexcluded pool
 while $L_2$'s easier tasks sit nearer the ceiling and will vary less. So what the $p_0$ axis buys
 is not a loss turning into a gain; it is a swing of $0.102$ in $\dd$ that noise does not account
-for, from no measurable effect to the study's largest loop-level gain. Every
+for, from no measurable effect to the largest loop-level gain the study replicates. Every
 instruction-following run in this paper, superseded or not, sits at the low-$p_0$ end of the axis
 --- the hard tier mandates \texttt{exact\_word\_count}, which caps $p_0$ at $0.16$
 (Paper~II) --- and where we measure it directly it is $0.067$: the end of the axis
@@ -717,19 +718,14 @@ verifier on a task with a low base rate of correct first drafts faces the same g
 makes ``never accept'' a failure mode to test for rather than a quirk of this run.
 
 \paragraph{The same corner is reachable by hand, which is why the re-run was worth buying.}
-Before paying for it we wrote a verify gene by hand against this paper's own findings and ran it
-against the seed gene on one shared cassette, so each task's first draft was byte-identical across
-the two conditions and the pair isolates the gene exactly. The hand-written gene moved the
-detector's \emph{threshold} and nothing else: \texttt{PASS} rate $0.09 \to 0.00$, no true positive
-on either side, held-out $-0.033$ with a bootstrap interval of $[-0.095,+0.028]$ and sign test
-$p=0.61$ --- inconclusive under our registered rule, and not equivalence either. If the reachable
-improvements in prose space are threshold moves, then a search over prose searches a space whose
-gains are threshold moves, and a threshold move in a detector that cannot discriminate has no
-systematic gain to offer. That is a mechanism for the loop-level null which does not involve the
-optimizer at all, and it is evidence rather than proof: one hand-written point does not establish
-that no prose adds discrimination, which is exactly what made the re-run above worth its price
-(registered in \S\ref{sec:directions}). Appendix~\ref{sec:handgene} reports the experiment, its
-detector table and the decomposition of the $-0.033$.
+Before paying for it we wrote a verify gene by hand against this paper's own findings and measured
+it against the seed gene on one shared cassette, each task's first draft byte-identical across the
+two conditions. It moved the detector's \emph{threshold} and nothing else. That is a mechanism for
+the loop-level null which does not involve the optimizer at all, and it is evidence rather than
+proof: one hand-written point does not establish that no prose adds discrimination, which is what
+made the re-run above worth its price (registered in \S\ref{sec:directions}).
+Appendix~\ref{sec:handgene} reports the experiment, its detector table and the decomposition of
+the $-0.033$.
 
 \paragraph{Intrinsic self-correction has a low ceiling, and optimizing on top of it
 costs.} Consistent with \citet{huang2023cannot}, run~4 shows the loop improving when given an
@@ -1199,6 +1195,39 @@ execute model code, do replay bit-for-bit.) We normalize the string-level non-de
 can: object ids, addresses, and temp paths in failure messages. The actuator runs share this
 scope.
 
+\section{Cross-provider: a Critic Off the Worker's Weights}
+\label{sec:xprovider}
+
+One reading of the null survives everything above: the critique is bad at judging its own
+lineage's drafts, and a critic from another vendor would be a better detector and therefore a
+better thing to optimize. This was pre-registered as D3 and bought on 2026-08-06. Run 6's critic
+shared a vendor and a lineage with the worker; this repeats it cross-\emph{provider}, with the
+critique on \texttt{llama-\allowbreak 3.3-\allowbreak 70b} over the same \texttt{gpt-4.1-mini}
+worker, at the $8$ seeds the registration asked for. $\dd(D-B) = +0.014$, \textbf{inconclusive}
+against a noise band of $0.081$.
+
+The informative half is the detector. Crossing the vendor boundary did not produce a better critic
+but a \emph{degenerate} one, emitting \texttt{PASS} on none of $80$ held-out drafts, where the
+same-vendor cross-lineage critic of run~6 was the only \emph{model substitution} that produced an
+accurate detector (Paper~II, which also reports an accurate detector obtained a different way, by
+feeding the same critique a measurement tool). So the question this entry existed to settle ---
+unreliable detector or self-preferring one --- is answered against self-preference: moving off the
+worker's weights entirely made detection worse, and loop-level optimization bought nothing over
+prompt-only optimization under either. On the \emph{unoptimized} loop the two critics do separate,
+and Paper~II reports that separately --- a distinction worth keeping, since the two axes were
+briefly conflated while this run was being written up.
+
+The degeneracy is \emph{not} one model's quirk: a third lineage, \texttt{qwen3.6-27b}, put in the
+critique seat over a \texttt{llama-3.3-70b} worker
+emits \texttt{PASS} on none of $200$ first drafts, $20$ of which were already correct
+(Paper~II's cross-worker section). One qualification we
+keep rather than round off: \texttt{qwen} is a second \emph{lineage} but not a second
+\emph{provider}, since it and its worker are served by the same vendor.
+
+This run also supplied the companion paper's first \emph{prospective} test of its reporting
+minimum, and strengthened it: arm~D accepted on only $3$ of $8$ seeds, and $74\%$ of the positive
+$\dd$ came from two seeds where the treatment never applied (Paper~III).
+
 \section{Threats to Validity}
 \label{sec:threats}
 
@@ -1247,7 +1276,12 @@ the verifier costs held-out performance at low $p_0$.} It rests on a single $1.4
 that three other training-split sizes do not reproduce (\S\ref{sec:splitresult}). What survives
 is narrower and better supported: the verifier reliably degenerates to non-acceptance at low
 $p_0$ ($11/12$ genes across four split sizes), and the $+0.060$ gain at higher $p_0$ is the
-study's largest loop-level effect and is unanimous across seeds. Two caveats on the estimate
+largest loop-level effect the study replicates and is unanimous across seeds. One cell prints a
+larger number and we name it rather than leave it to be found: the split sweep's
+$n_{\mathrm{train}}{=}16$ row at $+0.062$, $2.12\sigma$ (Table~\ref{tab:splitresults}). It is a
+single draw, and that table reports its four cells as one quantity plus noise, so we do not count
+it as a larger effect --- a reader who reads those four cells as four effects should read the
+superlative as ours over the replicated ones. Two caveats on the estimate
 itself: the mean signed difference
 between replicates, $-0.014$, is confounded with any provider-side drift between recording
 dates, and five replicates of three seeds cannot separate the two. It establishes an order of
@@ -1424,34 +1458,10 @@ shows to be partly feedback-limited and partly generator-limited. Each changes o
   \item[D2$'$ (feedback actionability) --- \textbf{done}, runs 9--10 (Paper~II).]
     \emph{Remaining:} whether an LLM \emph{rewriting} the measured edits adds anything over the
     raw measurement.
-  \item[D3 (true cross-family critic) --- \textbf{done} (pre-registered and bought
-    2026-08-06).] Run 6's critic shared a vendor and lineage with the worker; this repeats it
-    cross-\emph{provider}, with the critique on \texttt{llama-\allowbreak 3.3-\allowbreak 70b}
-    over the same \texttt{gpt-4.1-mini} worker, at the $8$ seeds this entry asked for.
-    $\dd(D-B) = +0.014$, \textbf{inconclusive} against a noise band of $0.081$. The informative
-    half is the detector: crossing the vendor boundary did not produce a better critic but a
-    \emph{degenerate} one, emitting \texttt{PASS} on none of $80$ held-out drafts, where the
-    same-vendor cross-lineage critic of run~6 was the only \emph{model substitution} that
-    produced an accurate detector (Paper~II, which also reports an accurate detector obtained a
-    different way --- by feeding the same critique a measurement tool). So the question this entry existed to settle --- unreliable
-    detector or self-preferring one --- is answered against self-preference: moving off the
-    worker's weights entirely made detection worse, and loop-level optimization bought nothing
-    over prompt-only optimization under either. On the \emph{unoptimized} loop the two critics do
-    separate, and Paper~II reports that separately --- a distinction worth keeping, since the two
-    axes were briefly conflated while this entry was being written.
-    The degeneracy is \emph{not} one model's quirk: a third lineage, \texttt{qwen3.6-27b},
-    put in the critique seat over a \texttt{llama-3.3-70b} worker emits \texttt{PASS} on none
-    of $200$ first drafts, $20$ of which were already correct (Paper~II's
-    cross-worker section). That was this entry's \emph{Remaining} item and it is
-    discharged, with one qualification we keep rather than round off: \texttt{qwen} is a second
-    \emph{lineage} but not a second \emph{provider}, since it and its worker are served by the
-    same vendor.
-    \emph{Remaining:} the same comparison with an evolved rather than a seed critique, and a
-    genuinely second serving provider.
-    This run also supplied the companion paper's first \emph{prospective} test of its
-    reporting minimum, and strengthened it: arm~D accepted on only $3$ of $8$ seeds, and $74\%$ of
-    the positive $\dd$ came from two seeds where the treatment never applied
-    (Paper~III).
+  \item[D3 (true cross-family critic) --- \textbf{done}, \S\ref{sec:xprovider}.] Pre-registered
+    here and bought on 2026-08-06; the run has its own section because it is a measurement rather
+    than a plan. \emph{Remaining:} the same comparison with an evolved rather than a seed critique,
+    and a genuinely second serving provider.
   \item[D4 (search depth) --- \textbf{done, and closed} (\S\ref{sec:budgetresult}).] Bought at
     fixed $n_{\mathrm{train}}{=}8$ over a measured six-fold depth range: no trend, deepest cell
     flattest. That was the last configuration in which a positive finding was available, since
@@ -1504,23 +1514,19 @@ shows to be partly feedback-limited and partly generator-limited. Each changes o
 \end{description}
 
 \paragraph{A pre-registered prediction for the corrected-harness re-run --- \textbf{resolved,
-\S\ref{sec:rerun}}.} Prediction (i) held decisively --- \texttt{ensure\_correct} changed on all
-three seeds of arm~D --- and (ii) held on the point estimate only barely, $\dd(D-B) = -0.042$
-against a $\pm0.05$ SESOI, with the interval $[-0.095,+0.050]$ extending well past it, so this is
-not an equivalence claim. \emph{The pre-registration, as written:} the hand-written verify gene
-of \S\ref{sec:analysis} changed the detector's threshold (PASS rate $0.09 \to
-0.00$) without producing a true positive, and moved held-out by $-0.033$ ($p=0.61$). If that
-generalizes to the search --- if the reachable improvements in prose space are threshold moves
---- then the corrected harness should produce a specific, unusual pattern: \textbf{the
+\S\ref{sec:rerun}}.} \emph{As written}, before the run was paid for and against the hand-written
+gene's result (Appendix~\ref{sec:handgene}): if the reachable improvements in prose space are
+threshold moves, the corrected harness should produce a specific, unusual pattern, \textbf{the
 treatment is applied and still does nothing}. Concretely we predict (i) \texttt{genes\_changed}
 will now include \texttt{ensure\_correct} on at least one seed of arm~D, since the reflector can
 finally see the detector's own verdicts and the selector no longer starves it; and (ii)
 $\dd(D-B)$ will nonetheless remain within our $\pm0.05$ SESOI. Prediction (i) is the one that
 matters procedurally: it is the check the released runs could not perform, and if it fails the
-re-run is again not a test of loop-level optimization and must be reported as such rather than
-as a null. Prediction (ii) is the substantive one, and the honest alternative is live --- an
-optimizer explores a far larger region of prose space than one author, so it may find the
-discrimination we could not write.
+re-run is again not a test of loop-level optimization and must be reported as such rather than as
+a null. Prediction (ii) is the substantive one, and the honest alternative was live --- an
+optimizer explores a far larger region of prose space than one author. Both held: (i) on all three
+seeds of arm~D, (ii) on the point estimate only, $\dd(D-B) = -0.042$ against an interval that
+extends past the SESOI, so this is not an equivalence claim.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -1542,7 +1548,9 @@ not a verdict on GEPA, which reports gains elsewhere, and it is not train-split 
 that was our reading until the sweep varied the split from $4$ to $24$ and found no trend to
 overfit along (\S\ref{sec:splitresult}). Nor is it under-search: a second pre-registered sweep
 spans a measured six-fold depth range with no ordering and the deepest cell flattest, while
-acceptance rises from $4/6$ to $6/6$ arm-seed pairs (\S\ref{sec:budgetresult}). That dissociation
+acceptance rises from $4/6$ to $6/6$ arm-seed pairs (\S\ref{sec:budgetresult}). Nor is it a critic
+grading its own lineage: moved to another provider entirely, it detected worse rather than better
+(\S\ref{sec:xprovider}). That dissociation
 is what separates \emph{the optimizer failed to search} from \emph{the optimizer searched and
 found nothing that generalizes}, and it points firmly at the second.
 
@@ -1597,7 +1605,8 @@ This paper's earlier drafts published claims it now withdraws, and two of its pr
 predictions failed. Reporting guidance for preregistered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Twenty} entries follow.
+collected here and the body text states only the surviving claim.
+\textbf{Twenty-one} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1770,6 +1779,20 @@ The series' other two papers carry the entries bearing on their own claims.
     entry~11 survived, and the third instance in this register of a number that is wrong and
     inert. The count is now derived from the estimator's own replicate list, so the two cannot
     disagree again.
+  \item \textbf{``The study's largest loop-level effect.''} Said of the $+0.060$ gain at three
+    sites, one of them contribution~1. Half right, and the falsifier was on a table of this paper's
+    own: the split sweep's $n_{\mathrm{train}}{=}16$ cell sits at $2.12\sigma$ against that gain's
+    $2.07$. What is true is narrower --- it is the largest effect the study \emph{replicates},
+    since the $p_0$ levels were each re-scored five times and no sweep cell was measured twice ---
+    and the surviving reading is the one Table~\ref{tab:splitresults}'s caption already argued,
+    that its four cells are one quantity plus noise rather than four effects. The sentence never
+    carried that qualifier, so the paper both supplied the counter-example and declined to count
+    it, which leaves a reader to reconstruct the scope from a caption twenty pages away. All three
+    sites now say \emph{replicates}, the larger cell is named where the estimate is discussed
+    rather than left to be found, and the ordering is derived: one check reads the largest
+    replicated $\dd$ from the artifacts and fails if another level overtakes it, another reads the
+    named cell, and a third fails if that cell ever stops being the larger of the two. A
+    superlative is a claim about a set, and this one never said which set.
 \end{enumerate}
 
 \section{The Actuator Experiment, and the MBPP+ Attempt}
@@ -1911,14 +1934,8 @@ threshold.}
 \label{tab:c1}
 \end{table}
 
-This is a mechanism for the loop-level null that does not involve the optimizer at all. If
-rewriting this gene's prose moves where its threshold sits without giving it discriminative
-power, then a search over prose searches a space whose reachable improvements are threshold
-moves, and a threshold move in a detector that cannot discriminate has no systematic gain to
-offer. It is evidence, not proof: one hand-written point in prose space does not establish
-that no prose adds discrimination, and a competent author might do better. It does mean a
-loop-level null should no longer be read primarily as a fact about optimizers. This is what
-made the corrected-harness re-run worth buying and what it was pre-registered to predict
-(\S\ref{sec:directions}); \S\ref{sec:rerun} reports the outcome.
+One consequence is worth stating where the numbers are: a loop-level null should no longer be read
+primarily as a fact about optimizers. \S\ref{sec:analysis} draws that conclusion, and
+\S\ref{sec:rerun} reports what the search did when it was finally able to reach the gene.
 
 \end{document}
