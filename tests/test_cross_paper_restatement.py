@@ -97,31 +97,48 @@ def _shingles(sentence: str) -> set[str]:
     return {" ".join(words[i : i + 6]) for i in range(max(1, len(words) - 5))}
 
 
+#: How many six-word shingles two sentences must share before their similarity is worth computing.
+#: One shared shingle is met by boilerplate ("as a share of the split it does not"), which put
+#: thousands of pairs through `difflib.ratio` and cost this file seven minutes of a pre-push gate --
+#: the sort of slow that gets a hook switched off. Two is enough of a filter to make it seconds and
+#: cannot lose a pair: a match at 0.85 over twelve words shares far more than two shingles.
+_MIN_SHARED_SHINGLES = 2
+
+
 def _restatements(left: tuple[str, ...], right: tuple[str, ...]) -> list[tuple[str, str, float]]:
     """Sentence pairs that read the same with their numbers masked out.
 
-    Shingled first so this stays linear enough to run on every pair of papers: comparing every
-    sentence against every other is 380x211 ratio computations for one pairing alone.
+    Shingled first, then filtered by shared-shingle count, then by `quick_ratio`, so the expensive
+    comparison runs on a handful of pairs: comparing every sentence against every other is 380x211
+    ratio computations over long word lists for one pairing alone.
     """
     index: dict[str, set[int]] = {}
+    masked_right = [_mask(sentence).split() for sentence in right]
     for j, sentence in enumerate(right):
         for shingle in _shingles(sentence):
             index.setdefault(shingle, set()).add(j)
     pairs = []
     for sentence in left:
-        candidates: set[int] = set()
+        hits: dict[int, int] = {}
         for shingle in _shingles(sentence):
-            candidates |= index.get(shingle, set())
-        for j in candidates:
-            other = right[j]
-            ratio = difflib.SequenceMatcher(
-                None, _mask(sentence).split(), _mask(other).split()
-            ).ratio()
+            for j in index.get(shingle, ()):
+                hits[j] = hits.get(j, 0) + 1
+        words = _mask(sentence).split()
+        for j, shared in hits.items():
+            if shared < _MIN_SHARED_SHINGLES:
+                continue
+            matcher = difflib.SequenceMatcher(None, words, masked_right[j])
+            # An upper bound on the real ratio, computed from a multiset intersection. Cheap enough
+            # to run on every candidate and exact enough to discard almost all of them.
+            if matcher.quick_ratio() < _SIMILARITY:
+                continue
+            ratio = matcher.ratio()
             if ratio >= _SIMILARITY:
-                pairs.append((sentence, other, ratio))
+                pairs.append((sentence, right[j], ratio))
     return pairs
 
 
+@cache
 def _all_restatements() -> list[tuple[str, str, str, str, float]]:
     out = []
     for a, b in itertools.combinations(paper_sources.PAPERS, 2):
