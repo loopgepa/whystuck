@@ -56,6 +56,107 @@ MATH_MACROS_ARXIV_RENDERS = frozenset(
 )
 
 
+#: The two documents that advertise how long each paper is.
+SUBMISSION_MD = paper_sources.PAPERS_DIR / "SUBMISSION.md"
+PAPERS_README = paper_sources.PAPERS_DIR / "README.md"
+
+#: How many places state a paper's total page count. Asserted rather than trusted: the sites are
+#: found by sweeping, and a sweep whose yield drops has stopped guarding something without failing.
+_EXPECTED_PAGE_SITES = 3
+
+
+def _table_pages(doc: Path, marker: str, cell: int) -> dict[str, int]:
+    """Page counts from a Markdown table, one row per paper, `cell` counted from the left."""
+    out = {}
+    for line in doc.read_text(encoding="utf-8").splitlines():
+        if not line.startswith("|"):
+            continue
+        for slug in paper_sources.PAPERS:
+            if marker.format(slug=slug) in line:
+                cells = [c.strip() for c in line.split("|")]
+                out[slug] = int(cells[cell])
+    return out
+
+
+def _page_sites() -> list[tuple[str, dict[str, int]]]:
+    """Every documented statement of the papers' total page counts, with where it was found.
+
+    Three sites, in two documents, one of them prose. The prose one is the reason this function
+    exists: SUBMISSION.md's Size table was guarded against README's table, so the pair could agree
+    while both drifted from the build, and the sentence that restates the same three numbers
+    ("references begin on p.28 / 18 / 15 of 38 / 23 / 20") was read by nothing at all. That is the
+    restatement failure the papers' own corrections register describes, in the documentation about
+    those papers.
+    """
+    sites = [
+        ("SUBMISSION.md Size table", _table_pages(SUBMISSION_MD, "`{slug}`", 3)),
+        ("papers/README.md overview table", _table_pages(PAPERS_README, "`{slug}/`", -2)),
+    ]
+    prose = re.search(
+        r"references begin on p\.\d+\s*/\s*\d+\s*/\s*\d+ of (\d+)\s*/\s*(\d+)\s*/\s*(\d+)",
+        SUBMISSION_MD.read_text(encoding="utf-8"),
+    )
+    if prose:
+        sites.append(
+            (
+                "SUBMISSION.md main-text sentence",
+                dict(zip(paper_sources.PAPERS, (int(g) for g in prose.groups()), strict=True)),
+            )
+        )
+    return [(where, counts) for where, counts in sites if counts]
+
+
+def _reconcile_pages(slug: str, sites: list[tuple[str, dict[str, int]]]) -> int:
+    """The one page count every site agrees on, or a LookupError naming the disagreement."""
+    found = [(where, counts[slug]) for where, counts in sites if slug in counts]
+    if not found:
+        raise LookupError(
+            f"no documented page count for {slug}; the sweep found {len(sites)} sites"
+        )
+    values = {n for _, n in found}
+    if len(values) > 1:
+        detail = ", ".join(f"{where}: {n}" for where, n in found)
+        raise LookupError(f"documented page counts for {slug} disagree ({detail})")
+    return found[0][1]
+
+
+def advertised_pages(slug: str) -> int:
+    """How many pages the documentation says `slug` is. Raises unless every site agrees."""
+    sites = _page_sites()
+    if len(sites) != _EXPECTED_PAGE_SITES:
+        raise LookupError(
+            f"expected {_EXPECTED_PAGE_SITES} documented page-count sites, found {len(sites)}: "
+            f"{[where for where, _ in sites]}. A site that stopped being read is how a number rots"
+        )
+    return _reconcile_pages(slug, sites)
+
+
+def rehearsed_pages(result: dict[str, object]) -> int:
+    """The rehearsal's page count, as an int. `rehearse` returns a mixed dict of log findings, and
+    the caller that compares this against the documentation should not have to assume its type."""
+    pages = result["pages"]
+    if not isinstance(pages, int):
+        raise TypeError(f"rehearse() reported the page count as {pages!r}")
+    return pages
+
+
+def stale_page_count(slug: str, built: int) -> str | None:
+    """None when the documentation matches the compiled PDF, an actionable message when it does not.
+
+    Compared against the rehearsal rather than against a second hand-typed number, because the
+    build is the only thing that knows. Paper I's count sat at 38 for the four days after an edit
+    made it 39, and both documents agreed with each other throughout.
+    """
+    advertised = advertised_pages(slug)
+    if advertised == built:
+        return None
+    return (
+        f"the documentation advertises {advertised} pages for {slug} and the rehearsal compiled "
+        f"{built}. Update every site that states it: "
+        f"{', '.join(where for where, counts in _page_sites() if slug in counts)}"
+    )
+
+
 def _run(cmd: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, check=False)
 
@@ -446,6 +547,14 @@ def main() -> int:
             for k in ("undefined_citations", "undefined_references", "errors", "missing_files"):
                 if result[k]:
                     print(f"  {k}: {result[k]}")
+            return 1
+        # The documented size, against the only thing that knows it. Skipped for the double-blind
+        # variant: it strips the author block, so its length is not the length the documentation
+        # describes, and blocking on that difference would report a defect that does not exist.
+        drift = None if args.anonymous else stale_page_count(args.paper, rehearsed_pages(result))
+        if drift:
+            print("THE DOCUMENTED SIZE IS STALE, so no package was written:")
+            print(f"  - {drift}")
             return 1
         prefix = "anon-" if args.anonymous else ""
         tar = out / f"{prefix}arxiv-{args.paper}.tar.gz"

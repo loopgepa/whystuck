@@ -188,3 +188,51 @@ def test_an_unresolvable_citation_is_an_actionable_error(tmp_path):
 
 def test_the_arxiv_limits_are_the_documented_ones():
     assert ap.ABSTRACT_LIMIT == 1920, "arXiv's documented abstract field limit"
+
+
+def test_every_documented_page_count_is_found_rather_than_listed():
+    """The page count is stated in three places, and all three have to be read.
+
+    `tests/test_paper_docs_consistency.py` already ties README's table to SUBMISSION's, but both
+    are hand-typed, so agreement between them says nothing about the built PDF -- the shared-error
+    blind spot the papers' own register describes. The sites are swept rather than enumerated, and
+    the sweep's own yield is asserted, because a guard that stops finding its subject reports
+    nothing rather than failing.
+    """
+    sites = ap._page_sites()
+    assert len(sites) == ap._EXPECTED_PAGE_SITES, (
+        f"found {len(sites)} documented page-count sites, expected {ap._EXPECTED_PAGE_SITES}: "
+        f"{[where for where, _ in sites]}"
+    )
+    for where, counts in sites:
+        assert set(counts) == set(paper_sources.PAPERS), f"{where} does not state all three"
+    for slug in paper_sources.PAPERS:
+        assert ap.advertised_pages(slug) > 0
+
+
+def test_a_page_count_that_disagrees_between_sites_is_an_error():
+    """Not a silent pick of the first one found."""
+    with pytest.raises(LookupError, match="disagree"):
+        ap._reconcile_pages(
+            "p1-conditional-lever",
+            [("doc A", {"p1-conditional-lever": 39}), ("doc B", {"p1-conditional-lever": 38})],
+        )
+
+
+def test_a_page_count_that_drifted_from_the_build_blocks_the_package():
+    for slug in paper_sources.PAPERS:
+        n = ap.advertised_pages(slug)
+        assert ap.stale_page_count(slug, n) is None
+        message = ap.stale_page_count(slug, n + 1)
+        assert message is not None
+        assert str(n) in message and str(n + 1) in message
+
+
+def test_the_build_refuses_a_stale_page_count_before_writing_the_tarball():
+    """A package whose documented size is wrong is what someone quotes in a submission form."""
+    src = inspect.getsource(ap.main)
+    check, tar = src.find("stale_page_count("), src.find("tarfile.open")
+    assert check != -1, "main() no longer compares the rehearsed page count against the docs"
+    assert tar != -1, "this guard has lost its subject"
+    assert check < tar, "the comparison must gate the tarball, not follow it"
+    assert "return 1" in src[check:tar], "a stale page count must fail the build, not warn"
