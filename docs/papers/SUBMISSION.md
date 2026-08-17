@@ -21,7 +21,7 @@ endorsement domain, and the primary category selects the domain.
 
 Two structural facts decide this, and neither is about the papers' quality.
 
-**Main-text length is 27 / 17 / 14 pages** (references begin on p.28 / 18 / 15 of 38 / 23 / 20).
+**Main-text length is 27 / 17 / 14 pages** (references begin on p.28 / 18 / 15 of 39 / 23 / 20).
 **All three papers are de-anonymised by their own reproducibility apparatus**: the title block
 prints author, affiliation and repository URL, and each abstract names the repository again.
 
@@ -116,13 +116,22 @@ something the packaging script should do on its own.
 pages, 16 tables, 28 references) until 2026-08-03; those figures belong to a document that no longer
 exists. Measured from the built PDFs and each paper's own source:
 
-| | paper | pages | tables | figures | distinct citations | package |
-|---|---|---|---|---|---|---|
-| I | `p1-conditional-lever` | 38 | 11 | 3 | 24 | 107 kB |
-| II | `p2-repair-not-detection` | 23 | 4 | 2 | 17 | 85 kB |
-| III | `p3-silent-no-op` | 20 | 4 | 1 | 13 | 83 kB |
+| | paper | pages | tables | figures | distinct citations |
+|---|---|---|---|---|---|
+| I | `p1-conditional-lever` | 39 | 11 | 3 | 24 |
+| II | `p2-repair-not-detection` | 23 | 4 | 2 | 17 |
+| III | `p3-silent-no-op` | 20 | 4 | 1 | 13 |
 
-Each package is far under arXiv's 50 MB limit. Abstract lengths against the 1920-character metadata
+Tables, figures and citations are counted from the sources by
+`tests/test_paper_docs_consistency.py`; the page count is compared against the compiled PDF by
+`make_arxiv_package.py`, which refuses to write a package while the two disagree. Paper I sat at 38
+here for four days after an edit made it 39, and README's table agreed with this one throughout,
+which is the failure the papers themselves describe: two hand-typed numbers checking each other.
+The three tarballs run 89 to 115 kB, far under arXiv's 50 MB limit; the build prints the exact size,
+and this file no longer quotes it, because gzip output is not identical across toolchains and a
+number nothing can re-derive is a number that rots.
+
+Abstract lengths against the 1920-character metadata
 field: **1912**, **1895**, 1788. Paper I has 8 characters of headroom and Paper II has 25, so any
 edit to either abstract has to be re-checked by `make_arxiv_package.py` rather than assumed to fit.
 
