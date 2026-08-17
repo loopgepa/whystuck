@@ -1319,6 +1319,80 @@ def _reflection_models() -> tuple[set[str], set[str]]:
     return corrected, pre
 
 
+@dataclass(frozen=True)
+class PrecorrectionRun:
+    """One contrast run recorded before the harness correction, with what each source says of it.
+
+    Three sources disagree about the same run, and the disagreement is Paper III's subject. The
+    `genes_changed` FIELD is absent from every one of these files, because the field postdates them;
+    the SCORES say an arm moved whenever its optimized held-out differs from its seed; and the Δ
+    column says nothing at all, since the two arms are the same program. A reader who takes the
+    absent field for a zero concludes that nothing was ever accepted, which the scores refute.
+    """
+
+    name: str
+    seeds: int
+    per_seed: tuple[float, ...]
+    mean_delta: float
+    difference_of_means: float
+    identical: bool
+    field_present: bool
+    moved_b: bool
+    moved_d: bool
+
+
+@cache
+def _precorrection_census() -> tuple[PrecorrectionRun, ...]:
+    """Every pre-correction contrast run, once, with the three readings of each.
+
+    `meta.module_selector == "all"` is the marker the corrected harness writes, so this partitions
+    the released runs by harness generation without a hand-maintained list. The selection lived in
+    two functions with two copies of the filter until 2026-08-17; a census they both read is one
+    place for the set to be defined, and the set is what every count here is a count of.
+    """
+    import glob
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from analyze_deltas import delta_arm
+
+    out = []
+    for path in sorted(glob.glob(f"{DOCS}/validation-study*.json")):
+        with open(path, encoding="utf-8") as fh:
+            doc = json.load(fh)
+        runs = doc["runs"]
+        first = runs[0]
+        arms = sorted(k for k in first if isinstance(first.get(k), dict))
+        if arms != ["A", "B", "C", "D"] or doc["meta"].get("module_selector") == "all":
+            continue
+        per_seed = tuple(delta_arm(path))
+        out.append(
+            PrecorrectionRun(
+                name=Path(path).stem.replace("validation-study-", "") or "validation-study",
+                seeds=len(runs),
+                per_seed=per_seed,
+                mean_delta=mean(per_seed),
+                difference_of_means=(
+                    mean(r["D"]["opt_heldout"] for r in runs)
+                    - mean(r["B"]["opt_heldout"] for r in runs)
+                ),
+                identical=all(d == 0.0 for d in per_seed),
+                field_present=any(
+                    r[arm].get("genes_changed") is not None for r in runs for arm in ("B", "D")
+                ),
+                moved_b=any(r["B"]["opt_heldout"] != r["B"]["seed_heldout"] for r in runs),
+                moved_d=any(r["D"]["opt_heldout"] != r["D"]["seed_heldout"] for r in runs),
+            )
+        )
+    if not out:
+        raise ValueError(
+            "no pre-correction contrast runs found; the module_selector marker must have "
+            "changed, and a count of zero would silently retract the paper's own caution"
+        )
+    return tuple(out)
+
+
 def _precorrection_counts() -> tuple[int, int, float, int]:
     """(contrast runs recorded pre-correction, arms identical on every seed, largest |mean Δ|,
     how many have a *mean* Δ of exactly 0).
@@ -1344,40 +1418,12 @@ def _precorrection_counts() -> tuple[int, int, float, int]:
     program, so they issued the same calls), and it is the count the papers now state. The
     mean-exactly-zero figure is still returned so the discrepancy stays pinned rather than latent.
     """
-    import glob
-    import sys
-    from pathlib import Path
-
-    sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from analyze_deltas import delta_arm
-
-    means: list[float] = []
-    identical: list[bool] = []
-    by_means: list[float] = []
-    for path in sorted(glob.glob(f"{DOCS}/validation-study*.json")):
-        with open(path, encoding="utf-8") as fh:
-            doc = json.load(fh)
-        first = doc["runs"][0]
-        arms = sorted(k for k in first if isinstance(first.get(k), dict))
-        if arms != ["A", "B", "C", "D"] or doc["meta"].get("module_selector") == "all":
-            continue
-        per_seed = delta_arm(path)
-        means.append(mean(per_seed))
-        identical.append(all(d == 0.0 for d in per_seed))
-        by_means.append(
-            mean(r["D"]["opt_heldout"] for r in doc["runs"])
-            - mean(r["B"]["opt_heldout"] for r in doc["runs"])
-        )
-    if not means:
-        raise ValueError(
-            "no pre-correction contrast runs found; the module_selector marker must have "
-            "changed, and a count of zero would silently retract the paper's own caution"
-        )
+    census = _precorrection_census()
     return (
-        len(means),
-        sum(identical),
-        max(abs(m) for m in means),
-        sum(1 for m in by_means if m == 0.0),
+        len(census),
+        sum(r.identical for r in census),
+        max(abs(r.mean_delta) for r in census),
+        sum(1 for r in census if r.difference_of_means == 0.0),
     )
 
 
@@ -1392,25 +1438,13 @@ def _precorrection_acceptance() -> dict[str, int]:
     not hold -- an accepted proposal can score identically -- so these counts are a lower bound, and
     the paper states them as such.
     """
-    import glob
-
-    either = arm_b = arm_d = flat = 0
-    for path in sorted(glob.glob(f"{DOCS}/validation-study*.json")):
-        with open(path, encoding="utf-8") as fh:
-            doc = json.load(fh)
-        first = doc["runs"][0]
-        arms = sorted(k for k in first if isinstance(first.get(k), dict))
-        if arms != ["A", "B", "C", "D"] or doc["meta"].get("module_selector") == "all":
-            continue
-        moved = {
-            arm: any(r[arm]["opt_heldout"] != r[arm]["seed_heldout"] for r in doc["runs"])
-            for arm in ("B", "D")
-        }
-        arm_b += moved["B"]
-        arm_d += moved["D"]
-        either += moved["B"] or moved["D"]
-        flat += not (moved["B"] or moved["D"])
-    return {"either": either, "B": arm_b, "D": arm_d, "flat": flat}
+    census = _precorrection_census()
+    return {
+        "either": sum(1 for r in census if r.moved_b or r.moved_d),
+        "B": sum(r.moved_b for r in census),
+        "D": sum(r.moved_d for r in census),
+        "flat": sum(1 for r in census if not (r.moved_b or r.moved_d)),
+    }
 
 
 def _registry_counts() -> tuple[int, int]:
@@ -3355,6 +3389,8 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_groq_second_worker_checks())
     out.extend(_paraphrase_drift_checks())
     out.extend(_superlative_scope_checks())
+    out.extend(_noop_figure_checks())
+    out.extend(_replicate_sigma_scale_checks())
 
     return out
 
@@ -4979,6 +5015,113 @@ def _xprovider_checks() -> list[tuple[str, float, float, float]]:
             xp["n"],
         )
     )
+    return out
+
+
+def _replicate_sigma_scale_checks() -> list[tuple[str, float, float, float]]:
+    r"""The five-replicate means of the three $p_0$ levels, in units of the cross-run $\sigma$.
+
+    Paper I reports each level three ways: a single draw, a five-replicate mean with its own
+    standard error, and a $\sigma$ multiple of the single draw. The multiple of the *five-replicate*
+    mean was the one quantity `fig:effects` needed and the paper did not state, which the figure
+    guard caught as an orphan before the figure shipped. It is worth stating rather than dropping,
+    because every one of the three shrinks: a single draw of a noisy quantity overstates it, and
+    that is the section's whole argument in one comparison.
+
+    The direction of each move is asserted too, per level rather than as one claim about all three.
+    The first draft of that sentence said every mean shrinks; this check failed on $L_3$, which
+    moves from a draw reading as zero to a larger magnitude with the opposite sign. That is the one
+    level where the shrinkage story does not hold, it is the reason the saturated null there is
+    withdrawn, and a blanket sentence would have buried it.
+    """
+    p1 = _sources().paper_tex("p1-conditional-lever")
+    sigma = _noise_estimate().sigma_delta_mean
+    repeat = {r.level: r for r in _repeat().aggregate(5)}
+    printed = _scrape_all(
+        p1,
+        r"the five-replicate means are\s+\$([\d.]+)\\sigma\$ at \$L_1\$, "
+        r"\$([\d.]+)\\sigma\$ at \$L_2\$ and \$([\d.]+)\\sigma\$ at \$L_3\$",
+    )
+    out = []
+    for i, level in enumerate(("L1", "L2", "L3")):
+        row = repeat[level]
+        out.append(
+            (
+                f"tex: {level} five-replicate mean in sigma",
+                printed[i],
+                0.005,
+                abs(row.delta) / sigma,
+            )
+        )
+        single = _decomposition(i)["delta"]
+        shrank = abs(row.delta) < abs(single)
+        out.append(
+            (
+                f"tex: {level} re-measurement moved the magnitude as stated",
+                1.0,
+                0.0,
+                float(shrank if level in ("L1", "L2") else not shrank),
+            )
+        )
+        if level == "L3":
+            out.append(
+                (
+                    "tex: L3 re-measurement reversed the sign",
+                    1.0,
+                    0.0,
+                    float(row.delta * single < 0),
+                )
+            )
+    return out
+
+
+def _noop_figure_checks() -> list[tuple[str, float, float, float]]:
+    r"""Paper III's `fig:noop` caption, which states three counts a reader will quote.
+
+    A caption is prose that nobody re-reads, and this one carries the paper's central contrast:
+    what the diagnostic could see, what the scores show anyway, and what the published $\dd$
+    column meant. Each count is derived from the same census the body's counts come from, so the
+    figure, its caption and the surrounding section cannot drift apart.
+
+    The cancellation epsilon is swept rather than pinned to one site: the register entry that
+    withdrew "exactly zero" prints it too, and a fact stated at two sites and checked at one is how
+    every drifted number in this series got in.
+    """
+    census = _precorrection_census()
+    moved = _precorrection_acceptance()
+    p3 = _sources().paper_tex("p3-silent-no-op")
+    out = [
+        (
+            "fig:noop caption, files missing the field",
+            _scrape_word(p3, r"\\emph\{absent\} from all \\textbf\{([\w-]+)\} files"),
+            0.0,
+            float(sum(1 for r in census if not r.field_present)),
+        ),
+        (
+            "fig:noop caption, runs the scores contradict",
+            _scrape_word(p3, r"contradict that in \\textbf\{([\w-]+)\} of the fifteen"),
+            0.0,
+            float(moved["either"]),
+        ),
+        (
+            "fig:noop caption, identical on every seed",
+            _scrape_word(p3, r"\\textbf\{([\w-]+)\} scored\s+identically on every seed"),
+            0.0,
+            float(sum(r.identical for r in census)),
+        ),
+    ]
+    multihard = next(r for r in census if r.name == "multihard")
+    sites = list(re.finditer(r"-(\d\.\d+) \\times 10\^\{-17\}", p3))
+    out.append(("fig:noop epsilon, sites stating it", float(len(sites)), 0.0, 2.0))
+    for i, site in enumerate(sites):
+        out.append(
+            (
+                f"fig:noop cancellation epsilon, site {i}",
+                float(site.group(1)),
+                0.01,
+                abs(multihard.mean_delta) * 1e17,
+            )
+        )
     return out
 
 

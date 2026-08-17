@@ -94,6 +94,33 @@ def _plotted() -> list[tuple[str, float]]:
             (f"mmc{c.mmc} accepted", float(c.accepted)),
         ]
     out.append(("within-run sigma", d.depth_sigma_within))
+    # fig:noop. Every marker in the left panel is a boolean and every dot in the right one is a
+    # published delta, so the deltas are what can go stale here; the counts the caption states are
+    # pinned separately by `_noop_figure_checks` in the claim checker.
+    for r in d.precorrection:
+        out.append((f"precorrection {r.name} delta", r.mean_delta))
+    out += [(f"precorrection moved {k}", float(v)) for k, v in d.precorrection_moved.items()]
+    out += [
+        ("precorrection runs", float(len(d.precorrection))),
+        ("precorrection identical", float(sum(r.identical for r in d.precorrection))),
+    ]
+    # fig:effects. The sigma-scaled values, which is where a stale sigma would show up.
+    for e in d.effects:
+        out.append((f"effect {e.label}", e.in_sigma))
+        if e.single_in_sigma is not None:
+            out.append((f"effect {e.label} single draw", e.single_in_sigma))
+    out.append(("SESOI in sigma", d.sesoi_in_sigma))
+    # fig:residual and fig:worker.
+    for bar in d.residual:
+        out += [(f"residual {bar.constraint} {run}", rate) for run, rate in bar.rates.items()]
+    for w in d.worker:
+        out += [
+            (f"worker {w.label} held-out", w.held_out),
+            (f"worker {w.label} delta", w.delta),
+            (f"worker {w.label} se", w.se),
+            (f"worker {w.label} t", w.t),
+        ]
+    out.append(("worker seeds", float(d.worker_seeds)))
     return out
 
 
@@ -205,8 +232,28 @@ def test_no_latex_text_markup_in_labels():
     """usetex is unavailable here (no dvipng), so \\textbf or \\emph would print literally.
 
     Cheap to check statically and impossible to notice in a 6-inch PDF until a reviewer does.
+
+    Scanned over string literals rather than over the raw text of the render half. The first version
+    grepped the source, and a code comment explaining which macro the constraint labels imitate was
+    enough to fail it: a guard that fires on prose about the thing it guards teaches people to edit
+    the comment. `\\mathtt` and other math macros are fine, since mathtext renders them.
     """
     src = pathlib.Path("scripts/make_figures.py").read_text(encoding="utf-8")
     render_half = src[src.index("def fig_p0(") : src.index("def render(")]
-    for macro in (r"\textbf", r"\emph", r"\texttt", r"\textit"):
-        assert macro not in render_half, f"{macro} in a figure label would be printed verbatim"
+    literals = [
+        node.value
+        for node in ast.walk(ast.parse(render_half))
+        if isinstance(node, ast.Constant) and isinstance(node.value, str)
+    ]
+    docstrings = {
+        ast.get_docstring(node) or ""
+        for node in ast.walk(ast.parse(render_half))
+        if isinstance(node, ast.FunctionDef)
+    }
+    for text in literals:
+        if text in docstrings:
+            continue
+        for macro in (r"\textbf", r"\emph", r"\texttt", r"\textit"):
+            assert macro not in text, (
+                f"{macro} in a figure label would be printed verbatim: {text[:60]!r}"
+            )

@@ -105,8 +105,30 @@ def edit_proposal(target: str, after: str | dict[str, Any], mid: str = "m1") -> 
 _BCB_IMAGE_STATE: dict[str, str | None] = {}
 
 
+#: What `docker` prints when it cannot reach a daemon at all, as opposed to reaching one that has
+#: never built the image. The two are different findings and used to produce the same skip reason.
+_DAEMON_UNREACHABLE = (
+    "Is the docker daemon running",
+    "failed to connect to the docker API",
+    "Cannot connect to the Docker daemon",
+    "docker daemon is not running",
+)
+
+
 def _bcb_image_missing() -> str | None:
-    """A reason string when the pinned image is unavailable, else None. Probed once per session."""
+    """A reason string when the pinned image is unavailable, else None. Probed once per session.
+
+    Probed with the environment the sandbox itself will use, and deliberately without defaulting
+    `DOCKER_HOST`: `whystuck.eval.bcb_exec` runs `docker run` with the inherited environment, so
+    Docker resolves the daemon through the active *context* there. A probe that overrode the
+    variable would be more permissive than the runtime, and the tests would run against a daemon
+    the product cannot reach --- which is how this reads on a host whose `desktop-linux` context
+    points at a socket that is not there while `unix:///var/run/docker.sock` answers.
+
+    The two failures are told apart rather than merged. On this host the image IS present and the
+    context IS dead, and the old message said "the pinned sandbox image is not present", sending a
+    reader to rebuild an image that already existed.
+    """
     if "reason" in _BCB_IMAGE_STATE:
         return _BCB_IMAGE_STATE["reason"]
     import os
@@ -123,7 +145,15 @@ def _bcb_image_missing() -> str | None:
             capture_output=True,
             text=True,
         )
-        if proc.returncode != 0:
+        if proc.returncode != 0 and any(m in proc.stderr for m in _DAEMON_UNREACHABLE):
+            reason = (
+                "no docker daemon is reachable the way the sandbox reaches one. `docker context "
+                "ls` will show which endpoint is active; a context pointing at a stopped Docker "
+                "Desktop is the usual cause, and `docker context use default` or "
+                "DOCKER_HOST=unix:///var/run/docker.sock is the fix. The image may well be built "
+                "already: this is a connection fault, not a missing image"
+            )
+        elif proc.returncode != 0:
             reason = (
                 f"the pinned sandbox image {image!r} is not present on this host. "
                 f"Rebuild it (it is fully pinned, so this is reproducible): "
