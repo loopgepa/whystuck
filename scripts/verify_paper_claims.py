@@ -3354,6 +3354,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_oracle_gap_direction_checks())
     out.extend(_groq_second_worker_checks())
     out.extend(_paraphrase_drift_checks())
+    out.extend(_superlative_scope_checks())
 
     return out
 
@@ -4802,7 +4803,10 @@ def _xprovider_checks() -> list[tuple[str, float, float, float]]:
             stdev([r["D"]["opt_heldout"] for r in runs])
             + stdev([r["B"]["opt_heldout"] for r in runs]),
         ),
-        ("D3 seeds (p1)", r"at the \$(\d+)\$ seeds this entry asked for", float(seeds)),
+        # Reworded when D3 stopped being a bullet in the directions list and became
+        # `sec:xprovider`: a bought, pre-registered run with nine claims of its own was being
+        # reported inside a to-do list. "this entry" was the list's word for itself.
+        ("D3 seeds (p1)", r"at the \$(\d+)\$ seeds the registration asked for", float(seeds)),
         ("D3 arm D accepted (p1)", r"accepted on only \$(\d+)\$ of \$\d+\$ seeds", float(d_seeds)),
         (
             "D3 share (p1)",
@@ -4976,6 +4980,59 @@ def _xprovider_checks() -> list[tuple[str, float, float, float]]:
         )
     )
     return out
+
+
+def _superlative_scope_checks() -> list[tuple[str, float, float, float]]:
+    r"""Paper I's "largest loop-level effect", and the set that superlative ranges over.
+
+    The claim sat at three sites unqualified while Paper I's own `tab:splitresults` printed a
+    bigger number: the split sweep's $n_\mathrm{train}=16$ cell at $+0.062$, $2.12\sigma$ against
+    $L_2$'s $2.07$. Defensible under that table's own caption, which reports its four cells as one
+    quantity plus noise rather than as four effects; not defensible as written, because the
+    sentence never said so and a reader could falsify it from the table on the facing page.
+
+    Four checks, because the scope stays true only while all four do. The effect the sentence
+    names has to be the largest of the ones the study re-measured; the cell the caveat names has to
+    be the one that is actually larger; its $\sigma$ multiple is a restatement of a table cell and
+    rots like every other restatement; and the ordering between the two has to still hold. If a
+    later run makes another replicated level the largest, the first fails. If the split cell stops
+    being larger, the caveat is naming a falsifier that no longer exists and the last one fails.
+
+    Replicated means re-measured: the three $p_0$ levels were each scored five times over
+    (`tab:repeat`), which is what licenses ranking them. Under those five-replicate means
+    ($-0.021$, $+0.055$, $+0.019$) $L_2$ is still the largest, so the ranking does not depend on
+    which of the two estimates the reader takes.
+    """
+    p1 = _sources().paper_tex("p1-conditional-lever")
+    replicated = {f"L{i + 1}": mean(_p0_deltas(i)) for i in range(3)}
+    largest = max(replicated.values())
+    unreplicated = _split_row("split16").delta
+    caveat = _scrape_all(p1, r"row at \$\+([\d.]+)\$, \$([\d.]+)\\sigma\$")
+    return [
+        (
+            "tex: largest replicated loop-level effect",
+            _scrape(
+                p1,
+                r"the \$\+([\d.]+)\$ gain at higher \$p_0\$ is the\s+"
+                r"largest loop-level effect the study replicates",
+            ),
+            0.0005,
+            largest,
+        ),
+        ("tex: the larger unreplicated cell", caveat[0], 0.0005, unreplicated),
+        (
+            "tex: the larger unreplicated cell in sigma",
+            caveat[1],
+            0.005,
+            abs(unreplicated) / _noise_estimate().sigma_delta_mean,
+        ),
+        (
+            "tex: the named cell really is the larger one",
+            1.0,
+            0.0,
+            float(unreplicated > largest),
+        ),
+    ]
 
 
 def _paraphrase_drift_checks() -> list[tuple[str, float, float, float]]:
