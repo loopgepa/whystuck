@@ -155,6 +155,38 @@ def test_advertised_abstract_lengths_equal_the_measured_ones() -> None:
         )
 
 
+def test_the_conference_limit_multiples_are_the_stated_lengths_divided_by_the_limit() -> None:
+    """SUBMISSION.md's "Paper I runs 3.0x" against a 9-page main-text limit.
+
+    It read "about four times" from the split until 2026-08-17, which is 39/9 rather than 27/9: the
+    sentence divided the total page count by a limit that governs main text only. Nothing checked
+    it, because it is arithmetic over two numbers stated in the same document and neither the page
+    guard in `make_arxiv_package` nor the table guards above look at prose multiples.
+
+    Derived rather than pinned: the multiples come from the main-text lengths the file states two
+    paragraphs earlier and the limit it names in the same sentence, so an edit to any of the three
+    has to move the others.
+    """
+    text = (PAPERS / "SUBMISSION.md").read_text(encoding="utf-8")
+    lengths = re.search(r"\*\*Main-text length is (\d+) / (\d+) / (\d+) pages\*\*", text)
+    assert lengths, "SUBMISSION.md no longer states the three main-text lengths in a readable form"
+    limit = re.search(r"the (\d+)-page\s+main-text limit", text)
+    assert limit, "SUBMISSION.md no longer names the conference main-text limit"
+    numeral = {"I": 0, "II": 1, "III": 2}
+    multiples = re.findall(r"Paper (I{1,3}) (?:runs )?([\d.]+)x", text)
+    assert len(multiples) == len(SLUGS), (
+        f"found {len(multiples)} stated multiples, expected {len(SLUGS)}; the sentence has been "
+        "reworded out of this guard's reach"
+    )
+    for roman, claimed in multiples:
+        main = int(lengths.group(numeral[roman] + 1))
+        expected = round(main / int(limit.group(1)), 1)
+        assert float(claimed) == expected, (
+            f"Paper {roman} is advertised at {claimed}x the {limit.group(1)}-page limit; "
+            f"{main} main-text pages over that limit is {expected}x"
+        )
+
+
 def test_every_advertised_check_count_equals_the_verifier_s_own() -> None:
     """The number in the docs is the number the script prints, or it is a lie with a shelf life."""
     actual = len(_checks())

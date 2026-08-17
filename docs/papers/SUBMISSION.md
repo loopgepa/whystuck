@@ -138,8 +138,10 @@ edit to either abstract has to be re-checked by `make_arxiv_package.py` rather t
 The three are cross-referenced as a series, so they should be posted together or in the order I, II,
 III; each abstract names its companions.
 
-These lengths are fine for arXiv and for TMLR, which sets no page limit. Papers II and III are each
-roughly twice the 9-page main-text limit at NeurIPS, ICLR and ICML and Paper I about four times, so a
+These lengths are fine for arXiv and for TMLR, which sets no page limit. Against the 9-page
+main-text limit at NeurIPS, ICLR and ICML, Paper I runs 3.0x, Paper II 1.9x and Paper III 1.6x, so a
 conference submission would need substantial main text moved into appendices, plus that venue's style
-file. This is the split's main practical gain: II and III are within reach of a conference cut in a
-way the 45-page monolith was not.
+file. Paper I read "about four times" until 2026-08-17, which is 39/9 rather than 27/9: the sentence
+divided the total by the main-text limit. The three multiples are now checked against the main-text
+lengths stated above. This is the split's main practical gain: II and III are within reach of a
+conference cut in a way the 45-page monolith was not.
