@@ -277,12 +277,15 @@ exclusions and gene overrides --- every dimension except the \emph{worker} that 
 another model, dropped into the release directory for an unrelated experiment, enrolled as an
 eleventh replicate (defect~11). Nothing reached a reader: the claim checker failed on the same
 commit and the screen went in before publication, so what follows is a counterfactual, measured
-by re-running the checker with the screen removed. It moves $55$ of this paper's published
-values, and only $30$ of the $55$ move far enough to breach the tolerance that guards them; the
+by re-running the checker with the screen removed. It moves $56$ of this paper's published
+values, and only $31$ of the $56$ move far enough to breach the tolerance that guards them; the
 remaining $25$ shift with nothing objecting. Those figures were $48$ and $29$ until a later audit
 added checks for seven $\sigma$-derived values the papers had always printed and nothing had ever
-read: the contamination was moving them all along, and the count of what it moves is bounded by
-the count of what is watched. That is the part worth keeping, and it is the same
+read, and $55$ and $30$ until a further one added an eighth: the contamination was moving them all
+along, and the count of what it moves is bounded by
+the count of what is watched. The pair has now moved twice for that reason and neither time
+because the contamination changed, which is the cleanest available demonstration of the sentence
+it sits in. That is the part worth keeping, and it is the same
 threshold problem as defect~6 wearing different clothes: a contamination does not have to be
 large to be real, only larger than whatever is watching. Both are the paper's own
 subject arriving in its tooling: a setting reported as applied that a surface never received, and a
@@ -333,7 +336,7 @@ sweep, and is defect~1's mirror image --- the same one-sided contrast with the s
 control side instead of the treatment side. 10--11 arrived while replicating on a second worker
 and are this paper's own thesis turned on its instruments: a switch reported as set that a
 surface never received, and a guard reporting agreement about a dimension it never compared.
-Neither is specific to an optimizer. 11 was caught before publication; removing its screen again moves $55$ of this paper's values, only $30$ of them past the tolerance that guards them.}
+Neither is specific to an optimizer. 11 was caught before publication; removing its screen again moves $56$ of this paper's values, only $31$ of them past the tolerance that guards them.}
 \label{tab:defects}
 \end{table}
 
@@ -453,8 +456,8 @@ first runs recorded under the corrected harness are two hand-written-gene condit
 the companion paper on the conditional lever; they replay bit-for-bit, so \texttt{verify\_reproducibility.py}
 verifies twenty-five runs rather than reporting that nothing has been proven --- those two
 conditions, the four-arm re-run, the two new $p_0$ levels and the two calibration passes behind
-them, the bought rows of the split and budget sweeps, the cross-provider critic run, and the
-eleven runs of the second-worker line. The cross-provider run is the only one of them whose critique
+them, the bought rows of the split and budget sweeps, the cross-provider critic run, the
+eight runs of the second-worker line and the diagonal splice control. The cross-provider run is the only one of them whose critique
 was served by a second vendor and therefore the only one that would notice a replay quietly
 falling back to the worker's provider. Eleven of those twenty-five were replaying already and
 were simply not registered, which is its own instance of this paper's subject: an unstated
@@ -786,7 +789,7 @@ This work's earlier drafts published claims it now withdraws. Reporting guidance
 work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Fifteen} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Sixteen} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -918,6 +921,21 @@ The series' other two papers carry the entries bearing on their own claims.
     rounded $-0.094$ over a rounded $0.029$ gives. The check that should have caught it was fed the
     same rounded $0.094$, so both sides of the comparison descended from the display and it passed
     inside tolerance while the artifact's value failed. It now reads the run.
+  \item \textbf{An enumeration of the twenty-five replayable runs that sums to twenty-seven.}
+    \S\ref{sec:fix} lists them as the two hand-written-gene conditions, the four-arm re-run, the
+    two new $p_0$ levels, the two calibration passes, the bought rows of the split and budget
+    sweeps, the cross-provider critic run, ``and the eleven runs of the second-worker line''. The
+    first seven groups are $16$; the registry's remainder is $9$, not $11$ --- eight runs on
+    \texttt{llama-3.3-70b-versatile} plus the diagonal splice control, which runs a third model
+    (\texttt{llama-3.1-8b-instant}) and is therefore not part of that line. The two files that
+    make the literal count eleven are a spend report, which is not a run, and the cross-provider
+    run, which the same sentence already counts. ``Eleven'' also opens the following sentence, for
+    a different quantity, which is where it was most likely copied from --- the same
+    collide-with-a-neighbour signature as the depth bound in Paper~I's register. \emph{The total
+    was right and the parts were not}, which is why no check caught it: twenty-five is pinned
+    against the registry, and the enumeration behind it was prose. The parts are now summed
+    against \texttt{verify\_reproducibility}'s own replayable count, so the list and the total
+    fail together or not at all.
 \end{enumerate}
 
 \end{document}

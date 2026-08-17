@@ -1025,7 +1025,12 @@ fund an accept cycle, never that one is accepted (Evidence~9) --- so that row wi
 the acceptance census and excluded from the trend test rather than read as a null. Second, these
 five runs re-measure the same unoptimized genome on the same thirty held-out tasks as the four-arm
 re-run, so they will nearly double the replicate count behind the cross-run $\sigma$ estimate
-($5 \to 9$). That estimate will therefore move, and every ratio derived from it will be
+($5 \to 9$).\footnote{The arithmetic is wrong and the registered text is left as it stands: five
+existing replicates plus these five is $10$, not $9$, and the artifact duly reports ten
+(\S\ref{sec:threats}, and \texttt{verify\_paper\_claims.py} now derives the count rather than
+reading either number). Nothing rests on the parenthetical --- $\sigma(\dd)$ is computed from
+whatever runs qualify, not from a predicted count --- which is exactly why it went unread for the
+life of the paper. Appendix~\ref{sec:corrections}.} That estimate will therefore move, and every ratio derived from it will be
 re-derived; we note it now so the change reads as the improvement it is rather than as a
 convenient adjustment.
 
@@ -1592,7 +1597,7 @@ This paper's earlier drafts published claims it now withdraws, and two of its pr
 predictions failed. Reporting guidance for preregistered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Nineteen} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Twenty} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1752,6 +1757,19 @@ The series' other two papers carry the entries bearing on their own claims.
     metric's floor is exploitable, and $6/11$ is a wider floor than $5/11$ --- and the paragraph's
     conclusion is untouched, since the floor applies to every arm equally and so does not bias
     $\dd$. The count is now derived by calling the verifiers.
+  \item \textbf{A registered replicate count that does not add up: $5 \to 9$.}
+    \S\ref{sec:budgetprereg} states that the five bought budget cells would take the cross-run
+    $\sigma$ estimate from five replicates to nine. Five plus five is ten, and ten is what the
+    artifact holds: \texttt{\_noise\_estimate} enrols \texttt{c2}, \texttt{c2b}, the three split
+    cells and the five budget cells, and \S\ref{sec:threats} has said ``ten released runs''
+    nineteen pages later for the whole life of the paper. As with the depth bound of entry~16 the
+    registered sentence is annotated rather than edited, because a pre-registration corrected
+    after the fact is not one. Nothing moves: $\sigma(\dd)$ is computed from the runs that
+    qualify and never from a predicted count, which is why the digit survived --- \emph{it was
+    load-bearing for nothing, so nothing checked it}. That is the same reason the $1.12$ of
+    entry~11 survived, and the third instance in this register of a number that is wrong and
+    inert. The count is now derived from the estimator's own replicate list, so the two cannot
+    disagree again.
 \end{enumerate}
 
 \section{The Actuator Experiment, and the MBPP+ Attempt}

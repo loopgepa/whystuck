@@ -895,9 +895,9 @@ reason they supersede the ratios.
 \textbf{A do-nothing floor in the
 metric:} the fraction-of-constraints-satisfied score is not anchored at zero for an empty
 answer --- the empty string scores $0.548$ on the vendored IFBench slice and $0.420$ on
-generated multi-hard, and five of eleven IFBench verifiers are vacuously satisfied by text
-containing no whitespace, quotes or bullets (\texttt{\_sub\_bullets("")} reduces to
-\texttt{all([]) = True}). These are faithful ports of the upstream checkers and the floor
+generated multi-hard, and six of eleven IFBench verifiers are vacuously satisfied by the empty
+string itself (\texttt{\_sub\_bullets("")} reduces to \texttt{all([]) = True}, and the vowel and
+consonant checks quantify over no words at all). These are faithful ports of the upstream checkers and the floor
 applies to every configuration equally, so it does not bias a between-row gap, but it compresses the scale: on IFBench
 the floor sits at or above our reported seed baselines. It also makes the metric a poor
 instrument for this loop, since a metric that partly rewards saying less is exposed to a
@@ -977,7 +977,7 @@ Earlier drafts of this work published claims it now withdraws. Reporting guidanc
 preregistered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Fourteen} entries follow. The
+collected here and the body text states only the surviving claim. \textbf{Fifteen} entries follow. The
 series' other two papers carry the entries bearing on their own claims, and the full
 register across all three, with the superseded values themselves, is in the released repository.
 
@@ -1109,6 +1109,22 @@ register across all three, with the superseded values themselves, is in the rele
     is built to license, and a premise supported by an unverifiable procedural claim is weaker than
     one supported by a property of the released data, even when both happen to yield the same
     results.
+  \item \textbf{``Five of eleven IFBench verifiers are vacuously satisfied.''} Six of eleven, and
+    the empty string satisfies all six. This paper's threats section carried the withdrawn count
+    for the whole life of the split: Paper~I corrected the same sentence to six and recorded it in
+    its own register, and the correction reached neither the copy in this paper nor
+    \texttt{docs/validation-study-summary.md}. The floor conclusion is untouched, since it applies
+    to every configuration equally and so does not bias a between-row gap, and the error ran
+    against us --- $6/11$ is a wider floor than $5/11$, so the threat was understated.
+    \textbf{The mechanism is why this entry exists.} The claim checker's corpus is every paper's
+    source concatenated, and it located this sentence with \texttt{re.search}, which returns the
+    \emph{first} match: it read Paper~I's ``six'', compared it against the six the verifiers
+    actually yield, and reported agreement while a second copy of the same sentence two papers
+    away said five. A series that states one fact in three documents is guarded at one of them
+    unless the sweep is told to find them all --- the same first-match blindness that let ``four
+    runs overrode'' survive in entry~15 of Paper~III's register. Every site is now found with
+    \texttt{finditer}, across the papers and the Markdown, and the number of sites is asserted, so
+    a fourth restatement fails rather than going quietly unchecked.
 \end{enumerate}
 
 \end{document}

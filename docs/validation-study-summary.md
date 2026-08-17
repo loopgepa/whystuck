@@ -51,8 +51,8 @@
 >    "accepted a change that hurt" into "accepted nothing", with no visible signal. The cassette
 >    now counts misses and raises on context exit.
 > 9. **The metric has a do-nothing floor.** The empty string scores 0.548 on the vendored
->    IFBench slice and 0.420 on generated multi-hard ('x' scores 0.452 / 0.499); five of eleven
->    IFBench verifiers pass vacuously on text with no whitespace, quotes or bullets. Faithful to
+>    IFBench slice and 0.420 on generated multi-hard ('x' scores 0.452 / 0.499); six of eleven
+>    IFBench verifiers pass vacuously on the empty string itself. Faithful to
 >    upstream, equal across arms (so Δ is unbiased), but on IFBench the floor sits at or above
 >    the reported seed baselines, so ±0.10 is measured against a much smaller effective range
 >    than [0,1] suggests.

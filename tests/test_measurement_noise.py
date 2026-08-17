@@ -238,20 +238,32 @@ def test_the_contamination_moved_exactly_the_number_of_values_the_paper_claims()
     # the two counts is the point: the rest shifted silently inside tolerance.
     caught = [k for k in moved if abs(after[k][2] - after[k][0]) > after[k][1]]
 
+    # The pair is stated twice -- once in the body and once in the caption of tab:defects -- and
+    # only the body was read here, so the caption could carry the superseded pair while this guard
+    # reported agreement. That is the restatement failure Paper III's own register entry 15
+    # describes, inside the guard for Paper III's own number. Both sites are found rather than
+    # listed, and the count of sites is asserted so a third statement cannot go unread.
     tex = pathlib.Path("docs/papers/p3-silent-no-op/main.tex").read_text(encoding="utf-8")
-    m = re.search(
-        r"It moves \$(\d+)\$ of this paper's published\s+values, and only \$(\d+)\$ of the",
-        tex,
+    sites = [
+        (int(a), int(b))
+        for a, b in re.findall(
+            r"moves \$(\d+)\$ of this paper's (?:published\s+)?values,? (?:and )?only \$(\d+)\$",
+            tex,
+        )
+    ]
+    assert len(sites) == 2, (
+        f"Paper III states the contamination pair at {len(sites)} site(s); it is stated in the "
+        "body and in tab:defects' caption, and a guard that stops matching vanishes rather "
+        "than failing"
     )
-    assert m, "Paper III no longer states the two contamination counts in the form this guard reads"
-    claimed_moved, claimed_caught = int(m.group(1)), int(m.group(2))
-    assert len(moved) == claimed_moved, (
-        f"the paper says {claimed_moved} values moved; re-deriving gives {len(moved)}"
-    )
-    assert len(caught) == claimed_caught, (
-        f"the paper says {claimed_caught} of them breached tolerance; re-deriving gives "
-        f"{len(caught)}"
-    )
+    for claimed_moved, claimed_caught in sites:
+        assert len(moved) == claimed_moved, (
+            f"the paper says {claimed_moved} values moved; re-deriving gives {len(moved)}"
+        )
+        assert len(caught) == claimed_caught, (
+            f"the paper says {claimed_caught} of them breached tolerance; re-deriving gives "
+            f"{len(caught)}"
+        )
     assert len(caught) < len(moved), (
         "if every moved value breached tolerance the sentence loses its point, which is that "
         "some shifted without any guard noticing"
