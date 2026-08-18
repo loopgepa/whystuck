@@ -5,9 +5,9 @@ questions, rest on different experiments, and are useful to different readers.
 
 | | paper | asks | uses the optimizer? | pages |
 |---|---|---|---|---|
-| **I** | [`p1-conditional-lever/`](p1-conditional-lever/) — *Whether Optimizing the Loop Beats Optimizing the Prompt Depends on One Number* | Does evolving a self-refine loop's verifier beat evolving its generation prompt? | yes, it is the subject | 40 |
-| **II** | [`p2-repair-not-detection/`](p2-repair-not-detection/) — *What a Checker Cannot Buy Is the Repair* | Where is the loop's own ceiling: detection or repair? | **no** — every measurement is arm A, which declares no evolvable genes | 24 |
-| **III** | [`p3-silent-no-op/`](p3-silent-no-op/) — *Your Loop Optimizer Is Not Optimizing Your Loop* | How can a componentized treatment silently not apply, and what catches it? | yes, as the thing that failed | 21 |
+| **I** | [`p1-conditional-lever/`](p1-conditional-lever/), *Whether Optimizing the Loop Beats Optimizing the Prompt Depends on One Number* | Does evolving a self-refine loop's verifier beat evolving its generation prompt? | yes, it is the subject | 40 |
+| **II** | [`p2-repair-not-detection/`](p2-repair-not-detection/), *What a Checker Cannot Buy Is the Repair* | Where is the loop's own ceiling: detection or repair? | **no**, every measurement is arm A, which declares no evolvable genes | 24 |
+| **III** | [`p3-silent-no-op/`](p3-silent-no-op/), *Your Loop Optimizer Is Not Optimizing Your Loop* | How can a componentized treatment silently not apply, and what catches it? | yes, as the thing that failed | 21 |
 
 ## Which paper answers your question
 
@@ -84,7 +84,7 @@ See [`../EXPERIMENTS.md`](../EXPERIMENTS.md) for every script and the claim it p
 
 ### How the checks survived the split
 
-All of them read through `scripts/paper_sources.py` rather than a hard-coded path — a guard that
+All of them read through `scripts/paper_sources.py` rather than a hard-coded path, a guard that
 silently narrowed its own scope is precisely the defect Paper III is about.
 
 - **Concatenated view** (`all_tex()`): the ~155 pinned-phrase checks and the four coverage guards.
@@ -107,7 +107,7 @@ Compiled alone it matched 3937 numbers, so the bound set *was* the document and 
 that the papers agree with themselves.
 
 It concealed seven orphans. All seven turned out to be correct once derived, so **none of the seven
-changed a published number** — but they were unpinned, and two were the exact defect the guard's own
+changed a published number**, and they were unpinned, and two were the exact defect the guard's own
 docstring was written about, including one that sat as a literal inside the pattern checking its own
 σ quotient. The repair replaced the replay with the check list itself, which already records every
 pinned value, and added `test_the_guard_reports_an_injected_orphan`: it feeds in a decimal known to
@@ -118,7 +118,7 @@ floor.
 Pinning them did surface one false *sentence*, now Paper I's thirteenth register entry: the
 appendix called all eight C1 tasks "the only ones on which the two genes' verdicts differ" while
 conceding two clauses earlier that both genes demanded a fix on five of them. The verdicts differ on
-three. No quantity moved — the −0.009/−0.023 split stands — and all three stratum sizes are now
+three. No quantity moved, the −0.009/−0.023 split stands, and all three stratum sizes are now
 derived from the replay.
 
 ## Shared across all three
@@ -130,7 +130,7 @@ derived from the replay.
   `groq/llama-3.3-70b-versatile` and **1** on `groq/llama-3.1-8b-instant`. Those last **9** are a
   second-worker replication line bought on a Groq credential (`validation-study-groq-*`,
   `validation-study-splice-*`). A different worker is a different baseline, so **none of that
-  line's numbers extends a released curve** — it corroborates rather than continues. All three
+  line's numbers extends a released curve**: it corroborates rather than continues. All three
   papers draw on it, and each says which part it is entitled to: Paper II
   builds its cross-worker section on the six detector cells, Paper I cites the collapse of the
   `p₀` ladder on that worker as evidence for an open design problem and explicitly declines to
@@ -141,8 +141,8 @@ derived from the replay.
   is derived from the entries actually listed, because it drifted twice during the study.
 - **One reproducibility guarantee, and it now covers the whole release.** Every one of the 43 runs
   holds a recorded status, and the three states partition it: **25** replay bit-for-bit from
-  cassette at `$0`, **13** are registered with frozen CLI args and labelled superseded — each with
-  its own stated reason, never a blanket one — and **5** BigCodeBench runs are listed as
+  cassette at `$0`, **13** are registered with frozen CLI args and labelled superseded, each with
+  its own stated reason and never a blanket one, and **5** BigCodeBench runs are listed as
   unreplayable because executing model code re-rolls unseeded randomness and shifts the
   content-addressed prompt key. `tests/test_verify_reproducibility.py` asserts that partition is
   total, so a run cannot supply a published number while holding no status at all. It reached 25

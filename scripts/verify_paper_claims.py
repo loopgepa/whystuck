@@ -2709,7 +2709,10 @@ def _checks() -> list[tuple[str, float, float, float]]:
     ]
     _printed = _scrape_all(
         tex,
-        r"within \$([\d.]+)\$ single-draw sd of the published value --- \$([\d.]+)\$, "
+        # The separator is `[-,]+` rather than a literal: this sentence used an em dash until the
+        # prose pass of 2026-08-17 replaced every one of them, and a pattern pinned to punctuation
+        # fails on a change that cannot affect the numbers it reads.
+        r"within \$([\d.]+)\$ single-draw sd of the published value[\s,-]+\$([\d.]+)\$, "
         r"\$([\d.]+)\$,\s*\$([\d.]+)\$, \$([\d.]+)\$, \$([\d.]+)\$ and \$([\d.]+)\$",
     )
     out.append(("tex: curve worst discrepancy", _printed[0], 0.005, max(_disc)))
@@ -2755,7 +2758,10 @@ def _checks() -> list[tuple[str, float, float, float]]:
         ),
         (
             "tex: curve oracle vs tool-fed",
-            r"it is clear:\s+\$-([\d.]+)\$ at \$([\d.]+)\\sigma\$",
+            # Anchored on the numbers' own frame rather than on the words "it is clear", which the
+            # prose pass of 2026-08-17 replaced: a pattern that keys on a hedge fails when the hedge
+            # goes, and the hedge was the thing worth removing.
+            r"tool-fed loop the direction is unambiguous:\s+\$-([\d.]+)\$ at \$([\d.]+)\\sigma\$",
             ("run4", "run7"),
         ),
         (

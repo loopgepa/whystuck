@@ -27,9 +27,9 @@ prints author, affiliation and repository URL, and each abstract names the repos
 
 | venue | window | verdict |
 |---|---|---|
-| **TMLR** | rolling | **The fit.** Its two criteria are whether the claims are supported by the evidence and whether anyone in the audience would be interested; novelty and significance are *explicitly excluded* as grounds for rejection. Variable manuscript length, so 27 pages is not a problem. arXiv preprints permitted. Double-blind. |
+| **TMLR** | rolling | **The fit.** Its two criteria are whether the claims are supported by the evidence and whether anyone in the audience would be interested; novelty and significance are *explicitly excluded* as grounds for rejection. Variable manuscript length, so the main-text lengths above are not a problem. arXiv preprints permitted. Double-blind. |
 | ICLR 2027 | abstract 18 Sep, paper 25 Sep 2026 | **Ruled out for a three-paper series.** 9-page initial limit (10 camera-ready; references and appendices excluded). And: *"If you and all of your co-authors have never had a paper accepted for publication in a major machine learning conference or journal, you may submit at most one paper to ICLR 2027."* Single-author and independent ⇒ **one paper, cut threefold.** Authors on 3+ papers must review 6. Mandatory AI-use statement whose required-disclosure list covers methodology feedback, implementing methods and interpreting results. |
-| NeurIPS 2026 Evaluations & Datasets | abstract 4 May, full 6 May 2026 | **Closed.** Was the best categorical fit — the renamed Datasets & Benchmarks track, now explicitly treating evaluation as an object of study. Next window ≈ May 2027. |
+| NeurIPS 2026 Evaluations & Datasets | abstract 4 May, full 6 May 2026 | **Closed.** Was the best categorical fit, the renamed Datasets & Benchmarks track, now explicitly treating evaluation as an object of study. Next window ≈ May 2027. |
 | MLRC 2026 | hard 30 Sep 2026 | **Not a fit.** Requires prior TMLR acceptance, and its scope is reproducing *others'* claims published 2025 onward. |
 
 Confirm every date against the venue's own page before relying on it; two sources disagreed by a
@@ -46,8 +46,8 @@ Strips the author block and the repository URL, drops the `references.bib` comme
 project, then **scans every byte of the staged tree** for six identifying strings and refuses to
 write a tarball if any survives. The scan reads bytes rather than parsing TeX because the leak that
 motivated it was a LaTeX comment, which renders as nothing and ships in the tarball regardless;
-the same pass covers figure PDF metadata. It is a floor, not a proof — a token inside a compressed
-PDF stream would not appear — and `tests/test_anonymous_package.py` pins that the scanner still
+the same pass covers figure PDF metadata. It is a floor rather than a proof, since a token inside a compressed
+PDF stream would not appear, and `tests/test_anonymous_package.py` pins that the scanner still
 finds the author in the *unmodified* sources, since a scanner that finds nothing anywhere would
 pass every other check.
 
@@ -77,8 +77,8 @@ promising a reviewer an anonymous artifact:
 3. **The reproducibility apparatus is the point of the release**, so it cannot simply be dropped:
    43 run JSONs, 225 replicate scorings and 267 cassettes have to stay reachable and replayable.
 4. **This file, and the anonymiser's own token list, name the author.** Neither ships in a paper
-   tarball — the package contains only `main.tex`, `main.bbl`, `references.bib` and the figures that
-   paper includes, which is why the byte scan passes — but both are in the tree a full mirror would
+   tarball. The package contains only `main.tex`, `main.bbl`, `references.bib` and the figures that
+   paper includes, which is why the byte scan passes, and both are in the tree a full mirror would
    host.
 
 Standing one up publishes content under a new identity and is a decision for the author, not
@@ -100,14 +100,14 @@ something the packaging script should do on its own.
 `preflight()` blocks the build on any of these, so they cannot silently regress:
 
 - the author block contains no placeholder (`TBD`, `TODO`, `Anonymous`, …)
-- `\pdfoutput=1` sits within the first five lines of `main.tex` — arXiv's pipeline chooses between
+- `\pdfoutput=1` sits within the first five lines of `main.tex`, since arXiv's pipeline chooses between
   `latex` (DVI) and `pdflatex` by inspection, and a DVI run cannot include the three PDF figures
 - the plain-text abstract fits arXiv's 1920-character metadata field
 - the three lengths quoted below, and that limit, equal what the sources measure
   (`test_advertised_abstract_lengths_equal_the_measured_ones`). Added after Paper III's was found
   advertised at 1786 while the source measured 1788: the table's numbers were guarded and this
   sentence's were not, so an edit that shortened the abstract left the figure behind
-- the staged tree compiles with **pdflatex only, never bibtex**, with zero undefined citations —
+- the staged tree compiles with **pdflatex only, never bibtex**, with zero undefined citations,
   because arXiv does not run bibtex, and a package missing `main.bbl` posts with every citation
   rendered `[?]`
 
@@ -136,7 +136,7 @@ neither stops a build, and Paper I shipped an oversized threats table until 2026
 nothing read the log.
 
 Abstract lengths against the 1920-character metadata
-field: **1912**, **1895**, 1788. Paper I has 8 characters of headroom and Paper II has 25, so any
+field: **1912**, **1894**, 1785. Paper I has 8 characters of headroom and Paper II has 25, so any
 edit to either abstract has to be re-checked by `make_arxiv_package.py` rather than assumed to fit.
 
 The three are cross-referenced as a series, so they should be posted together or in the order I, II,
