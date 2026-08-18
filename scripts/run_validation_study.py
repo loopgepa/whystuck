@@ -488,12 +488,12 @@ def main(argv: list[str] | None = None) -> int:
     #
     # Scoped to arms that actually optimize: the released C1 conditions run `--arms A` at
     # n_train=32 with mmc=64, where GEPA never runs and the budget is inert.
-    from whystuck.eval.study import arm_evolvable
+    from whystuck.eval.study import accept_cycle_floor, arm_evolvable
 
     optimizing = [
         a for a in arms if arm_evolvable(a, include_plan=args.plan_gene, actuator=args.actuator)
     ]
-    min_calls = 2 * args.n_train + min(3, args.n_train)
+    min_calls = accept_cycle_floor(args.n_train)
     if optimizing and args.max_metric_calls < min_calls:
         print(
             f"ERROR: --max-metric-calls {args.max_metric_calls} cannot fund one accept "

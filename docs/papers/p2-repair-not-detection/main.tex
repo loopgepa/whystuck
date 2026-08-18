@@ -32,14 +32,14 @@ turns out not to be the binding constraint. Replacing the loop's near-random sel
 (F$_1 = 0.11$) with the true metric as a \emph{perfect} inference-time gate moves held-out score by
 $-0.0027$ ($t = 0.33$ over five replicates): a perfect checker is statistically indistinguishable
 from one at chance, and it scores $0.042$ \emph{below} a mere text-statistics tool ($t = 2.89$).
-What does pay sits on the fix side. Holding the checker perfect and varying only the repair text,
+The gains sit on the fix side. Holding the checker perfect and varying only the repair text,
 naming which constraint failed adds $+0.003$ over a bare ``revise'' while a concrete measured edit
 adds $+0.0613$ ($t = 8.08$, the best-supported effect we measure), and that configuration beats the
 measurement tool outright ($+0.0640$, $t = 5.47$). We also show F$_1$ is the wrong statistic for an
 in-loop critique: across a $10\times$ range of task difficulty the same critique's F$_1$ nearly
 triples while Youden's $J$ and Matthews' correlation do not improve at all, so a rising F$_1$ on
-an easier benchmark is base-rate inflation. The residual is not a diffuse capability wall but one
-mechanical skill, exact word counting: $0.16 \to 0.33 \to 0.50$ under better feedback and never
+an easier benchmark is base-rate inflation. The residual is one
+mechanical skill rather than a diffuse capability wall, exact word counting: $0.16 \to 0.33 \to 0.50$ under better feedback and never
 solved. The practical consequence is a reordering of priorities: do not buy a better detector, buy
 a more actionable fixer. Every claim rests on five independent replicates of each configuration,
 paired within replicate on shared held-out tasks, and every published claim this paper withdraws is
@@ -281,7 +281,8 @@ five replicates, which agrees in sign and significance throughout.}
 \label{fig:detector}
 \end{figure}
 
-\paragraph{The critique is an unreliable detector, measured.} The
+\paragraph{The critique is an unreliable detector, measured.} Figure~\ref{fig:detector} is the
+shape of this section. The
 mechanism by which a better verify gene \emph{could} help is by catching failures
 the generator cannot self-see and steering refinement. We measure the in-loop
 critique directly as a binary classifier of ``the draft satisfies all
@@ -293,8 +294,7 @@ held-out split (Table~\ref{tab:curve}, left columns). The intrinsic critique is 
 (it emits \texttt{PASS} on drafts that fail, precision $0.08$). A detector this
 poor offers no reliable signal to sharpen.
 Strikingly, the \emph{same} critique fed the measurement tool (run~4) becomes a
-reliable detector (precision $1.00$, F$_1 = 0.83$), which is precisely why the
-tool lifts the baseline. This
+reliable detector (precision $1.00$, F$_1 = 0.83$), which is why the tool lifts the baseline. This
 matches the documented unreliability of LLM self-verification: high
 false-positive rates \citep{valmeekam2023selfcritique} and the self-enhancement bias of LLM
 judges \citep{zheng2023judging}.
@@ -314,7 +314,7 @@ critique model & relation to worker & $n$ & \texttt{PASS} rate & tp & fp & F$_1$
 \midrule
 \texttt{gpt-4.1-mini} & \emph{is} the worker & $50$ & $0.26$ & $1$ & $12$ & $0.11$ \\
 \texttt{gpt-5.6-luna} & same vendor, other lineage & $30$ & $0.13$ & $4$ & $0$ & $\mathbf{1.00}$ \\
-\texttt{llama-3.3-70b} & other vendor, other lineage & $80$ & $\mathbf{0.00}$ & $0$ & $0$ &, \\
+\texttt{llama-3.3-70b} & other vendor, other lineage & $80$ & $\mathbf{0.00}$ & $0$ & $0$ & --- \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -433,10 +433,10 @@ Critique detector & $R$ & precision & F$_1$ & $n$ & seed held-out & run \\
 intrinsic self-critique & 1 & 0.08 & 0.11 & 50 & 0.765$^{\dagger}$ & 3 \\
 intrinsic $+$ plan module & 1 & 0.00 & $\approx 0$ & 30 & 0.757 & 5 \\
 non-oracle measurement tool & 1 & \textbf{1.00} & \textbf{0.83} & 30 & 0.837 & 4 \\
-oracle, which-constraint (mid) & 1 & 1.00 & 1.00 &, & 0.748 & 7 \\
-oracle, which-constraint (mid) & 3 & 1.00 & 1.00 &, & 0.813 & 8 \\
-oracle, bare ``revise'' (lo) & 3 & 1.00 & 1.00 &, & 0.810 & 9 \\
-oracle, concrete measured edits (hi) & 3 & 1.00 & 1.00 &, & \textbf{0.873} & 10 \\
+oracle, which-constraint (mid) & 1 & 1.00 & 1.00 & --- & 0.748 & 7 \\
+oracle, which-constraint (mid) & 3 & 1.00 & 1.00 & --- & 0.813 & 8 \\
+oracle, bare ``revise'' (lo) & 3 & 1.00 & 1.00 & --- & 0.810 & 9 \\
+oracle, concrete measured edits (hi) & 3 & 1.00 & 1.00 & --- & \textbf{0.873} & 10 \\
 \bottomrule
 \end{tabular}
 \caption{The in-loop critique as a failure detector (left; seed loop, held-out split, scored
@@ -469,6 +469,16 @@ intrinsic baseline ($0.765$) and \emph{below} the tool baseline ($0.837$). Detec
 quality is therefore \textbf{not} the binding constraint. Even told exactly which
 constraints fail, \texttt{gpt-4.1-mini} cannot reliably fix hard constraints (e.g.
 an exact word count) within the bounded refine budget.
+
+One scope condition belongs with that conclusion, because the companion paper on the conditional
+lever appears to contradict it and does not. Every run on this ladder is multi-hard, where the
+first-draft pass rate is $p_0 = 0.067$: almost no draft arrives already correct, so a gate has
+almost nothing to protect and its quality cannot pay. That paper raises $p_0$ to $0.267$ by
+changing which constraints the generator may use, and there evolving the verifier \emph{gains}
+$0.060$ held-out. The two results are one mechanism read from its two ends. A gate earns its keep
+only in proportion to the drafts it can spare from an unnecessary rewrite, and at $p_0 = 0.067$
+there are two such drafts in thirty. Detection is not the binding constraint \emph{here}, and the
+condition under which it becomes one is $p_0$.
 
 \paragraph{More fix attempts help, but saturate (run 8).} Holding the detector perfect
 (oracle) and raising the refine budget $1 \to 3$ lifts the seed $0.748 \to 0.813$: the
@@ -632,7 +642,8 @@ above have a margin against the $2\sigma$ line smaller than that spread: the
 tool lift needs only $3\%$ more $\sigma$ to fall under it, actionability $9\%$ and the refine
 budget $12\%$. A borrowed denominator was therefore deciding them, so we bought the direct
 measurement: each of the six curve rows re-scored $K=5$ times on the thirty held-out tasks they
-share, $90$ runs under a priced bound of \$$2.98$. As with the $p_0$ replicates this is arm~A on a fixed genome with no
+share, $90$ runs under a priced bound of \$$2.98$, reported per row in
+Table~\ref{tab:curvesigma}. As with the $p_0$ replicates this is arm~A on a fixed genome with no
 re-optimization, each replicate carries a salt so record-mode dedup cannot serve one cached draw
 $K$ times, and all $90$ replay from their cassettes offline. Unlike the published rows, which were
 recorded hours apart, every replicate here was drawn in one session, so these standard errors carry
@@ -684,7 +695,7 @@ oracle under intrinsic, 7 under 3 & $-0.0283$ & $-0.0027$ & 0.0081 & 0.33 & not 
 $t(4)$, so the critical values are $2.132$ and $2.776$ rather than $1.96$. Every claim the paper
 leans on survives, and every one is now carried by a replicated interval instead of a single draw
 divided by a borrowed $\sigma$. The magnitudes are the part that moves, and not all one way:
-three shrink by $34$ to $52\%$, actionability is essentially unchanged at $-3\%$, the
+three shrink by $34$ to $52\%$, actionability is unchanged to within $-3\%$, the
 oracle-under-intrinsic null falls to near nothing, and the row the paper had withdrawn \emph{grows}
 by $74\%$. Each discrepancy is within $1.65$ single-draw sd of the published value, $0.79$, $1.65$,
 $1.00$, $0.09$, $1.36$ and $0.95$, so the two measurements are consistent and the shrinkage is
@@ -807,7 +818,7 @@ both halves of the loop at once, exactly as a critique-model swap does
 \toprule
 critique & held-out & $\dd$ vs.\ intrinsic & s.e. & $t$ \\
 \midrule
-intrinsic, its own prose (\texttt{PASS} on $0.5\%$) & 0.7895 &, &, &, \\
+intrinsic, its own prose (\texttt{PASS} on $0.5\%$) & 0.7895 & --- & --- & --- \\
 same-lineage smaller critic (8B) & 0.7860 & $-0.0035$ & 0.0093 & $-0.38$ \\
 cross-lineage critic (\texttt{qwen3.6-27b}) & 0.7973 & $+0.0077$ & 0.0095 & $+0.82$ \\
 \midrule
@@ -875,7 +886,7 @@ worker call and not the critique or verdict calls, and a pooled-$\sigma$ estimat
 a run from another worker as a replicate. The first was found here and fixed before these numbers
 were recorded; the second never reached a released value. We mention them in this section rather
 than only in that one because they were caught \emph{in} this experiment, and a reader entitled
-to weigh these results is entitled to know what the instrument was doing while they were taken.
+to weigh these results is entitled to know what the instrument was doing while we took them.
 
 \paragraph{What this does not corroborate.} \emph{The raw cell ranking is inverted between the
 two workers}, and no decomposition makes that go away: on \texttt{gpt-4.1-mini} the oracle is the
@@ -913,8 +924,7 @@ a \emph{comparison} under a fixed, perfect detector, which is exactly what isola
 
 \textbf{Runs 7--10 vary retries and feedback shape as well as checker quality.} The
 detector-quality column of Table~\ref{tab:curve} is therefore not a single-variable axis across
-all seven rows; \S\ref{sec:fixside} separates the levers, and the $R$ column is printed so no row
-is read against a row at a different budget by accident.
+all seven rows; \S\ref{sec:fixside} separates the levers, and we print the $R$ column so that no row is read against a row at a different budget by accident.
 
 \textbf{Between-run comparisons carry provider drift.} The gaps in Table~\ref{tab:curve} compare
 runs recorded on different dates, so they carry the same drift confound as the cross-run $\sigma$
@@ -1020,8 +1030,7 @@ register across all three, with the superseded values themselves, is in the rele
   \item \textbf{``Run~10 beats the tool-fed loop.''} An earlier caption called that gap decisive.
     On its single draw it is $1.26\sigma$, so we withdrew it. \textbf{That withdrawal is itself
     withdrawn}: five replicates of both rows give $+0.0640$ at $t = 5.47$
-    (\S\ref{sec:curverepeat}), so the claim stands after all. Both movements are left on the
-    record, because a register showing only the claims that were too strong would misrepresent
+    (\S\ref{sec:curverepeat}), so the claim stands after all. We leave both movements on the record, because a register showing only the claims that were too strong would misrepresent
     which way this paper's errors ran.
   \item \textbf{The oracle-checker ordering.} Published as an ordering only. It splits into two
     gaps of unequal strength: $-0.088$ at $3.04\sigma$ against the tool-fed loop, which carries

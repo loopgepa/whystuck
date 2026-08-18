@@ -393,6 +393,23 @@ def _table_row(tex: str, header_marker: str, row_label: str) -> list[list[float]
     raise LookupError(f"no row {row_label!r} under {header_marker!r}")
 
 
+@cache
+def _study():
+    """The harness module, for the two budget formulas the papers state.
+
+    Imported rather than re-implemented. The accept-cycle floor decides whether a run is allowed to
+    start, so the authority is the code that enforces it; a second copy here would let the paper and
+    the checker agree while the harness refused runs at a different budget.
+    """
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from whystuck.eval import study
+
+    return study
+
+
 def _scrape(tex: str, pattern: str) -> float:
     """Pull one number out of the paper's own prose.
 
@@ -797,7 +814,7 @@ def _budget_cell(mmc: int, cap: int) -> dict[str, float]:
     """
     from whystuck.eval.cost import WORKER_TOKENS, plan_study_calls
 
-    cycles = (mmc - BUDGET_N_TRAIN) / (min(3, BUDGET_N_TRAIN) + BUDGET_N_TRAIN)
+    cycles = _study().promotable_cycles(mmc, BUDGET_N_TRAIN)
     groups = plan_study_calls(
         arms=("B", "D"),
         n_train=BUDGET_N_TRAIN,
@@ -839,14 +856,21 @@ def _budget_acceptance(slug: str) -> int:
     return sum(1 for r in runs for arm in ("B", "D") if (r.get(arm, {}).get("genes_changed") or []))
 
 
-def _contrast_flag_census() -> tuple[int, int]:
-    """(one-sided, both-arms-starved) among released runs with at least one optimizing arm.
+def _contrast_flag_census() -> tuple[int, int, int]:
+    """(one-sided, both-arms-starved-on-the-record, acceptance-never-recorded).
 
-    Evidence 9's distinction, computed rather than transcribed. A run where exactly one
-    optimizing arm accepted nothing is the new defect: its Delta is labelled D-vs-B and is
-    really D-vs-seed. A run where BOTH accepted nothing is the original retraction, visible in
-    the scores for the first time. Collapsing the two would let the paper claim the sweep
-    surfaced sixteen new defects when it surfaced one.
+    Evidence 9's distinction, computed rather than transcribed. A run where exactly one optimizing
+    arm accepted nothing is the new defect: its Delta is labelled D-vs-B and is really D-vs-seed. A
+    run where BOTH accepted nothing is the original retraction, visible in the scores for the first
+    time. Collapsing the two would let the paper claim the sweep surfaced sixteen new defects when
+    it surfaced one.
+
+    The third number is the one this function used to fold into the second. `genes_changed`
+    postdates fifteen released runs, so `arms_optimized` returns zeros for them and a census that
+    stops
+    there reports "both arms accepted nothing" about runs that never recorded acceptance at all.
+    Paper III states that difference in prose; returning it separately makes the prose derived, and
+    `analyze_deltas.acceptance_recorded` is the one place that decides which case a run is in.
     """
     import glob
     import sys
@@ -855,16 +879,18 @@ def _contrast_flag_census() -> tuple[int, int]:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     import analyze_deltas as ad
 
-    one_sided = both = 0
+    one_sided = both = unrecorded = 0
     for path in sorted(glob.glob(f"{DOCS}/validation-study*.json")):
         counts = ad.arms_optimized(path)
         if not counts or ad.is_valid_contrast(path):
             continue
         if any(v > 0 for v in counts.values()):
             one_sided += 1
-        else:
+        elif ad.acceptance_recorded(path):
             both += 1
-    return one_sided, both
+        else:
+            unrecorded += 1
+    return one_sided, both, unrecorded
 
 
 @dataclass(frozen=True)
@@ -885,7 +911,7 @@ class SplitRow:
     @property
     def cycles(self) -> float:
         """Promotable accept cycles: the search depth the constant-epoch line does not hold."""
-        return (self.mmc - self.n_train) / (min(3, self.n_train) + self.n_train)
+        return _study().promotable_cycles(self.mmc, self.n_train)
 
 
 def _split_row(slug: str) -> SplitRow:
@@ -1844,7 +1870,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
                 f"tex: sweep n={n_train} accept-cycle floor",
                 row,
                 0,
-                2 * n_train + min(3, n_train),
+                _study().accept_cycle_floor(n_train),
             )
         )
         prose.append(
@@ -2806,7 +2832,8 @@ def _checks() -> list[tuple[str, float, float, float]]:
     # Evidence 9's census. The paper distinguishes two shapes of the same flag and the counts
     # are the whole argument: a one-sided contrast (one arm starved, the other searched) is the
     # new defect, while both-arms-zero is the original retraction re-derived from scores.
-    one_sided, no_contrast = _contrast_flag_census()
+    one_sided, starved_on_record, unrecorded = _contrast_flag_census()
+    no_contrast = starved_on_record + unrecorded
     # The correction to that sentence needs its own pins. It used to say both arms "accepted
     # nothing on every seed" in the other fifteen, which is false in eleven of them: those files
     # carry no `genes_changed` key at all, so the census reads an ABSENT field as a zero, and the
@@ -2833,6 +2860,22 @@ def _checks() -> list[tuple[str, float, float, float]]:
         ),
     ):
         out.append((label, _scrape_word(tex, pattern), 0, artifact))
+    # Of those, how many count zero because the field is ABSENT rather than because acceptance was
+    # measured and was zero. The paper says "by an \emph{absent} field rather than a measured one"
+    # about all of them, so the derived split has to agree: every one of the flagged both-arms runs
+    # is an unrecorded one, and none is a measured zero. If a future run ever lands in the measured
+    # bucket, that sentence is wrong and this fails rather than the reader finding it.
+    out.append(
+        (
+            "census: flagged both-arms runs with no acceptance record",
+            float(no_contrast),
+            0.0,
+            float(unrecorded),
+        )
+    )
+    out.append(
+        ("census: flagged both-arms runs with a measured zero", 0.0, 0.0, float(starved_on_record))
+    )
 
     # Between-cell spread of Δ, the sentence that licenses "one quantity plus noise".
     out.append(
@@ -3396,6 +3439,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_paraphrase_drift_checks())
     out.extend(_superlative_scope_checks())
     out.extend(_noop_figure_checks())
+    out.extend(_reconciliation_checks())
     out.extend(_replicate_sigma_scale_checks())
 
     return out
@@ -5078,6 +5122,57 @@ def _replicate_sigma_scale_checks() -> list[tuple[str, float, float, float]]:
                     float(row.delta * single < 0),
                 )
             )
+    return out
+
+
+def _reconciliation_checks() -> list[tuple[str, float, float, float]]:
+    r"""The scope sentences that keep Papers I and II from reading as a contradiction.
+
+    Paper II concludes that detection quality is not the binding constraint. Paper I measures a gain
+    from evolving the verifier. A reader meets those two headlines and has to reconcile them alone,
+    because the reconciliation, that a gate can only pay in proportion to the already-correct drafts
+    it spares and that Paper II's ladder sits where there are almost none, was the mechanism Paper I
+    states and neither paper joined to the other's conclusion. Both now carry it, and both name the
+    same two $p_0$ values, so the sentences are pinned to the ladder rather than to each other.
+
+    The already-correct count is derived too. "Two such drafts in thirty" is the $L_1$ stratum Paper
+    I decomposes, and if a future replicate moves it the sentence is wrong.
+    """
+    p1 = _sources().paper_tex("p1-conditional-lever")
+    p2 = _sources().paper_tex("p2-repair-not-detection")
+    low, high = _detector_metrics(0)["p0"], _detector_metrics(1)["p0"]
+    out = [
+        (
+            "tex: p2 reconciliation, low p0",
+            _scrape(p2, r"the\s+first-draft pass rate is \$p_0 = ([\d.]+)\$"),
+            0.0005,
+            low,
+        ),
+        (
+            "tex: p2 reconciliation, high p0",
+            _scrape(p2, r"That paper raises \$p_0\$ to \$([\d.]+)\$"),
+            0.0005,
+            high,
+        ),
+        (
+            "tex: p2 reconciliation, already-correct at low p0",
+            _scrape_word(p2, r"there are (\w+) such drafts in thirty"),
+            0.0,
+            float(_stratum(0, True)["n"]),
+        ),
+        (
+            "tex: p1 scope qualifier, low p0",
+            _scrape(p1, r"perfect detector buys nothing on a ladder sitting at \$p_0 = ([\d.]+)\$"),
+            0.0005,
+            low,
+        ),
+        (
+            "tex: p1 scope qualifier, high p0",
+            _scrape(p1, r"while the \$\+[\d.]+\$ here is measured at \$([\d.]+)\$"),
+            0.0005,
+            high,
+        ),
+    ]
     return out
 
 

@@ -99,6 +99,30 @@ def arm_evolvable(arm: str, *, include_plan: bool = False, actuator: bool = Fals
 ARM_EVOLVABLE: dict[str, set[str]] = {a: arm_evolvable(a) for a in ARMS}
 
 
+def accept_cycle_floor(n_train: int) -> int:
+    """The smallest ``--max-metric-calls`` that can fund one accepted proposal at this train size.
+
+    GEPA spends ``n_train`` metric calls on the seed evaluation alone, because its valset is the
+    train split, then needs a minibatch of ``min(3, n_train)`` and a further ``n_train`` to promote
+    a proposal. Below this an arm reports ``genes_changed=[]`` and a flat delta, which reads as
+    "optimization did not help" when it means "optimization never ran".
+
+    This lives here, in the harness, because three copies of it existed: the CLI guard that refuses
+    a run, the claim checker's expected value for the paper's own column, and the papers' prose. The
+    CLI is the only one that decides anything, so a change to it would have left the checker and the
+    paper agreeing with each other and disagreeing with the code -- the shared-error blind spot this
+    study documents, one level down. One function, three callers.
+    """
+    return 2 * n_train + min(3, n_train)
+
+
+def promotable_cycles(mmc: int, n_train: int) -> float:
+    """How many accept cycles a budget affords, which is the search depth a constant-epoch line
+    does not hold fixed. Same reason as `accept_cycle_floor` for living here: the formula was
+    written out in the depth analysis, in the claim checker and in the papers."""
+    return (mmc - n_train) / (min(3, n_train) + n_train)
+
+
 @dataclass
 class ArmResult:
     """One arm's outcome, including the provenance needed to interpret it.

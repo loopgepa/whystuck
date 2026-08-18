@@ -66,3 +66,26 @@ def test_arms_optimized_only_counts_arms_that_may_evolve():
     """Arms A and C are not asked to change anything, so they must not appear as failures."""
     counts = arms_optimized(f"{_DOCS}/validation-study-c2b.json")
     assert set(counts) == {"B", "D"}
+
+
+def test_a_run_with_no_acceptance_record_is_not_reported_as_accepting_nothing():
+    """`arms_optimized` returns zeros for a run recorded before `genes_changed` existed.
+
+    Fifteen released runs are in that position, and this study spent months reading their zeros as
+    measurements. The counting behaviour stays, because callers depend on it; what changes is that
+    `acceptance_recorded` lets a caller tell the two apart, and `verify_paper_claims` now counts
+    them separately so Paper III's "by an absent field rather than a measured one" is derived.
+    """
+    from analyze_deltas import acceptance_recorded
+
+    pre = f"{_DOCS}/validation-study-multihard.json"
+    post = f"{_DOCS}/validation-study-c2b.json"
+    assert not acceptance_recorded(pre), (
+        "multihard predates genes_changed; if it now records acceptance, the run set changed and "
+        "the fifteen-run count in Paper III needs re-deriving"
+    )
+    assert acceptance_recorded(post), "the four-arm re-run records acceptance"
+    # The trap itself: zeros from a run that recorded nothing.
+    counts = arms_optimized(pre)
+    assert counts and all(v == 0 for v in counts.values())
+    assert not is_valid_contrast(pre), "a run with no acceptance record is not a valid contrast"
