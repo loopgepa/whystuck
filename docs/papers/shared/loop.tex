@@ -35,7 +35,7 @@ leaderboard number.
 Every LLM call is recorded to a content-addressed cassette (\texttt{sha256} of name$+$args), so
 runs replay offline at zero cost and partial spend is always persisted. Reproduction is strict:
 re-running any study with \texttt{-{}-replay} re-executes the whole pipeline (loaders, GEPA search,
-scoring) against the cached calls with no API key, and any cassette miss raises --- per call, and,
+scoring) against the cached calls with no API key, and any cassette miss raises, per call and,
 after the correction in Evidence~7, per run as well, since a consumer that swallows the per-call
 error can otherwise let a replay finish with a different number. GEPA is deterministic under
 replay, so replay is bit-for-bit, and \texttt{scripts/verify\_reproducibility.py}
@@ -52,6 +52,6 @@ release with nothing left over, and a test asserts they do: a run that supplies 
 these pages cannot hold no reproducibility status at all. Output tokens are hard-capped via enforced \texttt{max\_tokens}; a pre-flight guard
 refuses any run whose conservative estimate exceeds \texttt{-{}-max-usd}, whose default is \$5.
 Five runs raised it explicitly, at four distinct values (\$6.18 twice, \$5.89, \$6.52, \$11.76), so
-\$5 is a default rather than a study-wide ceiling. Every experiment was pre-registered --- hypothesis,
+\$5 is a default rather than a study-wide ceiling. Every experiment was pre-registered: hypothesis,
 frozen configuration, expected seed band and verdict rule committed to version control
 \emph{before} spending.
