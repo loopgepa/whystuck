@@ -21,7 +21,7 @@ endorsement domain, and the primary category selects the domain.
 
 Two structural facts decide this, and neither is about the papers' quality.
 
-**Main-text length is 28 / 18 / 15 pages** (references begin on p.29 / 19 / 16 of 40 / 24 / 21).
+**Main-text length is 28 / 18 / 15 pages** (references begin on p.29 / 19 / 16 of 40 / 25 / 21).
 **All three papers are de-anonymised by their own reproducibility apparatus**: the title block
 prints author, affiliation and repository URL, and each abstract names the repository again.
 
@@ -120,7 +120,7 @@ exists. Measured from the built PDFs and each paper's own source:
 | | paper | pages | tables | figures | distinct citations |
 |---|---|---|---|---|---|
 | I | `p1-conditional-lever` | 40 | 11 | 3 | 24 |
-| II | `p2-repair-not-detection` | 24 | 4 | 3 | 17 |
+| II | `p2-repair-not-detection` | 25 | 4 | 3 | 17 |
 | III | `p3-silent-no-op` | 21 | 4 | 1 | 13 |
 
 Tables, figures and citations are counted from the sources by
@@ -136,7 +136,7 @@ neither stops a build, and Paper I shipped an oversized threats table until 2026
 nothing read the log.
 
 Abstract lengths against the 1920-character metadata
-field: **1912**, **1894**, 1785. Paper I has 8 characters of headroom and Paper II has 25, so any
+field: **1909**, **1893**, 1785. Paper I has 11 characters of headroom and Paper II has 27, so any
 edit to either abstract has to be re-checked by `make_arxiv_package.py` rather than assumed to fit.
 
 The three are cross-referenced as a series, so they should be posted together or in the order I, II,

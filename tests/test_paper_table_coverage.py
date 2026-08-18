@@ -149,3 +149,32 @@ def test_table_row_joins_a_wrapped_row():
     )
     assert len(cells) >= 4, "the corrected column was dropped, so the row was not joined"
     assert cells[3] == [-0.15, 0.0]
+
+
+def test_no_table_cell_holds_a_bare_comma() -> None:
+    r"""An empty cell in these tables is written `---`, and a comma there is edit damage.
+
+    The prose pass of 2026-08-17 replaced every em dash used as punctuation, and its rule for
+    `--- &` fired on nine cells where the dash was a *placeholder* rather than punctuation: the
+    baseline row of `tab:secondworker` came out as `0.7895 &, &, &,`. Nothing else caught it. The
+    table-coverage guard above reads numbers, a comma is not a number, and no check reads a cell
+    that is supposed to be empty.
+
+    A placeholder is typography, not prose, so the writing rule does not reach it and this test
+    says so in one place instead of leaving the next pass to rediscover it.
+    """
+    import re
+
+    import paper_sources
+
+    damaged = []
+    for slug in paper_sources.PAPERS:
+        for i, line in enumerate(paper_sources.paper_tex(slug).splitlines(), 1):
+            if line.lstrip().startswith("%") or "&" not in line:
+                continue
+            for cell in line.split("&"):
+                if re.fullmatch(r"\s*,\s*(\\\\)?\s*", cell):
+                    damaged.append(f"{slug}:{i}: {line.strip()[:80]}")
+    assert not damaged, (
+        "table cells holding a bare comma where a placeholder belongs:\n  " + "\n  ".join(damaged)
+    )

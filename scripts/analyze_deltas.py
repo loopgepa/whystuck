@@ -259,6 +259,11 @@ def arms_optimized(path: str) -> dict[str, int]:
 
     Arms A and C are excluded because neither is asked to change anything -- A evolves nothing
     and C's worker ignores the genome -- so counting them would report a permanent failure.
+
+    **A run recorded before `genes_changed` existed returns zeros here**, and zero-because-absent
+    is not zero-because-measured. Fifteen released runs are in that position, and reading their
+    zeros as measurements is the mistake this study made about its own data. Ask
+    `acceptance_recorded` before believing a zero from this function.
     """
     with open(path, encoding="utf-8") as fh:
         runs = json.load(fh)["runs"]
@@ -268,6 +273,23 @@ def arms_optimized(path: str) -> dict[str, int]:
             continue
         out[arm] = sum(1 for r in runs if r[arm].get("genes_changed"))
     return out
+
+
+def acceptance_recorded(path: str) -> bool:
+    """Whether this run's arm records carry `genes_changed` at all.
+
+    The field postdates the pre-correction runs, so `arms_optimized` cannot distinguish an arm that
+    accepted nothing from a run that never recorded acceptance. Every caller that reads a zero as
+    evidence has to consult this first; `verify_paper_claims` counts the two cases separately, and
+    Paper III's `fig:noop` draws them as different marks.
+    """
+    with open(path, encoding="utf-8") as fh:
+        runs = json.load(fh)["runs"]
+    return any(
+        isinstance(r.get(arm), dict) and r[arm].get("genes_changed") is not None
+        for r in runs
+        for arm in ("B", "D")
+    )
 
 
 def is_valid_contrast(path: str) -> bool:

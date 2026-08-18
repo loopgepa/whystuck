@@ -50,8 +50,14 @@ _ITER = re.compile(r"Iteration (\d+):")
 
 
 def priced_cycles(mmc: int, n_train: int = 8) -> float:
-    """The pre-registered estimate, kept so the paper can show how wrong it was."""
-    return (mmc - n_train) / (min(3, n_train) + n_train)
+    """The pre-registered estimate, kept so the paper can show how wrong it was.
+
+    Delegates to the harness rather than restating the arithmetic: the same formula lived here, in
+    the claim checker and in the CLI guard, and only the CLI decided anything.
+    """
+    from whystuck.eval.study import promotable_cycles
+
+    return promotable_cycles(mmc, n_train)
 
 
 def eval_python() -> str:
