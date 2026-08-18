@@ -88,7 +88,20 @@ def _submission_table() -> dict[str, dict[str, int]]:
 
 
 def _source_counts(slug: str) -> dict[str, int]:
-    tex = (PAPERS / slug / "main.tex").read_text(encoding="utf-8")
+    """Tables, figures and distinct citations in one paper's source, comments excluded.
+
+    The exclusion is the load-bearing line. Every `main.tex` opens with a comment explaining why
+    `\\pdfoutput=1` has to sit in the first five lines, and that comment contains the word
+    `\\includegraphics`. Counting it put every paper's figure count one too high, so SUBMISSION.md
+    advertised three figures for Paper I, which has two, and one for Paper III, which had none. The
+    guard agreed with the document because both counted the same comment: the shared-error blind
+    spot these papers are about, inside the test that exists to stop it.
+    """
+    tex = "\n".join(
+        line
+        for line in (PAPERS / slug / "main.tex").read_text(encoding="utf-8").splitlines()
+        if not line.lstrip().startswith("%")
+    )
     cites: set[str] = set()
     for group in re.findall(r"\\cite[a-z]*\{([^}]*)\}", tex):
         cites.update(k.strip() for k in group.split(",") if k.strip())

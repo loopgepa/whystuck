@@ -524,11 +524,25 @@ did not help.
 \subsection{The residual is one constraint, not a diffuse ceiling}
 \label{sec:residual}
 
+\begin{figure}[!tb]
+\centering
+\includegraphics[width=\textwidth]{figures/fig-residual.pdf}
+\caption{Where the ceiling lives, constraint by constraint, under three conditions of the same
+loop. Every constraint that asks the worker to \emph{choose} something sits at or near the top of
+the axis in all three, so the fix step is not diffusely limited. One constraint,
+\texttt{exact\_word\_count}, sits far below the rest and stays below it as the fix side improves:
+a perfect detector and three refine rounds move it, measured repair edits move it further, and
+neither closes it. Constraints are ordered by their rate under the strongest condition, so the
+ordering is a property of the data rather than of this caption. Rates are read off each run's final
+draft by replaying its cassette (Table~\ref{tab:residual}).}
+\label{fig:residual}
+\end{figure}
+
 We decompose
 the fix-step residual by constraint: replaying each run's cassette (offline, \$0;
 \texttt{scripts/\allowbreak analyze\_residual\_\allowbreak by\_constraint.py}), we take the loop's \emph{final}
 draft for every held-out task and record the per-constraint satisfaction rate
-(Table~\ref{tab:residual}). The result is stark. Under the oracle detector with
+(Table~\ref{tab:residual}). The result is stark, and Figure~\ref{fig:residual} is its shape. Under the oracle detector with
 maximally-actionable feedback (run 10), every ``choice'' constraint --- \texttt{no\_comma},
 \texttt{all\_lowercase}, \texttt{num\_bullets}, \texttt{include\_keyword},
 \texttt{end\_with}, \texttt{forbidden\_word} --- is satisfied at rate $1.0$, and
@@ -752,12 +766,28 @@ can: object ids, addresses, and temp paths in failure messages.
 \subsection{Cross-worker corroboration: a second worker, twenty seeds, and a prediction we lost}
 \label{sec:secondworker}
 
+\begin{figure}[!tb]
+\centering
+\includegraphics[width=\textwidth]{figures/fig-worker.pdf}
+\caption{The same contrast on a second worker served by a different provider, at twenty seeds, with
+no optimizer anywhere. Each row is paired against that worker's own critique, so the baseline is
+the loop as it ships. \emph{Above the gap:} substituting the detector for a smaller model and then
+for another lineage moves nothing either way, and neither $t$ reaches one. \emph{Below it:} holding
+the gate perfect and varying only what the repair step is told walks the same loop up by a
+multiple of that, the largest step coming from measured edits rather than from a verdict. This is
+the paper's claim on an independent stack, and it is also where we lost a pre-registered prediction:
+the perfect-oracle cell is the best cell, because it changes the repair text as well as the gate.
+Bars are $\pm$1 standard error of the paired difference; the cells are tabulated in
+\S\ref{sec:secondworker}.}
+\label{fig:worker}
+\end{figure}
+
 Every result above runs one worker, \texttt{gpt-4.1-mini}, which \S\ref{sec:threats} lists as this
 paper's broadest limitation. We bought the detector comparison again on an unrelated worker:
 \texttt{llama-3.3-70b-versatile} served by a different provider, at \textbf{twenty} seeds rather
 than three, every cell \texttt{-{}-arms A} so no optimizer runs anywhere. Nothing here extends a
 curve above --- a different worker is a different baseline --- so this is corroboration on an
-independent stack, reported as such.
+independent stack, reported as such. Figure~\ref{fig:worker} is the whole line in one panel.
 
 We pre-registered the prediction that \emph{the perfect oracle would not be the best cell}, since
 that is what the ordering above says. \textbf{We lost that prediction}, and the way we lost it is

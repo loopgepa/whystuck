@@ -44,6 +44,61 @@ def test_the_rehearsal_fails_the_build_rather_than_warning():
     assert "undefined_citations" in src and "return 1" in src
 
 
+def test_only_the_figures_a_paper_includes_are_staged():
+    """Every paper's `figures/` is a symlink to the series' shared directory.
+
+    Copying the tree put all seven of the series' figures in each of the three tarballs, so Paper
+    III's package shipped Paper I's forest plot. arXiv ignores unused files, which is why nothing
+    caught it; the package was simply carrying two other papers' evidence.
+    """
+    counts = {}
+    for slug in paper_sources.PAPERS:
+        names = ap.included_figures(paper_sources.paper_tex(slug))
+        counts[slug] = len(names)
+        assert names, f"{slug}: no figures found in the source"
+        assert len(names) == len(set(names)), f"{slug}: a figure is staged twice"
+        for name in names:
+            assert (paper_sources.paper_dir(slug) / ap.FIGURES / name).is_file(), (
+                f"{slug} includes {name}, which does not exist"
+            )
+    shared = {p.name for p in (paper_sources.SHARED_DIR / ap.FIGURES).glob("*.pdf")}
+    assert sum(counts.values()) == len(shared), (
+        f"the three papers include {sum(counts.values())} figures and the shared directory holds "
+        f"{len(shared)}; a figure is either unused or included by two papers, and both are worth "
+        "looking at rather than shipping"
+    )
+
+
+def test_a_commented_out_include_is_not_staged():
+    """The `\\pdfoutput` comment at the top of every paper names `\\includegraphics`.
+
+    Counting that comment is what put SUBMISSION.md's figure column one too high for every paper,
+    so the staging pattern is checked against the same trap: it must match the directive and not
+    prose about it.
+    """
+    assert ap.included_figures("% see \\includegraphics{figures/ghost.pdf} for why") == []
+    assert ap.included_figures("\\includegraphics[width=\\textwidth]{figures/real.pdf}") == [
+        "real.pdf"
+    ]
+
+
+def test_ink_outside_the_text_block_blocks_the_package():
+    """Overfull boxes and oversized floats are warnings, and both put ink past the margin.
+
+    Paper I carried a threats table 61.9pt taller than the text block for its whole life. pdflatex
+    said so once, in the log, without naming the float; no test read the log and no reader diffs a
+    PDF's margins. Both findings are collected by `rehearse` and both gate the tarball.
+    """
+    findings = inspect.getsource(ap.rehearse)
+    assert "Float too large for page" in findings
+    assert "Overfull" in findings
+    src = inspect.getsource(ap.main)
+    gate, tar = src.find("oversized_floats"), src.find("tarfile.open")
+    assert gate != -1, "main() no longer reads the oversized-float finding"
+    assert "overfull_boxes" in src, "main() no longer reads the overfull-box finding"
+    assert gate < tar, "the finding must gate the tarball rather than be printed after it"
+
+
 def test_plain_abstract_has_no_latex_left():
     """Every macro that resolves against the document must become words; standard math may stay.
 

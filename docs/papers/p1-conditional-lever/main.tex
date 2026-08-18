@@ -1231,6 +1231,25 @@ $\dd$ came from two seeds where the treatment never applied (Paper~III).
 \section{Threats to Validity}
 \label{sec:threats}
 
+\begin{figure}[!tb]
+\centering
+\includegraphics[width=\textwidth]{figures/fig-effects.pdf}
+\caption{Every instruction-following effect this paper reports, divided by the study's own
+measurement noise. \emph{Squares} are the three $p_0$ levels' five-replicate means with their
+$t(4)$ intervals (\S\ref{sec:repeat}); the \emph{open circle} beside each is the single draw the
+paper reports elsewhere, and the distance between the two is what re-measurement moved.
+\emph{Filled circles} are single draws with no interval of their own, so they are point estimates
+of quantities their own sweeps report as one number plus noise. Two things are visible here and
+nowhere else. Nothing in the study clears $2\sigma$ with an interval behind it, and the largest
+quantity on the axis is the \emph{registered swing} between two levels rather than either level ---
+which is why the paper's claim is conditional rather than a pair of endpoints.
+The split sweep's $n{=}8$ cell and the budget sweep's $\mathrm{mmc}{=}28$ cell are the same
+four-arm re-run entered in both sweeps, so that row appears twice and is one measurement.
+Code-domain runs are absent on purpose: $\sigma$ was measured on multi-hard and its transfer to a
+benchmark that executes model code is an assumption rather than a measurement (Paper~III).}
+\label{fig:effects}
+\end{figure}
+
 We state these plainly. \textbf{The $p_0$ axis is an operationalization, not a dial.} Our levels
 raise $p_0$ by excluding constraints, and exclusion does not only make tasks easier: it re-assigns
 which constraints the hard tier forces into every task, so a level names a slightly different
@@ -1268,7 +1287,10 @@ two independent draws, so $\sigma(\dd)$ on one task is $0.1591$ and on a thirty-
 \sigma(\dd) \;=\; 0.1591/\sqrt{30} \;=\; 0.0291 .
 \]
 In those units the study's effects are: the $L_1$ loss $-0.042$ at $1.43\sigma$, the $L_2$ gain
-$+0.060$ at $2.07\sigma$ and the $L_3$ null $-0.002$ at $0.06\sigma$. Paper~III shows this
+$+0.060$ at $2.07\sigma$ and the $L_3$ null $-0.002$ at $0.06\sigma$.
+Figure~\ref{fig:effects} puts every instruction-following effect in the paper on that one axis,
+which is the comparison the tables cannot make: what the study can and cannot resolve is a
+property of this denominator, not of any individual cell. Paper~III shows this
 single study-wide $\sigma$ is an approximation --- measured per genome it spans $5.9\times$ ---
 and \S\ref{sec:repeat} supersedes it here with five-replicate standard errors wherever the two
 overlap. \textbf{We therefore withdraw the unconditional claim that evolving
@@ -1368,6 +1390,13 @@ five draws give $+0.019$ with $t=1.89$, which fails the $p<0.10$ threshold by $0
 therefore still not a result --- but the sign was an artifact of one sample, and we say so
 rather than leave the earlier reading standing.
 
+Scaled by the cross-run $\sigma(\dd)$ of \S\ref{sec:threats}, so that they can be read beside every
+other effect in the paper (Figure~\ref{fig:effects}), the five-replicate means are
+$0.72\sigma$ at $L_1$, $1.90\sigma$ at $L_2$ and $0.64\sigma$ at $L_3$. The first two are smaller
+than the single draws they replace, which is the ordinary shape of re-measuring a noisy quantity.
+$L_3$ moves the other way, away from zero and with its sign reversed, and that is why the saturated
+null there is withdrawn rather than restated.
+
 \paragraph{Which threats the released artifact can close.} The threats differ in what each
 requires: more spend against the same harness, a credential we do not hold, or new harness
 code. Table~\ref{tab:closability} separates them, so a reader can tell which open questions
@@ -1382,9 +1411,13 @@ $\mathrm{mmc}{=}160$ replication was designed, priced, started and stopped mid-r
 audit landed, having spent $\approx\!\$0.33$ of a projected $\$0.90$; its partial cassette is
 not released, since a recording with no corresponding result would be a misleading artifact.
 
+% \footnotesize, not \small: at \small this table is 61.9pt taller than the text block, and
+% LaTeX reports "Float too large for page" and then lets it run into the bottom margin. Nothing
+% in the log says which float, and no test reads the log, so it sat there for the life of the
+% paper.
 \begin{table}[h]
 \centering
-\small
+\footnotesize
 \begin{tabular}{p{0.27\textwidth}p{0.15\textwidth}p{0.44\textwidth}}
 \toprule
 Threat & Closable as released? & What it requires \\

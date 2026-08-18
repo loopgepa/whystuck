@@ -210,17 +210,66 @@ def stage(
     if anonymous:
         bib = dest / "references.bib"
         bib.write_text(anonymise_bib(bib.read_text(encoding="utf-8")), encoding="utf-8")
-    shutil.copytree(paper / FIGURES, dest / FIGURES, dirs_exist_ok=True)
+    stage_figures(paper, dest, tex)
     return dest
 
 
+def included_figures(tex: str) -> list[str]:
+    """The figure files this paper's source actually includes, in order of first appearance.
+
+    Comment lines are dropped first. Every paper opens with a comment explaining why `\\pdfoutput`
+    must sit in the first five lines, and that comment names `\\includegraphics`; counting it is
+    what put SUBMISSION.md's figure column one too high for all three papers. Here it would be
+    worse than a wrong count: a commented directive naming a file that does not exist would fail
+    the build.
+    """
+    body = "\n".join(line for line in tex.splitlines() if not line.lstrip().startswith("%"))
+    seen: list[str] = []
+    for name in re.findall(r"\\includegraphics(?:\[[^\]]*\])?\{" + FIGURES + r"/([^}]+)\}", body):
+        if name not in seen:
+            seen.append(name)
+    return seen
+
+
+def stage_figures(paper: Path, dest: Path, tex: str) -> list[str]:
+    """Copy only the figures the paper includes, not the whole shared directory.
+
+    Every paper's `figures/` is a symlink to `shared/figures`, which holds the series' figures, so
+    copying the tree shipped all of them in each of the three tarballs: Paper III's package carried
+    Paper I's forest plot and both of Paper II's panels. arXiv ignores unused files, and the byte
+    scan behind `--anonymous` reads whatever is staged, so nothing broke; the tarball was simply
+    describing a document it was not part of. Returns the names copied, so a caller can report them.
+    """
+    names = included_figures(tex)
+    if not names:
+        raise RuntimeError(
+            f"{paper.name} includes no figures; the pattern must have stopped matching"
+        )
+    (dest / FIGURES).mkdir(parents=True, exist_ok=True)
+    for name in names:
+        source = paper / FIGURES / name
+        if not source.is_file():
+            raise FileNotFoundError(f"{paper.name} includes {name}, which is not in {FIGURES}/")
+        shutil.copy2(source, dest / FIGURES / name)
+    return names
+
+
 def rehearse(staged: Path) -> dict[str, object]:
-    """Compile the staged tree the way arXiv will: pdflatex only, never bibtex."""
+    """Compile the staged tree the way arXiv will: pdflatex only, never bibtex.
+
+    Two of the findings below are warnings rather than errors, and both put ink outside the text
+    block: an overfull box runs a line into the margin, and "Float too large for page" lets a table
+    run past the bottom of it. Neither stops a build and neither names its own float in the log, so
+    Paper I carried an oversized threats table for its whole life. They block the package here
+    because the log is the only place they are visible and nothing else reads the log.
+    """
     for _ in range(3):
         _run(["pdflatex", "-interaction=nonstopmode", "main.tex"], staged)
     log = (staged / "main.log").read_text(errors="ignore")
     pages = re.search(r"Output written on main\.pdf \((\d+) pages", log)
     return {
+        "oversized_floats": re.findall(r"Float too large for page by [\d.]+pt.*", log),
+        "overfull_boxes": re.findall(r"^Overfull \\[hv]box .*", log, re.MULTILINE),
         "pages": int(pages.group(1)) if pages else 0,
         "undefined_citations": re.findall(r"Citation .*? undefined", log),
         "undefined_references": re.findall(r"Reference .*? undefined", log),
@@ -541,10 +590,19 @@ def main() -> int:
             or result["undefined_references"]
             or result["errors"]
             or result["missing_files"]
+            or result["oversized_floats"]
+            or result["overfull_boxes"]
         )
         if bad or not result["pages"]:
             print("ARXIV REHEARSAL FAILED (this is what the posted paper would look like):")
-            for k in ("undefined_citations", "undefined_references", "errors", "missing_files"):
+            for k in (
+                "undefined_citations",
+                "undefined_references",
+                "errors",
+                "missing_files",
+                "oversized_floats",
+                "overfull_boxes",
+            ):
                 if result[k]:
                     print(f"  {k}: {result[k]}")
             return 1

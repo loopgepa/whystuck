@@ -21,7 +21,7 @@ endorsement domain, and the primary category selects the domain.
 
 Two structural facts decide this, and neither is about the papers' quality.
 
-**Main-text length is 27 / 17 / 14 pages** (references begin on p.28 / 18 / 15 of 39 / 23 / 20).
+**Main-text length is 28 / 18 / 15 pages** (references begin on p.29 / 19 / 16 of 40 / 24 / 21).
 **All three papers are de-anonymised by their own reproducibility apparatus**: the title block
 prints author, affiliation and repository URL, and each abstract names the repository again.
 
@@ -77,8 +77,9 @@ promising a reviewer an anonymous artifact:
 3. **The reproducibility apparatus is the point of the release**, so it cannot simply be dropped:
    43 run JSONs, 225 replicate scorings and 267 cassettes have to stay reachable and replayable.
 4. **This file, and the anonymiser's own token list, name the author.** Neither ships in a paper
-   tarball — the package contains only `main.tex`, `main.bbl`, `references.bib` and three figures,
-   which is why the byte scan passes — but both are in the tree a full mirror would host.
+   tarball — the package contains only `main.tex`, `main.bbl`, `references.bib` and the figures that
+   paper includes, which is why the byte scan passes — but both are in the tree a full mirror would
+   host.
 
 Standing one up publishes content under a new identity and is a decision for the author, not
 something the packaging script should do on its own.
@@ -118,18 +119,21 @@ exists. Measured from the built PDFs and each paper's own source:
 
 | | paper | pages | tables | figures | distinct citations |
 |---|---|---|---|---|---|
-| I | `p1-conditional-lever` | 39 | 11 | 3 | 24 |
-| II | `p2-repair-not-detection` | 23 | 4 | 2 | 17 |
-| III | `p3-silent-no-op` | 20 | 4 | 1 | 13 |
+| I | `p1-conditional-lever` | 40 | 11 | 3 | 24 |
+| II | `p2-repair-not-detection` | 24 | 4 | 3 | 17 |
+| III | `p3-silent-no-op` | 21 | 4 | 1 | 13 |
 
 Tables, figures and citations are counted from the sources by
 `tests/test_paper_docs_consistency.py`; the page count is compared against the compiled PDF by
 `make_arxiv_package.py`, which refuses to write a package while the two disagree. Paper I sat at 38
 here for four days after an edit made it 39, and README's table agreed with this one throughout,
 which is the failure the papers themselves describe: two hand-typed numbers checking each other.
-The three tarballs run 89 to 115 kB, far under arXiv's 50 MB limit; the build prints the exact size,
-and this file no longer quotes it, because gzip output is not identical across toolchains and a
-number nothing can re-derive is a number that rots.
+Every tarball is a fraction of a megabyte against arXiv's 50 MB limit; the build prints the exact
+size, and this file does not quote it, because gzip output is not identical across toolchains and a
+number nothing can re-derive is a number that rots. The rehearsal also refuses a package whose log
+reports an overfull box or a float too large for the page: both put ink outside the text block,
+neither stops a build, and Paper I shipped an oversized threats table until 2026-08-17 because
+nothing read the log.
 
 Abstract lengths against the 1920-character metadata
 field: **1912**, **1895**, 1788. Paper I has 8 characters of headroom and Paper II has 25, so any
@@ -139,7 +143,7 @@ The three are cross-referenced as a series, so they should be posted together or
 III; each abstract names its companions.
 
 These lengths are fine for arXiv and for TMLR, which sets no page limit. Against the 9-page
-main-text limit at NeurIPS, ICLR and ICML, Paper I runs 3.0x, Paper II 1.9x and Paper III 1.6x, so a
+main-text limit at NeurIPS, ICLR and ICML, Paper I runs 3.1x, Paper II 2.0x and Paper III 1.7x, so a
 conference submission would need substantial main text moved into appendices, plus that venue's style
 file. Paper I read "about four times" until 2026-08-17, which is 39/9 rather than 27/9: the sentence
 divided the total by the main-text limit. The three multiples are now checked against the main-text
