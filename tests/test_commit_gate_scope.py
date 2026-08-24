@@ -46,11 +46,20 @@ def _scope_pattern() -> str:
     pattern -- a guard that passes by testing a string nobody runs.
     """
     text = _HOOK.read_text(encoding="utf-8")
-    found = re.findall(r"grep -qE '([^']+)'", text)
+    # Anchored on the gate that actually guards the claim check, not on there being only one
+    # gate in the file. It was "exactly one" until a second, independent gate was added for a
+    # different checker, at which point uniqueness stopped identifying anything -- and loosening
+    # this to "the first one found" would have left the guard pinning whichever gate happened to
+    # come first in the file.
+    blocks = [b for b in text.split("\nif ") if "verify_paper_claims" in b]
+    assert len(blocks) == 1, (
+        f"expected exactly one `if` block running verify_paper_claims in {_HOOK.name}, found "
+        f"{len(blocks)}. This guard can no longer tell which pattern gates the claim check."
+    )
+    found = re.findall(r"grep -qE '([^']+)'", blocks[0])
     assert len(found) == 1, (
-        f"expected exactly one `grep -qE '...'` scope pattern in {_HOOK.name}, found "
-        f"{len(found)}: {found}. This guard can no longer tell which pattern gates the "
-        f"claim check."
+        f"expected exactly one `grep -qE '...'` scope pattern in the block gating "
+        f"verify_paper_claims, found {len(found)}: {found}."
     )
     return found[0]
 
@@ -156,3 +165,59 @@ def test_the_hook_names_a_directory_that_exists() -> None:
     assert prefixes, f"no literal directory prefixes parsed out of {pattern!r}"
     dead = [p for p in prefixes if not (ROOT / p).is_dir()]
     assert not dead, f"the gate keys on directories that do not exist: {dead}"
+
+
+# --------------------------------------------------------------------- the papyrustrail gate
+#
+# The same silent-no-op risk as above, for the second gate: a scope regex that stops matching
+# leaves the hook printing `all green` having skipped a check. That gate is optional (the tool
+# lives in a separate project and not every machine has it), which makes a narrowing MORE likely
+# to go unnoticed, not less.
+
+
+def _papyrustrail_scope() -> str:
+    text = _HOOK.read_text(encoding="utf-8")
+    blocks = [b for b in text.split("\nif ") if "papyrustrail verify" in b]
+    assert len(blocks) == 1, (
+        f"expected exactly one `if` block running papyrustrail, found {len(blocks)}"
+    )
+    found = re.findall(r"grep -qE '([^']+)'", blocks[0])
+    assert len(found) == 1, f"expected one scope pattern in the papyrustrail block, found {found}"
+    return found[0]
+
+
+def _papyrustrail_fires_on(path: str) -> bool:
+    done = subprocess.run(
+        ["grep", "-qE", _papyrustrail_scope()], input=f"{path}\n", text=True, capture_output=True
+    )
+    assert done.returncode in (0, 1), f"grep failed on {path!r}: {done.stderr}"
+    return done.returncode == 0
+
+
+@pytest.mark.parametrize("slug", paper_sources.PAPERS)
+def test_the_papyrustrail_gate_fires_on_each_paper(slug: str) -> None:
+    assert _papyrustrail_fires_on(str(paper_sources.paper_path(slug)))
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "docs/validation-study-c2.json",
+        "docs/repeat/L1-B-s0-k0.json",
+        "papyrustrail.toml",
+        ".papyrustrail/baseline.json",
+    ],
+)
+def test_the_papyrustrail_gate_fires_on_what_it_reads(path: str) -> None:
+    """Its config and its baseline included: a commit editing only the baseline must re-verify,
+    or an accepted-away finding could land without the check that would have caught it."""
+    assert _papyrustrail_fires_on(path)
+
+
+@pytest.mark.parametrize(
+    "path",
+    ["README.md", "docs/getting-started.md", "src/whystuck/core/storage.py", "tests/test_diff.py"],
+)
+def test_the_papyrustrail_gate_does_not_fire_on_everything(path: str) -> None:
+    """A gate that fires on every commit is a gate that gets disabled."""
+    assert not _papyrustrail_fires_on(path)

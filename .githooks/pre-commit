@@ -43,6 +43,41 @@ if git diff --cached --name-only | grep -qE '^(docs/papers/|docs/.*\.json$|scrip
   $PY scripts/verify_paper_claims.py | grep -E 'claims match|DRIFT|FAIL'
 fi
 
+# Every claim-bearing numeral in the papers must trace to something in docs/, checked against a
+# committed baseline of the ones that legitimately cannot (cited results, design constants, prose
+# arithmetic). This is the complement to verify_paper_claims above, not a replacement: that gate
+# re-derives the numbers it knows about, this one asks whether any number has no backing at all.
+# On this tree the baseline holds 302 accepted sites out of 1239, so what it actually catches is a
+# NEW unsupported numeral appearing in a paper -- which is what a fabricated or hallucinated
+# figure looks like once the tables are already correct.
+#
+# OPTIONAL BY DESIGN. papyrustrail is a separate project and not every machine has it. A gate that
+# breaks commits on a laptop without it would get the whole hook disabled, which costs more than
+# it gains. But an optional gate that skips silently is a gate that is never running and nobody
+# notices, so absence prints a line rather than nothing.
+# Scoped to what papyrustrail actually reads, per papyrustrail.toml: the papers and their
+# shared inputs, the released run JSONs, the per-replicate re-scorings, and the config and
+# baseline themselves. `^docs/` would have fired on every unrelated doc, and
+# tests/test_commit_gate_scope.py rightly failed it.
+if git diff --cached --name-only | grep -qE '^(docs/papers/|docs/repeat/|docs/validation-study-.*\.json$|papyrustrail\.toml$|\.papyrustrail/)'; then
+  PT=""
+  if command -v papyrustrail >/dev/null 2>&1; then
+    PT="papyrustrail"
+  elif [ -n "${PAPYRUSTRAIL_HOME:-}" ] && [ -x "${PAPYRUSTRAIL_HOME}/.venv/bin/papyrustrail" ]; then
+    PT="${PAPYRUSTRAIL_HOME}/.venv/bin/papyrustrail"
+  fi
+  if [ -z "$PT" ]; then
+    echo "pre-commit: papyrustrail NOT RUN (not on PATH, PAPYRUSTRAIL_HOME unset or has no venv)"
+  else
+    echo "pre-commit: papyrustrail verify (every paper numeral traces to an artifact)"
+    # `verify` exits 1 on a numeral absent from the baseline AND on a baseline entry that no
+    # longer occurs, so a stale acceptance fails too rather than rotting. Re-accept deliberately
+    # with `papyrustrail accept --repo .` and commit the baseline diff, which is reviewable.
+    "$PT" verify --repo . | grep -E 'bind:|restate:|admit:|none|stale' || true
+    "$PT" verify --repo . >/dev/null
+  fi
+fi
+
 # Never let the author's employer name into a personal-project artifact. Checks the staged
 # content, not the working tree, so it cannot be bypassed by an unstaged revert.
 #

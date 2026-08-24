@@ -1,0 +1,34 @@
+[papyrustrail]
+regions = [
+  "docs/papers/p1-conditional-lever/main.tex",
+  "docs/papers/p2-repair-not-detection/main.tex",
+  "docs/papers/p3-silent-no-op/main.tex",
+]
+runs = "docs/validation-study-*.json"
+
+[[papyrustrail.replicates]]
+name = "L1 dd(D-B)"
+files = "docs/repeat/L1-{arm}-s{seed}-k{rep}.json"
+value = "runs.0.A.opt_heldout"
+contrast = ["D", "B"]
+average_over = ["seed"]
+over = "rep"
+arm_key = "arm"
+
+[[papyrustrail.replicates]]
+name = "L2 dd(D-B)"
+files = "docs/repeat/L2-{arm}-s{seed}-k{rep}.json"
+value = "runs.0.A.opt_heldout"
+contrast = ["D", "B"]
+average_over = ["seed"]
+over = "rep"
+arm_key = "arm"
+
+[[papyrustrail.replicates]]
+name = "L3 dd(D-B)"
+files = "docs/repeat/L3-{arm}-s{seed}-k{rep}.json"
+value = "runs.0.A.opt_heldout"
+contrast = ["D", "B"]
+average_over = ["seed"]
+over = "rep"
+arm_key = "arm"
