@@ -68,6 +68,7 @@ if git diff --cached --name-only | grep -qE '^(docs/papers/|docs/repeat/|docs/va
   fi
   if [ -z "$PT" ]; then
     echo "pre-commit: papyrustrail NOT RUN (not on PATH, PAPYRUSTRAIL_HOME unset or has no venv)"
+    echo "  to enable: export PAPYRUSTRAIL_HOME=/path/to/a/papyrustrail/checkout (needs its .venv)"
   else
     echo "pre-commit: papyrustrail verify (every paper numeral traces to an artifact)"
     # `verify` exits 1 on a numeral absent from the baseline AND on a baseline entry that no

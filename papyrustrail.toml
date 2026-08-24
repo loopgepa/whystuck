@@ -5,6 +5,7 @@ regions = [
   "docs/papers/p3-silent-no-op/main.tex",
 ]
 runs = "docs/validation-study-*.json"
+bib = "docs/papers/*/references.bib"
 
 [[papyrustrail.replicates]]
 name = "L1 dd(D-B)"
@@ -32,3 +33,10 @@ contrast = ["D", "B"]
 average_over = ["seed"]
 over = "rep"
 arm_key = "arm"
+
+[[papyrustrail.contrasts]]
+name = "D-B delta"
+files = "docs/validation-study-*.json"
+over = "runs"
+value = "delta"
+arms = ["D", "B"]
