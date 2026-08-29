@@ -124,7 +124,7 @@ as optimizing it}, and that the difference is invisible in exactly the number a 
 
 \paragraph{Reflective and evolutionary prompt optimization.}
 GEPA \citep{agrawal2025gepa} reports beating GRPO by $6\%$ on average and up to $20\%$ while
-using up to $35\times$ fewer rollouts, and exceeding MIPROv2 by over $10\%$. Crucially for us, GEPA
+using up to $35\times$ fewer rollouts, and exceeding MIPROv2 by over $10\%$. GEPA
 optimizes \emph{one or more} components and is known to plateau. The sharpest published
 instance is independent of us: optimizing a prompt with GEPA across six tasks,
 \citet{pappu2026multiagent} report that ``on GPQA Diamond and MATH-500, GEPA returned the
@@ -225,9 +225,9 @@ corrected one; within each set it is fixed, which is what the contrasts require.
 \textbf{INCONCLUSIVE} if positive-but-within-noise, fewer than two seeds, or a
 ceiling/floor flag fires (seed held-out $\ge 0.9$ or $\le 0.1$). This is a
 deliberately conservative bar (the sum of two standard deviations), erring
-toward under-claiming. It is worth noting what this rule cannot do: every branch of it reads
+toward under-claiming. The rule has one blind spot: every branch of it reads
 $\dd$ and the arm variances, so a genome-against-itself contrast passes through it and returns
-\textbf{NOT SUPPORTED}, a verdict rule cannot detect a treatment that never applied.
+\textbf{NOT SUPPORTED}. A verdict rule cannot detect a treatment that never applied.
 
 \section{How a Componentized Treatment Can Silently Not Apply}
 \label{sec:defect}
@@ -411,7 +411,7 @@ is zero.
 
 \paragraph{The rule, applied prospectively, and found too coarse.}
 Everything above is retrospective: a rule derived from runs that had already gone wrong. A later
-pre-registered run applied it in advance, and the result argues that the rule as stated is not
+pre-registered run applied it in advance, and we found the rule as stated is not
 enough. The run is a cross-provider critic study (Paper~I, D3) over \textbf{eight} seeds; its
 acceptance census reads arm~B on \textbf{five} seeds and arm~D on \textbf{three}, cross-checked
 against the seed-score identity. Neither count is zero, so \emph{the flag does not fire}. Its
@@ -925,7 +925,7 @@ The series' other two papers carry the entries bearing on their own claims.
     sentence is checked at all. Every site stating this count is now checked, in the papers and in
     the repository's documentation, by finding the sites rather than listing them; a sixth site in
     \texttt{docs/EXPERIMENTS.md} was carrying the same wrong digit and was found by that sweep.
-    Worth noting where this sat: the paragraph reporting it is the one headed
+    The paragraph reporting it is the one headed
     ``two factual slips belong with the withdrawals'', so the correction carried a third.
   \item \textbf{``The discarded first four-arm attempt at $-0.094$, ${\approx}3.24\sigma$.''}
     Two errors in one clause, and the run was the wrong one. This paper uses
