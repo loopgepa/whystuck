@@ -23,12 +23,12 @@ and actionable repair feedback gives it its best}
 \maketitle
 
 \begin{abstract}
-A generate--critique--refine loop is usually improved by improving its critique, on the reasoning
-that the loop can only repair what it detects. We measure the two halves separately on a
-verifiable instruction-following family, with \emph{no} optimizer in the design: every number we
-measure scores a fixed, hand-written genome, so nothing here depends on a search, except two
-figures quoted from the companion papers. Detection
-turns out not to be the binding constraint. Replacing the loop's near-random self-critique
+Practitioners usually strengthen a generate--critique--refine loop by improving its critique, on
+the reasoning that the loop can only repair what it detects. We measure the two halves separately
+on a verifiable instruction-following family, with \emph{no} optimizer in the design: every number
+we measure scores a fixed, hand-written genome, so nothing here depends on a search, except two
+figures quoted from the companion papers. Detection is not the binding constraint. Replacing the
+loop's near-random self-critique
 (F$_1 = 0.11$) with the true metric as a \emph{perfect} inference-time gate moves held-out score by
 $-0.0027$ ($t = 0.33$ over five replicates): a perfect checker is statistically indistinguishable
 from one at chance, and it scores $0.042$ \emph{below} a mere text-statistics tool ($t = 2.89$).
@@ -54,7 +54,7 @@ listed in Appendix~\ref{sec:corrections}.
 A self-refine loop \citep{madaan2023selfrefine} drafts an answer, criticizes it, and rewrites it if
 the criticism complains. Two components can be improved: the \textbf{detector} that decides whether
 the draft is acceptable, and the \textbf{fixer} that turns a complaint into a better draft. Almost
-all attention goes to the first. The reasoning is intuitive, a loop cannot repair what it does
+all attention goes to the first. The reasoning is intuitive: a loop cannot repair what it does
 not detect, and the literature supplies a sharp motivating fact: \emph{intrinsic}
 self-correction, with no external signal, fails and often degrades, while positive results relied
 on oracle stopping signals that ``vanish when oracle labels are not available''
