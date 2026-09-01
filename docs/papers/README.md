@@ -74,7 +74,7 @@ does not, something regressed.
 ## Verifying
 
 ```bash
-python scripts/verify_paper_claims.py     # 1025 checks against the released artifacts, $0
+python scripts/verify_paper_claims.py     # 1026 checks against the released artifacts, $0
 python scripts/verify_split_coverage.py   # the split lost no quantity, $0
 python -m pytest tests/test_split_coverage.py tests/test_paper_prose_coverage.py \
     tests/test_paper_table_coverage.py tests/test_paper_sigma_coverage.py tests/test_figures.py

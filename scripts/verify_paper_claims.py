@@ -2878,10 +2878,30 @@ def _checks() -> list[tuple[str, float, float, float]]:
     )
 
     # Between-cell spread of Δ, the sentence that licenses "one quantity plus noise".
+    #
+    # SAMPLE sd, not population. The sentence draws an inference from these four cells about the
+    # quantity behind them, so the four are a sample and the denominator is n-1. This check
+    # carried pstdev and the paper carried its output, which is the failure mode where a paper
+    # and its own checker share a formula and are wrong together: no amount of machine checking
+    # catches it, because both sides agree. It is the same estimator error as the K=5 standard
+    # errors corrected at the split, found again in a table caption by recomputing the
+    # inferential chain rather than by matching values.
     out.append(
         (
             "tex: split between-cell spread",
             _scrape(tex, r"spread of \$\\dd\$ \(\$([\d.]+)\$\)"),
+            0.0005,
+            stdev([_split_row(g).delta for _, g in _SPLIT_ROWS]),
+        )
+    )
+
+    # The superseded value, kept derived rather than exempted. The caption states both estimators
+    # on purpose, so a reader can see which one the inference needs; leaving the old number as an
+    # unchecked literal would put back exactly the unguarded prose the correction came out of.
+    out.append(
+        (
+            "tex: split between-cell spread, superseded population sd",
+            _scrape(tex, r"population sd of the same four, \$([\d.]+)\$"),
             0.0005,
             pstdev([_split_row(g).delta for _, g in _SPLIT_ROWS]),
         )
