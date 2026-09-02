@@ -240,7 +240,7 @@ involved in any measurement \emph{we make} here, since none of our configuration
 anything; the reflection field recorded in each run's metadata is the CLI default and is inert.
 Two figures in \S\ref{sec:detector} are exceptions, and are quoted rather than measured: the
 held-out movements loop-level optimization buys over prompt-only optimization with a substituted
-critic, which come from the companion runs of Paper~I and were produced under
+critic, which come from companion runs reported in Paper~I and Paper~III and were produced under
 \texttt{gpt-5.6-terra} reflection, as were the runs they are compared against.
 
 \paragraph{What is held constant across the curve.} Runs 3, 4 and 7--10 issue byte-identical
@@ -338,9 +338,10 @@ measurement tool, $+0.048$ for the accurate cross-lineage critic, $+0.007$ for t
 cross-provider one and $-0.028$ for the perfect oracle, against a noise floor of
 $\sigma(\dd) = 0.029$. On the \emph{optimization} axis, evolving the loop on top of either
 substituted critic buys nothing over evolving the prompt alone: $+0.008$ and $+0.014$, both inside
-that same noise. Those two are the only optimizer-derived figures in this paper, quoted from
-Paper~I rather than measured here (\S\ref{sec:setup}), and they carry a heavier caveat than that
-provenance suggests: both come from contrast runs whose loop-level gene is byte-identical to the
+that same noise. Those two are the only optimizer-derived figures in this paper, quoted rather
+than measured here (\S\ref{sec:setup}): the worker swap's $+0.014$ from Paper~I and the
+cross-lineage run's $+0.008$ from Paper~III. They carry a heavier caveat than that provenance
+suggests: both come from contrast runs whose loop-level gene is byte-identical to the
 seed, so neither measures evolving a loop, and Paper~III withdraws that column as a measurement.
 Read them as the absence of evidence they are, not as evidence of absence. The two axes answer different questions,
 and a number from one is not a comparison for a number from the other.
@@ -1164,7 +1165,7 @@ register across all three, with the superseded values themselves, is in the rele
     yield, and reported agreement while a second copy of the same sentence two papers
     away said five. A series that states one fact in three documents is guarded at one of them
     unless the sweep is told to find them all, the same first-match blindness that let ``four
-    runs overrode'' survive in entry~15 of Paper~III's register. Every site is now found with
+    runs overrode'' survive in entry~14 of Paper~III's register. Every site is now found with
     \texttt{finditer}, across the papers and the Markdown, and the number of sites is asserted, so
     a fourth restatement fails rather than going quietly unchecked.
 \end{enumerate}

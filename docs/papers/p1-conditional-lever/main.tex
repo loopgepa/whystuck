@@ -315,7 +315,7 @@ superseded flagship run and $0/15$ pooling all its arms (Paper~III). The genes G
 $3022$ and $2920$ characters against a $127$-character seed, and no completion anywhere in
 the run was empty (shortest reflection output: $968$ characters). The selector fix shows up
 alongside it: arm~D now receives proposal rounds at arm~B's rate rather than half of it,
-which was the starvation of Evidence~3.
+which was the starvation of Paper~III, defect~3.
 
 \begin{table}[h]
 \centering
@@ -778,7 +778,7 @@ trainset with no separate valset, so one accept cycle costs
 $2n_{\mathrm{train}} + \min(3, n_{\mathrm{train}})$: at $n_{\mathrm{train}}{=}24$ that is $51$
 calls, and run~3's budget of $28$ would have bought an arm that cannot complete a single cycle,
 reported \texttt{genes\_changed=[]} and a flat $\dd$, and read as \emph{optimization did not help}
-when it meant \emph{optimization never ran}. This is Evidence~3's confound in a new place; we
+when it meant \emph{optimization never ran}. This is Paper~III, defect~3's confound in a new place; we
 caught it before the money rather than after the write-up, and the harness now refuses the
 configuration at the dry-run step with the arithmetic in the error text. We scope the refusal to arms that evolve something, so the two \texttt{-{}-arms A} verifier-ablation runs, where the budget
 is inert, still stand.
@@ -914,7 +914,7 @@ population sd of the same four, $0.037$, is what an earlier draft printed, and d
 where an inference needs $n-1$ is the defect this series corrected once already. \emph{Arm~B accepted} is the number of seeds on which
 the prompt-only comparator changed a gene at all: at $n_{\mathrm{train}}{=}4$ it changed
 nothing on any seed, so that row is not a $D$-vs-$B$ contrast but $D$ vs.\ the seed genome
-(numerically identical here, and flagged rather than dropped: see Evidence~9, Paper~III).
+(numerically identical here, and flagged rather than dropped: see Paper~III, defect~9).
 Excluding it, two of three rows are positive.}
 \label{tab:splitresults}
 \end{table}
@@ -1020,7 +1020,7 @@ a design.
 \paragraph{Two risks we state in advance.} The $\mathrm{mmc}{=}20$ cell affords $1.09$ promotable
 cycles, i.e.\ about one proposal per arm, so either arm may accept nothing and produce a
 one-sided or empty contrast. The budget guard permits it: it enforces that an arm \emph{can}
-fund an accept cycle, never that the search accepts one (Evidence~9), so that row will be labelled by
+fund an accept cycle, never that the search accepts one (Paper~III, defect~9), so that row will be labelled by
 the acceptance census and excluded from the trend test rather than read as a null. Second, these
 five runs re-measure the same unoptimized genome on the same thirty held-out tasks as the four-arm
 re-run, so they will nearly double the replicate count behind the cross-run $\sigma$ estimate
@@ -1442,7 +1442,7 @@ Power, $n{=}3$; no sampling variance & Partly, as released & $\sigma(\dd) = 0.02
   recoverable at \$0 from ten runs that re-score one fixed seed genome (\S\ref{sec:threats}),
   and it is already decisive: it withdrew a headline. Tightening it needs the repeat loop,
   which re-scores released genomes and needs no re-optimization (D7) \\
-\textbf{Seeds are partitions, not samples} (Evidence~4b) & Partly, as released & Task-level
+\textbf{Seeds are partitions, not samples} (Paper~III, defect~5) & Partly, as released & Task-level
   pairing on the per-task scores runs now emit; for the recorded runs, a re-run \\
 \textbf{Metric has a do-nothing floor} (\S\ref{sec:threats}) & Partly, as released &
   The exploitation it invites is now measured and absent (answer length by arm,
@@ -1515,7 +1515,7 @@ ends. Each entry below changes one variable.
     column is unavailable rather than favourable. Two
     design notes for anyone repeating it: the salt must enter the cassette key, or record-mode
     dedup returns $K$ byte-identical draws and reports \emph{zero} variance; and a seed buys a
-    fresh sample only where it does not merely re-partition a fixed pool (Evidence~4b), so the
+    fresh sample only where it does not merely re-partition a fixed pool (Paper~III, defect~5), so the
     unit to pair on is the \emph{task}, which is why every run now releases its per-task vector.
   \item[D1$'$-tools (deterministic actuator).] Paper~II localizes the residual to
     \texttt{exact\_word\_count}, so a counter would recover most of it; its remaining value is

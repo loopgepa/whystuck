@@ -370,7 +370,7 @@ rewriting all genes per proposal so a multi-gene arm is not starved; (iii) repla
 with a genome-blind constant draft scored by the real metric, which is flat without being
 saturated, and re-measures arm~A instead of copying it; and (iv) records, for every arm, the
 per-gene accepted-change count, the train aggregate, and the final gene text. The audit of
-that harness (Evidence~6--7) added three more: (v) the verify gene's truth signal now receives
+that harness (defects~6--7) added three more: (v) the verify gene's truth signal now receives
 the real task, and a trace that cannot be matched to an evaluated task raises rather than being
 scored against a stand-in; (vi) a replay that swallows a cassette miss now fails at context
 exit instead of exiting $0$ with a divergent report; and (vii) every run releases the
@@ -383,7 +383,7 @@ priced, because such a run bills in full and reports a flat $\dd$ with
 \texttt{genes\_changed=[]}, a null-shaped result from an arm that never searched. That is
 this paper's central failure mode arriving as a \emph{budget} arithmetic slip rather than a
 wiring one, which is the argument for making the refusal a property of the harness instead of
-a habit of the operator. Running that sweep then produced a ninth (Evidence~9), which is the
+a habit of the operator. Running that sweep then produced a ninth (defect~9), which is the
 same failure mode again from the one direction we were not watching: at
 $n_{\mathrm{train}}{=}4$ the \emph{comparator} arm accepted no proposal on any of three seeds,
 so its released genome is byte-identical to the seed and $\dd(D-B)$ on that row is
@@ -434,7 +434,7 @@ neither accepted & 3 & $+0.0000$ & $0\%$ \\
 \textbf{Three quarters of the positive contrast comes from two seeds on which the treatment did not
 apply and the comparator damaged itself}, losing $0.065$ and $0.020$ against its own seed genome.
 On those seeds $\dd(D-B)$ is $\dd(\mathrm{seed}-B)$: the same one-sided contrast as
-Evidence~9, at the level of the individual seed rather than the run, and therefore invisible to a
+defect~9, at the level of the individual seed rather than the run, and therefore invisible to a
 flag that asks only whether an arm's count is zero. Restricted to the seeds where arm~D accepted
 something, $\dd = +0.0100$ on $n = 3$.
 
@@ -464,7 +464,7 @@ falling back to the worker's provider. Eleven of those twenty-five were replayin
 were not registered, which is its own instance of this paper's subject: an unstated
 status is read as the stated guarantee covering it.
 The \emph{discarded first attempt} at the four-arm re-run is not among them,
-for a reason worth recording: the blank-gene guard that attempt motivated (Evidence~8) makes
+for a reason worth recording: the blank-gene guard that attempt motivated (defect~8) makes
 its own cassette unreplayable, since a replay re-serves the empty completion and the guard
 raises on it. Its numbers stand as measured and are no longer verifiable under the current
 code, which is the honest definition of superseded.
@@ -583,7 +583,7 @@ table: run~1 reports $-0.09$ and run~6 $+0.01$, and run~3's per-seed vector is
 $[0,+0.055,0,0,-0.055]$, so on several seeds the two arms demonstrably did \emph{not} issue the
 same calls. An unchanged verify gene does not make the arms the same program, because they
 still differ in the gene they \emph{share}: under the default one-component-per-proposal
-selector, arm~D searched \texttt{generate} about half as hard as arm~B (Evidence~3). So the
+selector, arm~D searched \texttt{generate} about half as hard as arm~B (defect~3). So the
 non-zeros in this column are not residual treatment effects; they are the selector confound
 measured through the shared gene, plus sampling noise, which this study can now put a number on.
 Of the
@@ -828,7 +828,7 @@ The series' other two papers carry the entries bearing on their own claims.
   \item \textbf{``The extra evolvable gene over-fits the train split.''} Untestable from the
     release as published, because the train aggregate was computed and discarded; and the
     default one-component-per-proposal selector predicts the \emph{opposite}, since the two-gene
-    arm searched the shared gene about half as hard (Evidence~3). A later split sweep then found no
+    arm searched the shared gene about half as hard (defect~3). A later split sweep then found no
     split-size trend to overfit along at all.
   \item \textbf{The retraction accounting.} Published as eleven superseded runs whose zero
     $\dd$ values were all identities. It is \emph{fifteen}, and four of them are not zero
