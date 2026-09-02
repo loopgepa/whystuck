@@ -35,25 +35,49 @@ prints author, affiliation and repository URL, and each abstract names the repos
 Confirm every date against the venue's own page before relying on it; two sources disagreed by a
 day on ICLR's, and this table is a snapshot.
 
-### Two TMLR policies to settle with the editors before submitting three papers
+### Two TMLR policies, resolved from the published policy rather than from the editors
 
 Both are specific to submitting a SERIES, so neither shows up when the venue is read for one paper.
+Neither needed an email: the editorial policy page answers the first outright and names the rule
+behind the second.
 
-**Parallel submission and shared text.** TMLR states that there should be no reuse of written text,
-figures or results between a submission and any paper published, accepted, or submitted in parallel
-at *another* archival venue. Three papers to the same venue is not that case on a plain reading,
-and `shared/series.tex` announces the relationship in every paper rather than hiding it. But the
-sharing is literal and worth stating: `shared/loop.tex` and `shared/series.tex` are `\input` by all
-three, which is 828 words, or 3.8% of Paper~I, 6.3% of Paper~II and 7.3% of Paper~III. Measure it
-again before asking, with:
+**Parallel submission and shared text: not a problem.** The policy restricts reuse against
+*another* venue: "There should not be any reuse of written text, figures or results between the
+submitted paper and any paper which has been published, accepted for publication, or submitted in
+parallel at another archival, peer-reviewed venue." Three papers to TMLR at once is not that case,
+and nothing in the policy addresses companion papers or a series. The sharing is real and worth
+stating anyway: `shared/loop.tex` and `shared/series.tex` are `\input` by all three, which is 828
+words, or 3.8% of Paper~I, 6.3% of Paper~II and 7.3% of Paper~III. Re-measure with
 
     wc -w docs/papers/shared/loop.tex docs/papers/shared/series.tex
 
-**Annual author submission quota.** TMLR now publishes one. The policy page could not be retrieved
-when this note was written, so the number is deliberately absent here rather than guessed: read it
-before deciding whether all three can go in the same year, and in what order if not. If the quota
-binds, Paper~I is the one to send first. It carries the headline result, and the other two cite it
-more than it cites them.
+**The annual quota binds, and it binds at two.** TMLR restricts submissions per calendar year by
+the Generalized Harmonic Quota Rule with parameters $N_1 = 2$ and $N_9 = 9$: an author submitting
+only single-author papers may submit **two per year**, an author whose papers all carry nine
+authors may submit nine. This series is single-author, so **three papers cannot all go to TMLR in
+the same calendar year.**
+
+There is a documented way out that costs no favours. Authors who are active members of the TMLR
+Action Editor or reviewer pool receive **double** the budget, $N_1 = 4$, which accommodates all
+three. Joining the reviewer pool is the cheapest unblock available here and it is worth doing
+before submitting anything.
+
+### What the quota does to the order, and why a split submission needs arXiv first
+
+The three are interdependent by design, and the dependency is asymmetric: Paper~I cites Paper~II
+nineteen times and Paper~III twenty-one, while Paper~II cites Paper~I six times and Paper~III
+three. Submitting two and holding one leaves the two that ship citing an unpublished companion,
+which a reviewer cannot follow.
+
+TMLR permits preprints: overlap with work shared "on preprint servers such as arXiv" is
+acceptable. So the order that keeps the series readable is
+
+1. **Reviewer pool first** if you are willing, since $N_1 = 4$ removes the choice entirely.
+2. **arXiv all three**, which needs the endorsement once and makes every cross-reference
+   resolvable no matter what TMLR's timing does.
+3. **TMLR two this year** if the quota still binds, Paper~I among them, since the other two rest
+   on it. Hold Paper~III last: it is the methodological record the other two cite for corrections
+   rather than for results, so it is the one whose absence costs a reader least.
 
 ### The double-blind build
 
@@ -112,6 +136,12 @@ something the packaging script should do on its own.
       mirror instead, which now exists as a verified tree and needs only publishing. Going public
       before the venue is chosen can work against the submission: every commit here carries the
       author's name, so a public repository the paper points at breaks the blind.
+- [ ] **Publish the anonymous mirror.** The tree is built and verified; pushing it to an account
+      that is not yours is the step no script should take. Then rebuild all three packages against
+      its URL with `scripts/anon_submission.sh`.
+- [ ] **Join the TMLR reviewer pool**, if you are willing. It doubles the annual quota from two
+      submissions to four, which is the difference between sending this series over two years and
+      sending it in one. Cheapest unblock on this page.
 - [ ] **Endorsement.** arXiv tightened this on 21 January 2026: an institutional email address is no
       longer sufficient on its own. The automatic route requires an institutional address *and*
       prior authorship in the same endorsement domain. With neither, the only route is a personal
