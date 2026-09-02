@@ -106,9 +106,12 @@ something the packaging script should do on its own.
 
 ## Blocking
 
-- [ ] **The repository must be public.** The abstract claims a release and the title block prints
+- [ ] **The repository must be public** *for the arXiv path only.* The named title block prints
       the URL under the author's name, so posting while it is private ships a paper citing a 404.
-      This is the only remaining item that is not a form field.
+      A double-blind submission does not use the named build at all and is gated by the anonymous
+      mirror instead, which now exists as a verified tree and needs only publishing. Going public
+      before the venue is chosen can work against the submission: every commit here carries the
+      author's name, so a public repository the paper points at breaks the blind.
 - [ ] **Endorsement.** arXiv tightened this on 21 January 2026: an institutional email address is no
       longer sufficient on its own. The automatic route requires an institutional address *and*
       prior authorship in the same endorsement domain. With neither, the only route is a personal
