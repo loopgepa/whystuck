@@ -35,6 +35,26 @@ prints author, affiliation and repository URL, and each abstract names the repos
 Confirm every date against the venue's own page before relying on it; two sources disagreed by a
 day on ICLR's, and this table is a snapshot.
 
+### Two TMLR policies to settle with the editors before submitting three papers
+
+Both are specific to submitting a SERIES, so neither shows up when the venue is read for one paper.
+
+**Parallel submission and shared text.** TMLR states that there should be no reuse of written text,
+figures or results between a submission and any paper published, accepted, or submitted in parallel
+at *another* archival venue. Three papers to the same venue is not that case on a plain reading,
+and `shared/series.tex` announces the relationship in every paper rather than hiding it. But the
+sharing is literal and worth stating: `shared/loop.tex` and `shared/series.tex` are `\input` by all
+three, which is 828 words, or 3.8% of Paper~I, 6.3% of Paper~II and 7.3% of Paper~III. Measure it
+again before asking, with:
+
+    wc -w docs/papers/shared/loop.tex docs/papers/shared/series.tex
+
+**Annual author submission quota.** TMLR now publishes one. The policy page could not be retrieved
+when this note was written, so the number is deliberately absent here rather than guessed: read it
+before deciding whether all three can go in the same year, and in what order if not. If the quota
+binds, Paper~I is the one to send first. It carries the headline result, and the other two cite it
+more than it cites them.
+
 ### The double-blind build
 
 ```bash
