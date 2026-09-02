@@ -60,9 +60,13 @@ informative: a quantity printed once is usually a derived figure in prose. Left 
 
 ## cite
 
-22 findings, 14 numerals attributed to nobody and 8 numeric claims citing sources whose notes
-record no numbers. The second kind is directly actionable and does not need the checker to change:
-`agrawal2025gepa`, `liu2023evalplus`, `valmeekam2023selfcritique`, `lakens2018equivalence`,
-`jain2024livecodebench`, `decomposing2026selfcorrection` and `feedbackoverform2026` each carry a
-note that records no numeral, so nothing in the citing sentence can be checked against them. Only 4
-of the 29 bib entries record a numeral at all.
+16 findings, 14 numerals attributed to nobody and 2 numeric claims citing sources whose notes
+record no numbers. This paragraph said 22 and 8 until now, which were the counts before `cite` was
+narrowed: it had been firing on any paragraph that cited a source beside our own measurements, so
+citing `lakens2018equivalence` for what a SESOI means next to our own 0.05 read as an uncheckable
+numeric claim about that source. Six of the eight went that way. The two that remain each flag a
+ratio of two derived quantities, which is the registry's gap rather than the bibliography's.
+
+Only 4 of the 29 bib entries record a numeral at all, so 25 citations have nothing for `cite` to
+compare against in either direction. Three of the corpus's twenty defects were a paper misreporting
+a source, and all three were found by a person fetching the source. Nothing here reaches that.
