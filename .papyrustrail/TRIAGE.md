@@ -35,9 +35,13 @@ already emits, so declaring them is mechanical ONCE someone says which 30 observ
 Four candidate pools were tried and none reproduces 0.1591: the sweep's D-B differences (n = 87,
 sd = 0.0411), every arm's `seed_heldout` (n = 471, sd = 0.1124), `D.delta` alone (n = 87,
 sd = 0.0505), and per-task D-B differences within a level (n = 150, sd = 0.1779 / 0.1542 / 0.0963).
-This is the one cluster that is a genuine open question rather than a known gap: 40 published sites
-rest on a number no declared artifact reproduces. It needs the author to say what pools it, not a
-change to the checker.
+This was recorded here as a genuine open question, "40 published sites rest on a number no
+declared artifact reproduces". That was wrong, and correcting it matters because the sentence read
+as a defect in the papers. The papers' own checker derives the value: `tex: noise sigma delta task`
+compares the printed `0.1591` against a computed `0.1591246970504689` and passes. Four guessed
+pools failed to reproduce it because the guesses were wrong, not because nothing does. What is
+open is a papyrustrail CONFIG gap, not a paper claim: the pool is known to
+`scripts/verify_paper_claims.py` and has not been transcribed into a `contrasts` block.
 
 **Magnitude printed for a signed artifact (13 sites).** The papers write `0.042` where the artifact
 holds -0.041666. In prose "a loss of 0.042" is correct English, and `bind` requires an exact sign on
