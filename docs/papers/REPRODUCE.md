@@ -17,12 +17,26 @@ For the full map from a claim to the script that produced it, see
 
 Two virtual environments, deliberately:
 
+Building the papers also needs a LaTeX toolchain (`pdflatex` and `bibtex`; TeX Live 2023 or
+newer). Nothing else here does.
+
 ```bash
 # 1. Main venv — everything except live runs. gepa is NOT installed here on purpose,
 #    so a test asserting an actionable "gepa is missing" error stays meaningful.
-python -m venv .venv && .venv/bin/pip install -e '.[dev]'
+#    `dev` is a PEP 735 dependency group, NOT an extra. Installing it the way you install
+#    an extra makes pip warn "does not provide the extra 'dev'" and install the package
+#    alone, leaving you with no ruff, no mypy and no pytest. This page said to do exactly
+#    that until 2026-09-03, and `figures` and `docs` are groups too.
+uv venv .venv && uv pip install -p .venv -e . && uv pip install -p .venv --group dev
+#    With pip instead of uv, `--group` needs pip 25.1 or newer (tested on 26.2.1):
+#      python -m venv .venv && .venv/bin/pip install -U pip
+#      .venv/bin/pip install -e . && .venv/bin/pip install --group dev
 
-# 2. Eval venv — only needed to replay cassettes or make a live run (needs gepa + litellm).
+# 2. Eval venv — needed to replay cassettes, to make a live run, and to run the test suite
+#    at all. `tests/test_verify_paper_claims.py` parametrises over `_checks()` at import
+#    time, and one of those checks replays a cassette through this venv, so `.venv/bin/pytest`
+#    dies during COLLECTION if this directory does not exist. `.github/workflows/ci.yml`
+#    carries the same warning. Build it before running any gate, not only before a live run.
 python -m venv scratchpad/evalvenv && scratchpad/evalvenv/bin/pip install -e '.[eval]'
 ```
 
@@ -275,6 +289,13 @@ All four must pass before any commit:
 
 ```bash
 .venv/bin/ruff check . && .venv/bin/ruff format --check . && .venv/bin/mypy && .venv/bin/pytest
+```
+
+The README also advertises the documentation build as clean. That is a fifth gate, but a CI one
+rather than a commit one, and it lives in `.github/workflows/docs.yml`:
+
+```bash
+uv run --group docs mkdocs build --strict
 ```
 
 ## Known limits of this artifact

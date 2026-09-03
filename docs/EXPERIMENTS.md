@@ -29,9 +29,11 @@ python scripts/verify_split_coverage.py          # 318 pre-split quantities acco
 python scripts/verify_reproducibility.py         # 25 verified, 13 skipped as superseded, $0
 
 # 4. the figures, redrawn from the artifacts
+#    (needs matplotlib, in the `figures` dependency group, not an extra:
+#     uv pip install -p .venv --group figures)
 python scripts/make_figures.py                   # writes docs/papers/shared/figures/*.pdf, $0
 
-# 5. build the papers
+# 5. build the papers (needs pdflatex and bibtex; TeX Live 2023 or newer)
 cd docs/papers/p1-conditional-lever && pdflatex main && bibtex main && pdflatex main && pdflatex main
 ```
 
@@ -45,7 +47,7 @@ The four-arm GEPA study. Everything paid in this project is one invocation of th
 
 ```bash
 # DRY RUN (default): prints the priced upper bound and exits without spending
-python scripts/run_validation_study.py --task-set multi-hard --arms ABCD --seeds 0 1 2 \
+python scripts/run_validation_study.py --task-set multi-hard --arms ABCD --seeds 0,1,2 \
     --n-train 8 --n-heldout 10 --max-metric-calls 28 --out docs/validation-study-x.json
 
 # SPEND: add --yes. Never do this without reading the dry run's estimate first.

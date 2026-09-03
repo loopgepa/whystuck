@@ -382,6 +382,41 @@ def test_the_paper_licence_grants_over_paths_that_exist() -> None:
     )
 
 
+def test_every_extra_the_docs_tell_a_reader_to_install_exists() -> None:
+    """`pip install -e '.[X]'` fails open: pip warns and installs the base package anyway.
+
+    `docs/papers/REPRODUCE.md` told readers to run `pip install -e '.[dev]'` for the whole life
+    of this file. `dev` is a PEP 735 entry under `[dependency-groups]`, not an extra, so pip
+    printed "does not provide the extra 'dev'" and installed nothing else -- leaving the reader
+    with no ruff, no mypy and no pytest, and every command in the Gates section failing on a
+    missing binary. Nothing caught it because the install still exited 0.
+
+    So: every extra any document names has to be a real extra. Read from pyproject rather than
+    listed here, or this guard would need editing on the commit that renames one.
+    """
+    pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    extras_block = re.search(
+        r"^\[project\.optional-dependencies\]\n(.*?)(?=^\[)", pyproject, re.M | re.S
+    )
+    assert extras_block, "pyproject has no [project.optional-dependencies]; update this guard"
+    extras = set(re.findall(r"^([A-Za-z][\w-]*)\s*=", extras_block.group(1), re.M))
+    assert extras, "parsed no extras out of pyproject; the guard would be vacuous"
+
+    named: dict[str, set[str]] = {}
+    for rel in ("docs/papers/REPRODUCE.md", "docs/EXPERIMENTS.md", "README.md"):
+        text = (ROOT / rel).read_text(encoding="utf-8")
+        for extra in re.findall(r"-e ['\"]?\.\[([\w-]+)\]", text):
+            named.setdefault(extra, set()).add(rel)
+    assert named, "no document names an extra at all; the guard would be vacuous"
+
+    bogus = {e: sorted(f) for e, f in named.items() if e not in extras}
+    assert not bogus, (
+        f"documents tell a reader to install extras that do not exist: {bogus}. "
+        f"pyproject defines {sorted(extras)}. A PEP 735 dependency group is not an extra and "
+        "pip will not install it this way."
+    )
+
+
 #: The split proof's size, restated in two documents and derived in neither. It read 322 against a
 #: script printing 318 -- and unlike the counts above it had no guard at all, in either document,
 #: because the number lives in `verify_split_coverage` rather than in a file listing.
