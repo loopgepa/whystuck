@@ -173,7 +173,7 @@ here, because it says the defence is not a better training signal but a screen o
 output.
 
 \paragraph{Reporting practice.}
-Reporting guidance for preregistered work asks that deviations be disclosed in one systematic place
+Reporting guidance for pre-registered work asks that deviations be disclosed in one systematic place
 rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}. Our register (\S\ref{sec:corrections}) follows that guidance, and this
 paper's experience adds a specific argument for it: two of our withdrawn claims were not merely
@@ -517,7 +517,7 @@ instrument whose failure is silent.
 \section{Superseded Runs: What the Defect Invalidated}
 \label{sec:superseded}
 
-The ten pre-registered runs below are retained as the record of what the defect of
+The original ten runs below are retained as the record of what the defect of
 \S\ref{sec:defect} invalidated, and are \textbf{not} evidence about loop-level
 optimization: the loop-level gene never changed, so arms~B and~D are the same program and the
 $\dd$ column compares a genome against itself. Their \textbf{Seed} column is unaffected: it
@@ -546,7 +546,7 @@ Run & Regime & Seeds & Seed & B (prompt-only) & D (loop-level) & \dd \\
 10 & \quad $+$ oracle ($R{=}3$), feedback \emph{hi} & 3 & \textbf{0.873} & 0.86 & 0.86 & $\mathbf{0.00}$ \\
 \bottomrule
 \end{tabular}
-\caption{All ten pre-registered runs, retained as the record of what the defect
+\caption{All ten of the original runs, retained as the record of what the defect
 invalidated. \textbf{The \dd\ column is not a measurement} and no claim in this series
 rests on it: the loop-level gene never changed, so B and D are the same program
 (\S\ref{sec:defect}); the companion paper measures this contrast on a corrected harness.
@@ -799,8 +799,8 @@ plausible. The defect is therefore not a property of GEPA, which is a strong opt
 seam between an optimizer and the system it is pointed at, and that seam is exactly what
 componentized optimization adds.
 
-We release the corrected harness, every cassette and pre-registration including the superseded
-ones, and the audit that produced this paper, on the view that a study which invalidates its own
+We release the corrected harness, every cassette that has a released result behind it, and
+every pre-registration, including the superseded ones, and the audit that produced this paper, on the view that a study which invalidates its own
 headline is more useful published than withdrawn. This paper and its figures are licensed CC BY 4.0
 and the accompanying code Apache-2.0.
 
@@ -812,11 +812,11 @@ and the accompanying code Apache-2.0.
 \section{Withdrawals, Corrections and Registered Deviations}
 \label{sec:corrections}
 
-This work's earlier drafts published claims it now withdraws. Reporting guidance for preregistered
+This work's earlier drafts published claims it now withdraws. Reporting guidance for pre-registered
 work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Seventeen} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Eighteen} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -825,7 +825,7 @@ The series' other two papers carry the entries bearing on their own claims.
 
 \begin{enumerate}\itemsep2pt
   \item \textbf{``No measurable advantage for loop-level optimization.''} The original headline,
-    across ten pre-registered runs. Withdrawn: the treatment never reached the gene, so those
+    across the original ten runs. Withdrawn: the treatment never reached the gene, so those
     runs compared a genome against itself (\S\ref{sec:defect}). What replaces it is one
     configuration in which the treatment demonstrably ran, reported in the companion paper.
   \item \textbf{``The null is tight rather than merely underpowered.''} It rested on four
@@ -894,6 +894,21 @@ The series' other two papers carry the entries bearing on their own claims.
     acceptance: it was about the \emph{critique} gene, unchanged in $15/15$ winning genomes while
     \texttt{generate} changed in $5/15$. The counts in the sentence were right throughout; the
     mechanism and the inference were not.
+  \item \textbf{``Every experiment was pre-registered \ldots\ committed to version control
+    before spending.''} True of most, not all, and the shared harness section now says so with the
+    exceptions named. Git shows three kinds. The first single-constraint run was produced at
+    05:26 UTC on 2026-07-23 and the earliest registration in the repository was committed at
+    08:01 the same day, so it predates the practice. The code-domain runs and the actuator
+    experiment each appear first in the commit carrying their own results, with no registration
+    before them anywhere. And the feedback-actionability pair and the second-worker replication
+    line carry registrations committed in the same commit as their results, seventeen to
+    twenty-five minutes and two and a half to three and a quarter hours after the runs' own
+    \texttt{meta.generated} timestamps. Those registrations may well have been written first, but
+    version control cannot show it, and ``committed to version control before spending'' is a
+    claim about version control. Table~\ref{tab:results} separately called all ten of the
+    original runs pre-registered, which is wrong for run~1 and for runs~9 and~10; it now calls
+    them the original ten. Found on the third pre-submission read, by comparing every run's own
+    \texttt{meta.generated} against the commit dates of the registrations that name it.
   \item \textbf{``Our first fifteen contrast runs measured the effect of evolving the
     verifier.''} Correct for thirteen of them. The other two are the actuator runs, where
     arm~\textbf{D} evolved \texttt{generate} and an \texttt{actuator} gene with the verifier

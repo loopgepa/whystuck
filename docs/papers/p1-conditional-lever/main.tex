@@ -1186,8 +1186,8 @@ genome-blind control C is flat by construction. Yet on the held-out split \emph{
 arm scored exactly its seed baseline} ($0.40$, $0.50$): the accepted training
 improvements changed which held-out tasks \texttt{gpt-4.1-mini} solves not at all. The
 headline is therefore a clean $\dd(D-B)=0.00$ (exact-resample $95\%$ CI
-$[0.000, 0.000]$): even when loop-level optimization has its extra lever and \emph{pulls} it,
-an accepted \texttt{ensure\_correct} rewrite that improves training, train-split improvement
+$[0.000, 0.000]$): even when loop-level optimization has its extra lever and \emph{pulls} it
+(an accepted \texttt{ensure\_correct} rewrite that improves training), train-split improvement
 does not transfer and the lever is inert on held-out. The instruction-following null recurs in a
 semantically-verified, executable-feedback domain.
 
@@ -1660,8 +1660,9 @@ optimization is one configuration in which the treatment demonstrably ran and it
 conditional on a measurable property of the task distribution. For fifteen runs the answer was
 ``nothing yet''; the sixteenth is a first data point, not a verdict.
 
-We release the corrected harness, every cassette and pre-registration including the superseded
-ones. This paper and its figures are licensed CC BY 4.0 and the accompanying code Apache-2.0, so
+We release the corrected harness, every cassette that has a released result behind it, and
+every pre-registration, including the superseded ones. The one recording we withhold is the
+stopped replication's, for the reason given in \S\ref{sec:threats}. This paper and its figures are licensed CC BY 4.0 and the accompanying code Apache-2.0, so
 the artifact can be redistributed and built on rather than merely read.
 
 \bibliographystyle{plainnat}
@@ -1673,7 +1674,7 @@ the artifact can be redistributed and built on rather than merely read.
 \label{sec:corrections}
 
 This paper's earlier drafts published claims it now withdraws, and two of its pre-registered
-predictions failed. Reporting guidance for preregistered work asks that deviations be disclosed in
+predictions failed. Reporting guidance for pre-registered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
 collected here and the body text states only the surviving claim.

@@ -10,6 +10,7 @@ dropping them would remove the most useful script in the release.
 
 from __future__ import annotations
 
+import inspect
 import sys
 from pathlib import Path
 
@@ -18,6 +19,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+import make_anon_mirror as mirror  # noqa: E402
 from make_anon_mirror import (  # noqa: E402
     DROP,
     build,
@@ -80,6 +82,21 @@ def test_a_dropped_path_is_matched_as_a_prefix_not_a_substring() -> None:
 
 
 @pytest.mark.skipif(not (ROOT / ".git").exists(), reason="needs the git index for the file list")
+def test_the_attestation_counts_every_run_json_including_the_bare_named_one() -> None:
+    """The printed summary is the attestation that nothing was lost, so its glob has to be right.
+
+    Source-level because the count lives in a `print` inside `main()`. `docs/validation-study.json`
+    is the flagship run whose fifteen arm-runs carry the 15/15 statistic all three papers lead
+    with, and `validation-study-*.json` is exactly the pattern that omits it.
+    """
+    src = inspect.getsource(mirror)
+    assert '"docs/validation-study*.json"' in src, (
+        "the run-JSON attestation glob must not have a hyphen after `study`, or it under-reports "
+        "the release by dropping docs/validation-study.json"
+    )
+    assert '"docs/validation-study-*.json"' not in src
+
+
 def test_a_built_mirror_carries_the_artifacts_and_leaks_nothing(tmp_path: Path) -> None:
     """The whole point: the reproducibility apparatus survives and the identity does not."""
     written, _ = build(ROOT, tmp_path / "m", "loopstudy")
@@ -87,6 +104,17 @@ def test_a_built_mirror_carries_the_artifacts_and_leaks_nothing(tmp_path: Path) 
     assert written > 500, "the mirror must carry the release, not a subset of it"
     assert len(list(tree.glob("docs/repeat/*.json"))) == 225
     assert len(list(tree.glob("tests/fixtures/cassettes/**/*.json"))) == 267
+    # Run JSONs were the one artifact class with no assertion here, which is how the attestation
+    # line in `make_anon_mirror` kept a `validation-study-*.json` glob: the hyphen drops the
+    # bare-named flagship run, so it printed 42 for a tree holding 43. Compared by NAME against
+    # the source rather than against a literal, since a literal would have pinned the bug.
+    source_runs = sorted(q.name for q in ROOT.glob("docs/validation-study*.json"))
+    assert len(source_runs) > 40, "the source glob found almost no runs; this would be vacuous"
+    assert "validation-study.json" in source_runs, (
+        "the bare-named flagship run is the file the hyphenated glob dropped; without it in the "
+        "source this assertion no longer covers the case it was written for"
+    )
+    assert sorted(q.name for q in tree.glob("docs/validation-study*.json")) == source_runs
     assert (tree / "src" / "loopstudy" / "eval" / "cassette.py").is_file()
     assert not (tree / "src" / "whystuck").exists()
     assert leaks(tree) == []

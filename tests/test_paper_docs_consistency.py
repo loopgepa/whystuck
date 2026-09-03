@@ -350,6 +350,38 @@ def test_advertised_worker_census_equals_the_run_metadata() -> None:
     assert sum(census.values()) == len(list((ROOT / "docs").glob("validation-study*.json")))
 
 
+def test_the_paper_licence_grants_over_paths_that_exist() -> None:
+    """The CC BY grant enumerates what it covers, and a path migration invalidated that list once.
+
+    It was authored beside a single `main.tex` and read "the PAPER in this directory: main.tex,
+    references.bib, the figures under figures/, SUBMISSION.md, REPRODUCE.md". The three-way split
+    moved it into `shared/`, where none of `main.tex`, `SUBMISSION.md` or `REPRODUCE.md` exists, so
+    for the whole life of the split tree the grant named a layout that had stopped existing.
+    Nothing caught it because a licence is prose and no guard reads prose. This one does.
+
+    Paths resolve against `docs/papers/`, which is what the licence now says they do.
+    """
+    text = (PAPERS / "shared" / "LICENSE").read_text(encoding="utf-8")
+    # The GRANT only, not the paragraph explaining it. That paragraph quotes the pre-split wording,
+    # which names a bare `main.tex`, so a guard reading it would fail on the history it records.
+    start = text.index("Paths are relative to docs/papers/")
+    scope = text[start : text.index("and any PDF built from them.", start)]
+    named = set()
+    for raw in re.split(r"[\s,;:]+", scope):
+        tok = raw.strip("().\"'")
+        if tok.endswith("/") or re.search(r"\.(tex|md)$", tok):
+            named.add(tok.removeprefix("docs/papers/"))
+    assert len(named) >= 8, (
+        f"the licence scope parsed to {len(named)} paths, so this guard would be nearly empty; "
+        f"the sentence shape changed: {sorted(named)}"
+    )
+    missing = sorted(n for n in named if not (PAPERS / n).exists())
+    assert not missing, (
+        f"the paper licence grants over {missing}, which do not exist under docs/papers/. "
+        "A licence naming files that are not there grants nothing over the files that are."
+    )
+
+
 #: The split proof's size, restated in two documents and derived in neither. It read 322 against a
 #: script printing 318 -- and unlike the counts above it had no guard at all, in either document,
 #: because the number lives in `verify_split_coverage` rather than in a file listing.

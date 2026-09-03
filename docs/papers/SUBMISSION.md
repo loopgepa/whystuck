@@ -98,7 +98,8 @@ pass every other check.
 `--anon-url` is **required** under `--anonymous`: the abstract claims an artifact release, and a
 claim pointing nowhere is worse than a named one.
 
-**That mirror does not exist, and it is a larger job than the paper build.** Measured over the
+**Building that mirror is a larger job than the paper build, and `scripts/make_anon_mirror.py`
+is that job.** Measured over the
 working tree on 2026-08-12, excluding `.git`, `dist/` and caches:
 
 | identifying string | files |
@@ -126,7 +127,12 @@ promising a reviewer an anonymous artifact:
    host.
 
 Standing one up publishes content under a new identity and is a decision for the author, not
-something the packaging script should do on its own.
+something the packaging script should do on its own. The script writes a verified tree and stops
+there. Rebuilt for this review it produced 793 files, 43 run JSONs, 225 replicate scorings and 267
+cassettes, with no identifying token surviving a byte scan and a standalone install of that tree
+re-deriving 1036/1036 claims after the rename. It lands in `dist/`, which is gitignored, so
+**rebuild it at the commit you submit**: a snapshot kept from an earlier commit publishes
+superseded papers, which is what happened to this one inside a single review pass.
 
 ## Blocking
 

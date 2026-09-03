@@ -2,8 +2,9 @@
 
 The three papers claim an artifact release, and every venue that fits them is double-blind, so the
 link in the abstract cannot be this repository: every commit here is authored by the same name and
-address, and the project name resolves to it in one search. `SUBMISSION.md` records that the mirror
-does not exist and is a larger job than the paper build. This is that job, minus the one step that
+address, and the project name resolves to it in one search. `SUBMISSION.md` records why the
+mirror is a larger job than the paper build, and why it has to be rebuilt at the commit being
+submitted. This is that job, minus the one step that
 is not a program's to take: it writes a verified tree and stops. Publishing it is the author's.
 
 What makes it more than a search-and-replace, and how each part is handled:
@@ -183,7 +184,13 @@ def main() -> None:
 
     print(f"{written} file(s) written to {args.dest}, {rewritten} rewritten")
     for area, pattern in (
-        ("run JSONs", "docs/validation-study-*.json"),
+        # No hyphen after `study`. With one, this glob excluded `docs/validation-study.json` --
+        # the flagship run, whose fifteen arm-runs carry the 15/15 statistic all three papers
+        # lead with -- so the line attesting that the reproducibility apparatus survived the
+        # rename said 42 while the mirror held 43. The file was always copied; only the
+        # attestation omitted it, which is the worse direction for a number whose job is to say
+        # nothing was lost.
+        ("run JSONs", "docs/validation-study*.json"),
         ("replicate scorings", "docs/repeat/*.json"),
         ("cassettes", "tests/fixtures/cassettes/**/*.json"),
     ):

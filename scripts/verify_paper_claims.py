@@ -5679,11 +5679,20 @@ def main() -> int:  # pragma: no cover - CLI convenience
         "    commit, since the corrected reflective dataset changes every cassette key.\n"
         "    Re-verified 2026-07-28 at fe670a8: generate 5/15, ensure_correct 0/15, and\n"
         "    per arm B 3/5, C 0/5, D 2/5 generate with 0/5 ensure_correct.\n"
-        "  - Evidence 7's 70 swallowed misses and the 0.666 -> 0.681 substitution, which\n"
-        "    require a deliberately mismatched replay.\n"
+        "  - Evidence 7's 0.666 -> 0.681 substitution, which requires a deliberately\n"
+        "    mismatched replay. The swallowed-miss count beside it was recorded as 70 at the\n"
+        "    time; an independent replay of the same commit and cassette counted 60, and no\n"
+        "    released artifact settles which, so no paper prints either number.\n"
         "  - The stopped mmc=160 run's partial spend, whose cassette is not released.\n"
         "  - Every cited external result, and every prose claim that is not one of the\n"
-        "    `tex:` numbers above -- those are scraped from the papers' sources, the rest are not."
+        "    `tex:` numbers above -- those are scraped from the papers' sources, the rest\n"
+        "    are not.\n"
+        "  - A shared error between this script and the code it checks. Many checks above\n"
+        "    recompute a number by importing the same analysis functions that produced it, so a\n"
+        "    bug in one of those functions would make the paper and this script agree and both\n"
+        "    be wrong. `src/whystuck/eval/study.py` names the same blind spot for\n"
+        "    `accept_cycle_floor`. An [OK] line means the paper matches a recomputation, not\n"
+        "    that the recomputation is independent of the pipeline."
     )
     return 0
 

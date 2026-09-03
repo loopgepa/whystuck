@@ -1,7 +1,23 @@
 Creative Commons Attribution 4.0 International (CC BY 4.0)
 
-This licence covers the PAPER in this directory: main.tex, references.bib, the figures under
-figures/, SUBMISSION.md, REPRODUCE.md, and any PDF built from them.
+This licence covers the PAPERS of this series. Paths are relative to docs/papers/, one directory
+up from this file:
+
+  p1-conditional-lever/main.tex     p1-conditional-lever/figures/
+  p2-repair-not-detection/main.tex  p2-repair-not-detection/figures/
+  p3-silent-no-op/main.tex          p3-silent-no-op/figures/
+  shared/preamble.tex               shared/loop.tex
+  shared/series.tex                 shared/references.bib
+  shared/figures/                   README.md
+  SUBMISSION.md                     REPRODUCE.md
+
+and any PDF built from them.
+
+Paths are given relative to docs/papers/ because this file no longer sits beside the papers. It was
+written when the series was one paper in one directory and it said "the PAPER in this directory",
+naming main.tex, SUBMISSION.md and REPRODUCE.md. The split into three moved this file into shared/,
+where none of those three exist, so the grant named a layout that had stopped existing. Copyright
+and permission are unchanged; what changed is that the scope now resolves.
 
 It does NOT cover the software in this repository. Code is licensed Apache-2.0; see the LICENSE
 file at the repository root. The two are separate grants deliberately: the code carries a patent

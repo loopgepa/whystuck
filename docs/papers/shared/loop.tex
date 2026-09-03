@@ -53,6 +53,14 @@ release with nothing left over, and a test asserts they do: a run that supplies 
 these pages cannot hold no reproducibility status at all. Output tokens are hard-capped via enforced \texttt{max\_tokens}; a pre-flight guard
 refuses any run whose conservative estimate exceeds \texttt{-{}-max-usd}, whose default is \$5.
 Five runs raised it explicitly, at four distinct values (\$6.18 twice, \$5.89, \$6.52, \$11.76), so
-\$5 is a default rather than a study-wide ceiling. Every experiment was pre-registered: hypothesis,
+\$5 is a default rather than a study-wide ceiling. Experiments were pre-registered: hypothesis,
 frozen configuration, expected seed band and verdict rule committed to version control
-\emph{before} spending.
+\emph{before} spending. Most of them, not all, and the exceptions are named here rather than
+left for a reader to reconstruct from commit dates. The first single-constraint run predates the practice and
+has no registration. The code-domain runs and the actuator experiment have none either, each
+appearing first in the commit that carries its own results. Two further lines, the
+feedback-actionability pair and the second-worker replication, do carry registrations, but
+committed in the same commit as their results and after the runs' own recorded timestamps, by
+seventeen to twenty-five minutes in the first case and by two and a half to three and a quarter
+hours in the second. Those registrations may well have been written first; version control cannot
+show it, so for them we do not claim it.

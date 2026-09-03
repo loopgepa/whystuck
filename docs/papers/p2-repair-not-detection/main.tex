@@ -472,8 +472,8 @@ whether the loop \emph{can} convert a perfect detector into higher performance
 (expected seed $\ge 0.85$). It cannot: the oracle seed is $0.748$, level with the
 intrinsic baseline ($0.765$) and \emph{below} the tool baseline ($0.837$). Detection
 quality is therefore \textbf{not} the binding constraint. Even told exactly which
-constraints fail, \texttt{gpt-4.1-mini} cannot reliably fix hard constraints (e.g.
-an exact word count) within the bounded refine budget.
+constraints fail, \texttt{gpt-4.1-mini} cannot reliably fix hard constraints (e.g.\ an exact
+word count) within the bounded refine budget.
 
 One scope condition belongs with that conclusion, because the companion paper on the conditional
 lever appears to contradict it and does not. Every run on this ladder is multi-hard, where the
@@ -851,7 +851,7 @@ ladder this paper already runs rather than a contrast invented after seeing the 
 That is this paper's thesis, measured on a worker it was not derived from. We do \emph{not} claim
 it is measured more strongly here: the original's $t = 8.08$ is over five replicates of a fixed
 thirty-task set and carries no task-draw term, while these $t$ values are over twenty seeds
-redrawing an of\-ten-overlapping pool, so the two are not a like-for-like comparison and this
+redrawing an often-overlapping pool, so the two are not a like-for-like comparison and this
 paper elsewhere refuses exactly that kind of pooling. The apparent reversal was the bundle, and the
 lesson we take from losing the prediction is that a registered prediction about a cell that moves
 two things tests neither.
@@ -1013,7 +1013,8 @@ counting, which rises $0.16 \to 0.33 \to 0.50$ with better feedback and never re
 localization is actionable in a way a diffuse ceiling would not be, a deterministic counter
 would likely recover most of it, and no amount of prompt or rubric rewriting did.
 
-We release the harness, every cassette, the pre-registrations and the corrections register. This
+We release the harness, every cassette that has a released result behind it, the
+pre-registrations and the corrections register. This
 paper and its figures are licensed CC BY 4.0 and the accompanying code Apache-2.0, so the
 artifact can be redistributed and built on rather than merely read.
 
@@ -1026,7 +1027,7 @@ artifact can be redistributed and built on rather than merely read.
 \label{sec:corrections}
 
 Earlier drafts of this work published claims it now withdraws. Reporting guidance for
-preregistered work asks that deviations be disclosed in
+pre-registered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
 collected here and the body text states only the surviving claim. \textbf{Fifteen} entries follow. The
