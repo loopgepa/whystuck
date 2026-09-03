@@ -114,7 +114,7 @@ The papers were carved out of one 46-page draft. A split is a mass edit of prose
 mode is silent: a paragraph belonging to no paper's argument gets dropped and nothing errors. This
 compares the frozen pre-split source against the three papers and requires every quantity to be
 carried by at least one of them, superseded by a replacement it verifies is present, or explicitly
-dropped with a reason. All 322 are accounted for and none is dropped.
+dropped with a reason. All 318 are accounted for and none is dropped.
 
 Also runs as tests (`tests/test_split_coverage.py`), including one that re-reads the pre-split draft
 from git to prove the baseline was not edited to make the check pass.

@@ -357,6 +357,12 @@ SPLIT_QUANTITY_PATTERNS = (
     ("docs/papers/README.md", r"all (\d+) quantities in the frozen pre-split draft"),
     ("docs/EXPERIMENTS.md", r"# (\d+) pre-split quantities accounted for"),
     ("docs/EXPERIMENTS.md", r"all (\d+) quantities in the pre-split draft"),
+    # The fourth site, enrolled 2026-09-03. The comment above records fixing 322 -> 318 "in two
+    # documents", and this guard was written over exactly those two: REPRODUCE.md kept saying 322
+    # for as long as the guard existed, and the guard passed the whole time. Fixing every site a
+    # number occurs at is a different job from listing every site the guard reads, and only the
+    # second one is what makes the next drift fail.
+    ("docs/papers/REPRODUCE.md", r"All (\d+) are accounted for and none is dropped"),
 )
 
 

@@ -70,3 +70,15 @@ ratio of two derived quantities, which is the registry's gap rather than the bib
 Only 4 of the 29 bib entries record a numeral at all, so 25 citations have nothing for `cite` to
 compare against in either direction. Three of the corpus's twenty defects were a paper misreporting
 a source, and all three were found by a person fetching the source. Nothing here reaches that.
+
+## The two sites accepted on 2026-09-03
+
+`bind` gained two sites, both `-3.3`, one in each of Paper~I and Paper~III, in the sentence that
+reports what \citet{bai2026masprompt} measured. They are accepted for the same reason the
+`+4.2`, `-16.0` and `+24.0` beside them already were: the number belongs to the cited paper, and
+no artifact of ours can reproduce someone else's table. What changed is that the sentence used to
+repeat that paper's own prose claim of improvement "across all five diverse tasks" while quoting
+an average taken over nine, and its nine-task single-agent column is flat on LiveCodeBench and
+`-3.3` on SWE-Bench Verified. Reporting the two exceptions is what added the numeral. The value
+was read off the source PDF, and the bibliography note records where, so a future reader can
+check it without refetching.

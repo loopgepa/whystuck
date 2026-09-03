@@ -13,7 +13,7 @@
                Dimakis, Alexandros G. and Stoica, Ion and Klein, Dan and Zaharia, Matei and
                Khattab, Omar},
   booktitle = {International Conference on Learning Representations (ICLR)},
-  year      = {2025},
+  year      = {2026},
   eprint    = {2507.19457},
   archivePrefix = {arXiv},
   primaryClass  = {cs.CL},
@@ -274,11 +274,14 @@
   eprint    = {2606.23664},
   archivePrefix = {arXiv},
   primaryClass  = {cs.LG},
-  note      = {Johns Hopkins University. Reports GEPA improving single-agent performance across
-               all five tasks by +4.2 points on average, while its multi-agent extension ranges
-               from -16.0 to +24.0 points depending on task and workflow topology. No per-task
-               range is published for the single-agent case; an earlier draft of this series
-               attributed one},
+  note      = {Johns Hopkins University. Cite the NINE-task average, not the paper's own
+               "across all five diverse tasks" prose: its task table is nine tasks (reasoning,
+               coding, tool-calling, three each) and the single-agent column averages +4.2
+               (49.9 -> 54.1) while sitting at 0.0 on LiveCodeBench and -3.3 on SWE-Bench
+               Verified, so "improves across all" does not describe the column the +4.2 comes
+               from. Multi-agent extension ranges -16.0 to +24.0 by task and topology, and the
+               four topology averages (-0.5, +0.5, +1.6, +2.3) are each below the single-agent
+               +4.2. Read off the PDF, verified 2026-09-03},
   url       = {https://arxiv.org/abs/2606.23664}
 }
 

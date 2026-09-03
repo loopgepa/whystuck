@@ -67,8 +67,9 @@ optimizes multi-module pipelines end-to-end.
 This capability raises a concrete engineering question that, to our knowledge,
 has not been isolated experimentally for a self-refine loop's own verifier. The
 adjacent question for multi-\emph{agent} systems has since been benchmarked:
-\citet{bai2026masprompt} find that GEPA improves single-agent performance across all five of
-their tasks, by $+4.2$ points on average, while its multi-agent extension ranges from $-16.0$ to
+\citet{bai2026masprompt} find that GEPA lifts single-agent performance by $+4.2$ points
+averaged over their nine tasks, with one of the nine flat and one at $-3.3$, while its
+multi-agent extension ranges from $-16.0$ to
 $+24.0$ points depending on task and workflow topology, so more optimizable surface is not reliably
 better. Our question is narrower and about a different object: \emph{given a self-refine loop, does
 optimizing the loop's verification/critique component (and beyond) yield better
@@ -1487,6 +1488,23 @@ its numbers may be read to mean.}
 \label{tab:closability}
 \end{table}
 
+\textbf{Nothing here re-runs the search.} Every replicate in this paper re-scores a \emph{fixed}
+genome, and every seed re-partitions one fixed task pool rather than drawing a fresh one
+(Paper~III, defect~5), so $\sigma(\dd)$ carries the worker's sampling noise and none of the
+optimizer's own. The same arm, seed and budget could accept a different genome on a second
+search, and we have no measurement of how far that would move a cell. It is the one noise source
+we name without bounding: a re-score replays a cassette at \$0, while a search-path replicate
+costs a full run, so none was bought.
+
+\textbf{No multiplicity correction, by design rather than by omission.} This paper reports many
+comparisons and none of them is a search for a cell that clears a threshold. Each was registered
+with its hypothesis and its verdict rule before it was bought, and the registered predictions
+that failed are reported beside those that held (Appendix~\ref{sec:corrections}), so no $p$ here
+was selected from a larger family and a family-wise adjustment would correct for a selection we
+did not make. What the conclusion rests on is the registered swing between two levels rather than
+any single cell, and Figure~\ref{fig:effects} shows nothing in the study clearing $2\sigma$ with
+an interval behind it.
+
 \section{When Would Loop-Level Help? Directions}
 \label{sec:directions}
 
@@ -1766,7 +1784,7 @@ The series' other two papers carry the entries bearing on their own claims.
     The error ran \emph{against} us: the sentence exists to bound how far precision-1 acceptance
     fails to generalize, and the bound was too generous. \S\ref{sec:budgetresult} now states the
     cell by its \texttt{mmc}, and all four counts are derived from the same replay that already
-    reproduced the two we had right. Found independently by four of the twelve cold reviewers.
+    reproduced the two we had right.
   \item \textbf{The registered depth bound was computed from a $\sigma$ nothing measured.}
     \S\ref{sec:budgetprereg} registered ``$2.5$ times the directly measured $\sigma(\dd) = 0.042$ at
     this level (\S\ref{sec:repeat}), i.e.\ $|\dd| < 0.105$''. \S\ref{sec:repeat} reports $0.0468$,
@@ -1781,7 +1799,7 @@ The series' other two papers carry the entries bearing on their own claims.
     whether a printed decimal is in the set of \emph{values} some check derives, and $0.042$ collides
     with this paper's own $-0.042$ headline while $0.105$ collides with a confidence bound in
     Table~\ref{tab:p0}. A wrong number tends to collide with a related one nearby, because
-    nearby is where it was copied from. Found independently by three of the twelve cold reviewers.
+    nearby is where it was copied from.
   \item \textbf{Two results attributed to a citation that contains neither.} \S\ref{sec:related}
     read ``high false-positive rates \citep{valmeekam2023selfcritique} and a self-enhancement bias,
     with cross-family verification outperforming self-verification''. Only the first clause is in
@@ -1794,8 +1812,7 @@ The series' other two papers carry the entries bearing on their own claims.
     unverified citation with another is not a correction. Nothing in the paper's own results
     depended on it: D3 argues for a cross-provider critic from our own measurements, not from
     prior work, so the direction stands and the borrowed support does not. Paper~II carried the
-    same sentence and a second, broader version of it. Found by three of the twelve cold reviewers,
-    all in condition~B.
+    same sentence and a second, broader version of it.
   \item \textbf{We printed the $L_1$ cell at $1.44\sigma$ in the prose and $1.43\sigma$ in the table.} One quantity, two values, six prose sites against
     Table~\ref{tab:splitresults}'s column, for the whole life of this paper. $1.43$ is right:
     the exact $-0.041\overline{6}$ over the unrounded $\sigma = 0.029052$ is $1.4342$, and $1.44$ is
@@ -1870,9 +1887,11 @@ artifact rather than a null: GEPA logged \texttt{``All subsample scores perfect 
 0. Skipping''} on every iteration, because the seed loop, aided by executable base-test
 feedback, already solved all six training tasks. Held-out headroom looked adequate
 ($0.80$--$0.90$); the \emph{training} split had none, and that is what gates GEPA. We did
-not weaken the worker to manufacture headroom, because prompt-optimization and
-self-refinement gains scale inversely with model strength
-\citep{zhou2025bbopromptscale,zhang2024smallverifiers}, so a positive $\dd(D{-}B)$ bought
+not weaken the worker to manufacture headroom, because prompt-optimization gains scale
+inversely with model strength \citep{zhou2025bbopromptscale}, and self-correction needs a
+verifier stronger than the base model rather than the model's own critique
+\citep{zhang2024smallverifiers}, so a positive
+$\dd(D{-}B)$ bought
 that way would attenuate toward zero at frontier scale; moving headroom into the
 \emph{tasks} keeps the worker in the same capability-relative regime a frontier model
 occupies on frontier-hard work. The run reproduces bit-for-bit and its cassette is released

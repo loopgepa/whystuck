@@ -159,7 +159,7 @@ and tested.
 | LLM worker + output→apply→verify wiring (real-repo scoring) | 🟡 v0.2-alpha |
 | Optimize + frontier MCP tools (gated on the extra) | 🟡 v0.2-alpha |
 
-**1968 tests**, all local and offline; `ruff` + `mypy --strict` (on `src/`) + docs `--strict` clean.
+**1969 tests**, all local and offline; `ruff` + `mypy --strict` (on `src/`) + docs `--strict` clean.
 
 ## Configure
 
@@ -200,7 +200,7 @@ says which paper answers which question.
 | | paper | in one line |
 |---|---|---|
 | **I** | *Whether Optimizing the Loop Beats Optimizing the Prompt Depends on One Number* | Evolving a loop's verifier beats evolving its generation prompt **only when enough first drafts are already correct**: +0.060 held-out at p₀ = 0.267, nothing measurable at p₀ = 0.067, a 0.102 swing across the axis |
-| **II** | *What a Checker Cannot Buy Is the Repair* | A **perfect** inference-time checker gives the loop its **worst** score, indistinguishable from a near-random one; concrete measured repair instructions are worth +0.0613. No optimizer anywhere in the design |
+| **II** | *What a Checker Cannot Buy Is the Repair* | A **perfect** inference-time checker scores **0.042 below** a mere text-statistics tool and is indistinguishable from a near-random one; concrete measured repair instructions are worth +0.0613. No optimizer anywhere in the design |
 | **III** | *Your Loop Optimizer Is Not Optimizing Your Loop* | Pointing an optimizer at a component is not the same as optimizing it. Our first fifteen contrast runs had a critique gene **byte-identical to the seed in 15/15** winning genomes. Print one integer per component |
 
 - **[Every experiment, and the command that produced it](docs/EXPERIMENTS.md)** — one script spends

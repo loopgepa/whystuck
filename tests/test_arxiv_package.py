@@ -38,6 +38,28 @@ def test_the_rehearsal_never_runs_bibtex():
     assert '"bibtex"' in inspect.getsource(ap.build_bbl)
 
 
+def test_build_bbl_leaves_the_paper_directory_with_resolved_citations():
+    """Three pdflatex passes, not two, and the third must come after bibtex.
+
+    `build_bbl` deletes `main.bbl` first, so pass one runs with no bibliography and writes an aux
+    with no `\\bibcite`. Pass two reads that aux, so the PDF it produces prints `[?]` for every
+    citation even though it writes the correct aux for a successor. With only two passes the
+    packager left `docs/papers/<slug>/main.pdf` at 22 undefined citations and 14 rendered `[?]`,
+    which is a broken PDF sitting where a human looks for the finished paper. Source-level because
+    the alternative is three LaTeX runs inside the suite.
+    """
+    src = inspect.getsource(ap.build_bbl)
+    calls = re.findall(r'"(pdflatex|bibtex)"', src)
+    assert calls.count("pdflatex") >= 3, (
+        f"build_bbl runs pdflatex {calls.count('pdflatex')} times; two leaves the paper "
+        "directory with unresolved citations"
+    )
+    assert calls.index("bibtex") < len(calls) - 2, (
+        "at least two pdflatex passes must follow bibtex, or the aux it populates is never "
+        "typeset from"
+    )
+
+
 def test_the_rehearsal_fails_the_build_rather_than_warning():
     """Undefined citations must be a non-zero exit, not a line of output someone skims past."""
     src = inspect.getsource(ap.main)

@@ -185,6 +185,15 @@ def build_bbl(paper: Path = PAPER) -> Path:
         raise RuntimeError(
             "bibtex reported errors, so main.bbl is unreliable:\n" + "\n".join(fatal)
         )
+    # A third pass, for the directory rather than for the tarball. The pass above writes
+    # `\bibcite` into the aux but typesets from the aux the FIRST pass left behind, which had
+    # none, so without this line the packager leaves `docs/papers/<slug>/main.pdf` printing `[?]`
+    # for every citation: 22 undefined citations and 14 rendered `[?]` on Paper III, measured.
+    # The upload is unaffected -- it ships this `main.bbl` and is rehearsed in its own staged tree
+    # -- but the in-tree PDF is the one a human opens before submitting, and a packaging step that
+    # silently breaks it invites reading a real defect into a build artefact, or worse, trusting a
+    # later "0 undefined citations" that was measured on a different tree.
+    _run(["pdflatex", "-interaction=nonstopmode", "main.tex"], paper)
     return bbl
 
 
