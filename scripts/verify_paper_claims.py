@@ -492,8 +492,10 @@ def _scrape_word(tex: str, pattern: str) -> float:
     return float(_WORD_NUM[word])
 
 
-#: The split sweep's rows, as (paper row label, released run slug). Run 3 is the n_train=8 row:
-#: it was not bought for the sweep, it *is* the cell the sweep was designed to interrogate.
+#: The split sweep's rows, as (paper row label, released run slug). The n_train=8 row is `c2b`,
+#: the corrected four-arm re-run: it was not bought for the sweep, it *is* the cell the sweep was
+#: designed to interrogate. It is NOT run 3 -- run 3 is `multihard`, five seeds and a mean delta of
+#: 0.000, and this comment said "Run 3 is the n_train=8 row" while the mapping below said `c2b`.
 _SPLIT_ROWS = (("4", "split4"), ("8", "c2b"), ("16", "split16"), ("24", "split24"))
 
 
@@ -1451,6 +1453,79 @@ def _precorrection_counts() -> tuple[int, int, float, int]:
         max(abs(r.mean_delta) for r in census),
         sum(1 for r in census if r.difference_of_means == 0.0),
     )
+
+
+#: The corrected cells the pre-registered verdict rule of Paper I's method section applies to,
+#: as (paper's label for the cell, released run slug). The re-run doubles as the p0 sweep's L1.
+_PREREG_CELLS = (
+    ("re-run", "c2b"),
+    ("p0 L2", "p0-L2"),
+    ("p0 L3", "p0-L3"),
+    ("n_train 4", "split4"),
+    ("n_train 16", "split16"),
+    ("n_train 24", "split24"),
+)
+
+
+def _prereg_verdicts() -> tuple[int, int, float]:
+    """(cells, SUPPORTED verdicts, sigma_B + sigma_D at n_train=16) for the pre-registered rule.
+
+    Paper I stated the rule and then reported a different noise framework. That is only a neutral
+    omission if the rule agrees with what the paper reports, and it does not: applied literally it
+    returns SUPPORTED twice, because its bar is the sum of two across-seed spreads and a seed here
+    re-partitions one fixed pool rather than resampling it. Derived here so the paper's disclosure
+    of what the rule returns cannot drift from what it actually returns.
+    """
+    supported = 0
+    sigma_sum_16 = float("nan")
+    for label, slug in _PREREG_CELLS:
+        runs = _runs(f"validation-study-{slug}.json")
+        b = [r["B"]["opt_heldout"] for r in runs]
+        d = [r["D"]["opt_heldout"] for r in runs]
+        seeds = [r[arm]["seed_heldout"] for r in runs for arm in ("B", "D")]
+        s_b, s_d = stdev(b), stdev(d)
+        if label == "n_train 16":
+            sigma_sum_16 = s_b + s_d
+        if any(x >= 0.9 or x <= 0.1 for x in seeds):
+            continue
+        if mean(d) <= mean(b):
+            continue
+        if mean(d) - mean(b) > s_b + s_d:
+            supported += 1
+    if supported == 0:
+        raise ValueError(
+            "the pre-registered rule now returns SUPPORTED nowhere, so Paper I's disclosure that "
+            "it returns SUPPORTED twice is stale; re-read sec:method before relaxing this"
+        )
+    return len(_PREREG_CELLS), supported, sigma_sum_16
+
+
+def _verifier_evolvable() -> int:
+    """How many of the pre-correction fifteen actually let arm~D evolve `ensure_correct`.
+
+    Thirteen. The other two are the actuator runs, whose arm~D evolves `generate` + `actuator`
+    with the verifier frozen by design, so their critique-gene byte-identity is the configuration
+    rather than the defect. The papers cited `15/15` alone until the final pre-submission read,
+    which is the same count-right-composition-wrong shape as several entries in Paper III's own
+    register, so the denominator is derived here instead of asserted in prose.
+    """
+    census = _precorrection_census()
+    total = 0
+    for run in census:
+        stem = (
+            "validation-study" if run.name == "validation-study" else f"validation-study-{run.name}"
+        )
+        with open(f"{DOCS}/{stem}.json", encoding="utf-8") as fh:
+            doc = json.load(fh)
+        if "ensure_correct" in doc["runs"][0]["D"]["evolvable_genes"]:
+            total += 1
+    if total >= len(census):
+        raise ValueError(
+            f"{total} of {len(census)} pre-correction runs evolve ensure_correct; the papers "
+            "distinguish that subset from the full fifteen, so an equality here means the "
+            "distinction has become vacuous and the prose should drop it"
+        )
+    return total
 
 
 def _precorrection_acceptance() -> dict[str, int]:
@@ -3353,6 +3428,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     # were zero. The paper said "eleven" for a set of fifteen, and called all of their zeros
     # identities when four are not zero at all.
     n_pre, n_zero, max_abs, n_zero_by_means = _precorrection_counts()
+    n_verifier = _verifier_evolvable()
     # The floating-point gap this whole family of claims turned on. Pinned so that a future edit
     # cannot quietly reintroduce a count that depends on summation order: if these two ever agree,
     # the artifact changed and the prose's careful wording needs re-reading, not preserving.
@@ -3372,7 +3448,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
             r"preceded it: \\textbf\{(\w+)\} of them",
             n_pre,
         ),
-        ("tex: intro pre-correction runs", r"Our first (\w+) contrast runs measured", n_pre),
+        ("tex: intro pre-correction runs", r"[Oo]ur first (\w+) contrast runs measured", n_pre),
         (
             "tex: defect appendix pre-correction runs",
             r"Our first (\w+) contrast runs produced arms",
@@ -3421,8 +3497,36 @@ def _checks() -> list[tuple[str, float, float, float]]:
             r"(\w+) runs\s+reported held-out scores identical on every seed, and we read",
             n_zero,
         ),
+        (
+            "tex: abstract verifier-evolvable subset",
+            r"(\w+) of our first fifteen contrast runs measured",
+            n_verifier,
+        ),
+        (
+            "tex: defect appendix verifier-evolvable subset",
+            r"(\w+) of the fifteen made that gene evolvable",
+            n_verifier,
+        ),
     ):
         out.append((label, _scrape_word(tex, pattern), 0, artifact))
+    for label, pattern in (
+        ("tex: abstract 13/13 numerator", r"and \$(\d+)/13\$ where it was evolvable at all"),
+        ("tex: abstract 13/13 denominator", r"and \$13/(\d+)\$ where it was evolvable at all"),
+        ("tex: contributions 13/13", r"and in \$(\d+)/13\$ of the thirteen"),
+        ("tex: defect appendix 13/13", r"byte-identical in \$(\d+)/13\$ of them"),
+    ):
+        out.append((label, _scrape(tex, pattern), 0, float(n_verifier)))
+    n_cells, n_supported, sigma_sum_16 = _prereg_verdicts()
+    for label, pattern, artifact in (
+        ("tex: prereg corrected cells", r"literally to the\s+(\w+) corrected cells", n_cells),
+        ("tex: prereg supported count", r"\\textbf\{SUPPORTED\} at (\w+) of the", n_supported),
+    ):
+        out.append((label, _scrape_word(tex, pattern), 0, artifact))
+    for label, pattern in (
+        ("tex: prereg sigma sum, method", r"\\sigma_B \+ \\sigma_D = ([\d.]+)\$ at"),
+        ("tex: prereg sigma sum, register", r"sum to \$([\d.]+)\$ and so sit below"),
+    ):
+        out.append((label, _scrape(tex, pattern), 0.0005, sigma_sum_16))
     out.append(
         (
             "tex: largest pre-correction |mean delta|",

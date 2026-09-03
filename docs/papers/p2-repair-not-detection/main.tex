@@ -40,10 +40,10 @@ in-loop critique: across a $10\times$ range of task difficulty the same critique
 triples while Youden's $J$ and Matthews' correlation do not improve at all, so a rising F$_1$ on
 an easier benchmark is base-rate inflation. The residual is one
 mechanical skill rather than a diffuse capability wall, exact word counting: $0.16 \to 0.33 \to 0.50$ under better feedback and never
-solved. The practical consequence is a reordering of priorities: do not buy a better detector, buy
+solved. The practical consequence: do not buy a better detector, buy
 a more actionable fixer. Every claim rests on five independent replicates of each configuration,
-paired within replicate on shared held-out tasks, and every published claim this paper withdraws is
-listed in Appendix~\ref{sec:corrections}.
+paired within replicate on shared held-out tasks, bar the two seed-level corroborations, and every
+published claim this paper withdraws is listed in Appendix~\ref{sec:corrections}.
 \end{abstract}
 
 \input{../shared/series}
@@ -175,7 +175,8 @@ post-search held-out scores are identical on every seed of every released run, $
 arm-\textbf{A} seed entries across the release, with no exception. The cells introduced for this
 paper were additionally invoked with \texttt{-{}-arms A}, which runs no search at all. The earlier
 configurations are arm~\textbf{A} read out of a four-arm artifact in which search did run, on arms
-\textbf{B} and \textbf{D}, where it cannot reach a genome that has nothing to evolve. Either way no
+\textbf{B} and \textbf{D} (prompt-only and loop-level, defined in Paper~III), where it cannot
+reach a genome that has nothing to evolve. Either way no
 result below can be produced by a prompt optimizer, a search budget, or the wiring that connects
 one to a component. The harness varies between runs: which signal the critique receives,
 how many refine rounds it may gate, and what repair text the refine step is handed.

@@ -189,8 +189,8 @@ neither stops a build, and Paper I shipped an oversized threats table until 2026
 nothing read the log.
 
 Abstract lengths against the 1920-character metadata
-field: **1909**, **1893**, 1788. Paper I has 11 characters of headroom and Paper II has 27, so any
-edit to either abstract has to be re-checked by `make_arxiv_package.py` rather than assumed to fit.
+field: **1909**, **1902**, **1905**. The headroom is 11, 18 and 15 characters, so any edit to any
+of the three abstracts has to be re-checked by `make_arxiv_package.py` rather than assumed to fit.
 
 The three are cross-referenced as a series, so they should be posted together or in the order I, II,
 III; each abstract names its companions.

@@ -26,10 +26,11 @@ and the one integer that catches it}
 Reflective optimizers such as GEPA \citep{agrawal2025gepa} can evolve several text components of a
 compound LLM system at once. We report a failure mode of that capability which held-out scores
 cannot reveal: \textbf{pointing an optimizer at a component is not the same as optimizing it}.
-Our first fifteen contrast runs measured the effect of evolving a self-refine loop's verifier against
-evolving only its generation prompt. Replayed offline, the winning genome's critique gene is
-\emph{byte-identical to the seed in $15/15$ cases}; ten of the runs reported held-out scores
-identical on every seed. The two arms whose difference the study existed to measure were, for the gene that
+Thirteen of our first fifteen contrast runs measured the effect of evolving a self-refine loop's
+verifier against evolving only its generation prompt; the other two pointed the optimizer at a
+repair gene instead. Replayed offline, the winning genome's critique gene is
+\emph{byte-identical to the seed in $15/15$ cases}, and $13/13$ where it was evolvable at all;
+ten of the runs reported held-out scores identical on every seed. The two arms whose difference the study existed to measure were, for the gene that
 defines the difference, the same program, and we believed those runs for months. Two ordinary wiring
 choices caused it, one a library default: a reflective dataset built without regard to which
 component it describes, so the reflector never saw a verdict the critique had returned; and a
@@ -76,7 +77,8 @@ consistency as evidence of a tight null. It was evidence of the opposite. Our co
 \begin{enumerate}
   \item \textbf{The failure mode, established on a released artifact} (\S\ref{sec:defect}).
     Across the fifteen runs, the winning genome's critique gene is byte-identical to the seed in
-    $15/15$; and within the flagship run, whose five seeds and three evolvable arms give fifteen
+    $15/15$, and in $13/13$ of the thirteen that made that gene evolvable at all; and within the
+    flagship run, whose five seeds and three evolvable arms give fifteen
     arm-runs, the optimizer changed \texttt{generate} in $5/15$ winners and
     \texttt{ensure\_correct} in $0/15$ ($2/5$ and $0/5$ for arm~D alone). \emph{Two different
     fifteens}, and we name the unit of each because they are numerically equal and an earlier draft merged them. Every reported difference is a comparison of a genome
@@ -235,7 +237,12 @@ $\dd$ and the arm variances, so a genome-against-itself contrast passes through 
 Our first fifteen contrast runs produced arms whose held-out scores were identical on every seed ten times,
 and near-zero or moderately negative otherwise. None was a measurement of the hypothesis. Replayed
 offline, the winning genome's critique gene is \textbf{byte-identical to the seed in $15/15$} of
-those runs. Within the flagship run, five seeds by three evolvable arms, so fifteen arm-runs,
+those runs. Thirteen of the fifteen made that gene evolvable in arm~\textbf{D} and it is
+byte-identical in $13/13$ of them; the other two are the actuator runs, where arm~\textbf{D}
+evolved \texttt{generate} and an \texttt{actuator} gene with \texttt{ensure\_correct} held fixed
+by design, so identity there is expected rather than diagnostic and what invalidates their
+contrast is the selector confound below (defect~3) rather than defect~1.
+Within the flagship run, five seeds by three evolvable arms, so fifteen arm-runs,
 a second fifteen that we distinguish from the first because the two are equal by coincidence and an
 earlier draft ran them together, since GEPA changed
 \texttt{generate} in $5/15$ winners and \texttt{ensure\_correct} in $0/15$; for arm~D alone that
@@ -808,7 +815,7 @@ This work's earlier drafts published claims it now withdraws. Reporting guidance
 work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Sixteen} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Seventeen} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -886,6 +893,13 @@ The series' other two papers carry the entries bearing on their own claims.
     acceptance: it was about the \emph{critique} gene, unchanged in $15/15$ winning genomes while
     \texttt{generate} changed in $5/15$. The counts in the sentence were right throughout; the
     mechanism and the inference were not. Found by cold reviewers in seven of twelve runs.
+  \item \textbf{``Our first fifteen contrast runs measured the effect of evolving the
+    verifier.''} Correct for thirteen of them. The other two are the actuator runs, where
+    arm~\textbf{D} evolved \texttt{generate} and an \texttt{actuator} gene with the verifier
+    held fixed by design, so their critique-gene identity is expected rather than diagnostic, and
+    the selector confound (defect~3) rather than defect~1 is what invalidates their contrast. The
+    $15/15$ count is unchanged; what was wrong is the description of what all fifteen set out to
+    measure. Found on the final pre-submission read.
   \item \textbf{``Ten of the fifteen reported a \dd\ of exactly zero.''} Correct as a count only
     under a summation order this paper never specified, and it was the wrong predicate regardless.
     \S\ref{sec:defect} defines $\dd = \mathrm{mean}(D) - \mathrm{mean}(B)$; under that definition

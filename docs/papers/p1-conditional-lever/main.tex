@@ -271,6 +271,20 @@ ceiling/floor flag fires (seed held-out $\ge 0.9$ or $\le 0.1$). This is a
 deliberately conservative bar (the sum of two standard deviations), erring
 toward under-claiming.
 
+\paragraph{What that rule returns, and why it is not what we report.} Applied literally to the
+six corrected cells it returns \textbf{NOT SUPPORTED} for the four-arm re-run,
+\textbf{INCONCLUSIVE} at $p_0 = 0.667$ on the ceiling flag and at
+$n_{\mathrm{train}} \in \{4, 24\}$ within its own noise, and \textbf{SUPPORTED} at two of the
+six, $p_0 = 0.267$ and $n_{\mathrm{train}} = 16$. We report no per-cell verdicts, and the
+reason is the bar rather than the cells. $\sigma_B$ and $\sigma_D$ are across-seed spreads,
+and a seed here re-partitions one fixed task pool instead of resampling it (Paper~III,
+defect~5), so that spread reads as precision it has not earned and can shrink by luck:
+$\sigma_B + \sigma_D = 0.018$ at $n_{\mathrm{train}} = 16$, against a directly measured
+$\sigma(\dd) = 0.0291$ for a single cell. What we report instead is the swing across the
+$p_0$ axis against that measured floor (\S\ref{sec:threats}) and, for the headline cell, a
+five-replicate $t(4)$ (\S\ref{sec:repeat}). The deviation is registered in
+Appendix~\ref{sec:corrections}.
+
 \section{Experimental Setup}
 \label{sec:setup}
 
@@ -300,8 +314,8 @@ superseded and reported, with the reason, in Paper~III.
 \label{sec:rerun}
 
 The one four-arm contrast in this paper that measures what the study set out to measure was bought on a rebuilt harness, after the audit of Paper~III and under the prediction registered in \S\ref{sec:directions} and reproduced verbatim there. Same task family, budget and worker as run~3
-(multi-hard, $\mathrm{mmc}=28$, 8 train / 10 held-out, one refine round, three seeds), with
-the three corrections in place: a component-specific reflective dataset, an explicit
+(multi-hard, $\mathrm{mmc}=28$, 8 train / 10 held-out, one refine round), at three seeds of
+run~3's five, with the three corrections in place: a component-specific reflective dataset, an explicit
 \texttt{module\_selector=all}, and a non-saturating arm~C.
 
 We bought it twice, and discarded the first attempt because the harness accepted an empty
@@ -798,7 +812,7 @@ rejects; a budget-only sweep at fixed $n_{\mathrm{train}}{=}8$ (D4) is the compl
 $n_{\mathrm{train}}$ & \texttt{mmc} & accept-cycle floor & type-overlap count (3 seeds) & priced bound \\
 \midrule
 4  & 14 & 11 & 2 / 1 / 3 & \$1.47 \\
-8  & 28 & 19 & 3 / 2 / 3 & (run~3) \\
+8  & 28 & 19 & 3 / 2 / 3 & (re-run) \\
 16 & 56 & 35 & 5 / 5 / 3 & \$2.43 \\
 24 & 84 & 51 & 6 / 6 / 4 & \$3.08 \\
 \bottomrule
@@ -848,7 +862,7 @@ should change accordingly.
 \label{sec:splitresult}
 
 The three unbought rows were then bought, under the priced bound of \$6.98 stated above, and
-Table~\ref{tab:splitresults} reports them beside run~3. The harness records the pre-flight
+Table~\ref{tab:splitresults} reports them beside the re-run. The harness records the pre-flight
 \emph{estimate} for each run and not the invoice, so what is verifiable in the artifact is the
 bound ($\$1.47 + \$2.43 + \$3.08$) rather than the spend; run~3's precedent puts the estimator
 at roughly $6\times$ conservative. The two predictions come apart, so we take them in the order
@@ -876,7 +890,7 @@ than retreating to the interval, which is the move pre-registration exists to pr
 Table~\ref{tab:splitresults} holds $p_0$, the held-out tasks and the seeds fixed; only the
 split and its constant-epoch budget move. Across them $\dd(D-B)$ reads
 $+0.017,\,-0.042,\,+0.062,\,+0.023$: three of four positive, and the one negative cell is
-run~3 itself. The sign of the effect this paper leads with is therefore not a property of
+the re-run itself. The sign of the effect this paper leads with is therefore not a property of
 $p_0 = 0.067$; it is a property of one $(n_{\mathrm{train}}, \mathrm{mmc})$ cell. We withdraw
 the unconditional form of that claim in \S\ref{sec:threats} and state what survives:
 \emph{the verifier reliably degenerates at low $p_0$, and we have not shown that this costs
@@ -1581,7 +1595,8 @@ every instruction-following run we bought sat at the low-$p_0$ end of an axis we
 identified, and the corrected re-run measures it at $0.067$.
 
 \textbf{Does GEPA lift this task?} No, at the
-budgets tested: its genomes gave no held-out gain and sometimes \emph{degraded} both arms. That is
+budgets tested: its genomes gave no held-out gain, and the loss they did produce was specific to
+the arm carrying the extra gene. That is
 not a verdict on GEPA, which reports gains elsewhere, and it is not train-split overfitting,
 that was our reading until the sweep varied the split from $4$ to $24$ and found no trend to
 overfit along (\S\ref{sec:splitresult}). Nor is it under-search: a second pre-registered sweep
@@ -1644,7 +1659,7 @@ predictions failed. Reporting guidance for preregistered work asks that deviatio
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
 collected here and the body text states only the surviving claim.
-\textbf{Twenty-one} entries follow.
+\textbf{Twenty-two} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1828,6 +1843,17 @@ The series' other two papers carry the entries bearing on their own claims.
     replicated $\dd$ from the artifacts and fails if another level overtakes it, another reads the
     named cell, and a third fails if that cell ever stops being the larger of the two. A
     superlative is a claim about a set, and this one never said which set.
+  \item \textbf{The pre-registered verdict rule was stated and then never applied.} A
+    registration deviation, not a typo, and it ran in the direction that flatters us only if a
+    reader assumes the rule agrees with what we report. It does not: applied literally to the six
+    corrected cells it returns \textbf{SUPPORTED} at $p_0 = 0.267$ and at
+    $n_{\mathrm{train}} = 16$, because its bar is $\sigma_B + \sigma_D$, two across-seed
+    spreads, which at $n_{\mathrm{train}} = 16$ sum to $0.018$ and so sit below the noise on a
+    single cell. Seeds here re-partition one fixed task pool rather than resampling it (Paper~III,
+    defect~5), so that bar reads as precision it has not earned. \S\ref{sec:method} now prints
+    the verdicts the rule returns and says why the measured $\sigma(\dd)$ of
+    \S\ref{sec:threats} and the five-replicate $t(4)$ of \S\ref{sec:repeat} replace it. Found on
+    the final pre-submission read, by applying our own rule to our own cells.
 \end{enumerate}
 
 \section{The Actuator Experiment, and the MBPP+ Attempt}

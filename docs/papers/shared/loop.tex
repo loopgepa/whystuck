@@ -36,7 +36,7 @@ Every LLM call is recorded to a content-addressed cassette (\texttt{sha256} of n
 runs replay offline at zero cost and partial spend is always persisted. Reproduction is strict:
 re-running any study with \texttt{-{}-replay} re-executes the whole pipeline (loaders, GEPA search,
 scoring) against the cached calls with no API key, and any cassette miss raises, per call and,
-after the correction recorded as defect~7 of the series' defect table, per run as well, since a
+after the correction recorded as defect~7 of Paper~III's defect table, per run as well, since a
 consumer that swallows the per-call
 error can otherwise let a replay finish with a different number. GEPA is deterministic under
 replay, so replay is bit-for-bit, and \texttt{scripts/verify\_reproducibility.py}
