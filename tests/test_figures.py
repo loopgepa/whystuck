@@ -257,3 +257,85 @@ def test_no_latex_text_markup_in_labels():
             assert macro not in text, (
                 f"{macro} in a figure label would be printed verbatim: {text[:60]!r}"
             )
+
+
+#: Minimum greyscale contrast ratio between two palette colours that a reader has to tell apart.
+#: The three maps below sit at 1.52 or better; the defects this guard was written for sat at 1.34,
+#: 1.13 and 1.02.
+_MIN_GREY_RATIO = 1.4
+
+
+def _relative_luminance(hex_colour: str) -> float:
+    """WCAG relative luminance, which is what a greyscale printer approximates."""
+    channels = (int(hex_colour[i : i + 2], 16) / 255 for i in (1, 3, 5))
+    linear = [c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4 for c in channels]
+    return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2]
+
+
+def _grey_ratio(a: str, b: str) -> float:
+    hi, lo = sorted((_relative_luminance(a), _relative_luminance(b)), reverse=True)
+    return (hi + 0.05) / (lo + 0.05)
+
+
+def test_series_a_reader_must_separate_survive_greyscale() -> None:
+    """Colour is the encoding these figures fall back on, and reviewers print papers.
+
+    The palette is Okabe-Ito, so colour-vision deficiency is covered, and that is what made this
+    easy to miss: a colour-blind-safe pair can still be two identical greys. Three maps were,
+    each in the panel that carries its paper's point. `fig:residual` drew the intrinsic critique
+    and the three-refine-round oracle three greyscale levels apart out of 255, in the figure whose
+    subject is the progression between them. `fig:detector` separated the good tool from the
+    perfect oracle by 1.13, which is the pair Paper II's non-monotonicity is about. `fig:p0`'s
+    lower panel ran at 1.34 and also spent one of the upper panel's colours on a second meaning.
+
+    Captions describe shape and position rather than colour, and the bars carry printed values, so
+    none of this made a figure unreadable. It made the legend useless in print, which is a
+    different and quieter kind of wrong. The maps are read out of the source so a recolour has to
+    pass here, and the threshold is applied to computed luminance rather than to a colour name.
+    """
+    src = pathlib.Path("scripts/make_figures.py").read_text(encoding="utf-8")
+    tree = ast.parse(src)
+    palette = {
+        node.targets[0].id: node.value.value
+        for node in tree.body
+        if isinstance(node, ast.Assign)
+        and isinstance(node.targets[0], ast.Name)
+        and isinstance(node.value, ast.Constant)
+        and isinstance(node.value.value, str)
+        and node.value.value.startswith("#")
+    }
+    assert {"ORANGE", "GREEN", "BLUE", "VERMILLION", "SKY"} <= set(palette), (
+        f"the Okabe-Ito palette is no longer declared as module constants; found {sorted(palette)}"
+    )
+
+    #: Every set of palette colours in this file that distinguishes series inside one figure,
+    #: read from the source rather than restated: the two ordinal `colour` maps and the pair of
+    #: bars in fig:p0's lower panel.
+    maps: list[tuple[str, list[str]]] = []
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, ast.Assign)
+            and isinstance(node.targets[0], ast.Name)
+            and node.targets[0].id == "colour"
+            and isinstance(node.value, ast.Dict)
+        ):
+            names = [v.id for v in node.value.values if isinstance(v, ast.Name)]
+            if len(names) > 1:
+                maps.append((f"colour map of {len(names)}", names))
+    lower = re.search(
+        r"\(lv\.pass_seed, lv\.false_pass_seed, (\w+)\),\s*\(lv\.pass_evolved, "
+        r"lv\.false_pass_evolved, (\w+)\)",
+        re.sub(r"\s+", " ", src),
+    )
+    assert lower, "fig:p0's lower-panel bar pair no longer reads as this guard expects"
+    maps.append(("fig:p0 lower panel", [lower.group(1), lower.group(2)]))
+
+    assert len(maps) >= 3, f"expected at least three colour groups, found {len(maps)}"
+    for label, names in maps:
+        for i, a in enumerate(names):
+            for b in names[i + 1 :]:
+                ratio = _grey_ratio(palette[a], palette[b])
+                assert ratio >= _MIN_GREY_RATIO, (
+                    f"{label}: {a} and {b} are {ratio:.2f} apart in greyscale, under "
+                    f"{_MIN_GREY_RATIO}. A reader printing this figure cannot separate them."
+                )

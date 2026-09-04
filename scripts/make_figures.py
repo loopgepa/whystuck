@@ -583,11 +583,19 @@ def fig_p0(data: FigureData, out: Path) -> Path:
     ax.legend(loc="lower left", handletextpad=0.5, borderaxespad=0.4)
 
     # Lower panel: what the optimizer's critique actually does, which is why the sign moves.
+    #
+    # ORANGE rather than VERMILLION for the seed series, for two reasons that are invisible on a
+    # colour screen. The upper panel already spends VERMILLION on "single draw, as first
+    # published", so reusing it here made one figure give one colour two meanings under a single
+    # caption. And VERMILLION against BLUE is a greyscale contrast ratio of 1.34 (grey 56 against
+    # 39), so a reviewer printing the paper in black and white could not separate the two series
+    # in the panel that carries the mechanism. ORANGE against BLUE is 2.30, and orange/blue is the
+    # canonical colour-blind-safe pair; both colours stay inside the Okabe-Ito set above.
     w = 0.026
     for lv in data.levels:
         for off, (total, wrong, colour) in enumerate(
             (
-                (lv.pass_seed, lv.false_pass_seed, VERMILLION),
+                (lv.pass_seed, lv.false_pass_seed, ORANGE),
                 (lv.pass_evolved, lv.false_pass_evolved, BLUE),
             )
         ):
@@ -620,7 +628,7 @@ def fig_p0(data: FigureData, out: Path) -> Path:
 
     bx.legend(
         handles=[
-            Patch(facecolor=VERMILLION, label="seed rubric (arm B)"),
+            Patch(facecolor=ORANGE, label="seed rubric (arm B)"),
             Patch(facecolor=BLUE, label="evolved rubric (arm D)"),
             Patch(facecolor="white", edgecolor="0.35", hatch="////", label="of which wrong"),
         ],
@@ -656,7 +664,12 @@ def fig_detector(data: FigureData, out: Path) -> Path:
     ypos = [y for y in range(len(rows) + 1) if y != len(det)][: len(rows)]
     x_lo, x_hi = 0.700, 0.925
 
-    colour = {"near-random": ORANGE, "reliable, not perfect": GREEN, "perfect": VERMILLION}
+    # BLUE rather than VERMILLION for the perfect detector. GREEN against VERMILLION is a
+    # greyscale ratio of 1.13 (66 against 56), and those two are exactly the pair this figure
+    # exists to compare: the good tool against the perfect oracle, which is the paper's
+    # non-monotonicity. The same ORANGE/GREEN/BLUE triple as the residual figure, so detector
+    # quality is encoded by luminance the same way in both, and monotonically.
+    colour = {"near-random": ORANGE, "reliable, not perfect": GREEN, "perfect": BLUE}
     for r, y in zip(rows, ypos, strict=True):
         ax.plot([x_lo, r.score], [y, y], color="0.88", lw=0.7, zorder=0)
         hinge = r.run == "run7" and r.group == "detector"
@@ -762,7 +775,12 @@ def fig_residual(data: FigureData, out: Path) -> Path:
     import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots(figsize=(6.5, 3.7))
-    colour = {"run3": ORANGE, "run8": SKY, "run10": BLUE}
+    # GREEN rather than SKY for the middle condition. SKY and ORANGE differ by three greyscale
+    # levels out of 255 (103 against 106), so printed in black and white the intrinsic critique
+    # and the three-refine-round oracle were the same bar, in the figure whose whole point is the
+    # 0.16 -> 0.33 -> 0.50 progression. ORANGE/GREEN/BLUE reads 106/66/39, mutually separable and
+    # monotone, so luminance now orders with the strength of the condition instead of fighting it.
+    colour = {"run3": ORANGE, "run8": GREEN, "run10": BLUE}
     height = 0.24
     for row_i, bar in enumerate(data.residual):
         for cond_i, (run, _label) in enumerate(_RESIDUAL_CONDITIONS):
