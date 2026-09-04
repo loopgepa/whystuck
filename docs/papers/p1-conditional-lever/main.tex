@@ -11,6 +11,13 @@
 % ---------------------------------------------------------------------------
 \input{../shared/preamble}
 
+% The PDF's own metadata title, which was empty on every build until 2026-09-03: a reader
+% who downloads the file saw `main.pdf` in the window title and reference managers had
+% nothing to scrape. Deliberately title only. Setting `pdfauthor` here would put the
+% author's name inside the PDF of the ANONYMOUS build too, where the byte scan reads the
+% staged sources rather than the compiled metadata, so the blind would break silently.
+\hypersetup{pdftitle={Whether Optimizing the Loop Beats Optimizing the Prompt Depends on One Number}}
+
 \title{Whether Optimizing the Loop Beats Optimizing the Prompt\\
 Depends on One Number\\
 \large $p_0$, the base rate of already-correct first drafts,\\
@@ -32,12 +39,11 @@ already satisfying every requirement. At $p_0 = 0.067$ the search converges on a
 never accepts anything, on $11$ of $12$ evolved genes across four training-split sizes, and
 evolving it buys nothing measurable; at $p_0 = 0.267$, changing only which constraints the
 generator may use, evolving the verifier alongside the generator \emph{gains} $0.060$ held-out,
-unanimous across seeds and $p<0.10$ over five independent draws. The $0.102$ swing between them carries
-the result, about $2.5\sigma$ of measured
-noise, along an axis the mechanism named before the runs were bought, and neither endpoint carries
-it alone. Unconditional refinement is
+unanimous across seeds, and re-measured over five draws it holds at $+0.055$, $p<0.10$. The
+$0.102$ swing between them carries the result, about $2.5\sigma$ of measured noise, along an axis
+the mechanism named in advance, and neither endpoint carries it alone. Unconditional refinement is
 nearly free on a training signal where almost nothing is already correct and costly where much of
-it is, which makes the degenerate verifier optimal at low $p_0$ and screenable, before spending, as
+it is, which makes the degenerate verifier near-optimal at low $p_0$ and screenable as
 a \texttt{PASS} rate of zero. Two pre-registered sweeps close the alternative readings: no
 split-size trend to overfit along from $4$ to $24$ training tasks, and no trend over a measured
 six-fold range of search depth, where the deepest cell is the flattest while \emph{acceptance}
@@ -112,8 +118,9 @@ contributions:
     that never accepts. Scored as a detector, the evolved gene emits \texttt{PASS} zero times
     on every seed at low $p_0$ and loses the one true positive the seed rubric had.
     Unconditional refinement is near-free on a training signal where most first drafts fail,
-    so this is Goodhart's law operating inside the loop, and it is screenable, before
-    spending, as a \texttt{PASS} rate of zero. As $p_0$ rises the same search learns to accept,
+    so this is Goodhart's law operating inside the loop, and it is screenable on the
+    optimizer's output, as a \texttt{PASS} rate of zero, which is a screen on the search's
+    result rather than a gate before its spend. As $p_0$ rises the same search learns to accept,
     and does so at \emph{precision~1}: it never emits a false \texttt{PASS} at any level, while
     the seed rubric it is compared against emits six.
   \item \textbf{How much of a componentized $\dd$ is the component} (\S\ref{sec:decomp}):
@@ -316,7 +323,9 @@ superseded and reported, with the reason, in Paper~III.
 
 The one four-arm contrast in this paper that measures what the study set out to measure was bought on a rebuilt harness, after the audit of Paper~III and under the prediction registered in \S\ref{sec:directions} and reproduced verbatim there. Same task family, budget and worker as run~3
 (multi-hard, $\mathrm{mmc}=28$, 8 train / 10 held-out, one refine round), at three seeds of
-run~3's five, with the three corrections in place: a component-specific reflective dataset, an explicit
+run~3's five, with the three corrections in place: a component-specific reflective dataset (the reflector had
+been handed the generator's inputs and outputs whichever component it was asked to improve,
+so it never saw a verdict the critique had returned; Paper~III, defect~2), an explicit
 \texttt{module\_selector=all}, and a non-saturating arm~C.
 
 We bought it twice, and discarded the first attempt because the harness accepted an empty
@@ -698,7 +707,8 @@ seed rubric, seed 2 & 0.30 & \textbf{1} & 2 & 0 & 7 \\
 $127$-character seed rubric produces one true positive and the ${\sim}3000$-character evolved
 rubrics produce none. Given a large budget of prose and a reflector that could finally see
 its own verdicts, the optimizer converged on the same degenerate corner the hand-written gene
-slid toward: never accept. This is the strongest form of the C1 finding, because it now holds
+slid toward: never accept. This is the strongest form of the C1 finding, the hand-written
+verify-gene ablation of Appendix~\ref{sec:handgene}, because it now holds
 for the \emph{search} and not merely for one author. A critique that never passes sends every
 draft to a refine round, including drafts that were already correct: on seed~2 two compliant
 drafts were rejected. The loop-level arm does not lose because the optimizer failed at its
@@ -1303,6 +1313,12 @@ two independent draws, so $\sigma(\dd)$ on one task is $0.1591$ and on a thirty-
 \[
 \sigma(\dd) \;=\; 0.1591/\sqrt{30} \;=\; 0.0291 .
 \]
+The estimator is worth stating as a recipe, because ``from the paired differences'' underdetermines
+it and an independent auditor tried four conventions without hitting the figure: pair the ten draws
+all $45$ ways, take the \emph{sample} standard deviation of the thirty per-task differences inside
+each pair, and average those forty-five numbers. That average is the $0.1591$; the $0.1125$ is it
+over $\sqrt{2}$, so the paired quantity is the one measured and the single-draw one is derived.
+\texttt{scripts/analyze\_measurement\_noise.py} prints all three.
 In those units the study's effects are: the $L_1$ loss $-0.042$ at $1.43\sigma$, the $L_2$ gain
 $+0.060$ at $2.07\sigma$ and the $L_3$ null $-0.002$ at $0.06\sigma$.
 Figure~\ref{fig:effects} puts every instruction-following effect in the paper on that one axis,

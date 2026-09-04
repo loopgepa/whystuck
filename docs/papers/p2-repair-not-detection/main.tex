@@ -11,6 +11,13 @@
 % ---------------------------------------------------------------------------
 \input{../shared/preamble}
 
+% The PDF's own metadata title, which was empty on every build until 2026-09-03: a reader
+% who downloads the file saw `main.pdf` in the window title and reference managers had
+% nothing to scrape. Deliberately title only. Setting `pdfauthor` here would put the
+% author's name inside the PDF of the ANONYMOUS build too, where the byte scan reads the
+% staged sources rather than the compiled metadata, so the blind would break silently.
+\hypersetup{pdftitle={What a Checker Cannot Buy Is the Repair}}
+
 \title{What a Checker Cannot Buy Is the Repair\\
 \large A perfect verifier leaves a self-refine loop \emph{below} a text-statistics tool,\\
 and actionable repair feedback lifts it above both}
@@ -85,7 +92,7 @@ connects an optimizer to a component. Our contributions:
     verdicts were terse, not because a perfect detector hurts.
   \item \textbf{The residual is one mechanical skill} (\S\ref{sec:residual}), not a diffuse
     ceiling: under a perfect detector with maximally actionable feedback every ``choice'' constraint
-    reaches $1.0$ and the entire remainder is \texttt{exact\_word\_count}.
+    reaches $1.0$ and the remainder is almost entirely \texttt{exact\_word\_count}.
   \item \textbf{Each claim measured against its own noise, not a borrowed one}
     (\S\ref{sec:curverepeat}). An earlier draft scaled every gap by a $\sigma$ estimated on a
     different genome family; three of six gaps had a margin against the $2\sigma$ line smaller than
@@ -259,7 +266,9 @@ We measure the critique as a detector and show it is near-random (\S\ref{sec:det
 making it perfect does not help, and that F$_1$ hides this. We then vary the fix side and find
 where the budget pays (\S\ref{sec:fixside}), localize the residual (\S\ref{sec:residual}), and
 replace every borrowed noise floor with a directly measured one (\S\ref{sec:curverepeat}). A
-cross-domain replication on frontier-hard code follows (\S\ref{sec:bcb}).
+cross-domain replication on frontier-hard code follows (\S\ref{sec:bcb}), and then a second
+worker on an independent stack, where we lose a pre-registered prediction and the loss is the
+finding (\S\ref{sec:secondworker}).
 
 \subsection{Detector quality, and the non-monotonic ceiling}
 \label{sec:detector}
@@ -548,7 +557,9 @@ the axis in all three, so the fix step is not diffusely limited. One constraint,
 \texttt{exact\_word\_count}, sits far below the rest and stays below it as the fix side improves:
 a perfect detector and three refine rounds move it, measured repair edits move it further, and
 neither closes it. Constraints are ordered by their rate under the strongest condition, so the
-ordering is a property of the data rather than of this caption. Rates are read off each run's final
+ordering is a property of the data rather than of this caption. The eight plotted are every
+constraint the hard tier can generate; the ninth verifier, \texttt{min\_words}, is an easy-tier
+constraint that \texttt{exact\_word\_count} replaces there. Rates are read off each run's final
 draft by replaying its cassette (Table~\ref{tab:residual}).}
 \label{fig:residual}
 \end{figure}
@@ -611,7 +622,11 @@ the conditional lever
 evaluate the \emph{same} unoptimized seed genome on the \emph{same} thirty held-out tasks, so they
 are ten independent draws of one fixed number; from their paired differences $\sigma$ for one task
 under one draw is $0.1125$, a $\dd$ compares two independent draws so $\sigma(\dd)$ on one task is
-$0.1591$, and on a thirty-task mean $\sigma(\dd) = 0.1591/\sqrt{30} = 0.0291$. It applies to the
+$0.1591$, and on a thirty-task mean $\sigma(\dd) = 0.1591/\sqrt{30} = 0.0291$. As a recipe, since
+``paired differences'' underdetermines it: pair the ten draws all $45$ ways, take the \emph{sample}
+standard deviation of the thirty per-task differences inside each pair, and average those
+forty-five numbers, which gives the $0.1591$ directly and the $0.1125$ over $\sqrt{2}$
+(\texttt{scripts/analyze\_measurement\_noise.py}). It applies to the
 curve of Table~\ref{tab:curve} \emph{without} a new derivation and without any task-draw term, for
 the reason \S\ref{sec:setup} gives: the runs issue byte-identical first-draft prompts, so task
 difficulty cancels in a between-run difference and what remains is two independent draws averaged
@@ -1008,7 +1023,7 @@ conservative in all six rows, which we could not have known in advance and had i
 backwards.
 
 Finally, the residual is not a wall. Under a perfect detector with maximally actionable feedback
-every choice constraint reaches $1.0$ and the entire remainder is one mechanical skill: exact word
+every choice constraint reaches $1.0$ and the remainder is almost entirely one mechanical skill: exact word
 counting, which rises $0.16 \to 0.33 \to 0.50$ with better feedback and never reaches $1$. That
 localization is actionable in a way a diffuse ceiling would not be, a deterministic counter
 would likely recover most of it, and no amount of prompt or rubric rewriting did.

@@ -11,6 +11,13 @@
 % ---------------------------------------------------------------------------
 \input{../shared/preamble}
 
+% The PDF's own metadata title, which was empty on every build until 2026-09-03: a reader
+% who downloads the file saw `main.pdf` in the window title and reference managers had
+% nothing to scrape. Deliberately title only. Setting `pdfauthor` here would put the
+% author's name inside the PDF of the ANONYMOUS build too, where the byte scan reads the
+% staged sources rather than the compiled metadata, so the blind would break silently.
+\hypersetup{pdftitle={Your Loop Optimizer Is Not Optimizing Your Loop}}
+
 \title{Your Loop Optimizer Is Not Optimizing Your Loop\\
 \large A silent failure mode in componentized prompt optimization,\\
 and the one integer that catches it}
@@ -114,7 +121,9 @@ consistency as evidence of a tight null. It was evidence of the opposite. Our co
     a borrowed denominator was deciding published claims.
   \item \textbf{The register} (\S\ref{sec:corrections}): the withdrawals this failure mode forced,
     disclosed in one place, including two claims about our own null that turned out to be
-    restatements of the defect.
+    restatements of the defect. The runs it invalidated are kept rather than deleted
+    (\S\ref{sec:superseded}), each with the three readings of its \dd\ side by side, since a
+    retraction a reader cannot inspect is a claim about a claim.
 \end{enumerate}
 
 GEPA is a strong optimizer, and the companion papers of this
@@ -659,6 +668,12 @@ two independent draws, so $\sigma(\dd)$ on one task is $0.1591$ and on a thirty-
 \[
 \sigma(\dd) \;=\; 0.1591/\sqrt{30} \;=\; 0.0291 .
 \]
+The estimator is worth stating as a recipe, because ``from the paired differences'' underdetermines
+it and an independent auditor tried four conventions without hitting the figure: pair the ten draws
+all $45$ ways, take the \emph{sample} standard deviation of the thirty per-task differences inside
+each pair, and average those forty-five numbers. That average is the $0.1591$; the $0.1125$ is it
+over $\sqrt{2}$, so the paired quantity is the one measured and the single-draw one is derived.
+\texttt{scripts/analyze\_measurement\_noise.py} prints all three.
 Two caveats travel with it: the mean signed difference
 between replicates, $-0.014$, is confounded with any provider-side drift between recording
 dates, and five replicates of three seeds cannot separate the two. It establishes an order of

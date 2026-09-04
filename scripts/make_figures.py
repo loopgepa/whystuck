@@ -786,8 +786,11 @@ def fig_residual(data: FigureData, out: Path) -> Path:
                     color=colour[run],
                 )
     ax.axvline(1.0, color=BLACK, lw=0.8, zorder=4)
+    # In the margin right of the 1.0 rule, not left of it. At 0.988 this label was drawn on
+    # top of every bar that reaches 1.0, which is most of them, so an annotation about the axis
+    # sat over the data it describes. `set_xlim` already leaves 0.06 of clear space out there.
     ax.text(
-        0.988,
+        1.045,
         1.05,
         "every held-out task satisfies it",
         rotation=90,

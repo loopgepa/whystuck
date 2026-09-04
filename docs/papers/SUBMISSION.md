@@ -21,7 +21,7 @@ endorsement domain, and the primary category selects the domain.
 
 Two structural facts decide this, and neither is about the papers' quality.
 
-**Main-text length is 29 / 18 / 15 pages** (references begin on p.30 / 19 / 16 of 41 / 25 / 21).
+**Main-text length is 29 / 19 / 15 pages** (references begin on p.30 / 20 / 16 of 41 / 25 / 22).
 **All three papers are de-anonymised by their own reproducibility apparatus**: the title block
 prints author, affiliation and repository URL, and each abstract names the repository again.
 
@@ -180,7 +180,7 @@ exists. Measured from the built PDFs and each paper's own source:
 |---|---|---|---|---|---|
 | I | `p1-conditional-lever` | 41 | 11 | 3 | 24 |
 | II | `p2-repair-not-detection` | 25 | 4 | 3 | 17 |
-| III | `p3-silent-no-op` | 21 | 4 | 1 | 13 |
+| III | `p3-silent-no-op` | 22 | 4 | 1 | 13 |
 
 Tables, figures and citations are counted from the sources by
 `tests/test_paper_docs_consistency.py`; the page count is compared against the compiled PDF by
@@ -195,14 +195,14 @@ neither stops a build, and Paper I shipped an oversized threats table until 2026
 nothing read the log.
 
 Abstract lengths against the 1920-character metadata
-field: **1909**, **1902**, **1905**. The headroom is 11, 18 and 15 characters, so any edit to any
+field: **1902**, **1902**, **1905**. The headroom is 18, 18 and 15 characters, so any edit to any
 of the three abstracts has to be re-checked by `make_arxiv_package.py` rather than assumed to fit.
 
 The three are cross-referenced as a series, so they should be posted together or in the order I, II,
 III; each abstract names its companions.
 
 These lengths are fine for arXiv and for TMLR, which sets no page limit. Against the 9-page
-main-text limit at NeurIPS, ICLR and ICML, Paper I runs 3.2x, Paper II 2.0x and Paper III 1.7x, so a
+main-text limit at NeurIPS, ICLR and ICML, Paper I runs 3.2x, Paper II 2.1x and Paper III 1.7x, so a
 conference submission would need substantial main text moved into appendices, plus that venue's style
 file. Paper I read "about four times" until 2026-08-17, which is 39/9 rather than 27/9: the sentence
 divided the total by the main-text limit. The three multiples are now checked against the main-text

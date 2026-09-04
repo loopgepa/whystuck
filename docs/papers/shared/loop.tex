@@ -13,8 +13,10 @@ self-critique that returns \texttt{PASS} or a list of fixes and gates a bounded
 number of refine rounds; the final answer is scored by a programmatic metric.
 Critically, the critique is \emph{intrinsic}: the programmatic scorer is never
 consulted inside the loop (that would be oracle contamination), so the loop
-cannot game its own metric. Each eval costs $1 + 2R$ LLM calls for $R$ refine
-rounds (or $2 + 2R$ with the optional plan module).
+cannot game its own metric. Each eval costs \emph{at most} $1 + 2R$ LLM calls for a refine
+budget of $R$ (or $2 + 2R$ with the optional plan module), and fewer whenever a critique passes
+before the budget is spent: the loop stops on a \texttt{PASS} without issuing the refine call
+that would have followed it, so the bound is reached only by an eval that never passes.
 
 \paragraph{Tasks.} A composable IFEval-style \citep{zhou2023ifeval}
 multi-constraint generator with nine independent, parameter-carrying verifiers
@@ -32,7 +34,9 @@ judge). We report a relative result under matched budget, not a
 leaderboard number.
 
 \paragraph{Reproducibility and budget.}
-Every LLM call is recorded to a content-addressed cassette (\texttt{sha256} of name$+$args), so
+Every LLM call is recorded to a content-addressed cassette (\texttt{sha256} of the call's name,
+positional arguments \emph{and} keyword arguments, which is what gives a per-replicate salt or a
+changed temperature its own key rather than the previous draw's), so
 runs replay offline at zero cost and partial spend is always persisted. Reproduction is strict:
 re-running any study with \texttt{-{}-replay} re-executes the whole pipeline (loaders, GEPA search,
 scoring) against the cached calls with no API key, and any cassette miss raises, per call and,
