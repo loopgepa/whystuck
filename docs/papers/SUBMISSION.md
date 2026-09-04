@@ -130,7 +130,7 @@ Standing one up publishes content under a new identity and is a decision for the
 something the packaging script should do on its own. The script writes a verified tree and stops
 there. Rebuilt for this review it produced 793 files, 43 run JSONs, 225 replicate scorings and 267
 cassettes, with no identifying token surviving a byte scan and a standalone install of that tree
-re-deriving 1051/1051 claims after the rename. It lands in `dist/`, which is gitignored, so
+re-deriving 1070/1070 claims after the rename. It lands in `dist/`, which is gitignored, so
 **rebuild it at the commit you submit**: a snapshot kept from an earlier commit publishes
 superseded papers, which is what happened to this one inside a single review pass.
 
@@ -180,7 +180,7 @@ exists. Measured from the built PDFs and each paper's own source:
 |---|---|---|---|---|---|
 | I | `p1-conditional-lever` | 41 | 11 | 3 | 24 |
 | II | `p2-repair-not-detection` | 25 | 4 | 3 | 17 |
-| III | `p3-silent-no-op` | 22 | 4 | 1 | 13 |
+| III | `p3-silent-no-op` | 22 | 4 | 1 | 14 |
 
 Tables, figures and citations are counted from the sources by
 `tests/test_paper_docs_consistency.py`; the page count is compared against the compiled PDF by

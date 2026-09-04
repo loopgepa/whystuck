@@ -120,9 +120,11 @@ contributions:
     Unconditional refinement is near-free on a training signal where most first drafts fail,
     so this is Goodhart's law operating inside the loop, and it is screenable on the
     optimizer's output, as a \texttt{PASS} rate of zero, which is a screen on the search's
-    result rather than a gate before its spend. As $p_0$ rises the same search learns to accept,
-    and does so at \emph{precision~1}: it never emits a false \texttt{PASS} at any level, while
-    the seed rubric it is compared against emits six.
+    result rather than a gate before its spend. As $p_0$ rises the same search learns to accept:
+    the evolved critique emits zero \texttt{PASS} of thirty at $p_0 = 0.067$, four at $0.267$ and
+    six at $0.667$, so the screen fires on the level where the lever is inert and is silent on the
+    level where it pays. It accepts at \emph{precision~1}, never emitting a false \texttt{PASS} at
+    any level, while the seed rubric it is compared against emits six.
   \item \textbf{How much of a componentized $\dd$ is the component} (\S\ref{sec:decomp}):
     because both arms evolve the shared \texttt{generate} gene, $\dd(D-B)$ is a whole-system
     contrast and not a measurement of the treatment. Splitting it into a draft term and a loop
@@ -253,7 +255,7 @@ saturated.
 \paragraph{Optimizer.}
 We drive the official GEPA \citep{agrawal2025gepa} via a loop-genome adapter, calling
 \texttt{gepa.optimize} with \texttt{seed\_candidate}, \texttt{trainset}, \texttt{adapter},
-\texttt{reflection\_lm} and \texttt{max\_metric\_calls}, plus a
+\texttt{reflection\_lm} and \texttt{max\_metric\_calls} (written $\mathrm{mmc}$ below), plus a
 \texttt{MaxCandidateProposalsStopper} to make the reflection-LM spend a hard cap. GEPA's reflection channel (offline, between
 training iterations) sees per-constraint feedback prose: this is the standard
 optimizer signal and is identical across B and D; it is distinct from the
@@ -1133,7 +1135,7 @@ $\mathrm{mmc}=28$ row is the four-arm re-run, included at no cost.}
 measured six-fold range of search depth, $\dd(D-B)$ reads
 $+0.028,\,-0.042,\,-0.008,\,-0.008,\,-0.018,\,+0.002$. It does not increase with depth, it does
 not order along depth, and no cell reaches one standard deviation of the directly measured
-$\sigma(\dd)=0.047$, the largest is the original $-0.042$ at $0.89\sigma$. The registered
+within-run $\sigma(\dd) = 0.047$, the largest is the original $-0.042$ at $0.89\sigma$. The registered
 verdict rule required $\dd$ at the deepest cell to exceed both $+0.05$ and $2\sigma$ for the
 under-search explanation to survive; it reads $+0.0017$ (the $+0.002$ of
 Table~\ref{tab:budgetresult}, unrounded, because at this size the third decimal is the claim),
@@ -1469,7 +1471,7 @@ Single worker/reflection model & Partly, by spend & Worker swap done pre-audit
 Budget, $\mathrm{mmc}\in[20,64]$ & \textbf{Closed} (\S\ref{sec:budgetresult}) & Bought to
   $\mathrm{mmc}{=}160$ under the corrected harness. Measured search depth spans $2$ to $12$
   iterations; $\dd$ does not order along it and the deepest cell is the flattest \\
-Power, $n{=}3$; no sampling variance & Partly, as released & $\sigma(\dd) = 0.029$ is
+Power, $n{=}3$; no sampling variance & Partly, as released & $\sigma(\dd) = 0.0291$ is
   recoverable at \$0 from ten runs that re-score one fixed seed genome (\S\ref{sec:threats}),
   and it is already decisive: it withdrew a headline. Tightening it needs the repeat loop,
   which re-scores released genomes and needs no re-optimization (D7) \\
@@ -1664,7 +1666,7 @@ only $40\%$ of the $-0.042$ is the treated component while all of the $+0.060$ i
 better supported: the optimizer reliably
 drives the verifier to never accept when $p_0$ is low, that behaviour is cheap to screen for, and
 whether it helps or hurts held-out score depends on $p_0$ by about $0.1$ across the range we
-bought, against a measurement noise we can now size at $\sigma(\dd) = 0.029$
+bought, against a measurement noise we can now size at $\sigma(\dd) = 0.0291$
 (\S\ref{sec:threats}), which every interval in the study omits.
 
 One distinction is worth stating separately, because we had run two claims together and only one

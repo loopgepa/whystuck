@@ -154,6 +154,13 @@ $+24.0$ points depending on task and workflow topology. Our contribution is orth
 variance and prior to it: before asking whether componentized optimization helps, one must
 establish that it \emph{occurred}. A spread of $40$ points is compatible with a
 mixture of real effects and silent no-ops, and nothing in a held-out score separates them.
+The same question has been put to the judge prompt directly. Extending textual-gradient
+optimization across several evaluation criteria at once, \citet{darshan2026gradients} measure the
+gradient's task-focus dropping by $59\%$ when one feedback channel has to serve them all. Their
+failure is a loss of \emph{specificity} where ours is a loss of \emph{relevance}, defect~2 of
+Table~\ref{tab:defects}, where the reflector read the generator's records while editing the
+critique. Both carry the same lesson for a reflective optimizer: what it reads has to be evidence
+about the component it is editing, and no score reveals when it is not.
 
 \paragraph{Loop engineering, and why this is a hazard for the practice.}
 During June 2026 industry practice converged on a name for designing the machinery
@@ -293,14 +300,16 @@ exclusions and gene overrides, every dimension except the \emph{worker} that exe
 another model, dropped into the release directory for an unrelated experiment, enrolled as an
 eleventh replicate (defect~11). Nothing reached a reader: the claim checker failed on the same
 commit and the screen went in before publication, so what follows is a counterfactual, measured
-by re-running the checker with the screen removed. It moves $60$ of this paper's published
-values, and only $31$ of the $60$ move far enough to breach the tolerance that guards them; the
-remaining $29$ shift with nothing objecting. Those figures were $48$ and $29$ until a later audit
+by re-running the checker with the screen removed. It moves $68$ of this paper's published
+values, and only $31$ of the $68$ move far enough to breach the tolerance that guards them; the
+remaining $37$ shift with nothing objecting. Those figures were $48$ and $29$ until a later audit
 added checks for seven $\sigma$-derived values the papers had always printed and nothing had ever
-read, then $55$ and $30$ when a further one added an eighth, then $56$, $57$ and now $60$ as we scoped Paper~I's superlative, drew its figures, and each new check turned out to divide by
+read, then $55$ and $30$ when a further one added an eighth, then $56$, $57$, $60$ and now $68$
+as we scoped Paper~I's superlative, drew its figures, unified the noise floor's printed
+precision, and each new check turned out to divide by
 $\sigma$ too: the contamination was moving them all
 along, and the count of what it moves is bounded by
-the count of what is watched. The pair has now moved five times for that reason and not once
+the count of what is watched. The pair has now moved six times for that reason and not once
 because the contamination changed, which is the cleanest available demonstration of the sentence
 it sits in. That is the part worth keeping, and it is the same
 threshold problem as defect~6 wearing different clothes: a contamination does not have to be
@@ -353,7 +362,7 @@ sweep, and is defect~1's mirror image, the same one-sided contrast with the star
 control side instead of the treatment side. 10--11 arrived while replicating on a second worker
 and are this paper's own thesis turned on its instruments: a switch reported as set that a
 surface never received, and a guard reporting agreement about a dimension it never compared.
-Neither is specific to an optimizer. 11 was caught before publication; removing its screen again moves $60$ of this paper's values, only $31$ of them past the tolerance that guards them.}
+Neither is specific to an optimizer. 11 was caught before publication; removing its screen again moves $68$ of this paper's values, only $31$ of them past the tolerance that guards them.}
 \label{tab:defects}
 \end{table}
 
@@ -474,7 +483,8 @@ released cassettes cannot replay under it; they are retained and labelled supers
 first runs recorded under the corrected harness are two hand-written-gene conditions reported in
 the companion paper on the conditional lever; they replay bit-for-bit, so \texttt{verify\_reproducibility.py}
 verifies twenty-five runs rather than reporting that nothing has been proven, those two
-conditions, the four-arm re-run, the two new $p_0$ levels and the two calibration passes behind
+conditions, the four-arm re-run, the two new levels of the companion paper's first-draft
+pass-rate axis $p_0$ and the two calibration passes behind
 them, the bought rows of the split and budget sweeps, the cross-provider critic run, the
 eight runs of the second-worker line and the diagonal splice control. The cross-provider run is the only one of them whose critique
 was served by a second vendor and therefore the only one that would notice a replay quietly
@@ -682,7 +692,9 @@ magnitude, and that order of magnitude is the same as the effects being reported
 
 \paragraph{Then we measured it directly, and it was not one number.}
 We bought the direct version: every released genome of the $p_0$ sweep re-scored $K=5$ times
-on its own held-out tasks, three levels $\times$ \{prompt-only, loop-level, unoptimized\}
+on its own held-out tasks, three $p_0$ levels ($L_1$ to $L_3$, the companion paper's
+constraint-exclusion ladder from $p_0 = 0.067$ to $0.667$) $\times$ \{prompt-only, loop-level,
+unoptimized\}
 $\times$ three seeds $\times$ five replicates, $135$ runs. No re-optimization is involved, so
 this is the existing scoring path on a fixed genome, and all $135$ replay from their cassettes
 offline. Two properties make it a measurement rather than a cache: repeated scorings of one
@@ -778,7 +790,7 @@ nine genomes of one experiment; the companion ceiling paper measures $2.2\times$
 genomes of another. Both refute a single study-wide constant; neither establishes the size of the
 spread as a general quantity.
 
-\textbf{We cannot rerun the superseded cassettes.} The corrected wiring changes every reflection
+\textbf{We cannot re-run the superseded cassettes.} The corrected wiring changes every reflection
 prompt and therefore every cassette key, so the fifteen invalidated runs are documented rather
 than re-analysed. Their numbers stand as measured and are not verifiable under current code, which
 is what we mean by superseded.

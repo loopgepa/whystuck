@@ -476,6 +476,7 @@ _WORD_NUM = {
     "twenty-three": 23,
     "twenty-four": 24,
     "twenty-five": 25,
+    "thirty": 30,
     "twenty-six": 26,
     "thirty-eight": 38,
     "forty-three": 43,
@@ -3213,7 +3214,11 @@ def _checks() -> list[tuple[str, float, float, float]]:
     for label, pattern, want in (
         (
             "tex: depth sigma denominator",
-            r"\$\\sigma\(\\dd\)=([\d.]+)\$",
+            # Spacing-tolerant since the site gained a `within-run` qualifier and normal spacing:
+            # it printed the same symbol as the cross-run floor with no word distinguishing them,
+            # in the sentence carrying the budget null, where a reader holding 0.0291 in mind
+            # reads 0.047 as a contradiction.
+            r"within-run \$\\sigma\(\\dd\)\s*=\s*([\d.]+)\$, the largest",
             within["L1"],
         ),
         (
@@ -3557,6 +3562,9 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_spine_checks())
     out.extend(_cross_paper_checks())
     out.extend(_corrections_count_checks())
+    out.extend(_screen_discrimination_checks())
+    out.extend(_p3_level_gloss_checks())
+    out.extend(_noise_floor_precision_checks())
     out.extend(_arm_a_invariant_checks())
     out.extend(_directions_bought_checks())
     out.extend(_saturated_constraint_checks())
@@ -4134,6 +4142,105 @@ def _arm_a_invariant_checks() -> list[tuple[str, float, float, float]]:
     assert len(sites) == 2, f"expected two statements of the arm-A census, found {len(sites)}"
     out = [(f"arm-A census (site {i})", float(n), 0.0, float(total)) for i, n in enumerate(sites)]
     out.append(("arm-A census exceptions", 0.0, 0.0, float(exceptions)))
+    return out
+
+
+def _noise_floor_precision_checks() -> list[tuple[str, float, float, float]]:
+    """The cross-run noise floor must be printed to the same precision everywhere it appears.
+
+    It read $0.0291$ at four sites and $0.029$ at three, including Paper I's closing sentence and
+    the closability table. Both round correctly from $0.029052$, so no value check could see it,
+    and every published sigma ratio divides by the four-digit form: a reader recomputing a ratio
+    from the two-digit one gets a different answer than the paper prints. The within-run sigma of
+    the budget figure and the per-task sigma of the derivation are different quantities that share
+    the symbol, so both are excluded by the qualifier that already distinguishes them in prose.
+    """
+    src = _sources()
+    sigma = _noise_estimate().sigma_delta_mean
+    printed = []
+    for slug in src.PAPERS:
+        flat = re.sub(r"\s+", " ", src.paper_tex(slug))
+        for m in re.finditer(r"\\sigma\(\\dd\)\s*=\s*\$?([\d.]+)", flat):
+            before = flat[max(0, m.start() - 80) : m.start()]
+            after = flat[m.end() : m.end() + 8]
+            if "within-run" in before or "on one task" in before or after.startswith("/\\sqrt"):
+                continue
+            # A register entry quotes the registration verbatim, transcription error and all, so
+            # the superseded 0.042 inside ``...'' is the entry's subject rather than a live claim.
+            if before.count("``") > before.count("''"):
+                continue
+            printed.append((slug, m.group(1)))
+    assert len(printed) >= 5, (
+        f"found {len(printed)} cross-run noise-floor sites, expected at least 5; the sweep has "
+        "stopped covering them"
+    )
+    distinct = {v for _s, v in printed}
+    out: list[tuple[str, float, float, float]] = [
+        ("noise floor printed to one precision", 1.0, 0.0, float(len(distinct)))
+    ]
+    for i, (slug, value) in enumerate(printed):
+        out.append(
+            (f"noise floor {src.PAPER_NUMERALS[slug]} (site {i})", float(value), 0.00005, sigma)
+        )
+    return out
+
+
+def _screen_discrimination_checks() -> list[tuple[str, float, float, float]]:
+    """Paper I's contribution list now states what its recommended screen does at each level.
+
+    The screen is one of the paper's two practical claims, and the evidence that it discriminates
+    rather than firing on everything was only ever plotted: `fig:p0`'s lower panel carries the
+    counts and the prose said the search "begins to accept". A recommendation whose false-positive
+    behaviour a reader has to read off a figure is a recommendation stated weaker than the data
+    supports, so the three counts are in the sentence and derived here from the same confusion
+    matrices that pin the mechanism table.
+    """
+    src = _sources()
+    tex = src.paper_tex("p1-conditional-lever")
+    flat = re.sub(r"\s+", " ", tex)
+    m = re.search(
+        r"the evolved critique emits zero \\texttt\{PASS\} of (\w+) at \$p_0 = ([\d.]+)\$, "
+        r"(\w+) at \$([\d.]+)\$ and (\w+) at \$([\d.]+)\$",
+        flat,
+    )
+    assert m is not None, (
+        "Paper I's screen-discrimination sentence no longer reads as this guard expects"
+    )
+    words = [0.0, _WORD_NUM[m.group(3).lower()], _WORD_NUM[m.group(5).lower()]]
+    out = [("screen sentence denominator", _WORD_NUM[m.group(1).lower()], 0.0, 30.0)]
+    for i, claimed in enumerate(words):
+        counts = _arm_confusion(i, "D")
+        out.append(
+            (
+                f"screen PASS emitted L{i + 1} (prose)",
+                float(claimed),
+                0.0,
+                float(counts["tp"] + counts["fp"]),
+            )
+        )
+        out.append((f"screen false PASS L{i + 1} (prose)", 0.0, 0.0, float(counts["fp"])))
+    return out
+
+
+def _p3_level_gloss_checks() -> list[tuple[str, float, float, float]]:
+    """Paper III now says what its $L_1$ to $L_3$ labels mean, which puts two of Paper I's
+    numbers into a third document.
+
+    The labels reached Paper III through a table and nothing said what distinguished them: the
+    sweep that defines them lives in Paper I, so the split left the definition behind. The gloss
+    names the ladder's endpoints, and a number quoted across a paper boundary is a number free to
+    drift, so both are read back out of the prose and compared against the cells Paper I prints.
+    """
+    src = _sources()
+    p3 = re.sub(r"\s+", " ", src.paper_tex("p3-silent-no-op"))
+    p1 = src.paper_tex("p1-conditional-lever")
+    m = re.search(r"constraint-exclusion ladder from \$p_0 = ([\d.]+)\$ to \$([\d.]+)\$", p3)
+    assert m is not None, "Paper III's level gloss no longer reads as this guard expects"
+    hdr = r"Level & excluded & $\mathbb{E}[p_0]$ & $p_0$"
+    out = []
+    for i, (row, claimed) in enumerate(((r"$L_1$ &", m.group(1)), (r"$L_3$ &", m.group(2)))):
+        cells = _table_row(p1, hdr, row)
+        out.append((f"P3 level gloss endpoint {i + 1}", float(claimed), 0.0005, float(cells[3][0])))
     return out
 
 
@@ -5770,6 +5877,17 @@ def _paraphrase_drift_checks() -> list[tuple[str, float, float, float]]:
             r"which gives \$3.23\$, and \$([\d.]+)\$ is what the paper's own",
             0.005,
             round(run1, 3) / round(sigma, 3),
+        ),
+        # The rounded sigma the entry quotes, derived by REAPPLYING the rounding that caused the
+        # wrong multiple. It was covered only by coincidence until now: live prose printed the
+        # same three digits, so the prose-decimal sweep found the value somewhere and stopped
+        # asking. Unifying the live sites to four digits orphaned it, which is how a
+        # coverage-by-coincidence announces itself.
+        (
+            "register: run-1 rounded sigma",
+            r"over a rounded \$([\d.]+)\$ gives",
+            0.0005,
+            round(sigma, 3),
         ),
     ):
         out.append((label, _scrape(tex, pattern), tol, want))
