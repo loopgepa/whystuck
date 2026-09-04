@@ -43,6 +43,10 @@ docs/papers/*/main.blg
 docs/papers/*/main.log
 docs/papers/*/main.out
 docs/papers/*/main.toc
+# `pdftotext main.pdf` with no output argument writes main.txt beside the paper. Three of
+# those appeared untracked while auditing the rendered PDFs, and the extraction is how you
+# check what a reader actually sees, so it will happen again.
+docs/papers/*/main.txt
 # The frozen pre-split draft is provenance and is never built; if it ever acquires a build,
 # that is a mistake rather than an artifact to keep. A test asserts these do not exist.
 docs/papers/PRE-SPLIT-SOURCE.pdf

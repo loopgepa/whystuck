@@ -897,7 +897,7 @@ other direction either, but the prediction was registered as a sign claim about 
 estimate, and as a sign claim about a point estimate it failed. We report it that way rather
 than retreating to the interval, which is the move pre-registration exists to prevent.
 
-\textbf{What the sweep establishes is about run~3, not about arm~D.} Every row of
+\textbf{What the sweep establishes is about the re-run's cell, not about arm~D.} Every row of
 Table~\ref{tab:splitresults} holds $p_0$, the held-out tasks and the seeds fixed; only the
 split and its constant-epoch budget move. Across them $\dd(D-B)$ reads
 $+0.017,\,-0.042,\,+0.062,\,+0.023$: three of four positive, and the one negative cell is
@@ -1010,7 +1010,7 @@ this sweep needs no override.}
 
 \paragraph{The predictions.} Table~\ref{tab:budgetsweep} lists the registered cells. The
 mechanism of \S\ref{sec:analysis} says the degenerate verifier
-is optimal on a training signal where almost nothing is already correct, which is a property of
+is near-optimal on a training signal where almost nothing is already correct, which is a property of
 $p_0$ and not of how long the search runs. So we predict (i) the evolved critique's \texttt{PASS}
 rate remains $0.00$ on at least four of the six arm-D genes at the two deepest cells
 ($\mathrm{mmc}{=}80$ and $\mathrm{mmc}{=}160$). And we predict (ii) \textbf{no monotone trend in
@@ -1521,6 +1521,10 @@ did not make. What the conclusion rests on is the registered swing between two l
 any single cell, and Figure~\ref{fig:effects} shows nothing in the study clearing $2\sigma$ with
 an interval behind it.
 
+% Flush the threats table here rather than letting it queue to the end of the document, where
+% it landed on a page of its own thirteen pages after the sentence that introduces it.
+\FloatBarrier
+
 \section{When Would Loop-Level Help? Directions}
 \label{sec:directions}
 
@@ -1694,7 +1698,7 @@ predictions failed. Reporting guidance for pre-registered work asks that deviati
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
 collected here and the body text states only the surviving claim.
-\textbf{Twenty-two} entries follow.
+\textbf{Twenty-three} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1877,6 +1881,18 @@ The series' other two papers carry the entries bearing on their own claims.
     replicated $\dd$ from the artifacts and fails if another level overtakes it, another reads the
     named cell, and a third fails if that cell ever stops being the larger of the two. A
     superlative is a claim about a set, and this one never said which set.
+  \item \textbf{Three overstatements in the abstract, one class.} All three attached a claim to
+    something the body states more narrowly, and all three were found by reading the abstract
+    against the section it summarises rather than against the artifacts, which is why no check
+    caught them. The $L_2$ cell was given as ``gains $0.060$ held-out, unanimous across seeds and
+    $p<0.10$ over five independent draws'': the $0.060$ is the single draw, and the $p<0.10$
+    belongs to the five-replicate mean of $+0.055$, which the abstract did not mention, so the
+    significance was attached to the wrong number. The degenerate verifier was called
+    \emph{optimal} where \S\ref{sec:analysis} says near-optimal, at three sites. And it was
+    called ``screenable, before spending'' where \S\ref{sec:analysis} says the screen reads
+    ``the optimizer's output'', which exists only once the search has been paid for; what the
+    screen saves is the downstream spend and the wrong conclusion, not the search. An abstract is
+    the part most readers read and the part least covered by a checker that scrapes numbers.
   \item \textbf{The pre-registered verdict rule was stated and then never applied.} A
     registration deviation, not a typo, and it ran in the direction that flatters us only if a
     reader assumes the rule agrees with what we report. It does not: applied literally to the six

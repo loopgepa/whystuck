@@ -469,6 +469,10 @@ _WORD_NUM = {
     "twenty": 20,
     "twenty-one": 21,
     "twenty-two": 22,
+    # The sequence skipped 23 until 2026-09-03, when Paper I's register reached it and the
+    # scraper raised. It raises rather than passing, which is the right failure, but a gap in
+    # the middle of a run of consecutive numerals is a trap set for whoever adds one entry.
+    "twenty-three": 23,
     "twenty-four": 24,
     "twenty-five": 25,
     "twenty-six": 26,

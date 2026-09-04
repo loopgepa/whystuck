@@ -417,6 +417,95 @@ def test_every_extra_the_docs_tell_a_reader_to_install_exists() -> None:
     )
 
 
+#: Roman numeral -> slug, for pointers of the form "entry~N of Paper~III's register".
+_PAPER_BY_NUMERAL = {
+    "I": "p1-conditional-lever",
+    "II": "p2-repair-not-detection",
+    "III": "p3-silent-no-op",
+}
+
+
+def _register_entries(slug: str) -> list[str]:
+    """One paper's corrections register, split into entries in printed order."""
+    text = (PAPERS / slug / "main.tex").read_text(encoding="utf-8")
+    start = text.index("entries follow")
+    end = text.index("\\end{enumerate}", start)
+    # `\item` is a prefix of `\itemsep`, so a bare split over-counts every list by its spacing
+    # directives. That mistake was made once already while auditing these very counts.
+    return [e for e in re.split(r"\\item(?![A-Za-z])", text[start:end])[1:]]
+
+
+def test_cross_paper_register_pointers_land_on_the_entry_they_describe() -> None:
+    """A pointer into ANOTHER paper's register is positional, so inserting an entry breaks it.
+
+    That is not hypothetical. Paper II cites the entry withdrawing "four runs overrode" as
+    `entry~14 of Paper~III's register`. Two entries were later inserted above it during review,
+    which moved it to 16 and left Paper II pointing at "Ten of the fifteen reported a delta of
+    exactly zero" -- a real, published-facing mis-citation with nothing watching it, since a
+    number that still resolves to *an* entry breaks no build and no other guard.
+
+    So: resolve every such pointer and require the quoted phrase in the citing sentence to occur
+    in the entry it names. Case-insensitive, because the citing sentence lowercases the quote.
+    """
+    checked = 0
+    for slug in SLUGS:
+        flat = re.sub(r"\s+", " ", (PAPERS / slug / "main.tex").read_text(encoding="utf-8"))
+        for m in re.finditer(r"entry~(\d+) of Paper~(I{1,3})'s register", flat):
+            n, numeral = int(m.group(1)), m.group(2)
+            target = _PAPER_BY_NUMERAL[numeral]
+            assert target != slug, f"{slug} cites its own register as {numeral}"
+            entries = _register_entries(target)
+            assert 1 <= n <= len(entries), (
+                f"{slug} cites entry {n} of {target}'s register, which holds {len(entries)}"
+            )
+            quotes = re.findall(r"``(.+?)''", flat[max(0, m.start() - 240) : m.start()])
+            assert quotes, (
+                f"{slug}'s pointer at entry~{n} of {target} quotes nothing, so this guard cannot "
+                "confirm it lands correctly; quote the claim or drop the number"
+            )
+            phrase = quotes[-1].lower()
+            body = re.sub(r"\s+", " ", entries[n - 1]).lower()
+            assert phrase in body, (
+                f"{slug} cites entry~{n} of {target}'s register for {quotes[-1]!r}, but that "
+                f"entry reads {body[:120]!r}. An entry was probably inserted above it."
+            )
+            checked += 1
+    assert checked, (
+        "no cross-paper register pointer found; this guard has stopped covering anything"
+    )
+
+
+def test_the_bibliography_has_no_latex_special_characters_that_eat_text() -> None:
+    """BibTeX copies a field verbatim into `main.bbl`, which LaTeX then reads as source.
+
+    So an unescaped `%` inside a field value is a comment: every character after it on that line
+    disappears from the printed reference list, silently, with no warning in any log. Four notes
+    carried one, and all three shipped PDFs rendered "by 6fewer rollouts", "by over
+    10AIME-2025)" and "often 5null is read against" for the whole life of the bibliography. A
+    fifth entry had escaped its percent signs correctly, which is what made the omission a slip
+    rather than a convention.
+
+    `~` is checked too: it is a non-breaking space, not a tilde, so "~20%" prints as "20%" and an
+    approximation in a note marked "verified" silently becomes an exact figure.
+    """
+    lines = (PAPERS / "shared" / "references.bib").read_text(encoding="utf-8").splitlines()
+    inside, offenders = False, []
+    for n, line in enumerate(lines, 1):
+        if line.lstrip().startswith("@"):
+            inside = True
+        if inside:
+            for char, why in (("%", "comments out the rest of the line"), ("~", "is a space")):
+                if re.search(rf"(?<!\\){re.escape(char)}", line):
+                    offenders.append(f"line {n}: {char!r} {why}: {line.strip()[:90]}")
+                    break
+            if line.strip() == "}":
+                inside = False
+    assert not offenders, (
+        "unescaped LaTeX special characters inside bibliography entries:\n  "
+        + "\n  ".join(offenders)
+    )
+
+
 #: The split proof's size, restated in two documents and derived in neither. It read 322 against a
 #: script printing 318 -- and unlike the counts above it had no guard at all, in either document,
 #: because the number lives in `verify_split_coverage` rather than in a file listing.

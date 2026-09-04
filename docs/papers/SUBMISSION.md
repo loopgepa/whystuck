@@ -21,7 +21,7 @@ endorsement domain, and the primary category selects the domain.
 
 Two structural facts decide this, and neither is about the papers' quality.
 
-**Main-text length is 29 / 19 / 15 pages** (references begin on p.30 / 20 / 16 of 41 / 25 / 22).
+**Main-text length is 30 / 19 / 15 pages** (references begin on p.31 / 20 / 16 of 41 / 25 / 22).
 **All three papers are de-anonymised by their own reproducibility apparatus**: the title block
 prints author, affiliation and repository URL, and each abstract names the repository again.
 
@@ -202,7 +202,7 @@ The three are cross-referenced as a series, so they should be posted together or
 III; each abstract names its companions.
 
 These lengths are fine for arXiv and for TMLR, which sets no page limit. Against the 9-page
-main-text limit at NeurIPS, ICLR and ICML, Paper I runs 3.2x, Paper II 2.1x and Paper III 1.7x, so a
+main-text limit at NeurIPS, ICLR and ICML, Paper I runs 3.3x, Paper II 2.1x and Paper III 1.7x, so a
 conference submission would need substantial main text moved into appendices, plus that venue's style
 file. Paper I read "about four times" until 2026-08-17, which is 39/9 rather than 27/9: the sentence
 divided the total by the main-text limit. The three multiples are now checked against the main-text

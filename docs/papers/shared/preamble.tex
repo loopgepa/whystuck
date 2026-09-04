@@ -22,6 +22,13 @@
 % cost eleven overfull boxes running up to 1.7in into the margin. This lets it stretch
 % interword space as a last resort instead; content is unchanged.
 \setlength{\emergencystretch}{3em}
+% `\FloatBarrier`, used sparingly and by hand. Relaxing the float fractions below stopped two
+% figures falling twenty-eight pages past their reference, but it does not bound the queue: with
+% enough tables pending, one still drifts to the end of the document and lands on a page with no
+% body text at all. Paper I ended on two such pages. A barrier at one section boundary flushes
+% what is pending there instead of letting it queue to the tail. Loading the package changes
+% nothing on its own; only an explicit \FloatBarrier does.
+\usepackage{placeins}
 % Float placement. With many tables queued, LaTeX's defaults (a top float may occupy at most 0.7 of
 % the text height, and 0.2 of every float-bearing page must be text) deferred two full-width figures
 % to the end of the document --- twenty-eight pages from the section that references them. Relaxing
