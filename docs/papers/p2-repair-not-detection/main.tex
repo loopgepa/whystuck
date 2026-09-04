@@ -91,8 +91,8 @@ connects an optimizer to a component. Our contributions:
     $+0.003$. That resolves the inversion above: the oracle underperformed at one retry because its
     verdicts were terse, not because a perfect detector hurts.
   \item \textbf{The residual is one mechanical skill} (\S\ref{sec:residual}), not a diffuse
-    ceiling: under a perfect detector with maximally actionable feedback every ``choice'' constraint
-    reaches $1.0$ and the remainder is almost entirely \texttt{exact\_word\_count}.
+    ceiling: under a perfect detector with maximally actionable feedback six of the eight
+    constraints reach $1.0$ and the remainder is almost entirely \texttt{exact\_word\_count}.
   \item \textbf{Each claim measured against its own noise, not a borrowed one}
     (\S\ref{sec:curverepeat}). An earlier draft scaled every gap by a $\sigma$ estimated on a
     different genome family; three of six gaps had a margin against the $2\sigma$ line smaller than
@@ -530,7 +530,10 @@ feedback's \emph{shape}, a hand-built measurement function. Finally, \emph{hi} (
 configuration to \emph{exceed} the tool baseline ($0.837$), resolving the run-4 tool
 $>$ oracle inversion (\S\ref{sec:detector}) as an actionability effect: the oracle
 underperformed the tool at $R{=}1$ because its verdicts were terse, not because a perfect
-detector hurts. Yet even maximal, exact repair guidance saturates at $0.873$ (still short of
+detector hurts. It is also the first cell to clear the $0.85$ bar the oracle arm was
+registered against, which runs 7 and 8 missed: the loop \emph{can} turn a perfect detector into
+held-out score, and what the registered configuration lacked was actionable feedback rather than a
+better detector. Yet even maximal, exact repair guidance saturates at $0.873$ (still short of
 perfect, no ceiling flag), so a generator-limited residual remains. The fix step is thus
 \emph{both} feedback-limited (up to $\sim\!+0.06$ from actionability) and, beyond that,
 generator-limited.
@@ -607,7 +610,8 @@ Constraint (final-draft satisfaction) & run 3 (intrinsic $R1$) & run 8 (oracle m
 \caption{Per-constraint satisfaction of the loop's final draft (held-out, from
 cassettes). The fix-step residual is concentrated almost entirely in
 \texttt{exact\_word\_count}; actionable feedback lifts it ($0.16\!\to\!0.33\!\to\!0.50$)
-but never solves it, while every choice constraint reaches $1.0$. The generator-limited
+but never solves it, while six of the eight constraints reach $1.0$ and the only residual
+outside it is $0.10$ in \texttt{word\_max\_length}. The generator-limited
 residual is one mechanical skill (exact counting), not a diffuse ceiling.}
 \label{tab:residual}
 \end{table}
@@ -715,7 +719,7 @@ oracle under intrinsic, 7 under 3 & $-0.0283$ & $-0.0027$ & 0.0081 & 0.33 & not 
 $t(4)$, so the critical values are $2.132$ and $2.776$ rather than $1.96$. Every claim the paper
 leans on survives, and every one is now carried by a replicated interval instead of a single draw
 divided by a borrowed $\sigma$. The magnitudes are the part that moves, and not all one way:
-three shrink by $34$ to $52\%$, actionability is unchanged to within $-3\%$, the
+three shrink by $34$ to $52\%$, actionability is unchanged to within $3.2\%$, the
 oracle-under-intrinsic null falls to near nothing, and the row the paper had withdrawn \emph{grows}
 by $74\%$. Each discrepancy is within $1.65$ single-draw sd of the published value, $0.79$, $1.65$,
 $1.00$, $0.09$, $1.36$ and $0.95$, so the two measurements are consistent and the shrinkage is
@@ -1023,7 +1027,7 @@ conservative in all six rows, which we could not have known in advance and had i
 backwards.
 
 Finally, the residual is not a wall. Under a perfect detector with maximally actionable feedback
-every choice constraint reaches $1.0$ and the remainder is almost entirely one mechanical skill: exact word
+six of the eight constraints reach $1.0$ and the remainder is almost entirely one mechanical skill: exact word
 counting, which rises $0.16 \to 0.33 \to 0.50$ with better feedback and never reaches $1$. That
 localization is actionable in a way a diffuse ceiling would not be, a deterministic counter
 would likely recover most of it, and no amount of prompt or rubric rewriting did.
@@ -1045,7 +1049,7 @@ Earlier drafts of this work published claims it now withdraws. Reporting guidanc
 pre-registered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Fifteen} entries follow. The
+collected here and the body text states only the surviving claim. \textbf{Seventeen} entries follow. The
 series' other two papers carry the entries bearing on their own claims, and the full
 register across all three, with the superseded values themselves, is in the released repository.
 
@@ -1189,6 +1193,18 @@ register across all three, with the superseded values themselves, is in the rele
     runs overrode'' survive in entry~16 of Paper~III's register. Every site is now found with
     \texttt{finditer}, across the papers and the Markdown, and the number of sites is asserted, so
     a fourth restatement fails rather than going quietly unchecked.
+  \item \textbf{The oracle arm's registered bar was reported as missed and never as met.} Runs 7
+    and 8 fall short of the $0.85$ bar registered for the ceiling arm, and this paper states
+    both shortfalls. Run 10 clears the bar at $0.873$, and earlier drafts left that unsaid, so a
+    registered prediction read as an open failure while this paper's own best cell settles it.
+    \S\ref{sec:fixside} now states both. The omission understated our own result, which is why it
+    lasted: every number involved was already printed on the page, so no checker could see a
+    missing sentence and no reader had reason to look for one.
+  \item \textbf{``Actionability is unchanged to within $-3\%$.''} It moves $3.2\%$, so the
+    bound was rounded inward, and inward on the one row this paper leans on hardest. The
+    caption states the measured figure and the checker now derives it. Two digits, and the
+    same class as an interval published as excluding a zero it brackets: a bound reported
+    tighter than the data makes it.
 \end{enumerate}
 
 \end{document}

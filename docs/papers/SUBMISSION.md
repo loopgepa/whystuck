@@ -21,7 +21,7 @@ endorsement domain, and the primary category selects the domain.
 
 Two structural facts decide this, and neither is about the papers' quality.
 
-**Main-text length is 30 / 19 / 15 pages** (references begin on p.31 / 20 / 16 of 41 / 25 / 22).
+**Main-text length is 31 / 19 / 15 pages** (references begin on p.32 / 20 / 16 of 41 / 25 / 22).
 **All three papers are de-anonymised by their own reproducibility apparatus**: the title block
 prints author, affiliation and repository URL, and each abstract names the repository again.
 
@@ -130,7 +130,7 @@ Standing one up publishes content under a new identity and is a decision for the
 something the packaging script should do on its own. The script writes a verified tree and stops
 there. Rebuilt for this review it produced 793 files, 43 run JSONs, 225 replicate scorings and 267
 cassettes, with no identifying token surviving a byte scan and a standalone install of that tree
-re-deriving 1036/1036 claims after the rename. It lands in `dist/`, which is gitignored, so
+re-deriving 1051/1051 claims after the rename. It lands in `dist/`, which is gitignored, so
 **rebuild it at the commit you submit**: a snapshot kept from an earlier commit publishes
 superseded papers, which is what happened to this one inside a single review pass.
 
@@ -195,14 +195,14 @@ neither stops a build, and Paper I shipped an oversized threats table until 2026
 nothing read the log.
 
 Abstract lengths against the 1920-character metadata
-field: **1902**, **1902**, **1905**. The headroom is 18, 18 and 15 characters, so any edit to any
+field: **1902**, **1902**, **1906**. The headroom is 18, 18 and 14 characters, so any edit to any
 of the three abstracts has to be re-checked by `make_arxiv_package.py` rather than assumed to fit.
 
 The three are cross-referenced as a series, so they should be posted together or in the order I, II,
 III; each abstract names its companions.
 
 These lengths are fine for arXiv and for TMLR, which sets no page limit. Against the 9-page
-main-text limit at NeurIPS, ICLR and ICML, Paper I runs 3.3x, Paper II 2.1x and Paper III 1.7x, so a
+main-text limit at NeurIPS, ICLR and ICML, Paper I runs 3.4x, Paper II 2.1x and Paper III 1.7x, so a
 conference submission would need substantial main text moved into appendices, plus that venue's style
 file. Paper I read "about four times" until 2026-08-17, which is 39/9 rather than 27/9: the sentence
 divided the total by the main-text limit. The three multiples are now checked against the main-text

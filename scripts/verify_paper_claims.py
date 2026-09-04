@@ -448,6 +448,7 @@ def _arm_mean(name: str, arm: str, field: str) -> float:
 #: while still making the count a checked claim; anything not listed raises rather than
 #: quietly returning NaN, so a new spelled-out number cannot slip past unchecked.
 _WORD_NUM = {
+    "one": 1,
     "two": 2,
     "three": 3,
     "four": 4,
@@ -3556,6 +3557,9 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_spine_checks())
     out.extend(_cross_paper_checks())
     out.extend(_corrections_count_checks())
+    out.extend(_arm_a_invariant_checks())
+    out.extend(_directions_bought_checks())
+    out.extend(_saturated_constraint_checks())
     out.extend(_prose_orphan_checks())
     out.extend(_defect_class_count_checks())
     out.extend(_budget_false_pass_checks())
@@ -3826,6 +3830,29 @@ def _reflection_call_checks() -> list[tuple[str, float, float, float]]:
     return out
 
 
+def _actionability_movement(rows: list) -> float:
+    """How far the actionability magnitude moved from one draw to five, both sides from artifacts.
+
+    Two false starts are worth recording, because each produced a check that passed while
+    measuring the wrong thing. The row is selected by LABEL: picking it by sorting the movements
+    and taking an index is a rule about the current numbers rather than about which row is meant,
+    and it silently read the tool-lift row. And the single-draw side is recomputed from the runs
+    rather than scraped from `tab:curvepairs`: the table prints 0.0633 where the runs hold
+    0.0633 recurring, and dividing by the rounded copy returns 3.107% for a movement of 3.158%.
+    A tolerance loose enough to hide that gap is loose enough to accept the defect this check
+    exists to catch, so the two faults protect each other.
+    """
+    moves = [abs(r.delta) for r in rows if str(r.level).startswith("actionability")]
+    assert len(moves) == 1, (
+        f"expected one actionability row among {[str(r.level) for r in rows]}; a bare `next` here "
+        "would have raised StopIteration instead of naming the rows it searched"
+    )
+    single_draw = _arm_mean("validation-study-fbacthi.json", "A", "seed_heldout") - _arm_mean(
+        "validation-study-fbactlo.json", "A", "seed_heldout"
+    )
+    return moves[0] / single_draw - 1
+
+
 def _magnitude_movement_checks() -> list[tuple[str, float, float, float]]:
     """How far each published magnitude moved when its row was re-scored five times.
 
@@ -3879,6 +3906,21 @@ def _magnitude_movement_checks() -> list[tuple[str, float, float, float]]:
         ("tex: reinstated growth", r"\\emph\{grows\}\nby \$(\d+)\\%\$", 100 * max(moves)),
     ):
         out.append((label, _scrape(tex, pattern), 0.5, artifact))
+    # The fourth row's movement, with its OWN tolerance rather than the loop's. It read "within
+    # $-3\\%$" and measures 3.16%, so the sentence claimed a tighter agreement than it had, in the
+    # direction that flatters the paper's best-supported effect. The three checks above are whole
+    # percents, where 0.5 is the right slack; for a figure printed to one decimal it is far too
+    # much. At 0.5 this check accepted 3.0 against a measured 3.158, which is the mutation that
+    # proved it vacuous. 0.05 is the printed precision, so a figure that does not round to what
+    # the paper shows now fails.
+    out.append(
+        (
+            "tex: actionability movement",
+            _scrape(tex, r"actionability is unchanged to within \$([\d.]+)\\%\$"),
+            0.05,
+            100 * abs(_actionability_movement(rows)),
+        )
+    )
     return out
 
 
@@ -3969,6 +4011,129 @@ def _restated_statistic_checks() -> list[tuple[str, float, float, float]]:
                             float(value),
                         )
                     )
+    return out
+
+
+def _directions_bought_checks() -> list[tuple[str, float, float, float]]:
+    """Paper I declares how many of its registered directions were bought; the list must agree.
+
+    D6 (the oracle ceiling arm) was registered with a success threshold, bought as Paper II's
+    runs 7--10, and then deleted from the directions list in the same commit that bought it,
+    leaving the declared count reading six against a list of seven done entries. Nothing
+    numeric was wrong, which is why it survived the whole life of the split: the defect was a
+    missing item, and a checker that compares printed values against artifacts cannot see one.
+    So the two counts are compared against each other instead.
+    """
+    src = _sources()
+    tex = src.paper_tex("p1-conditional-lever")
+    claimed_all = _scrape_word(tex, r"([\w-]+) of the directions below have been\s+bought")
+    claimed_during = _scrape_word(tex, r"one of them only in part, ([\w-]+) during the study")
+    claimed_part = _scrape_word(tex, r"bought, ([\w-]+) of them only in part")
+    body = tex[tex.index("Each entry below changes one variable") :]
+    body = body[: body.index("\\end{description}")]
+    entries = re.findall(r"^  \\item\[D[^\]]*\]", body, re.MULTILINE)
+    done = [e for e in entries if "done" in e]
+    # D3 is the one bought after the study closed; every other done entry was bought during it.
+    after = [e for e in done if e.startswith("  \\item[D3 ")]
+    part = [e for e in done if "part done" in e]
+    # D6's entry quotes two of Paper II's seeds. A third copy of a number is a third chance to
+    # drift, so both are read out of Paper I's own prose and re-derived from the runs.
+    flat = re.sub(r"\s+", " ", tex)
+    quoted = [
+        ("D6 registered cell seed I", r"missed the bar \(\$([0-9.]+)\$", "oracle"),
+        ("D6 cleared bar seed I", r"gate clears it \(\$([0-9.]+)\$\)", "fbacthi"),
+    ]
+    out = [
+        ("directions bought I", claimed_all, 0.0, float(len(done))),
+        (
+            "directions bought during the study I",
+            claimed_during,
+            0.0,
+            float(len(done) - len(after)),
+        ),
+        ("directions bought after the study I", 1.0, 0.0, float(len(after))),
+        ("directions bought only in part I", claimed_part, 0.0, float(len(part))),
+    ]
+    out.extend(
+        (
+            label,
+            _scrape(flat, pattern),
+            0.0005,
+            _arm_mean(f"validation-study-{run}.json", "A", "seed_heldout"),
+        )
+        for label, pattern, run in quoted
+    )
+    return out
+
+
+def _saturated_constraint_checks() -> list[tuple[str, float, float, float]]:
+    """Paper II counts the constraints that reach 1.0 under its best condition; tab:residual
+    decides the count.
+
+    Three sites said "every choice constraint reaches 1.0" without the series ever defining a
+    choice constraint, and the paper's own table has `word_max_length` at 0.90 under that
+    condition, so the sentence was either false or unfalsifiable depending on a class the
+    reader had to guess. The claim is now a count, which the residual artifact settles.
+    """
+    src = _sources()
+    tex = src.paper_tex("p2-repair-not-detection")
+    run10 = _residual_rates()["run10"]
+    saturated = sum(1 for v in run10.values() if v >= 0.999)
+    residual_outside = sum(
+        1.0 - v for iid, v in run10.items() if iid != "exact_word_count" and v < 0.999
+    )
+    out = [
+        (
+            f"tab:residual saturated count (site {i})",
+            _WORD_NUM[m.group(1).lower()],
+            0.0,
+            float(saturated),
+        )
+        for i, m in enumerate(
+            re.finditer(r"([\w-]+) of the eight\s+constraints? reach \$1\.0\$", tex)
+        )
+    ]
+    assert len(out) == 3, f"expected three saturated-count sites, found {len(out)}"
+    out.append(
+        (
+            "tab:residual residual outside exact_word_count",
+            _scrape(tex, r"the only residual\s+outside it is \$([0-9.]+)\$"),
+            0.005,
+            residual_outside,
+        )
+    )
+    out.append(("tab:residual total constraints", 8.0, 0.0, float(len(run10))))
+    return out
+
+
+def _arm_a_invariant_checks() -> list[tuple[str, float, float, float]]:
+    """Arm A declares no evolvable genes, so its pre- and post-search held-out scores must be
+    equal on every seed of every released run.
+
+    Paper II leans on this in two places, and its register says the paragraph "now states the
+    invariant instead of the invocation, which has the additional merit of being checkable".
+    It was not being checked. The census was hand-counted once and then restated, which is the
+    defect that entry describes, one level up: a claim advertised as machine-verifiable that no
+    machine verified. Both the count and the number of exceptions are derived here, so a run
+    added to the release moves the census instead of falsifying a sentence quietly.
+    """
+    from pathlib import Path
+
+    total = 0
+    exceptions = 0
+    for f in sorted(Path(DOCS).glob("validation-study*.json")):
+        for r in _runs(f.name):
+            a = r.get("A")
+            if a is None:
+                continue
+            total += 1
+            exceptions += abs(a["seed_heldout"] - a["opt_heldout"]) > 1e-12
+    tex = _sources().paper_tex("p2-repair-not-detection")
+    flat = re.sub(r"\s+", " ", tex)
+    sites = re.findall(r"\$(\d+)\$ arm-\\textbf\{A\} seed entries", flat)
+    assert len(sites) == 2, f"expected two statements of the arm-A census, found {len(sites)}"
+    out = [(f"arm-A census (site {i})", float(n), 0.0, float(total)) for i, n in enumerate(sites)]
+    out.append(("arm-A census exceptions", 0.0, 0.0, float(exceptions)))
     return out
 
 

@@ -793,7 +793,7 @@ of it (\S\ref{sec:decomp}). One alternative explanation survives both, and the $
 does not touch it: eight training tasks is a small split, arm~D has two genes of surface to
 overfit rather than one, and the reflective optimizer overfits. That is testable by varying the
 split, the harness already exposes \texttt{-{}-n-train}, and we pre-register the design here,
-before paying, in the same form as the prediction that Section~\ref{sec:rerun} resolved.
+before paying, in the same form as the prediction that \S\ref{sec:rerun} resolved.
 
 \paragraph{A fixed-budget split sweep is not a split sweep.} The obvious experiment, raising
 \texttt{-{}-n-train} while holding \texttt{-{}-max-metric-calls} fixed, is confounded in the
@@ -1531,8 +1531,8 @@ an interval behind it.
 The null reads ``the critique component of a
 self-refine loop is not a productive optimization target when it is an unreliable,
 self-referential detector on shallow-verification tasks.'' It does not read ``componentized
-optimization is useless.'' Six of the directions below have been
-bought, one of them only in part, five during the study and D3 after it, and what they
+optimization is useless.'' Seven of the directions below have been
+bought, one of them only in part, six during the study and D3 after it, and what they
 changed is the priority: no longer \emph{get a better
 detector}, since a perfect one does not suffice \emph{at low $p_0$}, but \emph{fix the fixer},
 which Paper~II
@@ -1561,6 +1561,15 @@ ends. Each entry below changes one variable.
   \item[D5 (cross-domain), \textbf{done} (\S\ref{sec:bcb}).] The null recurs under
     executable feedback, so reliable, actionable verification is not by itself sufficient.
     \emph{Remaining:} math, i.e.\ a numeric checker.
+  \item[D6 (oracle ceiling arm), \textbf{done} (Paper~II, run~7).] Registered on
+    2026-07-23 to separate two readings of the null: (a) the loop mechanism cannot turn a good
+    detector into held-out score, or (b) the intrinsic critique is simply not a good detector.
+    The rule set success at an oracle seed of $\ge 0.85$ and made a result near or below the
+    intrinsic baseline the signature of (a). The registered cell missed the bar ($0.748$, at one
+    retry with terse verdicts), which by that rule reads as (a), and two levers later the same
+    gate clears it ($0.873$), which (a) forbids. Neither registered candidate is what we report:
+    the binding constraint is the fix step. \emph{Remaining:} the same ceiling on a worker that
+    can count.
   \item[D7 (statistics), \textbf{done}, $135$ re-scorings (\S\ref{sec:repeat}).] They settle
     all three $p_0$ effects, and Paper~III reports what they show about $\sigma$ itself.
     \emph{Remaining:} the same measurement in the code domain, whose $\sigma$
@@ -1698,7 +1707,7 @@ predictions failed. Reporting guidance for pre-registered work asks that deviati
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
 collected here and the body text states only the surviving claim.
-\textbf{Twenty-three} entries follow.
+\textbf{Twenty-four} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1790,7 +1799,7 @@ The series' other two papers carry the entries bearing on their own claims.
     exactly \emph{three} of the $32$ held-out tasks, the three false passes the hand-written
     gene caught, because both genes returned FAIL on all five already-compliant drafts, which
     is what ``both genes demanded fixes on all five'' says. The eight are the tasks
-    \S\ref{sec:handgene}'s decomposition \emph{names}: three where the verdict changed and five
+    Appendix~\ref{sec:handgene}'s decomposition \emph{names}: three where the verdict changed and five
     where the draft needed no change. Nothing quantitative moves; the $-0.009$/$-0.023$ split and
     every number in it stand. \texttt{verify\_paper\_claims.py} now derives all three stratum
     sizes from the replay, so the sentence cannot be restated the old way.
@@ -1904,6 +1913,11 @@ The series' other two papers carry the entries bearing on their own claims.
     the verdicts the rule returns and says why the measured $\sigma(\dd)$ of
     \S\ref{sec:threats} and the five-replicate $t(4)$ of \S\ref{sec:repeat} replace it. Found on
     the final pre-submission read, by applying our own rule to our own cells.
+  \item \textbf{A pre-registered direction was deleted from the list rather than marked done.}
+    D6, the oracle ceiling arm, was registered on 2026-07-23 with an explicit success threshold
+    and left \S\ref{sec:directions} in the same commit that bought it, so the count of bought
+    directions read six where it is seven. Restored, and nothing quantitative moves. A checker
+    that scrapes printed values cannot see a missing item: every number in the list was right.
 \end{enumerate}
 
 \section{The Actuator Experiment, and the MBPP+ Attempt}

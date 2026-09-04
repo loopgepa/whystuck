@@ -61,6 +61,12 @@ ABSTRACT_LENGTHS_RE = re.compile(
     r"\*{0,2}(\d+)\*{0,2}, \*{0,2}(\d+)\*{0,2}, \*{0,2}(\d+)\*{0,2}"
 )
 
+#: The same sentence's three headroom figures. Restated arithmetic over two numbers already in
+#: the sentence, which is the class this file exists for: the lengths were guarded and the
+#: subtraction beside them was not, so a one-character edit to an abstract left the headroom
+#: reading 15 where it was 14 until someone did the sum by hand.
+ABSTRACT_HEADROOM_RE = re.compile(r"The headroom is (\d+), (\d+) and (\d+) characters")
+
 
 def _readme_pages() -> dict[str, int]:
     """Slug -> page count, from the overview table's last column."""
@@ -165,6 +171,17 @@ def test_advertised_abstract_lengths_equal_the_measured_ones() -> None:
         assert int(claimed) == measured, (
             f"{slug}: SUBMISSION.md advertises a {claimed}-character abstract, the source measures "
             f"{measured}. The document is the stale one unless the abstract was just edited."
+        )
+
+    head = ABSTRACT_HEADROOM_RE.search(text)
+    assert head, (
+        "SUBMISSION.md no longer states the three headroom figures in the form this guard reads"
+    )
+    for slug, claimed in zip(SLUGS, head.groups(), strict=True):
+        left = pkg.ABSTRACT_LIMIT - len(pkg.plain_abstract(PAPERS / slug))
+        assert int(claimed) == left, (
+            f"{slug}: SUBMISSION.md gives {claimed} characters of headroom, the abstract leaves "
+            f"{left}. The headroom is the limit minus the length and both are stated above it."
         )
 
 
@@ -472,6 +489,123 @@ def test_cross_paper_register_pointers_land_on_the_entry_they_describe() -> None
             checked += 1
     assert checked, (
         "no cross-paper register pointer found; this guard has stopped covering anything"
+    )
+
+
+#: Index -> a phrase that must still occur in that row of Paper III's defect table. The series
+#: cites these defects positionally 21 times, across all three papers and the shared harness
+#: section, and always by paraphrase ("the selector confound", "a ninth", "defect~1's mirror
+#: image"), never by the table's own wording. So no textual overlap between a citation and its
+#: row can be required: every one of those 21 sites would fail it. What CAN be pinned is the
+#: numbering the citations were written against, which protects all of them at once.
+_DEFECT_IDENTITY = {
+    1: "Critique gene never changed",
+    2: "Reflective dataset component-agnostic",
+    3: "round\\_robin",
+    4: "dropped the largest atom",
+    5: "Seeds re-partition",
+    6: "own ground-truth signal was a",
+    7: "swallowed a cassette miss",
+    8: "empty reflection completion",
+    9: "arm accepted nothing",
+    10: "reached only the",
+    11: "pooled-$\\sigma$ estimator",
+}
+
+
+def _defect_rows() -> dict[int, str]:
+    """Paper III's defect table, row number -> the defect cell, in printed order."""
+    text = (PAPERS / "p3-silent-no-op/main.tex").read_text(encoding="utf-8")
+    label = text.index("\\label{tab:defects}")
+    table = text[text.rindex("\\begin{table}", 0, label) : label]
+    # The .tex is hard-wrapped, so a row's two cells are split by " &\n" as often as by " & ".
+    # Matching on the unflattened text drops whichever rows happen to wrap at the separator, which
+    # silently cost this parse row 8 on the first attempt.
+    flat = re.sub(r"\s+", " ", table)
+    rows = {}
+    for chunk in flat.split("\\\\"):
+        m = re.match(r"\s*(?:\\midrule\s*)?(\d+) & (.+?) & ", chunk)
+        if m:
+            rows[int(m.group(1))] = m.group(2)
+    return rows
+
+
+def test_the_defect_numbering_the_series_cites_has_not_shifted() -> None:
+    """Defect indices are positional pointers into another paper's list, like `entry~N` above.
+
+    `verify_paper_claims` already derives the table's total and asserts the rows run 1..n
+    contiguously, and the guard above protects register pointers. Neither covers this: inserting a
+    twelfth defect in the middle keeps the numbering contiguous, moves the derived counts with it,
+    and silently repoints all 21 `defect~N` citations at their neighbours. That is precisely how
+    `entry~14` became wrong for three review passes while every gate stayed green.
+
+    So the identity of each index is pinned here, and every citation is resolved against the table.
+    """
+    rows = _defect_rows()
+    assert sorted(rows) == list(range(1, len(rows) + 1)), (
+        f"tab:defects rows are {sorted(rows)}, not contiguous from 1"
+    )
+    assert set(_DEFECT_IDENTITY) == set(rows), (
+        f"tab:defects holds {sorted(rows)} but this guard pins {sorted(_DEFECT_IDENTITY)}; a "
+        "defect was added or removed, so every `defect~N` citation needs re-reading before the "
+        "pin is updated"
+    )
+    for n, phrase in _DEFECT_IDENTITY.items():
+        assert phrase in rows[n], (
+            f"defect~{n} now reads {rows[n][:90]!r}, which does not contain {phrase!r}. The rows "
+            "were reordered or renumbered; the series cites them by index, so the citations moved "
+            "too."
+        )
+
+    cited = 0
+    sources = [PAPERS / s / "main.tex" for s in SLUGS] + [PAPERS / "shared/loop.tex"]
+    for path in sources:
+        flat = re.sub(r"\s+", " ", path.read_text(encoding="utf-8"))
+        for m in re.finditer(r"defects?~(\d+)(?:--(\d+))?", flat):
+            for n in (int(g) for g in m.groups() if g):
+                assert n in rows, (
+                    f"{path.name} cites defect~{n}, but the table holds {len(rows)} rows"
+                )
+                cited += 1
+    assert cited >= 21, (
+        f"found {cited} defect citations, expected at least 21; this guard has stopped covering "
+        "the sites it was built for"
+    )
+
+
+def _direction_codes_defined() -> set[str]:
+    """The direction codes Paper I's list defines, by number. D1 and D2 carry a prime."""
+    text = (PAPERS / "p1-conditional-lever/main.tex").read_text(encoding="utf-8")
+    start = text.index("Each entry below changes one variable")
+    body = text[start : text.index("\\end{description}", start)]
+    return set(re.findall(r"\\item\[D(\d{1,2})", body))
+
+
+def test_every_direction_code_the_series_cites_is_defined() -> None:
+    """The third positional pointer in this series, after register entries and defect numbers.
+
+    D6 was registered with a success threshold, bought, and then deleted from the list in the
+    same commit that bought it. Nothing noticed for the whole life of the split, because D6 was
+    never cited by name: only the declared count of bought directions was wrong, and that count
+    is now derived in `verify_paper_claims`. This guard covers the other direction, a code cited
+    with no entry behind it, which is what deleting D4 or D7 would produce -- both are cited
+    from prose, and D3 is cited from Paper III as well.
+    """
+    defined = _direction_codes_defined()
+    assert defined, "Paper I's directions list defines no D-codes; the list or its header moved"
+    cited = 0
+    for slug in SLUGS:
+        flat = re.sub(r"\s+", " ", (PAPERS / slug / "main.tex").read_text(encoding="utf-8"))
+        for m in re.finditer(r"(?<![A-Za-z\\])D(\d{1,2})(?![\d.])", flat):
+            where = flat[max(0, m.start() - 70) : m.start()]
+            assert m.group(1) in defined, (
+                f"{slug} mentions D{m.group(1)} after ...{where!r}, but Paper I's directions "
+                f"list defines {sorted(defined)}"
+            )
+            cited += 1
+    assert cited >= 24, (
+        f"found {cited} direction-code mentions, expected at least 24; this guard has stopped "
+        "covering the sites it was built for"
     )
 
 

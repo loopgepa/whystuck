@@ -43,8 +43,8 @@ choices caused it, one a library default: a reflective dataset built without reg
 component it describes, so the reflector never saw a verdict the critique had returned; and a
 component selector that rewrites one component per proposal, so under a matched \emph{total} budget
 the two-gene arm searched the shared productive gene half as hard as the one-gene arm, a confound
-that flatters the one-gene arm exactly where an effect was being sought. Auditing the fix, and then
-auditing the audit, we found the same class of error eight more times, including a ground-truth signal
+that flatters the one-gene arm exactly where an effect was being sought. Auditing the fix, the audit,
+and a replication, we found the same class of error eight more times, including a ground-truth signal
 that was silently constant and an empty completion accepted as a gene, which deletes a step of the
 loop and thereby \emph{improves} the training score. We propose a reporting minimum that costs one
 integer per component, whether the optimizer's output differs from the seed, and would have
@@ -119,7 +119,7 @@ consistency as evidence of a tight null. It was evidence of the opposite. Our co
     ranges over $5.9\times$ across the genomes of one experiment. A single study-wide $\sigma$ is
     an approximation whose direction depends on which genome produced it, and we show a case where
     a borrowed denominator was deciding published claims.
-  \item \textbf{The register} (\S\ref{sec:corrections}): the withdrawals this failure mode forced,
+  \item \textbf{The register} (Appendix~\ref{sec:corrections}): the withdrawals this failure mode forced,
     disclosed in one place, including two claims about our own null that turned out to be
     restatements of the defect. The runs it invalidated are kept rather than deleted
     (\S\ref{sec:superseded}), each with the three readings of its \dd\ side by side, since a
@@ -184,7 +184,7 @@ output.
 \paragraph{Reporting practice.}
 Reporting guidance for pre-registered work asks that deviations be disclosed in one systematic place
 rather than left for a reader to reconstruct by comparing documents
-\citep{willroth2024bestlaid}. Our register (\S\ref{sec:corrections}) follows that guidance, and this
+\citep{willroth2024bestlaid}. Our register (Appendix~\ref{sec:corrections}) follows that guidance, and this
 paper's experience adds a specific argument for it: two of our withdrawn claims were not merely
 wrong but were \emph{restatements of the defect}, ``the null is tight rather than merely
 underpowered'' rested on four intervals of exactly $[0,0]$, which is the sharpest available evidence
@@ -272,7 +272,8 @@ and searched the shared productive gene half as hard as the one-gene arm. A matc
 \emph{total} budget is not a matched budget per component, and the confound flatters the
 one-gene arm exactly where we were looking for an effect.
 
-Auditing the fix, and then auditing the audit, found the same class of error eight more times.
+Auditing the fix, then the audit, then a replication on a second worker,
+found the same class of error eight more times.
 Table~\ref{tab:defects} is the record. Five are worth the reader's attention because they
 generalize past our code, three from the audits and two from the tooling below: a ground-truth signal that is silently \emph{constant} still trains
 (defect~6); a replay advertised as strict can swallow a cache miss and exit zero while
@@ -346,8 +347,8 @@ happen, and each was caught by a machine rather than by reading.
 \end{tabular}
 \caption{Eleven ways a componentized-optimization result can be confidently wrong while every
 number it prints looks reasonable. Defects 1--3 invalidated the original headline; 4--5 change
-what the intervals may be read to mean; 6--8 were caught before spending on the re-run, 8 only
-after it had already corrupted one seed of a paid run; 9 was caught after spending, in a later
+what the intervals may be read to mean; 6--7 were caught before spending on the re-run and 8
+only after it had already corrupted one seed of a paid run; 9 was caught after spending, in a later
 sweep, and is defect~1's mirror image, the same one-sided contrast with the starvation on the
 control side instead of the treatment side. 10--11 arrived while replicating on a second worker
 and are this paper's own thesis turned on its instruments: a switch reported as set that a
@@ -632,7 +633,7 @@ the reproducibility script registers thirteen superseded runs, not ten,
 and the \$5 spend ceiling is a CLI default that five runs overrode
 (up to \$11.76) rather than a study-wide cap. Neither changes a result; both are the kind of quiet
 arithmetic drift a reader finds and an author does not, which is why they are in the register
-(\S\ref{sec:corrections}) rather than silently fixed.
+(Appendix~\ref{sec:corrections}) rather than silently fixed.
 
 What survives in these runs is the \textbf{arm-A seed baseline}, which is a measurement of
 the loop rather than of the optimizer and is untouched by the defect. Read down the ``Seed''
@@ -791,8 +792,8 @@ exactly that: the critique gene is byte-identical to the seed in $15/15$ winning
 reported held-out scores identical on every seed, and we read the consistency as a tight null for months. Two
 ordinary wiring choices sufficed, a reflective dataset built without regard to which component
 it describes, and a selector that rewrites one component per proposal under a matched total budget,
-which is a library default and biases the comparison toward the one-gene arm. Auditing the fix
-found eight more errors of the same class, whose common signature is that the number they produce
+which is a library default and biases the comparison toward the one-gene arm. Auditing the fix, the audit and a
+replication found eight more errors of the same class, whose common signature is that the number they produce
 looks reasonable.
 
 The generalizable output is one integer: \textbf{per component, whether the optimizer's output
@@ -831,7 +832,7 @@ This work's earlier drafts published claims it now withdraws. Reporting guidance
 work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Eighteen} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Nineteen} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -999,6 +1000,12 @@ The series' other two papers carry the entries bearing on their own claims.
     against the registry, and the enumeration behind it was prose. The parts are now summed
     against \texttt{verify\_reproducibility}'s own replayable count, so the list and the total
     fail together or not at all.
+  \item \textbf{``Auditing the fix, and then auditing the audit, found the same class of error
+    eight more times.''} Eight is right and the attribution was not: two of the eight arrived
+    while replicating on a second worker, which is what Table~\ref{tab:defects}'s caption says
+    and what three prose sites contradicted. Every count involved is pinned and all three were
+    correct, so the guard could not see it; the claim that moved was about \emph{how} the
+    defects were found, and no artifact records that.
 \end{enumerate}
 
 \end{document}
