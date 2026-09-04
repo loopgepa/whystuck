@@ -60,8 +60,8 @@ Appendix~\ref{sec:corrections}.
 
 Automatic prompt optimization has matured from single-instruction search
 \citep{madaan2023selfrefine} to optimizers that treat an entire LLM program as
-the object of optimization. GEPA \citep{agrawal2025gepa}, the current
-state-of-the-art reflective optimizer and an ICLR-2026 oral, evolves any set of
+the object of optimization. GEPA \citep{agrawal2025gepa}, an ICLR-2026 oral and
+the reflective optimizer these runs drive, evolves any set of
 text components of a compound system (prompts, rubrics, tool descriptions)
 by reflecting on execution traces in natural language and maintaining a Pareto
 frontier of candidates. DSPy \citep{khattab2023dspy} similarly compiles and
@@ -300,16 +300,17 @@ exclusions and gene overrides, every dimension except the \emph{worker} that exe
 another model, dropped into the release directory for an unrelated experiment, enrolled as an
 eleventh replicate (defect~11). Nothing reached a reader: the claim checker failed on the same
 commit and the screen went in before publication, so what follows is a counterfactual, measured
-by re-running the checker with the screen removed. It moves $68$ of this paper's published
-values, and only $31$ of the $68$ move far enough to breach the tolerance that guards them; the
+by re-running the checker with the screen removed. It moves $79$ of this paper's published
+values, and only $42$ of the $79$ move far enough to breach the tolerance that guards them; the
 remaining $37$ shift with nothing objecting. Those figures were $48$ and $29$ until a later audit
 added checks for seven $\sigma$-derived values the papers had always printed and nothing had ever
-read, then $55$ and $30$ when a further one added an eighth, then $56$, $57$, $60$ and now $68$
-as we scoped Paper~I's superlative, drew its figures, unified the noise floor's printed
-precision, and each new check turned out to divide by
+read, then $55$ and $30$ when a further one added an eighth, then $56$, $57$, $60$, $68$ and now
+$79$ as we scoped Paper~I's superlative, drew its figures, unified the noise floor's printed
+precision, and swept the replicate count across all three papers, each new check turning out to
+read
 $\sigma$ too: the contamination was moving them all
 along, and the count of what it moves is bounded by
-the count of what is watched. The pair has now moved six times for that reason and not once
+the count of what is watched. The pair has now moved seven times for that reason and not once
 because the contamination changed, which is the cleanest available demonstration of the sentence
 it sits in. That is the part worth keeping, and it is the same
 threshold problem as defect~6 wearing different clothes: a contamination does not have to be
@@ -362,7 +363,7 @@ sweep, and is defect~1's mirror image, the same one-sided contrast with the star
 control side instead of the treatment side. 10--11 arrived while replicating on a second worker
 and are this paper's own thesis turned on its instruments: a switch reported as set that a
 surface never received, and a guard reporting agreement about a dimension it never compared.
-Neither is specific to an optimizer. 11 was caught before publication; removing its screen again moves $68$ of this paper's values, only $31$ of them past the tolerance that guards them.}
+Neither is specific to an optimizer. 11 was caught before publication; removing its screen again moves $79$ of this paper's values, only $42$ of them past the tolerance that guards them.}
 \label{tab:defects}
 \end{table}
 
@@ -844,7 +845,7 @@ This work's earlier drafts published claims it now withdraws. Reporting guidance
 work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Nineteen} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Twenty} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1018,6 +1019,12 @@ The series' other two papers carry the entries bearing on their own claims.
     and what three prose sites contradicted. Every count involved is pinned and all three were
     correct, so the guard could not see it; the claim that moved was about \emph{how} the
     defects were found, and no artifact records that.
+  \item \textbf{``The current state-of-the-art reflective optimizer.''} An unscoped superlative
+    about an open set at an unstated time, and nothing derived it. This paper's own rule, written
+    for the other one, is that a superlative is a claim about a set and has to say which set. The
+    sentence now carries GEPA's ICLR-2026 oral instead, which is the credential the superlative
+    was standing in for, is checkable in the bibliography, and cannot go stale between submission
+    and a rolling review. Nothing quantitative moves.
 \end{enumerate}
 
 \end{document}

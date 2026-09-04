@@ -2994,7 +2994,10 @@ def _checks() -> list[tuple[str, float, float, float]]:
     # number and the sigma it quotes is derived from a different set than it claims.
     n_reps = noise.n_replicates
     # The abstract used to restate this count; it was cut to meet the 200-word / one-paragraph
-    # limit, so sec:threats is now the only place that states it and the only anchor needed.
+    # limit. This site is the one sec:threats states, NOT the only one in the series: eleven
+    # sentences across the three papers state it, and `_replicate_count_checks` sweeps them all.
+    # The claim that this was the only anchor needed stood here while ten other sites went
+    # unread.
     out.append(
         (
             "tex: noise n replicates (threats)",
@@ -3562,6 +3565,8 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_spine_checks())
     out.extend(_cross_paper_checks())
     out.extend(_corrections_count_checks())
+    out.extend(_replicate_count_checks())
+    out.extend(_conclusion_replicated_magnitude_checks())
     out.extend(_screen_discrimination_checks())
     out.extend(_p3_level_gloss_checks())
     out.extend(_noise_floor_precision_checks())
@@ -4241,6 +4246,88 @@ def _p3_level_gloss_checks() -> list[tuple[str, float, float, float]]:
     for i, (row, claimed) in enumerate(((r"$L_1$ &", m.group(1)), (r"$L_3$ &", m.group(2)))):
         cells = _table_row(p1, hdr, row)
         out.append((f"P3 level gloss endpoint {i + 1}", float(claimed), 0.0005, float(cells[3][0])))
+    return out
+
+
+#: Every live statement of the sigma replicate count, across all three papers. Each pattern
+#: carries a disambiguating tail because "released runs" is not unique to this quantity: Paper III
+#: also says "Sixteen released runs trip that flag" about the acceptance census, and Paper I says
+#: "the released runs could not perform" about something else entirely.
+_REPLICATE_COUNT_SITES = (
+    r"(\w+) released runs,? (?:the|a) four-arm re-run",
+    r"(\w+) released runs of the companion paper",
+    r"(\w+) released runs (?:that )?re-score one fixed",
+    r"(\w+) runs that re-score one fixed",
+    r"they are (\w+) independent draws",
+    r"the artifact reports (\w+)",
+    r"(\w+) is what the artifact holds",
+)
+
+
+def _replicate_count_checks() -> list[tuple[str, float, float, float]]:
+    """The sigma replicate count, wherever any paper states it.
+
+    It was pinned at one site, in Paper I's threats section, under a comment asserting that
+    section was "the only place that states it". It is stated eleven times across the three
+    papers: Paper I's footnote on the registration's arithmetic, its closability table, its
+    register entry, both of Paper II's sigma paragraphs and Paper III's. A new run at this split
+    size enrols itself as a replicate automatically, which the old comment itself warned about, so
+    the count grows and ten of the eleven sentences would have kept saying ten while one failed.
+
+    That is the failure Paper III's register describes one level down, for the sigma quotients:
+    "one machine-checked sentence per quantity was updated and the restatements elsewhere were
+    not". The quotients got a coverage test. The count they divide by did not.
+    """
+    src = _sources()
+    n_reps = float(_noise_estimate().n_replicates)
+    out = []
+    for slug in src.PAPERS:
+        flat = re.sub(r"\s+", " ", src.paper_tex(slug))
+        for pat in _REPLICATE_COUNT_SITES:
+            for m in re.finditer(pat, flat):
+                word = m.group(1).lower()
+                if word not in _WORD_NUM:
+                    # An overlapping match on a neighbouring pattern, not a stated count.
+                    continue
+                out.append(
+                    (
+                        f"replicate count {src.PAPER_NUMERALS[slug]} ({len(out)})",
+                        _WORD_NUM[word],
+                        0.0,
+                        n_reps,
+                    )
+                )
+    assert len(out) == 11, (
+        f"found {len(out)} statements of the replicate count, expected 11; a site was added, "
+        "reworded past these patterns, or switched to a digit"
+    )
+    return out
+
+
+def _conclusion_replicated_magnitude_checks() -> list[tuple[str, float, float, float]]:
+    """Paper II's conclusion now prints the replicated magnitudes it says are smaller.
+
+    It opened with the single draws (+0.060 and +0.065 against a borrowed sigma), said two
+    sentences later that both are smaller once re-scored, and never gave the smaller figures. A
+    reader of the conclusion alone left with the two numbers the register records as having shrunk
+    by 34 and 44 per cent, and the corrected pair was a section reference away. The abstract
+    already led with the replicated values, so the two summaries of one paper disagreed about
+    which estimate was current.
+    """
+    src = _sources()
+    flat = re.sub(r"\s+", " ", src.paper_tex("p2-repair-not-detection"))
+    rows = {str(r.level): r for r in _sources_curve()}
+    out = []
+    for label, pattern, key in (
+        ("conclusion tool lift (K=5)", r"the tool lift is \$\+([\d.]+)\$", "tool lift (4 over 3)"),
+        (
+            "conclusion refine lift (K=5)",
+            r"the refine-budget lift \$\+([\d.]+)\$",
+            "refine budget (8 over 7)",
+        ),
+    ):
+        row = next(r for k, r in rows.items() if k.startswith(key.split(" (")[0]))
+        out.append((label, _scrape(flat, pattern), 0.00005, abs(row.delta)))
     return out
 
 

@@ -21,13 +21,13 @@ endorsement domain, and the primary category selects the domain.
 
 Two structural facts decide this, and neither is about the papers' quality.
 
-**Main-text length is 31 / 19 / 15 pages** (references begin on p.32 / 20 / 16 of 41 / 25 / 22).
+**Main-text length is 31 / 19 / 15 pages** (references begin on p.32 / 20 / 16 of 42 / 25 / 22).
 **All three papers are de-anonymised by their own reproducibility apparatus**: the title block
 prints author, affiliation and repository URL, and each abstract names the repository again.
 
 | venue | window | verdict |
 |---|---|---|
-| **TMLR** | rolling | **The fit.** Its two criteria are whether the claims are supported by the evidence and whether anyone in the audience would be interested; novelty and significance are *explicitly excluded* as grounds for rejection. Variable manuscript length, so the main-text lengths above are not a problem. arXiv preprints permitted. Double-blind. |
+| **TMLR** | rolling | **The fit.** Its two criteria are whether the claims are supported by the evidence and whether anyone in the audience would be interested; novelty and significance are *explicitly excluded* as grounds for rejection. Variable manuscript length, so the main-text lengths above are not a problem. arXiv preprints permitted. Double-blind. **Needs a restyle:** "Submissions must be PDF files generated using the TMLR LaTeX stylefile and template" (author guide, quoted 2026-09-04), and these build on `article` at 11pt, so the page counts on this page are for the current class and will move under theirs. Accepts the artifact as supplementary material, which removes the mirror-hosting step below. |
 | ICLR 2027 | abstract 18 Sep, paper 25 Sep 2026 | **Ruled out for a three-paper series.** 9-page initial limit (10 camera-ready; references and appendices excluded). And: *"If you and all of your co-authors have never had a paper accepted for publication in a major machine learning conference or journal, you may submit at most one paper to ICLR 2027."* Single-author and independent ⇒ **one paper, cut threefold.** Authors on 3+ papers must review 6. Mandatory AI-use statement whose required-disclosure list covers methodology feedback, implementing methods and interpreting results. |
 | NeurIPS 2026 Evaluations & Datasets | abstract 4 May, full 6 May 2026 | **Closed.** Was the best categorical fit, the renamed Datasets & Benchmarks track, now explicitly treating evaluation as an object of study. Next window ≈ May 2027. |
 | MLRC 2026 | hard 30 Sep 2026 | **Not a fit.** Requires prior TMLR acceptance, and its scope is reproducing *others'* claims published 2025 onward. |
@@ -130,7 +130,7 @@ Standing one up publishes content under a new identity and is a decision for the
 something the packaging script should do on its own. The script writes a verified tree and stops
 there. Rebuilt for this review it produced 793 files, 43 run JSONs, 225 replicate scorings and 267
 cassettes, with no identifying token surviving a byte scan and a standalone install of that tree
-re-deriving 1070/1070 claims after the rename. It lands in `dist/`, which is gitignored, so
+re-deriving 1083/1083 claims after the rename. It lands in `dist/`, which is gitignored, so
 **rebuild it at the commit you submit**: a snapshot kept from an earlier commit publishes
 superseded papers, which is what happened to this one inside a single review pass.
 
@@ -142,9 +142,15 @@ superseded papers, which is what happened to this one inside a single review pas
       mirror instead, which now exists as a verified tree and needs only publishing. Going public
       before the venue is chosen can work against the submission: every commit here carries the
       author's name, so a public repository the paper points at breaks the blind.
-- [ ] **Publish the anonymous mirror.** The tree is built and verified; pushing it to an account
-      that is not yours is the step no script should take. Then rebuild all three packages against
-      its URL with `scripts/anon_submission.sh`.
+- [ ] **Publish the anonymous mirror** *for a venue with no supplementary channel.* The tree is
+      built and verified; pushing it to an account that is not yours is the step no script should
+      take. Then rebuild all three packages against its URL with `scripts/anon_submission.sh`.
+      **For TMLR this step is avoidable.** The author guide, quoted 2026-09-04, permits "up to
+      100MB of supplementary material, such data, source code or illustrative videos; all
+      supplementary materials must be in PDF or ZIP format", and it must be anonymized like the
+      submission. The mirror is 21MB on disk and **6.4MB zipped**, so the whole artifact ships
+      with the paper and no third-party host is involved. Hosting is still required for the arXiv
+      path, where the abstract prints a URL that has to resolve.
 - [ ] **Join the TMLR reviewer pool**, if you are willing. It doubles the annual quota from two
       submissions to four, which is the difference between sending this series over two years and
       sending it in one. Cheapest unblock on this page.
@@ -178,7 +184,7 @@ exists. Measured from the built PDFs and each paper's own source:
 
 | | paper | pages | tables | figures | distinct citations |
 |---|---|---|---|---|---|
-| I | `p1-conditional-lever` | 41 | 11 | 3 | 24 |
+| I | `p1-conditional-lever` | 42 | 11 | 3 | 24 |
 | II | `p2-repair-not-detection` | 25 | 4 | 3 | 17 |
 | III | `p3-silent-no-op` | 22 | 4 | 1 | 14 |
 
