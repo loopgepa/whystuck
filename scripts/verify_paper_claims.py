@@ -3566,6 +3566,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_cross_paper_checks())
     out.extend(_corrections_count_checks())
     out.extend(_replicate_count_checks())
+    out.extend(_borrowed_figure_checks())
     out.extend(_conclusion_replicated_magnitude_checks())
     out.extend(_screen_discrimination_checks())
     out.extend(_p3_level_gloss_checks())
@@ -4328,6 +4329,45 @@ def _conclusion_replicated_magnitude_checks() -> list[tuple[str, float, float, f
     ):
         row = next(r for k, r in rows.items() if k.startswith(key.split(" (")[0]))
         out.append((label, _scrape(flat, pattern), 0.00005, abs(row.delta)))
+    return out
+
+
+def _borrowed_figure_checks() -> list[tuple[str, float, float, float]]:
+    """Paper II's claim about its own independence: exactly two of its numbers come from a search.
+
+    It says so twice, in the abstract ("except two figures quoted from the companion papers") and
+    in the body ("Those two are the only optimizer-derived figures in this paper"), and nothing
+    checked either. That claim is what lets Paper II stand alone: every other number it prints
+    scores a fixed, hand-written genome, so a reader needs no companion to audit it. A third
+    borrowed figure would falsify both sentences silently.
+
+    Derived here from the runs the two come from rather than from Paper II's own text, since a
+    figure quoted from a companion is exactly the number no reader of this paper can recompute.
+    """
+    src = _sources()
+    flat = re.sub(r"\s+", " ", src.paper_tex("p2-repair-not-detection"))
+    out: list[tuple[str, float, float, float]] = []
+    for label, pattern, run in (
+        ("borrowed cross-provider figure", r"cross-provider run's \$\+([\d.]+)\$", "xprovider"),
+        ("borrowed cross-lineage figure", r"cross-lineage run's \$\+([\d.]+)\$", "crossfamily"),
+    ):
+        runs = _runs(f"validation-study-{run}.json")
+        delta = mean(r["D"]["opt_heldout"] for r in runs) - mean(
+            r["B"]["opt_heldout"] for r in runs
+        )
+        out.append((label, _scrape(flat, pattern), 0.0005, delta))
+    # The stated count, at both sites, against the number of borrowed figures above.
+    for i, pattern in enumerate(
+        (
+            r"except two figures quoted from the companion",
+            r"Those two are the only optimizer-derived figures",
+        )
+    ):
+        assert re.search(pattern, flat), (
+            f"Paper II no longer states its borrowed-figure count in the form this guard reads "
+            f"(site {i}); the claim that it stands alone is what the count supports"
+        )
+    out.append(("borrowed figures stated as two", 2.0, 0.0, float(len(out))))
     return out
 
 

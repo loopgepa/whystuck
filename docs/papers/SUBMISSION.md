@@ -130,7 +130,7 @@ Standing one up publishes content under a new identity and is a decision for the
 something the packaging script should do on its own. The script writes a verified tree and stops
 there. Rebuilt for this review it produced 793 files, 43 run JSONs, 225 replicate scorings and 267
 cassettes, with no identifying token surviving a byte scan and a standalone install of that tree
-re-deriving 1083/1083 claims after the rename. It lands in `dist/`, which is gitignored, so
+re-deriving 1086/1086 claims after the rename. It lands in `dist/`, which is gitignored, so
 **rebuild it at the commit you submit**: a snapshot kept from an earlier commit publishes
 superseded papers, which is what happened to this one inside a single review pass.
 
@@ -151,6 +151,16 @@ superseded papers, which is what happened to this one inside a single review pas
       submission. The mirror is 21MB on disk and **6.4MB zipped**, so the whole artifact ships
       with the paper and no third-party host is involved. Hosting is still required for the arXiv
       path, where the abstract prints a URL that has to resolve.
+- [ ] **Put the two companion PDFs in the supplementary ZIP** for any double-blind submission.
+      A reviewer of Paper~I cannot read Papers II and III, and Paper I attributes twelve numeric
+      claims to them (Paper II seven, Paper III one), so those claims are unverifiable to the one
+      person who has to judge them. Two independent sources name the same remedy. COPE, on
+      divided publication: authors "should cross reference or include a copy of the companion
+      paper". NeurIPS, on citing your own concurrent submission that is not available as a
+      non-anonymous preprint: "include a copy of the cited anonymized submission in the
+      supplementary material". Both quoted 2026-09-05. The anonymous builds already exist, so
+      this costs nothing: the artifact is 6.3MB zipped and the three PDFs are 0.9, 0.7 and
+      0.5MB, so a bundle of the artifact plus two companions is 7.8MB against TMLR's 100MB.
 - [ ] **Join the TMLR reviewer pool**, if you are willing. It doubles the annual quota from two
       submissions to four, which is the difference between sending this series over two years and
       sending it in one. Cheapest unblock on this page.

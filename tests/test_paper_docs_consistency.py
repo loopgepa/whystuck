@@ -666,6 +666,64 @@ def test_every_coined_term_is_introduced_before_a_paper_uses_it() -> None:
             )
 
 
+#: (slug, entry number) -> a phrase that must occur in that register entry. These are the
+#: pointers a paper makes into its OWN register, which the cross-paper guard above does not see.
+#: They are positional in exactly the same way, and they do not quote the entry they cite, so a
+#: keyword census stands in for the quoted phrase that guard relies on.
+#: The number is READ from the citing sentence, never hard-coded beside it. A first version of
+#: this map keyed on (paper, index) and pinned only what the entry contained, so renumbering the
+#: citation from entry~2 to entry~3 changed nothing it looked at and the mutation passed.
+_INTRA_REGISTER_POINTERS = {
+    ("p1-conditional-lever", r"the depth bound of entry~(\d+)"): "depth bound",
+    ("p1-conditional-lever", r"the \$1\.12\$ of entry~(\d+)"): r"1\.12",
+    ("p2-repair-not-detection", r"the borrowed denominator entry~(\d+) retired"): "borrowed",
+    ("p2-repair-not-detection", r"why entry~(\d+) needed reinstating"): "beats the tool-fed loop",
+}
+
+
+def test_a_papers_pointers_into_its_own_register_still_land() -> None:
+    """`entry~14` broke because inserting an entry moves every number after it.
+
+    The guard written for that covers pointers into ANOTHER paper's register, which is where the
+    defect was found. It does not cover a paper pointing into its own, and there are four of
+    those: two in Paper I and two in Paper II. They are positional in the same way and fail in
+    the same silent way, since a number that still resolves to *an* entry breaks no build.
+
+    Entries have been appended to these registers five times during review, which is why the
+    four still land; an insertion anywhere but the end would have moved them.
+    """
+    for (slug, citing), phrase in _INTRA_REGISTER_POINTERS.items():
+        flat_paper = re.sub(r"\s+", " ", (PAPERS / slug / "main.tex").read_text(encoding="utf-8"))
+        cite = re.search(citing, flat_paper)
+        assert cite is not None, (
+            f"{slug} no longer carries the citing sentence {citing!r}; this guard reads the entry "
+            "number out of that sentence, so a rewording hides the pointer rather than moving it"
+        )
+        n = int(cite.group(1))
+        entries = _register_entries(slug)
+        assert 1 <= n <= len(entries), (
+            f"{slug} cites its own entry~{n}, but its register holds {len(entries)}"
+        )
+        body = re.sub(r"\s+", " ", entries[n - 1])
+        assert re.search(phrase, body, re.I), (
+            f"{slug}'s entry~{n} reads {body[:110]!r}, which does not match {phrase!r}. An entry "
+            "was probably inserted above it, moving every pointer after it."
+        )
+
+    found = 0
+    for slug in SLUGS:
+        flat = re.sub(r"\s+", " ", (PAPERS / slug / "main.tex").read_text(encoding="utf-8"))
+        for m in re.finditer(r"entry~(\d+)", flat):
+            window = flat[max(0, m.start() - 95) : m.end() + 45]
+            if re.search(r"Paper~I{1,3}|companion paper", window):
+                continue  # a cross-paper pointer, covered by the guard above
+            found += 1
+    assert found == len(_INTRA_REGISTER_POINTERS), (
+        f"found {found} pointers into a paper's own register, but {len(_INTRA_REGISTER_POINTERS)} "
+        "are pinned; enrol the new one so it cannot drift unwatched"
+    )
+
+
 def test_the_bibliography_has_no_latex_special_characters_that_eat_text() -> None:
     """BibTeX copies a field verbatim into `main.bbl`, which LaTeX then reads as source.
 

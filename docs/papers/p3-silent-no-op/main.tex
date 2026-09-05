@@ -772,7 +772,7 @@ one integer per component is cheap enough that it does not need one.
 
 \textbf{The diagnostic is necessary, not sufficient.} A per-component change count catches a
 treatment that never applied. It does not catch a treatment that applied and did something
-degenerate: our companion paper's non-accepting verifier changes the gene on every seed. That
+degenerate: the companion paper's non-accepting verifier changes the gene on every seed. That
 needs its own screen, and the cheap one there is a \texttt{PASS} rate of zero. Worse, it reports
 the \emph{reassuring} answer on defect~8: an empty completion accepted as a gene \emph{does}
 differ from the seed, so the count says ``changed'' on the run where the change deleted
