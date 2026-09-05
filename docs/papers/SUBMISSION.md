@@ -212,7 +212,7 @@ neither stops a build, and Paper I shipped an oversized threats table until 2026
 nothing read the log.
 
 Abstract lengths against the 1920-character metadata
-field: **1902**, **1902**, **1906**. The headroom is 18, 18 and 14 characters, so any edit to any
+field: **1902**, **1888**, **1906**. The headroom is 18, 32 and 14 characters, so any edit to any
 of the three abstracts has to be re-checked by `make_arxiv_package.py` rather than assumed to fit.
 
 The three are cross-referenced as a series, so they should be posted together or in the order I, II,

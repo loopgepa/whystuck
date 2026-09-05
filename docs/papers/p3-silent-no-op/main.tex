@@ -88,8 +88,9 @@ consistency as evidence of a tight null. It was evidence of the opposite. Our co
     flagship run, whose five seeds and three evolvable arms give fifteen
     arm-runs, the optimizer changed \texttt{generate} in $5/15$ winners and
     \texttt{ensure\_correct} in $0/15$ ($2/5$ and $0/5$ for the verifier-evolving arm alone). \emph{Two different
-    fifteens}, and we name the unit of each because they are numerically equal and an earlier draft merged them. Every reported difference is a comparison of a genome
-    against itself, which is why it was so stable.
+    fifteens}, and we name the unit of each because they are numerically equal and an earlier draft merged them. No reported difference measures the
+    treatment, and most of them compare a genome against itself, which is why they were so
+    stable.
   \item \textbf{Two ordinary causes, one of them a library default} (\S\ref{sec:defect}): a
     component-agnostic reflective dataset, and a one-component-per-proposal selector under a
     matched total budget. Neither is exotic, neither is visible in a held-out score, and the second
@@ -265,8 +266,10 @@ earlier draft ran them together, since GEPA changed
 \texttt{generate} in $5/15$ winners and \texttt{ensure\_correct} in $0/15$; for arm~D alone that
 is $2/5$ and $0/5$. The two arms whose
 difference the study exists to measure were, for the gene that defines the difference, the
-same program. Every $\dd$ in Table~\ref{tab:results} is therefore a comparison of a genome
-against itself, which is why it was so stable.
+same program. No $\dd$ in Table~\ref{tab:results} is therefore a measurement of the
+treatment, and most of that column is a genome compared against itself, which is why it was so
+stable. Where it is not, the two arms differ in the gene they \emph{share} rather than in the
+treated one (\S\ref{sec:superseded}).
 
 Two wiring defects produced that, and neither is visible in a held-out score.
 \textbf{The reflective dataset was component-agnostic.} GEPA builds reflection records per
@@ -541,8 +544,9 @@ instrument whose failure is silent.
 
 The original ten runs below are retained as the record of what the defect of
 \S\ref{sec:defect} invalidated, and are \textbf{not} evidence about loop-level
-optimization: the loop-level gene never changed, so arms~B and~D are the same program and the
-$\dd$ column compares a genome against itself. Their \textbf{Seed} column is unaffected: it
+optimization: the loop-level gene never changed, so nothing in the $\dd$ column measures the
+treatment. Most of it compares a genome against itself; the rows where it does not are the
+selector confound read through the shared gene, which the discussion below separates. Their \textbf{Seed} column is unaffected: it
 scores a fixed genome and involves no optimizer, and it is the live readout the companion
 paper on the loop's ceiling draws on for its oracle, fix-budget and actionability results. The
 cassettes are released and labelled superseded: the corrected wiring changes every reflection
@@ -570,8 +574,9 @@ Run & Regime & Seeds & Seed & B (prompt-only) & D (loop-level) & \dd \\
 \end{tabular}
 \caption{All ten of the original runs, retained as the record of what the defect
 invalidated. \textbf{The \dd\ column is not a measurement} and no claim in this series
-rests on it: the loop-level gene never changed, so B and D are the same program
-(\S\ref{sec:defect}); the companion paper on the conditional lever measures this contrast on a corrected harness.
+rests on it: the loop-level gene never changed, so nothing here measures the treatment
+(\S\ref{sec:defect}), and where the column is non-zero the arms differ in the gene they share
+rather than in the treated one; the companion paper on the conditional lever measures this contrast on a corrected harness.
 Rows 4--10 elide a repeated ``hard multi'' prefix: each is run 3's regime plus the listed lever. The \textbf{Seed} column is live throughout, and is the intended readout for runs 6--10.
 Runs 1--2 are uninformative by design (the verify gene is inert on single-constraint
 tasks; the seed saturates at $0.97$ on easy multi). Runs 8--10 share the oracle $R{=}3$
@@ -739,7 +744,8 @@ $0.0291$ the cross-run estimate gave, because optimized arms vary more than the 
 estimate was built from; $L_3$ does not, which is the ceiling effect
 Table~\ref{tab:sigmagenome} shows directly: at $p_0 = 0.667$ both arms sit near $0.97$ and
 have little room to vary.
-On a \emph{single} draw the study's three headline effects are therefore $0.89\sigma$,
+On a \emph{single} draw the three $p_0$-sweep contrasts of the conditional-lever paper,
+taken in the same $L_1$, $L_2$, $L_3$ order as the denominators above, are therefore $0.89\sigma$,
 $1.31\sigma$ and $0.08\sigma$: weaker against the within-run denominator for two of them,
 and marginally stronger for the third, which is a null either way.
 
@@ -846,7 +852,7 @@ This work's earlier drafts published claims it now withdraws. Reporting guidance
 work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Twenty} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Twenty-one} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1026,6 +1032,14 @@ The series' other two papers carry the entries bearing on their own claims.
     sentence now carries GEPA's ICLR-2026 oral instead, which is the credential the superlative
     was standing in for, is checkable in the bibliography, and cannot go stale between submission
     and a rolling review. Nothing quantitative moves.
+  \item \textbf{``Every $\dd$ in Table~\ref{tab:results} is a comparison of a genome against
+    itself.''} This register already withdrew the identity reading, and three places in the body
+    went on asserting it, one of them the opening of the section whose own text calls it too
+    strong sixty-four lines later. The table it quantifies over prints two non-zero rows. The
+    surviving claim is the one the withdrawal states: the gene that defines the contrast never
+    changed, so nothing in that column measures the treatment, and where it is non-zero the arms
+    differ in the gene they share. A correction recorded and not carried into the body is this
+    paper's own failure mode, one level up.
 \end{enumerate}
 
 \end{document}

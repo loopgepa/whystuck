@@ -37,8 +37,8 @@ we measure scores a fixed, hand-written genome, so nothing here depends on a sea
 figures quoted from the companion papers. Detection is not the binding constraint. Replacing the
 loop's near-random self-critique
 (F$_1 = 0.11$) with the true metric as a \emph{perfect} inference-time gate moves held-out score by
-$-0.0027$ ($t = 0.33$ over five replicates): a perfect checker is statistically indistinguishable
-from one at chance, and it scores $0.042$ \emph{below} a mere text-statistics tool ($t = 2.89$).
+$-0.0027$ ($t = 0.33$ over five replicates): a perfect checker buys nothing measurable over
+one at chance, and it scores $0.042$ \emph{below} a mere text-statistics tool ($t = 2.89$).
 The gains sit on the fix side. Holding the checker perfect and varying only the repair text,
 naming which constraint failed adds $+0.003$ over a bare ``revise'' while a concrete measured edit
 adds $+0.0613$ ($t = 8.08$, the best-supported effect we measure), and that configuration beats the
@@ -46,7 +46,7 @@ measurement tool outright ($+0.0640$, $t = 5.47$). We also show F$_1$ is the wro
 in-loop critique: across a $10\times$ range of task difficulty the same critique's F$_1$ nearly
 triples while Youden's $J$ and Matthews' correlation do not improve at all, so a rising F$_1$ on
 an easier benchmark is base-rate inflation. The residual is one
-mechanical skill rather than a diffuse capability wall, exact word counting: $0.16 \to 0.33 \to 0.50$ under better feedback and never
+mechanical skill rather than a diffuse capability wall, exact word counting: $0.16 \to 0.33 \to 0.50$ across fix regimes and never
 solved. The practical consequence: do not buy a better detector, buy
 a more actionable fixer. Every claim rests on five independent replicates of each configuration,
 paired within replicate on shared held-out tasks, bar the two seed-level corroborations, and every
@@ -396,8 +396,7 @@ $L_3$ & 0.667 & \textbf{0.632} & 0.600 & 0.400 & $\mathbf{0.000}$ / $\mathbf{0.0
 \end{tabular}
 \end{center}
 
-$\mathrm{F}_1$ nearly triples as the tasks get easier, and it is measuring the base rate, not
-the detector: Youden's $J$ and Matthews' correlation, both of which are zero for a
+$\mathrm{F}_1$ nearly triples as the tasks get easier while discrimination does not improve: Youden's $J$ and Matthews' correlation, both of which are zero for a
 chance-level detector regardless of base rate, do not improve at all, and at $L_3$ they are
 \emph{exactly} zero because $\mathrm{tp}\cdot\mathrm{tn} = \mathrm{fp}\cdot\mathrm{fn} = 48$.
 Across a $10\times$ range of task difficulty $\mathrm{F}_1$ orders the levels and the
@@ -422,8 +421,8 @@ $0.765$; the tool-fed critique (F$_1\!=\!0.83$) yields $0.837$; but the
 best detector gives the \emph{worst} of the three. The reading rests on the oracle's two gaps,
 which differ in strength, and the noise floor sizes them: the oracle sits
 $0.088$ below the tool-fed critique at $3.04\sigma$, but only $0.028$ below the
-\emph{intrinsic} one at $0.98\sigma$, so on this evidence a perfect checker is
-\emph{indistinguishable} from a near-random one and clearly worse than a measurement tool. The
+\emph{intrinsic} one at $0.98\sigma$, so on this evidence a perfect checker buys
+nothing measurable over a near-random one and is clearly worse than a measurement tool. The
 ordering holds on point estimates; the load-bearing half of it is the comparison against the
 tool. Both halves have since been re-scored five times each (\S\ref{sec:curverepeat}): the gap
 against the tool is $-0.0420$ at $t = 2.89$, replicated, and the gap against the intrinsic
@@ -614,8 +613,11 @@ Constraint (final-draft satisfaction) & run 3 (intrinsic $R1$) & run 8 (oracle m
 \end{tabular}
 \caption{Per-constraint satisfaction of the loop's final draft (held-out, from
 cassettes). The fix-step residual is concentrated almost entirely in
-\texttt{exact\_word\_count}; actionable feedback lifts it ($0.16\!\to\!0.33\!\to\!0.50$)
-but never solves it, while six of the eight constraints reach $1.0$ and the only residual
+\texttt{exact\_word\_count}, which rises across the three configurations
+($0.16\!\to\!0.33\!\to\!0.50$) without ever being solved. Only the second step isolates
+feedback: the first also swaps the intrinsic critique for the oracle and raises the refine budget
+from one round to three, so the trajectory bounds what the fix step recovers rather than
+attributing all of it to actionability. while six of the eight constraints reach $1.0$ and the only residual
 outside it is $0.10$ in \texttt{word\_max\_length}. The generator-limited
 residual is one mechanical skill (exact counting), not a diffuse ceiling.}
 \label{tab:residual}
@@ -648,7 +650,7 @@ run~9) is $+0.063$ at $2.18\sigma$. The result the mechanistic account turns on:
 differ in strength, so the ordering alone understates one and overstates the other. Against the
 tool-fed loop the direction is unambiguous:
 $-0.088$ at $3.04\sigma$. Against the \emph{intrinsic} loop it is not: $-0.028$ at $0.98\sigma$,
-i.e.\ indistinguishable. So the defensible form of the claim is that giving the loop the true
+which the noise floor cannot separate from zero. So the defensible form of the claim is that giving the loop the true
 metric as its checker buys nothing measurable over its own near-random self-critique, and is
 \emph{worse} than giving it text statistics, which is the stronger reading anyway, and the one
 the residual analysis of \S\ref{sec:residual} explains. Two caveats travel with all of these:
@@ -744,9 +746,11 @@ right call on the evidence then available and the wrong conclusion about the wor
 cost of an unmeasured denominator running in the conservative direction, and it is worth stating
 as plainly as the errors that ran the other way: most of this study's arithmetic withdrawals
 removed claims that were too strong, and this one restores a claim that was too weak.
-Third, \textbf{the perfect-checker null holds}: against the \emph{intrinsic} critique the oracle
-moves $-0.0027$ at $t = 0.33$, so ``a perfect checker is indistinguishable from a near-random
-one'' is confirmed rather than merely unrefuted. Fourth, a control we did not design. Run 3's row
+Third, \textbf{the perfect-checker null survives re-measurement}: against the \emph{intrinsic}
+critique the oracle moves $-0.0027$ at $t = 0.33$, so the claim that a perfect checker buys
+nothing measurable over a near-random one holds at five replicates. It is not an equivalence
+claim: no margin is registered here, and a test that fails to reject does not establish that two
+things are the same. Fourth, a control we did not design. Run 3's row
 here is the same genome and the same configuration as the unoptimized $L_1$ row of the $p_0$
 family, measured independently in two experiments: $0.0110$ against $0.0161$. At $K=5$ an sd
 estimate is itself uncertain by roughly a third, so the two agree, and a disagreement would have
@@ -947,7 +951,9 @@ scores the same thirty tasks; they contain no task-draw component and are not a 
 more seeds.
 
 \textbf{No multiplicity correction.} Each comparison here was specified before the runs that
-answer it, and the ones that went against us are reported: the second-worker prediction we lost
+answer it, bar the two the harness section names, where version control cannot place the
+registration before the run and we therefore do not claim it: the feedback-actionability pair and
+the second-worker replication. The ones that went against us are reported: the second-worker prediction we lost
 (\S\ref{sec:secondworker}) and every entry in Appendix~\ref{sec:corrections}. No $p$ here was
 selected from a larger family, so a family-wise adjustment would correct for a search we did not
 run. The claims rest on the five-replicate paired tests of \S\ref{sec:curverepeat}, whose unit
@@ -1034,7 +1040,8 @@ backwards.
 
 Finally, the residual is not a wall. Under a perfect detector with maximally actionable feedback
 six of the eight constraints reach $1.0$ and the remainder is almost entirely one mechanical skill: exact word
-counting, which rises $0.16 \to 0.33 \to 0.50$ with better feedback and never reaches $1$. That
+counting, which rises $0.16 \to 0.33 \to 0.50$ across the three fix regimes and never reaches
+$1$. That
 localization is actionable in a way a diffuse ceiling would not be, a deterministic counter
 would likely recover most of it, and no amount of prompt or rubric rewriting did.
 
@@ -1055,7 +1062,7 @@ Earlier drafts of this work published claims it now withdraws. Reporting guidanc
 pre-registered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Seventeen} entries follow. The
+collected here and the body text states only the surviving claim. \textbf{Twenty-one} entries follow. The
 series' other two papers carry the entries bearing on their own claims, and the full
 register across all three, with the superseded values themselves, is in the released repository.
 
@@ -1211,6 +1218,26 @@ register across all three, with the superseded values themselves, is in the rele
     caption states the measured figure and the checker now derives it. Two digits, and the
     same class as an interval published as excluding a zero it brackets: a bound reported
     tighter than the data makes it.
+  \item \textbf{``A perfect checker is statistically indistinguishable from one at chance.''} A
+    paired test at $t = 0.33$ fails to reject; it does not establish equivalence, and no margin
+    is registered in this paper. An earlier draft went further and called the null
+    \emph{confirmed rather than merely unrefuted}, which is the same error stated outright. Both
+    are replaced by the form this paper had already written once: the oracle buys nothing
+    measurable over the intrinsic critique. Nothing quantitative moves.
+  \item \textbf{``Each comparison here was specified before the runs that answer it.''} The
+    harness section names two lines whose registrations version control cannot place before
+    their runs, and one of them is the feedback-actionability pair carrying this paper's
+    best-supported effect. The sentence now carries that exception. The no-multiplicity argument
+    stands on the absence of a search rather than on registration alone.
+  \item \textbf{``$\mathrm{F}_1$ is measuring the base rate, not the detector.''} $\mathrm{F}_1$
+    depends on prevalence \emph{and} on where the detector sits, and the same table's sensitivity
+    and specificity columns move across levels. What the table shows is that discrimination does
+    not improve, which is the claim that survives and the one the recommendation rests on.
+  \item \textbf{``Actionable feedback lifts \texttt{exact\_word\_count} $0.16 \to 0.33 \to
+    0.50$.''} The three columns are run 3 (intrinsic, one refine round), run 8 (oracle, three)
+    and run 10 (oracle, three, richer feedback), so the first step swaps the detector and triples
+    the budget as well. Only the second step varies feedback alone; the trajectory bounds what
+    the fix step recovers rather than attributing all of it to actionability.
 \end{enumerate}
 
 \end{document}

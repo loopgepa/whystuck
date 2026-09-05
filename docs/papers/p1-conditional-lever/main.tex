@@ -1645,11 +1645,11 @@ is $0.102$, about $2.5\sigma$, and it is what carries the answer rather than eit
 condition in advance: unconditional refinement is nearly free where $p_0$ is small and costly
 where it is not, and the evolved gene's \texttt{PASS} rate moves from zero to non-zero as
 $p_0$ rises while never emitting a false \texttt{PASS}. \emph{The null was real and it was local},
-every instruction-following run we bought sat at the low-$p_0$ end of an axis we had not
-identified, and the corrected re-run measures it at $0.067$.
+every instruction-following run we had bought before the sweep sat at the low-$p_0$ end of
+an axis we had not yet identified, and the corrected re-run measures it at $0.067$.
 
-\textbf{Does GEPA lift this task?} No, at the
-budgets tested: its genomes gave no held-out gain, and the loss they did produce was specific to
+\textbf{Does GEPA lift the regime the study started in?} No, at the
+budgets tested: at $p_0 = 0.067$ its genomes gave no held-out gain, and the loss they did produce was specific to
 the arm carrying the extra gene. That is
 not a verdict on GEPA, which reports gains elsewhere, and it is not train-split overfitting,
 that was our reading until the sweep varied the split from $4$ to $24$ and found no trend to
@@ -1661,7 +1661,9 @@ grading its own lineage: moved to another provider entirely, it detected worse r
 is what separates \emph{the optimizer failed to search} from \emph{the optimizer searched and
 found nothing that generalizes}, and it points firmly at the second.
 
-Four qualifications travel with the answer. At $n=3$ per level no interval is significant, since
+Five qualifications travel with the answer. The $p_0$ axis is an operationalization rather
+than a dial: each level names a different generator, so the swing is measured along $p_0$ and not
+identified as caused by it (\S\ref{sec:threats}). At $n=3$ per level no interval is significant, since
 the sign test cannot fall below $p=0.25$, so the load-bearing evidence is the registered swing
 rather than any one interval. Two of our registered predictions \emph{failed}: monotonicity in
 $p_0$, because the highest level saturates, and the sign of $\dd$ at $n_{\mathrm{train}}{=}24$,
@@ -1714,7 +1716,7 @@ predictions failed. Reporting guidance for pre-registered work asks that deviati
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
 collected here and the body text states only the surviving claim.
-\textbf{Twenty-five} entries follow.
+\textbf{Twenty-seven} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1927,6 +1929,15 @@ The series' other two papers carry the entries bearing on their own claims.
   \item \textbf{``The current state-of-the-art reflective optimizer.''} An unscoped superlative
     about an open set at an unstated time, against this paper's own rule that a superlative has
     to say which set. It now carries GEPA's ICLR-2026 oral, which cannot go stale.
+  \item \textbf{``Does GEPA lift this task? No: its genomes gave no held-out gain.''} Unscoped,
+    and the same conclusion reports $+0.060$ at $p_0 = 0.267$ two sentences earlier, so a reader
+    met the paper's two headline answers contradicting each other unless they supplied a scope
+    the text did not give. The question is now asked of the regime the study started in, which
+    is the one the answer holds for.
+  \item \textbf{``Every instruction-following run we bought sat at the low-$p_0$ end.''} The
+    $p_0$ sweep deliberately bought two higher levels and this paper reports them, so as written
+    the sentence contradicted Table~\ref{tab:p0}. It is scoped to the runs bought before the
+    sweep, which is what it was describing.
 \end{enumerate}
 
 \section{The Actuator Experiment, and the MBPP+ Attempt}

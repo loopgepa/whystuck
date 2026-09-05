@@ -1403,3 +1403,93 @@ def test_a_companion_reference_says_which_companion() -> None:
             assert any(re.search(p, sentence) for p in _COMPANION_DISAMBIGUATORS), (
                 f"{slug} says {sentence.strip()[:110]!r} and this paper has two companions"
             )
+
+
+def _sentences(slug: str) -> list[str]:
+    """Body sentences, with the corrections register cut off.
+
+    The register's whole job is to quote the claim a paper withdraws, so every guard below would
+    fire on the entry recording the very defect it was written for. It is an appendix and
+    clearly delimited, so a live claim cannot hide inside it.
+    """
+    text = _expanded(slug)
+    text = text[: text.index(r"\label{sec:corrections}")]
+    body = "\n".join(ln for ln in text.splitlines() if not ln.lstrip().startswith("%"))
+    return re.split(r"(?<=[.:;]) ", re.sub(r"\s+", " ", body))
+
+
+def test_no_paper_reads_a_failure_to_reject_as_equivalence() -> None:
+    """A non-significant paired test does not make two things the same.
+
+    Paper II said "a perfect checker is statistically indistinguishable from one at chance" in
+    its abstract, "indistinguishable from a near-random one" in the body, and, worst, that the
+    claim was "confirmed rather than merely unrefuted" -- all from t = 0.33 on five replicates,
+    with no equivalence margin registered anywhere in the paper. The series knows the standard:
+    Paper I's conclusion says of its own null "this is not an equivalence claim", and the
+    bibliography carries Lakens on equivalence testing. The paper had even written the
+    defensible form once, and then overclaimed in three other places.
+
+    The guard fires on the pattern rather than the word: "indistinguishable" beside a reported
+    effect size. Paper I's "indistinguishable on the training signal" is a claim about a
+    mechanism and carries no test, so it stays.
+    """
+    for slug in SLUGS:
+        for sentence in _sentences(slug):
+            if "indistinguishable" not in sentence:
+                continue
+            assert not re.search(r"\$t = [\d.]+\$|[\d.]+\\sigma", sentence), (
+                f"{slug} calls something indistinguishable beside a test statistic, which is a "
+                f"failure to reject and not an equivalence result: {sentence.strip()[:120]!r}"
+            )
+
+
+def test_a_blanket_preregistration_claim_names_the_harness_exceptions() -> None:
+    """`shared/loop.tex` names two lines it does NOT claim registration for. A paper that says
+    everything was registered has to say that too.
+
+    Paper II's no-multiplicity paragraph read "Each comparison here was specified before the
+    runs that answer it" and used registration to argue no family-wise correction is needed.
+    The harness section it inputs says the feedback-actionability pair carries a registration
+    version control cannot place before the run, and that pair is this paper's best-supported
+    effect. The claim and its own methods section were in the same document, four hundred
+    lines apart.
+    """
+    loop = (PAPERS / "shared" / "loop.tex").read_text(encoding="utf-8")
+    assert "for them we do not claim it" in loop, (
+        "the harness section no longer carves out unregistered lines; this guard reads that "
+        "carve-out and would pass vacuously without it"
+    )
+    for slug in SLUGS:
+        for sentence in _sentences(slug):
+            if not re.search(r"specified before the runs", sentence):
+                continue
+            assert "bar the two" in sentence, (
+                f"{slug} claims every comparison was specified before its run and does not "
+                f"name the exceptions the harness section carves out: {sentence.strip()[:120]!r}"
+            )
+
+
+def test_the_superseded_runs_are_not_called_one_program_without_the_qualifier() -> None:
+    """Paper III asserted, in three live places, the claim it withdraws in a fourth.
+
+    "Every Delta in Table 3 is therefore a comparison of a genome against itself" appeared in
+    the contributions list, in the defect section, and in the opening of the very section whose
+    body says, sixty-four lines later, that the claim "is too strong" because an unchanged
+    verify gene does not make the arms the same program: they still differ in the gene they
+    share. The table it quantifies over prints two non-zero rows.
+
+    Only the qualified form survives: the arms were the same program FOR THE GENE THAT DEFINES
+    THE DIFFERENCE, which is what makes the contrast uninformative without making the genomes
+    identical.
+    """
+    text = re.sub(r"\s+", " ", _expanded("p3-silent-no-op"))
+    assert "does not make the arms the same program" in text, (
+        "Paper III no longer carries the withdrawal this guard is anchored to"
+    )
+    for sentence in _sentences("p3-silent-no-op"):
+        if not re.search(r"(?i)\b(every|all)\b", sentence):
+            continue
+        assert not re.search(r"comparison of a genome against itself", sentence), (
+            f"{sentence.strip()[:120]!r} quantifies the genome-identity claim over rows the "
+            "paper itself shows are not identities"
+        )

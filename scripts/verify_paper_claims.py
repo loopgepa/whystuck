@@ -478,6 +478,7 @@ _WORD_NUM = {
     "twenty-five": 25,
     "thirty": 30,
     "twenty-six": 26,
+    "twenty-seven": 27,
     "thirty-eight": 38,
     "forty-three": 43,
     "two hundred": 200,
@@ -3642,7 +3643,10 @@ _SPINE: tuple[tuple[str, str, str, float, float], ...] = (
     (
         "p2-repair-not-detection",
         "P2 perfect-checker null t",
-        r"the oracle\nmoves \$-0.0027\$ at \$t = ([\d.]+)\$",
+        # `\s+`, not a literal newline: the sentence was reflowed when the equivalence
+        # overclaim beside it was corrected, and a pattern that pins the line break stops
+        # matching without the number having moved at all.
+        r"the oracle\s+moves \$-0.0027\$ at \$t = ([\d.]+)\$",
         0.33,
         0.005,
     ),
