@@ -17,9 +17,6 @@ cannot game its own metric. Each eval costs \emph{at most} $1 + 2R$ LLM calls fo
 budget of $R$ (or $2 + 2R$ with the optional plan module), and fewer whenever a critique passes
 before the budget is spent: the loop stops on a \texttt{PASS} without issuing the refine call
 that would have followed it, so the bound is reached only by an eval that never passes.
-Throughout, a \emph{gene} is one editable text component of that loop and the \emph{genome} is
-the set of them, which is what the optimizer may rewrite; the vocabulary is ours, since GEPA's own
-is candidates and components.
 
 \paragraph{Tasks.} A composable IFEval-style \citep{zhou2023ifeval}
 multi-constraint generator with nine independent, parameter-carrying verifiers

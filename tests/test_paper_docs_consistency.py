@@ -609,6 +609,63 @@ def test_every_direction_code_the_series_cites_is_defined() -> None:
     )
 
 
+#: Term -> (regex that matches its DEFINITION, regex that matches a bare USE). A paper is
+#: main.tex plus three shared inputs, so both questions have to be asked against the expanded
+#: document. Asking them against main.tex alone is how a reviewer of this series twice concluded
+#: that an already-defined symbol was undefined, and "fixed" it by defining it a second time.
+_INTRODUCED_BEFORE_USE = {
+    "genome": (r"the \\emph\{genome\} is", r"\bgenome\b"),
+    "gene": (r"a \\emph\{gene\} is", r"\bgenes?\b"),
+    "p_0": (r"\$p_0\$, the base rate", r"p_0"),
+    "R": (r"refine\s+budget of \$R\$", r"\$R\{[:=]\}"),
+}
+
+
+def _expanded(slug: str) -> str:
+    """One paper as a reader meets it: main.tex with its shared inputs inlined in place."""
+    text = (PAPERS / slug / "main.tex").read_text(encoding="utf-8")
+
+    def inline(m: re.Match[str]) -> str:
+        return (PAPERS / "shared" / f"{m.group(1)}.tex").read_text(encoding="utf-8")
+
+    return re.sub(r"\\input\{\.\./shared/(\w+)\}", inline, text)
+
+
+def test_every_coined_term_is_introduced_before_a_paper_uses_it() -> None:
+    """Each paper has to stand alone, and the terms it stands on are its own coinage.
+
+    "Genome" ran to 116 uses across the series, in two of the three abstracts, defined in no
+    paper and in neither shared input: the central noun of the work, and a reader of any one
+    paper met it cold. Nothing caught that, because every check here asks whether a number traces
+    to an artifact and none asked whether a word had been introduced.
+
+    The expansion matters as much as the check. These papers are main.tex plus shared/preamble,
+    shared/series and shared/loop, and a term defined in a shared input is defined in all three
+    papers at the point that input appears. Two separate audits of this series read main.tex
+    alone, concluded that p_0 and R were undefined, and added redundant second definitions.
+    """
+    for slug in SLUGS:
+        whole = re.sub(r"\s+", " ", _expanded(slug))
+        # The abstract is exempt, as a stated decision rather than an oversight. All three run
+        # within 18 characters of arXiv's 1920-character cap, so a gloss does not fit, and an
+        # abstract using a term its body defines is ordinary. Every one of them does: Paper I
+        # says "evolved genes", Papers II and III say "genome". The body is not exempt.
+        text = whole[whole.index("\\end{abstract}") :]
+        for term, (define_pat, use_pat) in _INTRODUCED_BEFORE_USE.items():
+            use = re.search(use_pat, text)
+            if use is None:
+                continue
+            definition = re.search(define_pat, text)
+            assert definition is not None, (
+                f"{slug} uses {term!r} and neither it nor its shared inputs define it; a reader "
+                "of this paper alone meets the term cold"
+            )
+            assert definition.start() < use.start(), (
+                f"{slug} uses {term!r} at character {use.start()} but defines it at "
+                f"{definition.start()}, so the first use comes first"
+            )
+
+
 def test_the_bibliography_has_no_latex_special_characters_that_eat_text() -> None:
     """BibTeX copies a field verbatim into `main.bbl`, which LaTeX then reads as source.
 
