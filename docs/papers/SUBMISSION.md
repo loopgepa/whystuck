@@ -21,7 +21,7 @@ endorsement domain, and the primary category selects the domain.
 
 Two structural facts decide this, and neither is about the papers' quality.
 
-**Main-text length is 31 / 19 / 16 pages** (references begin on p.32 / 20 / 17 of 42 / 26 / 22).
+**Main-text length is 31 / 19 / 16 pages** (references begin on p.32 / 20 / 17 of 42 / 26 / 23).
 **All three papers are de-anonymised by their own reproducibility apparatus**: the title block
 prints author, affiliation and repository URL, and each abstract names the repository again.
 
@@ -86,7 +86,8 @@ python scripts/make_arxiv_package.py --paper p1-conditional-lever --anonymous \
     --anon-url <anonymous mirror>
 ```
 
-Strips the author block and the repository URL, drops the `references.bib` comment naming the
+Strips the author block and both repository URLs (the title block's and the one closing the
+companion-paper note), drops the `references.bib` comment naming the
 project, then **scans every byte of the staged tree** for six identifying strings and refuses to
 write a tarball if any survives. The scan reads bytes rather than parsing TeX because the leak that
 motivated it was a LaTeX comment, which renders as nothing and ships in the tarball regardless;
@@ -194,9 +195,9 @@ exists. Measured from the built PDFs and each paper's own source:
 
 | | paper | pages | tables | figures | distinct citations |
 |---|---|---|---|---|---|
-| I | `p1-conditional-lever` | 42 | 11 | 3 | 25 |
-| II | `p2-repair-not-detection` | 26 | 4 | 3 | 18 |
-| III | `p3-silent-no-op` | 22 | 4 | 1 | 14 |
+| I | `p1-conditional-lever` | 42 | 11 | 3 | 26 |
+| II | `p2-repair-not-detection` | 26 | 4 | 3 | 20 |
+| III | `p3-silent-no-op` | 23 | 4 | 1 | 16 |
 
 Tables, figures and citations are counted from the sources by
 `tests/test_paper_docs_consistency.py`; the page count is compared against the compiled PDF by

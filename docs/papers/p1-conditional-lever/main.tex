@@ -25,7 +25,7 @@ and a $0.102$ swing in the contrast across it}
 
 \author{Vladimir Rotariu \\ Independent researcher \\
   \texttt{github.com/loopgepa/whystuck}}
-\date{July 2026}
+\date{September 2026}
 
 \begin{document}
 \maketitle
@@ -130,7 +130,7 @@ contributions:
     contrast and not a measurement of the treatment. Splitting it into a draft term and a loop
     term, an identity computable offline from the released artifact, shows the $-0.042$
     is $60\%$ shared gene while the $+0.060$ is $100\%$ treatment. It also bounds the
-    outcome-side half of the mechanism: the stratum the always-\texttt{FIX} account blames
+    outcome-side half of the mechanism: the stratum the always-\emph{fix} account blames
     contributes $+0.002$, not the deficit.
   \item \textbf{Two pre-registered sweeps that close the alternative readings}
     (\S\ref{sec:splitresult}, \S\ref{sec:budgetresult}). Small-split overfitting was our own
@@ -169,7 +169,7 @@ feeds execution traces to an analysis step which improves the harness, two are o
 not. The verification loop is our object of study: the \texttt{ensure\_correct} gene \emph{is} the
 verifier, the PASS gate plus \texttt{loop\_max\_retries} \emph{is} the stop rule. The hill-climbing
 loop, called ``arguably most important'' \citep{langchain2026loopcraft}, is our intervention: GEPA
-reflects on recorded traces and rewrites the loop's own text components, so arm~D is a
+reflects on recorded traces and rewrites the loop's own text components, so the loop-level arm defined below is a
 hill-climbing loop pointed at a verification loop. The agent and event-driven loops are out of
 scope, since our worker is a fixed generate--critique--refine sequence with no tool-calling agent
 and is invoked once per benchmark task, with no triggers, schedules or cross-task memory.
@@ -323,12 +323,17 @@ superseded and reported, with the reason, in Paper~III.
 \subsection{The four-arm re-run on the corrected harness}
 \label{sec:rerun}
 
-The one four-arm contrast in this paper that measures what the study set out to measure was bought on a rebuilt harness, after the audit of Paper~III and under the prediction registered in \S\ref{sec:directions} and reproduced verbatim there. Same task family, budget and worker as run~3
+The one four-arm contrast in this paper that measures what the study set out to measure was bought on a rebuilt harness, after the audit of Paper~III and under the prediction registered in \S\ref{sec:directions} and reproduced verbatim there. Same task family, budget and worker as run~3%
+\footnote{Run numbers index the study's ten original runs, numbered as in the companion
+Paper~III's table of the original runs. This paper tabulates none of them, so each is
+glossed where it is used and the number is a label back to the release.}
 (multi-hard, $\mathrm{mmc}=28$, 8 train / 10 held-out, one refine round), at three seeds of
 run~3's five, with the three corrections in place: a component-specific reflective dataset (the reflector had
 been handed the generator's inputs and outputs whichever component it was asked to improve,
 so it never saw a verdict the critique had returned; Paper~III, defect~2), an explicit
-\texttt{module\_selector=all}, and a non-saturating arm~C.
+\texttt{module\_selector=all} (a proposal now rewrites every gene rather than one per
+proposal under GEPA's default round-robin; Paper~III, defect~3), and a non-saturating
+arm~C.
 
 We bought it twice, and discarded the first attempt because the harness accepted an empty
 reflection completion as the verify gene, so the arm carrying the treatment ran with no critique at all
@@ -448,7 +453,7 @@ from a released cassette by \texttt{scripts/make\_figures.py}, and
 Every result above was measured at one point on one axis. \S\ref{sec:analysis} explains the
 loss with a mechanism that makes a quantitative commitment, and that commitment turns out to be
 the difference between a null and a law. Write $p_0$ for the base rate of first drafts that
-already satisfy every constraint. The training-signal \emph{cost} of an always-\texttt{FIX}
+already satisfy every constraint. The training-signal \emph{cost} of an always-\emph{fix}
 critique is the chance it damages a draft that needed no repair, which is proportional to
 $p_0$. So the degenerate candidate is cheap when $p_0$ is small and expensive when it is large,
 and the mechanism predicts a \textbf{crossing} rather than a constant (Figure~\ref{fig:p0}):
@@ -629,7 +634,7 @@ that answers the paper's title question, and a componentized-optimization result
 both: knowing that the optimizer \emph{changed} a component does not tell you that the
 component is what moved the score.
 
-\paragraph{Where the loss sits, and the mechanism it does not support.} The always-\texttt{FIX}
+\paragraph{Where the loss sits, and the mechanism it does not support.} The always-\emph{fix}
 account says the cost of never accepting is borne by drafts that needed no repair, a stratum
 whose weight is $p_0$. That is directly checkable. Partition held-out tasks by whether the
 \emph{seed} genome's first draft was already correct, a pre-treatment covariate, identical
@@ -656,7 +661,7 @@ than prompt-only, on the two drafts its critique rejected. The whole $-0.042$ si
 $28$ drafts that were already wrong. The stratum the mechanism names is also, at $p_0 = 0.067$,
 structurally too thin to carry the result: its weight is $2/30$, so with per-task scores in
 $[0,1]$ its contribution is bounded by $0.067$ in magnitude whatever happens inside it. We
-therefore \textbf{withdraw the outcome-side half of the always-\texttt{FIX} account}: the
+therefore \textbf{withdraw the outcome-side half of the always-\emph{fix} account}: the
 training-signal argument for why a search converges on never-accepting stands and is what
 predicted the sign, but ``it loses by damaging correct drafts'' is not what the $L_1$ loss
 consists of. At $n=2$ this rules the channel out as the dominant term rather than estimating
@@ -738,7 +743,7 @@ search goes here} stands; the outcome-side argument for \emph{what it costs} nee
 decomposition, which also finds that $-0.025$ of the $-0.042$ is not this gene at all.
 
 The pull toward that corner is not specific to our setup. On multi-hard almost every first
-draft genuinely fails, so a detector that emits \texttt{FIX} unconditionally is nearly
+draft genuinely fails, so a detector that never returns \texttt{PASS} is nearly
 indistinguishable \emph{on the training signal} from one that reasons correctly, and it is far
 easier to express in prose; the penalty appears only on the minority of drafts that were already
 compliant, which a small training split barely contains. Any componentized optimizer pointed at a
@@ -1253,7 +1258,7 @@ emits \texttt{PASS} on none of $200$ first drafts, $20$ of which were already co
 keep rather than round off: \texttt{qwen} is a second \emph{lineage} but not a second
 \emph{provider}, since it and its worker are served by the same vendor.
 
-This run also supplied the companion paper's first \emph{prospective} test of its reporting
+This run also supplied Paper~III's first \emph{prospective} test of its reporting
 minimum, and strengthened it: arm~D accepted on only $3$ of $8$ seeds, and $74\%$ of the positive
 $\dd$ came from two seeds where the treatment never applied (Paper~III).
 
@@ -2002,7 +2007,8 @@ percentile-index defect is reported in full, because the first row is this appen
 \section{The Hand-Written Verify Gene}
 \label{sec:handgene}
 
-This is the experiment summarized in \S\ref{sec:analysis}: the degenerate corner reached by hand rather than by search, run before the re-run was bought. Its two conditions are the first runs recorded under the corrected harness.
+This is the experiment summarized in \S\ref{sec:analysis}: the degenerate corner reached by hand rather than by search, run before the re-run was bought. Its two conditions, released as \texttt{c1-base} and \texttt{c1-hand} and called
+\emph{C1} where a label is needed, are the first runs recorded under the corrected harness.
 
 \medskip\noindent
 Every mechanism above is measured on \emph{observed} critiques. It leaves open the

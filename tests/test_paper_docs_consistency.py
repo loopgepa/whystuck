@@ -23,6 +23,7 @@ part company again.
 
 from __future__ import annotations
 
+import datetime as _dt
 import json
 import os
 import pathlib
@@ -103,10 +104,12 @@ def _source_counts(slug: str) -> dict[str, int]:
     guard agreed with the document because both counted the same comment: the shared-error blind
     spot these papers are about, inside the test that exists to stop it.
     """
+    # The EXPANSION, not main.tex. bibtex reads what the paper inputs, so a citation living in
+    # `shared/loop.tex` is in that paper's reference list; counting main.tex alone undercounted
+    # every paper -- Paper III by two of its sixteen -- and the document agreed because it was
+    # derived from the same short read. `_expanded` is defined below and resolved at call time.
     tex = "\n".join(
-        line
-        for line in (PAPERS / slug / "main.tex").read_text(encoding="utf-8").splitlines()
-        if not line.lstrip().startswith("%")
+        line for line in _expanded(slug).splitlines() if not line.lstrip().startswith("%")
     )
     cites: set[str] = set()
     for group in re.findall(r"\\cite[a-z]*\{([^}]*)\}", tex):
@@ -618,6 +621,15 @@ _INTRODUCED_BEFORE_USE = {
     "gene": (r"a \\emph\{gene\} is", r"\bgenes?\b"),
     "p_0": (r"\$p_0\$, the base rate", r"p_0"),
     "R": (r"refine\s+budget of \$R\$", r"\$R\{[:=]\}"),
+    # A GEPA parameter, printed once in each of Papers I and III and glossed in neither. Paper I
+    # listed it as one of the study's three corrections beside two that carried a defect
+    # attribution; Paper III named it only in a corrections-register entry, twenty pages after
+    # describing the selector it configures without ever tying the two together.
+    "module_selector": (
+        r"component selector \(\\texttt\{module\\_selector\}\)"
+        r"|\\texttt\{module\\_selector=all\} \(a proposal now rewrites every gene",
+        r"module\\_selector",
+    ),
 }
 
 
@@ -969,3 +981,425 @@ def test_every_released_run_is_named_in_prose():
         f"{unexplained}. Either name them in one of {list(_PROSE_DOCS)} or generate their report; "
         "a run cited only by a LaTeX table is one a reader cannot look up."
     )
+
+
+#: Every way a reader can learn what an arm letter means, in the order they resolve it. A paper
+#: satisfies the guard below by carrying one of these BEFORE its first use of the letter. The list
+#: is deliberately not keyed by paper: adding a fourth paper needs no entry here, and a paper that
+#: drops its definition cannot be rescued by an entry someone wrote for it once.
+_ARM_RESOLUTIONS = (
+    # The four-arms block, which Papers I and III both carry in full.
+    r"\\item \\textbf\{%s\}",
+    # An arm glossed where it is used, which is how Paper II introduces the only arm it measures.
+    r"arm~\\textbf\{%s\} of the underlying study: a fixed genome, evolved by nothing",
+    # An attributed pointer at the paper that does define it. Paper II measures no B or D and
+    # says so, which is a better answer than repeating a definition it never uses.
+    r"\\textbf\{%s\}(?:[^.]{0,80}?)defined in Paper~III",
+    r"\\textbf\{B\} and \\textbf\{%s\}[^.]{0,80}?defined in Paper~III",
+)
+
+
+def test_no_paper_uses_an_arm_letter_before_a_reader_can_resolve_it() -> None:
+    """A, B, C, D are the series' oldest abbreviation and the least glossed.
+
+    The four-arms block sits in each paper's method section, and both Paper I's introduction and
+    Paper III's contributions list reached back for `arm~D` before it -- 61 lines early in one,
+    115 in the other. Nothing caught it: the coined-term guard above checks the nouns this work
+    invented, and an arm letter is not a noun. Published style guidance is unanimous and simple
+    here (define at first use, then abbreviate), and the failure is the ordinary one it exists to
+    prevent, in a series where the definition lives in a different paper for one of the three.
+
+    The abstract is exempt on the same stated grounds as the coined-term guard, and none of the
+    three abstracts uses a letter anyway.
+    """
+    for slug in SLUGS:
+        # Collapsed, because two of the resolutions below are sentences that wrap in the source
+        # and a guard that reads raw lines would miss them and report a definition as absent.
+        whole = re.sub(r"\s+", " ", _expanded(slug))
+        text = whole[whole.index("\\end{abstract}") :]
+        for letter in "ABCD":
+            # One `arms?` can carry several letters ("arms B and D", "arms~B and~D"), and the
+            # separator varies (tilde, space, hyphen). A first version required the letter to
+            # follow `arms?` with nothing between, so it read none of Paper II's B and D uses
+            # and reported the paper clean; the mutation that deleted its pointer passed.
+            letters = r"(?:\\textbf\{[ABCD]\}|\b[ABCD]\b)"
+            uses = [
+                m.span()
+                for m in re.finditer(
+                    rf"\barms?[~ \-]*{letters}(?:\s*(?:and|,|--|/)[~ ]*{letters})*", text
+                )
+                if re.search(rf"\\textbf\{{{letter}\}}|\b{letter}\b", m.group(0))
+            ]
+            if not uses:
+                continue
+            resolutions = [
+                m.start()
+                for pat in _ARM_RESOLUTIONS
+                if (m := re.search(pat % letter, text)) is not None
+            ]
+            assert resolutions, (
+                f"{slug} uses arm {letter} and never defines it, glosses it, or says which "
+                "paper does; a reader of this paper alone meets the letter cold"
+            )
+            # Compared against the END of the first use, not its start. Paper II resolves B and
+            # D inside the sentence that first names them ("arms B and D (prompt-only and
+            # loop-level, defined in Paper III)"), so the resolution begins five characters
+            # after the use does and a start-to-start comparison called that a forward
+            # reference. What a reader needs is to meet the resolution before finishing the
+            # phrase, which is what this asks.
+            first_start, first_end = min(uses)
+            assert min(resolutions) <= first_end, (
+                f"{slug} uses arm {letter} at character {first_start} but a reader cannot "
+                f"resolve it until {min(resolutions)}"
+            )
+
+
+def _cited_runs(text: str) -> set[int]:
+    """Every numbered run a paper cites, ranges expanded to their members."""
+    out: set[int] = set()
+    for lo, hi in re.findall(r"runs?~? ?(\d+)(?:--(\d+))?", text):
+        out.update(range(int(lo), int(hi or lo) + 1))
+    return out
+
+
+def _tabulated_runs(text: str) -> set[int]:
+    """Run numbers a paper lists itself, read out of any table that carries a run column.
+
+    A run column is found by its header, not by position, and the values are taken from the
+    matching cell of every body row, so a table gaining a column does not shift what this reads.
+    """
+    out: set[int] = set()
+    for block in re.findall(r"\\begin\{tabular\}.*?\\end\{tabular\}", text, re.S):
+        stripped = re.sub(
+            r"\\(?:begin|end)\{tabular\}(?:\{[^}]*\})?|\\(?:top|mid|bottom)rule", " ", block
+        )
+        rows = [[c.strip() for c in r.split("&")] for r in stripped.split(r"\\")]
+        head = next(
+            ((i, r) for i, r in enumerate(rows) if any(re.fullmatch(r"(?i)run", c) for c in r)),
+            None,
+        )
+        if head is None:
+            continue
+        idx = next(i for i, c in enumerate(head[1]) if re.fullmatch(r"(?i)run", c))
+        for row in rows[head[0] + 1 :]:
+            if len(row) == len(head[1]) and re.fullmatch(r"\d+", row[idx]):
+                out.add(int(row[idx]))
+    return out
+
+
+#: What each paper cites by number. Asserted, not merely used: a new citation has to be declared
+#: here, which is the half a presence-only check would leave unread.
+_RUN_CITATIONS = {
+    "p1-conditional-lever": {2, 3, 4, 5, 6, 7, 8, 9, 10},
+    "p2-repair-not-detection": {3, 4, 5, 7, 8, 9, 10},
+    "p3-silent-no-op": {1, 3, 6, 7, 8, 9, 10},
+}
+
+#: A sentence saying where the run numbering comes from, paired with what that sentence commits
+#: the paper to about its OWN tables. Each paper carries one, and each says something different:
+#: Paper I tabulates no run at all, Papers II and III both point at a table of their own. The
+#: commitment is what makes the table-reading half of the guard load-bearing -- a first version
+#: took the union of the local table and Paper III's, and since Paper III lists all ten, no
+#: paper's own table was ever read.
+#: Where the numbering itself comes from. Kept separate from the commitment below because a
+#: mutation that deleted this pointer and left the commitment behind passed: any one sentence
+#: satisfying a single "says something about runs" check is not the same as saying both things.
+_RUN_NUMBERING_POINTER = (
+    r"numbered as in the companion Paper~III's table of the original runs",
+    r"listed with the rest of the numbering in Table~\\ref\{tab:results\}",
+)
+
+#: What the paper commits to about its own tables.
+_RUN_TABLE_COMMITMENT = (
+    (r"This paper tabulates none of them", "none"),
+    (r"every one this paper cites carries its own row in Table~", "all"),
+    (r"listed with the rest of the numbering in Table~\\ref\{tab:results\}", "all"),
+)
+
+
+def test_every_numbered_run_a_paper_cites_is_one_a_reader_can_look_up() -> None:
+    """`run~3` is an index into a release, and an index is worth nothing without its list.
+
+    Paper III numbers the ten original runs in a table and points at it. Paper II cites seven
+    numbers and lists all seven in its own detector table. Paper I cites four, tabulates none of
+    them, and had no sentence saying what the numbering indexes -- so its reader met `run~4` and
+    `run~6` as bare labels, in a paper that has no list of runs at all.
+
+    Both halves are read here. The tabulated set comes from the papers' own tables and the cited
+    set from their prose, so the guard fails if a citation appears that no table carries and
+    fails again if the numbering statement goes missing.
+    """
+    listed = {slug: _tabulated_runs(_expanded(slug)) for slug in SLUGS}
+    for slug in SLUGS:
+        text = re.sub(r"\s+", " ", _expanded(slug))
+        cited = _cited_runs(text)
+        assert cited == _RUN_CITATIONS[slug], (
+            f"{slug} cites runs {sorted(cited)}, declared {sorted(_RUN_CITATIONS[slug])}; a new "
+            "numbered run has to be declared so this guard reads it"
+        )
+        assert any(re.search(pat, text) for pat in _RUN_NUMBERING_POINTER), (
+            f"{slug} cites numbered runs and never says where the numbering comes from"
+        )
+        commitments = [c for pat, c in _RUN_TABLE_COMMITMENT if re.search(pat, text)]
+        # The commitment is derived from the tables rather than declared beside the paper, so
+        # both directions bite: dropping the sentence fails, and so does gaining a run table
+        # without saying so.
+        if listed[slug]:
+            assert "all" in commitments, (
+                f"{slug} tabulates runs {sorted(listed[slug])} and never tells a reader that "
+                "the runs it cites are the ones listed there"
+            )
+            assert cited <= listed[slug], (
+                f"{slug} says every run it cites has a row of its own and runs "
+                f"{sorted(cited - listed[slug])} have none"
+            )
+        else:
+            assert "none" in commitments, (
+                f"{slug} tabulates no numbered run and does not say so, so a reader looking for "
+                "the list has nothing to find and no notice of it"
+            )
+        # Whatever a paper says about its own tables, the number has to be findable somewhere in
+        # the series, and Paper III is where the numbering lives.
+        resolvable = listed[slug] | listed["p3-silent-no-op"]
+        assert cited <= resolvable, (
+            f"{slug} cites runs {sorted(cited - resolvable)} which no table in the series lists"
+        )
+
+
+#: The two modules that decide what the loop emits. A monospace all-caps token in a paper is a
+#: value a reader should be able to find here, and only these files settle that: `FAIL` occurs in
+#: `bcb_exec.py` as a unittest label, which has nothing to do with a critique's verdict, so a
+#: whole-tree grep would have accepted the token this guard was written to catch.
+_LOOP_SOURCE = ("src/whystuck/eval/llm_worker.py", "src/whystuck/eval/adapter.py")
+
+
+def _texttt(slug: str) -> set[str]:
+    return {m.replace("\\_", "_") for m in re.findall(r"\\texttt\{([^}]*)\}", _expanded(slug))}
+
+
+def test_a_monospace_verdict_token_is_one_the_loop_actually_emits() -> None:
+    """`FIX` and `FAIL` were typeset as protocol tokens and the harness emits neither.
+
+    The critique's contract is one line of `llm_worker.py`: "Reply exactly PASS if every
+    requirement is satisfied; otherwise list what to fix." So `PASS` is a token and the failure
+    branch is prose. Paper I printed `\\texttt{FIX}` five times, four as a coined label and once
+    as a claim that a detector "emits FIX unconditionally"; Paper II paired `PASS` with a
+    `FAIL` that exists nowhere in the loop. Both read as greppable identifiers, which in this
+    series is a promise: every other monospace token in these papers resolves to something in
+    the release.
+    """
+    emitted = "\n".join((ROOT / f).read_text(encoding="utf-8") for f in _LOOP_SOURCE)
+    for slug in SLUGS:
+        for token in sorted(_texttt(slug)):
+            if not re.fullmatch(r"[A-Z][A-Z0-9_]{1,15}", token):
+                continue
+            assert token in emitted, (
+                f"{slug} prints \\texttt{{{token}}} as a value the loop emits and no loop "
+                f"module contains it; the critique's own contract lives in {_LOOP_SOURCE[0]}"
+            )
+
+
+def _released_slugs() -> set[str]:
+    return {
+        p.name[len("validation-study-") : -len(".json")]
+        for p in (ROOT / "docs").glob("validation-study-*.json")
+    }
+
+
+def test_a_printed_artifact_name_is_the_name_the_release_uses() -> None:
+    """Paper III printed `\\texttt{c2}` as `\\texttt{C2}`, twice, in its corrections register.
+
+    The register exists so a reader can check a withdrawn claim against the artifact, and the
+    entry pointing them at it named a file that does not exist: the release holds
+    `validation-study-c2.json` and a case-sensitive filesystem does not care that the paper
+    meant it. This compares case-folded against exact, so a token that looks like a released
+    study has to be spelled the way the release spells it.
+    """
+    released = _released_slugs()
+    assert released, "no released studies found; this guard would pass vacuously"
+    for slug in SLUGS:
+        printed = {t for t in _texttt(slug) if t.lower() in released}
+        wrong = sorted(t for t in printed if t not in released)
+        assert not wrong, (
+            f"{slug} prints {wrong} and the release spells them {sorted(t.lower() for t in wrong)}"
+        )
+
+
+def test_an_experiment_code_is_bound_to_the_artifacts_it_names() -> None:
+    """`C1` appeared three times in Paper I and was defined nowhere in it.
+
+    It is the internal name of the hand-written-gene ablation, which the release publishes as
+    `validation-study-c1-base` and `validation-study-c1-hand`. The prose glossed the finding
+    and the table used the bare code, so a reader could follow the argument and still not know
+    which two files to open. Any code of this shape has to sit in a paper that also prints one
+    of the released names it stands for.
+    """
+    released = _released_slugs()
+    for slug in SLUGS:
+        text = re.sub(r"\s+", " ", _expanded(slug))
+        printed = _texttt(slug)
+        for code in sorted(set(re.findall(r"\bC(\d)\b", text))):
+            bound = {s for s in released if s.startswith(f"c{code}")} & printed
+            assert bound, (
+                f"{slug} uses the experiment code C{code} and prints none of the released "
+                f"artifacts it names ({sorted(s for s in released if s.startswith(f'c{code}'))})"
+            )
+
+
+#: A named system and the bibliography entry that introduces it. Only systems whose name is a
+#: proper noun a reader would look up, not every cited work.
+_NAMED_SYSTEMS = {
+    "GEPA": "agrawal2025gepa",
+    "IFEval": "zhou2023ifeval",
+    "BigCodeBench": "zhuo2024bigcodebench",
+    "IFBench": "pyatkin2025ifbench",
+    "OPRO": "yang2023opro",
+    "DSPy": "khattab2023dspy",
+    "LiveCodeBench": "jain2024livecodebench",
+}
+
+
+def test_a_paper_that_names_a_system_cites_it() -> None:
+    """Paper II named GEPA three times and cited it nowhere; Paper III did the same to
+    BigCodeBench.
+
+    Both defects lived in the shared inputs, which is why seventeen passes went past them. The
+    series note says the gene/genome vocabulary is ours rather than GEPA's, and the harness
+    description lists the BigCodeBench runs as unreplayable -- so every paper says those names,
+    while the citation sat in the two main.tex files that happened to discuss the system at
+    length. bibtex prints only what a paper cites, so Paper II's reference list had no GEPA in
+    it at all: the optimizer the whole series is about, named in a paper that never told a
+    reader where to find it.
+
+    Read against the expansion, because that is the document a reader is handed, and the
+    citation for a name introduced in a shared input has to live in that input.
+    """
+    for slug in SLUGS:
+        text = _expanded(slug)
+        cited = {
+            key.strip()
+            for group in re.findall(r"\\cite[tp]?\{([^}]*)\}", text)
+            for key in group.split(",")
+        }
+        for name, key in _NAMED_SYSTEMS.items():
+            if not re.search(rf"\b{name}\b", text):
+                continue
+            assert key in cited, (
+                f"{slug} names {name} and never cites {key}, so the name does not appear in "
+                "this paper's reference list at all"
+            )
+
+
+def _paper_source_paths(slug: str) -> list[str]:
+    return [f"docs/papers/{slug}/main.tex", "docs/papers/shared"]
+
+
+def _last_source_month(slug: str) -> str | None:
+    """`YYYY-MM` of the newest change to this paper's sources, uncommitted edits included."""
+    paths = _paper_source_paths(slug)
+    dirty = subprocess.run(
+        ["git", "status", "--porcelain", "--", *paths],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if dirty.returncode != 0:
+        return None
+    if dirty.stdout.strip():
+        # Being edited now, so now is when it was last revised. Without this the guard reads the
+        # previous commit and lets the very edit that outdates the line pass.
+        return _dt.date.today().strftime("%Y-%m")
+    logged = subprocess.run(
+        ["git", "log", "-1", "--format=%cd", "--date=format:%Y-%m", "--", *paths],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    return logged.stdout.strip() or None
+
+
+_MONTHS = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+]
+
+
+def test_the_date_on_the_title_page_is_not_older_than_the_paper() -> None:
+    """All three said `July 2026` on 5 September, through eighteen review passes.
+
+    July is when the split happened. Every pass since has rewritten prose, withdrawn claims and
+    added register entries, and the title page kept advertising a draft five weeks older than
+    the document under it -- the one number on the front page, and the only one in these papers
+    that no check ever read.
+
+    Compared against the sources' own history rather than against a hard-coded month, so the
+    line has to move when the papers do and this test does not have to be edited every time.
+    """
+    for slug in SLUGS:
+        m = re.search(r"\\date\{(\w+) (\d{4})\}", (PAPERS / slug / "main.tex").read_text())
+        assert m, f"{slug} has no parseable \\date"
+        stated_month, stated_year = m.group(1), int(m.group(2))
+        assert stated_month in _MONTHS, f"{slug} dates itself {stated_month!r}"
+        stated = f"{stated_year:04d}-{_MONTHS.index(stated_month) + 1:02d}"
+        revised = _last_source_month(slug)
+        if revised is None:
+            pytest.skip("no git history available to date the sources against")
+        assert stated >= revised, (
+            f"{slug} says {stated_month} {stated_year} on its title page and its sources were "
+            f"last revised {revised}"
+        )
+
+
+#: What counts as saying WHICH companion. Either the series note's own numbering, or a phrase
+#: naming the paper's subject -- both resolve against the note every paper carries.
+_COMPANION_DISAMBIGUATORS = (
+    r"Paper~(?:I|II|III)\b",
+    r"conditional[- ]lever",
+    r"ceiling paper",
+    r"loop's ceiling",
+    r"silent no-op",
+    r"detector result",
+    # Plural, meaning both of them, which needs no further identification.
+    r"companion papers",
+)
+
+
+def test_a_companion_reference_says_which_companion() -> None:
+    """Each paper has TWO companions, and "the companion paper" names neither.
+
+    Paper I refers to its companions by number fifty-two times and is never ambiguous. Paper III
+    used the bare phrase nine times, for both companions: `the companion paper's $p_0$ axis` is
+    Paper I and `the companion ceiling paper` is Paper II, in the same document, with nothing
+    telling a reader that the first phrase excludes the second. Paper II had three.
+
+    This matters more here than in an ordinary cross-reference because these are the sentences
+    that hand a claim to another paper. A reader who cannot tell which paper holds the evidence
+    cannot go and check it, which is the whole point of splitting the work and saying so.
+    """
+    for slug in SLUGS:
+        # Comment lines dropped first: `shared/series.tex` opens with a comment calling itself
+        # the companion-paper note, which a reader never sees and this guard would fail on.
+        body = "\n".join(
+            ln for ln in _expanded(slug).splitlines() if not ln.lstrip().startswith("%")
+        )
+        text = re.sub(r"\s+", " ", body)
+        for sentence in re.split(r"(?<=[.:;]) ", text):
+            # "companion" has to be modifying a paper, within two words of it, so that
+            # "the companion ceiling paper" triggers and "Three companion rules cost as
+            # little" does not. Requiring both words anywhere in the sentence flagged the
+            # second as soon as any nearby clause happened to mention a paper.
+            if not re.search(r"\bcompanion(?:[- ]\w+){0,2}[- ]papers?\b", sentence):
+                continue
+            assert any(re.search(p, sentence) for p in _COMPANION_DISAMBIGUATORS), (
+                f"{slug} says {sentence.strip()[:110]!r} and this paper has two companions"
+            )

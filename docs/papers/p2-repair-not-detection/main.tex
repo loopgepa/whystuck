@@ -24,7 +24,7 @@ and actionable repair feedback lifts it above both}
 
 \author{Vladimir Rotariu \\ Independent researcher \\
   \texttt{github.com/loopgepa/whystuck}}
-\date{July 2026}
+\date{September 2026}
 
 \begin{document}
 \maketitle
@@ -105,7 +105,8 @@ connects an optimizer to a component. Our contributions:
     assertion is a sharper repair target than a word count.
 \end{enumerate}
 
-A companion paper asks whether a reflective optimizer can \emph{discover} any of this by evolving
+The companion paper on the conditional lever asks whether a reflective optimizer can
+\emph{discover} any of this by evolving
 the critique. It cannot, and the reason connects to the result here: the optimizer moves the
 detector's threshold, and this paper's finding is that thresholds are not where the value is.
 
@@ -187,6 +188,9 @@ reach a genome that has nothing to evolve. Either way no
 result below can be produced by a prompt optimizer, a search budget, or the wiring that connects
 one to a component. The harness varies between runs: which signal the critique receives,
 how many refine rounds it may gate, and what repair text the refine step is handed.
+Run numbers index the study's ten original runs, numbered as in the companion Paper~III's
+table of the original runs; every one this paper cites carries its own row in
+Table~\ref{tab:curve}.
 
 \paragraph{The two detector interventions.}
 (i) A non-oracle \emph{measurement tool}: the critique step is optionally given
@@ -297,7 +301,7 @@ mechanism by which a better verify gene \emph{could} help is by catching failure
 the generator cannot self-see and steering refinement. We measure the in-loop
 critique directly as a binary classifier of ``the draft satisfies all
 constraints,'' computed offline from the recorded cassettes (zero cost) by
-pairing each critique's \texttt{PASS}/\texttt{FAIL} verdict with the ground-truth
+pairing each critique's verdict, \texttt{PASS} or a list of fixes, with the ground-truth
 \texttt{mc\_pass} of the exact draft it judged, on the seed loop over the
 held-out split (Table~\ref{tab:curve}, left columns). The intrinsic critique is a
 \emph{near-random} detector: F$_1 = 0.11$ on run~3 and effectively $0$ on run~5
@@ -921,7 +925,7 @@ the ordering of the cells themselves does not. A reader who wants the ranking to
 treat that as unsupported. The two workers also do not face the same difficulty. Under
 identical task generation this worker's first-draft pass rate is $p_0 = 0.095$ against
 \texttt{gpt-4.1-mini}'s $0.067$, but relaxing one constraint takes it to $0.905$ where the other
-reaches $0.267$, so the two stacks are not matched on the axis the companion paper's headline turns
+reaches $0.267$, so the two stacks are not matched on the axis the conditional-lever paper's headline turns
 on. Twenty seeds is also not twenty independent task draws: the pool holds $64$ tasks and each seed
 draws $18$. We claim a replication of the detection-versus-repair ordering, not of any magnitude.
 
@@ -1109,7 +1113,7 @@ register across all three, with the superseded values themselves, is in the rele
     paragraph-by-paragraph audit after the estimator correction found this paper quoting the
     oracle-under-intrinsic $t$ as $0.37$ in two places (one of them the abstract) and $0.33$ in two
     others, and the actionability $t$ as $9.03$ in the conclusion against $8.08$ elsewhere; the
-    curve-$\sigma$ ratio range also disagreed with the companion paper's. Every pinned check passed
+    curve-$\sigma$ ratio range also disagreed with the companion paper on the silent no-op's. Every pinned check passed
     throughout, because each was anchored to one phrasing of a claim the paper makes four times.
     Separately, ``three magnitudes shrink by $35$ to $52\%$'' was selectively true: a fourth
     magnitude falls to near nothing and a fifth \emph{grows} by $74\%$, so the sentence read as the

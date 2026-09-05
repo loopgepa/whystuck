@@ -393,11 +393,15 @@ def unresolved_placeholders(paper: Path = PAPER, *, anonymous: bool = False) -> 
 
 
 def anonymise_tex(tex: str, anon_url: str | None = None) -> str:
-    """Strip the two sites that name the author, and nothing else.
+    """Strip the sites that name the author, and nothing else.
 
-    Two, verified by scanning all three papers: the `\\author` block, and one sentence in the
-    abstract ending in the repository URL. Both are rewritten rather than deleted -- a reviewer
-    should still see that an artifact exists and that the omission is deliberate.
+    Three per paper, verified by scanning all three: the `\\author` block, the repository URL
+    under the title, and the same URL closing the companion-paper note in `shared/series.tex`.
+    The docstring said "one sentence in the abstract" until the eighteenth review pass, which is
+    what the pre-split monolith had; the URL count doubled at the split and the substitution
+    kept working only because it replaces every match rather than the first. All are rewritten
+    rather than deleted -- a reviewer should still see that an artifact exists and that the
+    omission is deliberate.
 
     Raises if either site is missing. A silent no-op here produces a tarball that looks
     anonymised and is not, which is the failure this whole function exists to prevent, and it is
@@ -651,11 +655,24 @@ def main() -> int:
     for note in (LICENCE_NOTE, CATEGORY_NOTE, ENDORSEMENT_NOTE):
         print(note + "\n")
     print("--- the one thing this script cannot check ---")
-    print(
-        "  [ ] the repository must be public. The abstract claims a release and the title block\n"
-        "      prints the URL under the author's name, so posting while it is private ships a\n"
-        "      paper citing a 404."
-    )
+    # Branched on the variant, because the two builds cannot ship the same blocker. The public
+    # build prints the repository under the author's name; the anonymous one replaced that with
+    # whatever `--anon-url` names, so telling a reviewer-facing build to make the repository
+    # public describes a URL the tarball does not contain. Printed unconditionally until the
+    # eighteenth review pass, which built the anonymous variant for the first time.
+    if args.anonymous:
+        print(
+            "  [ ] the anonymous mirror must resolve, and must not carry the author in its own\n"
+            "      metadata. The abstract claims a release and this build points it at\n"
+            f"      {args.anon_url}. TMLR takes the artifact as supplementary material instead,\n"
+            "      which needs no host at all: see SUBMISSION.md."
+        )
+    else:
+        print(
+            "  [ ] the repository must be public. The abstract claims a release and the title\n"
+            "      block prints the URL under the author's name, so posting while it is private\n"
+            "      ships a paper citing a 404."
+        )
     return 0
 
 

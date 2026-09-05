@@ -24,7 +24,7 @@ and the one integer that catches it}
 
 \author{Vladimir Rotariu \\ Independent researcher \\
   \texttt{github.com/loopgepa/whystuck}}
-\date{July 2026}
+\date{September 2026}
 
 \begin{document}
 \maketitle
@@ -87,7 +87,7 @@ consistency as evidence of a tight null. It was evidence of the opposite. Our co
     $15/15$, and in $13/13$ of the thirteen that made that gene evolvable at all; and within the
     flagship run, whose five seeds and three evolvable arms give fifteen
     arm-runs, the optimizer changed \texttt{generate} in $5/15$ winners and
-    \texttt{ensure\_correct} in $0/15$ ($2/5$ and $0/5$ for arm~D alone). \emph{Two different
+    \texttt{ensure\_correct} in $0/15$ ($2/5$ and $0/5$ for the verifier-evolving arm alone). \emph{Two different
     fifteens}, and we name the unit of each because they are numerically equal and an earlier draft merged them. Every reported difference is a comparison of a genome
     against itself, which is why it was so stable.
   \item \textbf{Two ordinary causes, one of them a library default} (\S\ref{sec:defect}): a
@@ -181,7 +181,7 @@ itself worth screening. Structurally this is reward gaming in the sense of
 \citet{skalse2022reward}: the training score is a proxy, and a component can be collapsed to a
 constant policy the proxy cannot punish. \citet{pappu2026multiagent} report GEPA converging on
 \emph{extreme-deference} instructions telling non-expert agents to treat the expert's answer as
-correct by default; the companion paper of this series reports it converging on a verifier that
+correct by default; the companion paper on the conditional lever reports it converging on a verifier that
 never accepts anything. Refusing to accept and deferring unconditionally are the same move, which
 suggests the corner is a property of reflective search under a weak signal rather than of one task
 family. Skalse et al.'s result that unhackable proxies are essentially unavailable is worth stating
@@ -289,7 +289,7 @@ deletes that step of the loop, which \emph{improves} the training score whenever
 deletes is worse than useless (defect~8).
 
 Two arrived later than the rest and are worth attention for a different reason: they were found in
-the \emph{instruments}, not in the optimizer, while replicating the companion detector result on a
+the \emph{instruments}, not in the optimizer, while replicating the ceiling paper's detector result on a
 second worker. A \texttt{-{}-temperature} flag was applied where the sampling was assembled for the
 worker call and nowhere else, so the critique and verdict calls kept the provider default while the
 run's metadata recorded a pinned temperature (defect~10). It surfaced only because two calls issued
@@ -394,7 +394,7 @@ the rest of the numbering in Table~\ref{tab:results}.}
 
 The corrected harness (i) builds a \emph{component-specific} reflective dataset, so the verify
 gene's records carry the draft it judged, the verdict it returned, and whether that verdict
-was a false pass or a false alarm; (ii) passes an explicit component selector, defaulting to
+was a false pass or a false alarm; (ii) passes an explicit component selector (\texttt{module\_selector}), defaulting to
 rewriting all genes per proposal so a multi-gene arm is not starved; (iii) replaces arm~C
 with a genome-blind constant draft scored by the real metric, which is flat without being
 saturated, and re-measures arm~A instead of copying it; and (iv) records, for every arm, the
@@ -485,7 +485,7 @@ released cassettes cannot replay under it; they are retained and labelled supers
 first runs recorded under the corrected harness are two hand-written-gene conditions reported in
 the companion paper on the conditional lever; they replay bit-for-bit, so \texttt{verify\_reproducibility.py}
 verifies twenty-five runs rather than reporting that nothing has been proven, those two
-conditions, the four-arm re-run, the two new levels of the companion paper's $p_0$
+conditions, the four-arm re-run, the two new levels of that paper's $p_0$
 axis and the two calibration passes behind
 them, the bought rows of the split and budget sweeps, the cross-provider critic run, the
 eight runs of the second-worker line and the diagonal splice control. The cross-provider run is the only one of them whose critique
@@ -571,7 +571,7 @@ Run & Regime & Seeds & Seed & B (prompt-only) & D (loop-level) & \dd \\
 \caption{All ten of the original runs, retained as the record of what the defect
 invalidated. \textbf{The \dd\ column is not a measurement} and no claim in this series
 rests on it: the loop-level gene never changed, so B and D are the same program
-(\S\ref{sec:defect}); the companion paper measures this contrast on a corrected harness.
+(\S\ref{sec:defect}); the companion paper on the conditional lever measures this contrast on a corrected harness.
 Rows 4--10 elide a repeated ``hard multi'' prefix: each is run 3's regime plus the listed lever. The \textbf{Seed} column is live throughout, and is the intended readout for runs 6--10.
 Runs 1--2 are uninformative by design (the verify gene is inert on single-constraint
 tasks; the seed saturates at $0.97$ on easy multi). Runs 8--10 share the oracle $R{=}3$
@@ -635,7 +635,7 @@ and two do not: the powered actuator run at $\approx\!3.44\sigma$ and run~1, who
 single-constraint tasks leave the verify gene inert, at $-0.094$, $\approx\!3.23\sigma$. The caveat
 is that $\sigma$ was estimated on
 the hard-multi tasks while the largest of these is a code run, so its transfer is an assumption and not a
-measurement. This is the same conflation the companion paper finds in the corrected re-run, one
+measurement. This is the same conflation the companion paper on the conditional lever finds in the corrected re-run, one
 harness generation earlier: \dd\ is a whole-system contrast, so it moves when the shared gene
 moves, whether or not the treatment ever applied.
 
@@ -694,7 +694,7 @@ magnitude, and that order of magnitude is the same as the effects being reported
 
 \paragraph{Then we measured it directly, and it was not one number.}
 We bought the direct version: every released genome of the $p_0$ sweep re-scored $K=5$ times
-on its own held-out tasks, three $p_0$ levels ($L_1$ to $L_3$, the companion paper's
+on its own held-out tasks, three $p_0$ levels ($L_1$ to $L_3$, the conditional-lever paper's
 constraint-exclusion ladder from $p_0 = 0.067$ to $0.667$) $\times$ \{prompt-only, loop-level,
 unoptimized\}
 $\times$ three seeds $\times$ five replicates, $135$ runs. No re-optimization is involved, so
@@ -730,7 +730,7 @@ That splits the section's own $\sigma$ into two quantities that were being confl
 worth being explicit about which belongs where. A comparison \emph{between two runs recorded on
 different dates}, the seed-baseline curve of the companion ceiling paper being one, must carry
 provider-side drift, and the cross-run estimate is the one that contains it, so it is the right
-denominator \emph{of the two} for that curve. It is not the last word on it: the companion paper has
+denominator \emph{of the two} for that curve. It is not the last word on it: the ceiling paper has
 since re-scored each of those rows five times and superseded its ratios with each row's own measured
 $\sigma$, which is better than choosing correctly between two borrowed ones. A comparison \emph{between two arms
 inside one run} carries no drift, and there the directly measured value applies: $\sigma(\dd)$
@@ -772,7 +772,7 @@ one integer per component is cheap enough that it does not need one.
 
 \textbf{The diagnostic is necessary, not sufficient.} A per-component change count catches a
 treatment that never applied. It does not catch a treatment that applied and did something
-degenerate: the companion paper's non-accepting verifier changes the gene on every seed. That
+degenerate: the conditional-lever paper's non-accepting verifier changes the gene on every seed. That
 needs its own screen, and the cheap one there is a \texttt{PASS} rate of zero. Worse, it reports
 the \emph{reassuring} answer on defect~8: an empty completion accepted as a gene \emph{does}
 differ from the seed, so the count says ``changed'' on the run where the change deleted
@@ -857,7 +857,7 @@ The series' other two papers carry the entries bearing on their own claims.
   \item \textbf{``No measurable advantage for loop-level optimization.''} The original headline,
     across the original ten runs. Withdrawn: the treatment never reached the gene, so those
     runs compared a genome against itself (\S\ref{sec:defect}). What replaces it is one
-    configuration in which the treatment demonstrably ran, reported in the companion paper.
+    configuration in which the treatment demonstrably ran, reported in the companion paper on the conditional lever.
   \item \textbf{``The null is tight rather than merely underpowered.''} It rested on four
     intervals of exactly $[0,0]$. An interval of $[0,0]$ arises when the two arms produce
     byte-identical genomes and the cassette therefore serves identical completions, which is the
@@ -988,9 +988,9 @@ The series' other two papers carry the entries bearing on their own claims.
     ``two factual slips belong with the withdrawals'', so the correction carried a third.
   \item \textbf{``The discarded first four-arm attempt at $-0.094$, ${\approx}3.24\sigma$.''}
     Two errors in one clause, and the run was the wrong one. This paper uses
-    \emph{the discarded first attempt at the four-arm re-run} twice elsewhere for \texttt{C2}, whose
+    \emph{the discarded first attempt at the four-arm re-run} twice elsewhere for \texttt{c2}, whose
     mean $\dd$ is $-0.015$ ($0.52\sigma$) and which the pre-correction partition excludes outright,
-    since that partition is defined by \texttt{module\_selector} and \texttt{C2} carries the
+    since that partition is defined by \texttt{module\_selector} and \texttt{c2} carries the
     corrected value. The run that measures $-0.094$ is run~1, the single-constraint one, which
     Table~\ref{tab:results} lists as \emph{retained}. The count the sentence supports is
     unaffected, since two of the four non-zeros still sit above $1\sigma$, so this is a naming error, not a

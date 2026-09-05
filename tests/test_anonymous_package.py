@@ -19,6 +19,7 @@ them. A scanner that finds nothing anywhere would pass every other test in this 
 from __future__ import annotations
 
 import pathlib
+import re
 import sys
 
 import pytest
@@ -123,3 +124,27 @@ def test_preflight_refuses_anonymous_without_a_url() -> None:
     problems = pkg.preflight(anonymous=True, anon_url=None)
     assert any("anon-url" in p for p in problems), problems
     assert pkg.preflight(anonymous=True, anon_url="example.invalid/x") == []
+
+
+@pytest.mark.parametrize("slug", paper_sources.PAPERS)
+def test_every_repository_url_is_written_in_the_form_the_anonymiser_rewrites(slug: str) -> None:
+    """Two sites per paper, both `\\texttt{github.com/...}`, which is the only form matched.
+
+    `anonymise_tex` substitutes `\\texttt{github.com/...}` and accepts any count of at least one,
+    so a URL written as `\\url{...}` or split across a line break would survive it. That does not
+    ship -- `identifying_leaks` reads the staged bytes and `preflight` then refuses to write the
+    tarball -- but the failure arrives as "STILL IDENTIFYING, so no package was written" with no
+    line number, at the moment someone is trying to submit. This names the site instead.
+
+    The count is asserted because it doubled at the split without anyone noticing: the title
+    block has one and `shared/series.tex` closes the companion-paper note with another.
+    """
+    tex = paper_sources.paper_tex(slug)
+    matched = re.findall(r"\\texttt\{github\.com/[^}]*\}", tex)
+    assert len(matched) == 2, (
+        f"{slug} has {len(matched)} rewritable repository URLs, expected 2 (title block and the "
+        "companion-paper note)"
+    )
+    assert len(re.findall(r"github\.com/", tex)) == len(matched), (
+        f"{slug} names github.com somewhere the anonymiser's pattern does not reach"
+    )
