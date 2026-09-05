@@ -21,7 +21,7 @@ endorsement domain, and the primary category selects the domain.
 
 Two structural facts decide this, and neither is about the papers' quality.
 
-**Main-text length is 31 / 19 / 15 pages** (references begin on p.32 / 20 / 16 of 42 / 25 / 22).
+**Main-text length is 31 / 19 / 15 pages** (references begin on p.32 / 20 / 16 of 42 / 26 / 22).
 **All three papers are de-anonymised by their own reproducibility apparatus**: the title block
 prints author, affiliation and repository URL, and each abstract names the repository again.
 
@@ -184,8 +184,8 @@ exists. Measured from the built PDFs and each paper's own source:
 
 | | paper | pages | tables | figures | distinct citations |
 |---|---|---|---|---|---|
-| I | `p1-conditional-lever` | 42 | 11 | 3 | 24 |
-| II | `p2-repair-not-detection` | 25 | 4 | 3 | 17 |
+| I | `p1-conditional-lever` | 42 | 11 | 3 | 25 |
+| II | `p2-repair-not-detection` | 26 | 4 | 3 | 18 |
 | III | `p3-silent-no-op` | 22 | 4 | 1 | 14 |
 
 Tables, figures and citations are counted from the sources by

@@ -1348,7 +1348,7 @@ replicate sampling (D7) is the fix, needs no re-optimization, and has since been
 
 \textbf{A do-nothing floor in the
 metric:} the fraction-of-constraints-satisfied score is not anchored at zero for an empty
-answer, the empty string scores $0.548$ on the vendored IFBench slice and $0.420$ on
+answer, the empty string scores $0.548$ on the vendored IFBench slice \citep{pyatkin2025ifbench} and $0.420$ on
 generated multi-hard, and six of eleven IFBench verifiers are vacuously satisfied by the empty
 string itself (\texttt{\_sub\_bullets("")} reduces to \texttt{all([]) = True}, and the vowel and
 consonant checks quantify over no words at all). These are faithful ports of the upstream checkers and the floor

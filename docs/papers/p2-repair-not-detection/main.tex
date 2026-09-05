@@ -122,7 +122,7 @@ stacking loops'' \citep{swyx2026loopcraft}. Of the four loops that decomposition
 \citep{langchain2026loopcraft}, ours is the \textbf{verification} loop: scoring output against a
 rubric and retrying with feedback. The \texttt{ensure\_correct} gene \emph{is} the verifier, the
 PASS gate plus \texttt{loop\_max\_retries} \emph{is} the stop rule, and our fix-budget sweep
-($R{:}1\!\to\!3$) is a stop-rule experiment. The agent and event-driven loops are out of scope,
+(one refine round to three) is a stop-rule experiment. The agent and event-driven loops are out of scope,
 since our worker is a fixed generate--critique--refine sequence with no tool-calling agent and is
 invoked once per benchmark task, with no triggers, schedules or cross-task memory.
 
@@ -544,7 +544,8 @@ critique step lifts the seed loop by $+0.060$, run~3's first three seeds ($0.776
 column, a direct confirmation of
 the external-feedback prediction \citep{huang2023cannot}: the loop pays when the signal comes
 from outside the model.
-A third \texttt{plan} module (run 5) moved the baseline to $0.757$, i.e.\ by $-0.020$ against the
+A third module, \texttt{plan}, which prepends a planning step so the loop drafts an outline
+before the answer (run 5), moved the baseline to $0.757$, i.e.\ by $-0.020$ against the
 same three-seed reference, under one $\sigma$ and so no evidence either way: more structure
 did not help.
 
@@ -965,7 +966,7 @@ reason they supersede the ratios.
 
 \textbf{A do-nothing floor in the
 metric:} the fraction-of-constraints-satisfied score is not anchored at zero for an empty
-answer, the empty string scores $0.548$ on the vendored IFBench slice and $0.420$ on
+answer, the empty string scores $0.548$ on the vendored IFBench slice \citep{pyatkin2025ifbench} and $0.420$ on
 generated multi-hard, and six of eleven IFBench verifiers are vacuously satisfied by the empty
 string itself (\texttt{\_sub\_bullets("")} reduces to \texttt{all([]) = True}, and the vowel and
 consonant checks quantify over no words at all). These are faithful ports of the upstream checkers and the floor
