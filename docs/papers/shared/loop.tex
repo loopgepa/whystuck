@@ -11,9 +11,12 @@ The worker is a real generate--critique--refine loop. A \texttt{generate} gene
 drafts an answer; a \texttt{ensure\_correct} (verify) gene drives an LLM
 self-critique that returns \texttt{PASS} or a list of fixes and gates a bounded
 number of refine rounds; the final answer is scored by a programmatic metric.
-Critically, the critique is \emph{intrinsic}: the programmatic scorer is never
-consulted inside the loop (that would be oracle contamination), so the loop
-cannot game its own metric. Each eval costs \emph{at most} $1 + 2R$ LLM calls for a refine
+Critically, the critique is \emph{intrinsic} wherever the loop is left as built: the
+programmatic scorer is never consulted inside the loop (that would be oracle contamination), so
+the loop cannot game its own metric. Paper~II suspends this deliberately in its oracle-critique
+controls, which hand the in-loop gate the true metric and are named as such wherever they are
+reported; nothing else in the series does.
+Each eval costs \emph{at most} $1 + 2R$ LLM calls for a refine
 budget of $R$ (or $2 + 2R$ with the optional plan module), and fewer whenever a critique passes
 before the budget is spent: the loop stops on a \texttt{PASS} without issuing the refine call
 that would have followed it, so the bound is reached only by an eval that never passes.

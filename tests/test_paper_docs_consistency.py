@@ -690,6 +690,12 @@ _INTRA_REGISTER_POINTERS = {
     ("p1-conditional-lever", r"the \$1\.12\$ of entry~(\d+)"): r"1\.12",
     ("p2-repair-not-detection", r"the borrowed denominator entry~(\d+) retired"): "borrowed",
     ("p2-repair-not-detection", r"why entry~(\d+) needed reinstating"): "beats the tool-fed loop",
+    ("p2-repair-not-detection", r"the equivalence overclaim entry~(\d+) withdraws"): (
+        "statistically indistinguishable"
+    ),
+    ("p2-repair-not-detection", r"the guard written for entry~(\d+) did not match"): (
+        "statistically indistinguishable"
+    ),
 }
 
 
@@ -1435,7 +1441,17 @@ def test_no_paper_reads_a_failure_to_reject_as_equivalence() -> None:
     """
     for slug in SLUGS:
         for sentence in _sentences(slug):
-            if "indistinguishable" not in sentence:
+            # The CLASS, not one spelling of it. A first version tested for the exact word
+            # "indistinguishable", which is the word the first round of fixes happened to
+            # remove. It passed while the contributions list said "indistinguishably" (the
+            # adverb is not a superstring of the adjective) and the conclusion said "a null
+            # confirmed on five replicates rather than merely unrefuted", which never contained
+            # the word at all. A sol-medium inspector found both.
+            if not re.search(
+                r"indistinguishab|equivalent to|confirmed rather than|null confirmed"
+                r"|merely unrefuted",
+                sentence,
+            ):
                 continue
             assert not re.search(r"\$t = [\d.]+\$|[\d.]+\\sigma", sentence), (
                 f"{slug} calls something indistinguishable beside a test statistic, which is a "

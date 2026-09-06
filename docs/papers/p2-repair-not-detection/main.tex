@@ -48,8 +48,9 @@ triples while Youden's $J$ and Matthews' correlation do not improve at all, so a
 an easier benchmark is base-rate inflation. The residual is one
 mechanical skill rather than a diffuse capability wall, exact word counting: $0.16 \to 0.33 \to 0.50$ across fix regimes and never
 solved. The practical consequence: do not buy a better detector, buy
-a more actionable fixer. Every claim rests on five independent replicates of each configuration,
-paired within replicate on shared held-out tasks, bar the two seed-level corroborations, and every
+a more actionable fixer. Every gap we lean on rests on five independent replicates,
+paired within replicate on shared held-out tasks; the detector statistics and the two seed-level
+corroborations are single-draw. Every
 published claim this paper withdraws is listed in Appendix~\ref{sec:corrections}.
 \end{abstract}
 
@@ -77,10 +78,10 @@ connects an optimizer to a component. Our contributions:
     detector quality the three critiques are intrinsic (chance) $<$ tool-fed (precision $1.00$)
     $<$ oracle (perfect by construction); ranked by held-out score they come out $0.765$, $0.837$,
     $0.748$. The best detector gives the worst loop, scoring
-    below a measurement tool by $3.04\sigma$ and indistinguishably from a near-random critique.
+    below a measurement tool by $3.04\sigma$ and no better than a near-random critique.
     The ordering is the evidence, and it is not
     what ``get a better verifier'' predicts.
-  \item \textbf{F$_1$ measures the base rate, not the detector} (\S\ref{sec:detector}). Scored
+  \item \textbf{F$_1$ rises without discrimination improving} (\S\ref{sec:detector}). Scored
     across three task distributions differing only in difficulty, the same critique's F$_1$ rises
     $0.222 \to 0.357 \to 0.632$ while Youden's $J$ and Matthews' correlation do not improve at all
     and are \emph{exactly} zero at the easiest level. Base-rate-independent statistics are what
@@ -188,6 +189,9 @@ reach a genome that has nothing to evolve. Either way no
 result below can be produced by a prompt optimizer, a search budget, or the wiring that connects
 one to a component. The harness varies between runs: which signal the critique receives,
 how many refine rounds it may gate, and what repair text the refine step is handed.
+Every configuration here refines, at one round or three, so every contrast below is between two
+self-refine loops. We bought no first-draft-only arm, so nothing here measures whether refining
+beats not refining, and no claim in this paper needs it to.
 Run numbers index the study's ten original runs, numbered as in the companion Paper~III's
 table of the original runs; every one this paper cites carries its own row in
 Table~\ref{tab:curve}.
@@ -617,8 +621,8 @@ cassettes). The fix-step residual is concentrated almost entirely in
 ($0.16\!\to\!0.33\!\to\!0.50$) without ever being solved. Only the second step isolates
 feedback: the first also swaps the intrinsic critique for the oracle and raises the refine budget
 from one round to three, so the trajectory bounds what the fix step recovers rather than
-attributing all of it to actionability. while six of the eight constraints reach $1.0$ and the only residual
-outside it is $0.10$ in \texttt{word\_max\_length}. The generator-limited
+attributing all of it to actionability. Six of the eight constraints reach $1.0$ and the only
+residual outside \texttt{exact\_word\_count} is $0.10$ in \texttt{word\_max\_length}. The generator-limited
 residual is one mechanical skill (exact counting), not a diffuse ceiling.}
 \label{tab:residual}
 \end{table}
@@ -997,9 +1001,9 @@ combinations; this affects all rows equally but softens the generalization claim
 \section{Conclusion}
 \label{sec:conclusion}
 
-\textbf{Does the self-refine loop help?} Only through \emph{external} signal, a measurement tool
+\textbf{What makes the self-refine loop help?} \emph{External} signal, a measurement tool
 ($+0.060$, $2.07\sigma$) or more refine attempts ($+0.065$, $2.24\sigma$), both paired on the same
-thirty held-out tasks, never through the model grading its own draft, whose critique is a
+thirty held-out tasks, and not the model grading its own draft, whose critique is a
 near-random detector (F$_1\!=\!0.11$) and whose replacement by a \emph{perfect} checker
 moves held-out by $0.98\sigma$, i.e.\ not at all. Those three comparisons have since been
 re-scored five times each, and all three survive on a replicated interval rather than a
@@ -1011,8 +1015,8 @@ stronger reading and not a significance claim.
 
 The loop's bottleneck is therefore the fixer, not the detector, and the two are cleanly separable by
 experiment. Give the loop a \emph{perfect} inference-time checker and held-out score moves
-$-0.0027$ ($t = 0.33$) against its own near-random self-critique, a null confirmed on five
-replicates rather than merely unrefuted, while the same perfect checker scores $0.042$
+$-0.0027$ ($t = 0.33$) against its own near-random self-critique, a null that holds on five
+replicates without being an equivalence claim, while the same perfect checker scores $0.042$
 \emph{below} a deterministic text-statistics tool ($t = 2.89$). Ranked by detector quality the
 configurations run intrinsic $<$ tool $<$ oracle; ranked by outcome they run $0.765$, $0.837$,
 $0.748$. A monotone relationship between detection and performance was the premise of ``get a
@@ -1062,7 +1066,7 @@ Earlier drafts of this work published claims it now withdraws. Reporting guidanc
 pre-registered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Twenty-one} entries follow. The
+collected here and the body text states only the surviving claim. \textbf{Twenty-four} entries follow. The
 series' other two papers carry the entries bearing on their own claims, and the full
 register across all three, with the superseded values themselves, is in the released repository.
 
@@ -1238,6 +1242,20 @@ register across all three, with the superseded values themselves, is in the rele
     and run 10 (oracle, three, richer feedback), so the first step swaps the detector and triples
     the budget as well. Only the second step varies feedback alone; the trajectory bounds what
     the fix step recovers rather than attributing all of it to actionability.
+  \item \textbf{``F$_1$ measures the base rate, not the detector.''} The body sentence was
+    corrected and the contributions list was not, so the paper carried the withdrawn form for
+    one revision. The same revision left ``indistinguishably from a near-random critique'' in
+    that list and ``a null confirmed on five replicates rather than merely unrefuted'' in the
+    conclusion, both the equivalence overclaim entry~18 withdraws, in spellings the guard
+    written for entry~18 did not match.
+  \item \textbf{``Every claim rests on five independent replicates of each configuration.''} The
+    six curve gaps do. The detector statistics and the three-level calibration are single-draw
+    cassette measurements, and the abstract named only the two seed-level corroborations as
+    exceptions. It now names them.
+  \item \textbf{``Does the self-refine loop help?''} Every configuration in this paper refines,
+    at one round or three, so no contrast here compares refining against not refining. The
+    question is now what makes the loop help, and the absent first-draft-only arm is declared
+    where the configurations are introduced.
 \end{enumerate}
 
 \end{document}

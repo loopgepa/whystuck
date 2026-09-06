@@ -4115,7 +4115,14 @@ def _saturated_constraint_checks() -> list[tuple[str, float, float, float]]:
     out.append(
         (
             "tab:residual residual outside exact_word_count",
-            _scrape(tex, r"the only residual\s+outside it is \$([0-9.]+)\$"),
+            # "outside it" became "outside `exact_word_count`" when the caption's dangling
+            # clause was repaired, and the pronoun was what this pattern matched. Both spellings
+            # accepted, since the number is what the check is for.
+            _scrape(
+                tex,
+                r"the only\s+residual outside (?:it|\\texttt\{exact\\_word\\_count\})"
+                r" is \$([0-9.]+)\$",
+            ),
             0.005,
             residual_outside,
         )
@@ -5369,7 +5376,9 @@ def _xprovider_checks() -> list[tuple[str, float, float, float]]:
     out.append(
         (
             "tex: D3 treated-only delta",
-            _scrape(tex, r"something, \$\\dd = \+([\d.]+)\$ on \$n = 3\$"),
+            # "where arm D accepted something" became "where arm D's winner moved" when the
+            # field's name was corrected: it records an identity test, not an acceptance.
+            _scrape(tex, r"moved, \$\\dd = \+([\d.]+)\$ on \$n = 3\$"),
             0.0005,
             strata["treated"].mean_delta,
         )
@@ -5653,6 +5662,30 @@ def _replicate_sigma_scale_checks() -> list[tuple[str, float, float, float]]:
                     float(row.delta * single < 0),
                 )
             )
+
+    # The swing is this paper's headline: the subtitle, the abstract and five body sites give its
+    # SINGLE-DRAW value. What it becomes under the paper's own re-scoring appeared in none of
+    # them, and it is a quarter smaller at a slightly HIGHER ratio, because pairing on these two
+    # rows' standard errors beats the cross-run floor the single draw is divided by. Both sides
+    # are derived here, so the caption that now reports it cannot drift from either.
+    l1, l2 = repeat["L1"], repeat["L2"]
+    paired_se = (l1.standard_error**2 + l2.standard_error**2) ** 0.5
+    out.append(
+        (
+            "tex: replicated swing",
+            _scrape(p1, r"= ([\d.]+)\$ replicated against the"),
+            0.0005,
+            l2.delta - l1.delta,
+        )
+    )
+    out.append(
+        (
+            "tex: replicated swing in sigma",
+            _scrape(p1, r"standard errors it is \$([\d.]+)\\sigma\$ rather than"),
+            0.05,
+            (l2.delta - l1.delta) / paired_se,
+        )
+    )
     return out
 
 

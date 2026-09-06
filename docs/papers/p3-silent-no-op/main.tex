@@ -71,7 +71,7 @@ That capability creates an experimental hazard with no analogue in single-prompt
 When an optimizer may rewrite one component, ``did it run'' and ``did it change the thing under
 study'' are the same question. When it may rewrite several, they come apart: the search can run,
 accept candidates, and report a plausible held-out number while the component whose contribution
-you are measuring is never touched. Nothing in the output distinguishes that case from a genuine
+you are measuring never changes. Nothing in the output distinguishes that case from a genuine
 null. A componentized experiment can therefore return a clean, replicated, well-behaved zero from
 an experiment that did not happen.
 
@@ -140,9 +140,11 @@ using up to $35\times$ fewer rollouts, and exceeding MIPROv2 by over $10\%$. GEP
 optimizes \emph{one or more} components and is known to plateau. The sharpest published
 instance is independent of us: optimizing a prompt with GEPA across six tasks,
 \citet{pappu2026multiagent} report that ``on GPQA Diamond and MATH-500, GEPA returned the
-original prompt essentially unchanged.'' That is our failure mode observed in someone
-else's pipeline, and reported, which is the practice this paper argues should be
-routine. OPRO \citep{yang2023opro} and EvoPrompt \citep{guo2024evoprompt} likewise use an
+original prompt essentially unchanged.'' That is our failure mode's \emph{signature} in
+someone else's pipeline, and reported, which is the practice this paper argues should be routine.
+They diagnose no cause, and an unchanged prompt is also what a working search returns when it
+finds nothing worth keeping, which is precisely why the signature needs the per-component
+integer beside it. OPRO \citep{yang2023opro} and EvoPrompt \citep{guo2024evoprompt} likewise use an
 LLM as the optimizer, and OPRO's authors quantify the over-fitting risk directly: their
 ``training accuracies are often 5\%--20\% higher than our test accuracies''.
 
@@ -401,7 +403,10 @@ was a false pass or a false alarm; (ii) passes an explicit component selector (\
 rewriting all genes per proposal so a multi-gene arm is not starved; (iii) replaces arm~C
 with a genome-blind constant draft scored by the real metric, which is flat without being
 saturated, and re-measures arm~A instead of copying it; and (iv) records, for every arm, the
-per-gene accepted-change count, the train aggregate, and the final gene text. The audit of
+per-gene changed-from-seed count, the train aggregate, and the final gene text. That count is
+an identity test on the winner, not a tally of accepted proposals: GEPA proposed critique
+rewrites in the flagship run and they lost on training score, which the released summary records
+and which an empty count cannot distinguish from a search that never proposed anything. The audit of
 that harness (defects~6--7) added three more: (v) the verify gene's truth signal now receives
 the real task, and a trace that cannot be matched to an evaluated task raises rather than being
 scored against a stand-in; (vi) a replay that swallows a cassette miss now fails at context
@@ -467,11 +472,14 @@ neither accepted & 3 & $+0.0000$ & $0\%$ \\
 apply and the comparator damaged itself}, losing $0.065$ and $0.020$ against its own seed genome.
 On those seeds $\dd(D-B)$ is $\dd(\mathrm{seed}-B)$: the same one-sided contrast as
 defect~9, at the level of the individual seed rather than the run, and therefore invisible to a
-flag that asks only whether an arm's count is zero. Restricted to the seeds where arm~D accepted
-something, $\dd = +0.0100$ on $n = 3$.
+flag that asks only whether an arm's count is zero. Restricted to the seeds where arm~D's winner
+moved, $\dd = +0.0100$ on $n = 3$. That restriction conditions on an outcome of the treatment
+rather than on the assignment, so $+0.0100$ is not a treatment-effect estimate and we do not
+report it as one: what the stratification establishes is where the aggregate comes from, which
+is a reason to distrust the aggregate rather than a better estimate to put in its place.
 
 So the presentation rule needs strengthening, and this is the form we now propose: \textbf{report
-the per-arm acceptance count per seed, and stratify the contrast by it}, not merely flag the
+the per-arm changed-from-seed count per seed, and stratify the contrast by it}, not merely flag the
 case where a count is zero. A binary flag catches the run that never searched; it does not catch
 the run that searched on some seeds and not others, which is the ordinary case once a budget is
 tight enough to matter. The cost is the same one integer item~(iv) already demands, printed per
@@ -529,13 +537,20 @@ is a property of those tasks and that optimizer, not of the measurement path. Th
 saturating one, $0.000$ against $1.000$, so it establishes that the path is not \emph{dead}; it
 says nothing about sensitivity at the $0.01$--$0.04$ scale the real contrasts live at, against a
 $\sigma(\dd)$ near $0.03$. A canary is not a calibration
-(\texttt{scripts/positive\_control.py}).
+(\texttt{scripts/positive\_control.py}). It also scores its four tasks as both train and
+held-out, which the shared method's disjoint-split rule does not permit and which a canary does
+not need: the question it answers is whether the path can register a signal at all.
 
 We state this as a requirement rather than a courtesy. The control is cheap: it needs no
 network and no spend, and it is the only artifact in this study that would have failed
-loudly under the original wiring. Had we built it first, it would have caught defects~1--3 before
-any money was spent, because on that landscape a treatment that never reaches the verify gene
-returns $0.000$ rather than $1.000$. An instrument that has never been shown to register a signal
+loudly under the original wiring. Had we built it first, it would have caught defect~1 before
+any money was spent, because on that landscape a control that cannot fail shows itself: the
+command arm scores $1.000$ where a genome-blind worker has to score $0.000$. It would not have
+caught defects~2 or~3, and we say so rather than claiming the control is worth more than it is.
+Its reflection function returns the same proposal whatever records it is handed, so a
+component-agnostic reflective dataset is invisible to it; and it runs to this day with
+\texttt{module\_selector} at GEPA's default, so the selector confound is present in the control
+itself and the control still returns $\dd(D-B) = +1.000$. An instrument that has never been shown to register a signal
 cannot be trusted to report its absence, and a componentized optimizer is exactly the kind of
 instrument whose failure is silent.
 
@@ -793,9 +808,12 @@ in sequence, so their number reflects how long we looked rather than a density. 
 the \emph{class}, and that its members share a signature: the failure leaves the reported number
 plausible.
 
-\textbf{The $\sigma$ result is one family of genomes.} The $5.9\times$ spread is measured across
-nine genomes of one experiment; the companion ceiling paper measures $2.2\times$ across six
-genomes of another. Both refute a single study-wide constant; neither establishes the size of the
+\textbf{The $\sigma$ result is one family of genomes, and the cells are not single genomes.}
+The $5.9\times$ spread is measured across nine arm-by-level cells of one experiment, each of
+which pools its three seeds' genomes before the replicate means are taken, and the three levels
+differ in which constraints are excluded. So the spread is across cells that differ in genome,
+seed and task regime at once, not across nine genomes holding the rest fixed. The companion
+ceiling paper measures $2.2\times$ across six of its own. Both refute a single study-wide constant; neither establishes the size of the
 spread as a general quantity.
 
 \textbf{We cannot re-run the superseded cassettes.} The corrected wiring changes every reflection
@@ -807,7 +825,8 @@ is what we mean by superseded.
 \label{sec:conclusion}
 
 A componentized optimizer can be pointed at a component, run, accept candidates, report a
-plausible held-out number, and never touch the component. Our first fifteen contrast runs did
+plausible held-out number, and leave the component exactly as it found it. Our first fifteen
+contrast runs did
 exactly that: the critique gene is byte-identical to the seed in $15/15$ winning genomes, ten runs
 reported held-out scores identical on every seed, and we read the consistency as a tight null for months. Two
 ordinary wiring choices sufficed, a reflective dataset built without regard to which component
@@ -852,7 +871,7 @@ This work's earlier drafts published claims it now withdraws. Reporting guidance
 work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Twenty-one} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Twenty-six} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1040,6 +1059,28 @@ The series' other two papers carry the entries bearing on their own claims.
     changed, so nothing in that column measures the treatment, and where it is non-zero the arms
     differ in the gene they share. A correction recorded and not carried into the body is this
     paper's own failure mode, one level up.
+  \item \textbf{``\dots and never touch the component.''} The released summary records that GEPA
+    proposed critique rewrites in the flagship run and that they were rejected, having been
+    generation prose written into a critique slot. So the optimizer did reach the component; what
+    it never did was change it. The diagnosis is unaffected and the phrasing was false.
+  \item \textbf{``The per-gene accepted-change count.''} The harness records which genes of the
+    \emph{winning} genome differ from the seed. That is an identity test, not a tally of accepted
+    proposals, and an empty count cannot separate a search that proposed and lost from one that
+    never proposed. The field, the reporting rule built on it and the strata named after it are
+    renamed accordingly.
+  \item \textbf{``Restricted to the seeds where arm~D accepted something, $\dd = +0.0100$.''}
+    That restriction conditions on an outcome of the treatment rather than on the assignment, so
+    the figure is not a treatment-effect estimate. The stratification's value is that it locates
+    where the aggregate comes from, and it is now reported as that.
+  \item \textbf{``It would have caught defects~1--3 before any money was spent.''} The positive
+    control runs to this day with \texttt{module\_selector} at GEPA's default and no verify-truth
+    signal, and returns $+1.000$ anyway, so it does not fail under defects~2 or~3; its reflection
+    function also returns the same proposal whatever records it is shown. The claim is narrowed to
+    defect~1, and the control's use of one task set as both train and held-out is now disclosed.
+  \item \textbf{``The $5.9\times$ spread is measured across nine genomes.''} The nine cells are
+    arm-by-level aggregates, each pooling three seeds' genomes, across levels that differ in which
+    constraints are excluded. The spread stands; what it is measured across does not hold genome,
+    seed and task regime fixed, and the sentence said it did.
 \end{enumerate}
 
 \end{document}
