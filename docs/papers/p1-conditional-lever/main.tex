@@ -34,7 +34,7 @@ and a $0.102$ swing in the contrast across it}
 Reflective optimizers such as GEPA \citep{agrawal2025gepa} can evolve several text components of a
 compound LLM system, so a natural hypothesis is that optimizing an entire
 generate--critique--refine loop beats optimizing its generation prompt alone. On a corrected,
-control-heavy harness the answer turns on one quantity: $p_0$, the base rate of first drafts
+control-heavy harness the answer tracks one quantity: $p_0$, the base rate of first drafts
 already satisfying every requirement. At $p_0 = 0.067$ the search converges on a verifier that
 never accepts anything, on $11$ of $12$ evolved genes across four training-split sizes, and
 evolving it buys nothing measurable; at $p_0 = 0.267$, changing only which constraints the
@@ -298,7 +298,9 @@ Appendix~\ref{sec:corrections}.
 \section{Experimental Setup}
 \label{sec:setup}
 
-\paragraph{Models.} Worker \texttt{gpt-4.1-mini} (output cap 320 tokens); reflection
+\paragraph{Models.} Worker \texttt{gpt-4.1-mini} (output cap 320 tokens on the
+instruction-following runs, raised to 1024 on the five BigCodeBench ones and 512 on the earlier
+MBPP+ attempt); reflection
 \texttt{gpt-5.6-luna} on the corrected-harness runs this paper's conclusions rest on, the
 four-arm re-run, the $p_0$ sweep and the split-size sweep, and \texttt{gpt-5.6-terra}, which is
 the CLI default, on the superseded runs that preceded it and on the later cross-provider critic
@@ -784,8 +786,9 @@ and a caught flaw triggers a refine that passes. Arm~B therefore cannot escape t
 draft no matter how well it optimizes, and arm~D can. Running the real four-arm study through
 real GEPA on this landscape (no stubbed optimizer, no network, no spend) gives
 A~$0.000$, B~$0.000$, C~$0.000$, D~$\mathbf{1.000}$, i.e.\ $\dd(D-B) = +1.000$. The harness
-detects a loop-level advantage when one exists, so the near-zero $\dd$ we report on real tasks
-is a property of those tasks and that optimizer, not of the measurement path
+detects a loop-level advantage of that size, so a dead measurement path is not what produces the
+near-zero $\dd$ we report on real tasks. It does not follow that the path is sensitive at the
+size those contrasts actually have
 (\texttt{scripts/positive\_control.py}). Paper~III argues for this as a standing requirement
 rather than a courtesy, since it is the one artifact here that would have failed loudly under
 the original wiring.
@@ -1246,8 +1249,10 @@ same-vendor cross-lineage critic of run~6 was the only \emph{model substitution}
 accurate detector (Paper~II, which also reports an accurate detector obtained a different way, by
 feeding the same critique a measurement tool). So the question this entry existed to settle,
 unreliable detector or self-preferring one, is answered against self-preference: moving off the
-worker's weights entirely made detection worse, and loop-level optimization bought nothing over
-prompt-only optimization under either. On the \emph{unoptimized} loop the two critics do separate,
+worker's weights entirely made detection worse. The loop-level half of this run settles
+nothing either way: its $\dd(D-B)$ is inconclusive against the noise band, and the treatment
+applied on three of its eight seeds, with most of the positive contrast sitting on seeds where
+it did not (Paper~III). On the \emph{unoptimized} loop the two critics do separate,
 and Paper~II reports that separately, a distinction worth keeping, since the two axes were
 briefly conflated while this run was being written up.
 
@@ -1720,7 +1725,7 @@ predictions failed. Reporting guidance for pre-registered work asks that deviati
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
 collected here and the body text states only the surviving claim.
-\textbf{Twenty-seven} entries follow.
+\textbf{Thirty} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1942,6 +1947,18 @@ The series' other two papers carry the entries bearing on their own claims.
     $p_0$ sweep deliberately bought two higher levels and this paper reports them, so as written
     the sentence contradicted Table~\ref{tab:p0}. It is scoped to the runs bought before the
     sweep, which is what it was describing.
+  \item \textbf{``Worker \texttt{gpt-4.1-mini} (output cap 320 tokens).''} True of thirty-six
+    released runs and of neither the five BigCodeBench ones, at 1024, nor the MBPP+ attempt, at
+    512. All three papers printed the one figure, so the stated setup did not reproduce the
+    code-domain runs. The caps and their run counts are now derived from the release.
+  \item \textbf{``The answer turns on one quantity: $p_0$.''} The conclusion's own
+    qualifications say the axis is an operationalization and that the swing is measured along
+    $p_0$ rather than identified as caused by it. The abstract now says the answer tracks $p_0$.
+  \item \textbf{``The near-zero $\dd$ is a property of those tasks and that optimizer, not of
+    the measurement path.''} The positive control saturates, which shows the path is not dead
+    and not that it is sensitive at the size the real contrasts have, as the two sentences after
+    it already said. Paper~III carried the same sentence and was corrected first; this copy
+    stood for one revision longer.
 \end{enumerate}
 
 \section{The Actuator Experiment, and the MBPP+ Attempt}

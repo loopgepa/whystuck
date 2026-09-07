@@ -39,6 +39,7 @@ gap is visible rather than implied.
 from __future__ import annotations
 
 import json
+import pathlib
 import re
 from dataclasses import dataclass
 from functools import cache
@@ -479,6 +480,7 @@ _WORD_NUM = {
     "thirty": 30,
     "twenty-six": 26,
     "twenty-seven": 27,
+    "twenty-eight": 28,
     "thirty-eight": 38,
     "forty-three": 43,
     "two hundred": 200,
@@ -3577,6 +3579,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_saturated_constraint_checks())
     out.extend(_prose_orphan_checks())
     out.extend(_defect_class_count_checks())
+    out.extend(_output_cap_checks())
     out.extend(_budget_false_pass_checks())
     out.extend(_registered_depth_bound_checks())
     out.extend(_sigma_margin_checks())
@@ -6055,6 +6058,53 @@ def _paraphrase_drift_checks() -> list[tuple[str, float, float, float]]:
         ),
     ):
         out.append((label, _scrape(tex, pattern), tol, want))
+    return out
+
+
+def _output_cap_checks() -> list[tuple[str, float, float, float]]:
+    """The Models paragraph of all three papers gave one output cap, and the release has three.
+
+    `worker_max_output_tokens` is 320 on the instruction-following runs, 1024 on the five
+    BigCodeBench ones and 512 on the MBPP+ attempt. Every paper printed 320 without
+    qualification, so the stated setup did not reproduce the code-domain runs. A luna-high
+    inspector found it against `validation-study-bcb-acthi.json`. The caps and their run counts
+    are both read from the release here, so neither can drift away from the sentence.
+    """
+    caps: dict[int, int] = {}
+    for path in sorted(pathlib.Path(DOCS).glob("validation-study-*.json")):
+        with open(path, encoding="utf-8") as fh:
+            cap = json.load(fh).get("meta", {}).get("worker_max_output_tokens")
+        if cap is not None:
+            caps[int(cap)] = caps.get(int(cap), 0) + 1
+    assert caps, "no run declares worker_max_output_tokens; this check would pass vacuously"
+    common = max(caps, key=lambda c: caps[c])
+    out: list[tuple[str, float, float, float]] = []
+    for slug in _sources().PAPERS:
+        tex = _sources().paper_tex(slug)
+        out.append(
+            (
+                f"{slug}: default output cap",
+                _scrape(tex, r"output cap (\d+) tokens on the"),
+                0.5,
+                float(common),
+            )
+        )
+        out.append(
+            (
+                f"{slug}: raised output cap",
+                _scrape(tex, r"raised to (\d+) on the five BigCodeBench"),
+                0.5,
+                float(max(caps)),
+            )
+        )
+        out.append(
+            (
+                f"{slug}: runs at the raised cap",
+                _scrape_word(tex, r"raised to \d+ on the (\w+) BigCodeBench"),
+                0.5,
+                float(caps[max(caps)]),
+            )
+        )
     return out
 
 

@@ -10,7 +10,10 @@
 The worker is a real generate--critique--refine loop. A \texttt{generate} gene
 drafts an answer; a \texttt{ensure\_correct} (verify) gene drives an LLM
 self-critique that returns \texttt{PASS} or a list of fixes and gates a bounded
-number of refine rounds; the final answer is scored by a programmatic metric.
+number of refine rounds; the final answer is scored by a programmatic metric. Two further
+genes are optional and named where they are used: a \texttt{plan} module that drafts before
+generating, and a repair \texttt{actuator} that turns a critique into the instructions the
+refine step is handed.
 Critically, the critique is \emph{intrinsic} wherever the loop is left as built: the
 programmatic scorer is never consulted inside the loop (that would be oracle contamination), so
 the loop cannot game its own metric. Paper~II suspends this deliberately in its oracle-critique

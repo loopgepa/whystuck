@@ -74,7 +74,7 @@ result here can be an artifact of a prompt search, of a search budget, or of the
 connects an optimizer to a component. Our contributions:
 
 \begin{enumerate}
-  \item \textbf{Detection is necessary and not sufficient} (\S\ref{sec:detector}). Ranked by
+  \item \textbf{Detection is not sufficient} (\S\ref{sec:detector}). Ranked by
     detector quality the three critiques are intrinsic (chance) $<$ tool-fed (precision $1.00$)
     $<$ oracle (perfect by construction); ranked by held-out score they come out $0.765$, $0.837$,
     $0.748$. The best detector gives the worst loop, scoring
@@ -210,8 +210,9 @@ claim about deployable performance is drawn from it.
 \paragraph{The three repair-feedback levels.}
 Holding detection fixed at the perfect oracle, the text handed to the refine step takes one of
 three pre-registered forms: \emph{lo}, a bare ``revise'' verdict; \emph{mid}, which constraints
-failed with their targets; and \emph{hi}, mid \emph{plus} a concrete \emph{measured} edit per
-failed constraint. As emitted, for one draft failing one constraint:
+failed with their targets; and \emph{hi}, which \emph{replaces} that list with a concrete
+\emph{measured} edit per failed constraint. The three are not nested: hi drops mid's census of
+satisfied constraints, so it carries more about how to repair and less about what was checked. As emitted, for one draft failing one constraint:
 \begin{quote}\small
 \textbf{lo}\quad \texttt{not all requirements are satisfied; revise}\\
 \textbf{mid}\quad \texttt{Failed 1 of 4 requirement(s); fix: exact\_word\_count (use exactly 20
@@ -251,7 +252,9 @@ rather than a prompt that learned to detect better.
 \section{Experimental Setup}
 \label{sec:setup}
 
-\paragraph{Models.} Worker \texttt{gpt-4.1-mini} (output cap 320 tokens). No reflection model is
+\paragraph{Models.} Worker \texttt{gpt-4.1-mini} (output cap 320 tokens on the
+instruction-following runs, raised to 1024 on the five BigCodeBench ones and 512 on the earlier
+MBPP+ attempt). No reflection model is
 involved in any measurement \emph{we make} here, since none of our configurations optimizes
 anything; the reflection field recorded in each run's metadata is the CLI default and is inert.
 Two figures in \S\ref{sec:detector} are exceptions, and are quoted rather than measured: the
@@ -400,8 +403,8 @@ $L_3$ & 0.667 & \textbf{0.632} & 0.600 & 0.400 & $\mathbf{0.000}$ / $\mathbf{0.0
 \end{tabular}
 \end{center}
 
-$\mathrm{F}_1$ nearly triples as the tasks get easier while discrimination does not improve: Youden's $J$ and Matthews' correlation, both of which are zero for a
-chance-level detector regardless of base rate, do not improve at all, and at $L_3$ they are
+$\mathrm{F}_1$ nearly triples as the tasks get easier while discrimination does not improve: Youden's $J$ and Matthews' correlation, both of which have expectation zero
+for a chance-level detector regardless of base rate, do not improve at all, and at $L_3$ they are
 \emph{exactly} zero because $\mathrm{tp}\cdot\mathrm{tn} = \mathrm{fp}\cdot\mathrm{fn} = 48$.
 Across a $10\times$ range of task difficulty $\mathrm{F}_1$ orders the levels and the
 base-rate-independent statistics do not: $J$ runs $+0.286$, $-0.057$, $0.000$, which is a fall and
@@ -589,7 +592,8 @@ even told exactly ``the draft has 2 word(s) but needs exactly 20: add 18 more wo
 the \emph{hi} format of \S\ref{sec:method}, \texttt{gpt-4.1-mini} hits the exact count only
 $\sim\!0.50$ of the time (up from
 $0.16$ intrinsic, $0.33$ with which-constraint feedback). This is the known
-inability of LLMs to control exact token counts during generation. So the
+inability of LLMs to control exact counts during generation, of words here rather than tokens:
+the verifier counts whitespace-delimited words with edge punctuation stripped. So the
 generator-limited residual is a single mechanical
 skill, of a kind a deterministic actuator (not prompt/critique optimization) would
 address.
@@ -1066,7 +1070,7 @@ Earlier drafts of this work published claims it now withdraws. Reporting guidanc
 pre-registered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Twenty-four} entries follow. The
+collected here and the body text states only the surviving claim. \textbf{Twenty-eight} entries follow. The
 series' other two papers carry the entries bearing on their own claims, and the full
 register across all three, with the superseded values themselves, is in the released repository.
 
@@ -1256,6 +1260,19 @@ register across all three, with the superseded values themselves, is in the rele
     at one round or three, so no contrast here compares refining against not refining. The
     question is now what makes the loop help, and the absent first-draft-only arm is declared
     where the configurations are introduced.
+  \item \textbf{``\emph{hi}, mid \emph{plus} a concrete \emph{measured} edit.''} The emitted
+    text this paper prints two lines below shows otherwise: hi \emph{replaces} mid's list with
+    the measured edit and drops its census of satisfied constraints, so the three levels are not
+    nested. The effect stands; what varies across it is described correctly now.
+  \item \textbf{``Detection is necessary and not sufficient.''} Every configuration here
+    includes a detector and no first-draft-only arm was bought, so necessity is not testable
+    from this design. Non-sufficiency is what the ordering shows.
+  \item \textbf{``The known inability of LLMs to control exact token counts.''} The verifier
+    counts whitespace-delimited words with edge punctuation stripped, which is what its own
+    docstring says. The residual is a word-counting failure.
+  \item \textbf{``Youden's $J$ and Matthews' correlation, both of which are zero for a
+    chance-level detector.''} Zero is the expectation. The same table reports $J = +0.286$ at
+    $L_1$, so the sample values are not guaranteed to be zero and the prose now says expectation.
 \end{enumerate}
 
 \end{document}

@@ -1509,3 +1509,50 @@ def test_the_superseded_runs_are_not_called_one_program_without_the_qualifier() 
             f"{sentence.strip()[:120]!r} quantifies the genome-identity claim over rows the "
             "paper itself shows are not identities"
         )
+
+
+def _withdrawn_quotes(slug: str) -> list[str]:
+    """The claim each corrections entry opens by quoting, normalised for whitespace.
+
+    Every entry in every register begins `\\item \\textbf{``...''}`, so the papers already
+    publish their own list of retired phrasings. That list is what this reads.
+    """
+    text = _expanded(slug)
+    register = text[text.index(r"\label{sec:corrections}") :]
+    return [
+        re.sub(r"\s+", " ", q).strip()
+        for q in re.findall(r"\\item \\textbf\{``(.+?)''\}", register, re.S)
+    ]
+
+
+def test_no_body_text_restates_a_claim_its_own_register_withdrew() -> None:
+    """The register says the body states only the surviving claim. Twice it did not.
+
+    Self-maintaining, and narrower than it looks. The papers publish their retired phrasings in
+    the register, one quoted claim per entry, so a correction added later becomes a check on the
+    body with nobody writing one. What it catches is a VERBATIM restatement.
+
+    What it does not catch, stated because it was measured rather than guessed. Paper II's body
+    said `F$_1$ measures the base rate, not the detector` while its register withdrew
+    `$\mathrm{F}_1$ is measuring the base rate, not the detector`. Same claim, two spellings of
+    the subscript and two forms of the verb, and this guard runs clean over it: replayed against
+    the commit where that pair coexisted, it reports zero.
+
+    Loosening it does not work either, and that is the useful part. Normalising LaTeX, stemming
+    and matching the quote's content words in order within a bounded span does flag that pair --
+    and also flags six sentences on a tree known to be clean, because almost every fix here
+    inserts a qualifier: `specified before the runs that answer it` becomes `specified before
+    the runs that answer it, bar the two the harness section names`, and an order-with-gaps match
+    cannot tell a claim from the same claim scoped. The distinction this class turns on is
+    semantic, so the text guard stays narrow and the coverage problem is handled by enumerating
+    an error class across all three papers before fixing any site of it.
+    """
+    for slug in SLUGS:
+        whole = _expanded(slug)
+        body = re.sub(r"\s+", " ", whole[: whole.index(r"\label{sec:corrections}")])
+        quotes = _withdrawn_quotes(slug)
+        assert quotes, f"{slug} publishes no quoted withdrawn claims; this guard reads those"
+        for quote in quotes:
+            assert quote not in body, (
+                f"{slug} states in its body a claim its own register withdraws: {quote[:100]!r}"
+            )

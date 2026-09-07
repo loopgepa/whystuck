@@ -84,7 +84,9 @@ consistency as evidence of a tight null. It was evidence of the opposite. Our co
 \begin{enumerate}
   \item \textbf{The failure mode, established on a released artifact} (\S\ref{sec:defect}).
     Across the fifteen runs, the winning genome's critique gene is byte-identical to the seed in
-    $15/15$, and in $13/13$ of the thirteen that made that gene evolvable at all; and within the
+    $15/15$ (measured by replaying those runs during the audit; the corrected wiring changes
+    every cassette key, so that replay cannot be repeated under current code,
+    \S\ref{sec:threats}) and in $13/13$ of the thirteen that made that gene evolvable at all; and within the
     flagship run, whose five seeds and three evolvable arms give fifteen
     arm-runs, the optimizer changed \texttt{generate} in $5/15$ winners and
     \texttt{ensure\_correct} in $0/15$ ($2/5$ and $0/5$ for the verifier-evolving arm alone). \emph{Two different
@@ -234,7 +236,9 @@ We drive the official GEPA \citep{agrawal2025gepa} via a loop-genome adapter, ca
 \texttt{MaxCandidateProposalsStopper} to make the reflection-LM spend a hard cap. GEPA's reflection channel (offline, between
 training iterations) sees per-constraint feedback prose: this is the standard
 optimizer signal and is identical across B and D; it is distinct from the
-in-loop critique gate. Worker \texttt{gpt-4.1-mini} (output cap 320 tokens); reflection
+in-loop critique gate. Worker \texttt{gpt-4.1-mini} (output cap 320 tokens on the
+instruction-following runs, raised to 1024 on the five BigCodeBench ones and 512 on the earlier
+MBPP+ attempt); reflection
 \texttt{gpt-5.6-luna} on the corrected-harness runs this series' conclusions rest on, and
 \texttt{gpt-5.6-terra}, which is the CLI default, on the superseded runs that preceded it and on
 the later cross-provider critic run (output cap 1500 throughout). The reflection model is therefore \emph{not} constant across the
@@ -532,8 +536,9 @@ and a caught flaw triggers a refine that passes. Arm~B therefore cannot escape t
 draft no matter how well it optimizes, and arm~D can. Running the real four-arm study through
 real GEPA on this landscape (no stubbed optimizer, no network, no spend) gives
 A~$0.000$, B~$0.000$, C~$0.000$, D~$\mathbf{1.000}$, i.e.\ $\dd(D-B) = +1.000$. The harness
-detects a loop-level advantage when one exists, so the near-zero $\dd$ reported on real tasks
-is a property of those tasks and that optimizer, not of the measurement path. The control is a
+detects a loop-level advantage of that size, so a dead measurement path is not what produces the
+near-zero $\dd$ on real tasks. It does not follow that the path is sensitive at the size those
+contrasts actually have. The control is a
 saturating one, $0.000$ against $1.000$, so it establishes that the path is not \emph{dead}; it
 says nothing about sensitivity at the $0.01$--$0.04$ scale the real contrasts live at, against a
 $\sigma(\dd)$ near $0.03$. A canary is not a calibration
@@ -841,7 +846,7 @@ per component, because a whole-genome ``did anything change'' answered yes on $5
 and it has to be printed in the artifact, because the reader who most needs it is the one with no
 reason to suspect a problem. Three companion rules cost as little. Run a positive control before
 spending, since an instrument never shown to register a signal cannot be trusted to report its
-absence, and ours would have caught defects~1--3 for free. Label a difference between two optimized
+absence, and ours would have caught defect~1 for free. Label a difference between two optimized
 arms with how many seeds \emph{each} arm accepted on, which catches the mirror-image case where the
 comparator is the starved arm. And state which genome a $\sigma$ was measured on, because $\sigma$
 ranges over $5.9\times$ within one experiment and a borrowed denominator decided, and in our
@@ -871,7 +876,7 @@ This work's earlier drafts published claims it now withdraws. Reporting guidance
 work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Twenty-six} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Twenty-eight} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1081,6 +1086,13 @@ The series' other two papers carry the entries bearing on their own claims.
     arm-by-level aggregates, each pooling three seeds' genomes, across levels that differ in which
     constraints are excluded. The spread stands; what it is measured across does not hold genome,
     seed and task regime fixed, and the sentence said it did.
+  \item \textbf{``Ours would have caught defects~1--3 for free.''} The same claim was narrowed
+    to defect~1 where the control is described, and this copy in the conclusion was left standing
+    in that revision, which is the coverage failure this register documents one level down.
+  \item \textbf{The \texttt{actuator} gene, used and never defined.} The harness note named the
+    actuator experiment and the runs named an \texttt{actuator} gene, with the definition living
+    only in Paper~I's appendix, so a reader of either companion met it cold. It is now glossed
+    beside its sibling genes in the shared harness note.
 \end{enumerate}
 
 \end{document}
