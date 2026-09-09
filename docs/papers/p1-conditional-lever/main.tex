@@ -45,7 +45,7 @@ the mechanism named in advance, and neither endpoint carries it alone. Unconditi
 nearly free on a training signal where almost nothing is already correct and costly where much of
 it is, which makes the degenerate verifier near-optimal at low $p_0$ and screenable as
 a \texttt{PASS} rate of zero. Two pre-registered sweeps close the alternative readings: no
-split-size trend to overfit along from $4$ to $24$ training tasks, and no trend over a measured
+trend to overfit along the constant-epoch line from $4$ to $24$ training tasks, and no trend over a measured
 six-fold range of search depth, where the deepest cell is the flattest while \emph{acceptance}
 rises with budget. Reaching these measurements meant
 discarding fifteen earlier contrast runs,
@@ -124,7 +124,7 @@ contributions:
     the evolved critique emits zero \texttt{PASS} of thirty at $p_0 = 0.067$, four at $0.267$ and
     six at $0.667$, so the screen fires on the level where the lever is inert and is silent on the
     level where it pays. It accepts at \emph{precision~1}, never emitting a false \texttt{PASS} at
-    any level, while the seed rubric it is compared against emits six.
+    any level, while the seed rubric it is compared against emits six, six and two.
   \item \textbf{How much of a componentized $\dd$ is the component} (\S\ref{sec:decomp}):
     because both arms evolve the shared \texttt{generate} gene, $\dd(D-B)$ is a whole-system
     contrast and not a measurement of the treatment. Splitting it into a draft term and a loop
@@ -267,7 +267,10 @@ in-loop critique gate.
 properties of the draft (word/character/sentence/bullet counts, longest-word
 length, last words). It takes only the text and never sees the task, so it is a
 \emph{measurement}, the tool/executor signal \citep{huang2023cannot} found
-effective, not the oracle. (ii) \emph{Complexity}: an optional third
+effective rather than the oracle. That boundary is weaker than it sounds, and Paper~II draws it
+properly: with the task statement in the same prompt, the readout settles four of the eight
+constraint families by comparison, $57\%$ of instances, so the tool is verdict-equivalent on
+most of them without being the metric. (ii) \emph{Complexity}: an optional third
 \texttt{plan} gene turns the loop into plan--generate--critique--refine, giving
 D a third interacting module to co-tune (the DSPy lever); B still evolves only
 \texttt{generate}. Paper~II reports what these levers buy the loop itself; here they are
@@ -840,7 +843,9 @@ $n_{\mathrm{train}}$ & \texttt{mmc} & accept-cycle floor & type-overlap count (3
 \end{tabular}
 \caption{The pre-registered sweep. Arms~B and~D only: arm~A re-scores a fixed genome and
 arm~C is flat by construction, and replaying run~3's cassette under \texttt{-{}-arms BD}
-reproduces its B and D fields bit-for-bit, so dropping them changes nothing but the bill.
+reproduces its B and D fields bit-for-bit, so dropping them changes nothing but the bill. Run~3
+enters only as that validating cassette: the $n_{\mathrm{train}}{=}8$ row is the corrected
+four-arm re-run, released as \texttt{c2b}, and not run~3, which is \texttt{multihard}.
 \emph{Accept-cycle floor} is $2n_{\mathrm{train}} + \min(3, n_{\mathrm{train}})$, the budget
 below which the guard refuses. \emph{Type-overlap count} is how many of the
 $n_{\mathrm{train}}$ training tasks have a constraint-type set that also occurs in held-out,
@@ -1725,7 +1730,7 @@ predictions failed. Reporting guidance for pre-registered work asks that deviati
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
 collected here and the body text states only the surviving claim.
-\textbf{Thirty} entries follow.
+\textbf{Thirty-four} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1959,6 +1964,24 @@ The series' other two papers carry the entries bearing on their own claims.
     and not that it is sensitive at the size the real contrasts have, as the two sentences after
     it already said. Paper~III carried the same sentence and was corrected first; this copy
     stood for one revision longer.
+  \item \textbf{``The seed rubric it is compared against emits six.''} It emits six false
+    passes at $L_1$, six at $L_2$ and two at $L_3$, which the body states correctly and the
+    contributions list compressed into one number, right at two levels and wrong at the third and
+    wrong pooled at fourteen. The clause before it says the evolved critique emits six
+    \texttt{PASS}es at $L_3$, so the same numeral carried two quantities one clause apart, which
+    is how it survived. The triple is now derived from the confusion matrices.
+  \item \textbf{``\dots{} so it is a measurement, not the oracle.''} Too clean. With the task
+    statement in the same prompt the readout settles four of the eight constraint families by
+    comparison, $57\%$ of instances, which Paper~II states and the released summary records as
+    item~10, and this paper drew the boundary without it.
+  \item \textbf{``No split-size trend to overfit along.''} The sweep moves the split and its
+    budget together on the constant-epoch line, which the body says twice and the abstract did
+    not, so the abstract attributed the null to split size alone.
+  \item \textbf{A caption that put run~3 next to the row it is not.} The
+    $n_{\mathrm{train}}{=}8$ cell is the corrected four-arm re-run, released as \texttt{c2b};
+    run~3 is \texttt{multihard} and appears in that caption only as the cassette validating the
+    dropped arms. The claim checker's own comment records making this same confusion once, which
+    is why the caption now names both artifacts.
 \end{enumerate}
 
 \section{The Actuator Experiment, and the MBPP+ Attempt}

@@ -411,6 +411,58 @@ def _study():
     return study
 
 
+#: Where a paper's corrections register begins. Everything after it QUOTES a claim the paper
+#: withdrew, verbatim and frozen, which is the register's whole job.
+_REGISTER_MARKER = r"\label{sec:corrections}"
+#: The patterns that TARGET the corrections register on purpose. Each checks a value the
+#: register itself states, mostly the corrected figure beside the withdrawn one, so matching
+#: nowhere else is correct for them. Declared as a census: a new register-only pattern fails
+#: until someone adds it here, which is the point. Seven, counted by instrumenting the scraper
+#: rather than by reading, and every one names its intent in its own text.
+_REGISTER_TARGETED = frozenset(
+    {
+        r"\$([\d.]+)\$ and agreed with the wrong value",
+        r"and \$([\d.]+)\$ is\s+what the paper's own displayed",
+        r"correcting one lowers it by \$([\d.]+)\\%\$",
+        r"exceeded its corrected value by\s*\n?\s*\$([\d.]+)\\%\$",
+        r"is \$([\d.]+)\$, and \$1.44\$ is",
+        r"sum to \$([\d.]+)\$ and so sit below",
+        r"the cell is \$([\d.]+)\\sigma\$ of a measured noise floor",
+    }
+)
+
+
+def _refuse_register_only(tex: str, pattern: str, start: int) -> None:
+    """Fail when a pattern's only match sits inside the corrections register.
+
+    Every register entry opens by quoting the claim it withdraws, so a pattern loose enough to
+    match that quote has a second place to succeed. While the body still matches, `re.search`
+    finds the body first and nothing is wrong. Reword the body past the pattern and the check
+    falls through to a frozen quote of the claim that was just corrected, and passes.
+
+    Measured before adding this: 103 numerals occur in both the body and the register across the
+    three papers, so the exposure is not hypothetical. Raising here covers every check at once,
+    which auditing eleven hundred patterns by hand would not.
+    """
+    cut = tex.find(_REGISTER_MARKER)
+    if cut == -1 or start < cut:
+        return
+    # The register is ONE appendix, not the tail of the paper. Paper I puts the actuator
+    # appendix after it, and a first version of this guard treated that section's own prose as
+    # register text and refused a legitimate check on its C1 decomposition. Bound the span at
+    # the next \section, or at the end when the register is last.
+    nxt = tex.find("\\section{", cut)
+    if nxt != -1 and start >= nxt:
+        return
+    if pattern in _REGISTER_TARGETED:
+        return
+    raise AssertionError(
+        f"pattern {pattern!r} matches only inside the corrections register, which quotes "
+        "withdrawn claims. Scrape the body, tighten the pattern, or add it to "
+        "_REGISTER_TARGETED if checking the register's own value is the intent"
+    )
+
+
 def _scrape(tex: str, pattern: str) -> float:
     """Pull one number out of the paper's own prose.
 
@@ -424,6 +476,7 @@ def _scrape(tex: str, pattern: str) -> float:
     m = re.search(pattern, tex, re.DOTALL | re.MULTILINE)
     if m is None:
         return float("nan")
+    _refuse_register_only(tex, pattern, m.start())
     return float(m.group(1))
 
 
@@ -481,6 +534,8 @@ _WORD_NUM = {
     "twenty-six": 26,
     "twenty-seven": 27,
     "twenty-eight": 28,
+    "twenty-nine": 29,
+    "thirty-four": 34,
     "thirty-eight": 38,
     "forty-three": 43,
     "two hundred": 200,
@@ -3580,6 +3635,8 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_prose_orphan_checks())
     out.extend(_defect_class_count_checks())
     out.extend(_output_cap_checks())
+    out.extend(_seed_rubric_fp_triple_checks())
+    out.extend(_second_worker_pool_checks())
     out.extend(_budget_false_pass_checks())
     out.extend(_registered_depth_bound_checks())
     out.extend(_sigma_margin_checks())
@@ -5093,7 +5150,10 @@ def _groq_second_worker_checks() -> list[tuple[str, float, float, float]]:
     out.append(
         (
             "tex: second-worker task-level t",
-            _scrape(p2, r"\$t = ([\d.]+)\$ over the two hundred held-out tasks"),
+            # "held-out task", not "tasks": the sentence now reads "task pairings", because
+            # the 200 rows are not 200 distinct tasks. Both spellings match, and the binding to
+            # the artifact is unchanged.
+            _scrape(p2, r"\$t = ([\d.]+)\$ over the two hundred held-out task"),
             0.005,
             task_t,
         )
@@ -5101,7 +5161,7 @@ def _groq_second_worker_checks() -> list[tuple[str, float, float, float]]:
     out.append(
         (
             "tex: second-worker task-level n",
-            _scrape_word(p2, r"over the (\w+ \w+) held-out tasks"),
+            _scrape_word(p2, r"over the (\w+ \w+) held-out task"),
             0.0,
             float(len(diffs)),
         )
@@ -6059,6 +6119,73 @@ def _paraphrase_drift_checks() -> list[tuple[str, float, float, float]]:
     ):
         out.append((label, _scrape(tex, pattern), tol, want))
     return out
+
+
+def _seed_rubric_fp_triple_checks() -> list[tuple[str, float, float, float]]:
+    """Paper I's contributions list gave one number where the body gives three.
+
+    The body reads "pooled fp = 0 throughout, against the seed rubric's 6, 6 and 2". The
+    contributions list said the seed rubric "emits six", which is right at L1 and L2, wrong at L3,
+    and wrong pooled at 14. A luna-high inspector found it, and the collision is what made it
+    survive: the clause before it says the evolved critique emits "six" PASSes at L3, so the same
+    numeral carried two quantities one clause apart.
+    """
+    tex = _sources().paper_tex("p1-conditional-lever")
+    # Spelled in words, like the rest of that list, so each position gets its own
+    # `_scrape_word`: it raises on an unknown numeral rather than passing on an unparsed one.
+    sentence = r"the seed rubric it is compared against emits"
+    patterns = (
+        rf"{sentence} (\w+), \w+ and \w+",
+        rf"{sentence} \w+, (\w+) and \w+",
+        rf"{sentence} \w+, \w+ and (\w+)",
+    )
+    out = []
+    for i, (level, pattern) in enumerate(zip(("L1", "L2", "L3"), patterns, strict=True)):
+        out.append(
+            (
+                f"tex: contributions seed-rubric fp {level}",
+                _scrape_word(tex, pattern),
+                0,
+                float(_arm_confusion(i, "B")["fp"]),
+            )
+        )
+    return out
+
+
+def _second_worker_pool_checks() -> list[tuple[str, float, float, float]]:
+    """The second worker's task-level t treated 200 pairings as 200 independent tasks.
+
+    The paper already disclosed the reuse ninety lines later, for the SEED-level claim ("the pool
+    holds 64 tasks and each seed draws 18"), and never applied it to the task-level figure, which
+    is the statistic that actually assumes independence across rows. Both numbers now come from
+    the released per-task vectors: how many distinct held-out tasks the twenty runs cover, and how
+    often the most-reused one appears.
+    """
+    ids: dict[str, int] = {}
+    runs = 0
+    with open(f"{DOCS}/validation-study-groq-det-oracle.json", encoding="utf-8") as fh:
+        for run in json.load(fh)["runs"]:
+            runs += 1
+            for arm in run.values():
+                if isinstance(arm, dict) and isinstance(arm.get("seed_heldout_by_task"), dict):
+                    for task in arm["seed_heldout_by_task"]:
+                        ids[task] = ids.get(task, 0) + 1
+    assert ids, "no per-task vectors found; this check would pass vacuously"
+    tex = _sources().paper_tex("p2-repair-not-detection")
+    return [
+        (
+            "tex: second-worker distinct held-out tasks",
+            _scrape(tex, r"they cover \$(\d+)\$ distinct ones"),
+            0,
+            float(len(ids)),
+        ),
+        (
+            "tex: second-worker max task reuse",
+            _scrape(tex, r"most-reused appearing \$(\d+)\$ times"),
+            0,
+            float(max(ids.values())),
+        ),
+    ]
 
 
 def _output_cap_checks() -> list[tuple[str, float, float, float]]:

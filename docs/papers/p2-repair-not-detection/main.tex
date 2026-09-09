@@ -844,7 +844,9 @@ independent stack, reported as such. Figure~\ref{fig:worker} is the whole line i
 We pre-registered the prediction that \emph{the perfect oracle would not be the best cell}, since
 that is what the ordering above says. \textbf{We lost that prediction}, and the way we lost it is
 the finding. The oracle is the best cell, by $+0.0437$ at $t = 5.80$ over twenty seeds and
-$t = 4.70$ over the two hundred held-out tasks paired individually. Taken at face value it reverses
+$t = 4.70$ over the two hundred held-out task pairings. Those are not two hundred
+independent tasks: they cover $62$ distinct ones, the most-reused appearing $8$ times, so the
+task-level figure is anti-conservative and the seed-level one is what we lean on. Taken at face value it reverses
 this paper's headline on a second worker.
 
 It does not, and the reason is a confound we had documented one section earlier without applying it
@@ -1070,7 +1072,7 @@ Earlier drafts of this work published claims it now withdraws. Reporting guidanc
 pre-registered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Twenty-eight} entries follow. The
+collected here and the body text states only the surviving claim. \textbf{Twenty-nine} entries follow. The
 series' other two papers carry the entries bearing on their own claims, and the full
 register across all three, with the superseded values themselves, is in the released repository.
 
@@ -1273,6 +1275,12 @@ register across all three, with the superseded values themselves, is in the rele
   \item \textbf{``Youden's $J$ and Matthews' correlation, both of which are zero for a
     chance-level detector.''} Zero is the expectation. The same table reports $J = +0.286$ at
     $L_1$, so the sample values are not guaranteed to be zero and the prose now says expectation.
+  \item \textbf{``$t = 4.70$ over the two hundred held-out tasks paired individually.''} The two
+    hundred rows cover $62$ distinct tasks, the most-reused appearing $8$ times, so they are not
+    two hundred independent observations. This paper had already disclosed the reuse for the
+    seed-level claim, ninety lines later, and never applied it to the task-level figure, which is
+    the statistic that assumes independence across rows. Both counts are now derived from the
+    released per-task vectors, and the seed-level test is what the claim leans on.
 \end{enumerate}
 
 \end{document}
