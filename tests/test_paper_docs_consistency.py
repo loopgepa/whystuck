@@ -24,6 +24,7 @@ part company again.
 from __future__ import annotations
 
 import datetime as _dt
+import itertools
 import json
 import os
 import pathlib
@@ -1526,7 +1527,7 @@ def _withdrawn_quotes(slug: str) -> list[str]:
 
 
 def test_no_body_text_restates_a_claim_its_own_register_withdrew() -> None:
-    """The register says the body states only the surviving claim. Twice it did not.
+    r"""The register says the body states only the surviving claim. Twice it did not.
 
     Self-maintaining, and narrower than it looks. The papers publish their retired phrasings in
     the register, one quoted claim per entry, so a correction added later becomes a check on the
@@ -1555,4 +1556,149 @@ def test_no_body_text_restates_a_claim_its_own_register_withdrew() -> None:
         for quote in quotes:
             assert quote not in body, (
                 f"{slug} states in its body a claim its own register withdraws: {quote[:100]!r}"
+            )
+
+
+#: Source lines a float may sit after the first body reference to it. Calibrated, not guessed:
+#: measured against a build, Paper I's `tab:repeat` sits 371 lines after its first body reference
+#: and lands 8 pages later, and Paper II's `tab:curve` 248 lines and 5 pages, so roughly 46 lines
+#: to the page. 600 leaves today's worst case a wide margin and still catches the failure that
+#: has cost this project twice: `shared/preamble.tex` records two figures deferred TWENTY-EIGHT
+#: pages past their reference, and Paper I ending on two pages carrying nothing but floats.
+_MAX_FLOAT_LAG_LINES = 600
+
+
+def _float_lag(slug: str) -> list[tuple[str, int]]:
+    """(label, lines between its first BODY reference and its own definition), worst first.
+
+    Body reference means one outside every float environment. A `\\ref` inside a caption travels
+    with its own float, so counting those measures nothing about what a reader is asked to do:
+    it reported one table as arriving nine pages BEFORE the thing that pointed at it.
+    """
+    text = _expanded(slug)
+    spans = [
+        m.span()
+        for env in ("table", "figure")
+        for m in re.finditer(rf"\\begin\{{{env}\}}.*?\\end\{{{env}\}}", text, re.S)
+    ]
+    line_of = lambda pos: text.count("\n", 0, pos) + 1  # noqa: E731
+    out = []
+    for m in re.finditer(r"\\label\{((?:tab|fig):[^}]+)\}", text):
+        label = m.group(1)
+        refs = [
+            r.start()
+            for r in re.finditer(r"\\ref\{" + re.escape(label) + r"\}", text)
+            if not any(a <= r.start() < b for a, b in spans)
+        ]
+        if not refs:
+            continue
+        lag = line_of(m.start()) - line_of(refs[0])
+        if lag > 0:
+            out.append((label, lag))
+    return sorted(out, key=lambda pair: -pair[1])
+
+
+def test_no_float_sits_far_past_the_first_reference_to_it() -> None:
+    """A reader sent to a table should not have to turn eight pages to reach it.
+
+    Measured before this existed rather than assumed: of 26 floats across the three papers,
+    seven sit more than one page from their first body reference, and every one of those turned
+    out to be benign. The forward cases cite a table as the provenance of a value they already
+    print inline, and the backward cases are floats placed with their own prose and referenced
+    again later. None of the 26 is a "see the figure" instruction pointing pages away, so this
+    guard was written to hold a line that is currently clean, not to fix something.
+
+    It measures source lines instead of pages so it needs no build and no poppler, which keeps
+    it runnable in a clean checkout. The conversion is calibrated against a real build and
+    recorded beside the threshold.
+    """
+    worst: list[str] = []
+    for slug in SLUGS:
+        lags = _float_lag(slug)
+        assert lags, f"{slug}: measured no float lag at all, so this check is vacuous"
+        for label, lag in lags:
+            if lag > _MAX_FLOAT_LAG_LINES:
+                worst.append(f"{slug} {label}: {lag} source lines (~{lag // 46} pages)")
+    assert not worst, "floats stranded far past their first reference: " + "; ".join(worst)
+
+
+#: Jaccard overlap above which two register entries are the same correction written twice.
+#: Measured across all ninety-one entries: the closest genuine pair sits at 24% (Paper I's fifth
+#: and sixth), then 19% and 15% in the other two. A copy-paste duplicate scores far higher, so
+#: 45% separates the two cases with room to spare and does not fire on entries about related
+#: defects. The registers grew by twenty-two entries in three days, which is the reason this
+#: exists: nothing else would notice the same withdrawal recorded twice.
+_MAX_REGISTER_ENTRY_OVERLAP = 0.45
+
+_REGISTER_STOPWORDS = frozenset(
+    [
+        "the",
+        "a",
+        "an",
+        "of",
+        "is",
+        "are",
+        "was",
+        "were",
+        "to",
+        "in",
+        "on",
+        "and",
+        "that",
+        "it",
+        "its",
+        "for",
+        "this",
+        "by",
+        "with",
+        "at",
+        "as",
+        "not",
+        "we",
+        "our",
+        "from",
+        "which",
+        "be",
+        "been",
+        "one",
+        "two",
+    ]
+)
+
+
+def _register_entry_signatures(slug: str) -> list[set[str]]:
+    """One content-word signature per corrections entry, LaTeX stripped.
+
+    Named apart from `_register_entries` above on purpose: appending a same-named helper to this
+    file shadowed that one, which returns entry TEXT, and the two guards built on it failed with
+    a TypeError rather than an assertion. A collision, not a drift.
+    """
+    text = _expanded(slug)
+    register = text[text.index(r"\label{sec:corrections}") :]
+    register = register[: register.index(r"\end{enumerate}")]
+    out = []
+    for item in re.split(r"\n  \\item ", register)[1:]:
+        flat = re.sub(r"\\[a-zA-Z]+\*?", " ", item)
+        flat = re.sub(r"[^a-zA-Z0-9]+", " ", flat).lower()
+        out.append({w for w in flat.split() if w not in _REGISTER_STOPWORDS and len(w) > 2})
+    return out
+
+
+def test_no_correction_is_recorded_in_the_register_twice() -> None:
+    """Ninety-one entries across three registers, added over five weeks and often in batches.
+
+    Two entries describing one withdrawal would overstate how much this work found and would
+    leave a reader matching a body claim against two different accounts of its correction. The
+    signature is content words rather than the quoted claim, because the same correction written
+    twice gets quoted two different ways, which is what defeats an exact-text comparison.
+    """
+    for slug in SLUGS:
+        entries = _register_entry_signatures(slug)
+        assert len(entries) > 10, f"{slug}: parsed {len(entries)} entries, so this is vacuous"
+        assert all(entries), f"{slug}: an entry produced an empty signature"
+        for (i, left), (j, right) in itertools.combinations(enumerate(entries, 1), 2):
+            overlap = len(left & right) / len(left | right)
+            assert overlap <= _MAX_REGISTER_ENTRY_OVERLAP, (
+                f"{slug} entries {i} and {j} overlap {overlap:.0%}, which reads as one "
+                f"correction recorded twice: {sorted(left & right)[:10]}"
             )
