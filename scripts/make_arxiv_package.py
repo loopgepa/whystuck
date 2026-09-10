@@ -22,6 +22,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import zlib
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -447,6 +448,42 @@ def identifying_leaks(staged: Path) -> list[tuple[str, str]]:
         for token, needle in needles:
             if needle in blob:
                 found.append((str(path.relative_to(staged)), token))
+    return found
+
+
+def pdf_stream_leaks(pdfs: list[Path]) -> list[tuple[str, str]]:
+    r"""Identifying strings inside a PDF, including ones hidden in compressed streams.
+
+    `identifying_leaks` scans the staged SOURCES, and its docstring is honest that it is "a floor
+    rather than a proof, since a token inside a compressed PDF stream would not appear". This is
+    that hole. A PDF's text lives in Flate-compressed streams, so `grep` and `strings` over the
+    file find nothing and report clean for any input whatsoever -- measured: a plain scan of
+    Paper I returned zero for `whystuck` on a paper that prints the repository URL twice.
+
+    Returns (file, token) pairs. The raw bytes are scanned as well as the inflated streams, since
+    document metadata (`/Author`, `/Title`) sits outside them.
+
+    Callers must keep a positive control: a scanner that finds nothing anywhere passes every
+    check. `test_the_pdf_stream_scan_finds_the_author_in_a_named_build` is that control.
+    """
+    found: list[tuple[str, str]] = []
+    stream = re.compile(rb"stream\r?\n(.*?)endstream", re.S)
+    for pdf in pdfs:
+        data = pdf.read_bytes()
+        blobs = [data]
+        for m in stream.finditer(data):
+            raw = m.group(1)
+            for attempt in (raw, raw.strip(b"\r\n")):
+                try:
+                    blobs.append(zlib.decompress(attempt))
+                    break
+                except zlib.error:
+                    continue
+        for blob in blobs:
+            low = blob.lower()
+            for token in IDENTIFYING:
+                if token.lower().encode() in low and (pdf.name, token) not in found:
+                    found.append((pdf.name, token))
     return found
 
 

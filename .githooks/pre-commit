@@ -65,10 +65,25 @@ if git diff --cached --name-only | grep -qE '^(docs/papers/|docs/repeat/|docs/va
     PT="papyrustrail"
   elif [ -n "${PAPYRUSTRAIL_HOME:-}" ] && [ -x "${PAPYRUSTRAIL_HOME}/.venv/bin/papyrustrail" ]; then
     PT="${PAPYRUSTRAIL_HOME}/.venv/bin/papyrustrail"
+  else
+    # Third probe, and the one that actually gets this gate running on a developer machine.
+    # papyrustrail is a separate private repo (vladimirrott/papyrustrail), so its checkout path
+    # differs per clone and cannot be committed here. An environment variable only reaches hooks
+    # launched from a shell that exported it, which is why this gate printed NOT RUN for its
+    # whole life while the tool sat installed a directory away. `git config` is per-clone, lives
+    # in .git/config, and is never committed, so it carries the path without putting a local
+    # filesystem layout into the repository:
+    #
+    #   git config papyrustrail.home /path/to/a/papyrustrail/checkout
+    PT_HOME="$(git config --get papyrustrail.home || true)"
+    if [ -n "$PT_HOME" ] && [ -x "${PT_HOME}/.venv/bin/papyrustrail" ]; then
+      PT="${PT_HOME}/.venv/bin/papyrustrail"
+    fi
   fi
   if [ -z "$PT" ]; then
     echo "pre-commit: papyrustrail NOT RUN (not on PATH, PAPYRUSTRAIL_HOME unset or has no venv)"
-    echo "  to enable: export PAPYRUSTRAIL_HOME=/path/to/a/papyrustrail/checkout (needs its .venv)"
+    echo "  to enable: git config papyrustrail.home /path/to/a/papyrustrail/checkout"
+    echo "             (per-clone, uncommitted; or export PAPYRUSTRAIL_HOME to the same path)"
   else
     echo "pre-commit: papyrustrail verify (every paper numeral traces to an artifact)"
     # `verify` exits 1 on a numeral absent from the baseline AND on a baseline entry that no

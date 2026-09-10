@@ -27,7 +27,7 @@ prints author, affiliation and repository URL, and each abstract names the repos
 
 | venue | window | verdict |
 |---|---|---|
-| **TMLR** | rolling | **The fit.** Its two criteria are whether the claims are supported by the evidence and whether anyone in the audience would be interested; novelty and significance are *explicitly excluded* as grounds for rejection. Variable manuscript length, so the main-text lengths above are not a problem. arXiv preprints permitted. Double-blind. **Needs a restyle:** "Submissions must be PDF files generated using the TMLR LaTeX stylefile and template" (author guide, quoted 2026-09-04), and these build on `article` at 11pt, so the page counts on this page are for the current class and will move under theirs. Accepts the artifact as supplementary material, which removes the mirror-hosting step below. |
+| **TMLR** | rolling | **The fit.** Its two criteria are whether the claims are supported by the evidence and whether anyone in the audience would be interested; novelty and significance are *explicitly excluded* as grounds for rejection. Variable manuscript length, so the main-text lengths above are not a problem. arXiv preprints permitted. Double-blind. **Needs a restyle:** "Submissions must be PDF files generated using the TMLR LaTeX stylefile and template" (author guide, quoted 2026-09-04), and these build on `article` at 11pt, so the page counts on this page are for the current class and will move under theirs. Accepts the artifact as supplementary material, which removes the mirror-hosting step below. **Restyle done 2026-09-10**, see below: 37 / 24 / 20 pages under `tmlr.sty`, 0 overfull, 0 undefined. |
 | ICLR 2027 | abstract 18 Sep, paper 25 Sep 2026 | **Ruled out for a three-paper series.** 9-page initial limit (10 camera-ready; references and appendices excluded). And: *"If you and all of your co-authors have never had a paper accepted for publication in a major machine learning conference or journal, you may submit at most one paper to ICLR 2027."* Single-author and independent ⇒ **one paper, cut threefold.** Authors on 3+ papers must review 6. Mandatory AI-use statement whose required-disclosure list covers methodology feedback, implementing methods and interpreting results. |
 | NeurIPS 2026 Evaluations & Datasets | abstract 4 May, full 6 May 2026 | **Closed.** Was the best categorical fit, the renamed Datasets & Benchmarks track, now explicitly treating evaluation as an object of study. Next window ≈ May 2027. |
 | MLRC 2026 | hard 30 Sep 2026 | **Not a fit.** Requires prior TMLR acceptance, and its scope is reproducing *others'* claims published 2025 onward. |
@@ -64,9 +64,19 @@ before submitting anything.
 
 ### What the quota does to the order, and why a split submission needs arXiv first
 
-The three are interdependent by design, and the dependency is asymmetric: Paper~I cites Paper~II
-nineteen times and Paper~III twenty-one, while Paper~II cites Paper~I six times and Paper~III
-three. Submitting two and holding one leaves the two that ship citing an unpublished companion,
+The three are interdependent by design, and the dependency is asymmetric. Counting both the
+`Paper~N` form and the descriptive one ("the companion paper on the silent no-op"), measured
+2026-09-10 and pinned by `tests/test_submission_doc.py` so it cannot rot again:
+
+| | -> Paper I | -> Paper II | -> Paper III | outbound |
+|---|---|---|---|---|
+| Paper I | | 22 | 36 | **58** |
+| Paper II | 8 | | 10 | 18 |
+| Paper III | 10 | 6 | | 16 |
+
+Paper I leans on the other two roughly three times as hard as either leans on it. These figures
+read nineteen / twenty-one / six / three until 2026-09-10; they were prose in this file, guarded
+by nothing, and six review passes moved them while the sentence stood still. Submitting two and holding one leaves the two that ship citing an unpublished companion,
 which a reviewer cannot follow.
 
 TMLR permits preprints: overlap with work shared "on preprint servers such as arXiv" is
@@ -78,6 +88,43 @@ acceptable. So the order that keeps the series readable is
 3. **TMLR two this year** if the quota still binds, Paper~I among them, since the other two rest
    on it. Hold Paper~III last: it is the methodological record the other two cite for corrections
    rather than for results, so it is the one whose absence costs a reader least.
+
+### The TMLR build, and what the style swap actually costs
+
+Built and measured 2026-09-10. The stylefile is vendored in `docs/papers/tmlr/` (Apache-2.0)
+rather than fetched, so the build stays offline like every other gate here.
+
+```bash
+python scripts/make_tmlr_package.py --paper p1-conditional-lever --anonymous \
+    --anon-url "the supplementary material accompanying this submission"
+python scripts/make_tmlr_supplement.py --paper p1-conditional-lever
+```
+
+| paper | `article` 11pt | `tmlr.sty` 10pt | supplement ZIP |
+|---|---|---|---|
+| I | 44 | **37** | 7.3MB |
+| II | 28 | **24** | 7.5MB |
+| III | 24 | **20** | 7.6MB |
+
+Zero overfull boxes, zero undefined citations or references, zero missing files on all three.
+
+Three collisions the swap has to handle, each silent if it goes wrong: `tmlr.sty` sets
+`\textwidth`/`\textheight`/`\topmargin` as raw lengths that a later `geometry` overwrites, it
+`\RequirePackage`s natbib and fancyhdr, and it expects a 10pt base. `tmlrise()` asserts all
+three anchors occur exactly once before editing anything, because a style swap that matched
+nothing produces a paper that compiles, reads correctly and is formatted for the wrong venue.
+
+**The style package is not an anonymiser.** `\usepackage{tmlr}` without `[accepted]` renders
+"Anonymous authors / Paper under double-blind review" in place of the author block, but it only
+hides what that block contains. Measured on Paper I: the rendered PDF still printed the
+repository URL once, from the companion-paper note in `shared/series.tex`. So `--anonymous`
+still runs the source anonymiser and the byte scan still has to pass. The two compose; neither
+replaces the other.
+
+**Supplementary material must be anonymised too**, which the author guide states outright and
+this file did not record: "Like submissions, supplementary material must be anonymized." Both
+bundle scans exist for that reason, and the second one is new: `pdf_stream_leaks` inflates every
+PDF stream, closing the hole the byte scan documents but cannot cover.
 
 ### The double-blind build
 
