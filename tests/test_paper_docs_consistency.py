@@ -1702,3 +1702,188 @@ def test_no_correction_is_recorded_in_the_register_twice() -> None:
                 f"{slug} entries {i} and {j} overlap {overlap:.0%}, which reads as one "
                 f"correction recorded twice: {sorted(left & right)[:10]}"
             )
+
+
+#: Bare prose words that name one of the loop's genes, mapped to the identifier they name.
+#: These are ALIASES, not descriptors: a reader who meets "the critique gene" and "the verify
+#: gene" in one paper has met one component under two names, and nothing said so. Paper III's
+#: register entry 28 records fixing this exact class once already, for the actuator gene, whose
+#: definition lived only in Paper I's appendix. It recurred on four more names because the fix
+#: was applied to the instance rather than to the class.
+_GENE_ALIASES = {
+    "generation": r"\texttt{generate}",
+    "verify": r"\texttt{ensure\_correct}",
+    "verifier": r"\texttt{ensure\_correct}",
+    "critique": r"\texttt{ensure\_correct}",
+    "repair": r"\texttt{actuator}",
+}
+
+#: Words that modify "gene" without naming one, so they need no binding. Declared rather than
+#: inferred: the point of the census below is that a word which is neither an alias nor a
+#: descriptor fails until someone decides which it is.
+_GENE_DESCRIPTORS = frozenset(
+    (
+        "a",
+        "accepting",
+        "all",
+        "an",
+        "and",
+        "any",
+        "arm-D",
+        "both",
+        "D",
+        "each",
+        "editable",
+        "every",
+        "evolvable",
+        "evolved",
+        "extra",
+        "few",
+        "final",
+        "first",
+        "fixed",
+        "further",
+        "hand-written",
+        "its",
+        "later",
+        "level",
+        "loop-level",
+        "most",
+        "neither",
+        "new",
+        "no",
+        "one",
+        "only",
+        "optional",
+        "other",
+        "own",
+        "per",
+        "productive",
+        "released",
+        "same",
+        "second",
+        "seed",
+        "shared",
+        "sibling",
+        "some",
+        "that",
+        "the",
+        "their",
+        "these",
+        "this",
+        "those",
+        "three",
+        "treatment",
+        "two",
+        "which",
+        "winning",
+        "written",
+    )
+)
+
+
+def _gene_phrase_words(text: str) -> list[str]:
+    """Every bare word standing directly before "gene"/"genes", identifiers excluded.
+
+    Identifiers are excluded because `\\texttt{generate} gene` carries its own name; the class
+    this guards is the PROSE name, which is the one a reader cannot look up.
+    """
+    words = []
+    # The leading backslash has to be INSIDE the group. A pattern starting at the letter
+    # matches "texttt{generate" and the startswith check never fires, which passed every
+    # identifier through as though it were prose.
+    for match in re.finditer(r"(\\?[A-Za-z][A-Za-z\\_{}-]*)\s+genes?\b", text):
+        word = match.group(1)
+        if word.startswith("\\"):  # \texttt{...}, \emph{...}: an identifier, not prose
+            continue
+        words.append(word)
+    return words
+
+
+def _declared_gene_names(loop: str) -> dict[str, str]:
+    r"""The alias -> identifier map the shared loop description actually declares.
+
+    Parsed rather than substring-matched. A first version asked whether the alias occurred
+    anywhere in the paragraph, and "critique" occurs there three times for other reasons
+    ("generate--critique--refine loop", "drives an LLM self-critique", "the critique is
+    intrinsic"), so deleting the alias from the declaration left the guard green. The mutation
+    is what showed that; the check had looked like it worked.
+    """
+    para = re.sub(r"\s+", " ", loop[loop.index(r"\paragraph{The loop.}") :][:1200])
+    declared: dict[str, str] = {}
+
+    # "a \texttt{ensure\_correct} gene, which it calls the verify, verifier or critique gene"
+    for ident, names in re.findall(
+        r"(\\texttt\{[A-Za-z\\_]+\}) gene, which "
+        r"(?:the prose also calls|it calls) the ([^;.]+?) genes?\b",
+        para,
+    ):
+        for name in re.split(r",|\bor\b|\band\b", names):
+            name = name.strip()
+            if name:
+                declared[name] = ident
+
+    # "a repair \texttt{actuator} that turns a critique into ..." -- the adjective form.
+    # Restricted to identifiers the papers actually alias, and to words that can be a name:
+    # unrestricted it also read "a \texttt{ensure\_correct}" and "returns \texttt{PASS}" as
+    # declarations of genes called "a" and "returns".
+    identifiers = set(_GENE_ALIASES.values())
+    for name, ident in re.findall(r"\b([a-z]+) (\\texttt\{[A-Za-z\\_]+\})", para):
+        if name in {"a", "an", "the", "and", "or", "returns"} or ident not in identifiers:
+            continue
+        declared.setdefault(name, ident)
+
+    return declared
+
+
+def test_a_prose_name_for_a_gene_is_tied_to_the_identifier_it_names() -> None:
+    r"""Every prose alias for a gene has to be bound where the loop is described.
+
+    The failure this catches is not a reader meeting an undefined word. `shared/series.tex`
+    binds the generic noun early in all three papers ("a \emph{gene} is one editable text
+    component"), so "the critique gene" reads compositionally wherever it appears. The failure
+    is TWO names for ONE component with nothing equating them: Paper I describes defect 8 as the
+    harness accepting an empty reflection completion "as the verify gene", Paper III's own
+    defect table row 8 describes the same event "as the critique gene", and Paper I cites that
+    row. A reader comparing the two has no way to know it is one gene.
+
+    Counted before it was fixed: verify 20 uses, critique 17, generation 1, verifier 1, across
+    Papers I and III. Paper II uses only "verify gene" and is the control showing the shape the
+    other two should have had.
+    """
+    declared = _declared_gene_names((PAPERS / "shared" / "loop.tex").read_text(encoding="utf-8"))
+
+    for alias, identifier in _GENE_ALIASES.items():
+        used = any(alias in _gene_phrase_words(_expanded(slug)) for slug in SLUGS)
+        if not used:
+            continue
+        assert alias in declared, (
+            f"the papers call a gene the {alias!r} gene, and the shared loop description "
+            f"declares only {sorted(declared)}, so nothing ties that name to {identifier}"
+        )
+        assert declared[alias] == identifier, (
+            f"the loop description ties the {alias!r} gene to {declared[alias]}, but the "
+            f"papers use it to mean {identifier}"
+        )
+
+
+def test_no_paper_invents_a_gene_name_the_census_has_not_ruled_on() -> None:
+    """A new bare word before "gene" fails until it is declared an alias or a descriptor.
+
+    Without this the guard above only ever checks the five aliases I happened to enumerate, and
+    the sixth one lands silently. Fixing the instances is measured at roughly 62% of a class in
+    this project; the census is what covers the rest.
+    """
+    unknown: dict[str, set[str]] = {}
+    for slug in SLUGS:
+        for word in _gene_phrase_words(_expanded(slug)):
+            key = word.lower().strip("{}")
+            if key in _GENE_ALIASES or key in {d.lower() for d in _GENE_DESCRIPTORS}:
+                continue
+            unknown.setdefault(key, set()).add(slug)
+
+    assert not unknown, (
+        'these words stand before "gene" and are neither a declared alias nor a declared '
+        "descriptor, so nobody has decided whether a reader can resolve them: "
+        f"{ {k: sorted(v) for k, v in unknown.items()} }"
+    )

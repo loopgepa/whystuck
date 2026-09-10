@@ -7,8 +7,9 @@
 % checked. Edit here, and never reflow a line that contains a number.
 
 \paragraph{The loop.}
-The worker is a real generate--critique--refine loop. A \texttt{generate} gene
-drafts an answer; a \texttt{ensure\_correct} (verify) gene drives an LLM
+The worker is a real generate--critique--refine loop. A \texttt{generate} gene, which the prose also calls the
+generation gene, drafts an answer; a \texttt{ensure\_correct} gene, which it calls the
+verify, verifier or critique gene interchangeably, drives an LLM
 self-critique that returns \texttt{PASS} or a list of fixes and gates a bounded
 number of refine rounds; the final answer is scored by a programmatic metric. Two further
 genes are optional and named where they are used: a \texttt{plan} module that drafts before

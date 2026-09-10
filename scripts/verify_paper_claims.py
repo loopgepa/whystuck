@@ -536,6 +536,7 @@ _WORD_NUM = {
     "twenty-eight": 28,
     "twenty-nine": 29,
     "thirty-four": 34,
+    "thirty-five": 35,
     "thirty-eight": 38,
     "forty-three": 43,
     "two hundred": 200,
