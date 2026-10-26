@@ -331,7 +331,8 @@ Stated here rather than discovered:
 `verify_reproducibility.py` should print `ALL 25 RUNS REPRODUCE FROM CASSETTE`. Those are the
 corrected-harness runs: the two C1 verifier-ablation conditions, the C2b four-arm re-run, the p0
 levels and the two OpenAI calibration passes, the split-size sweep, the five bought rows of the
-budget sweep, the cross-provider critic run, and the eleven-run Groq second-worker line.
+budget sweep, the cross-provider critic run, the eight-run Groq second-worker line, and the
+diagonal splice control.
 
 A further **13** runs are reported as skipped as superseded, each carrying its own reason in the
 registry: eleven recorded under the pre-correction wiring (whose reflection prompts, and therefore

@@ -485,11 +485,12 @@ def aggregate(k: int) -> list[LevelResult]:
 def sigma_by_genome(k: int) -> dict[tuple[str, str], float]:
     """(level, arm) -> sd of that genome's 30-task mean across the K replicates.
 
-    THE EXPERIMENT'S OWN FINDING. The offline estimate assumed one sigma for the whole study,
-    which is what every interval in the paper was then scaled by. Measured directly, sigma is a
-    property of the GENOME: a critique that refines every draft issues more sampled calls than
-    one that accepts some, and an arm near the metric ceiling has less room to vary at all. A
-    single study-wide sigma is therefore an approximation, and this returns the spread it hides.
+    The offline estimate assumed one sigma for the whole study, which is what every interval in
+    the paper was then scaled by. Measured directly, the nine cells span 5.9x, though at K = 5
+    each Bartlett's test does not reject a common sigma at p < 0.05 (Paper III, corrections
+    entry 32). An arm near the metric ceiling has less room to vary; the sampled-call mechanism
+    once named here runs the wrong way in the data. This returns the spread a single study-wide
+    sigma hides.
     """
     out: dict[tuple[str, str], float] = {}
     for level, slug, excl in LEVELS:

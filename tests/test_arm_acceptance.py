@@ -89,3 +89,20 @@ def test_a_run_with_no_acceptance_record_is_not_reported_as_accepting_nothing():
     counts = arms_optimized(pre)
     assert counts and all(v == 0 for v in counts.values())
     assert not is_valid_contrast(pre), "a run with no acceptance record is not a valid contrast"
+
+
+def test_the_report_line_names_an_absent_record_rather_than_reading_it_as_a_zero():
+    """`_describe` prints the line a reader sees, and it used to say `accepted nothing` for runs
+    that never recorded acceptance: the misreading Paper III withdraws, in the script the paper
+    says enforces its rule. A measured zero keeps the strong flag; an absent field gets its own."""
+    from analyze_deltas import _describe
+
+    pre = _describe(
+        "multihard", [0.0, 0.055, 0.0, 0.0, -0.055], f"{_DOCS}/validation-study-multihard.json"
+    )
+    assert "accepted nothing" not in pre, pre
+    assert "acceptance not recorded" in pre, pre
+    split4 = f"{_DOCS}/validation-study-split4.json"
+    if pathlib.Path(split4).exists():
+        line = _describe("split4", [0.0, 0.0, 0.0], split4)
+        assert "arm B accepted nothing" in line, line

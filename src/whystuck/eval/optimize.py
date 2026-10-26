@@ -45,8 +45,9 @@ def optimize_loop(
     """Run GEPA over a loop's text genes; save the winner as a variant + frontier.
 
     `max_metric_calls` bounds worker (task LM) calls; `max_candidate_proposals`,
-    when set, bounds the number of GEPA proposals — one reflection LM call each —
-    so the reflection spend is a *hard* cap, not an estimate (GEPA's
+    when set, bounds the number of GEPA proposals. Under `"all"` a proposal makes one
+    reflection LM call per component it rewrites, so the cap bounds proposals and the
+    reflection spend is at most cap x components, not cap (GEPA's
     `max_reflection_cost` stopper is inert for a callable reflection_lm, which is
     what the cassette wrapper always supplies). Left `None`, GEPA stops on
     `max_metric_calls` alone.
@@ -57,9 +58,9 @@ def optimize_loop(
     each gene and searches the productive gene half as hard as a one-gene arm under the
     same cap — a budget-per-gene confound that a matched-total-budget comparison cannot
     see. `"all"` rewrites every component per proposal, which is the fair comparison for
-    "does optimizing more of the loop help". The default stays `"round_robin"` because
-    the committed cassettes were recorded under it: changing it changes every reflection
-    prompt, hence every cassette key, and would invalidate the released replays.
+    "does optimizing more of the loop help", and it is what `run_validation_study` passes by
+    default. This library default stays GEPA's `"round_robin"`, which is what the superseded
+    cassettes were recorded under and what `scripts/positive_control.py` still runs with.
 
     `verify_gene`/`verify_truth` enable component-specific reflection for the critique
     gene (see `LoopGenomeAdapter`). Both default to None, the released behaviour.
@@ -78,6 +79,14 @@ def optimize_loop(
     if max_candidate_proposals is not None:
         optimizer_kwargs["max_candidate_proposals"] = max_candidate_proposals
     result = optimizer(**optimizer_kwargs)
+    if adapter.reflection_failures:
+        # GEPA swallowed these and skipped the proposals, so the result below would be a
+        # search that silently lost its verify-gene signal. Fail the run instead.
+        raise RuntimeError(
+            f"{len(adapter.reflection_failures)} reflective-dataset build(s) failed inside the "
+            f"optimizer, which skips the proposal and carries on; first: "
+            f"{adapter.reflection_failures[0]}"
+        )
     best_candidate = result["best_candidate"]
 
     # Score the winner ourselves — deterministic, GEPA-internals-independent.
@@ -132,13 +141,15 @@ def _gepa_optimize(**kwargs: Any) -> dict[str, Any]:
         def make_reflective_dataset(self, candidate, eval_batch, components_to_update):  # type: ignore[no-untyped-def]
             return our.make_reflective_dataset(candidate, eval_batch, components_to_update)
 
-    # Bound reflection LM calls to a HARD cap. GEPA makes one reflection call per
-    # candidate proposal, so a MaxCandidateProposalsStopper caps reflection spend.
+    # Bound the number of proposals. GEPA makes one reflection call per component a
+    # proposal rewrites (one under "round_robin", every evolvable gene under "all"), so a
+    # MaxCandidateProposalsStopper caps reflection calls at cap x components, not at cap:
+    # the mmc160 cassette holds 96 distinct reflection entries under a 72-proposal cap.
     # (GEPA's max_reflection_cost stopper is inert for a callable reflection_lm —
     # it reports $0 cost — and gepa.optimize has no max_candidate_proposals kwarg,
     # so the stopper is the only reliable lever.) GEPA ORs this with its own
     # max_metric_calls stopper (CompositeStopper mode="any"), so whichever bound
-    # fires first stops the run — both remain genuine ceilings.
+    # fires first stops the run.
     optional: dict[str, Any] = {}
     if kwargs.get("max_candidate_proposals") is not None:
         cap = kwargs["max_candidate_proposals"]

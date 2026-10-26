@@ -1,5 +1,7 @@
 """Tests for whystuck.eval.optimize — GEPA wrapper (real gepa injected/faked)."""
 
+import contextlib
+
 import pytest
 from conftest import FIXED_TS
 
@@ -284,3 +286,45 @@ def test_gepa_optimize_omits_stopper_when_no_cap(monkeypatch):
         max_metric_calls=5,
     )
     assert "stop_callbacks" not in recorded
+
+
+def test_a_reflection_failure_the_optimizer_swallows_still_fails_the_run(tmp_path):
+    """GEPA catches any exception from `make_reflective_dataset`, logs it, and skips the
+    proposal (gepa/proposer/reflective_mutation/reflective_mutation.py). So the adapter's
+    "a trace that cannot be matched raises" ends, under the real optimizer, as a run that exits
+    0 with the seed genome and an empty `genes_changed`: defect 7's swallowed-exception shape.
+    The adapter records the failure and `optimize_loop` raises once the optimizer returns, the
+    way the cassette raises a swallowed miss at context exit."""
+    store = WhyStuckStore(tmp_path)
+    store.save_loop(
+        LoopGenome(
+            id="bugfix",
+            name="Bugfix",
+            genes=[
+                LoopGene(id="skill", type=GeneType.SKILL, name="S", content="Fix the bug."),
+                LoopGene(id="verify", type=GeneType.SKILL, name="V", content="Check it."),
+            ],
+        )
+    )
+
+    def fake_optimize(**kw):
+        adapter = kw["adapter"]
+        seed = kw["seed_candidate"]
+        batch = adapter.evaluate(kw["trainset"], seed, capture_traces=True)
+        batch.trajectories[0].task_id = "never-evaluated"
+        # What GEPA does with an exception from the reflective dataset: log it and carry on.
+        with contextlib.suppress(Exception):
+            adapter.make_reflective_dataset(seed, batch, ["verify"])
+        return {"best_candidate": seed}
+
+    with pytest.raises(RuntimeError, match="never-evaluated"):
+        optimize_loop(
+            store,
+            "bugfix",
+            [BenchmarkTask(id="t1")],
+            _run_task,
+            reflection_lm="fake",
+            verify_gene="verify",
+            verify_truth=lambda output, task: (True, "ok"),
+            _optimize=fake_optimize,
+        )

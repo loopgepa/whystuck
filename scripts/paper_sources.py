@@ -52,7 +52,7 @@ PAPER_TITLES: dict[str, str] = {
         "Whether Optimizing the Loop Beats Optimizing the Prompt Depends on One Number"
     ),
     "p2-repair-not-detection": "What a Checker Cannot Buy Is the Repair",
-    "p3-silent-no-op": "Your Loop Optimizer Is Not Optimizing Your Loop",
+    "p3-silent-no-op": "A Loop Optimizer That Was Not Optimizing Its Loop",
 }
 
 PAPERS_DIR = Path("docs/papers")

@@ -155,6 +155,11 @@ class LoopGenomeAdapter:
         # BEFORE reflecting on each in turn, so "the last batch" is the wrong batch for
         # all but one of them.
         self._tasks: dict[str, BenchmarkTask] = {}
+        # Every `_task_for` failure, kept as well as raised. GEPA catches any exception from
+        # `make_reflective_dataset`, logs it and skips the proposal, so a raise alone ends as a
+        # run that exits 0 with the seed genome. `optimize_loop` reads this after the optimizer
+        # returns and raises there, the way the cassette raises a swallowed miss at exit.
+        self.reflection_failures: list[str] = []
 
     def evaluate(
         self, batch: list[BenchmarkTask], candidate: dict[str, str], capture_traces: bool = False
@@ -235,11 +240,13 @@ class LoopGenomeAdapter:
         """
         task = self._tasks.get(trace.task_id or "")
         if task is None:
-            raise KeyError(
+            message = (
                 f"trace {trace.id!r} reports task_id {trace.task_id!r}, which `evaluate` "
                 "never saw; the verify gene's reflection records cannot be scored without "
                 "the task's payload (run_task must set task_id from the task it was given)"
             )
+            self.reflection_failures.append(message)
+            raise KeyError(message)
         return task
 
     def _detector_records(self, traces: list[LoopTrace]) -> list[dict[str, Any]]:

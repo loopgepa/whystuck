@@ -186,13 +186,14 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         "--temperature",
         type=float,
         default=None,
-        help="pin the worker sampling temperature (default: the provider's, which is "
-        "what every committed run used). Required before repeated-sample intervals mean "
-        "anything: no interval in this study contains within-condition sampling "
-        "variance, because the worker draws one sample per task at an unpinned "
-        "temperature. Passed per call so it enters the cassette key -- a factory-level "
-        "temperature would let two runs at different temperatures serve each other's "
-        "completions",
+        help="pin the sampling temperature of the worker, critique and verdict calls (not "
+        "the reflection call, so it is refused for an optimizing arm; default: the provider's, "
+        "which every committed run used except the A-only splice control). Required before "
+        "repeated-sample intervals mean anything: no interval in this study contains "
+        "within-condition sampling variance, because the worker draws one sample per task "
+        "at an unpinned temperature. Passed per call so it enters the cassette key -- a "
+        "factory-level temperature would let two runs at different temperatures serve each "
+        "other's completions",
     )
     p.add_argument(
         "--sample",
@@ -493,6 +494,19 @@ def main(argv: list[str] | None = None) -> int:
     optimizing = [
         a for a in arms if arm_evolvable(a, include_plan=args.plan_gene, actuator=args.actuator)
     ]
+    # `--temperature` reaches the worker, critique and verdict calls through `_sampled`, but
+    # not GEPA's reflection call, which every optimizing arm issues. Accepting the pair would
+    # record `meta.temperature` for a run whose reflection sampled at the provider default:
+    # a setting reported as applied that a surface never received (Paper III, defect 10).
+    if optimizing and args.temperature is not None:
+        print(
+            f"ERROR: --temperature pins the worker, critique and verdict calls, not the "
+            f"reflection call that arms {''.join(optimizing)} make, so the run's metadata "
+            f"would record a temperature its reflection never used. Use --arms A, or drop "
+            f"--temperature.",
+            file=sys.stderr,
+        )
+        return 2
     min_calls = accept_cycle_floor(args.n_train)
     if optimizing and args.max_metric_calls < min_calls:
         print(

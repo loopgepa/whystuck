@@ -332,11 +332,16 @@ def _describe(label: str, d: list[float], path: str | None = None) -> str:
     # An arm that accepted nothing is still the seed genome, so the line is not the contrast
     # its label claims. Marked here rather than left to the reader, because a Δ with an
     # interval and a p-value looks like a measurement whatever its arms did.
+    # A run recorded before `genes_changed` existed returns zeros from `arms_optimized`, and
+    # printing "accepted nothing" for it is the misreading Paper III withdraws: its scores show
+    # acceptances on most such runs. So an absent record gets its own, weaker flag.
     one_sided = ""
     if path:
         counts = arms_optimized(path)
         starved = [a for a, v in counts.items() if v == 0]
-        if starved:
+        if starved and not acceptance_recorded(path):
+            one_sided = "  [??] acceptance not recorded (run predates genes_changed)"
+        elif starved:
             one_sided = f"  [!!] arm {'/'.join(starved)} accepted nothing — NOT a D-vs-B contrast"
     return (
         f"{label}: Δ={m:+.3f}  seeds={seeds}  95%CI[{lo:+.3f},{hi:+.3f}]"
@@ -351,7 +356,9 @@ _CONTRAST_LEGEND = (
     "     SEED genome. The Δ on that line therefore compares the other arm against the seed,\n"
     "     not against its intended control, and must not be read as D-vs-B. The budget guard\n"
     "     enforces that an arm CAN fund an accept cycle; it cannot enforce that one is\n"
-    "     accepted. This is the retraction's defect entering from the unwatched side."
+    "     accepted. This is the retraction's defect entering from the unwatched side.\n"
+    "[??] = the run predates the genes_changed field, so acceptance was never recorded. Not\n"
+    "     a zero: on most such runs the scores show an arm moving off its seed score."
 )
 
 _SEED_LEGEND = (

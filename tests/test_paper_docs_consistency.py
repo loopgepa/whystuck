@@ -687,6 +687,8 @@ def test_every_coined_term_is_introduced_before_a_paper_uses_it() -> None:
 #: this map keyed on (paper, index) and pinned only what the entry contained, so renumbering the
 #: citation from entry~2 to entry~3 changed nothing it looked at and the mutation passed.
 _INTRA_REGISTER_POINTERS = {
+    ("p3-silent-no-op", r"left standing by this entry; entry~(\d+) withdraws it"): "15/15",
+    ("p3-silent-no-op", r"the\s+misreading entry~(\d+) withdraws"): "accepted nothing",
     ("p1-conditional-lever", r"the depth bound of entry~(\d+)"): "depth bound",
     ("p1-conditional-lever", r"the \$1\.12\$ of entry~(\d+)"): r"1\.12",
     ("p2-repair-not-detection", r"the borrowed denominator entry~(\d+) retired"): "borrowed",

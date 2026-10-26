@@ -860,3 +860,17 @@ def test_the_g1_diagonal_is_inert_by_measurement_not_construction():
     assert 0.15 < sum(seeds) / len(seeds) < 0.95, (
         "the gate would now trip; the record says it did not"
     )
+
+
+def test_temperature_is_refused_for_an_arm_that_reflects():
+    # `--temperature` reaches the worker, critique and verdict calls, but not the
+    # reflection call, which GEPA issues for every optimizing arm. Accepting it there
+    # would record `meta.temperature` for a run whose reflection sampled at the provider
+    # default: the defect-10 shape (a setting reported as applied that a surface never
+    # received) moved to a fourth surface. The only released run with a pinned
+    # temperature is `--arms A`, which makes no reflection call, so it stays allowed.
+    code, _, err = _run(["--arms", "AB", "--seeds", "0", "--temperature", "0"])
+    assert code == 2
+    assert "--temperature" in err and "reflection" in err
+    ok, out, _ = _run(["--arms", "A", "--seeds", "0", "--temperature", "0"])
+    assert ok == 0, out

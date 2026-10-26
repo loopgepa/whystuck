@@ -361,11 +361,6 @@
   url    = {https://x.com/steipete/status/2063697162748260627}
 }
 
-% Pinned to v4 deliberately. The sentence this series quotes verbatim lives in Appendix G,
-% "GEPA Prompt Optimization of the Reveal Expert Prompt", which v1 does not contain: its Appendix G
-% is a different section entirely. An unversioned abs/ URL therefore resolves to a document that
-% supports the quotation today and did not at first posting, which makes the attribution depend on
-% when the reader clicks. Quoting a preprint means pinning the version.
 @inproceedings{pyatkin2025ifbench,
   title     = {Generalizing Verifiable Instruction Following},
   author    = {Pyatkin, Valentina and Malik, Saumya and Graf, Victoria and Ivison, Hamish and
@@ -401,6 +396,11 @@
                configurations; that sentence is not in the abstract, so it is not cited here.},
 }
 
+% Pinned to v4 deliberately. The sentence this series quotes verbatim lives in Appendix G,
+% "GEPA Prompt Optimization of the Reveal Expert Prompt", which v1 does not contain: its Appendix G
+% is a different section entirely. An unversioned abs/ URL therefore resolves to a document that
+% supports the quotation today and did not at first posting, which makes the attribution depend on
+% when the reader clicks. Quoting a preprint means pinning the version.
 @inproceedings{pappu2026multiagent,
   title     = {Multi-Agent Teams Hold Experts Back},
   author    = {Pappu, Aneesh and El, Batu and Cao, Hancheng and di Nolfo, Carmelo and
@@ -410,12 +410,13 @@
   eprint    = {2602.01011v4},
   archivePrefix = {arXiv},
   url       = {https://arxiv.org/abs/2602.01011v4},
-  note      = {Quoted passage: v4, Appendix G. Peer-reviewed, independent report of BOTH halves
-               of this paper's finding: optimizing a prompt with GEPA, they state ``On GPQA
-               Diamond and MATH-500, GEPA returned the original prompt essentially unchanged''
-               (the treatment silently not applying), and on their remaining tasks GEPA converged
-               on extreme-deference prompts instructing non-experts to defer to the expert by
-               default (a degenerate policy that is optimal on the training signal)}
+  note      = {Quoted passage: v4, Appendix G, re-read 2026-10-25. A robustness check on their
+               Reveal Expert prompt: GEPA ``optimizes against a 10-problem subsample under a budget
+               of 5 optimization iterations'', and ``On GPQA Diamond and MATH-500, GEPA returned the
+               original prompt essentially unchanged''; on the remaining tasks it converged on
+               extreme-deference prompts. They diagnose no cause for the unchanged prompt, and a
+               short search that finds nothing returns the same thing, so this is a report of the
+               symptom, not of a treatment failing to apply}
 }
 
 @inproceedings{guo2024evoprompt,
@@ -476,4 +477,61 @@
   url       = {https://proceedings.neurips.cc/paper_files/paper/2022/hash/3d719fee332caa23d5038b8a90e81796-Abstract-Conference.html},
   note      = {Formalizes optimizing a proxy that diverges from the true objective; the
                training-signal half of this paper's mechanism is an instance}
+}
+
+@misc{nguyen2026harnessevo,
+  title     = {Where Does Harness-Optimization Value Live? Localized Gains and the Budget-Splitting
+               Trap in Self-Evolving {LLM} Agents},
+  author    = {Nguyen, Michael and Tan, Wei Chen and Hassan, Nurul Aisyah and Raman, Arvind and
+               Lim, Li Hua and Razak, Ahmad Faiz},
+  year      = {2026},
+  eprint    = {2609.02889},
+  archivePrefix = {arXiv},
+  url       = {https://arxiv.org/abs/2609.02889},
+  note      = {v1, read 2026-10-25 (abstract page dated 25 Jun 2026). Section 1: splitting a fixed
+               budget across four harness slots under GEPA ``froze every slot at its empty seed,
+               producing a harness that is byte-identical to stock'', because each slot's share
+               fell below the optimizer's accept-and-rescore floor; they call this the
+               budget-splitting trap. Cited as the closest componentized instance of the symptom}
+}
+
+@misc{giummarra2026localgepa,
+  title     = {Understanding When Reflective Prompt and Skill Optimization Helps on Locally Served
+               Reasoning Models: A Two-Model Study of {GEPA} and {SkillOpt}},
+  author    = {Giummarra, Andrea and Baglieri, Carmelo and Di Maria, Antonio and Farruggio, Andrea
+               and Piatto, Michele and Micale, Giovanni},
+  year      = {2026},
+  eprint    = {2610.26020},
+  archivePrefix = {arXiv},
+  url       = {https://arxiv.org/abs/2610.26020},
+  note      = {v1, read 2026-10-25. Section 6.4: on HotpotQA ``Qwen v2 GEPA selected the one-line
+               seed. The baseline and GEPA artifacts have the same hash'', which they call ``an
+               exact no-intervention outcome of the realized search''}
+}
+
+@misc{singh2026mage,
+  title     = {{MAGE}: Understanding Stability-Performance Trade-offs in Multi-component Prompt
+               Optimization},
+  author    = {Singh, Prateek},
+  year      = {2026},
+  eprint    = {2607.11944},
+  archivePrefix = {arXiv},
+  url       = {https://arxiv.org/abs/2607.11944},
+  note      = {v1, read 2026-10-25. Section 5: ``OPRO and Self-Refine were run on the same 5 seeds
+               as GEPA; both returned the seed prompt unchanged on every seed'', marked in the
+               results table}
+}
+
+@misc{xu2026harnessrepair,
+  title     = {What Does a Harness Repair? A Preregistered Study of Visibility, Baseline Adequacy
+               and Evaluation Defects},
+  author    = {Xu, Bowen and Chen, Boyu},
+  year      = {2026},
+  eprint    = {2610.05533},
+  archivePrefix = {arXiv},
+  url       = {https://arxiv.org/abs/2610.05533},
+  note      = {v1, read 2026-10-25. Abstract: six evaluation defects injected one at a time into a
+               preregistered study with a GEPA search arm; ``In 6 of 15 evaluable defect-model
+               pairs, replication through the same pipeline reproduced the defect's distortion
+               instead of revealing it''}
 }

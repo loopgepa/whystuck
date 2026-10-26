@@ -7,7 +7,7 @@ questions, rest on different experiments, and are useful to different readers.
 |---|---|---|---|---|
 | **I** | [`p1-conditional-lever/`](p1-conditional-lever/), *Whether Optimizing the Loop Beats Optimizing the Prompt Depends on One Number* | Does evolving a self-refine loop's verifier beat evolving its generation prompt? | yes, it is the subject | 44 |
 | **II** | [`p2-repair-not-detection/`](p2-repair-not-detection/), *What a Checker Cannot Buy Is the Repair* | Where is the loop's own ceiling: detection or repair? | **no**, every measurement is arm A, which declares no evolvable genes | 28 |
-| **III** | [`p3-silent-no-op/`](p3-silent-no-op/), *Your Loop Optimizer Is Not Optimizing Your Loop* | How can a componentized treatment silently not apply, and what catches it? | yes, as the thing that failed | 24 |
+| **III** | [`p3-silent-no-op/`](p3-silent-no-op/), *A Loop Optimizer That Was Not Optimizing Its Loop* | How can a componentized treatment silently not apply, and what catches it? | yes, as the thing that failed | 27 |
 
 ## Which paper answers your question
 
@@ -24,8 +24,8 @@ worth +0.0613.
 
 **"How do I know my componentized optimization experiment actually ran?"** → **III**. Print one
 integer per component: whether the optimizer's output differs from the seed. Our first fifteen
-contrast runs did not, and the critique gene was byte-identical to the seed in 15/15 winning
-genomes.
+contrast runs did not, and in ten of the twelve that can be replayed the critique gene was
+byte-identical to the seed in every winning genome.
 
 ## Why II is a separate paper, not a section of I
 
@@ -74,7 +74,7 @@ does not, something regressed.
 ## Verifying
 
 ```bash
-python scripts/verify_paper_claims.py     # 1102 checks against the released artifacts, $0
+python scripts/verify_paper_claims.py     # 1139 checks against the released artifacts, $0
 python scripts/verify_split_coverage.py   # the split lost no quantity, $0
 python -m pytest tests/test_split_coverage.py tests/test_paper_prose_coverage.py \
     tests/test_paper_table_coverage.py tests/test_paper_sigma_coverage.py tests/test_figures.py

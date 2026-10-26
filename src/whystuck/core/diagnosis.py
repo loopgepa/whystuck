@@ -209,12 +209,20 @@ def screen_optimizer_result(
     genes_after: dict[str, str],
     verify_pass: int | None = None,
     verify_total: int | None = None,
+    treatment_genes: list[str] | None = None,
 ) -> list[str]:
-    """Two screens Paper III and Paper I pay for, run on an optimizer's output.
+    """Screens Paper III and Paper I pay for, run on an optimizer's output.
 
-    The no-op screen is the one the third paper is named for: across fifteen contrast runs the
-    winning genome's critique gene was byte-identical to the seed in 15/15, so ten runs reported
-    a held-out score for an experiment that never ran.
+    The no-op screen is the one the third paper is named for, and it answers per component: in
+    the flagship superseded run `generate` changed in 5/15 winning genomes and the critique gene
+    in 0/15, so a whole-genome "did anything change" said yes on runs whose treatment gene had
+    not moved. A gene named in `treatment_genes` that is byte-identical to the seed is reported
+    by name. Without `treatment_genes`, a genome in which some genes moved and others did not
+    reports the unmoved ones, since the caller has not said which of them the contrast is about.
+
+    The blank-gene screen catches defect 8: an empty completion accepted as a gene differs from
+    the seed, so a change count says "changed" on the run where the change deleted a step of
+    the loop.
 
     The PASS-rate screen catches the degenerate verifier. It is a screen on the search's RESULT,
     not a gate before its spend: it saves the wrong conclusion and the downstream spend, not the
@@ -226,11 +234,30 @@ def screen_optimizer_result(
     warnings: list[str] = []
 
     changed = [k for k, v in genes_after.items() if genes_before.get(k) != v]
+    unchanged = [k for k in genes_after if k not in changed]
     if not changed:
         warnings.append(
             "no-op: every gene is byte-identical to the seed, so any score reported here "
             "measures the seed genome and not the optimizer (Paper III, defect 1)."
         )
+    else:
+        watched = (
+            [g for g in treatment_genes if g in unchanged]
+            if treatment_genes is not None
+            else unchanged
+        )
+        for gene in watched:
+            warnings.append(
+                f"per-component no-op: gene {gene!r} is byte-identical to the seed while "
+                f"{', '.join(repr(c) for c in changed)} changed, so a contrast attributed to "
+                f"{gene!r} measures the other genes (Paper III, defect 1)."
+            )
+    for gene in changed:
+        if not genes_after[gene].strip() and (genes_before.get(gene) or "").strip():
+            warnings.append(
+                f"blank gene: {gene!r} is empty after optimization. It counts as changed, but an "
+                "empty gene deletes that step of the loop (Paper III, defect 8)."
+            )
 
     if verify_total:
         if verify_pass == 0:

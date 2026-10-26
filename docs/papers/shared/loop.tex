@@ -21,7 +21,8 @@ the loop cannot game its own metric. Paper~II suspends this deliberately in its 
 controls, which hand the in-loop gate the true metric and are named as such wherever they are
 reported; nothing else in the series does.
 Each eval costs \emph{at most} $1 + 2R$ LLM calls for a refine
-budget of $R$ (or $2 + 2R$ with the optional plan module), and fewer whenever a critique passes
+budget of $R$ (or $2 + 2R$ with the optional plan module; $1 + 3R$ with the \texttt{actuator} gene or a
+separate verdict call, and $1 + R$ under the oracle gate, which issues no critique call), and fewer whenever a critique passes
 before the budget is spent: the loop stops on a \texttt{PASS} without issuing the refine call
 that would have followed it, so the bound is reached only by an eval that never passes.
 

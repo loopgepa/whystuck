@@ -9,9 +9,10 @@ Each is a result the series paid for and the served tool did not expose. They we
    optimization without measuring p0 is recommending the coin flip.
 2. **The degenerate-verifier screen.** That failure is visible as a PASS rate of zero on the
    optimizer's output, which costs nothing to check and is the cheapest result in the series.
-3. **The silent no-op.** Paper III: the critique gene was byte-identical to the seed in 15/15
-   winning genomes. An optimizer that changed nothing and reports a score is the failure mode
-   the paper is named for.
+3. **The silent no-op.** Paper III: in the flagship superseded run the critique gene was
+   byte-identical to the seed in 15/15 winning genomes while `generate` moved in 5/15. An
+   optimizer that left the treatment gene alone and reports a score is the failure mode the paper
+   is named for, which is why the screen answers per component.
 """
 
 from __future__ import annotations
@@ -117,3 +118,26 @@ def test_a_zero_or_missing_denominator_does_not_divide(total: int | None) -> Non
         genes_before={"v": "A"}, genes_after={"v": "B"}, verify_pass=0, verify_total=total
     )
     assert any("pass rate not measured" in w.lower() for w in warnings), warnings
+
+
+def test_a_treatment_gene_that_did_not_move_is_reported_per_component() -> None:
+    """The flagship run's shape: `generate` changed and the critique did not. A whole-genome
+    "did anything change" says yes there, which is the reading Paper III says does not work, so
+    the screen has to answer per component."""
+    before = {"generate": "a", "ensure_correct": "b"}
+    after = {"generate": "x", "ensure_correct": "b"}
+    named = screen_optimizer_result(before, after, treatment_genes=["ensure_correct"])
+    assert any("ensure_correct" in w and "byte-identical" in w for w in named), named
+    unnamed = screen_optimizer_result(before, after)
+    assert any("ensure_correct" in w and "byte-identical" in w for w in unnamed), unnamed
+    moved = screen_optimizer_result(before, {"generate": "x", "ensure_correct": "y"})
+    assert not any("byte-identical" in w for w in moved), moved
+
+
+def test_a_blanked_gene_is_reported_even_though_it_counts_as_changed() -> None:
+    """Defect 8: an empty completion accepted as a gene differs from the seed, so a change count
+    says "changed" on the run where the change deleted a step of the loop."""
+    warnings = screen_optimizer_result(
+        {"generate": "a", "ensure_correct": "b"}, {"generate": "x", "ensure_correct": "  "}
+    )
+    assert any("ensure_correct" in w and "empty" in w for w in warnings), warnings

@@ -428,6 +428,8 @@ _REGISTER_TARGETED = frozenset(
         r"is \$([\d.]+)\$, and \$1.44\$ is",
         r"sum to \$([\d.]+)\$ and so sit below",
         r"the cell is \$([\d.]+)\\sigma\$ of a measured noise floor",
+        r"replicates each Bartlett's test gives \$p = ([\d.]+)\$",
+        r"like for like, (\w+) of the six rows are noisier",
     }
 )
 
@@ -1593,6 +1595,138 @@ def _verifier_evolvable() -> int:
     return total
 
 
+#: The full replay of the pre-correction runs at the pre-fix commit, written by
+#: `scripts/replay_superseded_genes.py`. The only released record of which genes the superseded
+#: winners changed: those runs predate `genes_changed`, and current code cannot replay them.
+GENE_REPLAY = "tests/fixtures/evidence/precorrection-gene-replay.json"
+
+
+@cache
+def _gene_replay() -> dict[str, float]:
+    """Counts behind Paper III's headline, derived from the released replay record.
+
+    The papers once stated "byte-identical to the seed in 15/15 runs, 13/13 where evolvable",
+    pinned here as a literal and listed as verified by hand. The audit behind it had replayed the
+    flagship run only. A full replay found the critique gene moved on one seed of run 6 and one
+    seed of the nano worker swap, so the counts are now derived, and the record is trusted only
+    after it is tied back to the released JSON: every replayed held-out score must equal the
+    published one, with no cassette miss, or this raises instead of counting.
+    """
+    with open(GENE_REPLAY, encoding="utf-8") as fh:
+        doc = json.load(fh)
+    census = {r.name for r in _precorrection_census()}
+    replayed: list[str] = []
+    unchanged_runs = changed_runs = oracle_gated = 0
+    d_winners = d_critique = 0
+    flagship: dict[str, float] = {}
+    worst: dict[str, float] = {}
+    for run in doc["runs"]:
+        if run["exit_code"] != 0 or run["cassette_misses"] != 0:
+            raise ValueError(f"{run['label']}: the replay did not reproduce cleanly")
+        art = run["artifact"]
+        with open(art, encoding="utf-8") as fh:
+            released = json.load(fh)
+        rows = released["runs"]
+        if len(rows) != len(run["seeds"]):
+            raise ValueError(f"{run['label']}: seed count differs from {art}")
+        for row, seed in zip(rows, run["seeds"], strict=True):
+            for arm in ("B", "C", "D"):
+                if seed[arm]["opt_heldout"] != row[arm]["opt_heldout"]:
+                    raise ValueError(
+                        f"{run['label']} arm {arm}: replayed {seed[arm]['opt_heldout']} against "
+                        f"released {row[arm]['opt_heldout']}; the gene record is not this run's"
+                    )
+        name = Path(art).stem.replace("validation-study-", "") or "validation-study"
+        if name not in census:
+            raise ValueError(f"{name} is not a pre-correction contrast run")
+        if "ensure_correct" not in rows[0]["D"]["evolvable_genes"]:
+            raise ValueError(f"{name}: arm D does not evolve the critique; it cannot count here")
+        replayed.append(name)
+        moved = ["ensure_correct" in s["D"]["changed"] for s in run["seeds"]]
+        d_winners += len(moved)
+        d_critique += sum(moved)
+        if any(moved):
+            changed_runs += 1
+            for row, m in zip(rows, moved, strict=True):
+                if m:  # what arm D's critique-only rewrite did to its own held-out score
+                    worst[name] = row["D"]["opt_heldout"] - row["D"]["seed_heldout"]
+                    worst[name + " B"] = row["B"]["opt_heldout"] - row["B"]["seed_heldout"]
+        else:
+            unchanged_runs += 1
+        oracle_gated += bool(released["meta"].get("oracle_critique"))
+        if name == "multihard":
+            for gene in ("generate", "ensure_correct"):
+                flagship[gene] = sum(
+                    gene in s[arm]["changed"] for s in run["seeds"] for arm in ("B", "C", "D")
+                )
+                flagship["D " + gene] = sum(gene in s["D"]["changed"] for s in run["seeds"])
+            flagship["arm-runs"] = 3 * len(run["seeds"])
+            flagship["seeds"] = len(run["seeds"])
+    evolvable = _verifier_evolvable()
+    if len(replayed) >= evolvable or len(set(replayed)) != len(replayed):
+        raise ValueError("the replay record no longer leaves exactly the unreplayable runs out")
+    return {
+        "evolvable": float(evolvable),
+        "replayed": float(len(replayed)),
+        "unreplayed": float(evolvable - len(replayed)),
+        "unchanged_runs": float(unchanged_runs),
+        "changed_runs": float(changed_runs),
+        "oracle_gated": float(oracle_gated),
+        "d_winners": float(d_winners),
+        "d_critique": float(d_critique),
+        "run6 D": worst["crossfamily"],
+        "run6 B": worst["crossfamily B"],
+        "nano D": worst["multihard-nano"],
+        **{"flagship " + k: float(v) for k, v in flagship.items()},
+    }
+
+
+def _chi2_sf(x: float, df: int) -> float:
+    """Upper tail of the chi-square distribution, by the series for the lower incomplete gamma.
+
+    Pure Python because this checker runs in the venv without scipy; agrees with
+    `scipy.stats.chi2.sf` to well inside the printed precision for the arguments used here.
+    """
+    import math
+
+    a, z = df / 2.0, x / 2.0
+    if z <= 0:
+        return 1.0
+    term = total = 1.0 / a
+    n = 0
+    while term > 1e-15 * total:
+        n += 1
+        term *= z / (a + n)
+        total += term
+    return 1.0 - math.exp(-z + a * math.log(z) - math.lgamma(a)) * total
+
+
+def _chi2_quantile(q: float, df: int) -> float:
+    """Inverse of the chi-square CDF by bisection on `_chi2_sf`."""
+    lo, hi = 0.0, 200.0
+    for _ in range(200):
+        mid = (lo + hi) / 2
+        if 1.0 - _chi2_sf(mid, df) < q:
+            lo = mid
+        else:
+            hi = mid
+    return (lo + hi) / 2
+
+
+def _bartlett_p(sds: list[float], n: int) -> float:
+    """Bartlett's test p for equal variances, from k sample sds that each rest on n draws.
+
+    Equal group sizes only, which is the case for every replicate cell in this study (K = 5).
+    """
+    import math
+
+    k, v = len(sds), n - 1
+    pooled = mean(s * s for s in sds)
+    stat = k * v * math.log(pooled) - v * sum(math.log(s * s) for s in sds)
+    corr = 1 + (k / v - 1 / (k * v)) / (3 * (k - 1))
+    return _chi2_sf(stat / corr, k - 1)
+
+
 def _precorrection_acceptance() -> dict[str, int]:
     """Acceptances in the fifteen pre-correction contrast runs, derived from SCORES not fields.
 
@@ -2539,7 +2673,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
             out.append(
                 (
                     "tex: sigma genome range factor",
-                    _scrape(tex, r"a factor of \$([\d.]+)\$\. Two mechanisms"),
+                    _scrape(tex, r"a factor of \$([\d.]+)\$\. One mechanism"),
                     0.05,
                     hi / lo,
                 )
@@ -3556,7 +3690,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
         # predicate: the abstract, the introduction and Paper III's own conclusion all carried it.
         (
             "tex: abstract identical-on-every-seed",
-            r"(\w+) of the runs reported held-out scores\s+identical on every seed",
+            r"(\w+) of the fifteen runs reported held-out scores\s+identical on every seed",
             n_zero,
         ),
         (
@@ -3571,23 +3705,16 @@ def _checks() -> list[tuple[str, float, float, float]]:
         ),
         (
             "tex: abstract verifier-evolvable subset",
-            r"(\w+) of our first fifteen contrast runs measured",
+            r"(\w+) of our first fifteen contrast runs made a self-refine",
             n_verifier,
         ),
         (
             "tex: defect appendix verifier-evolvable subset",
-            r"(\w+) of the fifteen made that gene evolvable",
+            r"(\w+) of the fifteen made the critique gene evolvable in",
             n_verifier,
         ),
     ):
         out.append((label, _scrape_word(tex, pattern), 0, artifact))
-    for label, pattern in (
-        ("tex: abstract 13/13 numerator", r"and \$(\d+)/13\$ where it was evolvable at all"),
-        ("tex: abstract 13/13 denominator", r"and \$13/(\d+)\$ where it was evolvable at all"),
-        ("tex: contributions 13/13", r"and in \$(\d+)/13\$ of the thirteen"),
-        ("tex: defect appendix 13/13", r"byte-identical in \$(\d+)/13\$ of them"),
-    ):
-        out.append((label, _scrape(tex, pattern), 0, float(n_verifier)))
     n_cells, n_supported, sigma_sum_16 = _prereg_verdicts()
     for label, pattern, artifact in (
         ("tex: prereg corrected cells", r"literally to the\s+(\w+) corrected cells", n_cells),
@@ -3649,6 +3776,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_noop_figure_checks())
     out.extend(_reconciliation_checks())
     out.extend(_replicate_sigma_scale_checks())
+    out.extend(_gene_replay_checks())
 
     return out
 
@@ -3727,9 +3855,9 @@ _SPINE: tuple[tuple[str, str, str, float, float], ...] = (
     ),
     (
         "p3-silent-no-op",
-        "P3 verify gene unchanged",
-        r"byte-identical to the seed in \$(\d+)/15\$ cases",
-        15.0,
+        "P3 replayed winners",
+        r"moved on one seed each, \$2\$\s+of \$(\d+)\$ winning genomes",
+        38.0,
         0.0,
     ),
     (
@@ -3749,7 +3877,7 @@ _SPINE: tuple[tuple[str, str, str, float, float], ...] = (
     (
         "p3-silent-no-op",
         "P3 sigma spread factor",
-        r"a factor of \$([\d.]+)\$\. Two mechanisms",
+        r"a factor of \$([\d.]+)\$\. One mechanism",
         5.9,
         0.05,
     ),
@@ -3803,7 +3931,7 @@ _SHARED_ALIASED: tuple[tuple[str, dict[str, str]], ...] = (
         "sigma genome spread (5.9x)",
         {
             "p2-repair-not-detection": r"genome across that family it spans \$([\d.]+)\\times\$",
-            "p3-silent-no-op": r"a factor of \$([\d.]+)\$\. Two mechanisms",
+            "p3-silent-no-op": r"a factor of \$([\d.]+)\$\. One mechanism",
         },
     ),
     (
@@ -5403,7 +5531,11 @@ def _xprovider_checks() -> list[tuple[str, float, float, float]]:
 
     # --- Paper III: the acceptance census and the stratification -----------------------------
     for label, pattern, actual in (
-        ("seeds", r"cross-provider critic study \(Paper~I, D3\) over \\textbf\{(\w+)\}", seeds),
+        (
+            "seeds",
+            r"cross-provider critic study reported in Paper~I, over \\textbf\{(\w+)\}",
+            seeds,
+        ),
         ("arm B accepted", r"arm~B on \\textbf\{(\w+)\} seeds", b_seeds),
         ("arm D accepted", r"and arm~D on \\textbf\{(\w+)\}", d_seeds),
     ):
@@ -5801,6 +5933,190 @@ def _reconciliation_checks() -> list[tuple[str, float, float, float]]:
             high,
         ),
     ]
+    return out
+
+
+def _gene_replay_checks() -> list[tuple[str, float, float, float]]:
+    """Every site stating Paper III's replay counts, derived from the released replay record.
+
+    The counts replaced a literal `15/15` that the checker had carried since the retraction and
+    listed as verified by hand. They are scraped site by site rather than once, because the
+    literal survived for months in four places the same way: correct where it was checked and
+    restated, unchecked, everywhere else.
+    """
+    import math
+
+    g = _gene_replay()
+    tex = _sources().paper_tex("p3-silent-no-op")
+    out: list[tuple[str, float, float, float]] = []
+    words = (
+        ("abstract replayed", r"recorded them, (\w+) of the thirteen reproduce", "replayed"),
+        ("abstract unchanged runs", r"exactly, and in (\w+) of those twelve the", "unchanged_runs"),
+        ("contribution replayed", r"sec:threats\}\), (\w+) reproduce their released", "replayed"),
+        (
+            "contribution unchanged runs",
+            r"exactly; in (\w+) of the twelve the\s+verifier",
+            "unchanged_runs",
+        ),
+        (
+            "contribution evolvable",
+            r"(\w+) of the fifteen runs made the critique gene",
+            "evolvable",
+        ),
+        (
+            "defect replayed",
+            r"(\w+) reproduce their released\s+held-out scores exactly",
+            "replayed",
+        ),
+        ("defect unchanged runs", r"In \\textbf\{(\w+) of the twelve\} arm~D's", "unchanged_runs"),
+        ("defect oracle-gated", r"(\w+) of the\s+twelve, runs~7--10, gate on", "oracle_gated"),
+        ("limitations replayed", r"(\w+) of them\s+replay bit for bit at the pre-fix", "replayed"),
+        (
+            "conclusion unchanged runs",
+            r"replayed, (\w+) of the \w+ that can be replayed",
+            "unchanged_runs",
+        ),
+        ("conclusion replayed", r"replayed, \w+ of the (\w+) that can be replayed", "replayed"),
+        ("conclusion moved", r"and the other (\w+) moved it on one seed each", "changed_runs"),
+    )
+    for label, pattern, key in words:
+        out.append((f"replay: {label}", _scrape_word(tex, pattern), 0, g[key]))
+    for label, pattern in (
+        (
+            "contribution",
+            r"moved on one seed each, \$(\d+)\$ of \$(\d+)\$ winning genomes\. The per-run",
+        ),
+        ("defect", r"\\textbf\{\$(\d+)\$ of \$(\d+)\$\} winning genomes: run~6"),
+    ):
+        moved, winners = _scrape_all(tex, pattern)
+        out.append((f"replay: {label} D critique moved", moved, 0, g["d_critique"]))
+        out.append((f"replay: {label} D winners", winners, 0, g["d_winners"]))
+    # The flagship's own counts, derived instead of transcribed for the first time.
+    fl = _scrape_all(
+        tex,
+        r"GEPA changed\s+\\texttt\{generate\} in \$(\d+)/(\d+)\$ winners and "
+        r"\\texttt\{ensure\\_correct\} in \$(\d+)/(\d+)\$; for arm~D alone that\s+is "
+        r"\$(\d+)/(\d+)\$ and \$(\d+)/(\d+)\$",
+    )
+    want = (
+        g["flagship generate"],
+        g["flagship arm-runs"],
+        g["flagship ensure_correct"],
+        g["flagship arm-runs"],
+        g["flagship D generate"],
+        g["flagship seeds"],
+        g["flagship D ensure_correct"],
+        g["flagship seeds"],
+    )
+    for i, (got, exp) in enumerate(zip(fl, want, strict=True)):
+        out.append((f"replay: flagship count {i}", got, 0, exp))
+    out.append(
+        (
+            "replay: run 6 comparator loss",
+            _scrape(tex, r"\\texttt\{generate\} edit lost \$([\d.]+)\$"),
+            0.0005,
+            -g["run6 B"],
+        )
+    )
+    out.append(("replay: run 6 arm D held its seed score", 1.0, 0, float(g["run6 D"] == 0.0)))
+    out.append(
+        (
+            "replay: nano critique-only cost",
+            _scrape(tex, r"critique-only rewrite cost it \$([\d.]+)\$"),
+            0.0005,
+            -g["nano D"],
+        )
+    )
+    out.append(
+        (
+            "replay: BigCodeBench runs that cannot replay",
+            _scrape_word(tex, r"The (\w+) BigCodeBench runs do not replay"),
+            0,
+            _precorrection_counts()[0] - g["evolvable"] + g["unreplayed"],
+        )
+    )
+    out.append(
+        (
+            "replay: BigCodeBench runs that froze the critique",
+            _scrape_word(tex, r"replay at all: (\w+) of them froze the critique"),
+            0,
+            _precorrection_counts()[0] - g["evolvable"],
+        )
+    )
+
+    # The sigma section's corrected claims (Paper III corrections entry 32).
+    sig = _repeat_sigma()
+    p_cells = _bartlett_p(list(sig.values()), 5)
+    csig, _ = _curve_replicates()
+    p_rows = _bartlett_p(list(csig.values()), 5)
+    for label, pattern in (
+        ("caption", r"Bartlett's test across the nine gives\s+\$p = ([\d.]+)\$"),
+        ("limitations", r"\(Bartlett \$p = ([\d.]+)\$ across the nine cells here"),
+        ("register", r"replicates each Bartlett's test gives \$p = ([\d.]+)\$"),
+    ):
+        out.append(
+            (f"sigma: Bartlett p, nine cells, {label}", _scrape(tex, pattern), 0.0005, p_cells)
+        )
+    out.append(
+        (
+            "sigma: Bartlett p, six curve rows",
+            _scrape(tex, r"across the nine cells here, \$p = ([\d.]+)\$ across"),
+            0.005,
+            p_rows,
+        )
+    )
+    out.append(
+        ("sigma: neither family rejects at 0.05", 1.0, 0, float(min(p_cells, p_rows) > 0.05))
+    )
+    out.append(
+        (
+            "sigma: loop-level arm quieter at every level",
+            1.0,
+            0,
+            float(all(sig[(lvl, "D")] < sig[(lvl, "B")] for lvl in ("L1", "L2", "L3"))),
+        )
+    )
+    single = _noise_estimate().sigma_delta_mean / math.sqrt(2)
+    out.append(
+        (
+            "sigma: single-draw analogue in the reporting paragraph",
+            _scrape(tex, r"Against the single-draw analogue, \$([\d.]+)\$,"),
+            0.00005,
+            single,
+        )
+    )
+    noisier = float(sum(s > single for s in csig.values()))
+    out.append(
+        (
+            "sigma: curve rows noisier than the single-draw analogue",
+            _scrape_word(tex, r"\$, \\textbf\{(\w+)\} of the six rows are noisier"),
+            0,
+            noisier,
+        )
+    )
+    out.append(
+        (
+            "sigma: register rows noisier",
+            _scrape_word(tex, r"like for like, (\w+) of the six rows are noisier"),
+            0,
+            noisier,
+        )
+    )
+    lo_f = math.sqrt(4 / _chi2_quantile(0.975, 4))
+    hi_f = math.sqrt(4 / _chi2_quantile(0.025, 4))
+    paired = _noise_estimate().sigma_delta_mean
+    both = all(s * lo_f <= single and paired <= s * hi_f for s in csig.values())
+    out.append(("sigma: every curve row's interval holds both denominators", 1.0, 0, float(both)))
+
+    # The reflection output cap, which the papers once gave as 1500 throughout.
+    cost_src = pathlib.Path("src/whystuck/eval/cost.py").read_text(encoding="utf-8")
+    current = float(re.search(r"^REFLECTION_MAX_OUTPUT_TOKENS = (\d+)$", cost_src, re.M).group(1))  # type: ignore[union-attr]
+    before = float(re.search(r"# Raised from (\d+) after the C2 run", cost_src).group(1))  # type: ignore[union-attr]
+    caps = _scrape_all(
+        tex, r"reflection output cap of (\d+) for the superseded runs.*?and (\d+) from the clean"
+    )
+    out.append(("reflection cap, superseded runs", caps[0], 0, before))
+    out.append(("reflection cap, corrected runs", caps[1], 0, current))
     return out
 
 
@@ -6304,10 +6620,10 @@ def main() -> int:  # pragma: no cover - CLI convenience
         return 1
     print(
         "\nNOT machine-checkable here (verified by hand, listed so the gap is visible):\n"
-        "  - Evidence 1's per-arm gene-change counts: they replay only against the pre-fix\n"
-        "    commit, since the corrected reflective dataset changes every cassette key.\n"
-        "    Re-verified 2026-07-28 at fe670a8: generate 5/15, ensure_correct 0/15, and\n"
-        "    per arm B 3/5, C 0/5, D 2/5 generate with 0/5 ensure_correct.\n"
+        "  - The replay record behind Paper III's gene counts\n"
+        "    (tests/fixtures/evidence/precorrection-gene-replay.json) is checked against every\n"
+        "    released score, but regenerating it needs a checkout of the pre-fix commit;\n"
+        "    scripts/replay_superseded_genes.py says how.\n"
         "  - Evidence 7's 0.666 -> 0.681 substitution, which requires a deliberately\n"
         "    mismatched replay. The swallowed-miss count beside it was recorded as 70 at the\n"
         "    time; an independent replay of the same commit and cassette counted 60, and no\n"

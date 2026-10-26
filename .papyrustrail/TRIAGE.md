@@ -82,3 +82,14 @@ an average taken over nine, and its nine-task single-agent column is flat on Liv
 `-3.3` on SWE-Bench Verified. Reporting the two exceptions is what added the numeral. The value
 was read off the source PDF, and the bibliography note records where, so a future reader can
 check it without refetching.
+
+## The site accepted on 2026-10-26
+
+`bind` gained one identity, `0.061`, printed three times in Paper~III: Bartlett's test for equal
+variances across the nine arm-by-level cells of `tab:sigmagenome`, which the round-1 review asked
+for before the paper could keep calling $\sigma$ "a property of the genome". A test statistic is
+not a field of any run JSON, so no registry entry can hold it. It is derived instead, by
+`_bartlett_p` in `scripts/verify_paper_claims.py`, from the same five-replicate sds the table
+prints, and all three sites are pinned there; the pure-Python value agrees with
+`scipy.stats.bartlett` (0.06103). The `0.67` beside it, Bartlett across the six curve rows, did
+not need accepting and is pinned the same way.

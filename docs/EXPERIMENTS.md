@@ -19,7 +19,7 @@ claim to the command that produced it.
 
 ```bash
 # 1. every machine-checkable number in all three papers, against the released artifacts
-python scripts/verify_paper_claims.py            # 1102 checks, offline, $0
+python scripts/verify_paper_claims.py            # 1139 checks, offline, $0
 
 # 2. the three-way split lost no quantity
 python scripts/verify_split_coverage.py          # 318 pre-split quantities accounted for, $0
@@ -109,8 +109,9 @@ runs the real four-arm study through real GEPA on it. No network, no spend.
 python scripts/positive_control.py      # expects A/B/C = 0.000, D = 1.000
 ```
 
-This is the only artifact in the project that would have failed loudly under the original,
-defective wiring. A null from an instrument never shown to register a signal is not evidence.
+It rules out a dead measurement path and nothing more: run against the pre-fix source tree it
+prints the same four scores and passes, so it would not have caught the defects Paper III
+retracts. A null from an instrument never shown to register a signal is still not evidence.
 
 ## Offline analyzers ($0, no network, no key)
 
@@ -137,7 +138,7 @@ to stop computing depth and measure it.
 
 | script | asserts |
 |---|---|
-| `verify_paper_claims.py` | 1102 checks: every machine-checkable number in the three papers against the artifacts, plus per-paper spine numbers, cross-paper agreement, and each paper's corrections count |
+| `verify_paper_claims.py` | 1139 checks: every machine-checkable number in the three papers against the artifacts, plus per-paper spine numbers, cross-paper agreement, and each paper's corrections count |
 | `verify_split_coverage.py` | all 318 quantities in the pre-split draft are carried by some paper, superseded by a verified replacement, or explicitly dropped with a reason |
 | `verify_reproducibility.py` | every corrected-harness run replays bit-for-bit; superseded runs are **skipped and reported**, never silently "verified" |
 | `verify_stdio.py` | the MCP console script speaks stdio (product, not paper) |
@@ -230,8 +231,10 @@ The single most useful field in any run JSON:
 ```
 
 Per component, whether the optimizer's output differs from the seed. Paper III exists because the
-first fifteen contrast runs did not print it: the critique gene was byte-identical to the seed in
-15/15 winning genomes, ten runs reported a held-out difference of exactly zero, and the consistency
-read as a tight null when it was a genome compared against itself. Check this field before
+first fifteen contrast runs did not print it: replayed at the pre-fix commit, ten of the twelve
+replayable runs had a critique gene byte-identical to the seed in every winning genome (the other
+two moved it on one seed each; `scripts/replay_superseded_genes.py`), ten runs reported held-out
+scores identical on every seed, and the consistency read as a tight null when it was a genome
+compared against itself. Check this field before
 interpreting any Δ. Its companion screen is as cheap — a `PASS` rate of zero means the search went
 to the degenerate corner.
