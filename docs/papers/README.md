@@ -16,11 +16,12 @@ on p₀, the base rate of first drafts that already satisfy every requirement: a
 0.060 held-out, at p₀ = 0.067 it does not measurably help, and the 0.102 swing between them is what
 carries the result rather than either endpoint.
 
-**"Should I buy a better verifier for my self-refine loop?"** → **II**. Probably not. A *perfect*
-inference-time checker is statistically indistinguishable from the loop's near-random self-critique
-(−0.0027, *t* = 0.33) and scores 0.042 *below* a deterministic text-statistics tool. What pays is
-the repair instruction: naming which constraint failed is worth +0.003, a concrete measured edit is
-worth +0.0613.
+**"Should I buy a better verifier for my self-refine loop?"** → **II**. Not first, when first
+drafts rarely pass. At one refine round a *perfect* inference-time checker that names the failed
+constraints buys nothing measurable over the loop's near-random self-critique (−0.0027, *t* = 0.33)
+and scores 0.042 *below* a deterministic text-statistics tool, on one fixed set of thirty tasks.
+What pays is the repair instruction: naming which constraint failed is worth −0.0080 on one worker
+and +0.0327 on another, and adding a concrete measured edit is worth +0.0613.
 
 **"How do I know my componentized optimization experiment actually ran?"** → **III**. Print one
 integer per component: whether the optimizer's output differs from the seed. Our first fifteen
@@ -29,10 +30,11 @@ byte-identical to the seed in every winning genome.
 
 ## Why II is a separate paper, not a section of I
 
-Paper II's six experiments invoke the optimizer **zero times**. Every one is
-`run_validation_study.py --arms A`, which scores a fixed genome and runs no search. Remove GEPA from
-this project entirely and Paper II loses not one number. It is a harness ablation of a self-refine
-loop, not a result about optimizers, and it has the study's best-supported effects.
+Every number Paper II measures scores arm A, which declares no evolvable genes, so no search can
+reach it. The cells bought for Paper II ran `run_validation_study.py --arms A`; the earlier curve
+runs carry all four arms, and Paper II reads arm A out of them. Two figures it quotes from the
+companions come from optimizer runs, and it labels them as quoted. It is a harness ablation of a
+self-refine loop, not a result about optimizers, and it has the study's best-supported effects.
 
 ## Layout
 

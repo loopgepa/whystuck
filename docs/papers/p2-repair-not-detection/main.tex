@@ -19,12 +19,12 @@
 \hypersetup{pdftitle={What a Checker Cannot Buy Is the Repair}}
 
 \title{What a Checker Cannot Buy Is the Repair\\
-\large A perfect verifier leaves a self-refine loop \emph{below} a text-statistics tool,\\
-and actionable repair feedback lifts it above both}
+\large In a self-refine loop, a perfect verifier did not beat a text-statistics tool;\\
+measured repair edits are what moved the score}
 
 \author{Vladimir Rotariu \\ Independent researcher \\
   \texttt{github.com/loopgepa/whystuck}}
-\date{September 2026}
+\date{October 2026}
 
 \begin{document}
 \maketitle
@@ -33,25 +33,26 @@ and actionable repair feedback lifts it above both}
 Practitioners usually strengthen a generate--critique--refine loop by improving its critique, on
 the reasoning that the loop can only repair what it detects. We measure the two halves separately
 on a verifiable instruction-following family, with \emph{no} optimizer in the design: every number
-we measure scores a fixed, hand-written genome, so nothing here depends on a search, except two
-figures quoted from the companion papers. Detection is not the binding constraint. Replacing the
-loop's near-random self-critique
-(F$_1 = 0.11$) with the true metric as a \emph{perfect} inference-time gate moves held-out score by
+we measure scores a fixed, hand-written genome, except two figures quoted from the companion
+papers. At one refine round, replacing the loop's
+near-random self-critique (F$_1 = 0.11$) with the true metric as a \emph{perfect} gate that names
+the failed constraints moves held-out score by
 $-0.0027$ ($t = 0.33$ over five replicates): a perfect checker buys nothing measurable over
-one at chance, and it scores $0.042$ \emph{below} a mere text-statistics tool ($t = 2.89$).
-The gains sit on the fix side. Holding the checker perfect and varying only the repair text,
-naming which constraint failed adds $+0.003$ over a bare ``revise'' while a concrete measured edit
-adds $+0.0613$ ($t = 8.08$, the best-supported effect we measure), and that configuration beats the
-measurement tool outright ($+0.0640$, $t = 5.47$). We also show F$_1$ is the wrong statistic for an
-in-loop critique: across a $10\times$ range of task difficulty the same critique's F$_1$ nearly
-triples while Youden's $J$ and Matthews' correlation do not improve at all, so a rising F$_1$ on
-an easier benchmark is base-rate inflation. The residual is one
-mechanical skill rather than a diffuse capability wall, exact word counting: $0.16 \to 0.33 \to 0.50$ across fix regimes and never
-solved. The practical consequence: do not buy a better detector, buy
-a more actionable fixer. Every gap we lean on rests on five independent replicates,
-paired within replicate on shared held-out tasks; the detector statistics and the two seed-level
-corroborations are single-draw. Every
-published claim this paper withdraws is listed in Appendix~\ref{sec:corrections}.
+one at chance, and it scores $0.042$ \emph{below} a text-statistics tool ($t = 2.89$).
+The gains sit on the fix side. Holding the checker perfect, naming the failed constraint is worth
+$-0.0080$ ($t = 0.59$) on this worker and $+0.0327$ ($t = 4.94$) on a second, while a concrete
+measured edit adds $+0.0613$ ($t = 8.08$; its registration was committed after the run), and
+that configuration beats the
+measurement tool ($+0.0640$, $t = 5.47$). Those replicates re-score one fixed set of thirty
+tasks; with the task draw as the unit only actionability stays under $p = 0.05$ ($p = 0.047$; the
+gap to the tool has $p = 0.30$); detector statistics are single-draw. F$_1$ is the wrong statistic for an
+in-loop critique: across a $10\times$ range of difficulty the same critique's F$_1$ nearly
+triples while Youden's $J$ and Matthews' correlation do not improve. In a generator that puts
+an exact word count in every hard task, the residual is that one skill: $0.16 \to 0.33 \to 0.50$
+across fix regimes and never solved. Where first drafts rarely pass ($p_0 = 0.067$), spend on a
+more actionable fixer before a better detector; we never crossed the two, and the conditional-lever
+paper finds a gate that pays at $p_0 = 0.267$. Withdrawn claims are listed in
+Appendix~\ref{sec:corrections}.
 \end{abstract}
 
 \input{../shared/series}
@@ -77,9 +78,10 @@ connects an optimizer to a component. Our contributions:
   \item \textbf{Detection is not sufficient} (\S\ref{sec:detector}). Ranked by
     detector quality the three critiques are intrinsic (chance) $<$ tool-fed (precision $1.00$)
     $<$ oracle (perfect by construction); ranked by held-out score they come out $0.765$, $0.837$,
-    $0.748$. The best detector gives the worst loop, scoring
+    $0.748$. The best detector gives the worst loop at one refine round, scoring
     below a measurement tool by $3.04\sigma$ and no better than a near-random critique.
-    The ordering is the evidence, and it is not
+    Each step also changes the text the refine step receives, so the ordering shows that
+    detector quality alone does not order these loops, which is not
     what ``get a better verifier'' predicts.
   \item \textbf{F$_1$ rises without discrimination improving} (\S\ref{sec:detector}). Scored
     across three task distributions differing only in difficulty, the same critique's F$_1$ rises
@@ -88,12 +90,14 @@ connects an optimizer to a component. Our contributions:
     carry a mechanism here.
   \item \textbf{The fix side is where the budget pays, and actionability is the lever}
     (\S\ref{sec:fixside}). Holding detection perfect, more refine attempts are worth $+0.0367$ and
-    concrete measured repair instructions $+0.0613$, while naming the failed constraint is worth
-    $+0.003$. That resolves the inversion above: the oracle underperformed at one retry because its
-    verdicts were terse, not because a perfect detector hurts.
+    concrete measured repair instructions $+0.0613$, while naming the failed constraint without a
+    measured edit is worth $-0.0080$ on this worker and $+0.0327$ on a second. That accounts for the
+    inversion above: at one retry the oracle's repair text named the failed constraint and gave no
+    measured edit, and adding the edit puts the oracle loop above the tool.
   \item \textbf{The residual is one mechanical skill} (\S\ref{sec:residual}), not a diffuse
     ceiling: under a perfect detector with maximally actionable feedback six of the eight
-    constraints reach $1.0$ and the remainder is almost entirely \texttt{exact\_word\_count}.
+    constraints reach $1.0$ and the remainder is almost entirely \texttt{exact\_word\_count}, a
+    constraint the hard tier puts in every task.
   \item \textbf{Each claim measured against its own noise, not a borrowed one}
     (\S\ref{sec:curverepeat}). An earlier draft scaled every gap by a $\sigma$ estimated on a
     different genome family; three of six gaps had a margin against the $2\sigma$ line smaller than
@@ -101,15 +105,18 @@ connects an optimizer to a component. Our contributions:
     times, $90$ runs, and report paired $t$-tests. Every claim survives; the magnitudes move in
     both directions, three shrinking by $34$ to $52\%$ and the one claim the earlier draft had
     \emph{withdrawn} for lack of power growing by $74\%$ and reinstated.
-  \item \textbf{Cross-domain corroboration} (\S\ref{sec:bcb}): on BigCodeBench-Hard the same
-    actionability lever is worth $+0.20$, a $3\times$ larger effect, plausibly because a code
-    assertion is a sharper repair target than a word count.
+  \item \textbf{Cross-domain corroboration} (\S\ref{sec:bcb}): on BigCodeBench-Hard a lever of
+    the same kind, the visible tests' source added to what the critique reads, is worth $+0.20$.
+    The gate there is the LLM critique rather than an oracle, so the contrast can move detection
+    as well as repair.
 \end{enumerate}
 
 The companion paper on the conditional lever asks whether a reflective optimizer can
 \emph{discover} any of this by evolving
-the critique. It cannot, and the reason connects to the result here: the optimizer moves the
-detector's threshold, and this paper's finding is that thresholds are not where the value is.
+the critique. At this family's low $p_0$ it does not, and the reason connects to the result here:
+the optimizer moves the detector's threshold, and where almost no first draft is already correct,
+thresholds are not where the value is. At $p_0 = 0.267$ the same paper finds the evolved verifier
+gains $0.060$, so the conclusion carries its $p_0$.
 
 \section{Background and Related Work}
 \label{sec:related}
@@ -132,10 +139,12 @@ Osmani's central prescription for a verification loop is a \emph{separated} veri
 model that wrote the code is way too nice grading its own homework''
 \citep{osmani2026loop}, which is a qualitative claim this design measures directly, and then
 sharpens in a direction the prescription does not anticipate: separation is not enough, because the
-maximally separated verifier is the true metric itself and it buys nothing measurable.
-Chronology: our runs were pre-registered and executed around and before these posts
-appeared, so the correspondence is convergent rather than causal, the practitioner
-literature supplied the vocabulary and the stakes, not the hypotheses.
+maximally separated verifier is the true metric itself, and at one refine round it buys nothing
+measurable.
+Chronology: every run in this study postdates these posts, so we cannot claim the
+correspondence arose independently of them. We take vocabulary and stakes from them; the
+hypotheses tested here are the ones stated in each run's registration, with the exceptions the
+harness section lists.
 
 \paragraph{Self-refine and the limits of self-correction.}
 Self-Refine \citep{madaan2023selfrefine} popularized generate--critique--refine
@@ -163,14 +172,35 @@ choice is what makes the noise floor of \S\ref{sec:curverepeat} non-zero in the 
 
 Our contribution against this line is to take the oracle signal Huang et al.\ identify as the
 active ingredient and \emph{supply} it, at inference, as the loop's gate. If reliable external
-verification were the binding constraint, that configuration should be the best in the study. It
-is the worst of three. What separates our result from theirs is therefore not the presence of an
+verification were the binding constraint, that configuration should be the best in the study. At
+one refine round it is the worst of three. What separates our result from theirs is therefore not the presence of an
 external signal but its \emph{form}: we vary the repair text while holding the verdict perfect, and
 that is where the effect lives. This independently matches
 \citet{decomposing2026selfcorrection}'s finding that a model's detection ability does not
 predict its correction success, and is consistent with contemporaneous
 code-generation findings that the feedback signal and the number of repair attempts, not
 the loop's structure, drive self-repair gains \citep{feedbackoverform2026,howmanytries2026}.
+
+\paragraph{Prior evidence on both sides of the detection-versus-repair split.}
+Three results point the other way and bound ours. DeCRIM \citep{ferraz2024decrim} runs a
+decompose--critique--refine loop on multi-constraint instructions, with a critic that names the
+unsatisfied constraints; given gold constraint lists, replacing Mistral's own critic with the
+rule-based IFEval evaluator raised its instruction-level IFEval accuracy from 62.3\% to 80.4\%,
+reporting the best of up to ten iterations. That oracle critic is close to our \emph{mid} oracle,
+a perfect verdict that names the failed constraint. Our matching cell (run~7) gains nothing over
+the intrinsic critique at one refine round; at three rounds (run~8) it gains $+0.0367$ over
+itself, and we never ran the intrinsic critique at three rounds. The two studies differ in worker,
+iteration budget, task generator and metric, so they do not contradict each other, and DeCRIM is
+evidence that a perfect critic can pay over a deeper budget. \citet{tyen2024cannotfind} find that on reasoning tasks LLMs fail to \emph{locate}
+mistakes yet correct them when given the location, which puts the bottleneck on detection; on our
+constraints the location is never in doubt, and the repair is what fails. \citet{zhang2024smallverifiers}
+find that a weak self-verifier limits small models' self-correction, by mis-deciding when
+to correct. On the repair side, Self-Refine's own ablation shows specific, actionable
+feedback beating generic feedback \citep{madaan2023selfrefine}, large models given targeted
+feedback refine to near-perfect scores where unguided self-refinement barely moves
+\citep{lee2025refinebench}, and solvers given near-complete feedback still resist it
+\citep{jiang2025feedbackfriction}. What this paper adds is a controlled magnitude: repair text
+varied while the verdict is held perfect, on one task family.
 
 \section{Method}
 \label{sec:method}
@@ -210,14 +240,15 @@ claim about deployable performance is drawn from it.
 \paragraph{The three repair-feedback levels.}
 Holding detection fixed at the perfect oracle, the text handed to the refine step takes one of
 three pre-registered forms: \emph{lo}, a bare ``revise'' verdict; \emph{mid}, which constraints
-failed with their targets; and \emph{hi}, which \emph{replaces} that list with a concrete
-\emph{measured} edit per failed constraint. The three are not nested: hi drops mid's census of
-satisfied constraints, so it carries more about how to repair and less about what was checked. As emitted, for one draft failing one constraint:
+failed with their targets; and \emph{hi}, which keeps mid's text in full and appends a concrete
+\emph{measured} edit per failed constraint. The levels are nested, so hi differs from mid only by
+the measured edits. As emitted, for a $15$-word draft of one held-out task failing one constraint:
 \begin{quote}\small
 \textbf{lo}\quad \texttt{not all requirements are satisfied; revise}\\
-\textbf{mid}\quad \texttt{Failed 1 of 4 requirement(s); fix: exact\_word\_count (use exactly 20
-words). Satisfied: include\_keyword, word\_max\_length, end\_with.}\\
-\textbf{hi}\quad \texttt{- the draft has 15 word(s) but needs exactly 20: add 5 more word(s)}
+\textbf{mid}\quad \texttt{Failed 1 of 4 requirement(s) \textemdash{} fix: exact\_word\_count (use
+exactly 20 words). Satisfied: word\_max\_length, no\_comma, forbidden\_word.}\\
+\textbf{hi}\quad the mid text, then \texttt{Concrete edits:} and \texttt{- the draft has 15
+word(s) but needs exactly 20: add 5 more word(s)}
 \end{quote}
 All three carry the same verdict and the same detector. Only the actionability differs.
 
@@ -236,17 +267,23 @@ verdict by comparison rather than judgement, because the task statement supplies
 and the tool supplies the measured value;
 \item a \textbf{non-determining measurement}: maps to no verifier, or leaves the verdict open.
 \end{itemize}
-Every retained field passes the old rule, since each needs a task-supplied target. Under the
-new one, four of the eight hard-constraint families are verdict-equivalent once the task
+Every constraint-mapped field passes the old rule, since each needs a task-supplied target; the
+\texttt{characters} and \texttt{sentences} fields map to no verifier. Under the
+new rule, three of the eight hard-constraint families are verdict-equivalent once the task
 statement is in the prompt: \texttt{words} against \texttt{exact\_word\_count},
-\texttt{longest\_word\_letters} against \texttt{word\_max\_length}, \texttt{bullet\_lines}
-against \texttt{num\_bullets}, \texttt{last\_words} against \texttt{end\_with}. That is $165$
-of $288$ constraint instances ($57\%$) in the hard pool, with at least one on every one of the
-$64$ tasks, though only $2$ tasks ($3\%$) are settled by the tool alone, since
-\texttt{forbidden\_word} and \texttt{include\_keyword} are uncovered. This does not contaminate
+\texttt{longest\_word\_letters} against \texttt{word\_max\_length}, and \texttt{bullet\_lines}
+against \texttt{num\_bullets}. A fourth, \texttt{last\_words} against \texttt{end\_with}, comes
+close and falls short: the readout strips edge punctuation from every word, every hard
+\texttt{end\_with} phrase ends in a period, and the verifier demands that period, so the readout
+cannot tell a passing ending from a failing one. Counting \texttt{end\_with}, the four cover $165$
+of $288$ constraint instances ($57\%$) in the hard pool and settle $2$ of the $64$ tasks ($3\%$)
+by the tool alone; without it the three cover $137$ ($48\%$) and settle none. Either way at least
+one covered family sits on every task, and the uncovered families, \texttt{forbidden\_word},
+\texttt{include\_keyword}, \texttt{all\_lowercase} and \texttt{no\_comma}, keep the rest open.
+This does not contaminate
 held-out scores, which never see the tool. It changes the reading of the detector
 result in \S\ref{sec:detector}: the tool-fed critique's $\mathrm{F}_1$ of $0.11 \to 0.83$ is
-substantially the tool \emph{replacing} the detector on the majority of constraint checks,
+substantially the tool \emph{replacing} the detector on about half of the constraint checks,
 rather than a prompt that learned to detect better.
 
 \section{Experimental Setup}
@@ -256,7 +293,8 @@ rather than a prompt that learned to detect better.
 instruction-following runs, raised to 1024 on the five BigCodeBench ones and 512 on the earlier
 MBPP+ attempt). No reflection model is
 involved in any measurement \emph{we make} here, since none of our configurations optimizes
-anything; the reflection field recorded in each run's metadata is the CLI default and is inert.
+anything; the reflection model a run's metadata records, whether the CLI default or one passed
+explicitly, is inert for arm~\textbf{A}, which never reflects.
 Two figures in \S\ref{sec:detector} are exceptions, and are quoted rather than measured: the
 held-out movements loop-level optimization buys over prompt-only optimization with a substituted
 critic, which come from companion runs reported in Paper~I and Paper~III and were produced under
@@ -312,7 +350,8 @@ pairing each critique's verdict, \texttt{PASS} or a list of fixes, with the grou
 \texttt{mc\_pass} of the exact draft it judged, on the seed loop over the
 held-out split (Table~\ref{tab:curve}, left columns). The intrinsic critique is a
 \emph{near-random} detector: F$_1 = 0.11$ on run~3 and effectively $0$ on run~5
-(it emits \texttt{PASS} on drafts that fail, precision $0.08$). A detector this
+(it emits \texttt{PASS} only on drafts that fail, so its precision is $0.00$, against run~3's
+$0.08$). A detector this
 poor offers no reliable signal to sharpen.
 Strikingly, the \emph{same} critique fed the measurement tool (run~4) becomes a
 reliable detector (precision $1.00$, F$_1 = 0.83$), which is why the tool lifts the baseline. This
@@ -334,7 +373,7 @@ the model behind the critique step changed:
 critique model & relation to worker & $n$ & \texttt{PASS} rate & tp & fp & F$_1$ \\
 \midrule
 \texttt{gpt-4.1-mini} & \emph{is} the worker & $50$ & $0.26$ & $1$ & $12$ & $0.11$ \\
-\texttt{gpt-5.6-luna} & same vendor, other lineage & $30$ & $0.13$ & $4$ & $0$ & $\mathbf{1.00}$ \\
+\texttt{gpt-5.6-luna} & same vendor, other model & $30$ & $0.13$ & $4$ & $0$ & $\mathbf{1.00}$ \\
 \texttt{llama-3.3-70b} & other vendor, other lineage & $80$ & $\mathbf{0.00}$ & $0$ & $0$ & --- \\
 \bottomrule
 \end{tabular}
@@ -342,11 +381,13 @@ critique model & relation to worker & $n$ & \texttt{PASS} rate & tp & fp & F$_1$
 
 \noindent
 The ordering is not the one the remedy predicts. Moving off the worker's own weights does help:
-the same-vendor, other-lineage critic is the only accurate detector of the three. Moving
+the same-vendor critic, a different model from the worker's, is the only accurate detector of
+the three. Whether it also shares the worker's training lineage the release cannot say; the series
+calls it the cross-lineage critic. Moving
 \emph{further}, to another vendor entirely, does not help more: it produces a critic that
 \textbf{never emits \texttt{PASS} at all}, missing all nine already-correct drafts in $80$ events.
 That is not a better verifier but a degenerate one, behaviourally identical to \emph{always
-refine}, and it is the same degeneracy the companion paper on the silent no-op reports the
+refine}, and it is the same degeneracy the companion paper on the conditional lever reports the
 optimizer converging to. Two caveats hold the reading down: the perfect row rests on $30$ events
 with four positives, and every row scores the \emph{seed} rubric, so this measures the model
 behind the critique and not an evolved one. The three base rates are comparable: the
@@ -361,28 +402,40 @@ $\sigma(\dd) = 0.0291$. On the \emph{optimization} axis, evolving the loop on to
 substituted critic buys nothing over evolving the prompt alone: $+0.008$ and $+0.014$, both inside
 that same noise. Those two are the only optimizer-derived figures in this paper, quoted rather
 than measured here (\S\ref{sec:setup}): the cross-provider run's $+0.014$ from Paper~I and the
-cross-lineage run's $+0.008$ from Paper~III. They carry a heavier caveat than that provenance
-suggests: both come from contrast runs whose loop-level gene is byte-identical to the
-seed, so neither measures evolving a loop, and Paper~III withdraws that column as a measurement.
-Read them as the absence of evidence they are, not as evidence of absence. The two axes answer different questions,
+cross-lineage run's $+0.008$ from Paper~III. Each carries a heavier caveat than that provenance
+suggests. The $+0.008$ comes from a run recorded before the harness correction. Replayed, its
+loop-level arm rewrote the critique on one of its $3$ seeds and left it byte-identical on the
+others (Paper~III), and the whole contrast sits on that seed, the only one of the $3$ where the two
+arms differ, and where the prompt-only arm also rewrote its prompt. So it measures one evolved
+critique on one task draw. The $+0.014$
+comes from the corrected harness, where the loop-level arm changed its critique on only $3$ of
+$8$ seeds, and $74\%$ of the positive contrast comes from seeds on which that arm returned the
+seed genome and only the prompt-only arm moved (Paper~III). Read both as the absence of evidence
+they are, not as evidence of absence. The two axes answer different questions,
 and a number from one is not a comparison for a number from the other.
 
 The first list is the one to resist over-reading. Swapping the critique model is \emph{not} a
 detection-only intervention: a different model rewrites the critique's \emph{prose} as well as its
 verdict, so it changes what the refine step is told at the same time as what the verdict is, the
 same two-at-once change the measurement tool makes, and the two land within $0.012$ of each other.
-The released critiques make the prose difference plain: across every complaint each of them
-recorded, the cross-lineage critic answers in a median of $53$ characters (``\emph{add one word;
-all other rules pass}'') and the cross-provider one in $210$. So this run
+The released critiques make the prose difference plain: across every non-empty complaint each of
+them recorded, the cross-lineage critic answers in a median of $53$ characters (``\emph{add one word;
+all other rules pass}'') and the cross-provider one in $210$. The cross-lineage critic also
+returns an \emph{empty} completion for $12$ of the $26$ complaints its seed loop recorded. The
+loop reads an empty critique as a failed verdict, so those twelve verdicts count as correct
+rejections in its $\mathrm{F}_1$, and it hands the refine step a blank repair text, less than the
+bare ``revise'' of \S\ref{sec:method}. So this run
 cannot say which half bought the $+0.048$, and we do not claim it does; separating them, one
 model's verdict carried by another model's prose, is the experiment this result calls for.
 
 What the list does establish is a negative and an ordering. The negative: a judge from somewhere
 else is not, on its own, the remedy: pushed to a second vendor it yields a critic that never
-passes, and the seed loop is no better for it. The ordering: the one intervention here that changes
-the verdict and \emph{nothing} else is the oracle, whose judgement is perfect and whose feedback
-carries nothing to act on, and it is the worst of the four. Detection quality alone does not order
-these loops, which is the claim this section makes and the model swaps do not disturb.
+passes, and the seed loop is no better for it. The ordering: no intervention in this list changes
+the verdict alone. The oracle comes closest, replacing the intrinsic critique's verdict with a
+perfect one and its prose with the \emph{mid} text of \S\ref{sec:method}, which names each failed
+constraint and its target but gives no measured edit, and it is the worst of the four. Detection
+quality alone does not order these loops, which is the claim this section makes and the model
+swaps do not disturb.
 
 \paragraph{$\mathrm{F}_1$ is the wrong statistic, and the $p_0$ calibration shows it.}
 Three task distributions differing only in which
@@ -420,16 +473,17 @@ better detector. It is the base-rate-independent statistics that carry the mecha
 \paragraph{But detection quality is necessary, not sufficient.} If a poor detector were the \emph{only} obstacle, a better
 one should monotonically raise the loop's held-out score. It does not
 (Table~\ref{tab:curve}). Read the second row with the taxonomy of
-\S\ref{sec:method} in hand: for $57\%$ of constraint instances the tool's readout is
-verdict-equivalent given the task statement, so that F$_1$ is largely measurement substituting
-for judgement. The intrinsic critique (F$_1\!=\!0.11$) yields seed
+\S\ref{sec:method} in hand: for $48\%$ of constraint instances the tool's readout is
+verdict-equivalent given the task statement, and for $57\%$ if \texttt{end\_with} is counted, so
+that F$_1$ is in large part measurement substituting for judgement. The intrinsic critique (F$_1\!=\!0.11$) yields seed
 $0.765$; the tool-fed critique (F$_1\!=\!0.83$) yields $0.837$; but the
 \emph{oracle} critique (F$_1\!=\!1.0$ by construction) yields only $0.748$, the
 best detector gives the \emph{worst} of the three. The reading rests on the oracle's two gaps,
 which differ in strength, and the noise floor sizes them: the oracle sits
 $0.088$ below the tool-fed critique at $3.04\sigma$, but only $0.028$ below the
 \emph{intrinsic} one at $0.98\sigma$, so on this evidence a perfect checker buys
-nothing measurable over a near-random one and is clearly worse than a measurement tool. The
+nothing measurable over a near-random one at one refine round and is worse than a measurement
+tool. The
 ordering holds on point estimates; the load-bearing half of it is the comparison against the
 tool. Both halves have since been re-scored five times each (\S\ref{sec:curverepeat}): the gap
 against the tool is $-0.0420$ at $t = 2.89$, replicated, and the gap against the intrinsic
@@ -441,8 +495,9 @@ predict its correction success. Two non-exclusive mechanisms explain the inversi
 both pointing past detection: (i) the \emph{fix} step is the true bottleneck,
 even told exactly which constraints fail, the worker cannot reliably repair an exact
 word count in one refine round; and (ii) \emph{actionability} matters more than
-correctness, the tool-fed critique emits instructive fix prose where the oracle
-emits terse verdicts. Runs 9--10 test (ii) directly (\S\ref{sec:fixside}) and confirm
+correctness: the tool-fed critique writes its own repair prose from measured values, where the
+oracle's text names the failed constraint and its target and stops there. Runs 9--10 test (ii)
+directly (\S\ref{sec:fixside}) and confirm
 it, which resolves the tool${>}$oracle inversion as an actionability artefact rather
 than evidence that a perfect detector hurts; mechanism (i) survives alongside it,
 since even maximally-actionable feedback saturates at $0.873$.
@@ -488,21 +543,25 @@ lift is $0.8367 - 0.7767 = +0.060$ and not the $+0.072$ this column's rounded en
 \paragraph{A perfect detector does not lift the ceiling (run 7).} The oracle-critique
 control, where the in-loop gate is the true metric, was pre-registered to test
 whether the loop \emph{can} convert a perfect detector into higher performance
-(expected seed $\ge 0.85$). It cannot: the oracle seed is $0.748$, level with the
-intrinsic baseline ($0.765$) and \emph{below} the tool baseline ($0.837$). Detection
-quality is therefore \textbf{not} the binding constraint. Even told exactly which
+(expected seed $\ge 0.85$). At one refine round it cannot: the oracle seed is $0.748$, level with
+the intrinsic baseline ($0.765$) and \emph{below} the tool baseline ($0.837$). Detection
+quality is therefore \textbf{not} the binding constraint at that budget. Even told exactly which
 constraints fail, \texttt{gpt-4.1-mini} cannot reliably fix hard constraints (e.g.\ an exact
 word count) within the bounded refine budget.
 
 One scope condition belongs with that conclusion, because the companion paper on the conditional
-lever appears to contradict it and does not. Every run on this ladder is multi-hard, where the
-first-draft pass rate is $p_0 = 0.067$: almost no draft arrives already correct, so a gate has
-almost nothing to protect and its quality cannot pay. That paper raises $p_0$ to $0.267$ by
+lever appears to contradict it and does not. Every run on this ladder is multi-hard, the family
+whose calibration run measured a first-draft pass rate of $p_0 = 0.067$, and the ladder runs' own
+first drafts pass on between $1$ and $7$ of their thirty held-out tasks: few drafts arrive
+already correct, so a gate has little to protect and its quality has little room to pay. Run~4
+drew the most, $7$, which is close to the $p_0$ at which the conditional-lever paper finds a gate pays,
+and is one more reason to read its single-draw lift through the replicates of
+\S\ref{sec:curverepeat}. That paper raises $p_0$ to $0.267$ by
 changing which constraints the generator may use, and there evolving the verifier \emph{gains}
 $0.060$ held-out. The two results are one mechanism read from its two ends. A gate earns its keep
 only in proportion to the drafts it can spare from an unnecessary rewrite, and at $p_0 = 0.067$
-there are two such drafts in thirty. Detection is not the binding constraint \emph{here}, and the
-condition under which it becomes one is $p_0$.
+there are two such drafts in thirty. Detection is not the binding constraint \emph{here}, and
+$p_0$ is the condition under which we expect it to become one.
 
 \paragraph{More fix attempts help, but saturate (run 8).} Holding the detector perfect
 (oracle) and raising the refine budget $1 \to 3$ lifts the seed $0.748 \to 0.813$: the
@@ -533,14 +592,17 @@ and, since that floor was borrowed from another run family, the direct
 measurement: $+0.0613$ at $t = 8.08$ over five replicates of each row, the best-supported effect
 in the paper (\S\ref{sec:curverepeat}). The whole comparison remains a ceiling result measured with the
 true metric gating at inference. Two
-sharp qualifications follow. (i) The gain is entirely in the \emph{hi} step: lo $\approx$
-mid ($0.810$ vs.\ $0.813$), so naming \emph{which} constraint failed adds nothing over a
-bare verdict; only the concrete, measured edit moves the needle. (ii) The lever is the
+sharp qualifications follow. (i) On this worker the gain is entirely in the \emph{hi} step:
+naming \emph{which} constraint failed, without a measured edit, moves the loop by $-0.0080$ over a
+bare verdict ($t = 0.59$ over five replicates; the single draws read $0.810$ and $0.813$), and
+only the measured edit moves the needle. The second worker of \S\ref{sec:secondworker} disagrees,
+with $+0.0327$ for the same step at one refine round, so the value of naming the constraint
+depends on the worker, while the measured edit pays on both. (ii) The lever is the
 feedback's \emph{shape}, a hand-built measurement function. Finally, \emph{hi} ($0.873$) is the first oracle
 configuration to \emph{exceed} the tool baseline ($0.837$), resolving the run-4 tool
-$>$ oracle inversion (\S\ref{sec:detector}) as an actionability effect: the oracle
-underperformed the tool at $R{=}1$ because its verdicts were terse, not because a perfect
-detector hurts. It is also the first cell to clear the $0.85$ bar the oracle arm was
+$>$ oracle inversion (\S\ref{sec:detector}) as an actionability effect: at $R{=}1$ the oracle's
+repair text named the failed constraint without a measured edit, and we read its deficit against
+the tool as that missing edit rather than as harm from a perfect detector. It is also the first cell to clear the $0.85$ bar the oracle arm was
 registered against, which runs 7 and 8 missed: the loop \emph{can} turn a perfect detector into
 held-out score, and what the registered configuration lacked was actionable feedback rather than a
 better detector. Yet even maximal, exact repair guidance saturates at $0.873$ (still short of
@@ -587,7 +649,8 @@ maximally-actionable feedback (run 10), every ``choice'' constraint, \texttt{no\
 \texttt{all\_lowercase}, \texttt{num\_bullets}, \texttt{include\_keyword},
 \texttt{end\_with}, \texttt{forbidden\_word}, is satisfied at rate $1.0$, and
 \texttt{word\_max\_length} at $0.90$. The residual is almost entirely
-\texttt{exact\_word\_count} (with a small remainder in \texttt{word\_max\_length}):
+\texttt{exact\_word\_count} (with a small remainder in \texttt{word\_max\_length}, two
+failures in twenty):
 even told exactly ``the draft has 2 word(s) but needs exactly 20: add 18 more word(s)'',
 the \emph{hi} format of \S\ref{sec:method}, \texttt{gpt-4.1-mini} hits the exact count only
 $\sim\!0.50$ of the time (up from
@@ -595,8 +658,10 @@ $0.16$ intrinsic, $0.33$ with which-constraint feedback). This is the known
 inability of LLMs to control exact counts during generation, of words here rather than tokens:
 the verifier counts whitespace-delimited words with edge punctuation stripped. So the
 generator-limited residual is a single mechanical
-skill, of a kind a deterministic actuator (not prompt/critique optimization) would
-address.
+skill, of a kind a deterministic actuator (not prompt/critique optimization) might
+address; we have not tested one on this loop. The skill is also one the task generator selects
+for: the hard tier puts \texttt{exact\_word\_count} in every task because the worker misses it,
+so the residual describes this worker on this generator and not self-refine loops at large.
 
 \begin{table}[h]
 \centering
@@ -627,7 +692,12 @@ feedback: the first also swaps the intrinsic critique for the oracle and raises 
 from one round to three, so the trajectory bounds what the fix step recovers rather than
 attributing all of it to actionability. Six of the eight constraints reach $1.0$ and the only
 residual outside \texttt{exact\_word\_count} is $0.10$ in \texttt{word\_max\_length}. The generator-limited
-residual is one mechanical skill (exact counting), not a diffuse ceiling.}
+residual is one mechanical skill (exact counting), not a diffuse ceiling. Run~3's column pools its
+five seeds, $50$ \texttt{exact\_word\_count} instances against $30$ in the other two columns;
+restricted to the three seeds the other columns score, it reads $0.17$ for
+\texttt{exact\_word\_count}, $0.80$ for \texttt{word\_max\_length} and $1.00$ for every other
+constraint, so the small steps up in the choice constraints come from seeds the other columns
+never see.}
 \label{tab:residual}
 \end{table}
 
@@ -663,7 +733,7 @@ metric as its checker buys nothing measurable over its own near-random self-crit
 \emph{worse} than giving it text statistics, which is the stronger reading anyway, and the one
 the residual analysis of \S\ref{sec:residual} explains. Two caveats travel with all of these:
 they compare runs recorded on different dates, so they carry the same drift confound as $\sigma$
-itself, though the measured drift ($0.007$) is well under the gaps; and runs 7--10 vary retries
+itself, which no released measurement separates from sampling noise; and runs 7--10 vary retries
 and feedback shape as well as checker quality, which \S\ref{sec:fixside} separates.
 
 The next subsection replaces this borrowed denominator with each row's own, and every ratio above
@@ -703,15 +773,19 @@ run 9  & oracle, lo         & 3 & 0.0142 & $0.49\times$ \\
 run 10 & oracle, hi         & 3 & 0.0164 & $0.56\times$ \\
 \bottomrule
 \end{tabular}
-\caption{$\sigma$ measured on the rows the gaps come from. \textbf{Every row is quieter
-than the denominator the paper borrowed}, between $0.38$ and $0.82$ of it, so the borrowing was
-conservative and the published ratios were understated rather than flattered. The direction was
-not knowable in advance, and we had guessed wrong: sampled-call count is one candidate mechanism
-for genome-dependent $\sigma$, and it predicts the $R{=}3$ rows
+\caption{$\sigma$ measured on the rows the gaps come from. Each row's sd of one draw is
+between $0.38$ and $0.82$ of the borrowed $0.0291$, but that ratio is not like for like:
+$\sigma(\dd)$ is the sd of a \emph{difference} of two draws, and its single-draw counterpart is
+$0.0291/\sqrt{2} = 0.0205$, against which $2$ of the six rows are noisier. The sd of each
+paired gap of Table~\ref{tab:curvepairs}, the quantity a ratio divides, runs from
+$0.58$ to $1.12$ of $0.0291$, above it for the oracle-under-tool gap. Every one of these rests on
+five draws, so the borrowing was shown neither conservative nor flattering. Sampled-call count is one candidate
+mechanism for genome-dependent $\sigma$, and it predicts the $R{=}3$ rows
 should be the noisiest. They are not, $R{=}1$ averages $0.0166$ against $R{=}3$'s $0.0181$, and
 the quietest and second-noisiest rows sit at the same $R$. The spread here is $2.2\times$ against
-$5.9\times$ across the $p_0$ genomes, so ``$\sigma$ is a property of the genome'' survives with a
-smaller coefficient on this family.}
+$5.9\times$ across the $p_0$ genomes, and Bartlett's test does not reject one common $\sigma$
+across the six rows ($p = 0.67$), so this family gives no evidence that $\sigma$ depends on the
+genome.}
 \label{tab:curvesigma}
 \end{table}
 
@@ -731,7 +805,9 @@ oracle under intrinsic, 7 under 3 & $-0.0283$ & $-0.0027$ & 0.0081 & 0.33 & not 
 \bottomrule
 \end{tabular}
 \caption{Each comparison paired \emph{within} a replicate over the shared held-out tasks, on
-$t(4)$, so the critical values are $2.132$ and $2.776$ rather than $1.96$. Every claim the paper
+$t(4)$, so the critical values are $2.132$ and $2.776$ rather than $1.96$. Every replicate scores
+the same thirty tasks, so these tests measure scoring noise and not task-draw variance;
+\S\ref{sec:threats} gives the seed-level values. Every claim the paper
 leans on survives, and every one is now carried by a replicated interval instead of a single draw
 divided by a borrowed $\sigma$. The magnitudes are the part that moves, and not all one way:
 three shrink by $34$ to $52\%$, actionability is unchanged to within $3.2\%$, the
@@ -785,11 +861,14 @@ time on a host with ample free RAM, such an out-of-memory kill is the \emph{solu
 image/mount error), which aborts loudly rather than silently recording a $0.0$.}
 
 \paragraph{Actionable feedback lifts the code baseline too, and more strongly.} The one
-intervention that helped on instruction-following, concrete measurement-shaped repair
-feedback (runs 9--10), transfers to code. Holding the arm at A
-(no optimizer, so the lever is feedback \emph{shape}) and varying only the in-loop
-visible-test feedback between a bare verdict (\emph{lo}) and the verdict plus the source of the
-visible tests the solution must satisfy (\emph{hi}), the held-out (hidden-test) score rises by
+intervention that helped on instruction-following, concrete repair feedback (runs 9--10), has a
+counterpart in code that also helps. It is a lever of the same kind and not the same
+configuration: no oracle gates this loop. The LLM critique still decides \texttt{PASS} and writes
+the repair prose, after reading the visible-test result in one of two forms, a bare verdict
+(\emph{lo}) or the failure detail plus the source of the visible tests the solution must
+satisfy (\emph{hi}). So lo against hi can move detection as well as repair, and \emph{hi} hands over test
+source rather than a measured edit. Holding the arm at A (no optimizer), the held-out (hidden-test)
+score rises by
 a mean $+0.20$ across six seeds (per-seed $+0.40, 0.00, +0.20, +0.20, +0.20, +0.20$), a
 $3\times$-larger effect than the instruction-following actionability lift ($+0.063$), plausibly
 because a code assertion is a sharper repair target than a word-count. \textbf{We do not report
@@ -805,8 +884,9 @@ column is unavailable here rather than favourable. What the evidence is, stated 
 six seeds move by $+0.20$ or more, and on ten binary-scored held-out tasks $+0.20$ is two task
 flips per seed. Read it as a large and consistent shift with no calibrated interval, not as a
 significant one. One further qualification: the held-out scores carry some
-execution non-determinism (the effect size dwarfs it, but we do not over-read the exact value). This reinforces the paper's conclusion:
-the productive lever is the fixer and the actionability of its feedback.
+execution non-determinism (the effect size dwarfs it, but we do not over-read the exact value). It is consistent with the paper's conclusion that the productive lever is the fixer and the
+actionability of its feedback, as a cross-domain check on a differently shaped lever rather than a
+replication of runs 9--10.
 
 \paragraph{Reproducibility scope.} We release cassettes and scores, but do \emph{not} claim
 byte-for-byte replay of the full call trace in the code domain: model solutions may use unseeded
@@ -828,7 +908,8 @@ for another lineage moves nothing either way, and neither $t$ reaches one. \emph
 the gate perfect and varying only what the repair step is told walks the same loop up by a
 multiple of that, the largest step coming from measured edits rather than from a verdict. This is
 the paper's claim on an independent stack, and it is also where we lost a pre-registered prediction:
-the perfect-oracle cell is the best cell, because it changes the repair text as well as the gate.
+the registered perfect-oracle cell beats every non-oracle cell, because it changes the repair text
+as well as the gate.
 Bars are $\pm$1 standard error of the paired difference; the cells are tabulated in
 \S\ref{sec:secondworker}.}
 \label{fig:worker}
@@ -843,10 +924,12 @@ independent stack, reported as such. Figure~\ref{fig:worker} is the whole line i
 
 We pre-registered the prediction that \emph{the perfect oracle would not be the best cell}, since
 that is what the ordering above says. \textbf{We lost that prediction}, and the way we lost it is
-the finding. The oracle is the best cell, by $+0.0437$ at $t = 5.80$ over twenty seeds and
-$t = 4.70$ over the two hundred held-out task pairings. Those are not two hundred
-independent tasks: they cover $62$ distinct ones, the most-reused appearing $8$ times, so the
-task-level figure is anti-conservative and the seed-level one is what we lean on. Taken at face value it reverses
+the finding. The oracle is the best of the registered cells, beating the intrinsic loop by
+$+0.0437$ at $t = 5.80$ over twenty seeds and
+$t = 4.70$ over the two hundred held-out task pairings. Each seed generates its own task pool, so
+the two hundred are $200$ distinct tasks from twenty independent draws, although the generator's
+positional task ids repeat across seeds. We lean on the seed-level figure, the more conservative
+of the two. Taken at face value it reverses
 this paper's headline on a second worker.
 
 It does not, and the reason is a confound we had documented one section earlier without applying it
@@ -854,7 +937,8 @@ to our own registration. \textbf{The oracle cell is not a detection-only interve
 the verdict with the true metric \emph{and} the repair text with the metric's feedback. It moves
 both halves of the loop at once, exactly as a critique-model swap does
 (\S\ref{sec:detector}). Holding the gate perfect and varying only the repair text, the same
-\texttt{lo}/\texttt{mid}/\texttt{hi} ladder as \S\ref{sec:fixside}, separates them:
+three \texttt{lo}/\texttt{mid}/\texttt{hi} texts as \S\ref{sec:fixside}, here at one refine round
+rather than three, separates them:
 
 \begin{center}\small
 \begin{tabular}{lcccr}
@@ -888,9 +972,10 @@ ladder this paper already runs rather than a contrast invented after seeing the 
 
 That is this paper's thesis, measured on a worker it was not derived from. We do \emph{not} claim
 it is measured more strongly here: the original's $t = 8.08$ is over five replicates of a fixed
-thirty-task set and carries no task-draw term, while these $t$ values are over twenty seeds
-redrawing an often-overlapping pool, so the two are not a like-for-like comparison and this
-paper elsewhere refuses exactly that kind of pooling. The apparent reversal was the bundle, and the
+thirty-task set and carries no task-draw term, while these $t$ values are over twenty independent
+task draws and do carry one. So these speak to task-draw variance where the original cannot, on
+a different worker at a different budget, and the two $t$ values remain incomparable as measures of
+one effect. The apparent reversal was the bundle, and the
 lesson we take from losing the prediction is that a registered prediction about a cell that moves
 two things tests neither.
 
@@ -913,7 +998,7 @@ not \emph{a decent detector does not help}. The claim that a good detector is no
 constraint rests here on the oracle rows, where the gate is perfect by construction, and not on
 these two.
 
-One further observation belongs to the companion paper on the silent no-op. This worker's
+One further observation concerns the intrinsic critique itself. This worker's
 intrinsic critique is a false-\emph{alarm} machine where \texttt{gpt-4.1-mini}'s was a
 false-\emph{pass} machine at precision $0.08$: it emits \texttt{PASS} on $1$ of $200$ drafts at
 the level the table above uses, and at the relaxed level where $181$ of $200$ first drafts are
@@ -940,8 +1025,7 @@ treat that as unsupported. The two workers also do not face the same difficulty.
 identical task generation this worker's first-draft pass rate is $p_0 = 0.095$ against
 \texttt{gpt-4.1-mini}'s $0.067$, but relaxing one constraint takes it to $0.905$ where the other
 reaches $0.267$, so the two stacks are not matched on the axis the conditional-lever paper's headline turns
-on. Twenty seeds is also not twenty independent task draws: the pool holds $64$ tasks and each seed
-draws $18$. We claim a replication of the detection-versus-repair ordering, not of any magnitude.
+on. We claim a replication of the detection-versus-repair ordering, not of any magnitude.
 
 \section{Threats to Validity}
 \label{sec:threats}
@@ -958,7 +1042,13 @@ What carries every claim now is the five-replicate
 paired $t$-test of \S\ref{sec:curverepeat}, whose unit is the replicate rather than the seed.
 Those standard errors describe sampling noise on a \emph{fixed} task set, since every replicate
 scores the same thirty tasks; they contain no task-draw component and are not a substitute for
-more seeds.
+more seeds. The three seeds are three independent task draws, so a coarser test with the task draw
+as its unit exists: average each seed's five replicates and test the three per-seed gaps on
+$t(2)$. On that test the tool lift has $p = 0.28$, the oracle-under-tool gap $p = 0.30$, the refine
+budget $p = 0.10$, actionability $p = 0.047$, the oracle-under-intrinsic null $p = 0.79$ and run~10
+over the tool $p = 0.064$. Only actionability stays under $0.05$, so every other $p<0.05$ in this
+paper is a statement about these thirty tasks, and the oracle-under-tool gap in particular is not
+established beyond them.
 
 \textbf{No multiplicity correction.} Each comparison here was specified before the runs that
 answer it, bar the two the harness section names, where version control cannot place the
@@ -980,7 +1070,8 @@ all seven rows; \S\ref{sec:fixside} separates the levers, and we print the $R$ c
 
 \textbf{Between-run comparisons carry provider drift.} The gaps in Table~\ref{tab:curve} compare
 runs recorded on different dates, so they carry the same drift confound as the cross-run $\sigma$
-that scaled them, though the measured drift ($0.007$) is well under the gaps. The replicates of
+that scaled them, and nothing released measures that drift apart from sampling noise. The
+replicates of
 \S\ref{sec:curverepeat} were drawn in one session and do not have this problem, which is one more
 reason they supersede the ratios.
 
@@ -996,7 +1087,8 @@ instrument for this loop, since a metric that partly rewards saying less is expo
 critique that pushes toward shorter answers.
 
 \textbf{Single worker model:} results may be model-dependent \citep{huang2023cannot}. In
-particular the residual of \S\ref{sec:residual} is a \texttt{gpt-4.1-mini} limitation, and a
+particular the residual of \S\ref{sec:residual} is a \texttt{gpt-4.1-mini} limitation, measured on a
+generator that puts the failing constraint in every task, and a
 worker that counts words reliably would move the ceiling without any change to the loop.
 \textbf{One task family:} verifiable instruction-following may be a domain where the critique
 has unusually little leverage, which is why \S\ref{sec:bcb} checks the actionability lever
@@ -1015,12 +1107,17 @@ moves held-out by $0.98\sigma$, i.e.\ not at all. Those three comparisons have s
 re-scored five times each, and all three survive on a replicated interval rather than a
 borrowed noise floor, with smaller magnitudes than one draw suggested: the tool lift is
 $+0.0393$ and the refine-budget lift $+0.0367$ over five replicates
-(\S\ref{sec:curverepeat}). The two positive effects survive as effects, at $p<0.05$
-($t = 4.38$ and $t = 3.12$); the third survives as a \emph{null}, at $t = 0.33$, which is the
-stronger reading and not a significance claim.
+(\S\ref{sec:curverepeat}). The two positive effects survive as effects on these thirty tasks,
+at $p<0.05$ ($t = 4.38$ and $t = 3.12$); the third survives as a \emph{null}, at $t = 0.33$, which
+is the stronger reading and not a significance claim. With the three seeds' task draws as the unit
+neither positive effect reaches $p<0.05$ (\S\ref{sec:threats}), so their generality beyond these
+tasks is open.
 
-The loop's bottleneck is therefore the fixer, not the detector, and the two are cleanly separable by
-experiment. Give the loop a \emph{perfect} inference-time checker and held-out score moves
+On this family, at one refine round, the loop's bottleneck is therefore the fixer. The two
+halves separate only where the verdict is held perfect and the repair text varied
+(\S\ref{sec:fixside}, \S\ref{sec:secondworker}); a model swap or the oracle cell moves both at
+once. Give the loop a \emph{perfect} inference-time checker that names the failed constraints and
+held-out score moves
 $-0.0027$ ($t = 0.33$) against its own near-random self-critique, a null that holds on five
 replicates without being an equivalence claim, while the same perfect checker scores $0.042$
 \emph{below} a deterministic text-statistics tool ($t = 2.89$). Ranked by detector quality the
@@ -1029,31 +1126,38 @@ $0.748$. A monotone relationship between detection and performance was the premi
 better verifier'', and it is absent.
 
 What resolves the inversion is \emph{actionability}, not correctness. Holding the checker perfect,
-a bare ``revise'' yields $0.810$ and naming the failed constraint yields $0.813$: identifying the
-failure is worth essentially nothing. A concrete measured edit, ``the draft has 15 word(s) but
+naming the failed constraint over a bare ``revise'' is worth $-0.0080$ ($t = 0.59$) on this worker
+and $+0.0327$ ($t = 4.94$) on the second, so its value depends on the worker. Adding a concrete
+measured edit, ``the draft has 15 word(s) but
 needs exactly 20: add 5 more word(s)'', yields $0.873$, worth $+0.0613$ at $t = 8.08$, and beats
 the measurement tool outright at $+0.0640$, $t = 5.47$. More refine attempts are worth $+0.0367$.
 So the two things that pay are both on the fix side, and the one that pays most is the shape of the
-repair instruction.
+repair instruction. The prescription that follows, a more actionable fixer before a better
+detector, is scoped to where we measured it: first drafts that rarely pass, so a gate has little to
+protect. We never crossed a better detector with actionable repair text, DeCRIM's oracle critic
+pays over a deeper budget \citep{ferraz2024decrim}, and the conditional-lever paper finds a gate
+that pays at $p_0 = 0.267$.
 
 Two methodological points travel with this. First, \textbf{F$_1$ is the wrong statistic for an
 in-loop critique}: across a $10\times$ range of task difficulty the same critique's F$_1$ nearly
 triples while Youden's $J$ and Matthews' correlation do not improve at all, so a rising F$_1$ on
 an easier benchmark is base-rate inflation and not a better detector. Second,
-\textbf{$\sigma$ is a property of the genome, so a borrowed denominator can decide a claim}. Ours
+\textbf{$\sigma$ estimates can sit far apart between genomes, so a borrowed denominator can decide
+a claim}. Ours
 was borrowed from another genome family and three of six gaps had less margin against $2\sigma$
 than the known spread in $\sigma$. Measuring it directly cost \$$2.98$ of priced bound, upgraded
-every ratio to a five-replicate $t$-test, shrank three magnitudes by $35$ to $52\%$, and
-reinstated one claim the earlier draft had withdrawn for lack of power. The borrowing had been
-conservative in all six rows, which we could not have known in advance and had in fact guessed
-backwards.
+every ratio to a five-replicate $t$-test, shrank three magnitudes by $34$ to $52\%$, and
+reinstated one claim the earlier draft had withdrawn for lack of power. Measured like for like,
+the borrowed floor was shown neither conservative nor flattering: five paired gaps came out
+quieter than it and the oracle-under-tool gap noisier, each on five draws.
 
 Finally, the residual is not a wall. Under a perfect detector with maximally actionable feedback
 six of the eight constraints reach $1.0$ and the remainder is almost entirely one mechanical skill: exact word
 counting, which rises $0.16 \to 0.33 \to 0.50$ across the three fix regimes and never reaches
-$1$. That
-localization is actionable in a way a diffuse ceiling would not be, a deterministic counter
-would likely recover most of it, and no amount of prompt or rubric rewriting did.
+$1$. The generator puts that constraint in every hard task because this worker misses it, so the
+localization describes this worker on this generator. It is actionable in a way a diffuse ceiling
+would not be: a deterministic counter is the obvious next test, which we have not run, and no
+amount of prompt or rubric rewriting closed it.
 
 We release the harness, every cassette that has a released result behind it, the
 pre-registrations and the corrections register. This
@@ -1072,7 +1176,7 @@ Earlier drafts of this work published claims it now withdraws. Reporting guidanc
 pre-registered work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Twenty-nine} entries follow. The
+collected here and the body text states only the surviving claim. \textbf{Forty-six} entries follow. The
 series' other two papers carry the entries bearing on their own claims, and the full
 register across all three, with the superseded values themselves, is in the released repository.
 
@@ -1281,6 +1385,105 @@ register across all three, with the superseded values themselves, is in the rele
     seed-level claim, ninety lines later, and never applied it to the task-level figure, which is
     the statistic that assumes independence across rows. Both counts are now derived from the
     released per-task vectors, and the seed-level test is what the claim leans on.
+  \item \textbf{``\emph{hi}, which \emph{replaces} that list'' (entry~25 above).} Entry~25 was itself
+    wrong. The function that built the \emph{hi} text for runs~10 and the second worker's
+    \texttt{hi} cell keeps the whole \emph{mid} text and appends the measured edits, and run~10's
+    cassette replays only under that function: with the edits alone, its refine calls miss.
+    The quotation entry~25 relied on printed the appended block without the text above it. The
+    levels are nested, so \emph{hi} minus \emph{mid} is the measured edit and nothing else, and
+    \S\ref{sec:method} now prints what the loop sent.
+  \item \textbf{``The one intervention that changes the verdict and nothing else is the oracle,
+    whose feedback carries nothing to act on''; ``the oracle emits terse verdicts''.} Run~7 hands
+    the refine step the \emph{mid} text, which names each failed constraint and its target, in
+    place of the intrinsic critique's prose. So the oracle cell moves the verdict and the repair
+    text together, the bundling \S\ref{sec:secondworker} names on the second worker.
+    The perfect-checker null and the gap to the tool now carry that description and their one-round
+    scope in the abstract, introduction and conclusion; what the oracle lacked at one round is a
+    measured edit, not words.
+  \item \textbf{``Naming which constraint failed adds $+0.003$.''} A single draw, printed in the
+    abstract beside replicated effects. Over five replicates the same step is $-0.0080$
+    ($t = 0.59$), and on the second worker at one refine round it is $+0.0327$ ($t = 4.94$). The
+    value of naming the constraint depends on the worker; ``adds nothing'' survives for this worker
+    only.
+  \item \textbf{The cross-lineage critic's ``median of $53$ characters'' across ``every complaint''.}
+    The median is over its non-empty completions. On its seed loop $12$ of its $26$ complaints are
+    empty strings, which the loop reads as a failed verdict and passes to the refine step as a blank
+    repair text. Its $\mathrm{F}_1$ counts those twelve as correct rejections, which they are by the
+    loop's own rule, but the description of what its refine step received was wrong for nearly half
+    of them.
+  \item \textbf{``Four of the eight hard-constraint families are verdict-equivalent.''} Three are.
+    The readout strips edge punctuation, every hard \texttt{end\_with} phrase ends in a period the
+    verifier requires, so \texttt{last\_words} cannot settle \texttt{end\_with}. The coverage is
+    $48\%$ without it and $57\%$ with it, and no task is settled by the tool alone without it. The
+    same paragraph said every retained field needs a task-supplied target, false of
+    \texttt{characters} and \texttt{sentences}, and named only \texttt{forbidden\_word} and
+    \texttt{include\_keyword} as blockers, where \texttt{all\_lowercase} and \texttt{no\_comma}
+    block too.
+  \item \textbf{The residual table's run-3 column.} It pools five seeds while the other columns
+    score three, so its small shortfalls on the choice constraints come from tasks the other
+    columns never see; on the matched seeds every choice constraint is at $1.00$ under the
+    intrinsic critique too. The \texttt{exact\_word\_count} trajectory survives ($0.17$ on matched
+    seeds). The caption now gives both.
+  \item \textbf{``Every run on this ladder is multi-hard, where $p_0 = 0.067$.''} That is the
+    family's calibration run. The ladder runs' own first drafts pass on $1$ to $7$ of thirty, and
+    run~4, with seven, sits near the $p_0$ at which the conditional-lever paper finds a gate pays.
+  \item \textbf{``The measured drift ($0.007$) is well under the gaps.''} No released artifact
+    measures drift. The figure traces to an earlier draft's mean signed difference between noise
+    replicates, which the companion paper on the conditional lever says is confounded with drift
+    and cannot be separated from it. The sentence now says drift is unmeasured.
+  \item \textbf{``The one intervention that helped on instruction-following transfers to code.''}
+    The code runs use no oracle: the LLM critique still gates and writes the repair prose, and
+    \emph{hi} adds the visible tests' source rather than a measured edit. The $+0.20$ stands as a
+    cross-domain check on a lever of the same kind, which can move detection as well as repair.
+  \item \textbf{``They cover $62$ distinct tasks''; ``twenty seeds is also not twenty independent
+    task draws'' (entry~29 above).} Both counted task ids. The multi-hard loader generates a fresh
+    pool per seed, so ids repeat across seeds with different content: the two hundred held-out
+    tasks are $200$ distinct payloads and the twenty seeds are twenty independent draws. Entry~29
+    corrected a reuse that does not exist, and the check written for it pinned the id count. The
+    second-worker $t$ values therefore carry task-draw variance, which the five-replicate tests do
+    not.
+  \item \textbf{The $p<0.05$ verdicts read as general.} The five-replicate tests re-score the same
+    thirty tasks. With the three seeds' task draws as the unit only actionability stays under
+    $0.05$ ($p = 0.047$), and the oracle-under-tool gap behind the original subtitle has $p = 0.30$. Each
+    verdict now carries its scope, and \S\ref{sec:threats} prints all six seed-level values.
+  \item \textbf{``Every row is quieter than the denominator the paper borrowed'', ``conservative in
+    all six rows''.} The comparison set one draw's sd against the sd of a difference of two draws.
+    Like for like, the paired gaps' own sd runs from $0.58$ to $1.12$ of $0.0291$, five below it
+    and the oracle-under-tool gap above, each on five draws, so the borrowing was shown neither
+    conservative nor flattering. The same caption said ``$\sigma$ is a property of the genome''
+    survives on this family; Bartlett's test across the six rows gives $p = 0.67$, and Paper~III
+    withdraws the claim for the same reason.
+  \item \textbf{``Do not buy a better detector, buy a more actionable fixer''; the optimizer
+    ``cannot'' discover the lever.} Both were stated without the scope the body gave them: first
+    drafts that rarely pass, one refine round for the null, and no cell crossing a better
+    detector with actionable repair text. DeCRIM reports an oracle critic paying over a deeper
+    budget, and the conditional-lever paper finds a gate that pays at $p_0 = 0.267$. Both sentences now
+    carry the scope, and the related work cites the results on the other side.
+  \item \textbf{``Our runs were pre-registered and executed around and before these posts
+    appeared.''} Every run postdates the June 2026 posts. The sentence now says so and claims
+    only that each run's hypotheses are the ones its registration states.
+  \item \textbf{``Both come from contrast runs whose loop-level gene is byte-identical to the
+    seed.''} True of neither. Paper~III's replay of the cross-lineage run shows its loop-level arm
+    rewriting the critique on one seed, the only seed where its $+0.008$ is non-zero. The
+    cross-provider run's $+0.014$ comes from the corrected harness, with the treatment applied on
+    $3$ of $8$ seeds.
+  \item \textbf{The subtitle ``A perfect verifier leaves a self-refine loop \emph{below} a
+    text-statistics tool, and actionable repair feedback lifts it above both''.} It stated, as a
+    property of self-refine loops, a gap that holds on one fixed set of thirty tasks: with the
+    task draw as the unit the oracle-under-tool gap has $p = 0.30$, and run~10 over the tool has
+    $p = 0.064$. Only the measured edit passes that test, at $p = 0.047$. The subtitle now says the
+    perfect verifier did not beat the tool and that the measured edits moved the score.
+  \item \textbf{Seven smaller misstatements.} The reflection field was called the CLI default on
+    every run, where $23$ of the $43$ released runs record another model, all inert for
+    arm~\textbf{A}. Run~5's precision
+    was given as run~3's $0.08$; it is $0.00$. The second worker's ladder was called the same as
+    \S\ref{sec:fixside}'s, which ran three refine rounds where it ran one. Its oracle cell was
+    called the best cell, where the \texttt{hi} cell, never the cell under test, scores higher. The conclusion
+    said $35$ to $52\%$ where every other site says $34$. Two pointers sent the never-accepting
+    verifier and the false-alarm critique to the paper on the silent no-op, which reports neither.
+    And \texttt{gpt-5.6-luna} was called another lineage than the worker in this paper and the same
+    lineage in its companions; the release cannot settle it, so this paper now says only that it
+    is a different model from the same vendor.
 \end{enumerate}
 
 \end{document}

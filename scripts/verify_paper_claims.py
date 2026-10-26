@@ -439,6 +439,11 @@ _REGISTER_TARGETED = frozenset(
         r"split cells\s+at \\\$\$([\d.]+)\$ against",
         r"comparison, \$(\d+)\\%\$ of instances, or",
         r"of instances, or \$(\d+)\\%\$ counting",
+        # Paper II's register entries of the review-r1 pass, each pinning the corrected value the
+        # entry states beside the claim it withdraws.
+        r"held-out\s+tasks are \$(\d+)\$ distinct payloads",
+        r"\$0.05\$ \(\$p = ([\d.]+)\$\), and the oracle-under-tool",
+        r"behind the original subtitle has \$p = ([\d.]+)\$",
     }
 )
 
@@ -552,6 +557,7 @@ _WORD_NUM = {
     "thirty-eight": 38,
     "forty-three": 43,
     "forty-five": 45,
+    "forty-six": 46,
     "two hundred": 200,
 }
 
@@ -3733,18 +3739,9 @@ def _checks() -> list[tuple[str, float, float, float]]:
         )
     )
 
-    # The lo->mid difference, which the split introduced as an explicit number where the pre-split
-    # draft only printed the two levels side by side ("lo $\approx$ mid ($0.810$ vs. $0.813$)").
-    # A derived number stated in an abstract needs the same pinning as one from a table.
-    out.append(
-        (
-            "tex: lo-to-mid actionability step",
-            _scrape(tex, r"naming which constraint failed adds \$\+([\d.]+)\$"),
-            0.0005,
-            _arm_mean("validation-study-fixbudget.json", "A", "seed_heldout")
-            - _arm_mean("validation-study-fbactlo.json", "A", "seed_heldout"),
-        )
-    )
+    # The lo->mid difference was pinned here as a single draw (run 8 minus run 9) while Paper II
+    # printed it beside replicated effects. Its replicated value has the opposite sign, so it is
+    # now derived from the replicates in `_p2_review_r1_checks`, at every site that states it.
 
     out.extend(_spine_checks())
     out.extend(_cross_paper_checks())
@@ -3763,6 +3760,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_output_cap_checks())
     out.extend(_seed_rubric_fp_triple_checks())
     out.extend(_second_worker_pool_checks())
+    out.extend(_p2_review_r1_checks())
     out.extend(_budget_false_pass_checks())
     out.extend(_registered_depth_bound_checks())
     out.extend(_sigma_margin_checks())
@@ -5659,7 +5657,7 @@ def _xprovider_checks() -> list[tuple[str, float, float, float]]:
     bold = r"\$\\mathbf\{([\d.]+)\}\$"
     patterns = (
         rf"\\emph\{{is\}} the worker & {num} & {dec} & {num} & {num} & {dec}",
-        rf"same vendor, other lineage & {num} & {dec} & {num} & {num} & {bold}",
+        rf"same vendor, other model & {num} & {dec} & {num} & {num} & {bold}",
         rf"other vendor, other lineage & {num} & {bold} & {num} & {num}",
     )
     for (name, cassette, seed_tuple, sep), pattern in zip(detectors, patterns, strict=True):
@@ -5903,7 +5901,9 @@ def _reconciliation_checks() -> list[tuple[str, float, float, float]]:
     out = [
         (
             "tex: p2 reconciliation, low p0",
-            _scrape(p2, r"the\s+first-draft pass rate is \$p_0 = ([\d.]+)\$"),
+            _scrape(
+                p2, r"calibration run measured a\s+first-draft pass rate of \$p_0 = ([\d.]+)\$"
+            ),
             0.0005,
             low,
         ),
@@ -6468,40 +6468,684 @@ def _seed_rubric_fp_triple_checks() -> list[tuple[str, float, float, float]]:
     return out
 
 
-def _second_worker_pool_checks() -> list[tuple[str, float, float, float]]:
-    """The second worker's task-level t treated 200 pairings as 200 independent tasks.
+@dataclass(frozen=True)
+class HeldoutCounts:
+    """How many held-out tasks the second worker's twenty seeds score, counted two ways."""
 
-    The paper already disclosed the reuse ninety lines later, for the SEED-level claim ("the pool
-    holds 64 tasks and each seed draws 18"), and never applied it to the task-level figure, which
-    is the statistic that actually assumes independence across rows. Both numbers now come from
-    the released per-task vectors: how many distinct held-out tasks the twenty runs cover, and how
-    often the most-reused one appears.
+    slots: int
+    distinct_ids: int
+    distinct_payloads: int
+    max_payload_reuse: int
+    seeds_matching_recorded_ids: int
+
+
+@cache
+def _second_worker_heldout_counts() -> HeldoutCounts:
+    """Count the second worker's held-out tasks by CONTENT, regenerated through the loader.
+
+    The released per-task vectors are keyed by task id, and the multi-hard generator numbers tasks
+    by position within a pool it regenerates per seed, so an id names a slot and not a task. A
+    first version of this check counted ids, found 62 distinct with one reused 8 times, and pinned
+    a reuse that does not exist (Paper II, register entries 29 and 39). Payloads are regenerated
+    here, and the regenerated ids are compared seed by seed with the ids the run recorded, so the
+    count cannot silently describe a different task set.
     """
-    ids: dict[str, int] = {}
-    runs = 0
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from whystuck.eval.multi_constraint import load_multi_constraint
+
     with open(f"{DOCS}/validation-study-groq-det-oracle.json", encoding="utf-8") as fh:
-        for run in json.load(fh)["runs"]:
-            runs += 1
-            for arm in run.values():
-                if isinstance(arm, dict) and isinstance(arm.get("seed_heldout_by_task"), dict):
-                    for task in arm["seed_heldout_by_task"]:
-                        ids[task] = ids.get(task, 0) + 1
-    assert ids, "no per-task vectors found; this check would pass vacuously"
+        doc = json.load(fh)
+    meta, runs = doc["meta"], doc["runs"]
+    n_heldout = int(meta["n_heldout"])
+    pool = max(64, 2 * max(int(meta["n_train"]), n_heldout) + 2)
+    ids: dict[str, int] = {}
+    payloads: dict[str, int] = {}
+    matching = 0
+    for seed, run in zip(meta["seeds"], runs, strict=True):
+        tasks = load_multi_constraint("heldout", seed=seed, n=n_heldout, pool=pool, hard=True)
+        recorded = sorted(run["A"]["seed_heldout_by_task"])
+        if recorded == sorted(t.id for t in tasks):
+            matching += 1
+        for task in tasks:
+            ids[task.id] = ids.get(task.id, 0) + 1
+            key = json.dumps(task.payload, sort_keys=True)
+            payloads[key] = payloads.get(key, 0) + 1
+    assert payloads, "no held-out tasks regenerated; this check would pass vacuously"
+    return HeldoutCounts(
+        slots=sum(payloads.values()),
+        distinct_ids=len(ids),
+        distinct_payloads=len(payloads),
+        max_payload_reuse=max(payloads.values()),
+        seeds_matching_recorded_ids=matching,
+    )
+
+
+def _second_worker_pool_checks() -> list[tuple[str, float, float, float]]:
+    """The second worker's held-out tasks: how many distinct ones, counted by content.
+
+    Paper II once said the 200 pairings "cover 62 distinct" tasks and that twenty seeds are "not
+    twenty independent task draws". Both counted ids. Each seed regenerates its pool, so the 200
+    held-out tasks are 200 distinct payloads and the seeds are independent draws; the paper now
+    says so and this pins it, with the regenerated ids matched against the recorded ones.
+    """
+    counts = _second_worker_heldout_counts()
+    if counts.seeds_matching_recorded_ids != 20:
+        raise AssertionError(
+            f"only {counts.seeds_matching_recorded_ids}/20 regenerated held-out id sets match the "
+            "released run, so the payload count would describe a different task set"
+        )
     tex = _sources().paper_tex("p2-repair-not-detection")
     return [
         (
             "tex: second-worker distinct held-out tasks",
-            _scrape(tex, r"they cover \$(\d+)\$ distinct ones"),
+            _scrape(tex, r"the two hundred are \$(\d+)\$ distinct tasks"),
             0,
-            float(len(ids)),
+            float(counts.distinct_payloads),
         ),
         (
-            "tex: second-worker max task reuse",
-            _scrape(tex, r"most-reused appearing \$(\d+)\$ times"),
+            "tex: second-worker tasks, register",
+            _scrape(tex, r"held-out\s+tasks are \$(\d+)\$ distinct payloads"),
             0,
-            float(max(ids.values())),
+            float(counts.distinct_payloads),
         ),
+        ("second-worker max payload reuse", 1, 0, float(counts.max_payload_reuse)),
     ]
+
+
+@cache
+def _curve_rep_module():
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import repeat_scores as rc
+
+    return rc
+
+
+def _curve_extra_pair(a: str, b: str) -> tuple[float, float, float]:
+    """(mean gap b-a, se, t) over the five curve replicates, for a pair outside CURVE_PAIRS.
+
+    Exists for the lo-to-mid step (run 8 over run 9). Paper II printed it as a single draw beside
+    replicated effects; its replicated value has the opposite sign, so it is derived the same way
+    as the six gaps of tab:curvepairs, paired within replicate on the shared tasks.
+    """
+    rc = _curve_rep_module()
+    va = [rc._curve_vector(a, k) for k in range(5)]
+    vb = [rc._curve_vector(b, k) for k in range(5)]
+    if any(v is None for v in va + vb):
+        raise AssertionError(f"a curve replicate of {a} or {b} is missing")
+    gaps = rc.paired_gaps(va, vb)
+    se = stdev(gaps) / len(gaps) ** 0.5
+    return mean(gaps), se, mean(gaps) / se
+
+
+def _curve_seed_level(a: str, b: str) -> tuple[float, float]:
+    """(t on 2 df, two-sided p) for gap b-a with the task draw as the unit.
+
+    The five-replicate tests re-score one fixed set of thirty tasks, so they condition on those
+    tasks. The three seeds are three independent task draws (multi-hard regenerates its pool per
+    seed), so averaging each seed's five replicates and testing the three per-seed gaps is the
+    test whose unit is the draw. On 2 df the t tail has a closed form, p = 1 - |t|/sqrt(2 + t^2),
+    so no distribution library is involved.
+    """
+    rc = _curve_rep_module()
+
+    def seed_mean(label: str, seed: int) -> float:
+        run = next(r for r in rc.CURVE if r.label == label)
+        vals = []
+        for rep in range(5):
+            job = rc.CurveJob(run, seed, rep)
+            if not job.done:
+                raise AssertionError(f"curve replicate {job.out} is missing")
+            vals.append(mean(rc._vector(job.out).values()))
+        return mean(vals)
+
+    diffs = [seed_mean(b, s) - seed_mean(a, s) for s in rc.CURVE_SEEDS]
+    if len(diffs) != 3:
+        raise AssertionError(f"expected three seeds, got {len(diffs)}")
+    t = mean(diffs) / (stdev(diffs) / len(diffs) ** 0.5)
+    return t, 1.0 - abs(t) / (2.0 + t * t) ** 0.5
+
+
+@cache
+def _first_critique_replay(slug: str, seeds: tuple[int, ...], mode: str) -> tuple:
+    """(first-draft passes, first-critique texts) of one curve-family run's seed loop, replayed.
+
+    `mode` is "intrinsic", "tool" (text_stats fed to the critique), "separate" (a substituted
+    critic in its own cassette namespace), or "oracle-<level>". One refine round is enough: the
+    quantities read here are the first draft and the first critique, and a shortened loop replays a
+    prefix of the recorded calls. Every task must replay; a miss raises rather than shrinking n.
+    """
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from run_validation_study import _build_oracle_feedback
+
+    from whystuck.eval.cassette import Cassette
+    from whystuck.eval.llm_worker import make_self_refine_run_task
+    from whystuck.eval.multi_constraint import (
+        load_multi_constraint,
+        mc_feedback,
+        mc_pass,
+        mc_score,
+    )
+    from whystuck.eval.study import seed_genome
+    from whystuck.eval.text_stats import text_stats
+
+    passes = 0
+    texts: list[str] = []
+    with Cassette(f"tests/fixtures/cassettes/study-{slug}.json", mode="replay") as cas:
+
+        def _unreachable(_prompt: str) -> str:  # pragma: no cover - replay never calls it
+            raise AssertionError("live model call during replay")
+
+        kw: dict = {}
+        if mode == "tool":
+            kw["stats_fn"] = text_stats
+        elif mode == "separate":
+            kw["critique_complete"] = cas.wrap(_unreachable, name="critic")
+        elif mode.startswith("oracle-"):
+            kw["oracle_critique"] = True
+            kw["oracle_feedback"] = _build_oracle_feedback(mode.split("-", 1)[1], mc_feedback)
+        run_task = make_self_refine_run_task(
+            cas.wrap(_unreachable, name="worker"),
+            mc_score,
+            feedback=mc_feedback,
+            max_retries=1,
+            **kw,
+        )
+        for seed in seeds:
+            for task in load_multi_constraint("heldout", seed=seed, n=10, pool=64, hard=True):
+                trace = run_task(seed_genome("study-A", evolvable=set()), task)
+                gen0 = next(s for s in trace.steps if s.step_id == "generate-0")
+                crit0 = next((s for s in trace.steps if s.step_id == "critique-0"), None)
+                passes += 1 if mc_pass(gen0.output_summary or "", task) else 0
+                texts.append("" if crit0 is None else (crit0.output_summary or ""))
+    return passes, tuple(texts)
+
+
+def _p2_review_r1_checks() -> list[tuple[str, float, float, float]]:
+    """Paper II's corrections from the round-1 review, every new or changed number derived.
+
+    Each block names the register entry it backs. The theme they share is the series' own: a
+    number that was right while the sentence around it described a different object (an id count
+    read as a task count, one draw read beside five, a five-seed column beside three-seed ones, a
+    fixed-task test read as a general one).
+    """
+    p2 = _sources().paper_tex("p2-repair-not-detection")
+    out: list[tuple[str, float, float, float]] = []
+
+    def site(label: str, pattern: str, tol: float, actual: float, group: int = 0) -> None:
+        vals = _scrape_all(p2, pattern)
+        out.append((f"tex: {label}", vals[group], tol, actual))
+
+    # --- lo-to-mid on this worker, replicated (register: "Naming ... adds +0.003") ----------
+    mid_lo, _mid_lo_se, mid_lo_t = _curve_extra_pair("run9", "run8")
+    if mid_lo >= 0:
+        raise AssertionError("the replicated lo-to-mid step is no longer negative; reword Paper II")
+    for label, pattern in (
+        (
+            "lo-to-mid replicated, abstract",
+            r"naming the failed constraint is worth\s+\$-([\d.]+)\$ \(\$t = ([\d.]+)\$\) on this "
+            r"worker",
+        ),
+        (
+            "lo-to-mid replicated, fix side",
+            r"moves the loop by \$-([\d.]+)\$ over a\s+bare verdict \(\$t = ([\d.]+)\$",
+        ),
+        (
+            "lo-to-mid replicated, conclusion",
+            r"``revise'' is worth \$-([\d.]+)\$ \(\$t = ([\d.]+)\$\) on this worker",
+        ),
+        ("lo-to-mid replicated, register", r"same step is \$-([\d.]+)\$\s+\(\$t = ([\d.]+)\$\)"),
+    ):
+        site(label, pattern, 0.00005, abs(mid_lo), 0)
+        site(label + " t", pattern, 0.005, abs(mid_lo_t), 1)
+    site(
+        "lo-to-mid replicated, contributions",
+        r"measured edit is worth \$-([\d.]+)\$ on this worker",
+        0.00005,
+        abs(mid_lo),
+    )
+    # The withdrawn single draw, quoted by the register entry that replaces it: derived the way the
+    # old check derived it, so the quotation is a checked value rather than a frozen literal.
+    site(
+        "lo-to-mid single draw, register quotation",
+        r"Naming which constraint failed adds \$\+([\d.]+)\$",
+        0.0005,
+        _arm_mean("validation-study-fixbudget.json", "A", "seed_heldout")
+        - _arm_mean("validation-study-fbactlo.json", "A", "seed_heldout"),
+    )
+    # The second worker's lo-to-mid step, restated beside it at each site.
+    w2, _w2_se, w2_t = _groq_paired("det-oracle-lo", "det-oracle")
+    for label, pattern in (
+        (
+            "second-worker lo-to-mid, abstract",
+            r"on this worker and \$\+([\d.]+)\$ \(\$t = ([\d.]+)\$\) on a second,",
+        ),
+        (
+            "second-worker lo-to-mid, conclusion",
+            r"and \$\+([\d.]+)\$ \(\$t = ([\d.]+)\$\) on the second",
+        ),
+        ("second-worker lo-to-mid, register", r"it is \$\+([\d.]+)\$ \(\$t = ([\d.]+)\$\)\. The"),
+    ):
+        site(label, pattern, 0.00005, w2, 0)
+        site(label + " t", pattern, 0.005, w2_t, 1)
+    for label, pattern in (
+        ("second-worker lo-to-mid, contributions", r"and \$\+([\d.]+)\$ on a second\."),
+        ("second-worker lo-to-mid, fix side", r"with \$\+([\d.]+)\$ for the same step"),
+    ):
+        site(label, pattern, 0.00005, w2)
+
+    # --- seed-level tests (register: "The p<0.05 verdicts read as general") ------------------
+    names = (
+        ("tool lift", "run3", "run4"),
+        ("oracle under tool", "run4", "run7"),
+        ("refine budget", "run7", "run8"),
+        ("actionability", "run9", "run10"),
+        ("oracle under intrinsic", "run3", "run7"),
+        ("run 10 over tool", "run4", "run10"),
+    )
+    printed = _scrape_all(
+        p2,
+        r"On that test the tool lift has \$p = ([\d.]+)\$, the oracle-under-tool gap \$p = "
+        r"([\d.]+)\$, the refine\s+budget \$p = ([\d.]+)\$, actionability \$p = ([\d.]+)\$, the "
+        r"oracle-under-intrinsic null \$p = ([\d.]+)\$ and run~10\s+over the tool \$p = ([\d.]+)\$",
+    )
+    pvals = {}
+    for (label, a, b), shown in zip(names, printed, strict=True):
+        _t, pv = _curve_seed_level(a, b)
+        pvals[label] = pv
+        tol = 0.0005 if shown < 0.1 and len(str(shown)) > 4 else 0.005
+        out.append((f"tex: seed-level p, {label}", shown, tol, pv))
+    below = [k for k, v in pvals.items() if v < 0.05]
+    out.append(
+        (
+            "seed-level p below 0.05 is actionability alone",
+            1.0,
+            0.0,
+            float(below == ["actionability"]),
+        )
+    )
+    for label, pattern, key in (
+        (
+            "seed-level p actionability, abstract",
+            r"stays under \$p = 0.05\$ \(\$p = ([\d.]+)\$;",
+            "actionability",
+        ),
+        (
+            "seed-level p oracle-under-tool, abstract",
+            r"gap to the tool has \$p = ([\d.]+)\$\)",
+            "oracle under tool",
+        ),
+        (
+            "seed-level p actionability, register",
+            r"\$0.05\$ \(\$p = ([\d.]+)\$\), and the oracle-under-tool",
+            "actionability",
+        ),
+        (
+            "seed-level p oracle-under-tool, register",
+            r"behind the original subtitle has \$p = ([\d.]+)\$",
+            "oracle under tool",
+        ),
+    ):
+        shown = _scrape(p2, pattern)
+        out.append((f"tex: {label}", shown, 0.0005 if shown < 0.1 else 0.005, pvals[key]))
+
+    # --- paired-gap sd against the borrowed floor (register: "Every row is quieter") ---------
+    sigma = _noise_estimate().sigma_delta_mean
+    _csig, cpairs = _curve_replicates()
+    ratios = [res.sd_between_replicates / sigma for res in cpairs.values()]
+    site(
+        "single-draw counterpart of sigma(Delta)",
+        r"\\sqrt\{2\} = ([\d.]+)\$",
+        0.00005,
+        sigma / 2**0.5,
+    )
+    for where, pattern in (
+        (
+            "caption",
+            r"the quantity a ratio divides, runs from\s+\$([\d.]+)\$ to "
+            r"\$([\d.]+)\$",
+        ),
+        ("register", r"paired gaps' own sd runs from \$([\d.]+)\$ to \$([\d.]+)\$"),
+    ):
+        lo, hi = _scrape_all(p2, pattern)
+        out.append((f"tex: paired-gap sd ratio low, {where}", lo, 0.005, min(ratios)))
+        out.append((f"tex: paired-gap sd ratio high, {where}", hi, 0.005, max(ratios)))
+    worst = max(cpairs, key=lambda k: cpairs[k].sd_between_replicates)
+    out.append(
+        ("anti-conservative gap is oracle under tool", 1.0, 0.0, float(worst == ("run4", "run7")))
+    )
+    out.append(("gaps conservative against sigma(Delta)", 5, 0, float(sum(r < 1 for r in ratios))))
+
+    # --- cross-lineage critic's empty complaints (register: "median ... every complaint") ----
+    _p, texts = _first_critique_replay("crossfamily", (0, 1, 2), "separate")
+    complaints = [t for t in texts if not t.strip().upper().startswith("PASS")]
+    empty = sum(1 for t in complaints if not t.strip())
+    for where, pattern in (
+        ("body", r"\\emph\{empty\} completion for \$(\d+)\$ of the \$(\d+)\$ complaints"),
+        ("register", r"On its seed loop \$(\d+)\$ of its \$(\d+)\$ complaints are"),
+    ):
+        e, n = _scrape_all(p2, pattern)
+        out.append((f"tex: cross-lineage empty complaints, {where}", e, 0, float(empty)))
+        out.append(
+            (f"tex: cross-lineage seed-loop complaints, {where}", n, 0, float(len(complaints)))
+        )
+
+    # --- first-draft passes on the ladder (register: "Every run ... p0 = 0.067") -------------
+    ladder = {
+        "run3": ("multihard", "intrinsic"),
+        "run4": ("feedback", "tool"),
+        "run7": ("oracle", "oracle-mid"),
+        "run8": ("fixbudget", "oracle-mid"),
+        "run9": ("fbactlo", "oracle-lo"),
+        "run10": ("fbacthi", "oracle-hi"),
+    }
+    firsts = {
+        k: _first_critique_replay(slug, (0, 1, 2), mode)[0] for k, (slug, mode) in ladder.items()
+    }
+    for where, pattern in (
+        ("body", r"pass on between \$(\d+)\$ and \$(\d+)\$ of their thirty"),
+        ("register", r"first drafts pass on \$(\d+)\$ to \$(\d+)\$ of thirty"),
+    ):
+        lo, hi = _scrape_all(p2, pattern)
+        out.append(
+            (f"tex: ladder first-draft passes low, {where}", lo, 0, float(min(firsts.values())))
+        )
+        out.append(
+            (f"tex: ladder first-draft passes high, {where}", hi, 0, float(max(firsts.values())))
+        )
+    out.append(
+        (
+            "tex: run 4 drew the most first-draft passes",
+            _scrape(p2, r"Run~4\s+drew the most, \$(\d+)\$"),
+            0,
+            float(firsts["run4"]) if max(firsts, key=firsts.get) == "run4" else -1.0,
+        )
+    )
+
+    # --- oracle taxonomy without end_with (register: "Four ... verdict-equivalent") ----------
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from whystuck.eval.multi_constraint import _HARD_PHRASES, MC_VERIFIERS, load_multi_constraint
+    from whystuck.eval.text_stats import text_stats
+
+    mh = load_multi_constraint("all", pool=64, hard=True)
+    three = {"exact_word_count", "word_max_length", "num_bullets"}
+    four = three | {"end_with"}
+    inst = [i for t in mh for i in t.payload["instruction_id_list"]]
+    alone = {
+        k: sum(all(i in fam for i in t.payload["instruction_id_list"]) for t in mh)
+        for k, fam in (("three", three), ("four", four))
+    }
+    # The mechanism, not just the count: every hard ending carries a period the verifier demands
+    # and the readout strips, so the readout reads the same for a passing and a failing ending.
+    blind = all(
+        p.endswith(".")
+        and text_stats(f"x y. {p}").split("last_words=")[-1]
+        == text_stats(f"x y. {p[:-1]}").split("last_words=")[-1]
+        and MC_VERIFIERS["end_with"](f"x y. {p}", {"phrase": p})
+        and not MC_VERIFIERS["end_with"](f"x y. {p[:-1]}", {"phrase": p})
+        for p in _HARD_PHRASES
+    )
+    out.append(("last_words cannot settle a hard end_with", 1.0, 0.0, float(blind)))
+    n3 = sum(1 for i in inst if i in three)
+    n4 = sum(1 for i in inst if i in four)
+    site("taxonomy three-family instances", r"without it the three cover \$(\d+)\$", 0, n3)
+    site(
+        "taxonomy three-family share",
+        r"cover \$\d+\$ \(\$(\d+)\\%\$\) and settle none",
+        0.5,
+        100 * n3 / len(inst),
+    )
+    out.append(("taxonomy three-family tasks settled alone", 0, 0, alone["three"]))
+    site("taxonomy four-family instances", r"the four cover \$(\d+)\$\s+of \$\d+\$", 0, n4)
+    site(
+        "taxonomy four-family share",
+        r"of \$288\$ constraint instances \(\$(\d+)\\%\$\) in the hard pool",
+        0.5,
+        100 * n4 / len(inst),
+    )
+    site(
+        "taxonomy four-family tasks alone",
+        r"settle \$(\d+)\$ of the \$64\$ tasks",
+        0,
+        alone["four"],
+    )
+    site(
+        "taxonomy four-family tasks alone pct",
+        r"of the \$64\$ tasks \(\$(\d+)\\%\$\)",
+        0.5,
+        100 * alone["four"] / len(mh),
+    )
+    site(
+        "taxonomy detector reading, three",
+        r"for \$(\d+)\\%\$ of constraint instances the tool's readout",
+        0.5,
+        100 * n3 / len(inst),
+    )
+    site(
+        "taxonomy detector reading, four",
+        r"and for \$(\d+)\\%\$ if \\texttt\{end\\_with\} is counted",
+        0.5,
+        100 * n4 / len(inst),
+    )
+    site(
+        "taxonomy register, three",
+        r"The coverage is\s+\$(\d+)\\%\$ without it",
+        0.5,
+        100 * n3 / len(inst),
+    )
+    site(
+        "taxonomy register, four", r"without it and \$(\d+)\\%\$ with it", 0.5, 100 * n4 / len(inst)
+    )
+
+    # --- residual table on matched seeds (register: "The residual table's run-3 column") ----
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import analyze_residual_by_constraint as arc
+
+    matched = arc.constraint_pass_counts(
+        f"{arc.CASSETTE_DIR}/study-multihard.json", [0, 1, 2], max_retries=1
+    )
+    pooled = arc.constraint_pass_counts(
+        f"{arc.CASSETTE_DIR}/study-multihard.json", [0, 1, 2, 3, 4], max_retries=1
+    )
+    ewc_n = _scrape_all(
+        p2, r"five seeds, \$(\d+)\$ \\texttt\{exact\\_word\\_count\} instances against \$(\d+)\$"
+    )
+    out.append(
+        ("tex: residual run-3 pooled ewc n", ewc_n[0], 0, float(pooled["exact_word_count"][1]))
+    )
+    out.append(("tex: residual matched ewc n", ewc_n[1], 0, float(matched["exact_word_count"][1])))
+    rates = _scrape_all(
+        p2,
+        r"it reads \$([\d.]+)\$ for\s+\\texttt\{exact\\_word\\_count\}, \$([\d.]+)\$ for "
+        r"\\texttt\{word\\_max\\_length\} and \$([\d.]+)\$ for every other",
+    )
+    out.append(
+        ("tex: residual matched ewc", rates[0], 0.005, arc.pass_rate(matched, "exact_word_count"))
+    )
+    out.append(
+        ("tex: residual matched wml", rates[1], 0.005, arc.pass_rate(matched, "word_max_length"))
+    )
+    others = [
+        arc.pass_rate(matched, i)
+        for i in arc._IDS
+        if i not in ("exact_word_count", "word_max_length")
+    ]
+    out.append(("tex: residual matched choice constraints", rates[2], 0.005, min(others)))
+    site(
+        "residual matched ewc, register",
+        r"trajectory survives \(\$([\d.]+)\$ on matched",
+        0.005,
+        arc.pass_rate(matched, "exact_word_count"),
+    )
+    site(
+        "residual matched choice, register",
+        r"every choice constraint is at \$([\d.]+)\$ under the",
+        0.005,
+        min(others),
+    )
+
+    # --- cross-provider run as Paper II now describes it (register: "byte-identical") --------
+    seeds, _b, d_seeds = _xprovider_acceptance()
+    strata = _xprovider_strata()
+    site(
+        "cross-provider treated seeds (p2)",
+        r"changed its critique on only \$(\d+)\$ of\s+\$\d+\$ seeds",
+        0,
+        d_seeds,
+    )
+    site("cross-provider seeds (p2)", r"on only \$\d+\$ of\s+\$(\d+)\$ seeds", 0, seeds)
+    site(
+        "cross-provider comparator share (p2)",
+        r"seeds, and \$(\d+)\\%\$ of the positive contrast",
+        0.5,
+        100 * strata["comparator only"].share,
+    )
+    site(
+        "cross-provider treated seeds, register",
+        r"with the treatment applied on\s+\$(\d+)\$ of \$\d+\$ seeds",
+        0,
+        d_seeds,
+    )
+
+    # --- reflection field (register: "Seven smaller misstatements") --------------------------
+    import glob
+
+    metas = [
+        json.loads(Path(f).read_text())["meta"] for f in glob.glob(f"{DOCS}/validation-study*.json")
+    ]
+    other = sum(1 for m in metas if m.get("reflection_model") != "openai/gpt-5.6-terra")
+    total_runs = _scrape_all(
+        p2, r"where \$(\d+)\$ of the \$(\d+)\$ released runs record another model"
+    )
+    out.append(
+        ("tex: runs recording a non-default reflection model", total_runs[0], 0, float(other))
+    )
+    out.append(("tex: released runs", total_runs[1], 0, float(len(metas))))
+
+    # --- the emitted repair texts (register: "hi, which replaces that list") -----------------
+    from run_validation_study import _build_oracle_feedback
+
+    from whystuck.eval.multi_constraint import mc_edit_directives, mc_feedback
+
+    task = load_multi_constraint("heldout", seed=0, n=10, pool=64, hard=True)[0]
+    words = int(_scrape(p2, r"As emitted, for a \$(\d+)\$-word draft"))
+    draft = " ".join(["word"] * words) + "."
+    mid_text = mc_feedback(draft, task)
+    edits = mc_edit_directives(draft, task)
+    hi_text = _build_oracle_feedback("hi", mc_feedback)(draft, task)
+    out.append(
+        (
+            "hi text is mid plus the measured edits",
+            1.0,
+            0.0,
+            float(hi_text == f"{mid_text}\n\nConcrete edits:\n{edits}"),
+        )
+    )
+
+    def _untex(s: str) -> str:
+        s = s.replace(r"\textemdash{}", "\u2014").replace(r"\_", "_")
+        return " ".join(s.split())
+
+    m = re.search(r"\\textbf\{mid\}\\quad \\texttt\{(.*?)\}\\\\", p2, re.DOTALL)
+    out.append(
+        (
+            "tex: printed mid text is what the loop emits",
+            1.0,
+            0.0,
+            float(bool(m) and _untex(m.group(1)) == mid_text),
+        )
+    )
+    m = re.search(
+        r"\\texttt\{Concrete edits:\} and \\texttt\{(.*?)\}\n\\end\{quote\}", p2, re.DOTALL
+    )
+    out.append(
+        (
+            "tex: printed hi edit is what the loop emits",
+            1.0,
+            0.0,
+            float(bool(m) and _untex(m.group(1)) == edits),
+        )
+    )
+
+    # --- curve rows like for like, and the equal-variance test (Paper III withdrew "property") -
+    single = sigma / 2**0.5
+    site(
+        "curve rows noisier than the single-draw floor",
+        r"against which \$(\d+)\$ of the six rows are noisier",
+        0,
+        float(sum(v > single for v in _csig.values())),
+    )
+
+    def _bartlett_local(sds: list[float], n: int) -> float:
+        # Bartlett's p for equal variances from k sds on n draws each, chi-square tail by the
+        # lower-incomplete-gamma series. Local on purpose: Paper III's branch adds the same test
+        # at module level as `_bartlett_p`, and two module-level definitions would collide on
+        # merge. Replace this with that one once both branches are in.
+        import math
+
+        k, v = len(sds), n - 1
+        pooled = mean(x * x for x in sds)
+        stat = k * v * math.log(pooled) - v * sum(math.log(x * x) for x in sds)
+        corr = 1 + (k / v - 1 / (k * v)) / (3 * (k - 1))
+        a, z = (k - 1) / 2.0, stat / corr / 2.0
+        term = total = 1.0 / a
+        i = 0
+        while term > 1e-15 * total:
+            i += 1
+            term *= z / (a + i)
+            total += term
+        return 1.0 - math.exp(-z + a * math.log(z) - math.lgamma(a)) * total
+
+    bart = _bartlett_local(list(_csig.values()), 5)
+    for where, pattern in (
+        ("caption", r"one common \$\\sigma\$\s+across the six rows \(\$p = ([\d.]+)\$\)"),
+        ("register", r"Bartlett's test across the six rows gives \$p = ([\d.]+)\$"),
+    ):
+        site(f"Bartlett p across the six curve rows, {where}", pattern, 0.005, bart)
+
+    # --- the cross-lineage run's +0.008 sits on one seed (Paper III's replay) ---------------
+    cf = _runs("validation-study-crossfamily.json")
+    differing = sum(1 for r in cf if abs(r["D"]["opt_heldout"] - r["B"]["opt_heldout"]) > 1e-9)
+    site("cross-lineage seeds", r"rewrote the critique on one of its \$(\d+)\$\s+seeds", 0, len(cf))
+    site(
+        "cross-lineage seeds, contrast", r"the only one of the \$(\d+)\$ where the two", 0, len(cf)
+    )
+    out.append(("cross-lineage contrast sits on one seed", 1, 0, float(differing)))
+
+    # --- the subtitle's register entry ---------------------------------------------------------
+    for label, pattern, key in (
+        (
+            "subtitle register, oracle under tool",
+            r"task draw as the unit the oracle-under-tool gap has \$p = ([\d.]+)\$",
+            "oracle under tool",
+        ),
+        (
+            "subtitle register, run 10 over tool",
+            r"run~10 over the tool has\s+\$p = ([\d.]+)\$",
+            "run 10 over tool",
+        ),
+        (
+            "subtitle register, actionability",
+            r"passes that test, at \$p = ([\d.]+)\$",
+            "actionability",
+        ),
+    ):
+        shown = _scrape_all(p2, pattern)[0]
+        out.append((f"tex: {label}", shown, 0.0005 if shown < 0.1 else 0.005, pvals[key]))
+
+    # --- the conclusion's restatement of the shrinkage range (register: smaller misstatements)
+    shrink = _scrape(p2, r"shrank three magnitudes by \$(\d+)\$ to \$52\\%\$")
+    intro = _scrape(p2, r"three shrinking by \$(\d+)\$ to \$52\\%\$")
+    out.append(("tex: conclusion shrinkage low agrees with the introduction", shrink, 0, intro))
+    return out
 
 
 def _output_cap_checks() -> list[tuple[str, float, float, float]]:

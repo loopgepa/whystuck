@@ -53,7 +53,8 @@
   primaryClass  = {cs.CL},
   url       = {https://arxiv.org/abs/2303.17651},
   note      = {Abstract, verified 2026-07-31: "improving by about 20\% absolute on average in task
-               performance" across seven diverse tasks}
+               performance" across seven diverse tasks. Table 2, read off the PDF 2026-10-25:
+               its own feedback beats generic feedback and no feedback on all three ablated tasks}
 }
 
 @misc{liu2024intrinsic,
@@ -298,6 +299,66 @@
   note      = {Abstract, verified 2026-07-31: "Error detection rates vary dramatically across
                architectures (10\% to 82\%), yet detection capability does not predict correction
                success". Independent corroboration of Paper II's detection/repair separation}
+}
+
+@inproceedings{ferraz2024decrim,
+  title     = {{LLM} Self-Correction with {DeCRIM}: Decompose, Critique, and Refine for
+               Enhanced Following of Instructions with Multiple Constraints},
+  author    = {Ferraz, Thomas Palmeira and Mehta, Kartik and Lin, Yu-Hsiang and
+               Chang, Haw-Shiuan and Oraby, Shereen and Liu, Sijia and Subramanian, Vivek and
+               Chung, Tagyoung and Bansal, Mohit and Peng, Nanyun},
+  booktitle = {Findings of the Association for Computational Linguistics: EMNLP 2024},
+  year      = {2024},
+  eprint    = {2410.06458},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  url       = {https://arxiv.org/abs/2410.06458},
+  note      = {Read off the arXiv HTML, verified 2026-10-25: Table 4, Mistral with the oracle
+               decomposer, IFEval instruction accuracy 62.3 with its own critic and 80.4 with the
+               rule-based evaluator as oracle critic, best of up to ten iterations}
+}
+
+@inproceedings{tyen2024cannotfind,
+  title     = {{LLMs} Cannot Find Reasoning Errors, but Can Correct Them Given the Error
+               Location},
+  author    = {Tyen, Gladys and Mansoor, Hassan and C{\u{a}}rbune, Victor and Chen, Peter and
+               Mak, Tony},
+  booktitle = {Findings of the Association for Computational Linguistics: ACL 2024},
+  year      = {2024},
+  eprint    = {2311.08516},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.AI},
+  url       = {https://arxiv.org/abs/2311.08516},
+  note      = {Abstract, verified 2026-10-25: poor self-correction "stems from LLMs' inability to
+               find logical mistakes"; given ground-truth mistake locations, correction improves}
+}
+
+@misc{jiang2025feedbackfriction,
+  title     = {Feedback Friction: {LLMs} Struggle to Fully Incorporate External Feedback},
+  author    = {Jiang, Dongwei and Zhang, Alvin and Wang, Andrew and Andrews, Nicholas and
+               Khashabi, Daniel},
+  year      = {2025},
+  eprint    = {2506.11930},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  url       = {https://arxiv.org/abs/2506.11930},
+  note      = {Abstract, verified 2026-10-25: given targeted feedback from a generator with
+               near-complete ground truth, "solver models consistently show resistance to feedback"}
+}
+
+@misc{lee2025refinebench,
+  title     = {{RefineBench}: Evaluating Refinement Capability of Language Models via
+               Checklists},
+  author    = {Lee, Young-Jun and Kim, Seungone and Lee, Byung-Kwan and Moon, Minkyeong and
+               Hwang, Yechan and Kim, Jong Myoung and Neubig, Graham and Welleck, Sean and
+               Choi, Ho-Jin},
+  year      = {2025},
+  eprint    = {2511.22173},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  url       = {https://arxiv.org/abs/2511.22173},
+  note      = {Abstract, verified 2026-10-25: self-refinement barely improves frontier models,
+               while large models given targeted feedback reach near-perfect within five turns}
 }
 
 @article{kamoi2024whencan,

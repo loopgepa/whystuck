@@ -702,6 +702,11 @@ _INTRA_REGISTER_POINTERS = {
     ("p2-repair-not-detection", r"the guard written for entry~(\d+) did not match"): (
         "statistically indistinguishable"
     ),
+    ("p2-repair-not-detection", r"that list'' \(entry~(\d+) above\)"): r"\\emph\{replaces\}",
+    ("p2-repair-not-detection", r"The quotation entry~(\d+) relied on"): r"\\emph\{replaces\}",
+    ("p2-repair-not-detection", r"independent task draws'' \(entry~(\d+) above\)"): (
+        r"\$62\$ distinct"
+    ),
 }
 
 

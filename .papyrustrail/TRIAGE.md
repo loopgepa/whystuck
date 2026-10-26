@@ -115,3 +115,13 @@ the `contrasts` block does not emit:
 
 They are accepted rather than declared because declaring them means teaching the registry a cassette
 replay; until then the claim checker is the binding.
+
+## The four values accepted on 2026-10-25
+
+Paper II's round-1 review fixes added four `bind` values. `62.3` and `80.4` are DeCRIM's own IFEval
+instruction accuracies (its Table 4, read off the arXiv HTML; the bibliography note records where),
+so no artifact of ours can hold them. `0.17` (run 3's `exact_word_count` rate on the three seeds the
+other residual columns score) and `0.064` (the seed-level p of run 10 over the tool) are derived
+from a cassette replay and from the curve replicates respectively, shapes no `runs` spec here
+expresses; both are pinned in `verify_paper_claims._p2_review_r1_checks`, which mutation-tested
+red on each.
