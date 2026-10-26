@@ -694,6 +694,7 @@ _INTRA_REGISTER_POINTERS = {
     ("p1-conditional-lever", r"and entry~(\d+) records how unstable"): "percentages",
     ("p1-conditional-lever", r"narrowed to \\emph\{re-measures\} by entry~(\d+)"): "re-measure",
     ("p1-conditional-lever", r"so entry~(\d+)'s ``bounds are labelled"): "Cost figures",
+    ("p1-conditional-lever", r"still too wide \(entry~(\d+)\)"): "bought before the",
     ("p2-repair-not-detection", r"the borrowed denominator entry~(\d+) retired"): "borrowed",
     ("p2-repair-not-detection", r"why entry~(\d+) needed reinstating"): "beats the tool-fed loop",
     ("p2-repair-not-detection", r"the equivalence overclaim entry~(\d+) withdraws"): (
@@ -1107,7 +1108,7 @@ def _tabulated_runs(text: str) -> set[int]:
 #: What each paper cites by number. Asserted, not merely used: a new citation has to be declared
 #: here, which is the half a presence-only check would leave unread.
 _RUN_CITATIONS = {
-    "p1-conditional-lever": {2, 3, 4, 5, 6, 7, 8, 9, 10},
+    "p1-conditional-lever": {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
     "p2-repair-not-detection": {3, 4, 5, 7, 8, 9, 10},
     "p3-silent-no-op": {1, 3, 6, 7, 8, 9, 10},
 }

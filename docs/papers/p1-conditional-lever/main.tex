@@ -21,7 +21,7 @@
 \title{Whether Optimizing the Loop Beats Optimizing the Prompt\\
 Tracks One Number\\
 \large $p_0$, the base rate of already-correct first drafts,\\
-and a $0.102$ swing in the contrast across it}
+and a $0.102$ swing in the contrast between two of its levels on one worker}
 
 \author{Vladimir Rotariu \\ Independent researcher \\
   \texttt{github.com/loopgepa/whystuck}}
@@ -31,28 +31,27 @@ and a $0.102$ swing in the contrast across it}
 \maketitle
 
 \begin{abstract}
-Reflective optimizers such as GEPA \citep{agrawal2025gepa} can evolve several text components of a
-compound LLM system, so a natural hypothesis is that optimizing an entire
-generate--critique--refine loop beats optimizing its generation prompt alone. On a corrected,
-control-heavy harness the answer tracks one quantity: $p_0$, the base rate of first drafts
-already satisfying every requirement. At $p_0 = 0.067$ the search converges on a verifier that
-never accepts anything, on $11$ of $12$ evolved genes across four training-split sizes, and
-evolving it buys nothing measurable; at $p_0 = 0.267$, reached by changing which constraints the
-generator may use, evolving the verifier alongside the generator \emph{gains} $0.060$ held-out,
-unanimous across seeds, and re-measured over five draws it holds at $+0.055$, $p<0.10$. The
-$0.102$ swing between them carries the result: $1.55\sigma$ of the per-draw spread at those
-levels, and $2.6$ standard errors re-measured, on fixed genomes and tasks. Each level is a
-different generator, so the swing is measured along $p_0$ rather than shown to be caused by it.
-Unconditional refinement is
-nearly free on a training signal where almost nothing is already correct and costly where much of
-it is, which makes the degenerate verifier near-optimal at low $p_0$ and screenable as
-a \texttt{PASS} rate of zero. Two pre-registered sweeps, over split size at constant epochs and
-over a measured six-fold range of search depth, find no trend, though at three seeds a cell they cannot
-exclude an effect the size of the gain. Reaching these measurements meant
-discarding fifteen earlier contrast runs,
-whose critique gene the optimizer left unchanged on all but two seeds Paper~III could replay.
-$\dd$ is a whole-system contrast: it splits exactly into a shared-gene term and a treatment term,
-and the split moves between re-measurements. Every claim this paper withdraws is listed in
+Reflective optimizers such as GEPA \citep{agrawal2025gepa} can evolve every text component of an
+LLM system, so evolving a full generate--critique--refine loop might beat evolving
+its generation prompt alone. On a corrected, control-heavy harness and one worker the answer
+tracked $p_0$, the base rate of first drafts already satisfying every requirement. At
+$p_0 = 0.067$ the search converges on a verifier that never accepts, on $11$ of $12$ evolved
+genes across four training-split sizes, and evolving it buys nothing measurable; at
+$p_0 = 0.267$, reached by excluding constraints from the generator, evolving the verifier
+alongside the generator \emph{gains} $0.060$ held-out, positive on all three seeds, and $+0.055$
+over five re-measurements, $p<0.10$ against scoring noise. The result is the $0.102$ swing
+between them, and how far it clears noise depends on the unit: $1.55\sigma$ of the per-draw
+spread, $2.6$ standard errors re-measured on fixed genomes and tasks, and $p = 0.20$ by exact
+permutation over seeds. Four split-size cells at the lower level's one $p_0$ spread over $0.103$,
+and we chose the pair of levels after the registered monotone prediction failed at a third,
+saturated one. Each level is a different generator, so the swing is measured along $p_0$, not
+shown to be caused by it. Refining every draft is nearly free where almost none is
+already correct, so the degenerate verifier is near-optimal at low $p_0$ and screenable as a
+\texttt{PASS} rate of zero. Two pre-registered sweeps, over split size and a measured
+six-fold depth range, find no trend, though at three seeds per cell they cannot
+exclude an effect the size of the gain. Fifteen earlier contrast runs were discarded: replayed, their
+critique gene changed on two seeds in all (Paper~III). $\dd$ splits exactly into a shared-gene and a treatment term, and the split
+moves between re-measurements. Withdrawn claims are listed in
 Appendix~\ref{sec:corrections}.
 \end{abstract}
 
@@ -640,14 +639,18 @@ spread the swing is $1.68\sigma$. Re-measured, the swing is $0.076$ at $2.6$ sta
 (\S\ref{sec:repeat}), but those standard errors re-score the same genomes on the same tasks
 and contain none of the optimizer's own variance; with each level's three seeds as the unit, an
 exact permutation test of the six per-seed deltas gives $p = 0.20$. So the $p_0$ axis buys
-a swing of $0.102$ in $\dd$ that scoring noise alone does not account for, from no measurable effect
-to the largest loop-level gain the study re-measures, and the sign flip is not the finding. That
+a swing of $0.102$ in $\dd$ that re-scoring noise does not account for, from no measurable effect
+to the largest loop-level gain the study re-measures, while a single draw, the spread of the
+split cells at one $p_0$ and a test with the seed as the unit do not separate it from noise; the
+sign flip is not the finding. That
 a fresh search at each level would reproduce it is untested. Every
-instruction-following run we bought before the $p_0$ sweep, superseded or not, sits at the
+hard-tier run we bought before the $p_0$ sweep, superseded or not, sits at the
 low-$p_0$ end of the axis: the hard tier mandates \texttt{exact\_word\_count}, which run~3's
 final drafts satisfy only $0.16$ of the time (Paper~II), and where we measure first-draft $p_0$
 directly it is $0.067$: the end of the axis
-where refusing to accept is nearly free. At $p_0 = 0.267$ the same harness, optimizer, budget and
+where refusing to accept is nearly free. The two instruction-following runs bought off that tier
+do not sit there: replayed, $13$ of run~1's $32$ single-constraint first drafts already pass, and
+$46$ of run~2's $50$ on the easy tier, which saturates. At $p_0 = 0.267$ the same harness, optimizer, budget and
 seeds give $\dd(D-B) = +0.060$ with every seed agreeing. One caveat belongs with that number: at
 $n=3$ with three same-signed deltas the exact-resample interval \emph{must} exclude zero, so
 ``excludes zero'' here restates sign-unanimity and the sign test is at its floor ($p = 0.25$). It
@@ -1302,14 +1305,14 @@ $\mathrm{mmc}=30$.
 The seed baseline sits at $0.40$ (seed 0) and $0.50$ (seed 1), far from both floor
 and ceiling, so the loop has genuine headroom, unlike MBPP+. And unlike MBPP+, GEPA
 \emph{ran}: the run's written summary records accepted candidates for both optimizing arms on
-seed 1 and none on seed 0. The released results carry no acceptance or training-score field to
+seed 1, and says nothing of seed 0. The released results carry no acceptance or training-score field to
 check that against, and the run predates the harness correction and cannot be replayed, so
 whether arm~D's acceptance touched its critique gene is not recoverable from the release
 either. On the held-out split
 \emph{every arm scored exactly its seed baseline} ($0.40$, $0.50$). The headline is a tie on both
 seeds, $\dd(D-B)=0.00$; its exact-resample interval collapses to $[0.000, 0.000]$ because the arms
-are identical on each seed, which says nothing about precision, and with seed~0 accepting nothing
-at most one seed is informative. What the run shows is that training-side acceptances, where they
+are identical on each seed, which says nothing about precision, and with no acceptance record for
+seed~0 at most one seed is known to be informative. What the run shows is that training-side acceptances, where they
 happened, did not move held-out; it is not a test of the corrected treatment, and the
 instruction-following null is not contradicted in a semantically-verified, executable-feedback
 domain, which is weaker than reproducing it there.
@@ -1340,8 +1343,10 @@ scope.
 
 One reading of the null survives everything above: the critique is bad at judging its own
 lineage's drafts, and a critic from another vendor would be a better detector and therefore a
-better thing to optimize. This was pre-registered as D3 and bought on 2026-08-06. Run 6's critic
-shared a vendor and a lineage with the worker; this repeats it cross-\emph{provider}, with the
+better thing to optimize. This was pre-registered as D3 and bought on 2026-08-06. Run 6's critic,
+\texttt{gpt-5.6-luna}, is a different model from the worker's vendor, and whether it also
+shares the worker's training lineage the release cannot say (the series calls it the
+cross-lineage critic); this repeats it cross-\emph{provider}, with the
 critique on \texttt{llama-\allowbreak 3.3-\allowbreak 70b} over the same \texttt{gpt-4.1-mini}
 worker, at the $8$ seeds the registration asked for. $\dd(D-B) = +0.014$, \textbf{inconclusive}
 against a noise band of $0.081$.
@@ -1405,7 +1410,9 @@ target, rather than discovering one by exclusion, is the open problem and is why
 such. \textbf{Power:} runs 4--10 use $n{=}3$ seeds (runs 2--3 use 5), and
 our earlier claim that the intervals were ``unusually informative despite small $n$'' is
 withdrawn: it rested on intervals of exactly $[0,0]$ from arms that had produced byte-identical
-genomes, which reads as evidence that the experiment did not run (Paper~III, register entry~2).
+genomes, which reads as evidence that the experiment did not run; Paper~III's register
+entry~2 withdraws the same reading of those intervals, there worded as a null ``tight rather than
+merely underpowered''.
 We now report per-run tie counts alongside every
 interval and an exact sign test. At $n{=}3$ that test cannot fall below $p=0.25$ even with
 unanimous seeds, so no seed-level interval here is significant on replication grounds.
@@ -1477,8 +1484,12 @@ accepts is $27.3$ words against prompt-only's $26.4$ at $L_1$ ($42.3$ vs.\ $43.2
 $45.5$ vs.\ $46.1$ at $L_3$): the loop-level arm's answers are not systematically shorter, and
 a refine round moves length by under two words at every level, against a floor that needs an
 empty answer to reach. \textbf{Single worker/reflection
-model:} results may be model-dependent \citep{huang2023cannot}. \textbf{Cross-lineage, not
-cross-provider:} run 6's critic shares a vendor and training lineage with the worker, so it
+model:} results may be model-dependent \citep{huang2023cannot}. The lever's one run off
+\texttt{gpt-4.1-mini}, on a third worker, \texttt{qwen3.8-27b}, with \texttt{gpt-oss-120b}
+reflecting, is reported under D9 (\S\ref{sec:directions}); its registered manipulation check
+failed, so its levels do not test the lever, and its exploratory pooled contrast is reported there. \textbf{Cross-lineage, not
+cross-provider:} run 6's critic shares a vendor with the worker, and the release cannot say
+whether it shares a training lineage, so it
 breaks self-\emph{grading} but may retain self-preference bias. D3 repeats it across the vendor
 boundary, and its two halves answer differently (\S\ref{sec:xprovider}): the detector half
 answers the self-preference question, since the cross-provider critic detected worse rather than
@@ -1586,7 +1597,8 @@ Single worker/reflection model & Partly, by spend & Worker swap done pre-audit
   ($\dd=-0.014$); needs redoing post-fix. A second worker on another provider corroborates
   Paper~II's detection-versus-repair \emph{ordering} at $20$ seeds, not its magnitudes, and
   not the ranking of its cells, but cannot carry this paper's lever at all: the $p_0$ ladder
-  collapses on it (see D9), so there is no middle level to measure a conditional effect at \\
+  collapses on it (see D9), so there is no middle level to measure a conditional effect at. On
+  a third, \texttt{qwen3.8-27b}, D9's target-$p_0$ levels failed their manipulation check \\
 \textbf{Small train split} ($8$) & \textbf{Tested}, no trend (\S\ref{sec:splitresult}) & Bought:
   $n_{\mathrm{train}} \in \{4,8,16,24\}$ at constant epochs, held-out and seeds fixed. The
   degenerate verifier survives every size ($11/12$ genes); $\dd(D-B)$ does not, and the
@@ -1698,7 +1710,8 @@ ends. Each entry below changes one variable.
     detector into held-out score, or (b) the intrinsic critique is simply not a good detector.
     The rule set success at an oracle seed of $\ge 0.85$ and made a result near or below the
     intrinsic baseline the signature of (a). The registered cell missed the bar ($0.748$, at one
-    retry with terse verdicts), which by that rule reads as (a), and two levers later the same
+    retry, its oracle handing the refine step the text that names each failed constraint and
+    its target), which by that rule reads as (a), and two levers later the same
     gate clears it ($0.873$), which (a) forbids. Neither registered candidate is what we report:
     the binding constraint is the fix step. \emph{Remaining:} the same ceiling on a worker that
     can count.
@@ -1740,8 +1753,8 @@ ends. Each entry below changes one variable.
     task; at $L_3$ only one is and the freed slot is filled from the ordinary hard pool. An
     exclusion level therefore names a different \emph{generator} rather than a difficulty, and the
     $p_0$ it yields depends on which of the substituted constraints a given worker finds hard.
-    That is why (ii), sampling to a target $p_0$ measured per task, is the candidate that can
-    specify a level at all. It says nothing for or against (i), which varies the drafting budget
+    That is why (ii), sampling to a target $p_0$ measured per task, is the candidate meant to
+    specify a level directly; what it delivered is reported below. It says nothing for or against (i), which varies the drafting budget
     and leaves the constraint set alone.
     \emph{A variant of (ii), measured.} We pre-registered (ii) on 2026-10-25 for a third worker,
     \texttt{qwen3.8-27b}, since Groq had retired the Llama workers. Its gate failed on the hard
@@ -1789,11 +1802,12 @@ the same harness, optimizer, budget and seeds (\S\ref{sec:p0}). The swing betwee
 is $0.102$, and it is what carries the answer rather than either endpoint. How far it clears noise
 depends on the noise: $1.55\sigma$ of the per-draw spread at those levels in a single draw, and
 $2.6$ standard errors re-measured, where the standard errors hold the genomes and tasks fixed;
-with seeds as the unit, $p = 0.20$. The registered mechanism named the
+with seeds as the unit, $p = 0.20$. At the lower level's one $p_0$ the four split-size cells
+spread over $0.103$, as wide as the swing. The registered mechanism named the
 axis in advance: unconditional refinement is nearly free where $p_0$ is small and costly
 where it is not, and the evolved gene's \texttt{PASS} rate moves from zero to non-zero as
 $p_0$ rises, with no false \texttt{PASS} at the three $p_0$ levels. \emph{The null was real and it was local},
-every instruction-following run we had bought before the sweep sat at the low-$p_0$ end of
+every hard-tier run we had bought before the sweep sat at the low-$p_0$ end of
 an axis we had not yet identified, and the corrected re-run measures it at $0.067$.
 
 \textbf{Does GEPA lift the regime the study started in?} No, at the
@@ -1875,7 +1889,7 @@ predictions failed. Reporting guidance for pre-registered work asks that deviati
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
 collected here and the body text states only the surviving claim.
-\textbf{Forty-five} entries follow.
+\textbf{Forty-eight} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -2097,7 +2111,7 @@ The series' other two papers carry the entries bearing on their own claims.
   \item \textbf{``Every instruction-following run we bought sat at the low-$p_0$ end.''} The
     $p_0$ sweep deliberately bought two higher levels and this paper reports them, so as written
     the sentence contradicted Table~\ref{tab:p0}. It is scoped to the runs bought before the
-    sweep, which is what it was describing.
+    sweep, which is what it was describing, and that scope was still too wide (entry~46).
   \item \textbf{``Worker \texttt{gpt-4.1-mini} (output cap 320 tokens).''} The cap holds on
     thirty-seven released runs and on neither the five BigCodeBench ones, at 1024, nor the MBPP+
     attempt, at 512. All three papers printed the one figure, so the stated setup did not reproduce the
@@ -2230,6 +2244,33 @@ The series' other two papers carry the entries bearing on their own claims.
     metric-labelled verdict records; arm~A's re-measurement was offered as a fix although a
     cassette replay cannot differ from itself; and Self-Refine was cited for single-instruction
     prompt search, which it is not.
+  \item \textbf{``Every instruction-following run we bought before the $p_0$ sweep, superseded or
+    not, sits at the low-$p_0$ end of the axis.''} Entries~27 and~45 scoped this sentence to the
+    runs bought before the sweep and recorded it as repaired. It was still false: replayed, run~1's
+    single-constraint first drafts and run~2's easy-tier ones pass more often than at either level
+    the swing compares, and run~2's tier saturates. The sentence, in \S\ref{sec:p0} and in the
+    conclusion, now names the hard tier, where it holds, and \S\ref{sec:p0} states where runs~1
+    and~2 sit.
+  \item \textbf{``A swing of $0.102$ in $\dd$ that scoring noise alone does not account for.''}
+    Only the re-measured standard errors support that, and they hold genomes and tasks fixed. The
+    single-draw ratio, the ratio on the split cells and the permutation test with the seed as the
+    unit, all printed in the same paragraph, do not separate the swing from noise. The sentence now
+    says which noise the swing clears and which it does not. The abstract and the conclusion had
+    left out three concessions the body makes, and now carry them: the seed-level $p$, the
+    spread of the four split-size cells at one $p_0$, as wide as the swing, and that the pair of
+    levels was chosen after the monotone prediction failed. The subtitle and the abstract now
+    scope ``tracks'' to two levels on one worker, and the series note no longer says $p_0$
+    \emph{decides} the answer.
+  \item \textbf{Provenance and companion agreement, second pass.} The BigCodeBench paragraph
+    attributed ``none on seed~0'' to the run's written summary, which records acceptances on
+    seed~1 only and says nothing of seed~0; no released artifact settles seed~0, and the
+    paragraph now says so. Run~6's critic was said to share a vendor \emph{and a training lineage}
+    with the worker; the release establishes only the vendor, which is what Paper~II now says. The
+    oracle cell of D6 was said to send terse verdicts; it sends the text naming each failed
+    constraint and its target, as Paper~II's register records. The threats paragraph's pointer to
+    Paper~III's entry~2 now says that entry withdraws the same reading in other words. And D9 called
+    candidate~(ii) the one that \emph{can} specify a level, a sentence before reporting that the
+    attempt did not.
 \end{enumerate}
 
 \section{The Actuator Experiment, and the MBPP+ Attempt}

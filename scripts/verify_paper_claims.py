@@ -558,6 +558,7 @@ _WORD_NUM = {
     "forty-three": 43,
     "forty-five": 45,
     "forty-six": 46,
+    "forty-eight": 48,
     "two hundred": 200,
 }
 
@@ -3650,7 +3651,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
         # and it is the number a reader is most likely to quote back.
         (
             "tex: abstract pre-correction runs",
-            r"discarding (\w+) earlier contrast runs",
+            r"(\w+) earlier contrast runs were discarded",
             n_pre,
         ),
         (
@@ -3774,6 +3775,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_replicate_sigma_scale_checks())
     out.extend(_gene_replay_checks())
     out.extend(_review_round1_p1_checks())
+    out.extend(_review_round2_p1_checks())
     out.extend(_d9_target_p0_checks())
 
     return out
@@ -7432,7 +7434,7 @@ def _review_round1_p1_checks() -> list[tuple[str, float, float, float]]:
     per_draw = (l1.sd_between_replicates**2 + l2.sd_between_replicates**2) ** 0.5
     swing_sigma = single / per_draw
     for label, pattern in (
-        ("abstract", r"carries the result: \$([\d.]+)\\sigma\$ of the per-draw"),
+        ("abstract", r"on the unit: \$([\d.]+)\\sigma\$ of the per-draw"),
         ("contribution", r"in a single draw, \$([\d.]+)\\sigma\$\s+against the per-draw"),
         ("fig:p0", r"swing, \$([\d.]+)\\sigma\$ against the per-draw spread"),
         ("tab:p0", r"across the axis\}, \$([\d.]+)\\sigma\$ of the per-draw"),
@@ -7470,14 +7472,19 @@ def _review_round1_p1_checks() -> list[tuple[str, float, float, float]]:
     )
     # The split sweep's four cells at L1, which tab:splitresults reads as one quantity plus noise.
     cells = [_split_row(slug).delta for _, slug in _SPLIT_ROWS]
-    out.append(
-        (
-            "tex: split-cell range at L1",
-            _scrape(p1, r"spread over \$([\d.]+)\$, and on their"),
-            0.0005,
-            max(cells) - min(cells),
+    for label, pattern in (
+        ("sec:p0", r"spread over \$([\d.]+)\$, and on their"),
+        ("abstract", r"one \$p_0\$ spread over \$([\d.]+)\$,\s+and we chose"),
+        ("conclusion", r"split-size cells\s+spread over \$([\d.]+)\$, as wide as the swing"),
+    ):
+        out.append(
+            (
+                f"tex: split-cell range at L1, {label}",
+                _scrape(p1, pattern),
+                0.0005,
+                max(cells) - min(cells),
+            )
         )
-    )
     out.append(
         (
             "tex: swing on split-cell spread",
@@ -7489,7 +7496,7 @@ def _review_round1_p1_checks() -> list[tuple[str, float, float, float]]:
     replicated = l2.delta - l1.delta
     paired_se = (l1.standard_error**2 + l2.standard_error**2) ** 0.5
     for label, pattern in (
-        ("abstract", r"levels, and \$([\d.]+)\$ standard errors re-measured, on fixed"),
+        ("abstract", r"spread, \$([\d.]+)\$ standard errors\s+re-measured on fixed"),
         ("contribution", r"re-measured five times, \$([\d.]+)\$\s+standard errors of scoring"),
         ("sec:p0", r"the swing is \$0.076\$ at \$([\d.]+)\$ standard errors"),
         ("conclusion", r"\$([\d.]+)\$ standard errors re-measured, where"),
@@ -7505,6 +7512,7 @@ def _review_round1_p1_checks() -> list[tuple[str, float, float, float]]:
         )
     perm = _swing_permutation_p()
     for label, pattern in (
+        ("abstract", r"\$p = ([\d.]+)\$ by exact\s+permutation over seeds"),
         ("contribution", r"permutation test gives \$p = ([\d.]+)\$\. The axis"),
         ("sec:p0", r"per-seed deltas gives \$p = ([\d.]+)\$"),
         ("threats", r"\(\$p = ([\d.]+)\$ for the swing"),
@@ -7883,6 +7891,89 @@ def _review_round1_p1_checks() -> list[tuple[str, float, float, float]]:
             float(capped),
         )
     )
+    return out
+
+
+def _first_draft_pass_count(slug: str) -> tuple[int, int]:
+    """(already-correct first drafts, drafts) of the seed genome on a released run's held-out split.
+
+    Replays the run's own cassette with the run's own task loader, so the denominator is the run's
+    seeds times its held-out size. A cassette miss raises: a skipped task would shrink the
+    denominator and print a smaller sample as if it were the whole run.
+    """
+    from whystuck.eval.cassette import Cassette
+    from whystuck.eval.llm_worker import make_self_refine_run_task
+    from whystuck.eval.study import seed_genome
+
+    meta = json.loads(Path(f"{DOCS}/validation-study{slug}.json").read_text())["meta"]
+    n_heldout = meta["n_heldout"]
+    if meta["dataset"] == "IFBench":
+        from whystuck.eval.ifbench import (
+            ifbench_feedback,
+            ifbench_pass,
+            ifbench_score,
+            load_ifbench,
+        )
+
+        def load(seed: int) -> list:
+            return load_ifbench(split="heldout", seed=seed, n=n_heldout)
+
+        score, feedback, passed = ifbench_score, ifbench_feedback, ifbench_pass
+    else:
+        from whystuck.eval.multi_constraint import (
+            load_multi_constraint,
+            mc_feedback,
+            mc_pass,
+            mc_score,
+        )
+
+        hard = "hard" in meta["dataset"]
+        pool = max(64, 2 * max(meta["n_train"], n_heldout) + 2)
+
+        def load(seed: int) -> list:
+            return load_multi_constraint("heldout", seed=seed, n=n_heldout, pool=pool, hard=hard)
+
+        score, feedback, passed = mc_score, mc_feedback, mc_pass
+
+    def _unreachable(_prompt: str, **_kw: object) -> str:
+        raise AssertionError("unreachable in replay mode")
+
+    correct = total = 0
+    with Cassette(f"tests/fixtures/cassettes/study{slug}.json", mode="replay") as cas:
+        run_task = make_self_refine_run_task(
+            cas.wrap(_unreachable, name="worker"),
+            score,
+            feedback=feedback,
+            max_retries=meta["loop_max_retries"],
+        )
+        for seed in meta["seeds"]:
+            genome = seed_genome("study-A", evolvable=set())
+            for task in load(seed):
+                trace = run_task(genome, task)
+                draft = next(s for s in trace.steps if s.step_id == "generate-0")
+                total += 1
+                correct += int(passed(draft.output_summary or "", task))
+    return correct, total
+
+
+def _review_round2_p1_checks() -> list[tuple[str, float, float, float]]:
+    r"""Paper I's round-2 review corrections.
+
+    The low-$p_0$ scope sentence was narrowed to the runs bought before the sweep in round 1 and was
+    still false for the two instruction-following runs off the hard tier. Their first-draft pass
+    counts are replayed here from their own cassettes, so the sentence that now names them is read
+    against the release rather than against a number copied into it.
+    """
+    p1 = _sources().paper_tex("p1-conditional-lever")
+    out: list[tuple[str, float, float, float]] = []
+    for run, slug, pattern in (
+        (1, "", r"replayed, \$(\d+)\$ of run~1's \$(\d+)\$ single-constraint"),
+        (2, "-multi", r"\$(\d+)\$ of run~2's \$(\d+)\$ on the easy tier"),
+    ):
+        k, n = _first_draft_pass_count(slug)
+        got_k, got_n = _scrape_all(p1, pattern)
+        out.append((f"tex: run {run} first drafts already passing", got_k, 0, float(k)))
+        out.append((f"tex: run {run} first drafts replayed", got_n, 0, float(n)))
     return out
 
 
