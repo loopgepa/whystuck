@@ -21,7 +21,7 @@ endorsement domain, and the primary category selects the domain.
 
 Two structural facts decide this, and neither is about the papers' quality.
 
-**Main-text length is 32 / 19 / 17 pages** (references begin on p.33 / 20 / 18 of 44 / 28 / 27).
+**Main-text length is 33 / 19 / 16 pages** (references begin on p.34 / 20 / 17 of 47 / 28 / 24).
 **All three papers are de-anonymised by their own reproducibility apparatus**: the title block
 prints author, affiliation and repository URL, and each abstract names the repository again.
 
@@ -70,7 +70,7 @@ The three are interdependent by design, and the dependency is asymmetric. Counti
 
 | | -> Paper I | -> Paper II | -> Paper III | outbound |
 |---|---|---|---|---|
-| Paper I | | 22 | 36 | **58** |
+| Paper I | | 23 | 42 | **65** |
 | Paper II | 8 | | 10 | 18 |
 | Paper III | 10 | 6 | | 16 |
 
@@ -102,7 +102,7 @@ python scripts/make_tmlr_supplement.py --paper p1-conditional-lever
 
 | paper | `article` 11pt | `tmlr.sty` 10pt | supplement ZIP |
 |---|---|---|---|
-| I | 44 | **37** | 7.3MB |
+| I | 47 | **40** | 7.3MB |
 | II | 28 | **24** | 7.5MB |
 | III | 27 | **23** | 7.6MB |
 
@@ -242,7 +242,7 @@ exists. Measured from the built PDFs and each paper's own source:
 
 | | paper | pages | tables | figures | distinct citations |
 |---|---|---|---|---|---|
-| I | `p1-conditional-lever` | 44 | 11 | 3 | 26 |
+| I | `p1-conditional-lever` | 47 | 11 | 3 | 28 |
 | II | `p2-repair-not-detection` | 28 | 4 | 3 | 20 |
 | III | `p3-silent-no-op` | 27 | 4 | 1 | 19 |
 
@@ -259,14 +259,14 @@ neither stops a build, and Paper I shipped an oversized threats table until 2026
 nothing read the log.
 
 Abstract lengths against the 1920-character metadata
-field: **1913**, **1911**, **1881**. The headroom is 7, 9 and 39 characters, so any edit to any
+field: **1917**, **1911**, **1906**. The headroom is 3, 9 and 14 characters, so any edit to any
 of the three abstracts has to be re-checked by `make_arxiv_package.py` rather than assumed to fit.
 
 The three are cross-referenced as a series, so they should be posted together or in the order I, II,
 III; each abstract names its companions.
 
 These lengths are fine for arXiv and for TMLR, which sets no page limit. Against the 9-page
-main-text limit at NeurIPS, ICLR and ICML, Paper I runs 3.6x, Paper II 2.1x and Paper III 1.9x, so a
+main-text limit at NeurIPS, ICLR and ICML, Paper I runs 3.7x, Paper II 2.1x and Paper III 1.8x, so a
 conference submission would need substantial main text moved into appendices, plus that venue's style
 file. Paper I read "about four times" until 2026-08-17, which is 39/9 rather than 27/9: the sentence
 divided the total by the main-text limit. The three multiples are now checked against the main-text

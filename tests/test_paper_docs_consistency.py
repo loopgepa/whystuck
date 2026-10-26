@@ -691,6 +691,9 @@ _INTRA_REGISTER_POINTERS = {
     ("p3-silent-no-op", r"the\s+misreading entry~(\d+) withdraws"): "accepted nothing",
     ("p1-conditional-lever", r"the depth bound of entry~(\d+)"): "depth bound",
     ("p1-conditional-lever", r"the \$1\.12\$ of entry~(\d+)"): r"1\.12",
+    ("p1-conditional-lever", r"and entry~(\d+) records how unstable"): "percentages",
+    ("p1-conditional-lever", r"narrowed to \\emph\{re-measures\} by entry~(\d+)"): "re-measure",
+    ("p1-conditional-lever", r"so entry~(\d+)'s ``bounds are labelled"): "Cost figures",
     ("p2-repair-not-detection", r"the borrowed denominator entry~(\d+) retired"): "borrowed",
     ("p2-repair-not-detection", r"why entry~(\d+) needed reinstating"): "beats the tool-fed loop",
     ("p2-repair-not-detection", r"the equivalence overclaim entry~(\d+) withdraws"): (

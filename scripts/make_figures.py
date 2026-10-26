@@ -153,6 +153,10 @@ class FigureData:
     sigma: float
     swing: float
     swing_in_sigma: float
+    #: The same single-draw swing over the per-draw spread of Delta the D7 re-scorings measure at
+    #: L1 and L2. The cross-run sigma above comes from re-scoring one unoptimized genome and is
+    #: smaller than either level's own per-draw spread, so the figure annotates this one.
+    swing_per_draw_sigma: float
     curve: list[CurveRow]
     curve_gaps: dict[str, tuple[float, float]]
     depth: list[DepthCell]
@@ -229,7 +233,7 @@ def _effect_rows(
         )
     rows.append(
         EffectRow(
-            label="the registered swing, $L_2 - L_1$",
+            label="the swing, $L_2 - L_1$",
             group="difference of two draws",
             in_sigma=swing_in_sigma,
             replicated=False,
@@ -377,6 +381,9 @@ def figure_data() -> FigureData:
         sigma=noise.sigma_delta_mean,
         swing=swing,
         swing_in_sigma=swing_sigma,
+        swing_per_draw_sigma=swing
+        / (repeat["L1"].sd_between_replicates ** 2 + repeat["L2"].sd_between_replicates ** 2)
+        ** 0.5,
         curve=curve,
         curve_gaps=curve_gaps,
         depth=depth,
@@ -530,7 +537,7 @@ def fig_p0(data: FigureData, out: Path) -> Path:
     ax.text(
         xa + 0.013,
         (y0 + y1) / 2,
-        f"swing {data.swing:.3f}\n$\\approx {data.swing_in_sigma:.1f}\\sigma$",
+        f"swing {data.swing:.3f}\n${data.swing_per_draw_sigma:.2f}\\sigma_{{\\mathrm{{draw}}}}$",
         color=VERMILLION,
         fontsize=8,
         va="center",

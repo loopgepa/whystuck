@@ -84,6 +84,7 @@ def _plotted() -> list[tuple[str, float]]:
         if lv.saturated_baseline is not None:
             out.append((f"{lv.name} saturated baseline", lv.saturated_baseline))
     out += [("sigma", d.sigma), ("swing", d.swing), ("swing in sigma", d.swing_in_sigma)]
+    out.append(("swing in per-draw sigma", d.swing_per_draw_sigma))
     out += [(f"curve {r.run}", r.score) for r in d.curve]
     for k, (gap, sig) in d.curve_gaps.items():
         out += [(f"gap {k}", gap), (f"gap {k} in sigma", sig)]
@@ -156,7 +157,13 @@ def test_headline_quantities_equal_the_text():
     d = mf.figure_data()
     checks = [
         ("sigma", d.sigma, r"\\sigma\(\\dd\) \\;=\\; 0.1591/\\sqrt\{30\} \\;=\\; ([\d.]+)", 5e-5),
-        ("swing", d.swing, r"is \$([\d.]+)\$, about", 5e-4),
+        ("swing", d.swing, r"between them\s+is \$([\d.]+)\$, and it is what carries", 5e-4),
+        (
+            "swing in per-draw sigma",
+            d.swing_per_draw_sigma,
+            r"those units the swing is \$([\d.]+)\\sigma\$",
+            5e-3,
+        ),
         ("swing in sigma", d.swing_in_sigma, r"\\approx\\; ([\d.]+) ,", 0.05),
         (
             "oracle vs tool in sigma",

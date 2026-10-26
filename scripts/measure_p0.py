@@ -70,6 +70,56 @@ STACKS: dict[str, tuple[list[int], list[tuple[str, str, frozenset[str]]]]] = {
 SEEDS, LEVELS = STACKS["openai"]
 
 
+#: The cassettes that hold each level's TRAIN-split first drafts. The calibration passes above
+#: are arm A only and never evaluate the train split, so the train side comes from the optimizing
+#: runs, whose GEPA seed evaluation scores the unoptimized genome on every training task.
+TRAIN_LEVELS: tuple[tuple[str, str, frozenset[str]], ...] = (
+    ("L1", f"{CASSETTES}/study-c2b.json", frozenset()),
+    ("L2", f"{CASSETTES}/study-p0-L2.json", _L2_EXCLUDE),
+    ("L3", f"{CASSETTES}/study-p0-L3.json", _L3_EXCLUDE),
+)
+
+
+def train_p0(
+    cassette: str, exclude: frozenset[str], seeds: tuple[int, ...] = (0, 1, 2), n_train: int = 8
+) -> tuple[int, int]:
+    """(already-correct first drafts, drafts) of the SEED genome on the train split.
+
+    The training signal GEPA optimizes is scored on this split, so this is the base rate the
+    always-refine mechanism acts on; the tabulated p0 is the held-out one. A cassette miss
+    raises rather than shrinking the denominator.
+    """
+    from whystuck.eval.cassette import Cassette
+    from whystuck.eval.llm_worker import make_self_refine_run_task
+    from whystuck.eval.multi_constraint import (
+        load_multi_constraint,
+        mc_feedback,
+        mc_pass,
+        mc_score,
+    )
+    from whystuck.eval.study import seed_genome
+
+    def _unreachable(_prompt: str, **_kw: object) -> str:
+        raise AssertionError("unreachable in replay mode")
+
+    pool = max(64, 2 * max(n_train, N_HELDOUT) + 2)
+    genome = seed_genome("study-A", evolvable=set())
+    correct = total = 0
+    with Cassette(cassette, mode="replay") as cas:
+        run_task = make_self_refine_run_task(
+            cas.wrap(_unreachable, name="worker"), mc_score, feedback=mc_feedback, max_retries=1
+        )
+        for seed in seeds:
+            for task in load_multi_constraint(
+                "train", seed=seed, n=n_train, pool=pool, hard=True, exclude=exclude
+            ):
+                trace = run_task(genome, task)
+                draft = next(s for s in trace.steps if s.step_id == "generate-0")
+                total += 1
+                correct += int(mc_pass(draft.output_summary or "", task))
+    return correct, total
+
+
 def main(argv: list[str] | None = None) -> int:  # pragma: no cover - CLI convenience
     import argparse
 

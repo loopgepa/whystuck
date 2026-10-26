@@ -268,3 +268,19 @@ def test_the_contamination_moved_exactly_the_number_of_values_the_paper_claims()
         "if every moved value breached tolerance the sentence loses its point, which is that "
         "some shifted without any guard noticing"
     )
+
+
+def test_headline_multiples_are_computed_from_the_artifacts_not_from_rounded_literals():
+    """The CLI used to divide the literals -0.0417 and 0.0630, four-decimal displays of the
+    deltas, and printed 1.44 and 2.17 sigma where the papers (and the exact deltas) give 1.43 and
+    2.18. Paper I's register records that defect for the claim checker; the script that
+    docs/EXPERIMENTS.md names as the source of sigma kept it."""
+    from analyze_measurement_noise import headline_effects
+
+    est = noise_estimate()
+    effects = dict(headline_effects())
+    assert round(est.in_sigma(effects["L1  four-arm re-run"]), 2) == 1.43
+    assert round(est.in_sigma(effects["actionability hi-lo"]), 2) == 2.18
+    # Exact artifact values, not their four-decimal displays.
+    assert effects["L1  four-arm re-run"] != -0.0417
+    assert abs(effects["L1  four-arm re-run"] - (-0.0416667)) < 1e-6

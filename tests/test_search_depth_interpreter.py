@@ -44,3 +44,27 @@ def test_the_eval_venv_still_wins_when_it_is_there(monkeypatch, tmp_path):
     fake.touch()
     monkeypatch.setattr(asd, "EVAL_PY", str(fake))
     assert asd.eval_python() == str(fake)
+
+
+def test_the_split_sweep_depth_replays_at_its_own_training_split(monkeypatch):
+    """The split sweep varied --n-train. Replaying its cassettes at the budget sweep's fixed 8
+    would build a different task pool and miss every call, so the training split has to be a
+    parameter, and it has to reach the replay CLI."""
+    seen: list[list[str]] = []
+
+    class _Done:
+        returncode = 0
+        stdout = "Iteration 1: x\nIteration 6: y\n"
+        stderr = ""
+
+    def _fake_run(argv, **_kw):
+        seen.append(list(argv))
+        return _Done()
+
+    monkeypatch.setattr(asd.subprocess, "run", _fake_run)
+    assert asd.measured_depth("split24", 84, 6, n_train=24) == 6
+    argv = seen[0]
+    assert argv[argv.index("--n-train") + 1] == "24"
+    # The default stays the budget sweep's fixed split, so existing callers are unchanged.
+    asd.measured_depth("c2b", 28, 6)
+    assert seen[1][seen[1].index("--n-train") + 1] == "8"

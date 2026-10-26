@@ -298,6 +298,82 @@ def strata(level: Level) -> dict[bool, Stratum]:
     return out
 
 
+#: Where the D7 re-scorings live: one results JSON and one cassette per (level, arm, seed, k).
+REPEAT_DIR = f"{DOCS}/repeat"
+REPEAT_CASSETTE_DIR = f"{CASSETTE_DIR}/repeat"
+
+
+def _replicate_rows(level: Level, arm: str, k: int) -> list[tuple[float, float]]:
+    """(first-draft score, final score) per held-out task for one arm's genome, replicate k.
+
+    The re-scorings are arm-A runs of the released genome with a per-replicate salt in the
+    cassette key (`sample=k`), so the replay passes the same salt or every call misses.
+    """
+    rows: list[tuple[float, float]] = []
+    seed = 0
+    while Path(f"{REPEAT_DIR}/{level.name}-{arm}-s{seed}-k{k}.json").exists():
+        tag = f"{level.name}-{arm}-s{seed}-k{k}"
+        doc = json.loads(Path(f"{REPEAT_DIR}/{tag}.json").read_text())
+        meta = doc["meta"]
+        if meta.get("sample") != k or meta.get("seeds") != [seed]:
+            raise ValueError(
+                f"{tag}: recorded sample/seed {meta.get('sample')}/{meta.get('seeds')}"
+            )
+        final_by_task = doc["runs"][0]["A"]["seed_heldout_by_task"]
+        genome = seed_genome("study-A", evolvable=set(), overrides=dict(meta["gene_overrides"]))
+        heldout = load_multi_constraint(
+            "heldout",
+            seed=seed,
+            n=_N_HELDOUT,
+            pool=max(64, 2 * _N_HELDOUT + 2),
+            hard=True,
+            exclude=level.exclude,
+        )
+        with Cassette(f"{REPEAT_CASSETTE_DIR}/{tag}.json", mode="replay") as cas:
+            worker = cas.wrap(_unreachable, name="worker")
+
+            def salted(prompt: str, _w=worker, _k=k) -> str:
+                return _w(prompt, sample=_k)
+
+            run_task = make_self_refine_run_task(
+                salted, mc_score, feedback=mc_feedback, max_retries=1
+            )
+            for task in heldout:
+                trace = run_task(genome, task)
+                gen0 = next(s for s in trace.steps if s.step_id == "generate-0")
+                rows.append((mc_score(gen0.output_summary or "", task), final_by_task[task.id]))
+        seed += 1
+    if not rows:
+        raise ValueError(f"no D7 re-scoring found for {level.name} arm {arm} replicate {k}")
+    return rows
+
+
+def replicate_decompose(level: Level, k: int) -> list[Decomposition]:
+    """The draft/loop split repeated on each of the first `k` D7 re-scorings of one level.
+
+    `decompose` splits ONE draw per arm, and its shares (how much of Delta is the shared gene) are
+    ratios of two noisy terms. The re-scorings score the same released genomes again and record
+    the first draft too, so the split has a sampling distribution, and this returns it. A cassette
+    miss raises: a decomposition of a partial replay would describe fewer tasks than it claims.
+    """
+    out: list[Decomposition] = []
+    for rep in range(k):
+        b, d = _replicate_rows(level, "B", rep), _replicate_rows(level, "D", rep)
+        if len(b) != len(d):
+            raise ValueError(f"{level.name} replicate {rep}: B and D scored different task counts")
+        out.append(
+            Decomposition(
+                level=f"{level.name}-k{rep}",
+                n=len(b),
+                draft_b=_mean([x[0] for x in b]),
+                draft_d=_mean([x[0] for x in d]),
+                final_b=_mean([x[1] for x in b]),
+                final_d=_mean([x[1] for x in d]),
+            )
+        )
+    return out
+
+
 def released_delta(level: Level) -> float:
     """Δ(D−B) as the paid run itself reported it, from the arm-level means."""
     runs = json.loads(Path(level.results).read_text())["runs"]

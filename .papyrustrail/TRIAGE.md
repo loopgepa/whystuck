@@ -93,3 +93,25 @@ not a field of any run JSON, so no registry entry can hold it. It is derived ins
 prints, and all three sites are pinned there; the pure-Python value agrees with
 `scipy.stats.bartlett` (0.06103). The `0.67` beside it, Bartlett across the six curve rows, did
 not need accepting and is pinned the same way.
+
+## The thirteen values Paper I's round-1 review corrections added (2026-10-26)
+
+`bind` gained 29 sites carrying 13 values, all in Paper~I, all introduced by the round-1 review
+fixes and all derived from the release by `verify_paper_claims._review_round1_p1_checks`, which
+papyrustrail does not read. Each was checked by mutating it in the paper and watching that check
+fail. None is expressible in the registry today, because each comes from a replay or a statistic
+the `contrasts` block does not emit:
+
+| value | what it is | derived from |
+|---|---|---|
+| `-0.004`, `0.003`, `0.024`, `0.032` | five-replicate means of the draft and loop terms (`tab:decomp`) | replaying the 135 D7 cassettes (`replicate_decompose`) |
+| `0.012` | standard error of the L1 already-correct stratum's contribution | `tab:repeat` per-draw sd and the stratum size |
+| `1.55`, `1.68` | the single-draw swing over the per-draw spread, and over the split cells' spread | `tab:repeat` sds; split-sweep deltas |
+| `-0.067` | lower end of the deepest budget cell's 95% t-interval (upper end `0.070` already bound) | mmc160 per-seed deltas, t(2) |
+| `0.103` | range of the four split-sweep cells at L1 | split-sweep deltas |
+| `0.54` | Fisher's exact p, evolved gene against seed rubric false passes at L2 | the two confusion matrices |
+| `1.25` | smallest E[p0] over measured p0 | `_expected_p0` and the p0 confusion matrices |
+| `0.19`, `7.35` | p0-sweep L2 priced spend; split cells' bound over priced spend | `docs/actual-spend.json` |
+
+They are accepted rather than declared because declaring them means teaching the registry a cassette
+replay; until then the claim checker is the binding.

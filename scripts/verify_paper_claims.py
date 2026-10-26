@@ -430,6 +430,15 @@ _REGISTER_TARGETED = frozenset(
         r"the cell is \$([\d.]+)\\sigma\$ of a measured noise floor",
         r"replicates each Bartlett's test gives \$p = ([\d.]+)\$",
         r"like for like, (\w+) of the six rows are noisier",
+        # Paper I's round-1 review entries (36-45), each restating the value its body now prints.
+        r"On those spreads the swing is \$([\d.]+)\\sigma\$",
+        r"re-measured it is \$([\d.]+)\$ standard\s+errors",
+        r"exact permutation \$p\$ is \$([\d.]+)\$",
+        r"shared gene's term is \$([+-][\d.]+)\$ of",
+        r"at \$L_1\$ and \$([+-][\d.]+)\$ of \$\+0.055\$ at \$L_2\$",
+        r"split cells\s+at \\\$\$([\d.]+)\$ against",
+        r"comparison, \$(\d+)\\%\$ of instances, or",
+        r"of instances, or \$(\d+)\\%\$ counting",
     }
 )
 
@@ -539,8 +548,10 @@ _WORD_NUM = {
     "twenty-nine": 29,
     "thirty-four": 34,
     "thirty-five": 35,
+    "thirty-seven": 37,
     "thirty-eight": 38,
     "forty-three": 43,
+    "forty-five": 45,
     "two hundred": 200,
 }
 
@@ -903,7 +914,7 @@ def _budget_cell(mmc: int, cap: int) -> dict[str, float]:
     }
 
 
-def _search_depth(slug: str, mmc: int, cap: int) -> int | None:
+def _search_depth(slug: str, mmc: int, cap: int, n_train: int = 8) -> int | None:
     """Measured GEPA iterations, replayed from the cassette. See analyze_search_depth."""
     import sys
     from pathlib import Path
@@ -911,7 +922,7 @@ def _search_depth(slug: str, mmc: int, cap: int) -> int | None:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     import analyze_search_depth as asd
 
-    return asd.measured_depth(slug, mmc, cap)
+    return asd.measured_depth(slug, mmc, cap, n_train=n_train)
 
 
 def _budget_delta(slug: str) -> float:
@@ -1539,25 +1550,28 @@ def _prereg_verdicts() -> tuple[int, int, float]:
 
     Paper I stated the rule and then reported a different noise framework. That is only a neutral
     omission if the rule agrees with what the paper reports, and it does not: applied literally it
-    returns SUPPORTED twice, because its bar is the sum of two across-seed spreads and a seed here
-    re-partitions one fixed pool rather than resampling it. Derived here so the paper's disclosure
-    of what the rule returns cannot drift from what it actually returns.
+    returns SUPPORTED twice, because its bar is the sum of two three-seed spreads, each uncertain by
+    about a factor of two. Derived here so the paper's disclosure of what the rule returns cannot
+    drift from what it actually returns.
+
+    "Literally" means as the harness codes it, which is what every released report prints:
+    `report._verdict` sums POPULATION standard deviations and has no ceiling branch (the ceiling is
+    a warning printed beside the label). Paper I printed a sample-sd sum (0.018 at n_train=16 where
+    the code gives 0.014) and a ceiling clause the code does not have; the count of SUPPORTED cells
+    was the same either way, which is why the difference survived. Both the label and the noise sum
+    are now read from the shipped rule.
     """
+    from whystuck.eval.report import _verdict
+
     supported = 0
     sigma_sum_16 = float("nan")
     for label, slug in _PREREG_CELLS:
         runs = _runs(f"validation-study-{slug}.json")
         b = [r["B"]["opt_heldout"] for r in runs]
         d = [r["D"]["opt_heldout"] for r in runs]
-        seeds = [r[arm]["seed_heldout"] for r in runs for arm in ("B", "D")]
-        s_b, s_d = stdev(b), stdev(d)
         if label == "n_train 16":
-            sigma_sum_16 = s_b + s_d
-        if any(x >= 0.9 or x <= 0.1 for x in seeds):
-            continue
-        if mean(d) <= mean(b):
-            continue
-        if mean(d) - mean(b) > s_b + s_d:
+            sigma_sum_16 = pstdev(b) + pstdev(d)
+        if _verdict(runs)[0] == "SUPPORTED":
             supported += 1
     if supported == 0:
         raise ValueError(
@@ -2317,12 +2331,6 @@ def _checks() -> list[tuple[str, float, float, float]]:
     final_words = [(_length(i, "B")[1], _length(i, "D")[1]) for i in range(3)]
     decomp_prose: list[tuple[str, str, float, float]] = [
         (
-            "tex: decomp L1 overstatement factor",
-            r"penalty by a factor of \$([\d.]+)\$",
-            0.05,
-            abs(_decomposition(0)["delta"]) / abs(_decomposition(0)["loop_term"]),
-        ),
-        (
             "tex: decomp L2 both arms draft score",
             r"both arms' drafts score \$([\d.]+)\$ there",
             0.0005,
@@ -2490,19 +2498,9 @@ def _checks() -> list[tuple[str, float, float, float]]:
         if want_f1:
             out.append((f"tab:curve {tag} F1", cells[3][0], 0.005, st["f1"]))
 
-    # tab:decomp's treated-share column: |loop| / |delta|, the number the section's headline
-    # claim ("overstates by 2.5x") is the reciprocal of.
-    for i, row_label in (("0", "$L_1$ &"), ("1", "$L_2$ &")):
-        d = _decomposition(int(i))
-        cells = _table_row(tex, decomp_hdr, row_label)
-        out.append(
-            (
-                f"tab:decomp {row_label.strip(' &')} treated share",
-                cells[4][0],
-                0.5,
-                100.0 * abs(d["loop_term"]) / abs(d["delta"]),
-            )
-        )
+    # tab:decomp's treated-share column was withdrawn (Paper I register entry 37): a share of one
+    # draw's delta. The five-replicate columns that replace it are checked in
+    # `_review_round1_p1_checks`.
 
     # tab:splitsweep's priced bounds. These are money figures the prose of sec:splitresult now
     # cites as the bound that was NOT exceeded, so they must come from each run's own recorded
@@ -3777,6 +3775,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_reconciliation_checks())
     out.extend(_replicate_sigma_scale_checks())
     out.extend(_gene_replay_checks())
+    out.extend(_review_round1_p1_checks())
 
     return out
 
@@ -5877,7 +5876,7 @@ def _replicate_sigma_scale_checks() -> list[tuple[str, float, float, float]]:
     out.append(
         (
             "tex: replicated swing in sigma",
-            _scrape(p1, r"standard errors it is \$([\d.]+)\\sigma\$ rather than"),
+            _scrape(p1, r"standard errors it is \$([\d.]+)\\sigma\$, against"),
             0.05,
             (l2.delta - l1.delta) / paired_se,
         )
@@ -6202,7 +6201,7 @@ def _superlative_scope_checks() -> list[tuple[str, float, float, float]]:
             _scrape(
                 p1,
                 r"the \$\+([\d.]+)\$ gain at higher \$p_0\$ is the\s+"
-                r"largest loop-level effect the study replicates",
+                r"largest loop-level effect the study re-measures",
             ),
             0.0005,
             largest,
@@ -6599,6 +6598,526 @@ def _defect_class_count_checks() -> list[tuple[str, float, float, float]]:
         ("threats", r"The (\w+) defects are not independent findings", total),
     ):
         out.append((f"p3 defect count, {site}", _scrape_word(tex, pattern), 0.0, expected))
+    return out
+
+
+def _swing_permutation_p() -> float:
+    """Exact two-sided permutation p for the L2-minus-L1 swing with each level's seeds as the unit.
+
+    Six per-seed single-draw deltas, every 3-vs-3 relabelling; the statistic is the absolute
+    difference of the two means. At 3 v 3 the smallest attainable p is 2/20 = 0.10.
+    """
+    from itertools import combinations
+
+    pooled = _p0_deltas(0) + _p0_deltas(1)
+    observed = abs(mean(pooled[3:]) - mean(pooled[:3]))
+    splits = list(combinations(range(len(pooled)), 3))
+    hits = 0
+    for idx in splits:
+        a = [pooled[i] for i in idx]
+        b = [pooled[i] for i in range(len(pooled)) if i not in idx]
+        if abs(mean(a) - mean(b)) >= observed - 1e-12:
+            hits += 1
+    return hits / len(splits)
+
+
+def _fisher_two_sided(a: int, b: int, c: int, d: int) -> float:
+    """Fisher's exact test, two-sided, for the 2x2 table [[a, b], [c, d]]."""
+    from math import comb
+
+    row1, col1, n = a + b, a + c, a + b + c + d
+
+    def prob(x: int) -> float:
+        return comb(col1, x) * comb(n - col1, row1 - x) / comb(n, row1)
+
+    observed = prob(a)
+    lo, hi = max(0, row1 - (n - col1)), min(row1, col1)
+    return sum(prob(x) for x in range(lo, hi + 1) if prob(x) <= observed * (1 + 1e-9))
+
+
+#: t(0.975, df=2). A constant of the t distribution, not a measurement.
+_T975_DF2 = 4.302652729911275
+
+
+@cache
+def _replicate_decomposition() -> dict[str, list[object]]:
+    mod = _decomp()
+    return {lvl.name: mod.replicate_decompose(lvl, 5) for lvl in mod.LEVELS}
+
+
+def _review_round1_p1_checks() -> list[tuple[str, float, float, float]]:
+    r"""Paper I's round-1 review corrections, each pinned to the artifact it now rests on.
+
+    The swing: the paper divided the single-draw $0.102$ by the cross-run $\sigma(\dd)$ and called
+    the $2.5$ a lower bound because the easier level "will vary less". Its own `tab:repeat` measures
+    the per-draw spread of $\dd$ at both levels and both are larger, so the per-draw quotient and
+    the seed-level permutation $p$ are derived here and every site that states them is read.
+
+    The decomposition: the single-draw shares were withdrawn; the five-replicate terms that replace
+    them come from replaying the 135 D7 cassettes (`replicate_decompose`), the same instrument whose
+    replicate $\dd$ already reproduces `tab:repeat`.
+
+    The sweeps, the setup and the cost sentences: each new number is derived from the release.
+    """
+    p1 = _sources().paper_tex("p1-conditional-lever")
+    out: list[tuple[str, float, float, float]] = []
+    repeat = _repeat_results()
+    l1, l2 = repeat["L1"], repeat["L2"]
+    single = _decomposition(1)["delta"] - _decomposition(0)["delta"]
+    per_draw = (l1.sd_between_replicates**2 + l2.sd_between_replicates**2) ** 0.5
+    swing_sigma = single / per_draw
+    for label, pattern in (
+        ("abstract", r"carries the result: \$([\d.]+)\\sigma\$ of the per-draw"),
+        ("contribution", r"in a single draw, \$([\d.]+)\\sigma\$\s+against the per-draw"),
+        ("fig:p0", r"swing, \$([\d.]+)\\sigma\$ against the per-draw spread"),
+        ("tab:p0", r"across the axis\}, \$([\d.]+)\\sigma\$ of the per-draw"),
+        ("sec:p0", r"those units the swing is \$([\d.]+)\\sigma\$"),
+        ("tab:repeat", r"against \$([\d.]+)\\sigma\$ for the single draw"),
+        ("conclusion", r"depends on the noise: \$([\d.]+)\\sigma\$ of the per-draw"),
+        ("register", r"On those spreads the swing is \$([\d.]+)\\sigma\$"),
+    ):
+        out.append(
+            (f"tex: swing on per-draw spread, {label}", _scrape(p1, pattern), 0.005, swing_sigma)
+        )
+    out.append(
+        (
+            "tex: per-draw spread L1 (sec:p0)",
+            _scrape(p1, r"spread of \$\\dd\$ at \$([\d.]+)\$ at \$L_1\$"),
+            0.00005,
+            l1.sd_between_replicates,
+        )
+    )
+    out.append(
+        (
+            "tex: per-draw spread L2 (sec:p0)",
+            _scrape(p1, r"at \$L_1\$ and\s+\$([\d.]+)\$ at \$L_2\$: larger"),
+            0.00005,
+            l2.sd_between_replicates,
+        )
+    )
+    out.append(
+        (
+            "tex: per-draw spread L1 (conclusion)",
+            _scrape(p1, r"and \$([\d.]+)\$ for a single draw of an optimized pair"),
+            0.00005,
+            l1.sd_between_replicates,
+        )
+    )
+    # The split sweep's four cells at L1, which tab:splitresults reads as one quantity plus noise.
+    cells = [_split_row(slug).delta for _, slug in _SPLIT_ROWS]
+    out.append(
+        (
+            "tex: split-cell range at L1",
+            _scrape(p1, r"spread over \$([\d.]+)\$, and on their"),
+            0.0005,
+            max(cells) - min(cells),
+        )
+    )
+    out.append(
+        (
+            "tex: swing on split-cell spread",
+            _scrape(p1, r"spread the swing is \$([\d.]+)\\sigma\$"),
+            0.005,
+            single / (stdev(cells) * 2**0.5),
+        )
+    )
+    replicated = l2.delta - l1.delta
+    paired_se = (l1.standard_error**2 + l2.standard_error**2) ** 0.5
+    for label, pattern in (
+        ("abstract", r"levels, and \$([\d.]+)\$ standard errors re-measured, on fixed"),
+        ("contribution", r"re-measured five times, \$([\d.]+)\$\s+standard errors of scoring"),
+        ("sec:p0", r"the swing is \$0.076\$ at \$([\d.]+)\$ standard errors"),
+        ("conclusion", r"\$([\d.]+)\$ standard errors re-measured, where"),
+        ("register", r"re-measured it is \$([\d.]+)\$ standard\s+errors"),
+    ):
+        out.append(
+            (
+                f"tex: replicated swing in SE, {label}",
+                _scrape(p1, pattern),
+                0.05,
+                replicated / paired_se,
+            )
+        )
+    perm = _swing_permutation_p()
+    for label, pattern in (
+        ("contribution", r"permutation test gives \$p = ([\d.]+)\$\. The axis"),
+        ("sec:p0", r"per-seed deltas gives \$p = ([\d.]+)\$"),
+        ("threats", r"\(\$p = ([\d.]+)\$ for the swing"),
+        ("conclusion", r"with seeds as the unit, \$p = ([\d.]+)\$"),
+        ("register", r"exact permutation \$p\$ is \$([\d.]+)\$"),
+    ):
+        out.append((f"tex: swing permutation p, {label}", _scrape(p1, pattern), 0.005, perm))
+
+    # The decomposition, repeated on each D7 re-scoring.
+    reps = _replicate_decomposition()
+
+    def rmean(level: str, field: str) -> float:
+        return mean(getattr(d, field) for d in reps[level])  # type: ignore[attr-defined]
+
+    hdr = r"level & $\dd(D-B)$ & draft term"
+    for i, lvl in enumerate(("L1", "L2", "L3")):
+        row = _table_row(p1, hdr, f"$L_{i + 1}$ &")
+        out.append((f"tab:decomp {lvl} replicate delta", row[4][0], 0.0005, rmean(lvl, "delta")))
+        out.append(
+            (f"tab:decomp {lvl} replicate draft", row[5][0], 0.0005, rmean(lvl, "draft_term"))
+        )
+        out.append((f"tab:decomp {lvl} replicate loop", row[6][0], 0.0005, rmean(lvl, "loop_term")))
+    term_sds = [
+        stdev(getattr(d, f) for d in reps[lvl])  # type: ignore[attr-defined]
+        for lvl in ("L1", "L2", "L3")
+        for f in ("draft_term", "loop_term")
+    ]
+    sd_lo, sd_hi = _scrape_all(p1, r"standard deviations run from \$([\d.]+)\$ to \$([\d.]+)\$")
+    out.append(("tex: decomp replicate term sd min", sd_lo, 0.0005, min(term_sds)))
+    out.append(("tex: decomp replicate term sd max", sd_hi, 0.0005, max(term_sds)))
+    draft1, draft2 = rmean("L1", "draft_term"), rmean("L2", "draft_term")
+    for label, pattern, want in (
+        ("contribution L1", r"re-measurements puts it at \$([+-][\d.]+)\$ and", draft1),
+        ("contribution L2", r"puts it at \$[+-][\d.]+\$ and \$([+-][\d.]+)\$\. It", draft2),
+        ("caption L1", r"it carries \$([+-][\d.]+)\$ of \$-0.021\$", draft1),
+        ("caption L2", r"of \$-0.021\$ and\s+\$([+-][\d.]+)\$ of \$\+0.055\$", draft2),
+        ("conclusion L1", r"from \$-0.025\$ to \$([+-][\d.]+)\$ at \$L_1\$", draft1),
+        ("conclusion L2", r"from none to \$([+-][\d.]+)\$ at \$L_2\$", draft2),
+        ("register L1", r"shared gene's term is \$([+-][\d.]+)\$ of", draft1),
+        ("register L2", r"at \$L_1\$ and \$([+-][\d.]+)\$ of \$\+0.055\$ at \$L_2\$", draft2),
+    ):
+        out.append((f"tex: replicate draft term, {label}", _scrape(p1, pattern), 0.0005, want))
+    loops = _scrape_all(
+        p1,
+        r"replicate means it runs \$([+-][\d.]+) \\to ([+-][\d.]+) \\to ([+-][\d.]+)\$",
+    )
+    for lvl, got in zip(("L1", "L2", "L3"), loops, strict=True):
+        out.append((f"tex: replicate loop term {lvl}", got, 0.0005, rmean(lvl, "loop_term")))
+
+    # The deepest budget cell at seed level: a t interval over its three per-seed deltas.
+    deepest = [
+        r["D"]["opt_heldout"] - r["B"]["opt_heldout"] for r in _runs("validation-study-mmc160.json")
+    ]
+    half = _T975_DF2 * stdev(deepest) / len(deepest) ** 0.5
+    for label, pattern in (
+        ("contribution", r"\$t\$-interval is \$\[([+-][\d.]+),([+-][\d.]+)\]\$, which holds the"),
+        ("fig:depth", r"own \$95\\%\$ \$t\$-interval is\s+\$\[([+-][\d.]+),([+-][\d.]+)\]\$, so"),
+        ("sec:budgetresult", r"interval of\s+\$\[([+-][\d.]+),([+-][\d.]+)\]\$, which holds"),
+        ("register", r"interval is \$\[([+-][\d.]+),([+-][\d.]+)\]\$, and acceptance"),
+    ):
+        lo, hi = _scrape_all(p1, pattern)
+        out.append((f"tex: deepest-cell t interval lo, {label}", lo, 0.0005, mean(deepest) - half))
+        out.append((f"tex: deepest-cell t interval hi, {label}", hi, 0.0005, mean(deepest) + half))
+
+    # E[p0] over measured p0, per level.
+    ratios = []
+    for level, (excl, _e, _m) in enumerate(_P0_LEVELS):
+        tp, fp, fn, tn = _confusion(level)
+        ratios.append(_expected_p0(excl)[0] / ((tp + fn) / (tp + fp + fn + tn)))
+    lo_r, hi_r = _scrape_all(p1, r"by a factor of \$([\d.]+)\$ to \$([\d.]+)\$, because")
+    out.append(("tex: E[p0] over-estimate, smallest factor", lo_r, 0.005, min(ratios)))
+    out.append(("tex: E[p0] over-estimate, largest factor", hi_r, 0.05, max(ratios)))
+
+    # Train-split versus held-out p0.
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import measure_p0
+
+    train = [measure_p0.train_p0(c, e) for _, c, e in measure_p0.TRAIN_LEVELS]
+    m = re.search(
+        r"rate is \$(\d+)/(\d+)\$, \$(\d+)/(\d+)\$ and \$(\d+)/(\d+)\$ at the\s+"
+        r"three levels below, "
+        r"against \$(\d+)/(\d+)\$, \$(\d+)/(\d+)\$ and \$(\d+)/(\d+)\$ held-out",
+        p1,
+    )
+    printed = [float(g) for g in m.groups()] if m else [float("nan")] * 12
+    for i, (k, n) in enumerate(train):
+        out.append((f"tex: train p0 L{i + 1} numerator", printed[2 * i], 0, k))
+        out.append((f"tex: train p0 L{i + 1} denominator", printed[2 * i + 1], 0, n))
+    for level in range(3):
+        tp, fp, fn, tn = _confusion(level)
+        out.append((f"tex: heldout p0 L{level + 1} numerator", printed[6 + 2 * level], 0, tp + fn))
+        out.append(
+            (
+                f"tex: heldout p0 L{level + 1} denominator",
+                printed[7 + 2 * level],
+                0,
+                tp + fp + fn + tn,
+            )
+        )
+
+    # Precision 1 on small counts: L2, evolved gene against the seed rubric, false vs true PASS.
+    d2, b2 = _arm_confusion(1, "D"), _arm_confusion(1, "B")
+    out.append(
+        (
+            "tex: L2 precision Fisher p",
+            _scrape(p1, r"Fisher's exact test\s+gives \$p = ([\d.]+)\$"),
+            0.005,
+            _fisher_two_sided(d2["fp"], d2["tp"], b2["fp"], b2["tp"]),
+        )
+    )
+    # The already-correct stratum's standard error at L1: weight x per-task sigma / sqrt(n), with
+    # the per-task sigma of Delta taken from the D7 re-scorings at L1 (sd of a 30-task mean times
+    # sqrt(30)). Deliberately not the cross-run sigma: Paper III counts the values that move with
+    # that estimator, and this one is a re-scoring quantity.
+    g = _stratum(0, True)
+    per_task = l1.sd_between_replicates * 30**0.5
+    out.append(
+        (
+            "tex: L1 already-correct stratum SE",
+            _scrape(p1, r"standard error of about\s+\$([\d.]+)\$, so the"),
+            0.0005,
+            (g["n"] / 30) * per_task / g["n"] ** 0.5,
+        )
+    )
+    # Coverage of a three-seed range: 1 - 2^(1-n) at n = 3.
+    out.append(
+        (
+            "tex: three-seed range coverage",
+            _scrape(p1, r"1-2\^\{1-n\} = (\d+)\\%"),
+            0,
+            100 * (1 - 2 ** (1 - 3)),
+        )
+    )
+
+    # Split sweep: measured search depth, replayed per cell at its own training split.
+    depths = [
+        _search_depth(slug, mmc, 6, n_train=n)
+        for n, mmc, slug in (
+            (4, 14, "split4"),
+            (8, 28, "c2b"),
+            (16, 56, "split16"),
+            (24, 84, "split24"),
+        )
+    ]
+    if any(d is None for d in depths):
+        raise ValueError(f"a split-sweep depth replay returned nothing: {depths}")
+    printed_depths = _scrape_all(
+        p1, r"the sweep reaches \$(\d+)\$, \$(\d+)\$, \$(\d+)\$ and\s+\$(\d+)\$ iterations"
+    )
+    for (n, _mmc, _s), want, got in zip(
+        ((4, 14, "split4"), (8, 28, "c2b"), (16, 56, "split16"), (24, 84, "split24")),
+        depths,
+        printed_depths,
+        strict=True,
+    ):
+        out.append((f"tex: split sweep measured depth n_train={n}", got, 0, float(want)))  # type: ignore[arg-type]
+    out.append(
+        (
+            "tex: split n_train=24 reaches the cap",
+            _scrape(p1, r"the search reaches the\s+proposal cap of \$(\d+)\$"),
+            0,
+            float(depths[-1]),  # type: ignore[arg-type]
+        )
+    )
+    lo_d, hi_d = _scrape_all(p1, r"measured they are \$(\d+)\$ to \$(\d+)\$ iterations")
+    out.append(("tex: split depth range lo (correction)", lo_d, 0, float(min(depths))))  # type: ignore[type-var]
+    out.append(("tex: split depth range hi (correction)", hi_d, 0, float(max(depths))))  # type: ignore[type-var]
+
+    # Non-acceptance across both sweeps, each evolved arm-D gene counted once.
+    import analyze_evolved_gene as ev
+
+    split_rows = {
+        slug: ev.score_run(
+            f"{DOCS}/validation-study-{slug}.json", f"tests/fixtures/cassettes/study-{slug}.json"
+        )
+        for _, slug in _SPLIT_ROWS
+    }
+    evolved = sum(1 for rows in split_rows.values() for r in rows if r.kind == "evolved")
+    silent = sum(
+        1
+        for rows in split_rows.values()
+        for r in rows
+        if r.kind == "evolved" and r.pass_rate == 0.0
+    )
+    for slug, _seed, was_evolved, n_pass, _tp, _fp in _budget_pass_census():
+        if slug == "c2b" or not was_evolved:
+            continue
+        evolved += 1
+        silent += int(n_pass == 0)
+    got_silent, got_evolved = _scrape_all(p1, r"both sweeps, \$(\d+)\$ of \$(\d+)\$ emit")
+    out.append(("tex: evolved genes emitting no PASS, both sweeps", got_silent, 0, float(silent)))
+    out.append(("tex: evolved genes, both sweeps", got_evolved, 0, float(evolved)))
+    got_s, got_e = _scrape_all(p1, r"against \$(\d+)\$ of \$(\d+)\$ in the\s+split sweep")
+    out.append(
+        (
+            "tex: evolved genes emitting no PASS, split sweep",
+            got_s,
+            0,
+            float(sum(_sweep_pass_zero().values())),
+        )
+    )
+    out.append(
+        (
+            "tex: evolved genes, split sweep",
+            got_e,
+            0,
+            float(sum(1 for rows in split_rows.values() for r in rows if r.kind == "evolved")),
+        )
+    )
+
+    # Money: the bounds the guard priced against what the cassettes' token counts price.
+    spend = json.loads(Path(f"{DOCS}/actual-spend.json").read_text())
+    measured = {e["run"]: e for e in spend["measured"]}
+
+    def run_usd(slug: str) -> float:
+        return float(measured[f"{DOCS}/validation-study-{slug}.json"]["usd"])
+
+    def run_bound(slug: str) -> float:
+        return float(measured[f"{DOCS}/validation-study-{slug}.json"]["bound_usd"])
+
+    split_usd = sum(run_usd(s) for s in ("split4", "split16", "split24"))
+    split_bound = sum(run_bound(s) for s in ("split4", "split16", "split24"))
+    out.append(
+        (
+            "tex: split cells priced from tokens",
+            _scrape(p1, r"gives \\\$\$([\d.]+)\$ in all"),
+            0.005,
+            split_usd,
+        )
+    )
+    out.append(
+        (
+            "tex: split cells priced from tokens (register)",
+            _scrape(p1, r"split cells\s+at \\\$\$([\d.]+)\$ against"),
+            0.005,
+            split_usd,
+        )
+    )
+    out.append(
+        (
+            "tex: split estimator conservatism",
+            _scrape(p1, r"about \$([\d.]+)\\times\$ conservative here"),
+            0.005,
+            split_bound / split_usd,
+        )
+    )
+    for label, pattern, want in (
+        ("calibration bound", r"priced at a \\\$([\d.]+) bound and", run_bound("p0cal-L2")),
+        (
+            "calibration spend",
+            r"bound and\s+measured at \\\$([\d.]+), creates",
+            run_usd("p0cal-L2"),
+        ),
+        ("level bound", r"priced bound of \\\$([\d.]+) per optimizing level", run_bound("p0-L2")),
+        ("L2 spend", r"against a measured \\\$([\d.]+) and", run_usd("p0-L2")),
+        ("L3 spend", r"against a measured \\\$[\d.]+ and \\\$([\d.]+) \(", run_usd("p0-L3")),
+    ):
+        out.append((f"tex: p0 sweep {label}", _scrape(p1, pattern), 0.005, want))
+
+    # The reflection output cap, read from the cost model and its own comment on the old value.
+    from whystuck.eval import cost
+
+    src = Path(cost.__file__).read_text(encoding="utf-8")
+    old_cap = re.search(r"Raised from (\d+) after the C2 run", src)
+    cap_old, cap_new = _scrape_all(
+        p1, r"output cap was\s+\$(\d+)\$ tokens .*?, and \$(\d+)\$\s+from the clean"
+    )
+    out.append(
+        (
+            "tex: reflection cap before the clean re-run",
+            cap_old,
+            0,
+            float(old_cap.group(1)) if old_cap else float("nan"),
+        )
+    )
+    out.append(
+        (
+            "tex: reflection cap from the clean re-run",
+            cap_new,
+            0,
+            float(cost.REFLECTION_MAX_OUTPUT_TOKENS),
+        )
+    )
+
+    # Chronology: the earliest released run's recording date, as YYYYMMDD.
+    dates = []
+    for path in pathlib.Path(DOCS).glob("validation-study*.json"):
+        generated = json.loads(path.read_text()).get("meta", {}).get("generated")
+        if generated:
+            dates.append(generated[:10])
+    printed_date = re.search(r"earliest released run was recorded on (\d{4})-(\d\d)-(\d\d)", p1)
+    out.append(
+        (
+            "tex: earliest released run date",
+            float("".join(printed_date.groups())) if printed_date else float("nan"),
+            0,
+            float(min(dates).replace("-", "")),
+        )
+    )
+
+    # shared/loop.tex: how many generator verifiers there are, and how many sample parameters.
+    import random
+
+    from whystuck.eval import multi_constraint as mc
+
+    ids = set(mc._EASY_IDS) | set(mc._HARD_IDS)
+    parameterised = sum(1 for i in ids if mc._sample_params(i, random.Random(0), hard=True))
+    out.append(
+        (
+            "tex: generator verifier count (loop.tex)",
+            _scrape_word(p1, r"generator with (\w+) independent verifiers"),
+            0,
+            float(len(ids)),
+        )
+    )
+    out.append(
+        (
+            "tex: parameter-carrying verifier count (loop.tex)",
+            _scrape_word(p1, r"independent verifiers, (\w+) of them parameter-carrying"),
+            0,
+            float(parameterised),
+        )
+    )
+
+    # The text_stats readout's verdict-equivalent families (Paper II's taxonomy, corrected there:
+    # the readout strips the period every hard `end_with` phrase ends in, so that family is not
+    # settled by comparison). Paper I restates the count at two sites.
+    from whystuck.eval.multi_constraint import load_multi_constraint
+
+    settled = {"exact_word_count", "word_max_length", "num_bullets"}
+    inst = [
+        i
+        for t in load_multi_constraint("all", pool=64, hard=True)
+        for i in t.payload["instruction_id_list"]
+    ]
+    share = round(100 * sum(i in settled for i in inst) / len(inst))
+    share_with_end = round(100 * sum(i in settled | {"end_with"} for i in inst) / len(inst))
+    for label, pattern in (
+        ("method", r"readout settles (\w+) of the eight\s+constraint families by comparison, \$"),
+        ("register", r"readout settles (\w+) of the eight constraint families by\s+comparison, \$"),
+    ):
+        out.append(
+            (f"tex: settled families, {label}", _scrape_word(p1, pattern), 0, float(len(settled)))
+        )
+    for label, pattern, want in (
+        ("method share", r"by comparison, \$(\d+)\\%\$ of instances \(", share),
+        ("method share with end_with", r"of instances \(\$(\d+)\\%\$ counting", share_with_end),
+        ("register share", r"comparison, \$(\d+)\\%\$ of instances, or", share),
+        ("register share with end_with", r"of instances, or \$(\d+)\\%\$ counting", share_with_end),
+    ):
+        out.append((f"tex: verdict-equivalent {label}", _scrape(p1, pattern), 0, float(want)))
+
+    # The proposal stopper caps proposals, not reflection calls: the deepest budget cell's cassette.
+    entries = json.loads(Path("tests/fixtures/cassettes/study-mmc160.json").read_text())["entries"]
+    reflection_calls = sum(1 for v in entries.values() if v.get("name") == "reflection")
+    meta160 = _meta_of("validation-study-mmc160.json")
+    proposals = int(meta160["reflection_calls"]) * 2 * len(_runs("validation-study-mmc160.json"))
+    got_calls, got_cap = _scrape_all(
+        p1, r"recorded \$(\d+)\$ reflection calls under a cap of \$(\d+)\$\s+proposals"
+    )
+    out.append(("tex: mmc160 reflection calls", got_calls, 0, float(reflection_calls)))
+    out.append(("tex: mmc160 proposal cap, two arms x seeds", got_cap, 0, float(proposals)))
+
+    # Register entry 28: every released results file, including the one with no suffix.
+    capped = 0
+    for path in pathlib.Path(DOCS).glob("validation-study*.json"):
+        cap = json.loads(path.read_text()).get("meta", {}).get("worker_max_output_tokens")
+        capped += int(cap == 320)
+    out.append(
+        (
+            "tex: runs at the 320-token cap (register)",
+            _scrape_word(p1, r"The cap holds on\s+([\w-]+) released runs"),
+            0,
+            float(capped),
+        )
+    )
     return out
 
 

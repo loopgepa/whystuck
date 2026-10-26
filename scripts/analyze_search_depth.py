@@ -72,8 +72,11 @@ def eval_python() -> str:
     return sys.executable
 
 
-def measured_depth(slug: str, mmc: int, cap: int) -> int | None:
+def measured_depth(slug: str, mmc: int, cap: int, n_train: int = 8) -> int | None:
     """Highest GEPA iteration index reached, replayed from the cassette. None if absent.
+
+    `n_train` defaults to the budget sweep's fixed split; the split sweep passes its own, since a
+    different split builds a different task pool and would miss every recorded call.
 
     Replay rather than record: no key, no spend, and a cassette miss raises rather than
     silently truncating the count -- a depth read off a partial replay would understate the
@@ -94,7 +97,7 @@ def measured_depth(slug: str, mmc: int, cap: int) -> int | None:
                 "--seeds",
                 "0,1,2",
                 "--n-train",
-                "8",
+                str(n_train),
                 "--n-heldout",
                 "10",
                 "--max-metric-calls",

@@ -49,7 +49,7 @@ PAPER_NUMERALS: dict[str, str] = {
 #: One-line description, used by the docs generator and the navigation README.
 PAPER_TITLES: dict[str, str] = {
     "p1-conditional-lever": (
-        "Whether Optimizing the Loop Beats Optimizing the Prompt Depends on One Number"
+        "Whether Optimizing the Loop Beats Optimizing the Prompt Tracks One Number"
     ),
     "p2-repair-not-detection": "What a Checker Cannot Buy Is the Repair",
     "p3-silent-no-op": "A Loop Optimizer That Was Not Optimizing Its Loop",

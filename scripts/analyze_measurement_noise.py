@@ -266,6 +266,31 @@ def noise_estimate(names: list[str] | None = None) -> Noise:
     )
 
 
+def _mean_arm_gap(name: str, hi: str, lo: str, field: str = "opt_heldout") -> float:
+    runs = _doc(name)["runs"]
+    return sum(r[hi][field] - r[lo][field] for r in runs) / len(runs)
+
+
+def headline_effects() -> list[tuple[str, float]]:
+    """The effects the papers quote in sigma units, read from the released artifacts.
+
+    These were literals (-0.0417, 0.0600, -0.0017, 0.0630): four-decimal displays of the deltas.
+    Dividing a display by sigma printed 1.44 and 2.17 where the exact deltas give 1.43 and 2.18,
+    the defect Paper I's register records for the claim checker. Reading the artifacts removes it.
+    """
+    hi = _doc("fbacthi")["runs"]
+    lo = _doc("fbactlo")["runs"]
+    actionability = sum(r["A"]["seed_heldout"] for r in hi) / len(hi) - sum(
+        r["A"]["seed_heldout"] for r in lo
+    ) / len(lo)
+    return [
+        ("L1  four-arm re-run", _mean_arm_gap("c2b", "D", "B")),
+        ("L2  p0 sign flip", _mean_arm_gap("p0-L2", "D", "B")),
+        ("L3  p0 saturated", _mean_arm_gap("p0-L3", "D", "B")),
+        ("actionability hi-lo", actionability),
+    ]
+
+
 def main() -> int:  # pragma: no cover - CLI convenience
     reps = eligible_replicates()
     est_means = seed_vectors([r.name for r in reps])
@@ -290,12 +315,7 @@ def main() -> int:  # pragma: no cover - CLI convenience
     )
 
     print("\n=== the paper's headline effects, in units of that noise ===")
-    for label, delta in (
-        ("L1  four-arm re-run", -0.0417),
-        ("L2  p0 sign flip", 0.0600),
-        ("L3  p0 saturated", -0.0017),
-        ("actionability hi-lo", 0.0630),
-    ):
+    for label, delta in headline_effects():
         print(f"  {label:22} Δ={delta:+.4f}  {est.in_sigma(delta):.2f} sigma")
     print(
         "\nRead this as scope, not as a refutation: the mean signed difference is confounded\n"

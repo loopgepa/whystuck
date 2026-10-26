@@ -27,7 +27,7 @@ before the budget is spent: the loop stops on a \texttt{PASS} without issuing th
 that would have followed it, so the bound is reached only by an eval that never passes.
 
 \paragraph{Tasks.} A composable IFEval-style \citep{zhou2023ifeval}
-multi-constraint generator with nine independent, parameter-carrying verifiers
+multi-constraint generator with nine independent verifiers, seven of them parameter-carrying
 (e.g.\ \texttt{exact\_word\_count}, \texttt{forbidden\_word},
 \texttt{word\_max\_length}, \texttt{num\_bullets}). Joint satisfiability of every
 generated task is guaranteed by a witness the generator validates to score
@@ -36,8 +36,8 @@ combinations). The \emph{hard} tier mandates \texttt{exact\_word\_count} (a
 genuine LLM skill gap) plus at least one further ``brutal'' constraint, which
 structurally caps the seed below saturation.
 
-\paragraph{Metric.} Mean fraction of constraints satisfied on a disjoint
-held-out split (\texttt{mc\_score} $\in [0,1]$), scored programmatically (no LLM
+\paragraph{Metric.} Mean fraction of constraints satisfied on a held-out split that
+shares no task instance with training (\texttt{mc\_score} $\in [0,1]$), scored programmatically (no LLM
 judge). We report a relative result under matched budget, not a
 leaderboard number.
 

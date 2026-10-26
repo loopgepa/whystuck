@@ -5,7 +5,7 @@ questions, rest on different experiments, and are useful to different readers.
 
 | | paper | asks | uses the optimizer? | pages |
 |---|---|---|---|---|
-| **I** | [`p1-conditional-lever/`](p1-conditional-lever/), *Whether Optimizing the Loop Beats Optimizing the Prompt Depends on One Number* | Does evolving a self-refine loop's verifier beat evolving its generation prompt? | yes, it is the subject | 44 |
+| **I** | [`p1-conditional-lever/`](p1-conditional-lever/), *Whether Optimizing the Loop Beats Optimizing the Prompt Tracks One Number* | Does evolving a self-refine loop's verifier beat evolving its generation prompt? | yes, it is the subject | 47 |
 | **II** | [`p2-repair-not-detection/`](p2-repair-not-detection/), *What a Checker Cannot Buy Is the Repair* | Where is the loop's own ceiling: detection or repair? | **no**, every measurement is arm A, which declares no evolvable genes | 28 |
 | **III** | [`p3-silent-no-op/`](p3-silent-no-op/), *A Loop Optimizer That Was Not Optimizing Its Loop* | How can a componentized treatment silently not apply, and what catches it? | yes, as the thing that failed | 27 |
 
@@ -74,7 +74,7 @@ does not, something regressed.
 ## Verifying
 
 ```bash
-python scripts/verify_paper_claims.py     # 1139 checks against the released artifacts, $0
+python scripts/verify_paper_claims.py     # 1202 checks against the released artifacts, $0
 python scripts/verify_split_coverage.py   # the split lost no quantity, $0
 python -m pytest tests/test_split_coverage.py tests/test_paper_prose_coverage.py \
     tests/test_paper_table_coverage.py tests/test_paper_sigma_coverage.py tests/test_figures.py
@@ -115,7 +115,7 @@ be underivable and demands a failure. The size floors in `test_coverage_is_not_v
 have caught this, because an over-broad bound set is *larger* than a correct one and clears every
 floor.
 
-Pinning them did surface one false *sentence*, now Paper I's thirteenth register entry: the
+Pinning them did surface one false *sentence*, now Paper I's fourteenth register entry: the
 appendix called all eight C1 tasks "the only ones on which the two genes' verdicts differ" while
 conceding two clauses earlier that both genes demanded a fix on five of them. The verdicts differ on
 three. No quantity moved, the −0.009/−0.023 split stands, and all three stratum sizes are now

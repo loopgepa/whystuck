@@ -289,3 +289,46 @@ def test_the_sweep_holds_the_seed_genome_fixed_while_its_score_moves(split_decom
     # sigma(mean of 30) = 0.153/sqrt(30) = 0.0279; the range of four draws should not exceed a
     # few sigma. This is a smoke test on the noise story, not a hypothesis test.
     assert spread < 4 * 0.0279, f"seed-genome means span {spread:.4f}, too wide to be noise"
+
+
+#: level -> (mean delta, mean draft term, mean loop term) over the five D7 re-scorings, i.e. the
+#: same decomposition applied to each of the 135 released replicate cassettes.
+_REPLICATE_MEANS = {
+    "L1": (-0.0210, -0.0173, -0.0037),
+    "L2": (+0.0553, +0.0237, +0.0317),
+    "L3": (+0.0187, +0.0027, +0.0160),
+}
+
+
+@pytest.fixture(scope="module")
+def replicated() -> dict[str, object]:
+    from analyze_delta_decomposition import replicate_decompose
+
+    return {lvl.name: replicate_decompose(lvl, 5) for lvl in LEVELS}
+
+
+@pytest.mark.parametrize("level", ["L1", "L2", "L3"])
+def test_the_decomposition_repeats_on_each_released_replicate(replicated, level):
+    """The single-draw shares (60% shared gene at L1, 100% treatment at L2) are one draw each.
+    The D7 re-scorings record a first draft too, so the split can be repeated five times."""
+    reps = replicated[level]
+    assert len(reps) == 5
+    for d in reps:
+        assert d.n == 30
+        assert d.draft_term + d.loop_term == pytest.approx(d.delta, abs=1e-12)
+    want = _REPLICATE_MEANS[level]
+    got = (
+        sum(d.delta for d in reps) / 5,
+        sum(d.draft_term for d in reps) / 5,
+        sum(d.loop_term for d in reps) / 5,
+    )
+    assert got == pytest.approx(want, abs=1e-4)
+
+
+def test_the_replicate_deltas_are_the_ones_tab_repeat_reports(replicated):
+    """Positive control: the replay must reproduce the replicate Delta the paper already prints."""
+    import repeat_scores
+
+    by_level = {r.level: r.delta for r in repeat_scores.aggregate(5)}
+    for level, reps in replicated.items():
+        assert sum(d.delta for d in reps) / 5 == pytest.approx(by_level[level], abs=1e-9)
