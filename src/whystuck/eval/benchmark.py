@@ -38,11 +38,17 @@ class BenchmarkTask(BaseModel):
 #: shared pool are positively correlated, which makes a bootstrap interval over seeds too
 #: narrow and a sign test's p too small. Both err toward overstating significance, so a
 #: statistic over seeds of a vendored task set cannot be read as replication.
-SEED_INDEPENDENT_TASK_SETS = frozenset({"multi", "multi-hard"})
+#:
+#: ``multi-hard-manifest`` qualifies by construction rather than by regeneration: its loader
+#: reads a frozen manifest whose assignments are refused at load if any task appears in two
+#: places (`task_manifest._check_assignments`), so its seeds share no task at all.
+SEED_INDEPENDENT_TASK_SETS = frozenset({"multi", "multi-hard", "multi-hard-manifest"})
 
 #: Every task set the study can run, so an unknown name fails loud rather than silently
 #: defaulting to "independent" (the permissive answer) in the analysis.
-KNOWN_TASK_SETS = frozenset({"ifbench", "multi", "multi-hard", "code", "bcb"})
+KNOWN_TASK_SETS = frozenset(
+    {"ifbench", "multi", "multi-hard", "multi-hard-manifest", "code", "bcb"}
+)
 
 
 def seeds_are_independent(task_set: str) -> bool:

@@ -111,6 +111,93 @@ def test_litellm_complete_retries_an_empty_completion_then_fails_loudly(monkeypa
     assert litellm_complete("openai/gpt-5.6-luna", max_tokens=1500)("x") == "the real proposal"
 
 
+def test_empty_attempts_is_configurable_and_every_resample_is_counted(monkeypatch):
+    # Measured 2026-10-25: qwen/qwen3.8-27b answers some critique prompts with a one-token
+    # EMPTY completion (finish_reason "stop", no reasoning) on 4 of 10 identical calls. That is
+    # the model's own output, not reasoning starvation, so "retry once" aborts a run on an
+    # ordinary draw. The attempt count becomes a recorded parameter, and every resample is
+    # counted, because resampling conditions the output on being non-empty and a reader must
+    # be able to see how often that happened.
+    class _Msg:
+        def __init__(self, c):
+            self.content = c
+
+    class _Resp:
+        def __init__(self, c):
+            self.choices = [types.SimpleNamespace(message=_Msg(c))]
+
+    seq = ["", "  ", None, "a real critique"]
+    fake = types.SimpleNamespace(completion=lambda **kw: _Resp(seq.pop(0)))
+    monkeypatch.setitem(sys.modules, "litellm", fake)
+    complete = litellm_complete("groq/qwen/qwen3.8-27b", max_tokens=320, empty_attempts=4)
+    assert complete("judge this") == "a real critique"
+    assert complete.empty_resamples == 3  # type: ignore[attr-defined]
+
+    seq[:] = [""] * 4
+    with pytest.raises(RuntimeError, match="4 times"):
+        complete("judge this")
+    assert complete.empty_resamples == 3 + 4  # type: ignore[attr-defined]
+
+
+def test_a_rate_limit_is_waited_out_rather_than_aborting_the_run(monkeypatch):
+    # Measured 2026-10-25: three parallel calibration runs on qwen3.8 hit Groq's 32k output
+    # tokens/minute limit and two of them died mid-pool. A rate limit says "later", not
+    # "never": the same request is re-sent after a backoff, so no completion changes.
+    class RateLimitError(Exception):
+        pass
+
+    class _Msg:
+        def __init__(self, c):
+            self.content = c
+
+    class _Resp:
+        def __init__(self, c):
+            self.choices = [types.SimpleNamespace(message=_Msg(c))]
+
+    sent: list[dict] = []
+    outcomes = [RateLimitError("429"), RateLimitError("429"), "ok"]
+
+    def completion(**kw):
+        sent.append(kw)
+        o = outcomes.pop(0)
+        if isinstance(o, Exception):
+            raise o
+        return _Resp(o)
+
+    sleeps: list[float] = []
+    fake = types.SimpleNamespace(completion=completion, RateLimitError=RateLimitError)
+    monkeypatch.setitem(sys.modules, "litellm", fake)
+    monkeypatch.setattr("whystuck.eval.llm_worker.time.sleep", sleeps.append)
+    assert litellm_complete("m", max_tokens=5)("p") == "ok"
+    assert len(sent) == 3 and all(k == sent[0] for k in sent)  # identical request each time
+    assert len(sleeps) == 2 and sleeps[1] > sleeps[0] > 0
+
+
+def test_a_rate_limit_that_never_clears_still_raises(monkeypatch):
+    class RateLimitError(Exception):
+        pass
+
+    def completion(**kw):
+        raise RateLimitError("429")
+
+    fake = types.SimpleNamespace(completion=completion, RateLimitError=RateLimitError)
+    monkeypatch.setitem(sys.modules, "litellm", fake)
+    monkeypatch.setattr("whystuck.eval.llm_worker.time.sleep", lambda s: None)
+    with pytest.raises(RateLimitError):
+        litellm_complete("m", max_tokens=5)("p")
+
+
+def test_empty_attempts_default_is_unchanged():
+    import inspect
+
+    assert inspect.signature(litellm_complete).parameters["empty_attempts"].default == 2
+
+
+def test_empty_attempts_must_allow_at_least_one_call():
+    with pytest.raises(ValueError):
+        litellm_complete("m", max_tokens=1, empty_attempts=0)
+
+
 # --- reflective-signal capture (fixes GEPA reflection starvation) -------------
 
 

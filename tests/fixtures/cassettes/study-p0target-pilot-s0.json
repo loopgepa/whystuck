@@ -1,0 +1,1353 @@
+{
+  "entries": {
+    "worker:011a9b46d8e6b5c30ee04a6680c8a86819770299683fe7e60209975632a18b00": {
+      "name": "worker",
+      "output": "1. Word length issue: \"doesn't\" is 7 letters.\n2. Word count issue: Total words = 2 + 3 + 2 + 5 + 2 = 14 words. Need 25.\n3. Phrase issue: The exact phrase \"all is set.\" (6 words) was placed at the very end of the text, but the 4th line ends with \"fresh all is set\", which does not exactly match the requirement to end the *response* with that phrase if it's part of a line, but usually \"end your response with\" implies the final characters. However, checking the bullet points: The last bullet point is \"- Air gets fresh all is set\". This line ends with \"set.\", but the phrase \"all is set.\" contains a space. The requirement says \"end your response with the exact phrase 'all is set.'\". The draft ends with \"...fresh all is set\". This does end with the phrase.\n4. Bullet points: 4 lines, starting with \"- \". OK.\n5. \"And\": Not used.\n6. Re-evaluating word count:\n   - Line 1: \"Light hits leaf\" (3 words)\n   - Line 2: \"Sun's heat is used\" (4 words)\n   - Line 3: \"Food is made\" (3 words)\n   - Line 4: \"Air gets fresh all is set\" (6 words)\n   Total: 3 + 4 + 3 + "
+    },
+    "worker:01842b141477f38e0f15639806453eab424017112cdf297756aedfc6968257d8": {
+      "name": "worker",
+      "output": "The cell takes in food and water. It makes energy to grow strong and live on. So it goes."
+    },
+    "worker:01ad1b1da72c1f4cdbabf7ee55a153f5965983bfbd11b376f376397cd757faaf": {
+      "name": "worker",
+      "output": "- Light hits leaf\n- Sun's heat is used\n- Food is made\n- Air gets fresh all is set"
+    },
+    "worker:02bd4eb0924e9af877862fab57404d0aab3d8b2ca3ec53970bf4cd238778d086": {
+      "name": "worker",
+      "output": "Here is a plan to help students learn well and work hard to succeed here we go."
+    },
+    "worker:03ce602606c08d54d695acd16da7d58fbd10a895f4c08b2fc6a59db4f1a1ca01": {
+      "name": "worker",
+      "output": "- ai learns fast.\n- phones link us well.\n- we get help so it goes."
+    },
+    "worker:0513e13ab0e12f8a12ecae27e84734f93ff30e7a8d10ac33227f17444a42fb20": {
+      "name": "worker",
+      "output": "Pass"
+    },
+    "worker:0736e32dc9c3c06bba50436a256d9a12cde1534ae55406715849c3444f0468c9": {
+      "name": "worker",
+      "output": "I need to check if the draft answer satisfies all requirements.\n\nLet me analyze the draft: \"Try this craft. It is fun and easy. here we go.\"\n\n1. Ends with exact phrase \"here we go.\" \u2713\n2. No word \"of\" used \u2713\n3. Word count: Try(1) this(2) craft(3). It(4) is(5) fun(6) and(7) easy(8). here(9) we(10) go(11). = 11 words. Need exactly 15 words. \u2717\n4. Check word lengths:\n- Try (3) \u2713\n- this (4) \u2713\n- craft (5) \u2713\n- It (2) \u2713\n- is (2) \u2713\n- fun (3) \u2713\n- and (3) \u2713\n- easy (4) \u2713\n- here (4) \u2713\n- we (2) \u2713\n- go (2) \u2713\nAll words are 6 letters or fewer. \u2713\n\nThe draft fails requirement 3 (needs exactly 15 words, currently has 11).\n\nWhat to fix: The answer needs exactly 15 words, but currently has only 11."
+    },
+    "worker:074e09e00add97604a0027d38c2bce89d4964871d08779b11f4412dde8933e74": {
+      "name": "worker",
+      "output": "The draft fails to satisfy all constraints. Here is the analysis:\n\n1.  **Use no word longer than 7 letters**:\n    -   The word \"discovery\" is not in the draft, so that's fine.\n    -   Let's check the draft words: \"I\", \"found\", \"a\", \"rare\", \"stone.\" (6), \"It\", \"is\", \"bright\", \"blue.\" (4), \"My\", \"heart\", \"beats\", \"fast.\" (4), \"We\", \"must\", \"keep\", \"it\", \"safe.\" (4), \"This\", \"is\", \"a\", \"true\", \"win.\" (3).\n    -   Wait, let's re-read carefully. \"bright\" is 6. \"found\" is 5. \"heart\" is 5. All words are 7 letters or fewer. This constraint is satisfied.\n\n2.  **Do not use any commas**:\n    -   The draft has no commas. This constraint is satisfied.\n\n3.  **Format as exactly 5 bullet points, each line starting \"- \"**:\n    -   The draft has 5 lines.\n    -   Each line starts with \"- \". This constraint is satisfied.\n\n4.  **Use exactly 20 words**:\n    -   Line 1: \"I\", \"found\", \"a\", \"rare\", \"stone.\" -> 5 words.\n    -   Line 2: \"It\", \"is\", \"bright\", \""
+    },
+    "worker:083812647db22f270310be05dd2a01d4a69fef263c4b0672a87832cf74c7d447": {
+      "name": "worker",
+      "output": "- photons hit eye\n- rods sense light\n- nerve sends signals. so it goes."
+    },
+    "worker:097ddc8495724963d645ceb4d165db861727224f0f29eb987970e63a122b6726": {
+      "name": "worker",
+      "output": "Air flux changes and spreads, so it goes."
+    },
+    "worker:0a7aa1043830e53af874996d128802493aec919e286db74a43cad1949d02266a": {
+      "name": "worker",
+      "output": "- Read a short book on the core topic.\n- Watch a video to see how it works in real life.\n- Do a small task to gain real skills today."
+    },
+    "worker:0c2df13a06f878829182401f743237df4f483b3a41fe1b5822a4b5bd59044415": {
+      "name": "worker",
+      "output": "I need to fix the following issues:\n- the word count is not exactly 20\n- the end does not match exactly \"here we go.\" because the final bullet lacks the period placement logic"
+    },
+    "worker:0c52536dbfc83267959e48aa4018336da2fa7b3dc785dabc6ea1d69bef7c85f8": {
+      "name": "worker",
+      "output": "An atom sits in every microchip so phones can share all data with you daily"
+    },
+    "worker:0db4ba9c7f15951cad575665d0d4a66dbc09b78ddf34a144f0dfefca30487684": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:0dfd1a800ea1925ccebedd69d36d30d2f268177eb6b800efa5e7951b8c1ed925": {
+      "name": "worker",
+      "output": "- Read the article carefully.\n- Note key details.\n- Write summary for peers."
+    },
+    "worker:0ef5bf20e0f87ab1c4a673a0122cfaa2f8aea8c1d4e63d15827479a4f72dd2a0": {
+      "name": "worker",
+      "output": "- We found a new star shining brightly in the distant sky.\n- That bright object challenges our understanding.\n- Future study will reveal more details about its nature."
+    },
+    "worker:11389fe5d7b6e46cea95b3ae86b5cf1e6ed305e27dd1dd6be242d493b57c4d62": {
+      "name": "worker",
+      "output": "- an atom is tiny\n- it holds matter\n- parts act as core\n- energy flows within\n- science helps us"
+    },
+    "worker:121c1c72f5b3a1b1b2d15f12cd433c33b84a31aa549d3171485b6bba506b318d": {
+      "name": "worker",
+      "output": "your brain stores facts as patterns to help you recall them fast"
+    },
+    "worker:128ca880e6457e1704f3a9d3e5937fe79740e962d81fbfa844937e64f9b9ad0f": {
+      "name": "worker",
+      "output": "This new code saves data on the net."
+    },
+    "worker:12bab96538ed5caf9aae62d127224ad93a2a5c8c5632c88c91758bfece36428b": {
+      "name": "worker",
+      "output": "sunlight warms water on leaves causing it to rise into the sky as faint vapor"
+    },
+    "worker:133e2be2087f3d18070964a874fa4ff7d43d13bf25219ad1cfcecdd8148a065e": {
+      "name": "worker",
+      "output": "- read\n- think\n- ask\n- share\n- learn\n- new\n- stuff\n- fast\n- smart\n- kids\n- can\n- get\n- the\n- job\n- done\n- well\n- feel\n- good\n- now\n- go"
+    },
+    "worker:13636663534c176f0026b66d193f8a3140ac372c31a1bc8658b035a6e31ba316": {
+      "name": "worker",
+      "output": "gene help make your body work in good ways"
+    },
+    "worker:136a5a70a6a593d8764cd5131b3464d87fa1a7b7c0a555be5584d8c0b6111eae": {
+      "name": "worker",
+      "output": "a node joins each part of your new code"
+    },
+    "worker:13b6899da5a90bbcf85cb7dc7d6b5b64ba39f2d00a1b44f1912e700215e498af": {
+      "name": "worker",
+      "output": "Here is a plan that lets you learn well as a student so you can succeed here we go."
+    },
+    "worker:1525c846c1ec5452e18589678d5af20d2c37d849922ba36c84552b5110ed82dc": {
+      "name": "worker",
+      "output": "FAIL"
+    },
+    "worker:15c6a5c77c59e99cee9860e7c88272c2699496525c4e7735e341c8ea88ac2692": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:15e80405a62bba6e496b5c5ba699d817ac12892a174ed5dea4619b4ef3a5f4ac": {
+      "name": "worker",
+      "output": "The response is \"Water falls from clouds as rain. It flows into rivers, then oceans. This cycle repeats without stop, so it goes.\"\n\nLet's check the constraints:\n1.  **Use no word longer than 7 letters**:\n    *   Water (5)\n    *   falls (5)\n    *   from (4)\n    *   clouds (6)\n    *   as (2)\n    *   rain (4)\n    *   It (2)\n    *   flows (5)\n    *   into (4)\n    *   rivers (6)\n    *   then (4)\n    *   oceans (6)\n    *   This (4)\n    *   cycle (5)\n    *   repeats (7)\n    *   without (7)\n    *   stop (4)\n    *   so (2)\n    *   it (2)\n    *   goes (4)\n    *   All words are 7 letters or fewer. (PASS)\n2.  **End your response with the exact phrase \"so it goes.\"**:\n    *   The text ends with \"so it goes.\" (PASS)\n3.  **Do not use the word \"and\"**:\n    *   The word \"and\" does not appear. (PASS)\n4.  **Use exactly 25 words**:\n    *   Let's count:\n        1. Water\n        2"
+    },
+    "worker:1707c905f5c14912104a759c2c7c4e0b0419c143c9df7bc21ce9098544f8ca66": {
+      "name": "worker",
+      "output": "an atom is a small unit that builds all matter"
+    },
+    "worker:17385fbdf18528890de7c0a69cd0ac0b2fc8abd297eaf88f52e14d4ac4f13537": {
+      "name": "worker",
+      "output": "To determine if the draft passes, I must check it against the constraints:\n\n1.  **Format:** Exactly 3 bullet points starting with \"- \".\n    *   The draft has 3 bullet points. (Pass)\n2.  **Word Length:** No word longer than 7 letters.\n    *   \"Start\" (5), \"by\" (2), \"reading\" (7), \"a\" (1), \"book\" (4), \"on\" (2), \"the\" (3), \"core\" (4), \"topic\" (5).\n    *   \"Watch\" (5), \"a\" (1), \"short\" (5), \"video\" (5), \"to\" (2), \"see\" (3), \"how\" (3), \"it\" (2), \"works\" (5), \"in\" (2), \"real\" (4), \"life\" (4).\n    *   \"Try\" (3), \"a\" (1), \"small\" (5), \"task\" (4), \"to\" (2), \"gain\" (4), \"real\" (4), \"hands-on\" (8 including hyphen? Usually treated as two words or 7 letters \"hands\" + \"on\". Let's look at \"experience\").\n    *   \"experience\" is 10 letters. This violates the constraint.\n3.  **Forbidden Word:** Do not use \"of\".\n    *   The draft does not use \"of\". ("
+    },
+    "worker:1bd0549ae55aa08f247c9abfe01a9b3aec874a89d4568e7eab886c48f39ac9e2": {
+      "name": "worker",
+      "output": "letter \"capital\" in \"frog\" is wrong wait no, let me re-read.\n\n- use no word longer than 6 letters\n- use exactly 25 words\n- format as exactly 5 bullet points, each line starting \"- \"\n- write your entire response in lowercase (no capital letters)\n\nLet's check the draft:\n1. \"we saw a frog\" -> 5 words. All <= 6 letters. Lowercase.\n2. \"it was big\" -> 3 words. All <= 6 letters. Lowercase.\n3. \"we ran fast\" -> 3 words. All <= 6 letters. Lowercase.\n4. \"it was cool\" -> 3 words. All <= 6 letters. Lowercase.\n5. \"we are glad\" -> 3 words. All <= 6 letters. Lowercase.\n\nTotal words: 5 + 3 + 3 + 3 + 3 = 17 words.\nRequirement: exactly 25 words.\nCurrent count: 17 words.\nConstraint violated: Word count is not 25.\n\nPASS/FAIL?\nThe prompt asks me to reply PASS if every requirement is satisfied, otherwise list what to fix.\n\nLet me double-check if I miscounted or if there is a trick.\n- Bullet 1: we(1) saw(2) a(3) frog(4) -> 4 words? No, \"we saw a frog\" is 4 words.\nWait"
+    },
+    "worker:1bdb75a735df9b68f025a3c68faba75d2ba17a052d82040d1f1eb2a6effebb9b": {
+      "name": "worker",
+      "output": "We found new flux near Mars. This data changes our view of space today."
+    },
+    "worker:1bfe73e30eca9c4a75b04b95d725c68d94fa5321615779366ecaf439cddb0cfa": {
+      "name": "worker",
+      "output": "The draft answer fails the requirements. It contains the word \"of\" (in \"network systems\" or \"for data\" - wait, let's re-read: \"The node represents a key point in complex network systems for data processing.\") There is no \"of\" in that sentence. Let's check the word count. \"The\" (1) \"node\" (2) \"represents\" (3) \"a\" (4) \"key\" (5) \"point\" (6) \"in\" (7) \"complex\" (8) \"network\" (9) \"systems\" (10) \"for\" (11) \"data\" (12) \"processing\" (13). That is 13 words. It needs to be exactly 15 words. Also, it must not use \"of\". It doesn't currently. It must include \"node\". It does. No commas. It has none.\n\nSo the issue is word count. I need to add 2 words without adding \"of\" or commas.\n\nRevised attempt:\nThe node represents a key structural point in complex network systems for data handling.\nCount: The(1) node(2) represents(3) a(4) key(5) structural(6) point(7) in(8) complex(9) network(10) systems(11) for(12) data(13) handling(14). Still 14.\n\nTry again:\nThe node represents a key structural point"
+    },
+    "worker:1e7002992dbe316680264365c6698acc92c2f8c3419280b3e99545d443f7c347": {
+      "name": "worker",
+      "output": "1\nThe\ncell\ntakes\nin\nfood,\nbreaks\nit\ndown,\nand\nmakes\nenergy.\nIt\ngrows\nand\nworks\nhard.\nSo\nit\ngoes."
+    },
+    "worker:20279588fc7208dafe4e056b47d9ac17f25a98b7bdca207faeefae5e91b28b21": {
+      "name": "worker",
+      "output": "Let me check each requirement for the draft:\n\n1. **End with \"all is set.\"** \u2014 No. Ends with \"Test yourself often.\"\n2. **Do not use \"the\"** \u2014 Yes. No \"the\" present.\n3. **Exactly 20 words** \u2014 Count: Learn(1) core(2) concepts(3) daily(4) Review(5) notes(6) regularly(7) Test(8) yourself(9) often(10). Only 10 words.\n4. **Exactly 3 bullet points, each starting \"- \"** \u2014 Yes.\n\nFailures identified:\n- Must end with phrase \"all is set.\"\n- Must contain exactly 20 words"
+    },
+    "worker:2027ea714fa032365e732ded9c3c9514e19e49e6e467836077c79af8b93cf1de": {
+      "name": "worker",
+      "output": "- a cell holds all life's core parts and fuel\n- it grows, splits, and clears out trash"
+    },
+    "worker:2091c13def727829dd071774af02c4b1282f0137870cd31e1ecfa7c262fff1f4": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:20f093081e7a6ac80c8ed639f3c3eacbc81ba53583c291d4a0fdd05ec3097d91": {
+      "name": "worker",
+      "output": "Found a hidden code in old notes. It took hours to find but it was worth it."
+    },
+    "worker:20fbd835ecb05946b047fcb44c729ffeebb85f83fc7a09b8f7a7e1a4790e5209": {
+      "name": "worker",
+      "output": "- think of each node as a key step in this complex student study idea.\n- connecting nodes helps students map out larger concepts clearly.\n- this node concept makes learning easier."
+    },
+    "worker:2244cb0bb62bcb7f9bec9f6381857b1d02320f5895984bd1190b43c6cb08ecfd": {
+      "name": "worker",
+      "output": "check:\n- do not use any commas: satisfied\n- use exactly 15 words: \"can a star shine bright in the night sky\" has 9 words. not satisfied.\n- write your entire response in lowercase: satisfied\n- do not use the word \"of\": satisfied\n- include the word \"star\": satisfied\n\nfix: revise the response to contain exactly 15 words"
+    },
+    "worker:231f5b8af663b70578ba1c2e0bb918676c5968a4f6535a20ad35d9bcd7ecccfa": {
+      "name": "worker",
+      "output": "- Sun heat warms the day.\n- Most trees help us.\n- Nature brings joy to you."
+    },
+    "worker:2327d7c9a7fe921968f4a47017e87b9bae21f30248ff51cee788a08680ca41bc": {
+      "name": "worker",
+      "output": "Air flux changes, so it goes."
+    },
+    "worker:23d6ef1c59fcd474216fc9e4b2da36ecf10f14eeebab732c0d6d444270407de4": {
+      "name": "worker",
+      "output": "- we found the old cave door open.\n- a bright gem glowed on the ground.\n- it was a rare, blue stone.\n- here we go."
+    },
+    "worker:243a49416ef997c2e8b3fbfa7505961c432c7288b91992e8f492ae5a4c8fb4f6": {
+      "name": "worker",
+      "output": "- learn basics of coding today\n- errors help you grow fast\n- write small scripts each day\n- ask others for quick tips\n- have fun while you build"
+    },
+    "worker:261bcb8654584858417eb145c434b77b771c60c727e2761bea2a44a0199c57b5": {
+      "name": "worker",
+      "output": "- think of each node as a key step in this complex student study idea.\n- connecting nodes helps students map out larger concepts clearly.\n- this node concept makes learning easier."
+    },
+    "worker:27b50c6ba5ad9c9f482f5f517c696e23c88e05565bb19b30c7bd80eb2761fdc3": {
+      "name": "worker",
+      "output": "Each node enables efficient data routing across modern computer networks in practice."
+    },
+    "worker:28b3f6a938c189a46ac1d7e820877ca95d7ef9597cf181bd3eaa28bb6e682a89": {
+      "name": "worker",
+      "output": "study the core points first, keep it short.\npractice often to gain full confidence right\nnow. this helps you pass the final test.\nhere we go."
+    },
+    "worker:2991058d2de0dfa41e9b82d75b77eb03b052a9a2363f7052151e21d8f2079d33": {
+      "name": "worker",
+      "output": "The draft answer \"The seed drops down to the node then grows all is set.\" does not meet all requirements. Here are the issues:\n\n- The response ends with \"is set.\" but must end with the exact phrase \"all is set.\"\n- Word count check: Let's list the words:\n  1. The (3 letters) \u2013 OK\n  2. seed (4) \u2013 OK\n  3. drops (5) \u2013 OK\n  4. down (4) \u2013 OK\n  5. to (2) \u2013 OK\n  6. the (3) \u2013 OK\n  7. node (4) \u2013 OK (includes required word)\n  8. then (4) \u2013 OK\n  9. grows (5) \u2013 OK\n  10. all (3) \u2013 OK\n  11. is (2) \u2013 OK\n  12. set (3) \u2013 OK\n  Total = 12 words\n  Required = exactly 15 words\n\nAdditional issues:\n- The phrase \"all is set.\" only appears after \"grows\", so the full ending is \"...grows all is set.\" which is acceptable if \"all is set.\" is the last five characters including punctuation. So that part may be okay.\n- However, word count is 12, not 15.\n\nWhat to fix:\n- Add 3 more words to reach exactly 15\n- Ensure no commas (already satisfied)\n"
+    },
+    "worker:2c8528d38267a137b9db65a61aebae30d5533e96219c093d41753578c861ebd0": {
+      "name": "worker",
+      "output": "Water rises, plants drink, leaves shine, rain falls, life grows all is set."
+    },
+    "worker:2d6351ddf92ce7186f5c420ad53fe43e8d0d3cf23975608e3ce9919bbb363aeb": {
+      "name": "worker",
+      "output": "The tide shifts, pulling out. The water rises, a wave forms. Here we go."
+    },
+    "worker:2d986d89c721d9e2216142aafb534f8964df33d0f64fe92efa7463ddcca2a583": {
+      "name": "worker",
+      "output": "we found a bright star hanging above our quiet town, filling the night air with simple wonder and soft peaceful human joy"
+    },
+    "worker:2edfe59bc3bd58efd5222d76801a7002a7d8c193de2be28844e6e244e19d876b": {
+      "name": "worker",
+      "output": "- we found a new stone.\n- it glows bright red.\n- all is set."
+    },
+    "worker:2ee0ddcf1ca55b78a1596c3121929a92138abdb7945b609c77cc6dfd28f25f86": {
+      "name": "worker",
+      "output": "water moves up trees through transpiration pull. all is set."
+    },
+    "worker:2f1cbde6c539b246f9a056b3303ba79c9560cc4d4e01de4cdd89e7e9d60d02f7": {
+      "name": "worker",
+      "output": "Here is a plan that lets you learn well as a student so you can succeed here we go."
+    },
+    "worker:3008f8a92b9fda697b7176b9c2e8bf836be0be01b770765f26e99431d829cfc2": {
+      "name": "worker",
+      "output": "Bee stings hurt but save lives. Bees pollinate crops. Learn their busy sweet life today."
+    },
+    "worker:30461fade3f0d276bc1d916e27b59898fbe60b173aa345909235fbbe4f7012b4": {
+      "name": "worker",
+      "output": "- Data is saved\n- Cloud holds all it\n- Users get the file\n- It is safe for you\n- Fast and built with care"
+    },
+    "worker:30ec37e128f1d9fb28d22d800b198718b9a14900fc0eb931a552cfda424aece4": {
+      "name": "worker",
+      "output": "- fix sentence fragment in one point\n- remove 8-letter word\n- add exact ending phrase"
+    },
+    "worker:3103df3bbba7b2fc576dd1a64febfae8ad4801dd45d787404307865daea48c3a": {
+      "name": "worker",
+      "output": "List what to fix:\n- format: must have exactly 4 bullet points (currently 1)\n- word count: must be exactly 15 words (currently 10)"
+    },
+    "worker:3229b43c094f7f7d6d00a1a204d6979bd39c3d60ed95f39c4f8516b7e0f3c1ab": {
+      "name": "worker",
+      "output": "1. **Word count correction**: The previous answer had only 11 words. The requirement is exactly 20 words.\n2. **Punctuation and phrase insertion**: The phrase \"all is set.\" needs to be the final 4 words. This leaves 16 words for the description.\n3. **Structure verification**: Ensure the new sentences describing a natural process total 16 words, are followed by \"all is set.\" (4 words), totaling 20 words.\n\nCorrected answer:\n\nRain falls on leaves. Water flows in earth. Sun shines bright day. Nature grows green. Life stays strong. all is set."
+    },
+    "worker:35f55283c4e450a370f18f1962793ef2725cbee36e357ff80f3a9ef69cbb7ba0": {
+      "name": "worker",
+      "output": "- I found gold.\n- It was huge.\n- The rocks held it.\n- My heart beat fast.\n- Hope rose within me."
+    },
+    "worker:36e52602045dd6b749155853a47517d51131f202fe437fefd49c12c2c6096a61": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:372561cb78908492fe8f6365b2edb87cda76899cefc255ec7d20b8ed9da90497": {
+      "name": "worker",
+      "output": "A tiny cell holds data. This micro tech stores bits. Fast speed helps us work, so it goes."
+    },
+    "worker:3735d42aab72aa9a48ed4959e622cea0fc60dcdbfb18a2eddf05518c8c6c3443": {
+      "name": "worker",
+      "output": "the draft answer does not satisfy the requirements. here is what to fix:\n\n1.  **words per line**: the first bullet point has 5 words. the total count of the draft is 20 words. i need a total of exactly 15 words.\n2.  **word length**: \"basics\" is 6 letters (ok). \"coding\" is 6 letters (ok). \"today\" is 5 letters (ok). \"errors\" is 6 letters (ok). \"learn\" is 5 letters. all words in the draft are 7 letters or fewer. this constraint is actually met in the draft.\n3.  **total word count**: let's recount.\n    -   line 1: learn (1) basics (2) of (3) coding (4) today (5) -> 5 words\n    -   line 2: errors (1) help (2) you (3) grow (4) fast (5) -> 5 words\n    -   line 3: write (1) small (2) scripts (3) each (4) day (5) -> 5 words\n    -   line 4: ask (1) others (2) for (3) quick (4) tips (5) -> 5 words\n    -   line 5: have (1) fun (2) while (3) you (4) build (5) -> 5 words\n    total is 25 words. the requirement is "
+    },
+    "worker:37406681d236a4db629d26253e10a34d8541252cad263bd4f1f97876fb67cb98": {
+      "name": "worker",
+      "output": "Energy transforms from one form into another naturally all is set."
+    },
+    "worker:38205ac639d817ade642dd47b0c721e005583122961ac18f9e07a9c73515f15a": {
+      "name": "worker",
+      "output": "Word count: 18 (Target: 25) Fix: Increase word count to exactly 25."
+    },
+    "worker:39a81c2b89f6ee5331563772a55bcf79701cc36bf4cd6740d9b7fea69c8bba16": {
+      "name": "worker",
+      "output": "The atom discovery changed science forever. We learned matter is not solid but has empty space inside. That is it."
+    },
+    "worker:3a5091ba0258c36e313fb9f146ea3bde5a199acc98e4af380ba94a6fb2f58d6c": {
+      "name": "worker",
+      "output": "learning code uses node as base key"
+    },
+    "worker:3abd44cb19a206e52093dc1e1e4b0c6bdfec20a09876754f9df86111c2c10bf2": {
+      "name": "worker",
+      "output": "- a new plant\n- was seen here\n- it looks unique\n- the team logged\n- here we go."
+    },
+    "worker:3ac0c66003c73017df5fc87ece17fe7b63bb6eee68bfec74feb51354170750be": {
+      "name": "worker",
+      "output": "I found the following issues:\n1. The draft has only 8 words, but exactly 20 are required.\n2. The context is simple, not a technology overview.\n3. Several constraint checks:\n   - \"atom\": Present \u2714\ufe0f\n   - No word >7 letters \u2714\ufe0f (An=2, atom=4, helps=5, build=5, all=3, matter=6, in=2, our=3, world=5)\n   - No \"the\": \u2714\ufe0f\n   - Exactly 20 words: \u274c (Only 8 words)\n   - No commas: \u2714\ufe0f\n\nTo fix:\n- Expand to exactly 20 words.\n- Ensure no word exceeds 7 letters.\n- Avoid \"the\" and commas.\n- Include \"atom\".\n- Describe a technology briefly.\n\nCorrected draft:\n\"Atoms form nano chips used in phones that give us news fun and play daily\"\n\nCheck constraints:\n- \"atom\": \"Atoms\" contains \"atom\", but let's avoid plural to be safe. Revise to use \"atom\".\n- Words: Atoms (5), form (4), nano (4), chips (5), used (4), in (2), phones (6), that (4), give (4), us (2), news (4), fun (3), and (3), play (4), daily (5). Count: 15 words. Need 20.\n- Revise again to include"
+    },
+    "worker:3bfd16f1c693baad373d2a96d6c7a90db9e5a1e774f0036c6c7582c8d522ffc7": {
+      "name": "worker",
+      "output": "- Learning code builds smart minds.\n- We write small, fun tools.\n- Try it now, you win. we are done."
+    },
+    "worker:3ca4fa60f5e8dfc4c9ca7de7840adb76ac89750e33fb67380572b604cfe16388": {
+      "name": "worker",
+      "output": "Light travels fast through space so it goes."
+    },
+    "worker:3cb5c9be4d81e8675741a039f062d7599baeda417d0368318bd83c788f550792": {
+      "name": "worker",
+      "output": "- Found the code.\n- It was old.\n- We start now.\n- It works fine."
+    },
+    "worker:3db789cd9e33ecaa5a5d94bdaf48a1a5612edcca3aed08074419162b5b18c578": {
+      "name": "worker",
+      "output": "- water rises, cooling, condensing into clouds\n- gravity pulls moisture down as rain falls\n- streams gather, flowing to oceans below\n- cycle repeats without end"
+    },
+    "worker:3dfe82ad952b5d3164c47c377325421188f250e5249097c973f59a9f3c4e9cf0": {
+      "name": "worker",
+      "output": "idea for you, star, we are done."
+    },
+    "worker:40293a76a26c0ab6ba65f975503a7d8d857bcd887d4b937b4224e5667b3c48ae": {
+      "name": "worker",
+      "output": "a gene is a small part of our body, it helps make who we"
+    },
+    "worker:40eccf732c88176625b5f35126cf26282207d7d89c30e4b497b76f1b21bd4083": {
+      "name": "worker",
+      "output": "I study code to build new tools for our users"
+    },
+    "worker:41341cd4b1b2b4a6be694f9d2f63cd58b07b8da047791c3a4e963d70541f7e7d": {
+      "name": "worker",
+      "output": "you can read books to learn more. this helps your mind grow and stay sharp."
+    },
+    "worker:4298354bf6df8fe0f2993c4327bf1df79d287c9acd080d2ef029efedc85ffbf6": {
+      "name": "worker",
+      "output": "i must pass or list what to fix. the draft answer is \"ai is a star that learns from data to solve complex problems for humans\".\n\n1.  all lowercase? yes.\n2.  no commas? yes.\n3.  no word longer than 7 letters?\n    - ai (2)\n    - is (2)\n    - a (1)\n    - star (4)\n    - that (4)\n    - learns (6)\n    - from (4)\n    - data (4)\n    - to (2)\n    - solve (5)\n    - complex (7) - this is 7 letters. ok.\n    - problems (8) - this is 8 letters. fail.\n    - for (3)\n    - humans (6)\n    \n    the word \"problems\" is 8 letters long. this violates the constraint.\n\n4.  exactly 25 words?\n    - current word count: 13 words.\n    - i need to expand the sentence to have exactly 25 words.\n    - i need to replace \"problems\" with a shorter word or rephrase to keep words short and add fluff.\n\n5.  include the word \"star\"? yes.\n\nso the answer is not pass. i need to list what to fix.\n\nwhat to fix:\n- the word \"problems\" is 8 letters long and must be 7 or fewer.\n- the response has only 1"
+    },
+    "worker:42a0d6dd393b932fecac0e11ebe283e6984825a8bb045f10aca097cede277aff": {
+      "name": "worker",
+      "output": "- water is diatomic\n- solar energy drives\n- cells make food\n- ice floats above\n- here we go."
+    },
+    "worker:42e0adc4581305cc09254e4be43b8e29149e908f961b5a591114020e58a2b056": {
+      "name": "worker",
+      "output": "A node helps each student to learn key facts about the system"
+    },
+    "worker:444fc6870d5dac0fadf62bbd8134bdf06ea26457283963b2715e0361ab8768fd": {
+      "name": "worker",
+      "output": "a gene is a small part of our body, it helps make who we"
+    },
+    "worker:4474bdaa783d32eac7ef3740a7e6a73ec28ce033966356c3374a238160e96415": {
+      "name": "worker",
+      "output": "we found a new lake in the dark forest today. we are done."
+    },
+    "worker:46c1255f7b9d9f233c99231ad7b23916b60f36678f118c638d699cc2f9cf0010": {
+      "name": "worker",
+      "output": "The seed drops down to the node then grows all is set."
+    },
+    "worker:48ab87c2d92aae82e63cc9fc17abb8e17a754201a9d4389952e5287325e73d6b": {
+      "name": "worker",
+      "output": "Let's check the constraints:\n\n1.  **Use no word longer than 7 letters:**\n    *   \"Wave\" (4) - OK\n    *   \"energy\" (6) - OK\n    *   \"is\" (2) - OK\n    *   \"a\" (1) - OK\n    *   \"big\" (3) - OK\n    *   \"idea\" (4) - OK\n    *   \"It\" (2) - OK\n    *   \"turns\" (5) - OK\n    *   \"ocean\" (5) - OK\n    *   \"motion\" (6) - OK\n    *   \"into\" (4) - OK\n    *   \"power\" (5) - OK\n    *   \"Students\" (8) - **FAIL** (8 letters)\n    *   \"can\" (3) - OK\n    *   \"learn\" (5) - OK\n    *   \"how\" (3) - OK\n    *   \"it\" (2) - OK\n    *   \"helps\" (5) - OK\n    *   \"our\" (3) - OK\n    *   \"planet\" (6) - OK\n    *   \"stay\" (4) - OK\n    *   \"clean\" (5) - OK\n\n2.  **Do not use the word \"and\":**\n    *   The draft does not contain \"and\". -"
+    },
+    "worker:49224a43b69dc6da715305d03d56b26393a2a33d29ba4e56536bf3cb97c22eed": {
+      "name": "worker",
+      "output": "Let's check the constraints against the draft:\n\n1.  **include the word \"wave\"**:\n    *   \"A **wave** rolls...\" (Yes)\n    *   \"Another **wave** approaches...\" (Yes)\n    *   Requirement satisfied.\n\n2.  **use exactly 25 words**:\n    *   Bullet 1: \"A wave rolls toward shore.\" (5 words)\n    *   Bullet 2: \"Foam breaks gently on sand.\" (5 words)\n    *   Bullet 3: \"Water pulls back slowly.\" (4 words)\n    *   Bullet 4: \"Another wave approaches steadily.\" (4 words)\n    *   Total: 5 + 5 + 4 + 4 = 18 words.\n    *   Requirement **not** satisfied (needs 25).\n\n3.  **do not use the word \"to\"**:\n    *   \"toward\" is used, not \"to\".\n    *   No instance of \"to\" found.\n    *   Requirement satisfied.\n\n4.  **format as exactly 4 bullet points, each line starting \"- \"**:\n    *   The draft has 4 lines, each starting with \"- \".\n    *   Requirement satisfied.\n\nWhat to fix:\n- The text currently has 18 words. It must be expanded to exactly 25 words while keeping the 4 bullet point format and ensuring the word \"to\" is not used.\n\nList of fixes"
+    },
+    "worker:496c985d30e33754dc8c55a3d2ad19f77263a708e2bf0e88e13cc56397eb92a9": {
+      "name": "worker",
+      "output": "not pass\n- \"inteli\" is not a standard word; use \"ai\" or \"tech\".\n- word count is 19, not 25."
+    },
+    "worker:4975b3f52e3bb4e2c7a8814e9b1511632645b61545b5ef0d50f6fc06585b1b6f": {
+      "name": "worker",
+      "output": "River flow shows flux, soil erodes, plants stand, the air shifts, sun warms the land, then it rains, so it goes."
+    },
+    "worker:4af13b25633223c92e21590bd10f2e36c69458e8698e6611ab0e94af133b5ff4": {
+      "name": "worker",
+      "output": "A node is a key part of a graph, used in many school math classes for students."
+    },
+    "worker:4b66a4652eb956d32e1cd75784f1a044c8af76288a7e3822a84fb8d900aa1c15": {
+      "name": "worker",
+      "output": "- key point one\n- key point two\n- key point three\n- key point four"
+    },
+    "worker:4c3b845cc3bb0c75b7f1731128b1262456b293d0342b3d112f2078eb2f62997f": {
+      "name": "worker",
+      "output": "- key goals set.\n- steps to solve work.\n- end with care. we are done."
+    },
+    "worker:4cd2097f5ebc8f85a941930db56a5477b0b7136a24cd9f09686501d9038e51ff": {
+      "name": "worker",
+      "output": "I found old code and it changed all my rules"
+    },
+    "worker:4e2fc82424d09c5a30b2d4e811c5d0b4538131321dc1d7d0721b49ce6dc9ad4f": {
+      "name": "worker",
+      "output": "**Fixes needed:**\n1.  **Word count:** The draft has 10 words (or 12 counting bullets/punctuation depending on definition). It must be exactly 25 words.\n2.  **Formatting/Content mix:** The first four bullet points describe the concept, and the last one contains the mandatory closing phrase. However, the constraint \"end your response with the exact phrase 'here we go.'\" usually implies the very last characters of the entire response. The format constraint requires 5 bullet points. The draft attempts to merge them, but the word count is the primary failure.\n3.  **Constraint Check:**\n    *   *Exactly 25 words:* NO (Draft has ~10-13 words).\n    *   *Include \"star\":* YES.\n    *   *End with \"here we go.\":* YES (if we consider the last line).\n    *   *5 bullet points:* YES.\n    *   *No \"the\":* YES.\n\nTo fix, I must expand the content of the first four bullets to reach a total of 25 words, ending the final bullet with \"here we go.\"\n\n**Revised Draft Calculation:**\nTarget: 25 words total.\nLast word group: \"here we go.\" (3 words).\nRemaining words needed: 22 words across the first 4 bullets.\n\nBullet 1: Star ignites hydrogen nuclei. \nBullet 2: Massive pressure crushes atoms. \nBullet 3:"
+    },
+    "worker:4e743a6d19386f5e8d017f334d31cb1cd44511d43ed09ce4ec13491361517aa8": {
+      "name": "worker",
+      "output": "cloud ai is new tech. it saves data online fast. this helps our world work in safe ways today. here we go."
+    },
+    "worker:4faf6a14e5c78ffd607b059aa46d21a630672c45b6f8930d66f54d22bbc5e33c": {
+      "name": "worker",
+      "output": "atom is the core idea summarized. that is it."
+    },
+    "worker:50a7be1fe0a995f60b30dd4a2c594039b72b8be2b3dcb8d38e0fd6f4f6a99256": {
+      "name": "worker",
+      "output": "Let's check the requirements against the draft:\n\n1. **Use exactly 15 words**:\n   Draft: \"Mobile tech uses cell signals. That is it.\"\n   Count: Mobile (1), tech (2), uses (3), cell (4), signals. (5), That (6), is (7), it. (8)\n   Word count is 8, not 15. **Fail**.\n\n2. **Do not use the word \"to\"**:\n   Draft does not contain \"to\". **Pass**.\n\n3. **End your response with the exact phrase \"that is it.\"**:\n   Draft ends with \"That is it.\"\n   The requirement specifies the exact phrase \"that is it.\" (lowercase 't' in that? The prompt says: end your response with the exact phrase \"that is it.\").\n   The draft has \"That is it.\" (Capital T).\n   Typically \"exact phrase\" implies matching case. The prompt uses lowercase \"that\". The draft uses \"That\". This is a potential mismatch.\n   Also, if the sentence before it ends in a period, \"That\" is capitalized. If it's a fragment, maybe. But let's look at the word \"is\" ends with \"is it.\"\n   Wait, the draft has a period after \"signals.\" then \"That is it.\"\n   The requirement is to end with the *exact* phrase \"that is it.\".\n   The draft ends with \"That is it.\" (different capitalization)."
+    },
+    "worker:50e50c15d22770d29bc3fa466a1909781af518236d9d28d6715918c6bc535de8": {
+      "name": "worker",
+      "output": "- star burns fuel\n- light shines bright\n- heat waves spread\n- gravity pulls strong\n- here we go."
+    },
+    "worker:51d0193b218158425b3ac58d0622b58f7ffb7d1530212ed706e68afd9b696c9b": {
+      "name": "worker",
+      "output": "An atom helps build all matter in our world"
+    },
+    "worker:52094c98a7106b1076cc7e555480e10449495e230e2ddb23dff7ef6325a177c9": {
+      "name": "worker",
+      "output": "The word \"one\" is 3 letters, fine.\nLet's count words in the draft:\n\"Our scan saw one cell. It had new power. This change is rare. We must act fast, right now. here we go.\"\n\n1. Our (3)\n2. scan (4)\n3. saw (3)\n4. one (3)\n5. cell. (4)\n6. It (2)\n7. had (3)\n8. new (3)\n9. power. (5)\n10. This (4)\n11. change (6)\n12. is (2)\n13. rare. (4)\n14. We (2)\n15. must (4)\n16. act (3)\n17. fast, (4)\n18. right (5)\n19. now. (3)\n20. here (4)\n21. we (2)\n22. go. (2)\n\nTotal words: 22.\nRequirement says exactly 25 words.\nAlso, check word length:\n\"change\" is 6 letters. OK.\n\"power\" is 5 letters. OK.\nNo word longer than 6 letters. OK.\nContains \"cell\". OK.\nDoes not use \"the\". OK.\nEnds with \"here we go.\". OK.\n\nThe draft fails the word count requirement (22 vs "
+    },
+    "worker:53eb67fc73dbe7f3fe2937763c6fddfb98a2621ff142df413f5a179dfbf16f8d": {
+      "name": "worker",
+      "output": "- Learn core concepts daily\n- Review notes regularly\n- Test yourself often"
+    },
+    "worker:54260a9581de8ab74c4d9a99e6f767ad4f7c35e719536a9a9d297709a1e5ec71": {
+      "name": "worker",
+      "output": "cell data is fast and quite safe for daily use that is it."
+    },
+    "worker:542de33c95a7c798ac83b90a6e81ff350db45f488ac4daebd71f80f13caa20c8": {
+      "name": "worker",
+      "output": "- Reading books helps you learn new things quickly.\n- Write down notes to remember facts better later.\n- Study with friends to share knowledge together daily."
+    },
+    "worker:54d95e19d69784c1f259f111c3a2f72f49ee093502e25de403137f8dd737f998": {
+      "name": "worker",
+      "output": "To determine if the draft satisfies the requirements, let's verify each constraint:\n\n1.  **use exactly 20 words**:\n    The draft is: \"we found a new star today. it shines brightly in our sky, guiding us safely. so it goes.\"\n    Let's count the words:\n    1. we\n    2. found\n    3. a\n    4. new\n    5. star\n    6. today\n    7. it\n    8. shines\n    9. brightly\n    10. in\n    11. our\n    12. sky\n    13. guiding\n    14. us\n    15. safely\n    16. so\n    17. it\n    18. goes\n    Total words = 18.\n    This is **not** 20 words.\n\n2.  **end your response with the exact phrase \"so it goes.\"**:\n    The draft ends with \"so it goes.\" This is satisfied.\n\n3.  **write your entire response in lowercase (no capital letters)**:\n    The draft has no capital letters. This is satisfied.\n\n4.  **do not use the word \"the\"**:\n    The draft does not contain the word \"the\". This is satisfied.\n\nSince the word count requirement is not met, the draft needs revision.\n\n**Revision:**\nI need to add "
+    },
+    "worker:54ff3b959b6848c48ccf4017da378a41fe23cb1f4faab7a2b8dce0d8e22f7d9e": {
+      "name": "worker",
+      "output": "Water falls from clouds as rain. It flows into rivers, then oceans. This cycle repeats without stop, so it goes."
+    },
+    "worker:55035144d50e3274cddab70f96e1bcaac9dbca307e53566af22d691aac50396f": {
+      "name": "worker",
+      "output": "not pass\n\nissues:\n1. uses 15 words (needs exactly 20)\n2. does not end with \"all is set.\"\n3. does not include the required ending phrase"
+    },
+    "worker:55774deee7c86dd6d8579dd1bc14e5510c32385a25c8079d0942f30561a574a9": {
+      "name": "worker",
+      "output": "A gene guides cell growth. This gene is key to life."
+    },
+    "worker:569335fc16cc07ae2793a8710bc4eadeef1f65089d6a9526719437c71e290894": {
+      "name": "worker",
+      "output": "List what to fix:\n\n1.  **Word count violation:** The draft has only 10 words, but the requirement is exactly 25 words. The final response must end with \"we are done.\" (4 words). The preceding descriptive text must therefore be exactly 21 words, totaling 25.\n2.  **Length check on \"we are done.\"**: \"we\" (2), \"are\" (3), \"done\" (4), \".\" (symbol). All words <= 6 letters. This part is valid, but the count contribution must be factored into the total 25.\n\nCurrent draft: \"The sun rises. Birds sing. Leaves move. Wind blows. We are done.\" (10 words)\nTarget: 25 words.\nGap: Need 15 more words. All must be <= 6 letters. No \"to\". No commas. Must end with \"we are done.\"\n\nLet's construct a 21-word description (since \"we are done\" is 4 words, 21+4=25).\nWord constraint: <= 6 letters. No 'comma'. No 'to'.\n\nDraft attempt 1:\nRain falls fast on dry land. Plants drink deep. Green leaves grow tall.\nCount: Rain(1) falls(2) fast(3) on(4) dry(5) land.(6) Plants(7) drink(8) deep.(9) Green(10) leaves(11) grow(1"
+    },
+    "worker:583de8d5249f259e271dc3153d7256c1e8f0d836c832348fdd4436ae807305ba": {
+      "name": "worker",
+      "output": "sound wave energy moves items past you in a steady way that shows physics in a clear and neat form"
+    },
+    "worker:585266e08533d82f543cb615b6e966db578cc5ca66f2539ddaee36d70465b119": {
+      "name": "worker",
+      "output": "word \"nucleus\" is 7 letters"
+    },
+    "worker:599ad050f771af38dad6d978bc67f1db4ee1ba9e90022da6b246acdfd239d42b": {
+      "name": "worker",
+      "output": "to learn smart, read often and write notes down. also, sleep well every day for your brain. that is it."
+    },
+    "worker:5ba92918a6aae40862d556a87aaad48aa41393f2faade17384e9e22910c34b73": {
+      "name": "worker",
+      "output": "The plan is to read a lot of books now. That is it."
+    },
+    "worker:5c2d1e80292ecef1dc74407d8dcd72bca565e046319bd47aee451f5d96d1a5b4": {
+      "name": "worker",
+      "output": "- a frog was there\n- we felt so glad\n- it sat by us\n- we saw its skin\n- we saw its eyes"
+    },
+    "worker:5cb2790400a1109a92540167148d676f9df268962a84cb00e130769d1ee63bff": {
+      "name": "worker",
+      "output": "- tech helps life.\n- it makes life go so it goes."
+    },
+    "worker:5cbcce65d4a979bb647e2adf4e6c15da82807a46ab32db5072c1f8a979a04102": {
+      "name": "worker",
+      "output": "- summarize ideas first.\n- keep sentences brief.\n- avoid complex terms.\n- focus on core concepts.\n- ensure clarity for learners."
+    },
+    "worker:5d44a40e16425c2f2f7785e5736d3032ab6eb308a3e29bd5a3cb137d5002a1ce": {
+      "name": "worker",
+      "output": "- water rises, cooling, condensing into clouds\n- gravity pulls moisture down as rain falls\n- streams gather, flowing to oceans below\n- cycle repeats without end"
+    },
+    "worker:5e9635ea8bce6953829451141e0a5213429180407ddec331e876d87bc1e6320a": {
+      "name": "worker",
+      "output": "- a star is a burning ball of gas.\n- gravity holds it all together tightly forever.\n- light lets you see it from afar."
+    },
+    "worker:5ef6ff83a1729d48cd51402c87ec314edbe75dce19ad27e55a84f4843220c9df": {
+      "name": "worker",
+      "output": "this small sun cell turns daylight into clean energy that helps save money"
+    },
+    "worker:5f1e945e6c1845e409567e1be150693d718ecab2949c50c68cf04ad418bc22a3": {
+      "name": "worker",
+      "output": "- data codes the web.\n- tools let you read it.\n- learn code to build sites."
+    },
+    "worker:605993100c7d26350b1417eb5ec3b540c695ef23306d480acd95439777d18f99": {
+      "name": "worker",
+      "output": "Gene basics help you learn how life works, truly."
+    },
+    "worker:60698f0b8d522f6dd878541ec4dc0544d4b9e3ac8d14a39048c2aa5ab0306630": {
+      "name": "worker",
+      "output": "- Start by reading a book on the core topic.\n- Watch a short video to see how it works in real life.\n- Try a small task to gain real hands-on experience today."
+    },
+    "worker:60f4633a48e7dbbe1813dc1dd7efa913cce6754549a39064187f6299b7e7d840": {
+      "name": "worker",
+      "output": "- we found a new stone.\n- it glows with red light.\n- this trait is quite rare.\n- we must share it all.\n- so it goes."
+    },
+    "worker:61fea64bb603d5135b73db3619f88f770129dd0791bcf0ed14ec6416549e1814": {
+      "name": "worker",
+      "output": "check the given text word by word\n\n1. ice (3) \u2713\n2. piles (5) \u2713\n3. form (4) \u2713\n4. clouds (6) \u2713\n5. that (4) \u2713\n6. float (5) \u2713\n7. high (4) \u2713\n8. up (2) \u2713\n9. in (2) \u2713\n10. the (3) \u2713\n11. daytime (7) \u2717 (too long)\n12. sky (3) \u2713\n\nthe word \"daytime\" is 7 letters which violates the 6-letter limit\n\ncount the words: 12 words total. required: 25. violates word count.\n\nno commas used \u2713. all lowercase \u2713.\n\nfixes needed:\n1. replace \"daytime\" with a word 6 letters or less\n2. increase total word count from 12 to 25"
+    },
+    "worker:634d1ecdc4909af6d1633c6f0a2f82922551fef43045e21ac5c2441d284eab22": {
+      "name": "worker",
+      "output": "Digital tech helps us store data for our use so it goes."
+    },
+    "worker:63bc18c8898ca19a4498ecc39eac0ad1087d250d8f8ff466b130de3569dfa61a": {
+      "name": "worker",
+      "output": "Water rises from seas as mist. Sun turns it to cloud. Rain falls to streams. The loop ends, yet life grows so it goes."
+    },
+    "worker:640201f03241127321a7c45de2ce3d82d13130c6d5af8b57a0f04c2f0f5cd1e7": {
+      "name": "worker",
+      "output": "Let's check the draft answer against the requirements:\n\nRequirement 1: Use exactly 25 words.\nDraft: \"Bee stings hurt but save lives. Bees pollinate crops. Learn their busy sweet life today.\"\nCount:\n1. Bee\n2. stings\n3. hurt\n4. but\n5. save\n6. lives\n7. Bees\n8. pollinate\n9. crops\n10. Learn\n11. their\n12. busy\n13. sweet\n14. life\n15. today\nTotal words: 15.\nConstraint violated: Must be exactly 25 words.\n\nRequirement 2: Do not use any commas.\nDraft: No commas.\nSatisfied.\n\nRequirement 3: Use no word longer than 6 letters.\nDraft words:\nBee (3)\nstings (6)\nhurt (4)\nbut (3)\nsave (4)\nlives (5)\nBees (4)\npollinate (9) -> Constraint violated. \"pollinate\" has 9 letters.\ncrops (5)\nLearn (5)\ntheir (5)\nbusy (4)\nsweet (5)\nlife (4)\ntoday (5)\nConstraint violated: \"pollinate\" is too long.\n\nRequirement 4: Do not use the word \"and\".\nDraft: No \"and\".\nSatisfied.\n\nSummary of violations:\n1. Word count is"
+    },
+    "worker:641e430d3442091c18ac2ee16beadd79364e1fbbe48392ffa690eed209819017": {
+      "name": "worker",
+      "output": "we discovered a bright star shining above our small town tonight, filling everyone with quiet wonder and deep peaceful joy"
+    },
+    "worker:65430f5882214fe437a98b39a76907c11d9288aaecb396a0c45e92d8d37c804a": {
+      "name": "worker",
+      "output": "light rays hit a smooth face, all move on, that is it."
+    },
+    "worker:661927229e7a4ac6a762c7e1517844a9ef7e24219bd3cf5e006ccc9f3a40588c": {
+      "name": "worker",
+      "output": "warm ocean air lifts as a gentle stream of steam and rises toward the clear blue sky"
+    },
+    "worker:6700d786493493530d37c31d841c74dc1bf8ceadf1b6fced783134e327e84e5a": {
+      "name": "worker",
+      "output": "flux is a wave. it shifts fast. data moves here. code stays free. change flows, so it goes."
+    },
+    "worker:68016eb5130da3d2b363171d6b22b9cd37b02f25e4e8f489f47648b9477ae5d8": {
+      "name": "worker",
+      "output": "sun rays help green plants grow well and make fresh air"
+    },
+    "worker:69142fa80e3e8a58a70d3e0b4c5e4099743a67f042cc3da9bc8514ae0b5c84e0": {
+      "name": "worker",
+      "output": "we found a bright star hanging above our quiet town, filling air with simple wonder and soft peaceful human"
+    },
+    "worker:693c8d84be981debcb9d5c530534b7caadc6bb02a8bb508d2c49fd2c2ce65f9d": {
+      "name": "worker",
+      "output": "atoms bond forming gases, liquids, solids, thus nature remains stable, so it goes."
+    },
+    "worker:695202fca858db60a69cf9bbd4318737c5ef61771fdd1485466958526d09fa9b": {
+      "name": "worker",
+      "output": "- use simple language.\n- explain concepts clearly.\n- review key points daily.\n- ask questions often.\n- test yourself regularly."
+    },
+    "worker:698ec5a65cf34e8337f14825fb4a7a29a47537c65a22fa22b8ce285ea5880cd2": {
+      "name": "worker",
+      "output": "A warm wind blows soft. Green leaves sway. The sun rises high. Birds fly past. We are done."
+    },
+    "worker:6b6e409683e3fa4ed05d60e84780ec0f25167dd9715f64823f2660a15d470e61": {
+      "name": "worker",
+      "output": "atom is the smallest unit of matter, which forms every element. that is it."
+    },
+    "worker:6bb82e7a94fd31b7b8000ca5bf8244aad7c8bd6b16738f19c1d6b263a0bee12a": {
+      "name": "worker",
+      "output": "artificial intelligence processes vast data sets for smart decision making here we go"
+    },
+    "worker:6bd530fc0c20c83ca07924b2c5c555d032fc7c5ee825c49f001c2f4cd56bf34e": {
+      "name": "worker",
+      "output": "I will write ten words that are short. all is set."
+    },
+    "worker:6d9def20372418b3e3bf8f75429a8428e72d7b6cebc4e6555f867a0ac36b567d": {
+      "name": "worker",
+      "output": "The phone lets us talk and share files here we go."
+    },
+    "worker:6ddc937c8d429b09463366652452f2ef246053ed0e19703ab2e239a716b2b95e": {
+      "name": "worker",
+      "output": "I will make a short note."
+    },
+    "worker:6df45ed8b2fa93f0b3a2038e6ed118ab4ebcaa383f1babebb4600812eaf794d0": {
+      "name": "worker",
+      "output": "- One time period marks creation. First, one era began."
+    },
+    "worker:6e857c4a718be0626be4da2b49c1417479a5c3fb4dda5cb8eb622bea42f3471f": {
+      "name": "worker",
+      "output": "we found a shiny rock hidden under our old tree"
+    },
+    "worker:6f01eed2bf7200f056fe781ff9502c6578a830554ce36273afd5b1b7e9a0504d": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:6f09b0f884f2b52bc8362cf28ecb76c2d582836eb41bd08cbaaa3d4ee11fab79": {
+      "name": "worker",
+      "output": "artificial inteli is smart. it helps us work and learn in new, safe, and very fast ways now. here we go."
+    },
+    "worker:6f3b82b6b741d17c5ccab7e7ac25078cb45db69adb07d1dbd5ffb2ecb88026c1": {
+      "name": "worker",
+      "output": "- a new cave was found up the hill\n- we dug in dirt by the hill\n- it holds a soft blue light\n- all of us agree we are done."
+    },
+    "worker:6f6e9d4b651d0766b157e262307f5a927835db2478e7d95b6e72b1f844f8a079": {
+      "name": "worker",
+      "output": "- start now\n- try one step\n- ask a friend\n- build simple code\n- stay calm"
+    },
+    "worker:7268b37778b8b91efff88d09736d2a743da4c2e98387ec58ff2ddf1cd7f6c1b6": {
+      "name": "worker",
+      "output": "Let me check each requirement carefully:\n\n1. Format as exactly 3 bullet points, each line starting \"- \":\n   - Line 1: \"- Learning code builds smart minds.\" \u2713\n   - Line 2: \"- We write small, fun tools.\" \u2713\n   - Line 3: \"- Try it now, you win. we are done.\" \u2713\n   \u2192 Exactly 3 bullet points, all start with \"- \" \u2713\n\n2. End your response with the exact phrase \"we are done.\":\n   - The last characters are \"we are done.\" \u2713\n\n3. Use no word longer than 7 letters:\n   - \"Learning\" = 8 letters \u2192 FAIL\n   - Wait, let me recount: L-e-a-r-n-i-n-g = 8 letters. That's too long.\n   - All other words:\n     - \"code\" = 4 \u2713\n     - \"builds\" = 6 \u2713\n     - \"smart\" = 5 \u2713\n     - \"minds.\" = 6 (word is \"minds\") \u2713\n     - \"We\" = 2 \u2713\n     - \"write\" = 5 \u2713\n     - \"small,\" = 6 (word is \"small\") \u2713\n     - \"fun\" = 3 \u2713\n     - \"tools.\" = 6 (word is \"tools\") \u2713\n     - \"Try\" = 3 \u2713\n     - \"it\" = 2 \u2713\n     - \"now,\" = 4 (word is \""
+    },
+    "worker:7338cb9e15e427f8f61b5716f250f367e74ee210edae2a607b12145ba18d3cdb": {
+      "name": "worker",
+      "output": "- A wave rolls toward shore.\n- Foam breaks gently on sand.\n- Water pulls back slowly.\n- Another wave approaches steadily."
+    },
+    "worker:73a832bd6d49bc3f5e158249431a861300a6b0ead977115d27f2113491947d70": {
+      "name": "worker",
+      "output": "Evaluation Of Draft:\n\n- \"cats\": 4 letters (OK)\n- \"sleep\": 5 letters (OK)\n- \"much\": 4 letters (OK)\n- Pur: 3 letters (OK)\n- \"soft\": 4 letters (OK)\n- \"like\": 4 letters (OK)\n- \"warm\": 4 letters (OK)\n- \"spots\": 5 letters (OK)\n- \"need\": 4 letters (OK)\n- \"daily\": 5 letters (OK)\n- \"care\": 4 letters (OK)\n- \"fun\": 3 letters (OK)\n- \"pets\": 4 letters (OK)\n\n1. No word longer than 7 letters: All words are 5 letters or less. \u2713\n2. Do not use the word \"to\": The word \"to\" is absent. \u2713\n3. Format as exactly 5 bullet points, each starting with \"- \": There are 5 lines, each starting with \"- \". \u2713\n4. Use exactly 25 words:\n   - Line 1: cats, sleep, much (3 words)\n   - Line 2: they, purr, soft (3 words)\n   - Line 3: like, warm, spots (3 words)\n   - Line 4: need, daily, care (3 words)\n   - Line 5: fun, pets (2 words)\n   \n   Total: 3 + 3 + 3 + 3"
+    },
+    "worker:73aa06354abd5b96eb825caa16f822768f3a44d8f46d58dca4afff9ce93e17d6": {
+      "name": "worker",
+      "output": "The draft answer does not satisfy all requirements. Here are the issues to fix:\n\n1.  **Word Count**: The draft has 16 words (\"We spotted a new star. It shines bright in the sky. The researchers confirmed this exciting discovery today.\"). The requirement is exactly 25 words.\n2.  **Format Structure**: While there are 3 lines starting with \"- \", the prompt asks for \"exactly 3 bullet points\". The current structure is fine, but the word count is the primary failure.\n3.  **Word \"of\"**: The draft does not use the word \"of\". This requirement is satisfied.\n4.  **Word \"star\"**: The draft includes the word \"star\". This requirement is satisfied.\n\n**Revised Note:**\n- A bright new star appeared in the night sky yesterday.\n- Astronomers used powerful telescopes to observe its unique light patterns.\n- This discovery will help us understand distant galaxy formations better.\n\n**Check against constraints:**\n- **3 bullet points?** Yes.\n- **No \"of\"?** Yes.\n- **Exactly 25 words?**\n    - Line 1: A (1) bright (2) new (3) star (4) appeared (5) in (6) the (7) night (8) sky (9) yesterday (10). -> 10 words\n    - Line 2: Astronomers (1) used (2) powerful (3) telescopes (4) to (5)"
+    },
+    "worker:74d85f2c13c497f6a5811e249f8b0a5f53bf0510ec5979c70599cd3f45bf4398": {
+      "name": "worker",
+      "output": "- Sun draws water up from earth into plant leaves\n- Water leaves leaves as vapor during warm days\n- Vapor rises high into cold clear empty skies above\n- Cold air makes vapor form clouds with tiny droplets"
+    },
+    "worker:74f71eda202b00c4a1aed05d8497231aacfadb001835ff582e359f57113fff73": {
+      "name": "worker",
+      "output": "sunlight warms water on leaves causing it to rise into the sky"
+    },
+    "worker:75137996e20d84003aa2c9e7a56a7dc720d1b1c3294ac3062556b915a620581e": {
+      "name": "worker",
+      "output": "review key lessons briefly to help students grasp essential concepts fast. all is set."
+    },
+    "worker:77854513fe96b05d094c125fa04908d6cc5f2ee0b9595fef024eb10b0b175dcb": {
+      "name": "worker",
+      "output": "solar tech makes clean sun power free for all homes"
+    },
+    "worker:786085611e89c8d2ae8dcdd37b75151833e2d4e634456d0376aff45b720e9485": {
+      "name": "worker",
+      "output": "I need to check each constraint. First the draft answer is \"This new code saves data on the net.\" Let me count words. This one word. new two. code three. saves four. data five. on six. the seven. net eight. Wait those are eight words. The requirement says exactly twenty words. I have only eight here. Also check comma usage: none present. So comma rule okay. Include word code yes it is there. No word longer than seven letters: all words look short. This is four letters new is three code four saves five data four on two the three net three. All within seven. So word length is fine but word count is wrong. I must produce a new answer that meets all. But the instruction says reply exactly PASS if satisfied otherwise list what to fix. Since not satisfied I list issues. The only fix needed is to use exactly twenty words. Other constraints already met in draft. I should state that clearly.\n\nthe draft has only eight words instead of twenty"
+    },
+    "worker:788dd95e7214c6761f9c9708a79aa947cd404f0aaa763bccc5c88ea01b57b72b": {
+      "name": "worker",
+      "output": "your brain links new data to old ideas for quick recall"
+    },
+    "worker:7910f6e4f75b04f81c47359a8b52bce6f94794780ef471fdaafe7580b56deb50": {
+      "name": "worker",
+      "output": "- we found a rare mineral\n- it glows bright\n- no one knew this\n- before our careful study\n- here we go."
+    },
+    "worker:7a6cd58a55e54a68d24da84e7f01d9d7cf81971118306b62e3c033217bdcb9f3": {
+      "name": "worker",
+      "output": "flux drives each web link, code runs fast and smooth, all tools stay free and clear, so it goes."
+    },
+    "worker:7ada330d1afd8b569926fd65d5caf0fda1f40e92229597c68c6df11b9e644d6e": {
+      "name": "worker",
+      "output": "water moves up trees via transpiration pull, a continuous process. all is set."
+    },
+    "worker:7ae4f678b18f1a840f66301c15c5fe5686e83769c438674cf33b380436ea159e": {
+      "name": "worker",
+      "output": "before answering the user's query about brain patterns, verify strict constraints are met"
+    },
+    "worker:7bde7788c79b026eef447190d11a52150442e273fb927df08715e41044bae1a7": {
+      "name": "worker",
+      "output": "Fix list: use exactly 15 words"
+    },
+    "worker:7be8d6eea04b2772f4e8874da7ec1b0370bb9d5ca50ec59c7abbc519d6da9da7": {
+      "name": "worker",
+      "output": "rain forms when water vapor cools high in the sky"
+    },
+    "worker:7d0d379217cb85f9a47ee67bdfd73468c808befeae29e6b5b5a2ed4b064bf8e0": {
+      "name": "worker",
+      "output": "water boils at one hundred degrees and we are done."
+    },
+    "worker:7d1f5b42f5b92d4b7a513bdd0c97c74b53e13fc5fa5675034683c972392c142c": {
+      "name": "worker",
+      "output": "Let's check each constraint against the draft:\n\nDraft: \"The water moves in constant flux, eventually filling the ocean basin. so it goes.\"\n\n1. **Use no word longer than 7 letters:**\n   - \"The\" (3)\n   - \"water\" (5)\n   - \"moves\" (5)\n   - \"in\" (2)\n   - \"constant\" (8) -> **FAIL** (\"constant\" is 8 letters)\n   - \"flux\" (4)\n   - \"eventually\" (10) -> **FAIL** (\"eventually\" is 10 letters)\n   - \"filling\" (7)\n   - \"the\" (3)\n   - \"ocean\" (5)\n   - \"basin\" (5)\n   - \"so\" (2)\n   - \"it\" (2)\n   - \"goes\" (4)\n\n2. **Use exactly 20 words:**\n   - Counting the words: The(1) water(2) moves(3) in(4) constant(5) flux,(6) eventually(7) filling(8) the(9) ocean(10) basin.(11) so(12) it(13) goes.(14)\n   - Total: 14 words. **FAIL** (Need 20 words).\n\n3. **End your response with the exact phrase \"so it goes.\":**\n"
+    },
+    "worker:7d4d3dc3f7ccc8f38ee490a315a51951e94cb1a70c282b279f3f9adc385110e6": {
+      "name": "worker",
+      "output": "- New code found.\n- It is old.\n- We fix it.\n- It works well."
+    },
+    "worker:7d7475f5c94fd687594938e934eca50b6c9c733524cdb34b9fe10c864f300400": {
+      "name": "worker",
+      "output": "sound waves travel through air, water, and solids. each pulse moves energy from one spot near by"
+    },
+    "worker:7df6753f430eb66d10cf34e94eb9252f4b31eff4c72aed55724b1bf41894953b": {
+      "name": "worker",
+      "output": "to learn smart, read daily and write down your key facts. sleep well so your mind can grow. that is it."
+    },
+    "worker:8195de0188feb2836b1ffca090acce965ed664e4bd8a952d83c8cee59ffca958": {
+      "name": "worker",
+      "output": "the dark cave is wide and deep and safe for us."
+    },
+    "worker:81b46604c3331a784510168bc612a77431e5e7db8df9b229a9699c56dd2c5b4e": {
+      "name": "worker",
+      "output": "ice piles form clouds that float high up in the daytime sky"
+    },
+    "worker:83038e2eb5b4edbadb5fa022a02a4f9e08dcefa3be95146202d2e843c0325a88": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:83955b84a654f0ac0c24effdb7a7e3985bc4c0b9a7aadbfe02cb086aa16cfc33": {
+      "name": "worker",
+      "output": "Mobile tech uses cell signals. That is it."
+    },
+    "worker:847236b5947469e70a8259137cd0c7cad8c392d67fc13e4997b7e1320757896a": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:84de699771c4c65e4177ecd918bf66a037c4ad0ec8402318e2203ddfeb302b58": {
+      "name": "worker",
+      "output": "i found a new cell. it glows bright blue in the dark. this small sight is a unique and rare find for us"
+    },
+    "worker:8500a71ce883bb470954b7176e097011218644db1b9a17b457950807b02f1573": {
+      "name": "worker",
+      "output": "the sun warms water that evaporates to cloud then rain returns all is set."
+    },
+    "worker:856a5345021fe4230fa2e39245a1ba8dd7aab1846fdd456e8d957215164bedd9": {
+      "name": "worker",
+      "output": "Use short notes. Set a goal. Stay on track. Study hard."
+    },
+    "worker:85c71a485e6deaaaa2c5bd9f281632eaf6f23a4711d201ad85b8516f004c6250": {
+      "name": "worker",
+      "output": "- I found gold.\n- It shone bright.\n- The rock broke.\n- My heart jumped.\n- Joy filled me."
+    },
+    "worker:86d27fec7e5187cb31a8a3fcd28b2e7b7d9aa6263dad1714d590a0f17d475180": {
+      "name": "worker",
+      "output": "Gene sequences govern life traits your parents passed down to you"
+    },
+    "worker:873594bf3567c5550d6cfb8faf3492e5f46e6f7817a5688c44698357e9fb30ec": {
+      "name": "worker",
+      "output": "can a star shine bright in the night sky"
+    },
+    "worker:88370ba3111389d9ea71a7c48951e017f560e71167e174a75276cb584dd235ba": {
+      "name": "worker",
+      "output": "That draft fails: it has only 14 words, not 25"
+    },
+    "worker:892adb4ca0c29ba6cb2478a356a38dfb5e7dcfe551ae574ff630bcbaa2e16f48": {
+      "name": "worker",
+      "output": "- a cell holds all life's core parts\n- it grows, splits, and clears out trash"
+    },
+    "worker:8a9c5d36aff628ae77e08e396978c61166eeb8322e47a5a53bea3d3ce9cc5ab2": {
+      "name": "worker",
+      "output": "Let us start here to learn basic code skills for you. here we go."
+    },
+    "worker:8aa0a442c471b09402bbe6a0cf507bf3c33d7d363bb2a9eb9542bb189dd7dbdc": {
+      "name": "worker",
+      "output": "1. use exactly 15 words"
+    },
+    "worker:8ab6b3827046e5d2a82caa964dcf56fd2d3ffc5859642ba1ae3c7985674e5cab": {
+      "name": "worker",
+      "output": "word count needs 4 more words."
+    },
+    "worker:8c9f0a46b71f7c66929c90e7534964cb0a16fa9f5ceea8fcb190da9bd0ae50e8": {
+      "name": "worker",
+      "output": "A star is a huge ball of hot gas that burns bright for our"
+    },
+    "worker:8cc8e07a059b55acf6c3fd4e0e4590c869e1f1f43262289b62b2aec27e69a5a2": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:8ccb632d64804de835bacb1d6e1a3caaae151aea979bfda52a8be5700d107df1": {
+      "name": "worker",
+      "output": "This explanation covers atom structure, ensuring every student understands all is set."
+    },
+    "worker:8d05f14ea772d6aeb0b9b9b46940d25c79a3dc2f6eef06f18ebc8a918bf5c5ad": {
+      "name": "worker",
+      "output": "1. word count is 9, not 15\n2. missing \"and\" is satisfied (no \"and\" present), but word count fails\n3. exact ending \"that is it.\" is satisfied\n4. lowercase is satisfied\n5. includes \"atom\" is satisfied\n\nfix: expand to exactly 15 words"
+    },
+    "worker:8d64f97e88effec6abad1f9979d19e5dc8b1357b3d56a8f5f415ddf0e2fb6fdb": {
+      "name": "worker",
+      "output": "- tea is a warm and calm daily drink for you"
+    },
+    "worker:8d936f2767521bd7cd28da1a99544fa24664c7e7b2b73a482b1074901600f8e8": {
+      "name": "worker",
+      "output": "water flows down the river, carving stone naturally. time erodes rocks, shaping valleys. this cycle continues daily, so it goes."
+    },
+    "worker:8da280ca84f615c651f882abe19e186e13c9703d75bdb04ae9c2c8d4cca1d777": {
+      "name": "worker",
+      "output": "- include the word \"code\": yes.\n- use exactly 25 words: currently 15 words. Fix needed.\n- use no word longer than 7 letters: \"worth\" is 5, \"hours\" is 5, \"hidden\" is 6. All good.\n- do not use any commas: correct."
+    },
+    "worker:8dd3f1531c812d3f621b97ca47c36cd750547e0c39f80b2ac287de28d3f7bef5": {
+      "name": "worker",
+      "output": "- Light is waves.\n- It bends a bit.\n- This is the act.\n- Known as refraction."
+    },
+    "worker:8e66225aab0eced9b8ab9d739c191d65257a37513d200564aa0f94c691b8a93a": {
+      "name": "worker",
+      "output": "Write code to learn. It helps you grow fast. Keep trying till you win the prize."
+    },
+    "worker:8f2e66fb0ee4a33e0f5325da22ed70d340739e7a6416ec7b7e041c40bed60c35": {
+      "name": "worker",
+      "output": "we found a new star today. it shines brightly in our sky, guiding us safely. so it goes."
+    },
+    "worker:8fdba059cebaf67c283dc794fcde31ce141525b93b1650522b935c7b839dcb64": {
+      "name": "worker",
+      "output": "Gene basics help you learn how life works, truly."
+    },
+    "worker:900319c49a6198cb16ecb39ef4b284f8847fc48edbfbaed2c4b0981a91e862cd": {
+      "name": "worker",
+      "output": "We must start. Let us begin. all is set."
+    },
+    "worker:913277bb0da34ec9449835397f15a35d43efcd887f719ca89d9f16df638ba6ee": {
+      "name": "worker",
+      "output": "I found a secret code in the old files. It took many days to read it all but it was truly a great find."
+    },
+    "worker:91716a1b599d77553f3b58ddc211591dc6d5f1c7fbad6c048b69e5976c8f79c0": {
+      "name": "worker",
+      "output": "- Learn new ideas through reading daily.\n- Take detailed notes for better memory.\n- Discuss topics to deepen understanding now."
+    },
+    "worker:9182ec7a065b8a50a4a5efd3315a2dfd7879981a84057458ec086c32e2f5b97a": {
+      "name": "worker",
+      "output": "list what to fix:\n- the response does not use exactly 15 words (it uses 7)\n- the response does not summarize an idea for a student (it is incomplete)"
+    },
+    "worker:91f5caaa4933b4f913a328900433ddcb2750b5099cefe13f0fcde4517e77f5fa": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:91f72e47a0fdd254b9a70605153da036849141edf897d3aed0e7b37f0e5178aa": {
+      "name": "worker",
+      "output": "Photons carry light energy as discrete quantum packets all is set"
+    },
+    "worker:920c65ebc5b8b9f4128eadd997f92519c35e5f34df0ce5bcb96420637b2f8c63": {
+      "name": "worker",
+      "output": "The draft fails the \"no word longer than 7 letters\" check? No, \"facts\" is 5. \"that\" is 4. \"are\" is 3. \"it\" is 2. \"try\" is 3. \"to\" is 2. The word \"that\" is in the draft. The draft ends with \"are it.\" not \"that is it.\" The draft has 7 words, not 15. I need to rewrite it.\n\nConstraint Checklist:\n1. No word longer than 7 letters.\n2. Exactly 15 words.\n3. End with exact phrase \"that is it.\" (These 4 words count towards the 15).\n4. Do not use the word \"and\".\n\nTarget structure: 11 words + \"that is it.\" (4 words) = 15 words.\nThe last 4 words are fixed: \"that is it.\"\nI need 11 words before that.\nExample idea: Study hard every day to pass tests well.\nLet's count:\n1. Study (5)\n2. hard (4)\n3. every (5)\n4. day (3)\n5. to (2)\n6. pass (4)\n7. tests (5)\n8. well (4)\nThat's 8 words. I need 11 words before \"that is it.\"\nLet's try: \"A good way is to read books often.\"\n1. A"
+    },
+    "worker:9347e8084242e4ead947c3a41a66636b7fdb6a1f843f8b9590d2d06529acc3ac": {
+      "name": "worker",
+      "output": "To ensure your students truly grasp the core material, I need to refine my approach. I will break down the topic into four distinct, memorable chunks. This strategy supports active recall and effective note-taking."
+    },
+    "worker:935bf4a92e49e98ae15d980e8a7a2447ef6eaaca77869f142a37a5041942ca9c": {
+      "name": "worker",
+      "output": "LIST WHAT TO FIX\n- has 2 bullet points not 3"
+    },
+    "worker:953ca8fa423feaefc2246efedd46f423617084512f5944d744e26d3bc2ad9ea8": {
+      "name": "worker",
+      "output": "Star energy comes from fusion. It glows bright. Here we go."
+    },
+    "worker:95f5ad62fd061937c1247923e7d949099e6caa28bda9c490391e3a4b0c09d952": {
+      "name": "worker",
+      "output": "Let's check the draft answer: \"sun light helps plants grow big and green\"\n\n1.  **No word longer than 6 letters**:\n    -   sun (3)\n    -   light (5)\n    -   helps (5)\n    -   plants (6)\n    -   grow (4)\n    -   big (3)\n    -   and (3)\n    -   green (5)\n    All words are 6 letters or fewer. (Pass)\n\n2.  **Write your entire response in lowercase**:\n    -   The draft is all lowercase. (Pass)\n\n3.  **Do not use the word \"to\"**:\n    -   The word \"to\" is not present. (Pass)\n\n4.  **Use exactly 15 words**:\n    -   The draft has 8 words: sun, light, helps, plants, grow, big, and, green.\n    -   Requirement is 15 words. (Fail)\n\nWhat to fix:\n-   The response needs to be expanded to contain exactly 15 words, while maintaining the other constraints (no words over 6 letters, no capitalization, no word \"to\").\n\nPASS"
+    },
+    "worker:96ac66a8d13a031bf2e0bacf333341c8c94ea281bb7dbdae1b58b4d0d94e262e": {
+      "name": "worker",
+      "output": "Let me check the draft answer against all the requirements:\n\n1. **format as exactly 3 bullet points, each line starting \"- \"**\n   - The draft has: `- starlight, - gravity, - light help you learn basic astronomy.`\n   - This is on ONE line with 3 items, but they're not each on separate lines starting with \"- \".\n   - \u274c NOT SATISFIED\n\n2. **write your entire response in lowercase (no capital letters)**\n   - The draft is all lowercase. \u2713\n\n3. **use exactly 20 words**\n   - Count: \"starlight, - gravity, - light help you learn basic astronomy.\" \n   - Words: starlight, gravity, light, help, you, learn, basic, astronomy = 8 words\n   - \u274c NOT SATISFIED (needs 20)\n\n4. **include the word \"star\"**\n   - The word \"starlight\" contains \"star\" as a substring, but it's not exactly the word \"star\".\n   - \u274c NOT SATISFIED (needs the standalone word \"star\")\n\n5. **do not use the word \"the\"**\n   - The draft doesn't use \"the\". \u2713\n\nFixes needed:\n- Format must be 3 separate bullet points, each starting with \"- \"\n- Must use exactly 20 words\n- Must include the exact word \"star\" (not just part of another word)"
+    },
+    "worker:97acf89e0cc242d7f0bf283720500abb193f221edb828c2cf98cd6b3a9823e14": {
+      "name": "worker",
+      "output": "the word \"solids\" has 6 letters, but \"through\" has 7. wait, the draft has a space in \"near by\" which is odd. let's check word length. \"solids\" is 6. \"through\" is 7. \"energy\" is 6. \"moves\" is 5. \"pulse\" is 5. \"waves\" is 5. \"sound\" is 5. \"travel\" is 6. \"from\" is 4. \"one\" is 3. \"spot\" is 4. \"near\" is 4. \"by\" is 2.\nword count: sound(1) waves(2) travel(3) through(4) air,(5) water,(6) and(7) solids.(8) each(9) pulse(10) moves(11) energy(12) from(13) one(14) spot(15) near(16) by(17)\ntotal words = 17.\nrequired words = 25.\nfix: add 8 words.\nalso \"air,\" and \"water,\" and \"solids.\" have punctuation, but words are usually defined by spaces.\n\"through\" is 7 letters. max is 7. ok.\nis \"lowercase\" satisfied? yes.\n\"no word longer than 7 letters\"?\nsound: 5\nwaves: 5\ntravel: 6\nthrough: 7\nair"
+    },
+    "worker:97cfdcbecef5de237e5dcd0e7c17521295c2ead673ade55ec29f6a582cd88022": {
+      "name": "worker",
+      "output": "A node is a point so it goes."
+    },
+    "worker:991fca024e5b6c026cd193b69a28bf318caab1060401a60bccba63b39095eabf": {
+      "name": "worker",
+      "output": "The node represents a key point in complex network systems for data processing."
+    },
+    "worker:9a2305a790c8a5a8e348d11a8c05350b93f7a8b2c933f220551c68330ea77aed": {
+      "name": "worker",
+      "output": "The draft answer:\n\"Star energy comes from fusion. It glows bright. Here we go.\"\n\nLet's check the constraints:\n1. **Explain a scientific concept**: Yes, it briefly explains stellar energy (fusion).\n2. **Use exactly 20 words**:\n   - Current count: \"Star\" (1) \"energy\" (2) \"comes\" (3) \"from\" (4) \"fusion.\" (5) \"It\" (6) \"glows\" (7) \"bright.\" (8) \"Here\" (9) \"we\" (10) \"go.\" (11).\n   - The count is 11 words. The requirement is 20 words. **Failed**.\n3. **Do not use the word \"and\"**: No \"and\" present. **Passed**.\n4. **Use no word longer than 7 letters**:\n   - Star (4)\n   - energy (6)\n   - comes (5)\n   - from (4)\n   - fusion (6)\n   - It (2)\n   - glows (5)\n   - bright (6)\n   - Here (4)\n   - we (2)\n   - go (2)\n   - All are 7 letters or fewer. **Passed**.\n5. **Include the word \"star\"**: Yes. **Passed**.\n6. **End your response with the exact phrase \"here we go.\"**:\n   - The"
+    },
+    "worker:9a3234b16249519e6ab692f770aaee299d217f4b9cdd7f1cee686f78c52f15a9": {
+      "name": "worker",
+      "output": "To evaluate the draft, let us check each requirement:\n\n1.  **Do not use the word \"and\"**: The draft does not contain the word \"and\". (Pass)\n2.  **Use no word longer than 6 letters**:\n    *   Bullet 1: \"Light\" (5), \"is\" (2), \"waves\" (5). All <= 6.\n    *   Bullet 2: \"It\" (2), \"bends\" (5), \"a\" (1), \"bit\" (3). All <= 6.\n    *   Bullet 3: \"This\" (4), \"is\" (2), \"the\" (3), \"act\" (3). All <= 6.\n    *   Bullet 4: \"Known\" (5), \"as\" (2), \"refraction\" (10). **FAIL**. \"Refraction\" is 10 letters long.\n3.  **Use exactly 20 words**:\n    *   Count: Light(1) is(2) waves(3). It(4) bends(5) a(6) bit(7). This(8) is(9) the(10) act(11). Known(12) as(13) refraction(14).\n    *   Total is 14 words. **FAIL**. Requirement is exactly 20 words.\n4.  **Format as exactly 4 bullet points, each line starting \"- \"**"
+    },
+    "worker:9a3f7ef55ba844518486d5e999e41db3dd17c377326f5886b5ea7456a98c3930": {
+      "name": "worker",
+      "output": "Gas laws show how air changes in size. This helps us learn about nature. Science is fun to study each day. all is set."
+    },
+    "worker:9a7c011759cbcafab128045cf96ee87c413b9afedc3e528ba0475c6cfb638944": {
+      "name": "worker",
+      "output": "Let me check the draft against all requirements:\n\n1. **End with \"all is set.\"** \u2014 The draft does not end with this phrase. \u274c\n2. **Exactly 15 words** \u2014 Let's count: \"rain forms when water vapor cools high in the sky\" \u2192 10 words. \u274c\n3. **All lowercase** \u2014 Yes, no capitals. \u2705\n4. **No \"and\"** \u2014 Correct, no \"and\" used. \u2705\n5. **No commas** \u2014 Correct, no commas. \u2705\n\nSo two requirements fail: the ending phrase and word count.\n\nI need to revise the response to:\n- Be exactly 15 words\n- End with \"all is set.\"\n- Be all lowercase\n- Avoid \"and\"\n- Avoid commas\n\nLet me craft a 15-word sentence describing a natural process that ends with \"all is set.\"\n\nNote: \"all is set.\" counts as 3 words. So the first part must be 12 words.\n\nDraft attempt:\n\"water rises from the ground as heat lifts it into the air, then condenses, all is set.\"\nWait \u2014 has a comma. Not allowed.\n\nTry without commas:\n\n\"water rises from ground as heat lifts it into air then condenses then all is set\"\n\nCount: water(1) rises(2) from(3) ground(4) as(5) heat(6) lifts(7) it(8) into(9) air(1"
+    },
+    "worker:9ab83d6d53af296b905db3ad89a54ccb36f932bc5109bbf4644c434231cc3a2b": {
+      "name": "worker",
+      "output": "light rays hit a glass pane and pass on, that is it."
+    },
+    "worker:9b4ee6695e9557a0a06a184bf3c0d84eea690a83bf0442f1d44c7c21001581e2": {
+      "name": "worker",
+      "output": "- I found a gem.\n- It glows in the dark.\n- I hold it with care.\n- No one else holds this.\n- My luck is truly rare."
+    },
+    "worker:9bd7c5c7397c5b520c76dfc3b782ad7f42bdbb3c7b8f996146035715ebbaf7bf": {
+      "name": "worker",
+      "output": "- Sun warms day.\n- Trees help.\n- Nature brings joy."
+    },
+    "worker:9bed6fcdf3ab60c39afdbda0b3f1d967dced201fba8b36a46dd0dc0bdb835459": {
+      "name": "worker",
+      "output": "Light moves very fast through space so it goes."
+    },
+    "worker:9c1bc84442e182eda9d2c6ffa92393bf79d344da243732af96c13f0be3a0cb89": {
+      "name": "worker",
+      "output": "- New result changes current view\n- Data supports prior urgent claims\n- Team shares the happy news"
+    },
+    "worker:9c4607fd4bdcd5b1423fe58398731452c894f45662560554d89fc44fdfc5473e": {
+      "name": "worker",
+      "output": "Each node holds key data for students to learn"
+    },
+    "worker:9c6e6c6fc72d7f7923259c095c065aebcb69e160e97a6d6976b7f6b976b4e74c": {
+      "name": "worker",
+      "output": "seeds germinate in soil then shoots grow upward through earth toward sunlight"
+    },
+    "worker:9d2857c8296c3b1df6a5f03dc269e6fc4fc5d7883267ad4b32f3b69c82fe0489": {
+      "name": "worker",
+      "output": "the draft fails multiple constraints:\n1. word count: the draft has 14 words, but the requirement is exactly 20 words.\n2. ending phrase: the draft does not end with the exact phrase \"we are done.\"\n3. format: while it has 3 bullet points, it needs 4.\n\nhere is a revised version:\n\n- we dug up an old box in the yard\n- it held a rare blue gem inside\n- this find is very wide and rare\n- all of us agree we are done.\n\nwait, \"re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is.\"\n\nlet's check the revised version:\nwords: we (1) dug (2) up (3) an (4) old (5) box (6) in (7) the (8) yard (9) it (10) held (11) a (12) rare (13) blue (14) gem (15) inside (16) this (17) find (18) is (19) not 20. also \"wide\" is wrong context.\n\nlet's try again to hit exactly 20 words.\n1. we\n2. dug\n3. up\n4. an\n5. old\n6. box\n7. in\n8. the\n9. yard\n10. it\n11. held\n12. a\n13."
+    },
+    "worker:9da6c330ec835a91bf5396a9ad6aae222561e748b5ac3c36cae3170a0b8991fc": {
+      "name": "worker",
+      "output": "star fusion burns atoms fast. heat shines out. here we go."
+    },
+    "worker:9e77ca906010aafb61fe89c293dda20e6a01547fd32f5bd397619f2b608aa6a0": {
+      "name": "worker",
+      "output": "stars fuse gas in a core. this heat makes a star shine bright for millions of years"
+    },
+    "worker:a02460dc4540e770c5c8e2889ef04cb8780e188d3d73dc55b776998e2ec64567": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:a0b72ddc8f367c617c3c18a55d4b30266edbf2f2dc4c7f159af24c6aee2d5e12": {
+      "name": "worker",
+      "output": "I need to check each requirement for the draft answer.\n\n1. \"so it goes.\" at the end - yes\n2. exactly 3 bullet points - yes\n3. no word over 6 letters - \"light\" (5), \"hits\" (4), \"eyes\" (4), \"see\" (3), \"brain\" (5), \"gets\" (4), \"so\" (2), \"it\" (2), \"goes\" (4) - all \u22646\n4. exactly 25 words - count: \"1light\" (1), \"1hits\" (2), \"1eyes\" (3), \"1see\" (4), \"1brain\" (5), \"1gets\" (6), \"1so\" (7), \"1it\" (8), \"1goes\" (9) - only 9 words total, need 25\n5. do not use the word \"of\" - yes\n\nThe draft fails requirement 4: only 9 words instead of 25. Needs 16 more words.\n\nAnswer: not all requirements met"
+    },
+    "worker:a46e739b8eb86fee317d3be844c3a159dc743ca827ff39ce8027919e4b4113d4": {
+      "name": "worker",
+      "output": "Let's check the draft against the requirements:\n\n1. **End with \"all is set.\"**: The draft ends with \"all is set.\" -> PASS.\n2. **No word longer than 6 letters**:\n   - \"Gas\" (3)\n   - \"laws\" (4)\n   - \"show\" (4)\n   - \"how\" (3)\n   - \"air\" (3)\n   - \"changes\" (7) -> FAIL. \"changes\" is 7 letters.\n   - \"in\" (2)\n   - \"size\" (4).\n   - \"This\" (4)\n   - \"helps\" (5)\n   - \"us\" (2)\n   - \"learn\" (5)\n   - \"about\" (5)\n   - \"nature\" (6)\n   - \"Science\" (7) -> FAIL. \"Science\" is 7 letters.\n   - \"is\" (2)\n   - \"fun\" (3)\n   - \"to\" (2)\n   - \"study\" (5)\n   - \"each\" (4)\n   - \"day\" (3)\n   - \"all\" (3)\n   - \"is\" (2)\n   - \"set\" (3)\n3. **No commas**: The draft has no commas -> PASS.\n4. **Exactly 25 words**:\n   - Word count in draft:\n     \""
+    },
+    "worker:a691fc44177dc9354a8708744e72e83dca003a411c5460901edb70fdb59d2c96": {
+      "name": "worker",
+      "output": "- We spotted a new star.\n- It shines bright in the sky.\n- The researchers confirmed this exciting discovery today."
+    },
+    "worker:a81c7e910b3fd358405370d8451566a7ad81d5287f6bba0e6926441cdd1a0a28": {
+      "name": "worker",
+      "output": "a drop falls through the air and breaks the still surface of a pond"
+    },
+    "worker:a83e8d166beba33a2ad89a2ec1c0636c62a2c4809cc3de476a6221de4e0fa7e7": {
+      "name": "worker",
+      "output": "use exactly 15 words"
+    },
+    "worker:a870e71fc47adf2073e018b1ba14869451664891e00abbef927a2c33aa2d2e44": {
+      "name": "worker",
+      "output": "- water evaporates\n- clouds form\n- rain falls\n- cycle"
+    },
+    "worker:a9524e539284dfe6b6f633d30de5f6c94feaf91ad1d92666f35c57d5d137e949": {
+      "name": "worker",
+      "output": "- Study hard daily\n- Read books\n- Focus attention\n- Ask questions\n- Write notes\n- Think deeply\n- Explore topics\n- Stay motivated\n- All is set."
+    },
+    "worker:ab271e6f8e1364c0373052bf4592faf030a89151f41fbc4c7b8bcdca4b9e3feb": {
+      "name": "worker",
+      "output": "Quantum flux explains particle states. Physics changes constantly, showing dynamic waves. we are done."
+    },
+    "worker:ab6c45c65b0cef41025507bab2230da8a0c325a12db24c34e5e20151477071d0": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:acff8e838817f46ea89951b70e66e9afddbc3d765ebfda854eb34c0f113b77f5": {
+      "name": "worker",
+      "output": "- Light is made of waves.\n- Waving them in air.\n- Hitting glass slows them.\n- The bend is refraction."
+    },
+    "worker:ad18f31c31c3052b74f66732da5b86f7e1cb3fa0fa68b621f8d95bb332020db4": {
+      "name": "worker",
+      "output": "Quantum flux explains particle physics. Science reveals dynamic wave patterns, letting us understand change. we are done."
+    },
+    "worker:ad19776c99b621a50ced03d21fc6213641a8e46abe9bf2677323519b9498ca54": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:ad93a93ad141c8f4dd5754d3a6d7442c1781a6582f811b6f0a6fe18b97a495d9": {
+      "name": "worker",
+      "output": "- tea is a warm and calm daily drink"
+    },
+    "worker:adb1433d90bac02804003c4a2f4ab5654a282dcad3c18e8fca17ef75c3318e09": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:ae6ee900c096e64eed7522475dcdc045b1ff0c371d44517a8b66e329b82b15d7": {
+      "name": "worker",
+      "output": "- New data confirms your urgent theory.\n- This result will change everything for us."
+    },
+    "worker:aed919cbed81aedf8cf5afc106bf4b699f72f6c060abc15e04cb9f92d85ab53f": {
+      "name": "worker",
+      "output": "not pass: response contains 15 words instead of exactly 20"
+    },
+    "worker:b084019e5c24351a56c7b8f35ada6b889780d3e2e41aece002cee14c871b1720": {
+      "name": "worker",
+      "output": "- goals you set help guide work.\n- steps to solve it show the path.\n- end with care. we are done."
+    },
+    "worker:b1128963f3a270959ce8ae3307f3150017d225d42c87a6ee0024445e23d3424f": {
+      "name": "worker",
+      "output": "List what to fix:\n- The draft answer contains only 9 words, but the requirement is exactly 15 words."
+    },
+    "worker:b198e96aa63bb6b66aa8d185959242b79ef0585a23ba1a7a2c0bff3f725cd7ea": {
+      "name": "worker",
+      "output": "- cats sleep much\n- they purr soft\n- like warm spots\n- need daily care\n- fun pets"
+    },
+    "worker:b2ceaba024df62e28052a8422a68d4c2b98435838fe22093cf89a0412d02a0b6": {
+      "name": "worker",
+      "output": "A star burns hot gas to make shine we see"
+    },
+    "worker:b35d378cd73c312e912a3dbf42995dc581032c070efd5f27331dc95545bd04c6": {
+      "name": "worker",
+      "output": "The sun sets, a wave rolls in, the tide pulls back. here we go."
+    },
+    "worker:b48d83eedeb04de416b229d6cb39f4a9e2822223b027354fbadf9f1b4a662eb1": {
+      "name": "worker",
+      "output": "pass"
+    },
+    "worker:b55f8fffbc44b8b02b14dae40aaff1a0d4a740923ea8980c45843f8467b6e890": {
+      "name": "worker",
+      "output": "try to learn facts that are it."
+    },
+    "worker:b62c7d6a0e7c5741200bffcd653ecfd8030c699d0f40482711ce724aac5a27ef": {
+      "name": "worker",
+      "output": "we found a new star today. it shines brightly in our dark sky, guiding travelers. so it goes."
+    },
+    "worker:b78dd28605c905f48cd82dacb218b5b8e5fa90a16f6a964a1ab8df11ce680aca": {
+      "name": "worker",
+      "output": "The draft fails to meet three requirements:\n1. **Exactly 15 words**: The draft has 8 words.\n2. **No word longer than 7 letters**: \"burning\" is 7, \"make\" is 4, \"shine\" is 5, \"we\" is 2, \"see\" is 3. Wait, let's re-read the draft: \"A star burns hot gas to make shine we see\". All words are 7 letters or fewer. So that constraint is satisfied.\n3. **Do not use commas**: Satisfied.\n4. **Include the word \"star\"**: Satisfied.\n5. **Do not use the word \"the\"**: Satisfied.\n\nThe primary failure is the word count. I need to expand the explanation to exactly 15 words while keeping all words 7 letters or fewer and avoiding \"the\" and commas.\n\nLet's try:\n\"A star is a ball of gas that burns bright.\" \n1. A (1)\n2. star (4)\n3. is (2)\n4. a (1)\n5. ball (4)\n6. of (2)\n7. gas (3)\n8. that (4)\n9. burns (5)\n10. bright (6)\n11. . (punctuation)\n\nThis is 10 words.\n\nLet's try:\n\"A star is a huge ball of gas that glows very bright.\"\n1. A (1"
+    },
+    "worker:b7a5d0323fa77073eab65fe865d19d829d9fc6e41e8e3367aafc6f15490d4856": {
+      "name": "worker",
+      "output": "Let me check the draft against all requirements:\n\n**Requirement 1: No word longer than 7 letters**\n- \"I\" (1), \"found\" (5), \"gold\" (4)\n- \"It\" (2), \"was\" (3), \"huge\" (4)\n- \"The\" (3), \"rocks\" (5), \"held\" (4), \"it\" (2)\n- \"My\" (2), \"heart\" (5), \"beat\" (4), \"fast\" (4)\n- \"Hope\" (4), \"rose\" (4), \"within\" (6), \"me\" (2)\n\n\u2705 All words are 7 letters or fewer.\n\n**Requirement 2: Do not use the word \"and\"**\n- The word \"and\" does not appear.\n\n\u2705 Satisfied.\n\n**Requirement 3: Format as exactly 5 bullet points, each line starting \"- \"**\n- There are 5 bullet points, each starting with \"- \".\n\n\u2705 Satisfied.\n\n**Requirement 4: Use exactly 20 words**\nLet me count the words:\n- Line 1: I, found, gold \u2192 3\n- Line 2: It, was, huge \u2192 3\n- Line 3: The, rocks, held, it \u2192 4\n- Line 4: My, heart, beat, fast \u2192 4\n- Line 5: Hope, rose, within, me \u2192 4\n\nTotal:"
+    },
+    "worker:b815d79e48ff8b06dbfcfd122b59d502db6ab0ec05ce4f89e4fa19431413098a": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:b8307581a243af1de69d61eafbf1a3054149567497192e3ec91b69f4c8479c3a": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:b8616560ead24432571fbe0e54ce50a127383710673f676b41b22d2490a3984f": {
+      "name": "worker",
+      "output": "Gene sequences reveal how life works and define your unique genetic identity."
+    },
+    "worker:b88c57e94a033f6caa82bc64d12c7d7a8367d6e47d98c62423cbfae3279929a0": {
+      "name": "worker",
+      "output": "- \nto fix:\n1. The phrase \"here we go.\" must end the *response* (the text block), not be a standalone bullet point.\n2. The word count is 11, not 25.\n3. The structure is 5 lines, but the 5th line is not a complete sentence explaining a concept; the requirement is \"format as exactly 5 bullet points... end your response with... here we go.\" This implies the last bullet point must contain the ending phrase.\n4. Check for \"of\": none.\n5. Check word length: all < 7 letters.\n\nLet's revise to meet the constraints:\n- 5 bullets\n- 25 words total\n- End with \"here we go.\"\n- No \"of\"\n- Max word length 7\n\nDraft:\n- light hits leaf (4)\n- gas goes in (4)\n- sugar gets made (4)\n- air comes out (4)\n- life is fed here we go (7)\nTotal: 4+4+4+4+7 = 23 words. Need 25.\n\nLet's try again.\n- sun warms water (4)\n- rain falls down (4)\n- rivers speed fast (4)\n- sea shrinks back (4)\n- cycle repeats here we go (6)\nTotal: 4+4+4+4+6 = 22.\n\nNeed 25 words across 5"
+    },
+    "worker:b9a013f68731b4538efb08a7187e7ea9d7093cc9bcd607bde066c6832aedd438": {
+      "name": "worker",
+      "output": "Wave energy is a big idea. It turns ocean motion into power. Students can learn how it helps our planet stay clean."
+    },
+    "worker:ba0be3ad1f46f17c97078abc3c1536a1340ab8b292208dd333db82622c9a9ce9": {
+      "name": "worker",
+      "output": "The sun rises. Birds sing. Leaves move. Wind blows. We are done."
+    },
+    "worker:ba355681aab16cab1c470b9445645dc015b4f50b8fb7cefcf2e3edc5c6dc6a54": {
+      "name": "worker",
+      "output": "read and write daily. sleep well nightly. do this often. study smartly. that is it."
+    },
+    "worker:baf792545b070c0346c3db11eac43758e55267e78751648c8d4c659b6ae190a6": {
+      "name": "worker",
+      "output": "internet star web lets us chat share and read new tech news from many far lands each day"
+    },
+    "worker:bb7dc9bc6b63a7456ec0d0dfd9f9c32510c83233b3a7fed91ef4a509a607dfc8": {
+      "name": "worker",
+      "output": "list what to fix"
+    },
+    "worker:bbf3222811b07842d558a87066a62cbccc877d43920a32c797a7d71b6e421ef0": {
+      "name": "worker",
+      "output": "- we made a big find in the dirt\n- it glows blue under moonlight here\n- this changes all known facts today"
+    },
+    "worker:bcfa404ad15fecfc87f481a1fb5907619a7b264cd6eb4d6a2bf62d71eafb55b2": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:bec789a246d412b7a7b7bcd1b9a3da8d484d2177e04a2664df4b1c583843d721": {
+      "name": "worker",
+      "output": "I will fix the draft."
+    },
+    "worker:bf01c430d70f9b60662c89f2fd029903ec623b4213f2de6bee8f687ddf7fc169": {
+      "name": "worker",
+      "output": "pass"
+    },
+    "worker:bf3c804be6ad2ea738eeb3b24c77c27253c4e22e9fe54491aeba156339d1dfa0": {
+      "name": "worker",
+      "output": "- light hits.\n- eyes see.\n- brain gets. so it goes."
+    },
+    "worker:bf9398ae270612aed09a24db5eb06a073c8d92790bcd5331253d21b7f8402e07": {
+      "name": "worker",
+      "output": "The water moves in constant flux, eventually filling the ocean basin. so it goes."
+    },
+    "worker:c0167b376454ded2812269439fe173407b10c39cba02d0916cec57aaf265eb59": {
+      "name": "worker",
+      "output": "- one node links two ideas\n- two nodes form a path\n- three nodes build your thought map"
+    },
+    "worker:c1c3373583619b3af3d22de8bbf463142d60edc8bfc23bb7ea46680a7757c4ba": {
+      "name": "worker",
+      "output": "- dogs love play\n- they run fast\n- need much care\n- good warm pets\n"
+    },
+    "worker:c246c855de6a0f076be7b8c8f9adaa531503c2606015ea4b7813bea9fec89adc": {
+      "name": "worker",
+      "output": "The draft \u201cA node is a point so it goes.\u201d fails because it does not end with the exact phrase \u201cso it goes.\u201d"
+    },
+    "worker:c27b75349a73e6c2cd42d27d30a7b3ff4114aac84dea66b7e3c8676b62759dd9": {
+      "name": "worker",
+      "output": "- Water cycles\n- Vapor rises\n- Nodes form clouds\n- Rain will fall"
+    },
+    "worker:c32b44b4cb634ff4c27bbe383be26e803ef783d6c1120af2dd1afd39dafd6e7c": {
+      "name": "worker",
+      "output": "Heat flux moves through layers, spreading power within the object."
+    },
+    "worker:c3a038f2a0c7235648f0e5d2576391bea7994006220299cf5431131e005aa10d": {
+      "name": "worker",
+      "output": "star student, learn, try, ask, grow, we are done."
+    },
+    "worker:c417aec3038680de6b54265a8f6999631fbcc35b4d4bbaca2ed8bab528f314b4": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:c64a7b09e163981dcf270e628b1d5a9f4495648e7620bac402538db9ceb0075f": {
+      "name": "worker",
+      "output": "The plant hits a new node and spreads its green roots all is set."
+    },
+    "worker:c70f210867b0ead5e1636ff4e1db25ce236bccfd6c5d5c7ec0fc8e76d9576bd3": {
+      "name": "worker",
+      "output": "Bees build hives with wax. They make sweet honey for all. Learn this fun bug today"
+    },
+    "worker:c745a7130b77c7c94e067c69591065c3a40b7ce31bbc7014a1a6f74682f7f6c2": {
+      "name": "worker",
+      "output": "The draft fails the word count constraint (8 words, not 15). It otherwise satisfies the other rules."
+    },
+    "worker:c76c20e95d309f3bb153a374faf7a5d06f3cfd701fccdd2d11751c7fe68e60b1": {
+      "name": "worker",
+      "output": "Let me evaluate the draft answer: \"Heat flux moves through layers, spreading power within the object.\"\n\n1. **Word count**: Heat(1) flux(2) moves(3) through(4) layers,(5) spreading(6) power(7) within(8) the(9) object.(10) = 10 words. \u274c (needs exactly 20)\n\n2. **No \"of\"**: No \"of\" present. \u2705\n\n3. **Includes \"flux\"**: Yes. \u2705\n\n4. **No word longer than 6 letters**: \n   - Heat(4) \u2705\n   - flux(4) \u2705\n   - moves(5) \u2705\n   - through(7) \u274c\n   - layers(6) \u2705\n   - spreading(9) \u274c\n   - power(5) \u2705\n   - within(6) \u2705\n   - the(3) \u2705\n   - object(6) \u2705\n\nFixes needed:\n- Word count must be exactly 20 (currently 10)\n- Replace \"through\" (7 letters)\n- Replace \"spreading\" (9 letters)"
+    },
+    "worker:c964fcfbbff42f0b2c29183f95f932f1c5765a73a18a7af4a2ba28fa5e4bb53c": {
+      "name": "worker",
+      "output": "ai is a star that learns from data to solve complex problems for humans"
+    },
+    "worker:c98d224fa700ce325a9f014541b3c47058e95d115cc605eddc0b98d52d47ff6a": {
+      "name": "worker",
+      "output": "summarize core concepts simply and clearly so students grasp main ideas quickly without confusion or excess detail"
+    },
+    "worker:c995f95a00e66d99e05abe18dd5fe7dce3e8b96137084ef6b920a89f6ca50cf7": {
+      "name": "worker",
+      "output": "List what to fix: The draft answer uses 11 words instead of exactly 15 words."
+    },
+    "worker:ca271ede2ee47f345ac6114854b6ee63af16cc79ca6eabbd154f14b9bd661431": {
+      "name": "worker",
+      "output": "- we saw a frog\n- it was big\n- we ran fast\n- it was cool\n- we are glad"
+    },
+    "worker:ca4287c4f01c3090373825b1365081844679262899b7ed5097bca69bbeabbfa4": {
+      "name": "worker",
+      "output": "a gene is a basic unit of heredity that controls traits in your body"
+    },
+    "worker:cb2d63a400281e0fe1ec6d0fab4c8fd8d49d2766306156d59ede4a5626884941": {
+      "name": "worker",
+      "output": "- star ignites hydrogen nuclei\n- massive pressure crushes atoms inside\n- energy radiates outward strongly\n- gravity holds gas firmly\n- here we go."
+    },
+    "worker:cc4279fefa4d950e9cdaa2d851bfdf9bee16b502f2a6146cb700f1848d682b2a": {
+      "name": "worker",
+      "output": "Wave power grows from ocean motion. It sends heat or light to homes. Kids can see how it saves our earth with no smoke."
+    },
+    "worker:cd2289a74df007cbec28270ac068a9dcbe4bea10af1426503ff9966ff4cdde1a": {
+      "name": "worker",
+      "output": "Wind flux moves a lot, as air flows past the wall."
+    },
+    "worker:cf76e6f1980e0a71f19deb7899f477666ff2f5faba5145b613dbc6812bda34b1": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:d0fef6b66c9594391b7d9e87bc298dd71e435565e8aa3020697ee4d2301fb443": {
+      "name": "worker",
+      "output": "fix: use exactly 15 words; use no comma"
+    },
+    "worker:d1253b67d7382b53a7be8c5f4b768dd454e45a812ad46e562b85b7b3854895cf": {
+      "name": "worker",
+      "output": "List what to fix:\n- The response has 18 words, not exactly 20."
+    },
+    "worker:d1a2f73d077fab1134ecad75ffd6f9a1938981ab89d140f1e34d42be27f29605": {
+      "name": "worker",
+      "output": "an atom has a nucleus which binds all its tiny parts"
+    },
+    "worker:d22f9dc313e7428e944dbd9159ff1e6ef9248ea1fade568b0557244530d4aa59": {
+      "name": "worker",
+      "output": "must fix: word \u201cmicro\u201d has 5 letters ok, \u201cspeed\u201d 5 ok, but total count is 14, not 25"
+    },
+    "worker:d44d5a7b00173674f19c66cbdf39e4b1966abeee1fb1704e1c338d93a41e33e1": {
+      "name": "worker",
+      "output": "not all requirements met:\n- response does not end with the exact phrase \"so it goes.\""
+    },
+    "worker:d5b01911956b646edd3f9b530656aacc3ec4fef2214594e79851c0be1cb50764": {
+      "name": "worker",
+      "output": "- Sunlight drives water upwards from plant roots through stems"
+    },
+    "worker:d65f647e99adc14a2622c8cfa5f38b4b015f04b594ac44480af160badd553bd4": {
+      "name": "worker",
+      "output": "to verify the draft:\n1. lowercase? yes.\n2. 20 words?\n   - summarize (1)\n   - ideas (2)\n   - first (3).\n   - keep (4)\n   - sentences (5)\n   - brief (6).\n   - avoid (7)\n   - complex (8)\n   - terms (9).\n   - focus (10)\n   - on (11)\n   - core (12)\n   - concepts (13).\n   - ensure (14)\n   - clarity (15)\n   - for (16)\n   - learners (17).\n   total words: 17. required: 20. failed.\n3. no \"the\"? yes, \"the\" is absent.\n4. 5 bullet points? yes.\n\nfix: add 3 words to reach exactly 20 words.\n\nrevised draft:\n- summarize main ideas first.\n- keep all sentences brief.\n- avoid using complex terms.\n- focus on core concepts.\n- ensure clarity for learners.\n\nword count check:\n1. summarize\n2. main\n3. ideas\n4. first\n5. keep\n6. all\n7. sentences\n8. brief\n9. avoid\n10. using\n11. complex\n12. terms\n13. focus\n14. on\n15. core\n16. concepts"
+    },
+    "worker:d91698491894fc127c36791181bc70458d976e5fe701c2e192e8d25a5f9bcc01": {
+      "name": "worker",
+      "output": "Gas laws show heat and air size. They tell us how air acts in a room. all is set."
+    },
+    "worker:d968dd286e13b2e6c6682d7f027e00ddb0b8682deab7b25a34d342f044e89912": {
+      "name": "worker",
+      "output": "reading helps you learn new facts. it makes your brain grow and think well"
+    },
+    "worker:da2e21fe12cc44066f9016a72efd7ec4bc220e0e3e71e6b3ed23e77557c50bae": {
+      "name": "worker",
+      "output": "warm water climbs from soil through roots to cool air"
+    },
+    "worker:da55350792b0d8a880b62c78f5d92a2100314b2ba65d8aa1f54f0ef83559330a": {
+      "name": "worker",
+      "output": "- A powerful ocean wave surges forward.\n- Foam bursts onto the wet sand.\n- Water recedes, pulling debris back.\n- Another crest builds for the next."
+    },
+    "worker:dadea87351305b6d9a53b3ddbd8e0d62efd167ca196e1454e83f7b79e5e67a25": {
+      "name": "worker",
+      "output": "- Sun warms day.\n- Trees help.\n- Rocks hold soil."
+    },
+    "worker:ddf449495fe03930cd21382836b164f0827038609880da072a7655935c09e4c0": {
+      "name": "worker",
+      "output": "- a tiny dot moved fast there.\n- we tracked it with ease.\n- a lost cat sat down.\n- here we go."
+    },
+    "worker:df19aad97f7282cb36fd1340cef528c49d424de6ea908e1f7e6b1c342595bec9": {
+      "name": "worker",
+      "output": "- Water evaporates\n- Vapor rises\n- Node forms clouds\n- Rain returns"
+    },
+    "worker:df24ea047b7ccde9f72ab6c48f081fcd7594f584b74b34aff5648342e5586daf": {
+      "name": "worker",
+      "output": "- Code builds smart tools.\n- Write and learn.\n- It is done. we are done."
+    },
+    "worker:e44254175702d099ee583cbaa140fba12ebe7ba710ef41331091940ed2042739": {
+      "name": "worker",
+      "output": "The cell takes in food, breaks it down, and makes energy. It grows and works hard. So it goes."
+    },
+    "worker:e484028ec1ad7fa5436e9449d54951729ab78c4002873315abc50d1f7fc16eb5": {
+      "name": "worker",
+      "output": "i. the response does not end with \"here we go.\" ii. it contains capital letters. iii. it has 11 words, not 20."
+    },
+    "worker:e547610b463cf6c4c1325134cdf44545f259e6d55850929c83422bed420601d5": {
+      "name": "worker",
+      "output": "A node is the basic unit so it goes."
+    },
+    "worker:e699d46deb45eee763af19eb8800458efbff1abefde0b15b3246874c334cb176": {
+      "name": "worker",
+      "output": "learning code uses node as base key"
+    },
+    "worker:e700a0d2b9df2528ee2be847a5bad917998ac76b6b4281656b8c6a070e08c2b5": {
+      "name": "worker",
+      "output": "The phone lets us talk and share files to all here we go."
+    },
+    "worker:e7a20222c2dc43c040166f61434c9c39d095425bec0d4adc80c3305fd417895d": {
+      "name": "worker",
+      "output": "- an atom holds matter\n- it is really tiny\n- parts act as core\n- energy flows within\n- science lets us learn"
+    },
+    "worker:e7f958fa4b2eaab6500f34c2cb97acf40f6a18b074af6a5626a1f4586283f2c4": {
+      "name": "worker",
+      "output": "cloud computing stores data remotely and grows reliably while saving money for everyone here we go"
+    },
+    "worker:e82ff6209d3cd8ec6a3194acfcd4ca995c66f059f29dfdcd57b3eb98803dcdfe": {
+      "name": "worker",
+      "output": "words in your answer:\n1. stars (5 letters) \u2713\n2. are (3 letters) \u2713\n3. balls (5 letters) \u2713\n4. of (2 letters) \u2713\n5. gas (4 letters) \u2713\n6. they (4 letters) \u2713\n7. burn (4 letters) \u2713\n8. hot (3 letters) \u2713\n9. and (3 letters) \u2713\n10. bright (6 letters) - wait, \"bright\" is 6 letters. Let me recount b-r-i-g-h-t = 6. \u2713\n11. fusion (6 letters) - f-u-s-i-o-n = 6 \u2713\n12. makes (5 letters) \u2713\n13. energy (6 letters) - e-n-e-r-g-y = 6 \u2713\n14. this (4 letters) \u2713\n15. is (2 letters) \u2713\n16. how (3 letters) \u2713\n17. a (1 letter) \u2713\n18. star (4 letters) - this satisfies the \"include the word star\" requirement \u2713\n19. lives (5 letters) \u2713\n20. on (2 letters) \u2713\n21. the (3 letters) \u2713\n22. sky (3 letters) \u2713\n23. for (3 letters) \u2713\n24. us (2 letters) \u2713\n25. to (2 letters) \u2713\n26. see (3 letters) - wait, that's 26 words."
+    },
+    "worker:e8cae3831cd5a764a705251ba18c70ec8b6f5e1effb23b0d951fdf50c7861ba8": {
+      "name": "worker",
+      "output": "Try this craft. It is fun and easy. here we go."
+    },
+    "worker:e9c5dfb521e117f50b19d33054104e4ffab1c1713333d253836fe867c125aba5": {
+      "name": "worker",
+      "output": "I must list what to fix because the draft fails several constraints.\n\n- It does not end with the exact phrase \"here we go.\" (it lacks capitalization and punctuation nuance? No the draft has \"here we go.\" but let's check word count and length).\n- Let's check word count for draft: \"The phone lets us talk and share files here we go.\"\n  - The (3)\n  - phone (5)\n  - lets (4)\n  - us (2)\n  - talk (4)\n  - and (3)\n  - share (5)\n  - files (5)\n  - here (4)\n  - we (2)\n  - go. (3)\n  - Total words: 11. Requirement is exactly 15 words.\n- Let's check word length: All words are 6 letters or fewer.\n- Let's check commas: No commas.\n- Let's check ending: It ends with \"here we go.\" Note: The requirement says end with the exact phrase \"here we go.\" The draft has \"files here we go.\" So the ending is correct in terms of text. But the word count is wrong.\n\nSo the issues are:\n1. Word count is 11 instead of 15.\n\nI need to provide the list of what to fix.\n\n1. The response has 11 words not 15."
+    },
+    "worker:ea26c86c7bc00429f48fbe7dbd0837d89df3014588c9ee26fabaed46cd14c9f2": {
+      "name": "worker",
+      "output": "- Tree takes in\n- Sun light makes\n- Sugar from air\n- Core path all is set."
+    },
+    "worker:eb111e6cb92c6c81469e39c5d0cc2866f2ca7d3b306524656739512f7b001c36": {
+      "name": "worker",
+      "output": "- I found a rare stone.\n- It is bright blue.\n- My heart beats fast.\n- We must keep it safe.\n- This is a true win."
+    },
+    "worker:ebe0d4d3452ecb769cd154a9cde34a524e6ec8a8a1ab6385a338ac05c444488b": {
+      "name": "worker",
+      "output": "1. The instruction says to end my response with \"so it goes.\", yet the first bullet point \"to type of\" is also required.\n2. The content is repetitive and doesn't satisfy the core \"short note about a discovery\"\n3. The word count is not exactly 20"
+    },
+    "worker:ed741e2e47350d416258fc74b743d2599d9d8757e6763dfcd44464bf9a17cb42": {
+      "name": "worker",
+      "output": "- starlight, - gravity, - light help you learn basic astronomy."
+    },
+    "worker:eea0f41d342e58c45a40b7eec0dcbdab3a8663125ba34bc15a5b9d2e2c39fd7b": {
+      "name": "worker",
+      "output": "a bright star in the sky shows the power"
+    },
+    "worker:eee783cbc6a4e04d5a01347a17ed1809d7c2a73d2fcc2e7b57e7a286aecccf1f": {
+      "name": "worker",
+      "output": "The electron was found inside every single atom of matter in the world today according to modern physics research"
+    },
+    "worker:ef6386007054876612074a94cd28a9758d7db48f62502143665cc0866ccac121": {
+      "name": "worker",
+      "output": "gravity is a force and we are done."
+    },
+    "worker:f038df3be3b413c8448acc858f3539b1f89d5fea1161f1f70a36ffca4845c5f2": {
+      "name": "worker",
+      "output": "- Wave patterns emerged.\n- Data confirmed anomalies.\n- Discovery changed science."
+    },
+    "worker:f21be3fd060360ddc49cd772b3d7bcd6e7e2aec007b2f9ac2af566a526711cd9": {
+      "name": "worker",
+      "output": "fibre optics send data via light wave pulses across vast distances ensuring rapid global digital network connectivity"
+    },
+    "worker:f24364f32fd10c59e39716f377a923c263c86277c4dad53fcf101dbffa693fc5": {
+      "name": "worker",
+      "output": "we failed."
+    },
+    "worker:f2c0a50bcd869a08eff5f76b69d95a4eb1857688ce5815340ba87d489a0656db": {
+      "name": "worker",
+      "output": "To ensure all constraints are met, I will analyze the draft answer: \"solar tech makes clean sun power free for all homes\"\n\n1.  **No word longer than 7 letters**:\n    - solar (5)\n    - tech (4)\n    - makes (5)\n    - clean (5)\n    - sun (3)\n    - power (5)\n    - free (4)\n    - for (3)\n    - all (3)\n    - homes (5)\n    - Result: All words are 7 letters or fewer. (Pass)\n\n2.  **Do not use the word \"of\"**:\n    - The word \"of\" is not present. (Pass)\n\n3.  **Use exactly 20 words**:\n    - Counting the words in the draft:\n      1. solar\n      2. tech\n      3. makes\n      4. clean\n      5. sun\n      6. power\n      7. free\n      8. for\n      9. all\n      10. homes\n    - Total: 10 words.\n    - Requirement: 20 words.\n    - Result: Fail.\n\n4.  **Write your entire response in lowercase**:\n    - All letters are lowercase. (Pass)\n\n**Conclusion**: The draft fails the word count constraint.\n\n**Fixes Required**:\n- Adjust the number of words to exactly 20"
+    },
+    "worker:f3159d3b7715b5394a0769339ad225f3519ae1c0e63be185c906b35ae2a829f7": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:f315a87eecdcb7760be4c93e27dad8b98697f1d3d2fafba76b4bcd47a0d34752": {
+      "name": "worker",
+      "output": "i found a new cell. it glows bright blue in the dark. this small sight is a true and rare find for us"
+    },
+    "worker:f34198c8b649b8ea8b8378f7abecbed9450b92424e171c7de7bc8831be638393": {
+      "name": "worker",
+      "output": "let me check if the draft answer meets all requirements.\n\n1. **no commas**: the draft has no commas \u2192 ok\n2. **no word longer than 6 letters**: let me check each word:\n   - reading (7 letters) \u2192 fail\n   - helps (5) \u2192 ok\n   - you (3) \u2192 ok\n   - learn (5) \u2192 ok\n   - new (3) \u2192 ok\n   - facts (5) \u2192 ok\n   - it (2) \u2192 ok\n   - makes (5) \u2192 ok\n   - your (4) \u2192 ok\n   - brain (5) \u2192 ok\n   - grow (4) \u2192 ok\n   - and (3) \u2192 ok\n   - think (5) \u2192 ok\n   - well (4) \u2192 ok\n   \n   \"reading\" is 7 letters \u2192 fails the 6-letter limit.\n\n3. **entirely lowercase**: all lowercase \u2192 ok\n4. **exactly 20 words**: let me count:\n   - reading (1)\n   - helps (2)\n   - you (3)\n   - learn (4)\n   - new (5)\n   - facts (6)\n   - . (not a word)\n   - it (7)\n   - makes (8)\n   - your (9)\n   - brain (10)\n   - grow (11)\n   - and (12)\n   - think (13)\n"
+    },
+    "worker:f389eebc66472bdb4eb37fc53c8c9a2cf7b2dd0302d6f67ec5e29d4add3cd371": {
+      "name": "worker",
+      "output": "list what to fix: use a word longer than 6 letters (\"unique\")"
+    },
+    "worker:f3e2f534ecfa419876bc4a7bba78492c6011a4f6f855cc53c04aee35a493c569": {
+      "name": "worker",
+      "output": "Our scan saw one cell. It had new power. This change is rare. We must act fast, right now. here we go."
+    },
+    "worker:f4324c018567075b3699d6d59f4ae59cc2bbcbead6194de506431c849e71c14b": {
+      "name": "worker",
+      "output": "List what to fix:\n\n1.  Do not use any commas: Satisfied.\n2.  End your response with the exact phrase \"so it goes.\": Satisfied.\n3.  Do not use the word \"the\": Satisfied.\n4.  Use exactly 15 words: The draft contains 8 words. It must be expanded to exactly 15 words while keeping all other constraints.\n\nFIX"
+    },
+    "worker:f46ee41af174286d20377c726434b3cd714f991dbc3424d8b7aeb05632e0da8c": {
+      "name": "worker",
+      "output": "stars are balls of gas. they burn hot and bright. fusion makes energy. this is how a star lives on in the sky for us to see"
+    },
+    "worker:f56841db372baec4f6ed9319f2d8c1173e72b444cf7be40f732c4ae4073d3a28": {
+      "name": "worker",
+      "output": "pass"
+    },
+    "worker:f77deb4ae76cabbdc13abe2f3980bd80fe7055bc4bdb29f6e7b5ac12fc0912bf": {
+      "name": "worker",
+      "output": "- a cell runs all plant life\n- it eats food and breathes air"
+    },
+    "worker:f8be125106e10ace665c883af4a2c6ea7d52e533bc9e362d764f16d0290d6067": {
+      "name": "worker",
+      "output": "One cell holds data. This tiny chip stores bits. It helps us work fast, so it goes"
+    },
+    "worker:fa2aec5befca697d5b48061bbfe62c696704bfc85a77e9c6f8cfb4e88e89d787": {
+      "name": "worker",
+      "output": "The draft answer has 13 words, not the required 20."
+    },
+    "worker:fa557d562d782954668fcc6def7a15cd3afda2e81296c5dcd71ff071d2419723": {
+      "name": "worker",
+      "output": "list what to fix: the draft contains 9 words, not exactly 15."
+    },
+    "worker:fa87063e30c2681ddca5ab9446c00dede018a841a9fb7c42b5b5436bbf5f0261": {
+      "name": "worker",
+      "output": "- sunlight hits leaf\n- gases enter pores\n- sugar gets made\n- heat escapes up\n- life is fed here we go"
+    },
+    "worker:fc8d3e260823efaef0280256910155eb751ac10d44fe7dffed6a18480fb5c3d1": {
+      "name": "worker",
+      "output": "light rays hit a smooth flat face and then keep on going that is it."
+    },
+    "worker:fcc2c620f492f08d84b4c5239b5963248dcec5a0ccb61153309c1ccfef894767": {
+      "name": "worker",
+      "output": "- we found a new rock type here.\n- its color is bright red.\n- it feels very warm to touch.\n- this change is both rare and cool.\n- so it goes."
+    },
+    "worker:fddf17177a50f5673fb7fe2cfaa231fc54dd5c4a7fd1a3b11f10aa205b775cd3": {
+      "name": "worker",
+      "output": "The draft answer fails to meet the requirements. Here is the list of issues:\n\n1.  **Word Count:** The draft has 10 words. It needs exactly 15 words.\n2.  **Punctuation/Phrase:** The draft does not end with the exact phrase \"all is set.\" followed by a period (it lacks the period and is not clearly appended as a distinct closing phrase).\n3.  **Missing Word \"of\":** The draft correctly avoids \"of\".\n4.  **Commas:** The draft correctly avoids commas.\n\n**Revised Answer:**\nPlanets orbit stars due to gravity and inertia all is set.\n\n**Verification:**\n1.  **Word \"of\":** Not present. (Pass)\n2.  **Word Count:** \"Planets\" (1) \"orbit\" (2) \"stars\" (3) \"due\" (4) \"to\" (5) \"gravity\" (6) \"and\" (7) \"inertia\" (8) \"all\" (9) \"is\" (10) \"set\" (11). Wait, I need 15 words. Let's adjust.\n\nLet's try: \"Water molecules bond via hydrogen interactions between hydrogens and oxygens all is set\"\n1. Water\n2. molecules\n3. bond\n4. via\n5. hydrogen\n6. interactions\n7. between\n8. hydrogens\n9. and\n10. oxygens\n11. all\n12"
+    },
+    "worker:fdefd6d84b6990a76ad2f54c13ed2913a32334983b21dc2bec8a94ab8366b360": {
+      "name": "worker",
+      "output": "list what to fix:\n- format as exactly 5 bullet points, each line starting \"- \" (currently 1)\n- use exactly 15 words (currently 9)"
+    },
+    "worker:fe1d79c7bfaaebc69a434acc2f3c2ddf292a0c78168740862800af845e81eab9": {
+      "name": "worker",
+      "output": "sun light helps plants grow big and green"
+    },
+    "worker:ffe73f16e620fcdc92f5f1be1353089973bea867f2d3085e70b743942b70a8f0": {
+      "name": "worker",
+      "output": "Our lab found a new cell. It glows with rare light. This core shift is real. We must act fast, right now. here we go."
+    }
+  },
+  "version": 1
+}

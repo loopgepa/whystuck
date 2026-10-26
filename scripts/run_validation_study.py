@@ -58,14 +58,37 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--arms", default="ABCD", help="which arms to run (default ABCD)")
     p.add_argument(
         "--task-set",
-        choices=("ifbench", "multi", "multi-hard", "code", "bcb"),
+        choices=("ifbench", "multi", "multi-hard", "multi-hard-manifest", "code", "bcb"),
         default="ifbench",
         help="ifbench = vendored single-constraint slice; multi = composable "
         "multi-constraint tasks (easy, saturated at seed 0.97); multi-hard = harder "
         "constraints with real headroom; code = MBPP+ (base VISIBLE / plus HIDDEN) — "
         "SATURATES a capable worker (see the appendix); bcb = BigCodeBench-Hard in a "
         "Docker sandbox (visible/hidden unittest-method split), hard even for frontier "
-        "models — the headroom-bearing v2 code study",
+        "models — the headroom-bearing v2 code study; multi-hard-manifest = hard-tier "
+        "tasks read from a frozen --task-manifest, one --manifest-level at a time (p0 "
+        "levels built by measurement, Paper I D9)",
+    )
+    p.add_argument(
+        "--empty-attempts",
+        type=int,
+        default=2,
+        help="calls per model request while the model keeps answering with empty content "
+        "(default 2, what every committed run used). Raise it for a model whose empty answers "
+        "are ordinary draws rather than reasoning starvation; every resample is counted into "
+        "the run's metadata",
+    )
+    p.add_argument(
+        "--task-manifest",
+        default=None,
+        help="manifest JSON for --task-set multi-hard-manifest (see "
+        "whystuck.eval.task_manifest): the tasks, and per level/seed/split which of them "
+        "are scored. Re-verified on load against the generator, so an edited task is refused",
+    )
+    p.add_argument(
+        "--manifest-level",
+        default=None,
+        help="which manifest level to run (e.g. a target-p0 level, or 'calib')",
     )
     p.add_argument("--n-train", type=int, default=16, help="train task count (default 16)")
     p.add_argument("--n-heldout", type=int, default=16, help="held-out task count (default 16)")
@@ -450,6 +473,66 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 2
 
+    # Manifest guards. Every one of these would otherwise surface only after spend, as a
+    # KeyError on the first seed missing from the manifest, or worse, as a run labelled
+    # with a level it never read.
+    manifest = None
+    if args.task_set == "multi-hard-manifest":
+        if not args.task_manifest:
+            print(
+                "ERROR: --task-set multi-hard-manifest needs --task-manifest PATH.", file=sys.stderr
+            )
+            return 2
+        if not args.manifest_level:
+            print(
+                "ERROR: --task-set multi-hard-manifest needs --manifest-level NAME.",
+                file=sys.stderr,
+            )
+            return 2
+        from whystuck.eval.task_manifest import load_manifest
+
+        try:
+            manifest = load_manifest(args.task_manifest)
+        except (OSError, ValueError, KeyError) as exc:
+            print(f"ERROR: cannot use --task-manifest {args.task_manifest}: {exc}", file=sys.stderr)
+            return 2
+        level = manifest.levels.get(args.manifest_level)
+        if level is None:
+            print(
+                f"ERROR: --manifest-level {args.manifest_level!r} is not in the manifest "
+                f"(has {sorted(manifest.levels)}).",
+                file=sys.stderr,
+            )
+            return 2
+        missing = [s for s in _seeds(args) if s not in level]
+        if missing:
+            print(
+                f"ERROR: seed(s) {missing} have no assignment in level {args.manifest_level!r} "
+                f"(assigned: {sorted(level)}).",
+                file=sys.stderr,
+            )
+            return 2
+        for s in _seeds(args):
+            for split, n in (("train", args.n_train), ("heldout", args.n_heldout)):
+                have = len(level[s].get(split, []))
+                if n > have:
+                    print(
+                        f"ERROR: --n-{split.replace('_', '-')} {n} exceeds the {have} "
+                        f"{split} tasks level {args.manifest_level!r} assigns to seed {s}.",
+                        file=sys.stderr,
+                    )
+                    return 2
+        # Carried on args so the live and replay paths read the manifest verified here,
+        # not a second copy that could differ if the file changed in between.
+        args.loaded_manifest = manifest
+    elif args.task_manifest or args.manifest_level:
+        print(
+            "ERROR: --task-manifest/--manifest-level only apply to --task-set "
+            "multi-hard-manifest; elsewhere they would be recorded but never read.",
+            file=sys.stderr,
+        )
+        return 2
+
     # p0-lever guard. An id that names no live constraint would leave the pool untouched and
     # run the UN-ablated condition under an ablated label -- the same failure as a gene
     # override naming a gene that is not live, so it is refused the same way.
@@ -764,6 +847,16 @@ def _run_live(
         score_fn, feedback_fn = code_score, code_feedback
         exec_feedback = code_feedback  # base-test execution read into the critique
         dataset = "MBPP+ (EvalPlus; base=visible/in-loop, plus=hidden/scored)"
+    elif args.task_set == "multi-hard-manifest":
+        from whystuck.eval.task_manifest import manifest_split
+
+        _manifest, _level = args.loaded_manifest, args.manifest_level
+
+        def load_split(split: str, seed: int, n: int):
+            return manifest_split(_manifest, _level, split, seed=seed, n=n)
+
+        score_fn, feedback_fn = mc_score, mc_feedback
+        dataset = f"multi-constraint-hard manifest level {_level!r} (IFEval-style)"
     elif args.task_set in ("multi", "multi-hard"):
         hard = args.task_set == "multi-hard"
         # Size the generated pool so each disjoint half comfortably covers the larger
@@ -829,10 +922,18 @@ def _run_live(
     # Enforce the exact output caps the budget guard priced (cost.py), so the live
     # spend cannot exceed the pre-flight estimate on the dominant (output) axis.
     # --replay opens the cassette read-only and strict: every call must be cached.
+    # Raw provider callables by cassette surface, kept so their empty-resample counters can be
+    # reported. Counts cover THIS process only: a resumed recording does not see resamples
+    # made by the process it resumes.
+    _raw: dict[str, Any] = {}
+
+    def _model(surface: str, model: str, max_tokens: int) -> Callable[..., str]:
+        fn = litellm_complete(model, max_tokens=max_tokens, empty_attempts=args.empty_attempts)
+        _raw[surface] = fn
+        return fn
+
     with Cassette(record_path, mode="replay" if args.replay else "record") as cassette:
-        complete = cassette.wrap(
-            litellm_complete(args.worker_model, max_tokens=worker_max_out), name="worker"
-        )
+        complete = cassette.wrap(_model("worker", args.worker_model, worker_max_out), name="worker")
         # Add the kwargs at the call site, OUTSIDE the cassette wrapper, so they land in
         # the hashed kwargs. Absent both flags the call is unchanged and every existing
         # cassette key still resolves. `sample` is a salt: it never reaches the provider,
@@ -859,7 +960,7 @@ def _run_live(
         complete = _sampled(complete)
 
         reflection = cassette.wrap(
-            litellm_complete(args.reflection_model, max_tokens=REFLECTION_MAX_OUTPUT_TOKENS),
+            _model("reflection", args.reflection_model, REFLECTION_MAX_OUTPUT_TOKENS),
             name="reflection",
         )
         # Cross-family critic (run 6): a separate model for the critique step only.
@@ -868,7 +969,7 @@ def _run_live(
         if args.critique_model and not args.oracle_critique:
             critique_complete = _sampled(
                 cassette.wrap(
-                    litellm_complete(args.critique_model, max_tokens=WORKER_MAX_OUTPUT_TOKENS),
+                    _model("critic", args.critique_model, WORKER_MAX_OUTPUT_TOKENS),
                     name="critic",
                 )
             )
@@ -880,7 +981,7 @@ def _run_live(
         if args.verdict_model and not args.oracle_critique:
             verdict_complete = _sampled(
                 cassette.wrap(
-                    litellm_complete(args.verdict_model, max_tokens=WORKER_MAX_OUTPUT_TOKENS),
+                    _model("verdict", args.verdict_model, WORKER_MAX_OUTPUT_TOKENS),
                     name="verdict",
                 )
             )
@@ -941,6 +1042,27 @@ def _run_live(
         # replicates cannot be told apart is not checkable.
         "sample": args.sample,
         "exclude_constraint": sorted(args.exclude_constraint),
+        # Present only off the historical default, so earlier results keep their exact key set.
+        **(
+            {
+                "empty_attempts": args.empty_attempts,
+                "empty_resamples": {
+                    k: int(getattr(f, "empty_resamples", 0)) for k, f in sorted(_raw.items())
+                },
+            }
+            if args.empty_attempts != 2
+            else {}
+        ),
+        # Present only on manifest runs, so earlier results keep their exact key set.
+        **(
+            {
+                "task_manifest": args.task_manifest,
+                "task_manifest_sha256": args.loaded_manifest.sha256,
+                "manifest_level": args.manifest_level,
+            }
+            if args.task_set == "multi-hard-manifest"
+            else {}
+        ),
         "loop_max_retries": args.loop_max_retries,
         "plan_gene": args.plan_gene,
         "feedback_stats": args.feedback_stats,

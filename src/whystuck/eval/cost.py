@@ -68,6 +68,13 @@ MODEL_PRICES: dict[str, tuple[float, float]] = {
     "groq/llama-3.1-8b-instant": (0.05, 0.08),
     "groq/openai/gpt-oss-20b": (0.075, 0.30),
     "groq/qwen/qwen3.6-27b": (0.60, 3.00),
+    # Added 2026-10-25 for the target-p0 study. By then Groq had retired both llama models
+    # above (404 `model_not_found` on 2026-10-25), so the released Groq line cannot be
+    # extended on its own worker. Preview-tier price as listed that day; preview models "may
+    # be discontinued at short notice", which the cassettes make harmless for replay. Run in
+    # its default mode it answers without a reasoning trace (12 completion tokens on a probe),
+    # unlike gpt-oss, whose reasoning exhausted the 320-token worker cap with empty content.
+    "groq/qwen/qwen3.8-27b": (0.80, 4.00),
 }
 
 

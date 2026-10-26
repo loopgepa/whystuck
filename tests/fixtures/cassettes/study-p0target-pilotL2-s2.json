@@ -1,0 +1,1217 @@
+{
+  "entries": {
+    "worker:007b202f48a44fc605664d483cb4eeaf234eede375bd0ff3450de8e610bf03f1": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:0096997cac3c881b45876fda463e94ca8a17fa926dcc993c2ce27f74a6a3d0e5": {
+      "name": "worker",
+      "output": "List what to fix:\n- The response uses the word \"the\" (twice).\n- The word \"unfold\" has 6 letters, which is allowed (<= 6).\n- The word \"petals\" has 6 letters, which is allowed (<= 6).\n- The word \"sun\" is 3 letters.\n- The word \"warming\" is not used.\n- Let's check word lengths in the draft:\n  - \"the\" (3) - forbidden word.\n  - \"soil\" (4)\n  - \"holds\" (5)\n  - \"a\" (1)\n  - \"seed\" (4)\n  - \".\"\n  - \"rain\" (4)\n  - \"feeds\" (5)\n  - \"it\" (2)\n  - \".\"\n  - \"roots\" (5)\n  - \"grow\" (4)\n  - \"deep\" (4)\n  - \".\"\n  - \"a\" (1)\n  - \"stem\" (4)\n  - \"pushes\" (6) - \"pushes\" is 6 letters. OK.\n  - \"up\" (2)\n  - \".\"\n  - \"leaves\" (6) - \"leaves\" is 6 letters. OK.\n  - \"unfold\" (6) - \"unfold\" is 6 letters. OK.\n  - \".\"\n  - \"sun\" (3)\n"
+    },
+    "worker:012513d256706dcd581085fb31d99d19c02b7bc797caa97f8abafa081115a379": {
+      "name": "worker",
+      "output": "A gene is a small part of DNA."
+    },
+    "worker:0200cebd5c9a1d3028dd4b1e67181b195041eb2a7e74591517acca6cd4a9e1d3": {
+      "name": "worker",
+      "output": "- list needs 4 bullets, draft has 4 \u2714\ufe0f\n- but \"new\" starts a bullet, next bullet \"found\" wait let's check words: \"new\" yes, \"facts:\" has 6 letters \"facts\" is 5, colon ok, wait \"new\" 3\n- check for \"the\": i don't see it\n- check lowercase: yes\n- check word length: \"new\" 3, \"facts\" 5, \"i\" 1, \"found\" 5, \"them\" 4, \"all\" 3, \"is\" 2, \"well\" 4, \"we\" 2, \"are\" 3, \"done\" 4\n- check ending phrase: \"we are done.\" matches\n- wait, task says \"write a short note about a discovery\". Draft is a bit generic but meets constraints.\n- let's re-read carefully. \"format as exactly 4 bullet points\".\n- \"each line starting '- '\".\n- \"no capital letters\".\n- \"no word longer than 6 letters\".\n- \"end your response with the exact phrase 'we are done.'\".\n\nWait, the draft provided in the prompt is:\n- new facts:\n- i found them\n- all is well\n- we are done.\n\nIs \"facts:\" a word? The word is \"facts\". 5 letters.\nIs \"them\" a word? 4 letters.\nIs \"found\" a word? 5 letters."
+    },
+    "worker:02848d97cd4e921201e54a1f03179c8388e6f43af486d5250dd0ed5c8e07028c": {
+      "name": "worker",
+      "output": "drops fall from leaves.\nthey mix in the air.\nwet earth takes in the rain.\nroots drink deep below."
+    },
+    "worker:03f81ae44922978555ecad6dc19c22acb1f209d4f3387d6c22ce652f5724692a": {
+      "name": "worker",
+      "output": "a star burns gas. this heat drives tech."
+    },
+    "worker:0542c313b6610aaa363cd9d71e8a9158d81595fb0ddbbbe1387b87c556a76e85": {
+      "name": "worker",
+      "output": "list what to fix:\n\n1. the word \"new\" is 3 letters (ok), \"pest\" is 4 (ok), \"was\" is 3 (ok), \"found\" is 5 (ok), \"in\" is 2 (ok), \"my\" is 2 (ok), \"yard\" is 4 (ok).\n2. the word \"it\" is 2 (ok), \"has\" is 3 (ok), \"green\" is 5 (ok), \"wings\" is 5 (ok), \"and\" is 3 (ok), \"odd\" is 3 (ok), \"legs\" is 4 (ok).\n3. the word \"i\" is 1 (ok), \"will\" is 4 (ok), \"seek\" is 4 (ok), \"a\" is 1 (ok), \"pro\" is 3 (ok), \"to\" is 2 (ok), \"help\" is 4 (ok).\n4. no commas used.\n5. all lowercase.\n6. wait, let's check the constraint \"use no word longer than 6 letters\".\n   - \"found\" (5)\n   - \"green\" (5)\n   - \"wings\" (5)\n   all are under 6.\n7. check for the word \"the\". not present.\n8. check for commas. not present.\n9. check for capital letters. none.\n\nwait, let me re-read"
+    },
+    "worker:05b2eba387616378c8ca9d6073b752dd34030695285065a6a3439e5a8fb9677e": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:06353de8957bfab1a31188d7d6703584272b346f60bf20ea8f01675e8a9a5708": {
+      "name": "worker",
+      "output": "- A star burns gas to make light\n- Heat moves from deep core out\n- Our sun keeps our world warm\n- Life grows and changes each day"
+    },
+    "worker:06d2b9d11ca749e4a67d616563e1e33074c83301346deb29676e96d954058fba": {
+      "name": "worker",
+      "output": "List what to fix:\n- the response is not a brief overview (it is just a list of isolated words/nouns rather than describing the technology)."
+    },
+    "worker:086a92b284795e479dc8e278fa114b8fba07b667df23c9b6dc3e19ffae8484dd": {
+      "name": "worker",
+      "output": "To determine if the draft answer passes, I will check each constraint:\n\n1.  **No word longer than 6 letters**:\n    *   \"water\" (5), \"is\" (2), \"the\" (3), \"key\" (3), \"for\" (3), \"life\" (4) - OK\n    *   \"cells\" (5), \"are\" (3), \"the\" (3), \"base\" (4), \"for\" (3), \"all\" (3), \"life\" (4), \"forms\" (5) - OK\n    *   \"the\" (3), \"sun\" (3), \"burns\" (5), \"fuel\" (4), \"to\" (2), \"make\" (4), \"light\" (5) - OK\n    *   \"the\" (3), \"earth\" (5), \"spins\" (5), \"on\" (2), \"its\" (3), \"own\" (3), \"spin\" (4) - OK\n    *   \"air\" (3), \"has\" (3), \"gas\" (3), \"we\" (2), \"breathe\" (6) - OK (\"breathe\" is 6 letters)\n    *   *Constraint Satisfied.*\n\n2.  **Do not use the word \"of\"**:\n    *   Scanning text: No instance of \"of\" found.\n    *   *Constraint Satisfied.*\n\n3."
+    },
+    "worker:08d28a3b545534dc015925767a8cbe25cc558b055193f7e61d3e6fb440453051": {
+      "name": "worker",
+      "output": "Pass"
+    },
+    "worker:08e0fd320e9c925cfb045cffbe55c21a6072be07950b6d020071b51d3bf169aa": {
+      "name": "worker",
+      "output": "The draft answer satisfies all requirements:\n- No word is longer than 7 letters (\"Read\"=4, \"the\"=3, \"text\"=4, \"Star\"=4, \"helps\"=5, \"you\"=3, \"focus\"=5).\n- Ends with \"all is set.\" (Wait, the draft does **not** end with \"all is set.\")\n\nLet me re-read the draft: \"Read the text. Star helps you focus.\"\nIt does not end with \"all is set.\"\n\nTherefore, the requirement \"end your response with the exact phrase 'all is set.'\" is not satisfied.\n\nFix needed:\nThe response must end with \"all is set.\""
+    },
+    "worker:091f7c54960b4bd8d81511888c2786e13188e243e61817c3fa31541a1e5990d9": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:0a24bde365ed74847cbd0ad9dcbf5791f52ae3a548debac880ea91be004e3eef": {
+      "name": "worker",
+      "output": "- a tree uses sun for food\n- it gives out fresh air\n- so it goes."
+    },
+    "worker:0cc5c6fa9cf705ff362f8b0ecacc2bf8c8755e421ec07bf6d961bc3159ddd582": {
+      "name": "worker",
+      "output": "- read the text.\n- take key notes.\n- we are done."
+    },
+    "worker:0d15e7fc336ebdef56137014012a531880a4cdd56bc5671a33e9b1f0b9b4b071": {
+      "name": "worker",
+      "output": "- Sum a idea\n- Keep it brief\n- Use easy words\n- Stay clear"
+    },
+    "worker:0e9f629dc01c31005f3556de7a5fbb26e0266f17cefe00e17ad9575fa84f9165": {
+      "name": "worker",
+      "output": "- i saw a rare bird\n- its feathers shimmered\n- i felt pure awe\n- note is down"
+    },
+    "worker:0f9f508779da0b5788150418a9e9108271c98b83e1bac77ef4060eaa6f17c196": {
+      "name": "worker",
+      "output": "- 5g is new\n- it is swift\n- data flies fast\n- net works well"
+    },
+    "worker:1061740f32203df7a0baa23904a6452e12b4ed1786cce05fba15ab7f109f12b4": {
+      "name": "worker",
+      "output": "- It is sun light.\n- It warms our earth.\n- Plants make food.\n- Life needs it.\n- That is it."
+    },
+    "worker:10682d3806c9c663a8d98279b3b65c9dcc613a1e9e8d1f6dc80ec1617a516ead": {
+      "name": "worker",
+      "output": "- a new fern was found\n- it grows in dark caves\n- this is a rare find"
+    },
+    "worker:1157c7c1557a5a444b5b7e26648fe5e2daa8264eca56f3be7fb7d0ce529593a7": {
+      "name": "worker",
+      "output": "- pick a tech trend as your topic\n- read three short articles on it\n- jot down the main points and facts\n- share the results with a peer"
+    },
+    "worker:12ed9535938aa9240a59bb980fe88b7f39873d5ed10747e53331885acf466f35": {
+      "name": "worker",
+      "output": "- saw a rare bird\n- its wings glowed\n- felt pure awe\n- kept a log"
+    },
+    "worker:133c8177f37b855ec440057c2aa2a07c6e2cac4bd40f36309e899a272e3184ef": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:142fabfc0f1de4e924e32bbe4e06fe5629bc9e93303e9cd1db03e03f20e3ee0c": {
+      "name": "worker",
+      "output": "Pass\n"
+    },
+    "worker:144d7efb073703fd921778fb3c7958116520f3f40aa57b918f77fb257d54ffb4": {
+      "name": "worker",
+      "output": "- plants run sun light in.\n- parts turn leaf new green.\n- soil feeds root with damp.\n- life grows in high rise."
+    },
+    "worker:14513dbd612115b40745c712a7aa76704c08acaa0ecffec22abbd0eb08a6ea15": {
+      "name": "worker",
+      "output": "The draft answer satisfies every requirement.\n\n1.  **No word longer than 7 letters:**\n    *   \"Photosynthesis\" has 14 letters. **FAIL**.\n    *   Let's re-read the constraint: \"use no word longer than 7 letters\".\n    *   \"Photosynthesis\" is 14 letters long.\n\n2.  **Do not use the word \"and\":**\n    *   The word \"and\" is not present. **PASS**.\n\n3.  **Do not use any commas:**\n    *   There are no commas. **PASS**.\n\n4.  **End with \"all is set.\":**\n    *   The text ends with \"all is set.\" **PASS**.\n\n**Issue found:** The word \"Photosynthesis\" is longer than 7 letters.\n\nLet's fix the draft:\nOriginal: \"Photosynthesis lets plants make food. They take in sun, air, plus water. This mix fuels their growth. It helps them stay alive. all is set.\"\n\nFix: Replace \"Photosynthesis\" with a shorter alternative or break it down.\nConstraint: No word > 7 letters.\n\"Photo\" is 5. \"synth\" is 5. But I need to explain the concept.\nConcept: Plants make food.\n\"Plant food making via sun, air, water.\"\n\nLet's try:\n\"Plants make food. They use sun, air, plus water. This mix fuels growth. It keeps them alive. all"
+    },
+    "worker:1637479197367ab1f78034ae6ea8d967062f3adde38147a0df485d2ca1ddb6c8": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:163fa3e2f5274ba80def434f91cc33b93fedd9576023a4f8b779760db32996fe": {
+      "name": "worker",
+      "output": "- light hits eyes. this lets us see. it is a core fact.\n- gravity pulls items to the earth. it is a strong force.\n- wind moves air. the air can push.\nall is set."
+    },
+    "worker:1664945dfaf456310a07c653e9f94667a2911c34911775d34f4c47b811e21b0a": {
+      "name": "worker",
+      "output": "- 5g\n- fast\n- web\n- data"
+    },
+    "worker:17e71c9088d6fc479952a5f16d3d4940c41cfcebcc719307c00a0bf734ad6463": {
+      "name": "worker",
+      "output": "light is made of waves. it travels in straight lines. the sun gives us light. we see things because light hits them. mirrors bounce light back. eyes catch the light."
+    },
+    "worker:19fe096aa46a67766d151e1c2283676459d8f80d3b6449778f384e8eead62509": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:1a3a04fcb056af1c1378c6020dbfc452208757bf3b567ed441faa293043b426b": {
+      "name": "worker",
+      "output": "- Sun gives off rays\n- Rays carry big heat\n- Leaves feed on light"
+    },
+    "worker:1c3491ee3bb17ac1892af0c62eb8a24f3d376d788aed00631c9cd6ca3bf1f184": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:1ce050c3ead97b03e44c671d82d9a4bf518b37bc2c2a75644f4566a2e57591f3": {
+      "name": "worker",
+      "output": "- Flux shows a change in a field.\n- The rate is key to this idea.\n- It tells us how stuff moves."
+    },
+    "worker:1cf6320aa787ab8e12de1a8bac4b2ace983f888df57abc131736cb51de14f1eb": {
+      "name": "worker",
+      "output": "Light is a wave"
+    },
+    "worker:1e2083abb49073496757f3d3e93a8d606b1a3ca311f579c6f6893bfc743cd52f": {
+      "name": "worker",
+      "output": "- cloud tech\n- saves data\n- helps users\nall is set."
+    },
+    "worker:1e82a72d6cedb20aa8b1f77236d9d26e068ee86505e65de782413ae7814366f8": {
+      "name": "worker",
+      "output": "not pass\n\nissues:\n1. \"format as exactly 5 bullet points, each line starting '- '\": \"here we go.\" is not a bullet point.\n2. \"end your response with the exact phrase \"here we go.\"\": must be the string \"here we go.\" not a bullet item."
+    },
+    "worker:1eda8aa2752474cb4b625eaa9b6457c3fbd71d4257c352d841fe37328d38f733": {
+      "name": "worker",
+      "output": "- pick a math aid as your theme\n- write the core facts on one page\n- share your plan with a buddy now\n- ask for clear tips on your work"
+    },
+    "worker:1efd2c90b3eb7822383210aa31a1a34ac2dc4ed1f287bbe67c26b8f34dd05469": {
+      "name": "worker",
+      "output": "I NEED TO CHECK THE DRAFT ANSWER.\n\nDRAFT:\n- Big in.\n- Learn it.\n- Start now.\n- Grow well.\n- Here we go.\n\nCHECKING REQUIREMENTS:\n1. format as exactly 5 bullet points, each line starting \"- \":\n   - Line 1: \"- Big in.\" -> Starts with \"- \"\n   - Line 2: \"- Learn it.\" -> Starts with \"- \"\n   - Line 3: \"- Start now.\" -> Starts with \"- \"\n   - Line 4: \"- Grow well.\" -> Starts with \"- \"\n   - Line 5: \"- Here we go.\" -> Starts with \"- \"\n   Total 5 lines. All start with \"- \".\n   Constraint SATISFIED.\n\n2. do not use the word \"the\":\n   Words in draft: Big, in, Learn, it, Start, now, Grow, well, Here, we, go.\n   None are \"the\".\n   Constraint SATISFIED.\n\n3. end your response with the exact phrase \"here we go.\":\n   The last line is \"- Here we go.\".\n   Wait, the requirement says \"end your response with the exact phrase 'here we go.'\".\n   The draft ends with \". Here we go.\" -> No, wait.\n   The last line is `- Here we go.`\n   The text of the last line is `Here we go.`\n   But the requirement says the *response* must end with `"
+    },
+    "worker:21bbbd9b08a4a859afabbf239e550032256112305c2808001de794bc453d71f1": {
+      "name": "worker",
+      "output": "- big key\n- read now\n- think it\n- share it\n- here we go."
+    },
+    "worker:23e14ae2ce72862010be2cc77e80039f469c2a7674c94d2f5b6325d81d0e6b4e": {
+      "name": "worker",
+      "output": "Rain falls. It soaks the dirt. A seed wakes up. It sends out roots. It makes leaves. The sun helps it grow. The plant stands tall. The code of life runs deep."
+    },
+    "worker:286948aebed31f4991a13b9cd304826756a4634dfbc31c36c92948e013e330cb": {
+      "name": "worker",
+      "output": "- Light is pure energy\n- Waves move fast in a void\n- Plants eat sun to live"
+    },
+    "worker:289e93a993fda2411c63b8188590441d4a2c4a4d37ac8e7c1da015d10655bacf": {
+      "name": "worker",
+      "output": "Hi. Let us see flux. It is a flow. Air moves fast. Water runs down. This shift is key. You can feel air push. That force is flux. No magic here. Just air and heat. Look at wind on your face. It changes all the time. Now you grasp the core idea. we are done."
+    },
+    "worker:28ea5de9ebfe1656068163bad25b6029e86e2b09749a6d126fe711ecfe0fb58d": {
+      "name": "worker",
+      "output": "let me check each constraint:\n\n1. **format as exactly 4 bullet points, each line starting \"- \"**: The draft has 4 lines starting with \"- \". \u2713\n2. **write your entire response in lowercase (no capital letters)**: All letters are lowercase. \u2713\n3. **do not use the word \"the\"**: The word \"the\" does not appear. \u2713\n4. **end your response with the exact phrase \"that is it.\"**: The last line ends with \"that is it.\" \u2713\n5. **use no word longer than 6 letters**: Let's check each word:\n   - \"tips\" (4)\n   - \"on\" (2)\n   - \"tips\" (4)\n   - \"keep\" (4)\n   - \"it\" (2)\n   - \"real\" (4)\n   - \"start\" (5)\n   - \"slow\" (4)\n   - \"now\" (3)\n   - \"have\" (4)\n   - \"fun\" (3)\n   - \"out\" (3)\n   - \"there\" (5)\n   - \"that\" (4)\n   - \"is\" (2)\n   - \"it\" (2)\n   All words are 6 letters or fewer. \u2713\n\nAll requirements are satisfied.\n\nPASS"
+    },
+    "worker:2bd651ab7087c1da37813fe1946ba6ba017e9e1371535c0a96b583c89c9dea94": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:2ca4acad6e57086474ac6bcb6b9e225e80726e66a7c7edbe3e4c893bfa11a6e4": {
+      "name": "worker",
+      "output": "Read the text. Star helps you focus."
+    },
+    "worker:2dbcce7d4bd03e41542eac4d9d5d3e6cf5288eaa7f6bafcd346c5af9f3258984": {
+      "name": "worker",
+      "output": "- the sun is a star\n- it burns gas for light\n- earth orbits the sun\n- we are done"
+    },
+    "worker:2e923434b033f06cd5fa967ffa1487d12dfd6926b8cc6fc380aa46c0568122bc": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:2f77673a8b1c103fb914b05241d39a00febae495bfd63333c8a0ea0a333b9616": {
+      "name": "worker",
+      "output": "a node is a key spot.\nit joins parts of a plant or tree.\nyou will find it on the stem.\nleaves grow from this point.\nit holds up new growth.\nthat is it."
+    },
+    "worker:2f9929edd47bb09232b142050732b539def7612aa430c6fc3814a26abe9c00c5": {
+      "name": "worker",
+      "output": "Reply exactly PASS"
+    },
+    "worker:300cd2fe659babd32cab52d625e6d75f94438fb9646964052378362ab59d57e0": {
+      "name": "worker",
+      "output": "we found a novel node"
+    },
+    "worker:3017795eb63e5fdc6f599a387270feafc118e0e1f31baf4f123775020295052e": {
+      "name": "worker",
+      "output": "- i saw odd bugs\n- each one had six legs\n- they ate old leaves\n- so it goes."
+    },
+    "worker:31131430ad7af46b23a80cf7328b42d0701750fb1d071228dcb90d60c427b6d4": {
+      "name": "worker",
+      "output": "found a new thing in the back. it is small and bright. all is set."
+    },
+    "worker:3123909461206ec8e4a9893f1d9a1f0685018b400a38f895b0e02f2524e8b8a2": {
+      "name": "worker",
+      "output": "- tips on tips\n- keep it real\n- start slow now\n- have fun out there. that is it."
+    },
+    "worker:313e522db0dfb1492c92a012b62dc47cb8e8ad60fdf8b5bcf5988b24c527a16b": {
+      "name": "worker",
+      "output": "ideas are fun.\nthey spark new thoughts.\nkids can build on them.\nthis helps them grow.\ncreative work is key.\nit makes study fun.\nwe are done."
+    },
+    "worker:3146ddaef9913ef6477ec7651acabb583f9dd90289974ffd686b6da41d1e7b87": {
+      "name": "worker",
+      "output": "The requirements are fully met:\n\n- \\ The response contains **exactly 4 bullet points**, each starting with `\\- `,\n- \\ **No word exceeds 6 letters**: \u201cLight\u201d (5), \u201ccomes\u201d (5), \u201cfrom\u201d (4), \u201csun\u201d (3), \u201cIt\u201d (2), \u201chits\u201d (4), \u201cearth\u201d (5), \u201cfast\u201d (4), \u201cThis\u201d (4), \u201cwarms\u201d (5), \u201cus\u201d (2), \u201call\u201d (3).\n- \\ **The response ends with** `that is it.`,\n- \\ The word **\u201cand\u201d is never used**.\n\nPASS"
+    },
+    "worker:3208adf3ebb0b0609d0127b1f37e81882517e2f26e4ebd5740452aae47eeff6f": {
+      "name": "worker",
+      "output": "- read it\n- think hard\n- share all\n- learn much\nhere we go."
+    },
+    "worker:3209704cb92f4e73d306534c5923620522eef87841172d994388e3a3b9ec684f": {
+      "name": "worker",
+      "output": "try out code"
+    },
+    "worker:3316d53a49353a6ec96eaa60c82b8396393d288eaa76515c397a3fbec140dd61": {
+      "name": "worker",
+      "output": "i saw a new code in the lab. it was a top hit. that is it."
+    },
+    "worker:34c2c4729763723d664db1dd0cf8c7550677c3f8afa78a6928abd4c5dded6896": {
+      "name": "worker",
+      "output": "a new pest was found in my yard. it has green wings and odd legs. i will seek a pro to help."
+    },
+    "worker:34d2be6f10fa1afe5ef1516f2dad146487213b6fb7ef36cf047d54861c58edaf": {
+      "name": "worker",
+      "output": "repair needed:\n- the word \"sends\" is 5 letters, good.\n- the word \"part\" is 4 letters, good.\n- wait, i need to check for capital letters. none.\n- wait, i need to check for the word \"and\". none.\n- wait, i need to check max word length.\n    - \"a\" (1)\n    - \"tree\" (4)\n    - \"has\" (3)\n    - \"a\" (1)\n    - \"node.\" (4)\n    - \"this\" (4)\n    - \"part\" (4)\n    - \"sends\" (5)\n    - \"sap.\" (3)\n    - \"it\" (2)\n    - \"is\" (2)\n    - \"key\" (3)\n    - \"to\" (2)\n    - \"life.\" (4)\n\nall words are 7 letters or fewer.\nno capital letters.\nno word \"and\".\nincludes \"node\".\n\nwait, is \"concept\" explained? \"a tree has a node. this part sends sap. it is key to life.\"\nthis explains a node in a tree structurally/functionally, but does it explain a \"scientific concept\"?\nthe task says \"explain a scientific concept\".\nis \"node\" a scientific concept? or is the concept \"sap flow\"?\nthe draft is very short. does it count as an explanation?\n\"this"
+    },
+    "worker:34e7cb83b68e76c55f09c5e40168b11832562289e001da64b0eaa985b742324d": {
+      "name": "worker",
+      "output": "check word lengths: \"we\" (2) ok \"found\" (5) ok \"a\" (1) ok \"node\" (4) ok\nno commas: ok\ninclude \"node\": ok\nno \"the\": ok\nall lowercase: ok\n\npass"
+    },
+    "worker:366f3c07540bc30073e741b323d4dab286e2977a651d9ad142cbb1485e25b895": {
+      "name": "worker",
+      "output": "soil holds a seed. rain feeds it. roots grow deep. a stem rises up. leaves spread out. sun warms a node. buds form and open."
+    },
+    "worker:3a458e07c379249399119fbb64da2bd63f29ce2087f2e7b014fbde640d51b6e5": {
+      "name": "worker",
+      "output": "pass"
+    },
+    "worker:3a5362e1caca10122bd3bd20a2901341bd17e6c0299ac43ce37d86ac5609aed6": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:3aa8d1ee4110dbcc7a7afde762529431d4f97809fa7d9faafe7f85bffada6c9f": {
+      "name": "worker",
+      "output": "- new tech aids daily lives\n- it lets us chat far away\n- so it goes."
+    },
+    "worker:3ae616daecb22e2f4d5db4b4a37e37bacf604b8f12128ad0af2c0c39d9c1e819": {
+      "name": "worker",
+      "output": "pass"
+    },
+    "worker:3b6be7255a2cca4718870abaa6187c6bf0a1f2f14f6e6fb9d59d363c89946d41": {
+      "name": "worker",
+      "output": "- plants run sun light in.\n- parts turn leaf new green.\n- soil feeds root with damp.\n- life grows in high rise."
+    },
+    "worker:3b7c5857bde6a1ffa28224da0f922638e18bebe6ec0ee7651d2f7ce03c8c4080": {
+      "name": "worker",
+      "output": "a tree has a node.\nthis part sends sap.\nit is key to life."
+    },
+    "worker:3ba67a7938fbb0fa21068826769d00195a51b9bc303d255429cf4df09b8de449": {
+      "name": "worker",
+      "output": "- Rain falls\n- Soil drinks\n- Seeds wake\n- Green sprouts\n- Trees rise\nhere we go."
+    },
+    "worker:3cfd274a83eb66d1171b8374f55860c711e6b926801e78dae3b1af2f159bd827": {
+      "name": "worker",
+      "output": "trying out code"
+    },
+    "worker:3d829847aa9e641fd2c326138a09b1cf967c0aa5a2601e9adbf80e5e55163df1": {
+      "name": "worker",
+      "output": "atoms hold a core\nthis is a form of code\nwe are done."
+    },
+    "worker:3de7f649234a1de1b23cc3d092702ce74a73e4a06d378013a77faaed2ad41c68": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:3f0dcad9c5bbfe46a7fe81ab8c96c35bec5fb402173a5c0b157f1bc58171426a": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:400d589d3ce000077b7fc2ec44f503dd4b7827557ab9463b963f7a9f212ee34e": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:400eb9fe73263c2474fb2198fc9d7a5785ee61e9518d0e3178830a97a63d59c4": {
+      "name": "worker",
+      "output": "pass"
+    },
+    "worker:414c32900895153d643968ef70186ef2d0cf0f5c43d8cd7af4368015fd5007bf": {
+      "name": "worker",
+      "output": "- Pick one key text.\n- State its claim.\n- Share what you think.\n- Use two facts.\n- Add a link.\nwe are done."
+    },
+    "worker:41d262f976c0644e493c7ef71d53722cfae21138b2c415e1a090ff1bfe886ef8": {
+      "name": "worker",
+      "output": "chatgpt is a star"
+    },
+    "worker:43e15f0e9d55cd82ce8bc8ae45cf4572780e7abf7b1413aefc923c974d652c31": {
+      "name": "worker",
+      "output": "The core has no wires no heat no sound it runs clean and fast it keeps data for us here we go."
+    },
+    "worker:445e02147077852699e2c6da78338cb0889b3d31b9ce6ecd9920ace3b0f0b958": {
+      "name": "worker",
+      "output": "the draft answer does not satisfy all requirements. here is what to fix:\n- the word \"wet earth takes in the rain\" uses the word \"earth\". while \"earth\" is not forbidden by length (5 letters) or case, check other constraints.\n- wait, let's re-read the constraints carefully.\n1. lowercase: yes.\n2. no \"of\": yes.\n3. no word longer than 7 letters:\n   - drops (5)\n   - fall (4)\n   - from (4)\n   - leaves (6)\n   - they (4)\n   - mix (3)\n   - in (2)\n   - the (3)\n   - air (3)\n   - wet (3)\n   - earth (5)\n   - takes (5)\n   - in (2)\n   - the (3)\n   - rain (4)\n   - roots (5)\n   - drink (5)\n   - deep (4)\n   - below (5)\n   all words are 7 letters or fewer.\n4. no commas: yes.\n\nwait, let me double-check the draft provided in the prompt.\ndraft:\n\"drops fall from leaves.\nthey mix in the air.\nwet earth takes in the rain.\nroots drink deep below.\"\n\nis \"earth\" allowed? yes.\nis any word > 7 letters? no.\nis there \"of\"? no.\nare there"
+    },
+    "worker:44954c4cb97726fbbccbdc3dc1ebbded89f4be3113ce687dc2f1686f806558b5": {
+      "name": "worker",
+      "output": "- A gene holds key data\n- Cells read this code\n- Traits shape your form\n- Life runs on this"
+    },
+    "worker:4684c404557bcceadb90086f38909a9868121dd0783f3903f3e0238b3b11ebab": {
+      "name": "worker",
+      "output": "Read text. Star aids study. All is set."
+    },
+    "worker:468dbba3dc52aa6cf632e5139127e21eb1dd9d1ed33956be2d88c22e1f5b4c31": {
+      "name": "worker",
+      "output": "Data shows users like clear tips. We will share just three key points. This helps you study better. Keep short notes often. Here we go."
+    },
+    "worker:469ecbe8aebb4433095ca49fa301c7a711c704835b2ea35a75705dea9b160da0": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:4740a6224661d8286e20bf31e7301880da8f8a068f58b9106335de500a10a5a9": {
+      "name": "worker",
+      "output": "- a star is hot gas orb\n- it glows with strong light\n- heat makes sure it burns\n- this makes life on earth"
+    },
+    "worker:4789db4d472fcd1d660c668f1c885c37366536d75b5ac196b3bea04996c21b8a": {
+      "name": "worker",
+      "output": "I will evaluate the draft answer against the stated constraints.\n\n1.  **\"do not use the word 'and'\"**:\n    *   The draft text is:\n        ```\n        - Pick one key text.\n        - State its claim.\n        - Share what you think.\n        - Use two facts.\n        - Add a link.\n        we are done.\n        ```\n    *   Scanning for \"and\": None found. Constraint satisfied.\n\n2.  **\"end your response with the exact phrase 'we are done.'\"**:\n    *   The draft ends with `we are done.`. Constraint satisfied.\n\n3.  **\"do not use any commas\"**:\n    *   Scanning for commas: None found. Constraint satisfied.\n\n4.  **\"use no word longer than 7 letters\"**:\n    *   Let's check word lengths:\n        *   \"Pick\" (4)\n        *   \"one\" (3)\n        *   \"key\" (3)\n        *   \"text.\" (5 including period, word is \"text\")\n        *   \"State\" (5)\n        *   \"its\" (3)\n        *   \"claim.\" (6 including period, word is \"claim\")\n        *   \"Share\" (5)\n        *   \"what\" (4)\n        *   \"you\" (3)\n        *   \"think.\" (6 including period, word is \"think\")\n        *"
+    },
+    "worker:47e7251a9ea95cea7754cb3cdd3a3669799c45530d2f4072813743b1ea4b4242": {
+      "name": "worker",
+      "output": "A seed lies in the ground. It drinks rain. The small root grows down. The stem goes up. It has no code. It takes years. It fights the wind. It bears fruit. So it goes."
+    },
+    "worker:495cecf90da8640f416a790490f11022043fd6c47e88b4b29b766e28483b78e0": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:49cd63f678de5daf8cc14e8c51eaf159802d3ff340e3779d63893c81f634d99d": {
+      "name": "worker",
+      "output": "let me check each constraint:\n\n1. include the word \"node\" - yes, \"node\" appears in the first line\n2. write your entire response in lowercase (no capital letters) - checking... all letters appear to be lowercase, good\n3. use no word longer than 7 letters - let me check each word:\n   - a (1), node (4), is (2), a (1), key (3), spot (4)\n   - it (2), joins (5), parts (5), of (2), a (1), plant (5), or (2), tree (4)\n   - you (3), will (4), find (4), it (2), on (2), the (3), stem (4)\n   - leaves (6), grow (4), from (4), this (4), point (5)\n   - it (2), holds (5), up (2), new (3), growth (6)\n   - that (4), is (2), it (2)\n   all words are 7 letters or less, good\n4. end your response with the exact phrase \"that is it.\" - yes, the response ends with \"that is it.\"\n5. do not use the word \"and\" - checking... i don't see the word \"and\" anywhere in the response, good\n\nall requirements appear to be satisfied.\n\npass"
+    },
+    "worker:4a358f072e03a8f523ac7efcfe92a2785f36dfc8baeb6b930b6ac033e7606138": {
+      "name": "worker",
+      "output": "The atom falls.\nHeat fades away.\nGas turns to ice.\nSo it goes."
+    },
+    "worker:4b0131ac45d8a21370b0859d92167a811622dcef66f9019907b20f2194f68665": {
+      "name": "worker",
+      "output": "pass"
+    },
+    "worker:4c0f5a2965e0e11154daabed390d0243cba4624381ee3652e97f9d255d76fad4": {
+      "name": "worker",
+      "output": "- Light is a wave\n- Light moves fast\n- Glass slows it down\n- The color shifts we are done."
+    },
+    "worker:4c9da7bad3e4d61035aa64de530e6aa2fe7870fae6ba5ffb6e5f1a7070aeb127": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:4d775885fb1279eb9087e806e5aa8bc6fc0a24cc560b9a4484985b4416019041": {
+      "name": "worker",
+      "output": "- a seed drops.\n- it soaks rain.\n- new life springs. all is set."
+    },
+    "worker:4ee6f21ce84a92da94cb8c7cce66e1071218008ad2299f59ad879ded029e7d66": {
+      "name": "worker",
+      "output": "pass"
+    },
+    "worker:513bc07bb915a8aa6bad0f61bbaa68277feacd2c414e8e8f14b52c6b352fe956": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:5151798b90f361af66b51b0ff78b2eb0d6c196fa9cfcef5b7b6e379027207f51": {
+      "name": "worker",
+      "output": "cows make a great start"
+    },
+    "worker:51be100bf2a957be037a416bc37fa9db7500c0377854aeb875525084a9dcb332": {
+      "name": "worker",
+      "output": "### Evaluation of Requirements:\n\n1. **format as exactly 4 bullet points, each line starting \"- \"**:\n   - The draft has 4 lines starting with \"- \". \u2705\n2. **do not use any commas**:\n   - The draft contains no commas. \u2705\n3. **end your response with the exact phrase \"we are done.\"**:\n   - The draft ends with \"we are done.\" \u2705\n4. **do not use the word \"the\"**:\n   - The word \"the\" does not appear in the draft. \u2705\n5. **use no word longer than 7 letters**:\n   - Word lengths check:\n     - Atoms: 5\n     - bond: 4\n     - Cells: 5\n     - grow: 4\n     - Light: 5\n     - bends: 5\n     - Waves: 5\n     - split: 5\n     - we: 2\n     - are: 3\n     - done: 4\n   - No word exceeds 7 letters. \u2705\n\n### Conclusion:\nEvery requirement is satisfied.\n\nPASS"
+    },
+    "worker:51eadebc4c5ab3d4cf3db70111ac2b66c98c5dd89fd79bbfa0dc9e38f38502d9": {
+      "name": "worker",
+      "output": "A tiny atom was found. It glows bright."
+    },
+    "worker:5278b0454f5b64429219b033469f30e93face10f2936f4c10847850417c3a5dd": {
+      "name": "worker",
+      "output": "A tree is a set. Each part is a node. Links bind all. Learn this well, so it goes."
+    },
+    "worker:529dfc7e9a3f190a2b9a86dfa937799d8663c9d38ae8ce79bfaaf3b477dc4720": {
+      "name": "worker",
+      "output": "ai is new tech.\ncode makes it work.\nall is set."
+    },
+    "worker:52a9bc8b51b2be416eac0d8c1cead8a28fdf39737605452fae6fcb2a01de75e5": {
+      "name": "worker",
+      "output": "the sun gene warms the sea water"
+    },
+    "worker:53dd28af2cf67691b765a086b96a24e2907192e984efc7ee0a7e45969cd4231c": {
+      "name": "worker",
+      "output": "heat is light. it is energy from a hot body. we feel warm. that is it."
+    },
+    "worker:54b1eeb0a794df6fda6bfd31217a219ef96eab7d3919dd6ae63eb2cbfe2f8bfd": {
+      "name": "worker",
+      "output": "- atoms bind parts\n- heat flows to cold spots\n- cells move our limbs\nall is set."
+    },
+    "worker:54db5fb701558ca192f8b275ae042306b61d211d008ab2287f7167a131204af4": {
+      "name": "worker",
+      "output": "- rain falls on green leaves.\n- roots drink from wet ground.\n- seeds burst into new shoots.\n- stems reach up to grow."
+    },
+    "worker:55c00bf68eff53a0f2976b99c124e50e94cae8c286ec2e545e024b3f85cb95bb": {
+      "name": "worker",
+      "output": "sun rays fly in space. they hit our sky. blue light bounces more. that is why the sky is blue."
+    },
+    "worker:560644929a25f8e4d2a2d61841d454d0806d18cd3a836458be229cffa262caa6": {
+      "name": "worker",
+      "output": "the sun gene warms the sea water\n\nchecklist:\n- no \"of\": pass\n- includes \"gene\": pass\n- all lowercase: pass\n- no commas: pass\n- no word longer than 7 letters: \n  - the (3) sun (3) gene (4) warms (5) the (3) sea (3) water (5) \u2014 all \u22647 \u2014 pass\n\npass"
+    },
+    "worker:561603686d4d7bc78432cc45326acf06c19c29bc538c889495b6d43e0efd9abb": {
+      "name": "worker",
+      "output": "- new facts:\n- i found them\n- all is well\n- we are done."
+    },
+    "worker:56166e913d18cc095e154c4de70fc9442530160c925b38d280267a54acf7d71b": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:56ae4f446f3fcb1854d9205b8b1c2d8cc869fa039e39b251cc233df724efb664": {
+      "name": "worker",
+      "output": "- rain falls.\n- roots grow.\n- new life blooms. all is set."
+    },
+    "worker:59a987a9b761193d8b2a615869052284764eb8743dac0e19f97116fe718ef6f4": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:5bb87e89c00994ae91fcdcd80cb015eadfec9028a61d3cbd87f311a54464c7c6": {
+      "name": "worker",
+      "output": "Cells are small units.\nThe cell holds the code.\nIt tells the cell what to do.\nCells split to make new cells.\nYou grow via cells.\nthat is it."
+    },
+    "worker:5be36b972917c9c665dacbd2267babd8df01a54cfdd19a21d8fd911ca33ec332": {
+      "name": "worker",
+      "output": "the sun shines on a leaf. the green parts drink up light. this makes sugar. the plant uses this for growth. leaves turn brown in fall. trees drop them. that is it."
+    },
+    "worker:5c7a6582d62bed5b0a74f4816185c51cff9696326b273879e46a0edd17720b0e": {
+      "name": "worker",
+      "output": "- we saw it\n- it is new\n- so nice\n- a cool find\n- now we know"
+    },
+    "worker:5d0c8c811874b6100f2d06f87dc6d95377e8ac757fd31fae0c3c92a24d4b48fd": {
+      "name": "worker",
+      "output": "flux is key. it shows change. your work will grow"
+    },
+    "worker:5de501b86196444141de11a54ee2ba009c6cff839a7f4808159652b02fa0d61c": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:5dea8d676c5771d604fad1bd118ca8f88e4c951813f44c5a4683de3a529c33f2": {
+      "name": "worker",
+      "output": "Here is a brief on tech.\nCode shapes data.\nApps link users.\nPower comes from grid.\nWe use such tools.\nhere we go."
+    },
+    "worker:5e0233de9d6a01031b6b01a49dba80e5a6467ccb530d696b10244c745a60894f": {
+      "name": "worker",
+      "output": "heat flux\nthe rate\nat which\nenergy\nflows\nthrough\na solid\nis key\nin\nhow\nwe\nfeel\nwarm\nor\ncool\nit is\nthe\nrate\nat\nwhich\nheat\nenergy\nmoves\nacross\na unit\narea\nper\nunit\ntime"
+    },
+    "worker:5e1a944e517dfa5c4cc98b1e83e4d06a3e0651484bc8b79ec0c304511996aad3": {
+      "name": "worker",
+      "output": "flux drives sea tides in a natural cycle"
+    },
+    "worker:5e28d46c31abec7c61825b39aad1b89f2b5f2c071dea76c09e4e7637792e9ae6": {
+      "name": "worker",
+      "output": "The draft contains \"The leaf full here we go.\" \"Full\" is 4 letters, \"The\" is 3, \"leaf\" is 4, \"here\" is 4, \"we\" is 2, \"go.\" is 3.\nLet's check the constraints against the draft:\n\n1.  **End with \"here we go.\"**: The last bullet point ends with \"here we go.\" (It is part of the sentence \"The leaf full here we go.\"). Wait, the constraint says \"end your response with the exact phrase 'here we go.'\". The draft's last line is \"- The leaf full here we go.\" The response ends with \"here we go.\" so that part is likely satisfied, but let's check the other constraints first.\n2.  **No word longer than 7 letters**:\n    -   Rain (4)\n    -   falls (5)\n    -   from (4)\n    -   dark (4)\n    -   clouds (6)\n    -   Roots (5)\n    -   reach (5)\n    -   soil (4)\n    -   to (2)\n    -   grow (4)\n    -   a (1)\n    -   node (4)\n    -   Sun (3)\n    -   warms (5)\n    -   the (3)\n    -   wet (3)\n    -   ground (6)\n    -   New (3)\n"
+    },
+    "worker:5f0a3fbbe36efcb4fc8628a98ec941f6ba5522592307d04d5f41bb6fffe39e89": {
+      "name": "worker",
+      "output": "- a star is born\n- gas turns to heat\n- light shines out\n- the sun burns on\n- so it goes."
+    },
+    "worker:5f5e81d28419774d98e28560e11513e2acc6f2fd49f9d99e53b394d64f5b55de": {
+      "name": "worker",
+      "output": "- the sun is a star\n- it burns gas for light\n- earth orbits the sun\n- we are done."
+    },
+    "worker:5fb34b450cabf336e47132bab55fdddac9ae6cfecc42acb38bdb6e843d77beb0": {
+      "name": "worker",
+      "output": "flux is a key idea in science. it shows how much stuff moves through a space. imagine water flowing in a pipe. the flux is the rate of flow. beginners can learn this by watching rain fall. it helps you see change in nature."
+    },
+    "worker:5fb48c01f76fb971e30086fd829ec7418723145b9015a946e48e5fb076cc11a5": {
+      "name": "worker",
+      "output": "a node is a point on a stem.\na leaf can form there.\nit sets the spot for new shoots.\nthis part links the plant.\nthat is it."
+    },
+    "worker:6071510987ab37c99499ebd2e768d88b4804832f609c8ff00144a738ef91632f": {
+      "name": "worker",
+      "output": "- Atoms bond\n- Cells grow\n- Light bends\n- Waves split we are done."
+    },
+    "worker:607cd8669715d04521148055d2aee14bfe24f32694c5a082020cd4ce5072b0a7": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:607d3b6bf021ed5ef6e9655da834a25fa1af4abc9bbc02d9620da61c42e7b7f4": {
+      "name": "worker",
+      "output": "star for heat drive tech"
+    },
+    "worker:61567af172e4fd8b3be9e6501e9b63dd4d6d48b0e80571c05d000ae056f3553c": {
+      "name": "worker",
+      "output": "- i saw a rare bird\n- its feathers glowed\n- i felt pure awe\n- note is down"
+    },
+    "worker:61f0336ef60484a4322660994cb067250b9d3d004773827cef8518e32adce03a": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:6240f69fea0f154de0f3ad3c947eb87767fecd6b86c388bb8edf4ad2118feda3": {
+      "name": "worker",
+      "output": "heat is energy. it moves from hot to cold spots in a room. this flow is called conduction. it happens when things touch. atoms bump into each other and pass on heat."
+    },
+    "worker:62994b1422fc9360ffdc484f48f166ae4bd69ace8eca6dbc173770b12a082c2a": {
+      "name": "worker",
+      "output": "we found a wave. all is set."
+    },
+    "worker:62b4ddc83decf2082b578d60b98efaf35dbd4b6c11bd6e635bfbaf7c154967f2": {
+      "name": "worker",
+      "output": "- an atom is tiny\n- it has a core\n- parts spin fast\n- this is basic"
+    },
+    "worker:635a27b6a481e72be2ef78ebfe7172dab065d457a5ad5a0dd8e0a56bd21f2cd3": {
+      "name": "worker",
+      "output": "To ensure the draft meets all constraints, let's verify each one:\n\n1.  **do not use the word \"to\"**: The draft \"Found flux in the cave. It glows red.\" does not contain the word \"to\". (Pass)\n2.  **use no word longer than 6 letters**:\n    *   \"Found\" (5 letters)\n    *   \"flux\" (4 letters)\n    *   \"in\" (2 letters)\n    *   \"the\" (3 letters)\n    *   \"cave\" (4 letters)\n    *   \"It\" (2 letters)\n    *   \"glows\" (5 letters)\n    *   \"red\" (3 letters)\n    All words are 6 letters or fewer. (Pass)\n3.  **include the word \"flux\"**: The word \"flux\" is present. (Pass)\n4.  **do not use any commas**: There are no commas in the text. (Pass)\n\nPASS"
+    },
+    "worker:63814d705a765a76d259eb7e93b32dab4e017b177d93c1362f1ffaf8747a6c08": {
+      "name": "worker",
+      "output": "- atoms are min parts\n- cells build life\n- sun gives light\n- air holds gas\n- water sustains us"
+    },
+    "worker:63c5a6b3f838baa7ce4aceee5d5a56e620bafa589b5a6f68fcdda13c7d5131ba": {
+      "name": "worker",
+      "output": "Quantum flux drives tech.\nIt links nodes.\nThat is it."
+    },
+    "worker:64aeccc77e65b7938be6466163ca0167cde76cf39e74eeb7722be705a2a9ec2a": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:64f202adfe0514d6929c85416dbc897a760249ce0c35d19dd2dc1d1268d6e4f9": {
+      "name": "worker",
+      "output": "list what to fix:\n\n1. do not use the word \"the\" -> the draft does not contain \"the\", so this is satisfied.\n2. include the word \"star\" -> \"star\" is present.\n3. write your entire response in lowercase -> \"ai is a star\" is all lowercase.\n4. do not use any commas -> no commas present.\n5. use no word longer than 6 letters -> \"ai\" (2), \"is\" (2), \"a\" (1), \"star\" (4). All are <= 6.\n\nWait, let me re-read the constraints carefully.\n- include the word \"star\": yes.\n- do not use the word \"the\": yes, \"the\" is absent.\n- write your entire response in lowercase: yes.\n- do not use any commas: yes.\n- use no word longer than 6 letters: yes.\n\nThe draft \"ai is a star\" satisfies all constraints. However, the task is to \"Give a brief overview of a technology.\" Does \"ai is a star\" count as a brief overview? It is very minimal, but it technically identifies a technology (ai) and describes it metaphorically. The prompt asks to check if constraints are satisfied. The constraints are met. But is it a good answer? The prompt asks \"Reply exactly PASS if every requirement is satisfied; otherwise list what to fix.\" It does not ask to judge quality beyond the explicit constraints. The explicit constraints are the hard rules.\n\nLet's double"
+    },
+    "worker:68638e697b5fca18e11c5b00bcf5da1450707414220099ea1af254395c91b77e": {
+      "name": "worker",
+      "output": "new dirt found"
+    },
+    "worker:69748b909eae440c1a022769e4eb8bac3af83bf5e230fc4186ea33b0fbbfd626": {
+      "name": "worker",
+      "output": "A gene holds code."
+    },
+    "worker:69dd5543202114272ed972977700f4c0bc25f0f8dcca80ff63dd129a873ac182": {
+      "name": "worker",
+      "output": "- An atom is tiny.\n- It forms all.\n- Study these bits."
+    },
+    "worker:6a4bad5bdf70d62ef1f54bc6534ee6f86311b0158d7f0c62ee972f46db0c0ff1": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:6a9d9c9e7bc57395966b0df0b711047f63ae18ed3249a8617ec35ee530e7fc82": {
+      "name": "worker",
+      "output": "- Rain falls from dark clouds\n- Roots reach soil to grow a node\n- Sun warms the wet ground\n- New leaves start to bloom\n- The leaf full here we go."
+    },
+    "worker:6b5a0ee5f10d1669b312edbadcf77cbe394a614f4b60b724107095ef20307f8f": {
+      "name": "worker",
+      "output": "- Slow rain falls into dark earth and soft soil.\n- Small roots drink deep and grow strong.\n- Bright light breaks the clouds, so all is set."
+    },
+    "worker:6d6fb77556fc744827bc123c033726ee4e50ea949348c0d0879ad9fa2f8140dc": {
+      "name": "worker",
+      "output": "- light comes from sun\n- it hits earth fast\n- this warms us all\n- that is it."
+    },
+    "worker:6d78916079efd3292e730b339312107eedb605c3d712e4116664d0255ed17059": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:6dd1b55ee458f04e8d77aab3ce409f66a36dd043d78ee4cc699cf768093ee301": {
+      "name": "worker",
+      "output": "- we saw a rare beast\n- it had big red eyes\n- the beast ran away\n- we felt so pleased\n- we are done."
+    },
+    "worker:6ea6c1f47bc68d337981d86afd88748a7f3032e616c4c5385dc121158b400e2b": {
+      "name": "worker",
+      "output": "a node is a key part of a plant stem. it holds leaves or buds. these spots look like rings on the bark. they mark growth zones in the wood. here we go."
+    },
+    "worker:6faf194816302f0b36fae63b6f92b837e415c090749f73a608221ebe12f057ac": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:73aa7e52f1cfa79733b323d80a2301e15e99eaacaeb9919f5be01c842ae88317": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:74ab961fd8f74b71e1909094393d9d7b74c6ee4b64ccfeaf31a81bedd262bffa": {
+      "name": "worker",
+      "output": "Found flux in the cave. It glows red."
+    },
+    "worker:775ada93d46a25c45d95ed4644359668212fdc9eecad558937fff84344626d52": {
+      "name": "worker",
+      "output": "- a.\n- b.\n"
+    },
+    "worker:7903b350d6031f3ad811d425dc3aca3c240ad2001e1d01c95e8c3498bff7b19f": {
+      "name": "worker",
+      "output": "- flux found\n- it is rare\n- no past data\n- we know now\n- all is set."
+    },
+    "worker:79487dd831ed9831cd0d4552dc8b71a5b3f50c42312731136514eafef5d849c2": {
+      "name": "worker",
+      "output": "check if all requirements are satisfied:\n\n1. do not use any commas: the draft has no commas. ok.\n2. use no word longer than 6 letters: check each word:\n   - an (2) ok\n   - atom (4) ok\n   - has (3) ok\n   - a (1) ok\n   - core (4) ok\n   - of (2) ok\n   - protons (7) - too long. fails\n   - and (3) ok\n   - neutrons (8) - too long. fails\n   - electrons (9) - too long. fails\n   - orbit (5) ok\n   - this (4) ok\n   - core (4) ok\n   - in (2) ok\n   - fixed (5) ok\n   - paths (5) ok\n   - this (4) ok\n   - structure (9) - too long. fails\n   - lets (4) ok\n   - atoms (5) ok\n   - bond (4) ok\n   so words like protons neutrons electrons structure are too long. fails.\n3. do not use the word \"to\": the draft does not contain \"to\". ok.\n4. include the word \"atom\": yes contains \"atom\". ok.\n5. write entire response in lowercase: no capital letters. ok.\n\nso the main issue is words longer than 6 letters. also need to keep the meaning of explaining a scientific concept."
+    },
+    "worker:7bdc9f17f0af2911fd8dd104e73abe53e475f76d978cd8ebacb6126f20a2e351": {
+      "name": "worker",
+      "output": "- atoms hold matter together\n- heat moves from warm to cold\n- cells make body parts work\nall is set."
+    },
+    "worker:7c555918b54a5e9c5bc998ace869a46751d088a4010596dde573c2811d98ab40": {
+      "name": "worker",
+      "output": "- read code.\n- list keys.\n- check all.\n- fix bugs.\n- run again."
+    },
+    "worker:7dfd1610ba67968978164202bdd1d592316685f763c146815a3e12afedcad395": {
+      "name": "worker",
+      "output": "- A hot star burns bright\n- Light moves from core out\n- Gas turns to liquid water\n- Rain falls on dry ground"
+    },
+    "worker:7e5cf8af68bab6659d437af167b404404394ee1a02c97c4630793464515ee1bf": {
+      "name": "worker",
+      "output": "- Zoom in on key ideas first\n- Read the text twice for core points\n- Keep note-taking short and simple\n- Ask own mind for quick checks\n- Sleep then test your self"
+    },
+    "worker:7e941f7e4c87f60c8c17d3ee58b4150fa161a7d144cdea21d80015e21ed38e4d": {
+      "name": "worker",
+      "output": "- Sum a idea\n- Keep it short\n- Use plain words\n- Avoid long terms"
+    },
+    "worker:8003876d60b1d5637d3c82c95c6c536ebed43405e37c9eb606200fbc9038c83b": {
+      "name": "worker",
+      "output": "try code"
+    },
+    "worker:803b35ff294bc9c3bd1c0001c15deb4fab1387241aecd9f53e28529c1ae9d263": {
+      "name": "worker",
+      "output": "the sun gene drives heat"
+    },
+    "worker:8048fc00c30e5a4a06c64fbe6858d53a9253de3ccc87ba2b276e47e656633d2f": {
+      "name": "worker",
+      "output": "- Art is fun\n- Start with a pen\n- Draw sad lines\n- Mix red and blue\n- Watch colors blend"
+    },
+    "worker:80df595d62e09849ad0d14e9d501c029450eb09b660480a5e8d283aa9b0d0cc3": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:80e7b0b5f4a0d18c6fdaf19c54eb4e0363377406f8bb7466e78d68acfa8eb53a": {
+      "name": "worker",
+      "output": "- Pick a text.\n- Note its claim.\n- Say why it matters.\n- List two proofs.\n- Cite a link.\nwe are done."
+    },
+    "worker:80f19b6d1ce5c764b3b24c2338f65c5972125fb11b86c01d8c9ac1ef739040e0": {
+      "name": "worker",
+      "output": "a bug was found in my yard. it has red wings and odd legs. i will seek a pro to help."
+    },
+    "worker:8117291c74330f9a71c1fb4b7a342524ea2aea53495c6f237eb8f98eeb5df153": {
+      "name": "worker",
+      "output": "we found a node"
+    },
+    "worker:8133b59f5da1e4cd60b53098f5b930dd0adf3b84ae27a6f840c81907a826d993": {
+      "name": "worker",
+      "output": "a wave rolls in"
+    },
+    "worker:81d448b9ee5830ba89480786d8543554ee3e065d7b6fa8d6fc83bee6762e25d0": {
+      "name": "worker",
+      "output": "let's check the criteria against the draft:\n1. **format as exactly 4 bullet points, each line starting \"- \"**: The draft has 4 bullet points, all starting with \"- \". This is satisfied.\n2. **do not use the word \"to\"**: Let's scan the words: \"pick\", \"a\", \"math\", \"aid\", \"as\", \"your\", \"theme\", \"write\", \"the\", \"core\", \"facts\", \"on\", \"one\", \"page\", \"share\", \"your\", \"plan\", \"with\", \"a\", \"buddy\", \"now\", \"ask\", \"for\", \"clear\", \"tips\", \"on\", \"your\", \"work\". The word \"to\" is not present. This is satisfied.\n3. **use no word longer than 6 letters**:\n   - pick (4)\n   - a (1)\n   - math (4)\n   - aid (3)\n   - as (2)\n   - your (4)\n   - theme (5)\n   - write (5)\n   - the (3)\n   - core (4)\n   - facts (5)\n   - on (2)\n   - one (3)\n   - page (4)\n   - share (5)\n   - your (4)\n   - plan (4)\n   - with (4)\n   - a (1)\n   - buddy (5)\n   - now (3"
+    },
+    "worker:81da5d19769e2365dd303fd0e6eb392d1015bbdc3cddbf28a7bd7bcf98a00a05": {
+      "name": "worker",
+      "output": "Hello. Let us chat about flux. It is a key part of physics and science. Think of it as a flow. Water flows from a tap. Air flows from a fan. This idea helps us see how things move. It changes over time. Watch a stream. See how water shifts. That is core movement. Now, you know flux. we are done."
+    },
+    "worker:824db6e25ab95b1a943675a790c4c31c1c64b6b3b74d2800463616bd613fd842": {
+      "name": "worker",
+      "output": "an atom has a core of protons and neutrons. electrons orbit this core in fixed paths. this structure lets atoms bond."
+    },
+    "worker:82fc9125ecd3c82b76e72362bd333fa562b6e6b8df6dfc3ed309c9e8d8f6d612": {
+      "name": "worker",
+      "output": "- water is the key for life\n- cells are the base for all life forms\n- the sun burns fuel to make light\n- the earth spins on its own spin\n- air has gas we breathe"
+    },
+    "worker:84210abfd8125d95eb26bf1bf5b8b5f7a08451a485ed065e12e76c66365825e5": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:850788511680e3a45c1a1fc017c8df89af8d5bb9df98bff63e658551b3c0e66c": {
+      "name": "worker",
+      "output": "- learn the base parts of code.\n- test your scripts for bugs.\n- read docs for help with terms.\n- build small apps with care.\n- keep up a steady pace so it goes."
+    },
+    "worker:8586251653d466fe17d71e1c159df62c1115f009413250ac95bcadda0b423e62": {
+      "name": "worker",
+      "output": "- start here to learn\n- keep it simple and clear\n- try small steps first\n- ask for help if stuck\n- we are done."
+    },
+    "worker:87a0294962b3f4e33f1c824f970b26e937529964c03eb019f4dc27b7b2c3c01f": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:87fa4156958da8d0e1043e7fa3d9a5ab01ab4b307def5257b8776450fd5cf6d5": {
+      "name": "worker",
+      "output": "1. The final bullet point does not start with \"- \" (it starts with the word \"we\").\n2. The word \"pleased\" in the fourth bullet point is 7 letters long (limit is 6).\n"
+    },
+    "worker:889eacef6266f90c2e096331182e69a8ff725baadada2114be9ff30480027ebc": {
+      "name": "worker",
+      "output": "Let's evaluate the draft against the constraints:\n\n1.  **Do not use the word \"to\"**:\n    *   Draft: \"- rain falls\\n- soil gets wet\\n- plants drink that is it.\"\n    *   Check: The word \"to\" is not present. (Pass)\n\n2.  **End your response with the exact phrase \"that is it.\"**:\n    *   Draft ends with: \"that is it.\"\n    *   Check: It ends with exactly \"that is it.\". (Pass)\n\n3.  **Use no word longer than 7 letters**:\n    *   Words in draft:\n        *   \"rain\" (4)\n        *   \"falls\" (5)\n        *   \"soil\" (4)\n        *   \"gets\" (4)\n        *   \"wet\" (3)\n        *   \"plants\" (6)\n        *   \"drink\" (5)\n        *   \"that\" (4)\n        *   \"is\" (2)\n        *   \"it.\" (2 characters including punctuation, word length 2)\n    *   Check: All words are 7 letters or fewer. (Pass)\n\n4.  **Format as exactly 3 bullet points, each line starting \"- \"**:\n    *   Line 1: \"- rain falls\" (Starts with \"- \")\n    *   Line 2: \"- soil gets wet\" (Starts with \"- \")\n    *"
+    },
+    "worker:88dbc1e1518d129e5edd34ca8e349ee7b3a66eecadc7b5f607a42f3845f62912": {
+      "name": "worker",
+      "output": "- sun warms air\n- air lifts high\n- clouds build there that is it."
+    },
+    "worker:8998a984a0588425ced3a5066917762dab92e456c5cd61db0a6ffe132a412efe": {
+      "name": "worker",
+      "output": "stacks hold code. all is set."
+    },
+    "worker:8ab428e63219f5ae5804383a8d927b08ccfac3bc5416556209423450b377b9ac": {
+      "name": "worker",
+      "output": "Let's check the draft answer \"Use one atom.\" against the constraints:\n\n1.  **use no word longer than 6 letters**:\n    -   \"Use\": 3 letters. (Pass)\n    -   \"one\": 3 letters. (Pass)\n    -   \"atom\": 4 letters. (Pass)\n2.  **do not use the word \"to\"**:\n    -   The text is \"Use one atom.\" It does not contain \"to\". (Pass)\n3.  **include the word \"atom\"**:\n    -   The text contains \"atom\". (Pass)\n4.  **end your response with the exact phrase \"we are done.\"**:\n    -   The draft ends with \"atom.\", not \"we are done.\". (Fail)\n5.  **do not use any commas**:\n    -   There are no commas. (Pass)\n\nWhat to fix: The response must end with the exact phrase \"we are done.\""
+    },
+    "worker:8b89d42dc332978d5c7c1f7715143fccf17e1a9419facaea02e41c05e6148ef7": {
+      "name": "worker",
+      "output": "- Read the text twice to grasp the core points  \n- Zoom in on key ideas first  \n- Keep note-taking short and simple  \n- Ask own mind for quick checks  \n- Sleep then test your self"
+    },
+    "worker:8ca8e49c7a56d00ea53539b91c3999e7e953659191c4e97c57471192149c03e7": {
+      "name": "worker",
+      "output": "the sun burns. rain falls. drops hit the ground. water seeps down. roots drink deep. leaves grow tall. trees stand firm. roots break rock. soil forms grain by grain."
+    },
+    "worker:8d5e209895936e68750915beac4d8d0a74b5cb31dad7a13adc08fb9017962663": {
+      "name": "worker",
+      "output": "All the criteria are met."
+    },
+    "worker:8eeb3b90ed14cc62a0a89df574511167d5d4c430d5ab889e177b0125c671c16a": {
+      "name": "worker",
+      "output": "- We saw flux\n- It was rare\n- No prior data\n- Now we know\n- all is set."
+    },
+    "worker:90f57ff3a7cc63acd01c222b28a30d4b76e2c5985ea34f77f6797d84f69f0cc8": {
+      "name": "worker",
+      "output": "An atom is tiny. we are done."
+    },
+    "worker:969c8d7fa175fd187c0d8ed9f28906c88524a076048206460c5a508818e9f964": {
+      "name": "worker",
+      "output": "- Rain drops on leaves.\n- Sun warms the damp earth.\n- Roots find a key node.\n- Water helps seeds to grow.\n- New life rings here we go."
+    },
+    "worker:982899d33e2c0b5094ea8f4e8d4d76d143b5860d5def1fefc3f8376f44fa507b": {
+      "name": "worker",
+      "output": "a tool for work. so it goes."
+    },
+    "worker:983ca7a1a43465f7cea1be4243a77c741cf94a23630ec25d24a6fb8ec023d6d4": {
+      "name": "worker",
+      "output": "- the sun warms the sea\n- heat lifts water up\n- sky makes clouds form\n- rain drops fall back here we go."
+    },
+    "worker:986bd798f5ea0f683e8f43a77040a1b3d03494b21c91c80932c05bc72fbeae8c": {
+      "name": "worker",
+      "output": "- all life holds deoxyribonucleic acid\n- gene code makes each cell act well\n- dna acts as base for all traits"
+    },
+    "worker:988b6548764c31c0bedb4a6984c5413498ba2cfbc136784a05cba54dc454bcb9": {
+      "name": "worker",
+      "output": "- An atom is tiny.\n- Atoms are small bits.\n- They build all things.\n- learn this fast.\nhere we go."
+    },
+    "worker:9924c78028a569d0c97c8165dffbaa1534d65a36622f51ff8c66172a8925ecb4": {
+      "name": "worker",
+      "output": "heat is a form of energy. it moves from warm spots to cool ones. this shift helps balance the temp."
+    },
+    "worker:9a193a6f438d09f299c5b5500f2fa94ceeb1a6f5c55ae366bf9c1a06ac886f82": {
+      "name": "worker",
+      "output": "List what to fix:\n\n- Word \"energy\" has 6 letters (OK)\n- All words in draft are under or equal to 6 letters?\n  - \"Light\" (5) OK\n  - \"is\" (2) OK\n  - \"pure\" (4) OK\n  - \"energy\" (6) OK\n  - \"Waves\" (5) OK\n  - \"move\" (4) OK\n  - \"fast\" (4) OK\n  - \"in\" (2) OK\n  - \"a\" (1) OK\n  - \"void\" (4) OK\n  - \"Plants\" (6) OK\n  - \"eat\" (3) OK\n  - \"sun\" (3) OK\n  - \"to\" (2) OK\n  - \"live\" (4) OK\n- Commas used? No.\n- Word \"the\" used? No.\n- Format: exactly 3 bullet points starting with \"- \"? Yes.\n\nWait, check \"energy\" again. E-N-E-R-G-Y. That is 6 letters.\nCheck \"Plants\". P-L-A-N-T-S. That is 6 letters.\nCheck \"Waves\". W-A-V-E-S. That is 5 letters.\nCheck \"Light\". L-I-G-H-T. That is 5 letters.\n\nAre there any words longer than 6 letters?\n\"energy\" is 6.\n\"Plants\" is "
+    },
+    "worker:9a3f44132660a5d9e65defd90c0d4a4713e589375962f87c52dd6a4f2fb14a16": {
+      "name": "worker",
+      "output": "a node is a key part of a plant stem. it holds leaves or buds. these spots look like rings on the bark. they mark growth zones in the wood. here we go."
+    },
+    "worker:9aa4c91ce38f19cd6861780d7f2636e602ca9dbe4d8cd1fb464766f04f792f1b": {
+      "name": "worker",
+      "output": "- Flux shifts.\n- Waves ripple.\n- Light bends.\n- Space stretches.\n- All moves."
+    },
+    "worker:9b09650b9b4f45819f0f0deb97582deb428a613325b4a7ca7aeffcf6ab7d635a": {
+      "name": "worker",
+      "output": "I need to check the draft answer against all requirements:\n\n1. **do not use the word \"and\"** - The draft does not contain \"and\". \u2713\n2. **include the word \"code\"** - The draft contains \"code\" in bullet 1. \u2713\n3. **end your response with the exact phrase \"that is it.\"** - The last line is \"- That is it.\" which ends with \"That is it.\" However, the requirement says the exact phrase should be \"that is it.\" (lowercase 't'). The draft has \"- That is it.\" with uppercase 'T'. This is a problem because the exact phrase \"that is it.\" (all lowercase) is required at the end. Also, the line starts with \"- \" so the actual ending is \"That is it.\" not \"that is it.\" \u2717\n4. **use no word longer than 7 letters** - Let's check each word:\n   - \"AI\" (2), \"uses\" (4), \"smart\" (5), \"code\" (4)\n   - \"It\" (2), \"learns\" (6), \"fast\" (4)\n   - \"Users\" (5), \"gain\" (4), \"help\" (4)\n   - \"Data\" (4), \"gets\" (4), \"read\" (4)\n   - \"That\" (4), \"is\" (2), \"it\" (2)\n   All words are 7 letters or fewer. \u2713\n5"
+    },
+    "worker:9b404348d71ecd3314ddef785241dc5828c7e03582efbd281ebcb8a4c115f879": {
+      "name": "worker",
+      "output": "The format requires 5 bullet points **each starting with \"-\"**. The required ending phrase is \"all is set.\", which does not start with a dash. I will revise the ending requirement so every bullet starts with a hyphen, and verify word length and prohibited words.\n\nRevised answer:\n\n- We saw flux\n- It was rare\n- No prior data\n- Now we know\n- all is set."
+    },
+    "worker:9d4c66ecd90e720102945499ae9f81d60b606bb502a316b5c109e98cb41f6d82": {
+      "name": "worker",
+      "output": "Cells are the base parts of life. Each cell holds a core with code. The code tells the cell what to do. A cell makes new cells. This is how you grow. That is it."
+    },
+    "worker:9f4745ccf2e45378166d4d006fbc54e2a7d5e581ef10d992e8f752679be57d66": {
+      "name": "worker",
+      "output": "a star is a huge ball of gas. it burns hot and bright. the light we see came from its core. this glow helps us see the night sky. stars make up most of what we know as galaxies."
+    },
+    "worker:9fbaa07d28e7a508691b26742d906ce5d49b1a3445bcc06f9fef2bfbbbf46770": {
+      "name": "worker",
+      "output": "I need to verify the draft against the requirements.\n\n1. **Use no word longer than 6 letters**:\n   - \"The\" (3) - OK\n   - \"core\" (4) - OK\n   - \"has\" (3) - OK\n   - \"no\" (2) - OK\n   - \"wires\" (5) - OK\n   - \"no\" (2) - OK\n   - \"heat\" (4) - OK\n   - \"no\" (2) - OK\n   - \"sound\" (5) - OK\n   - \"it\" (2) - OK\n   - \"runs\" (4) - OK\n   - \"clean\" (5) - OK\n   - \"and\" (3) - OK\n   - \"fast\" (4) - OK\n   - \"it\" (2) - OK\n   - \"stores\" (6) - OK\n   - \"data\" (4) - OK\n   - \"and\" (3) - OK\n   - \"helps\" (5) - OK\n   - \"us\" (2) - OK\n   - \"work\" (4) - OK\n   - \"here\" (4) - OK\n   - \"we\" (2) - OK\n   - \"go.\" (3) - OK\n\n2. **Do not use any commas**: There are no commas in the draft. - OK\n\n3. **Do not use the word \"to"
+    },
+    "worker:a09284ac6b92df0706571c344441c28d46b232c8afd0458b87d31e7a7a379063": {
+      "name": "worker",
+      "output": "The draft satisfies all requirements, so: all is set."
+    },
+    "worker:a0cc7f4750624884a7e31ece33d2c6cfa46fc484607f9b8c54d2b90be08ceb66": {
+      "name": "worker",
+      "output": "Reply exactly PASS"
+    },
+    "worker:a15e7121a04e660962648d7cbf72b4998d232d3387a2e62cfc95a8f117e4017c": {
+      "name": "worker",
+      "output": "heat is light. energy from a hot body. we feel warm. that is it."
+    },
+    "worker:a23a74545745563c69b4b703503288b0307c0d8f4cf2c8cf79b7ae2007a4d293": {
+      "name": "worker",
+      "output": "hi\nthis is a chat\nwe will talk now\ntell me what you know"
+    },
+    "worker:a346b6b88a3d1f4ff9fa53d2fd95094c0734d41e08e97baa00d5043cfd2a29d6": {
+      "name": "worker",
+      "output": "pass"
+    },
+    "worker:a491e3c95149b8b0fc030526298eea4ee2a54799e74f79e19a3bf58c02f812b0": {
+      "name": "worker",
+      "output": "A gene is a small part of DNA."
+    },
+    "worker:a4ac3ea4d07636858c1ee8fd72aad4b8d62ba91cdf2e0e4384bed7ab896da7e2": {
+      "name": "worker",
+      "output": "- heat is a form of energy\n- it moves from hot to cold\n- plants need sun and air"
+    },
+    "worker:a554db35313fb74fcd9c444a401ff98e029fa7d954f466029d64cb739e9aece7": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:a5e6817af259b74db935d9b33559d485d26ea1ffb4e16859327f438017eb7fdf": {
+      "name": "worker",
+      "output": "drops fall from leaves.\nthey mix in the air.\nwet ground takes in the rain.\nroots drink deep below."
+    },
+    "worker:a70970ef3f060488b489fc4e885fbd8dbc1013f6b446a5cac4077d6a0381fa69": {
+      "name": "worker",
+      "output": "a cell holds data"
+    },
+    "worker:a734bec50dc05cec346c77461754b3f62b3f7eea6e86739e986ae398f5e6117f": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:a84d831b4e9219c97f94c40a9ca277d13f2231c1ceea12f9d0fc546d09935b3d": {
+      "name": "worker",
+      "output": "- the sun warms the sea\n- heat lifts water up\n- sky makes clouds form\n- rain drops fall here we go."
+    },
+    "worker:a9bc55f33e6f7eebf5b3d30360bf4d7c842c84b81fe76162122247d33d533606": {
+      "name": "worker",
+      "output": "- AI runs code\n- It scans data\n- You get help\n- It feels fast\n- that is it."
+    },
+    "worker:aacae4e7f8d6f29f7ad83c758c980e5a8565b1dcf1bbb1d89f9bf51b6c5c80e8": {
+      "name": "worker",
+      "output": "- The core idea is simple\n- It helps you learn fast\n- Give it a good try now"
+    },
+    "worker:aaf3963a0789a47462fcb692f6d41c2a55fd720b9a3ce78cdcac92ace53f4b31": {
+      "name": "worker",
+      "output": "- a spark\n- i saw it\n- oil rose\n- we are done."
+    },
+    "worker:ab8eb6a5ffc009084c6df315126af38004f0d43ccb9c4440e2a4f72b3648bf6f": {
+      "name": "worker",
+      "output": "To ensure strict compliance with all constraints, I will generate a natural, accurate response that intrinsically satisfies every requirement without artificial tricks. I will carefully verify the word length, case, forbidden words, ending, and format for each line.\n\nLine 1: \"- a bold new bug\"\n- All words are within the 7-letter limit.\n- All words are lowercase.\n- The forbidden word \"the\" is absent.\n- It starts with \"- \".\n\nLine 2: \"- it moved in strange ways\"\n- All words are within the 7-letter limit.\n- All words are lowercase.\n- The forbidden word \"the\" is absent.\n- It starts with \"- \".\n\nLine 3: \"- we felt immense awe\"\n- All words are within the 7-letter limit.\n- All words are lowercase.\n- The forbidden word \"the\" is absent.\n- It starts with \"- \".\n\nLine 4: \"- so it goes.\"\n- All words are within the 7-letter limit.\n- All words are lowercase.\n- The forbidden word \"the\" is absent.\n- It starts with \"- \".\n- It ends with the exact required phrase.\n\nThis response consists of exactly 4 bullet points, adheres to the word length and capitalization rules, avoids the word \"the\", and ends correctly.\n\n- a bold new bug\n- it moved in strange ways\n- we felt immense awe\n- so it goes."
+    },
+    "worker:ab8f2bbbf42110c59fd428d7a14b4d6096a29bc23209d5fba32af04403816ad2": {
+      "name": "worker",
+      "output": "Not all requirements are satisfied. Here is what needs to be fixed:\n\n1.  **Format violation:** Bullet point 5 (\"we are done.\") does not start with \"- \".\n2.  **Constraint violation:** The word \"we\" in the final line is allowed, but the phrase \"we are done.\" appears as a standalone bullet point. The requirement states the *response* must end with that phrase, but the format constraint requires *exactly 5 bullet points, each line starting \"- \"*, which seems to suggest all lines including the last must be bullet points. However, combined rules often imply the last bullet point's content should be the phrase, or the phrase is appended. Let's look closer at the constraints: \"end your response with the exact phrase 'we are done.'\" AND \"format as exactly 5 bullet points, each line starting '- '\".\n    *   If the last line is `- we are done.`, it ends with \"we are done.\" (ignoring the hyphen? No, the string ends with the period). The text ends with \"dot\". The phrase is \"we are done.\". The line is \"- we are done.\". Does the line end with the phrase? Yes, the suffix is the phrase.\n    *   However, let's re-read: \"end your response with the exact phrase\". The characters at the very end are `d`, `o`, `n`, `e`, `.`. This matches.\n    *   So, is the format violated? The draft has 5 lines. Line"
+    },
+    "worker:ac9e4792f3b4398bef3329ff5bc1a70f997cffe681b5fc9148bbd3fc746760de": {
+      "name": "worker",
+      "output": "- trees take in sun and air\n- they make air we need\n- so it goes."
+    },
+    "worker:ae06294778aed8584ea75e5ed3163db1f336c1567d34bbcc8e4d021440b58245": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:aea8bc096335a50543388e6e8607166ca7141a16885850a367b0a8dc7a7bafcf": {
+      "name": "worker",
+      "output": "Learn stars.\nStars glow high so it goes."
+    },
+    "worker:aeec592297215ad1465150d0ddd60b569bbdb02cec506cfaab2c89ddbe3c2c1b": {
+      "name": "worker",
+      "output": "- trees take in sun and air\n- they make air we need\n- so it goes."
+    },
+    "worker:afe7d6102d78fe305c052ace87eb9f0f5bb2d7ce55f31be9610df28de1933e75": {
+      "name": "worker",
+      "output": "A node is a point.\nIt joins the parts.\nNet work flows.\nSo it goes."
+    },
+    "worker:b11091563fd3f608032c46dde337e344726aa4e97b4888dfb8501148c52d5ddb": {
+      "name": "worker",
+      "output": "list what to fix: no word longer than 6 letters"
+    },
+    "worker:b25fd7e43cab0c1577c5efb7a41774614924d3b87bc184929639743ad981112e": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:b30437b6ab4e58c5975e3f75232fbd09de4ff97cf9d2cdaf8783c6e2a9239b3f": {
+      "name": "worker",
+      "output": "- the sun heats the sea\n- warm air lifts water up\n- cool sky forms clouds high\n- rain drops fall to the earth here we go."
+    },
+    "worker:b3f2e39e584aa871d7d788db12f09b9189b610ecfec9b2b9f4eb62983f392d89": {
+      "name": "worker",
+      "output": "winds storm. storms move. dust rises. dust falls. air laps. drops form. drops drop. rain hits earth. soil swells. sap buds sprout. that is it."
+    },
+    "worker:b7d3642d8acc7e3f54088e743588301decd25fb07c13c334c737e67d22a174f7": {
+      "name": "worker",
+      "output": "not pass"
+    },
+    "worker:b8652bd3c4e600f97757c5417b06f8ac98678caeeb1f86b635c7ca3948fc80a0": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:b8b12612b01cdd9ed08503000f0df3ecd7a2a5ba67db0732f843ec6e73d69216": {
+      "name": "worker",
+      "output": "trees have nodes.\na node holds sap.\nit moves water.\nthis helps a plant grow."
+    },
+    "worker:b8dc1b164f55896b982ea34baa1a8c4cf7feed321e4a34dfd312c9d61575232b": {
+      "name": "worker",
+      "output": "the soil holds a seed. rain feeds it. roots grow deep. a stem pushes up. leaves unfold. sun warms a node. buds form. petals open."
+    },
+    "worker:b92c87ea30dff7efc635caf8cfabb0da3e620a5493655bedfdd5f4a08a4354db": {
+      "name": "worker",
+      "output": "I will verify the draft answer against the stated constraints.\n\n1.  **do not use any commas**: The draft contains no commas. (Pass)\n2.  **end your response with the exact phrase \"that is it.\"**: The draft ends with \"That is it.\" Note that the capitalization differs. The requirement says \"exact phrase\". Usually, case-insensitive checks are acceptable unless specified, but let's look closer. \"That is it.\" vs \"that is it.\". The draft uses a capital 'T'. The prompt asks for the exact phrase \"that is it.\". I should likely use the lowercase version or check if \"exact\" implies case sensitivity. Given the strictness, I should probably fix the capitalization to match exactly.\n3.  **use no word longer than 6 letters**:\n    - Cells (5) - OK\n    - are (3) - OK\n    - the (3) - OK\n    - base (4) - OK\n    - parts (5) - OK\n    - of (2) - OK\n    - life. (4 + 1 punct) - OK\n    - Each (4) - OK\n    - cell (4) - OK\n    - holds (5) - OK\n    - a (1) - OK\n    - core (4) - OK\n    - with (4) - OK\n    - code. (4) - OK\n    - The (3) - OK\n    - code (4) - OK\n    -"
+    },
+    "worker:b981c2d6b037d0c102db6fb52af206bc05fbde84e4583f9dcab566e77bcf0abe": {
+      "name": "worker",
+      "output": "The core has no wires no heat no sound it runs clean and fast it stores data and helps us work here we go"
+    },
+    "worker:b9d2aa6c310f6cece6678999d32084e9216f1e7ebdb4f8f5481369333018e8a2": {
+      "name": "worker",
+      "output": "- A new flux was found\n- It glows in dark tones\n- This shift is so bold\n- Key facts for all"
+    },
+    "worker:b9e7e6887f6c630235be71f29392773931d5a8f5ae1a7c0b704dd9a0722b61a4": {
+      "name": "worker",
+      "output": "list what to fix:\n- \"six\" is 3 letters (ok)\n- \"legs\" is 4 letters (ok)\n- \"ate\" is 3 letters (ok)\n- \"old\" is 3 letters (ok)\n- \"leaves\" is 6 letters (ok)\n- \"odd\" is 3 letters (ok)\n- \"bugs\" is 4 letters (ok)\n- \"each\" is 4 letters (ok)\n- \"one\" is 3 letters (ok)\n- \"had\" is 3 letters (ok)\n- \"i\" is 1 letter (ok)\n- \"saw\" is 3 letters (ok)\n- \"so\" is 2 letters (ok)\n- \"it\" is 2 letters (ok)\n- \"goes\" is 4 letters (ok)\n\nall words are no longer than 7 letters.\nall text is lowercase.\nthe word \"the\" is not used.\nthe response ends with \"so it goes.\"\nthe response is formatted as exactly 4 bullet points, each starting with \"- \".\n\nwait, let me double-check the last bullet point requirement. \"end your response with the exact phrase 'so it goes.'\"\nthe last line is \"- so it goes.\"\ndoes this end with \"so it goes.\"? yes, the string ends with that phrase.\nis it a bullet point? yes.\n\nlet me re-read carefully.\n\"format as exactly "
+    },
+    "worker:ba2b92f59a27fd49ff85310215140cc1ef2ccfc155e2c1d5b69273fce330ba39": {
+      "name": "worker",
+      "output": "- Learn data\n- Write code\n- Run tests\n- Fix bugs"
+    },
+    "worker:bb6c4815d60df53e91fcca3ac2b62253c35e4a3d944235a165fc3ab86d8b2fd9": {
+      "name": "worker",
+      "output": "- the net\n- you post\n- you text\n- all is set."
+    },
+    "worker:bcac5ebed086d72d0909903335e62b44ec7516e64fd8a2a9cff5945369da5de0": {
+      "name": "worker",
+      "output": "- A gene holds key data\n- Cells read this code\n- Traits shape your form\n- Life runs on this"
+    },
+    "worker:bd018d67381a0d871e30bf829b8ebf348e95c5c30e4df73a186c2bcc55e12968": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:bd274e25df38f16570aae85407b41bc6554b0b3854ca8f4fb5853a30eaa95262": {
+      "name": "worker",
+      "output": "One word\nShort text\nClear tone\nSimple form"
+    },
+    "worker:bd5e762e3499002de66bb0c6fbad3b948a5a0e8b91073aa6f3200458a8394825": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:bdb52a6004a0cba0183652b6a583aabdc7cbaa50211e55da7271a0f0432177ce": {
+      "name": "worker",
+      "output": "light is a kind of wave. it moves at a huge speed. your eye sees it. this lets you see things. the sun sends out this light."
+    },
+    "worker:bdfe9987c344cc960ab203fee40f69432af63620ca2805c22425ae4daf782fdb": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:c044d160f986abbb8bddfaa640338ec285d3819a0170f4fe1ad17d98a3d3e268": {
+      "name": "worker",
+      "output": "1. The draft contains the text \"long words gone.\" which is not part of the summary; it looks like an internal check.\n2. The task asks to \"summarize an idea for a student.\" The phrase \"long words gone\" explains the constraint, not an idea. A better idea should be conveyed.\n3. The prompt asks to evaluate if *every* requirement is satisfied by the *draft answer*.\n   - \"use no word longer than 6 letters\":\n     - \"Top\" (3)\n     - \"star\" (4)\n     - \"shines.\" (5)\n     - \"no\" (2)\n     - \"\"of\"\" (2, plus quotes? usually punctuation is ignored or part of the string. If strictly counting characters, \"of\" inside quotes is just \"of\". But wait, the draft has `\"of\"`. The word is `of`. Length 2.\n     - \"here.\" (4)\n     - \"long\" (4)\n     - \"words\" (5)\n     - \"gone.\" (4)\n     - \"so\" (2)\n     - \"it\" (2)\n     - \"goes.\" (4)\n     All words are <= 6 letters.\n   - \"end your response with the exact phrase \"so it goes.\"\": The draft ends with \"so it goes.\" Satisfied.\n   - \"include the word \"star\"\": Yes, \"star\" is present.\n   - \"do"
+    },
+    "worker:c06ba9b4d97cc66926e860e52444cb6ad4b1948c2b1d1df03f27e28573dbc273": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:c1dc12456af766fc6a3be21a590da1d0bb707598dfaa277389993f4651d6f765": {
+      "name": "worker",
+      "output": "Top star shines.\nno \"of\" here.\nlong words gone.\nso it goes."
+    },
+    "worker:c3d6e59480b57002213996283bc622b0311fc0f42cee97cd513292936e12415d": {
+      "name": "worker",
+      "output": "- read each line of code.\n- list every key step.\n- check for any bugs.\n- fix these errors now.\n- run once more."
+    },
+    "worker:c49d0affbded0a5ef74321f765fbebd519d98e35cf8db43fa386c0a2c9c1fc58": {
+      "name": "worker",
+      "output": "Photosynthesis lets plants make food. They take in sun, air, plus water. This mix fuels their growth. It helps them stay alive. all is set."
+    },
+    "worker:c4efcd1f7873480dc95344c3da09b2ff18937e4cfaa3856f129c6a5988627564": {
+      "name": "worker",
+      "output": "check the draft answer against the requirements:\n\n1. write your entire response in lowercase (no capital letters)\n   - \"heat is a form of energy\" -> all lowercase\n   - \"it moves from hot to cold\" -> all lowercase\n   - \"plants need sun and air\" -> all lowercase\n   \u2705 satisfied\n\n2. use no word longer than 7 letters\n   - \"heat\" (4), \"is\" (2), \"a\" (1), \"form\" (4), \"of\" (2), \"energy\" (6)\n   - \"it\" (2), \"moves\" (5), \"from\" (4), \"hot\" (3), \"to\" (2), \"cold\" (4)\n   - \"plants\" (6), \"need\" (4), \"sun\" (3), \"and\" (3), \"air\" (3)\n   \u2705 satisfied\n\n3. do not use any commas\n   - none of the lines contain commas\n   \u2705 satisfied\n\n4. format as exactly 3 bullet points, each line starting \"- \"\n   - each line starts with \"- \"\n   - there are exactly 3 lines\n   \u2705 satisfied\n\n5. do not use the word \"to\"\n   - the second line says \"it moves from hot to cold\"\n   - the word \"to\" is present\n   \u274c not satisfied\n\nfix:\n- replace \"to\" in the second line with a word that is 7 letters or fewer, not \""
+    },
+    "worker:c4f1d7e0f46f47bcf4354b9d7a0949bf6d9fd9bf23f433d533cf6c32aceeb403": {
+      "name": "worker",
+      "output": "- Sun light hits\n- the world gets\n- hot by day\n- that is it."
+    },
+    "worker:c808c3269084e9d5d2729122a8d38b9b38ba753d8f076728962b7ddfd025d014": {
+      "name": "worker",
+      "output": "we note a wave. all is set."
+    },
+    "worker:c8c1d82e73ea6c2fe8314ec15833c3482d0ec191162324851a05f2d2d0bd815b": {
+      "name": "worker",
+      "output": "Use one atom."
+    },
+    "worker:c96b874e1d7b6e703aaec4d7e03549d8d154f4804aec9b3cc04a4f5dda5fd074": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:ca04140f3ed358faacaad9d81c59dfe97e0687f623446acd359d52e0bafdbc5b": {
+      "name": "worker",
+      "output": "- this chip lets data flow fast\n- it runs without much heat\n- small parts make great speed\n- this tech helps us build so it goes."
+    },
+    "worker:ca178c697f6f3570186ed9d80d3ae542eb5316339fbb18f4d2eaf7fac27e7a90": {
+      "name": "worker",
+      "output": "- ai boosts thought speed\n- it aids us daily\n- so it goes."
+    },
+    "worker:ca3810fe02f9e46c236b5b18d65ec14754725c082018c375d755511ea0887cf8": {
+      "name": "worker",
+      "output": "To say it in short words, plants make food. They use the sun. Air plus water join in. This turns light to fuel. It gives life to every leaf. all is set."
+    },
+    "worker:ca79c6e983abc9b37aefa7ea2465d0c3b08756209fe918192f5f34e40da96434": {
+      "name": "worker",
+      "output": "- Read on.\n- Think hard.\n- Stop.\n- Write on.\n- here we go."
+    },
+    "worker:cbd8c666c253b68d95dfc6f2b694dfd97a9725763128d11b14de3ac7bb397728": {
+      "name": "worker",
+      "output": "- Rain falls\n- Soil then\n- Seeds wake\n- Tiny green\n- Life grows\nhere we go."
+    },
+    "worker:cc91100560081bdb21c1b924af8a7bb67600d4cc99f3ecf5748ffe96b06cd72a": {
+      "name": "worker",
+      "output": "- A gene holds key data\n- Cells read this code\n- Traits shape your form\n- Life runs on this"
+    },
+    "worker:cd4980b7a2756f25d895305fd615b6347db358bc10ca4f1a34ac57ce6bd0ada9": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:d0f976ef680562a122d2636842f6ab7f49a29fdfb6e6014729a50d00be5d85e1": {
+      "name": "worker",
+      "output": "stack is a key part. it holds bits of code. all is set."
+    },
+    "worker:d121cfaaed65fb803327f486101a317cfa6932f38d274ac62e0d4be0ce393453": {
+      "name": "worker",
+      "output": "pass"
+    },
+    "worker:d2b3135bba3812af4c7cd09b0280a066f3e28522cc9e06ecf166862cc10e91a7": {
+      "name": "worker",
+      "output": "pass"
+    },
+    "worker:d30f5bdaf337830ec4f96330d014b00b74c96dd34b636a0cb8fd1740226b5e02": {
+      "name": "worker",
+      "output": "- Big in.\n- Learn it.\n- Start now.\n- Grow well.\n- Here we go."
+    },
+    "worker:d384f31e277404eea2b0dde4d168f7087a4f073f06269d8c7d0eaa72e710fb39": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:d50318fa3348abcd0efdf0142d75f7e9a880ef26415a75d31225e9c2304a1d35": {
+      "name": "worker",
+      "output": "- rain falls\n- soil gets wet\n- plants drink that is it."
+    },
+    "worker:d597aafbc252c7a224574d439982cc01dcbed592daa9c25f9c994592030d712e": {
+      "name": "worker",
+      "output": "check: \"wave\" (4), \"found\" (5), \"short\" (5), \"note\" (4), \"set\" (3), \"all\" (3) - all under 7. no capitals. ends with required phrase. \"and\" not used. valid. \n\nwait, the task asks to write a note about a discovery. the draft is \"we found a wave. all is set.\" \n\nis \"note about a discovery\" satisfied? \"we found a wave\" is a discovery. \n\nlet's re-verify constraints:\n1. lowercase: yes.\n2. end with \"all is set.\": yes.\n3. no \"and\": yes.\n4. include \"wave\": yes.\n5. no word longer than 7: \"found\" (5), \"wave\" (4). yes.\n\nthe draft passes.\n\npass"
+    },
+    "worker:d764191dbde855686e0569254d234cc26821d3014f5b76fa8dcd3cb4a65599aa": {
+      "name": "worker",
+      "output": "- a new cell\n- was found\n- in the lab\n- that is it."
+    },
+    "worker:d7ad508a31a6361fc7b4df3ab4e52bf5fa72a8731d2926bfc99468c6ff4e07a5": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:d86f3b5feecdf48bc6acb15b16d4313f288d33885569df78bd5418a2ecf2cecc": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:d8fcd70944ec1ccd55cecda004f0cc08a6ee2c3be237933b928e1d52b5c3f546": {
+      "name": "worker",
+      "output": "list what to fix:\n1. the word \"the\" contains 3 letters, which is fine, but wait, i need to check word length again. \"everyone\" is not used. let's check the draft:\n- \"i\" (1) - ok\n- \"saw\" (3) - ok\n- \"a\" (1) - ok\n- \"new\" (3) - ok\n- \"code\" (4) - ok\n- \"in\" (2) - ok\n- \"the\" (3) - ok\n- \"lab\" (3) - ok\n- \"it\" (2) - ok\n- \"was\" (3) - ok\n- \"a\" (1) - ok\n- \"cool\" (4) - ok\n- \"find\" (4) - ok\n- \"that\" (4) - ok\n- \"is\" (2) - ok\n- \"it\" (2) - ok\n- \"that is it.\" ends with exact phrase.\n- includes \"code\".\n- no word longer than 6 letters.\n- all lowercase.\n- does not use the word \"to\".\n\nWait, i missed checking for \"to\" in the draft. The draft is: \"i saw a new code in the lab. it was a cool find. that is it.\"\nDoes it contain \"to\"? No.\nDoes it end with \"that is it.\"? Yes.\nDoes it include \"code\"? Yes.\n"
+    },
+    "worker:dad78564cc16f550bf59963ee6625fa479847ed4b9518c246f5e53f7dd4e3c84": {
+      "name": "worker",
+      "output": "heat is light.\nit is power\nfrom a hot body.\nwe feel warm.\nthat is it."
+    },
+    "worker:db0e92bc1f5696bc86042188d356958234f3d27103e8d060d2cf6f78d93a3064": {
+      "name": "worker",
+      "output": "- To learn well you need to focus on key ideas\n- Read the text twice to grasp the core points\n- Write short notes on what is most vital\n- Quiz your own mind to check your true recall\n- Rest a bit then test your final understanding"
+    },
+    "worker:ddbbce88bb62005fb72c47130bc645ce45c8be80c14c295db58c17166beba1c4": {
+      "name": "worker",
+      "output": "the sun burns hot. it fuses gas. this makes light. that heat warms us. life needs this."
+    },
+    "worker:ddd095334bdb45bb56a43d08ceef2c7049b95aa9b96771c84a6e9d2d268936fe": {
+      "name": "worker",
+      "output": "- pick a topic\n- read short notes\n- talk it out\n- stay calm\n- we are done."
+    },
+    "worker:de8b2025e93694e5141d9bf67dc867f54bcd9099bd68f148733cc74cc9a17aad": {
+      "name": "worker",
+      "output": "check each stated constraint:\n\n- \"do not use the word 'the'\": the draft is \"we found new rocks\". it does not contain \"the\". \u2713\n- \"write your entire response in lowercase (no capital letters)\": \"we found new rocks\" is all lowercase. \u2713\n- \"do not use any commas\": there are no commas. \u2713\n- \"use no word longer than 6 letters\": \n  - \"we\" (2) \u2713\n  - \"found\" (5) \u2713\n  - \"new\" (3) \u2713\n  - \"rocks\" (5) \u2713\n  all words are 6 letters or fewer.\n\nare there any missing constraints? \n- \"a short note about a discovery\": the draft \"we found new rocks\" is a short note implying a discovery. it fits.\n\nall requirements are satisfied.\n\npass"
+    },
+    "worker:df274b691bf8a03428910879b2d9d4e0a0d9e07bfc81f89424f9923f98374922": {
+      "name": "worker",
+      "output": "a node is a bump on a stem. it holds a leaf. these spots ring the wood. they mark growth spots. here we go."
+    },
+    "worker:df872b9c9899633998ad636127c1b2a00cfa8ad4c375579fdd96d53c44b58ba8": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:dfe1054dafa5797ed26291cf72dffdb49df3f6c5ecf3b249c85742e5f48e8ae7": {
+      "name": "worker",
+      "output": "The Draft answer satisfies all requirements:\n\n1.  **No commas**: The sentence \"A tiny atom was found. It glows bright.\" contains no commas.\n2.  **No word longer than 7 letters**:\n    *   \"A\" (1)\n    *   \"tiny\" (4)\n    *   \"atom\" (4)\n    *   \"was\" (3)\n    *   \"found\" (5)\n    *   \"It\" (2)\n    *   \"glows\" (5)\n    *   \"bright\" (6)\n    All words are 7 letters or fewer.\n3.  **No word \"and\"**: The word \"and\" does not appear in the draft.\n4.  **Includes the word \"atom\"**: The word \"atom\" is present.\n\nPASS"
+    },
+    "worker:e0d9b3cd10500b7736ceee73b6e0d6096ef69c7608b7aee89b5729207b2e4d34": {
+      "name": "worker",
+      "output": "stack is a key part. it holds bits of code. all is set."
+    },
+    "worker:e18a93f03a63af2f18dbb613b43a7bee7cc43e312566c991ed5517781397234d": {
+      "name": "worker",
+      "output": "Let me check each requirement against the draft:\n\n1. Do not use the word \"and\" \u2192 The draft has no \"and\". \u2705\n2. End with exact phrase \"we are done.\" \u2192 The last bullet is \"- we are done.\" \u2014 but the response must END with \"we are done.\" The bullet point formatting adds \"- \" before it, so the literal final characters are \"we are done.\" which matches the exact phrase requirement? Wait \u2014 the requirement says \"end your response with the exact phrase\", and the full line is \"- we are done.\" The last line does end with \"we are done.\" as part of the line, but the response itself ends with that phrase (ignoring the bullet marker). Actually, the response text ends with \"...we are done.\" including the bullet. Let me reconsider: the final characters of the entire response are \"e\" from \"done.\" \u2014 yes, it ends with \"we are done.\" \u2705\n3. Format as exactly 4 bullet points, each line starting \"- \" \u2192 There are 4 lines, each starts with \"- \". \u2705\n4. Use no word longer than 7 letters \u2192 Check each word: the, sun, is, a, star (4), it, burns, gas, for, light (5), earth, orbits, the, sun, we, are, done. (all \u22647) \u2705\n\nPASSED\n\nPASS"
+    },
+    "worker:e413da2862d3533800a20f8e93b05c2ac2991761f2e0ee035c01824da5c1ca37": {
+      "name": "worker",
+      "output": "Found flux in the cave. It glows red."
+    },
+    "worker:e442a38cf115d72146e3554e3c6a60586ad51997cdc38b1d5a215b0bc3b98367": {
+      "name": "worker",
+      "output": "an atom is a tiny part of all matter. it has a core. bits spin around it."
+    },
+    "worker:e54226dbb789b817cb819ef87a9127854abf8a23f25de38c364be9b2b0a6e22b": {
+      "name": "worker",
+      "output": "light is made of waves. it travels in straight lines. the sun gives us light. we see things because light hits them. mirrors bounce light back. eyes catch the light."
+    },
+    "worker:e5526c0a08916b4aef6b9594d24a68771ed3bf5b4ccbb3bbbd868486a45ee860": {
+      "name": "worker",
+      "output": "i saw a new code in the lab. it was a cool find. that is it."
+    },
+    "worker:e6283899aebb2b37e84b72ca1dcbac1f2fa18e256dd2e3d52bb1c6e9daf34dd4": {
+      "name": "worker",
+      "output": "- AI uses smart code.\n- It learns fast.\n- Users gain help.\n- Data gets read.\n- That is it."
+    },
+    "worker:e7e6cfdfddb2677f4cc95c73a161b733305e64c93641ee2c794be8b8bfc2a625": {
+      "name": "worker",
+      "output": "- learn facts\n- look at cues\n- read the text\n- keep it brief\n- gain insight"
+    },
+    "worker:e88058000caf46eb32f92d6616cd0397697155095c19e0da77d743f0b15b6d90": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:e890c47fa5e4c16a2978a258e69aa8f876bcc19d031e0db8d33762f098558aca": {
+      "name": "worker",
+      "output": "I need to PASS"
+    },
+    "worker:e8ad53ed1487cad94d2ca4fbc20b28322da38fe1854644a7325925452d08cd2f": {
+      "name": "worker",
+      "output": "PASS"
+    },
+    "worker:ea778c81d48aeb75b4b08781fd129fa857eb62d3dfed68ea230d4e53a4b48bd2": {
+      "name": "worker",
+      "output": "- i saw a bug\n- it was small\n- i felt glad\n- it is new\n- i am sad"
+    },
+    "worker:ed111700f280eafe36fea5576405b9be35c8dd454ab6475db9228b0537b9fb25": {
+      "name": "worker",
+      "output": "- heat flows down a temp drop\n- sun warms our land each day\n- fire turns wood ash and gas"
+    },
+    "worker:ede33e5942ab165e62e9512afeda05cc6cf3ec126282445b145426b263048bed": {
+      "name": "worker",
+      "output": "Alright. Let us check the draft against the requirements.\n\n1.  **Use no word longer than 7 letters:**\n    *   \"Hello.\" (5) - OK\n    *   \"Let\" (3) - OK\n    *   \"us\" (2) - OK\n    *   \"chat\" (4) - OK\n    *   \"about\" (5) - OK\n    *   \"flux.\" (4) - OK\n    *   \"It\" (2) - OK\n    *   \"is\" (2) - OK\n    *   \"a\" (1) - OK\n    *   \"key\" (3) - OK\n    *   \"part\" (4) - OK\n    *   \"of\" (2) - OK\n    *   \"physics\" (7) - OK\n    *   \"and\" (3) - OK\n    *   \"science.\" (7) - OK\n    *   \"Think\" (5) - OK\n    *   \"of\" (2) - OK\n    *   \"it\" (2) - OK\n    *   \"as\" (2) - OK\n    *   \"a\" (1) - OK\n    *   \"flow.\" (4) - OK\n    *   \"Water\" (5) - OK\n    *   \"flows\" (5) - OK\n    *   \"from\" (4) - OK\n    *   \"a\""
+    },
+    "worker:ee1e40701723d53b2683abf28b97295debbb87e7424eaa70421c5768d600318e": {
+      "name": "worker",
+      "output": "- water turns to gas via heat\n- it lifts up high in the sky\n- cold air makes water form drops\n- rain falls back down to the earth so it goes."
+    },
+    "worker:ee5de9206a9aa43465b5a272c044885104261cbc4c663840f397574f501ad98d": {
+      "name": "worker",
+      "output": "i found a rare stone. it glows at night. this is a start. here we go."
+    },
+    "worker:ee77095407110145228c68e678fe6ea6228d7eb425465d2d0ecf79c9d40c145c": {
+      "name": "worker",
+      "output": "I need to make sure my next answer totally obeys all rules. Let's look at each rule one by one. First, I must have just four items. Each one starts with a hyphen and a space. My old answer had four, which was good. No term can be over seven chars. Last time I had \"natural\" maybe? No, wait. Let's check the last output:\n- water (5) turns (5) to (2) gas (3) via (3) heat (4) -> All under 7.\n- it (2) lifts (5) up (2) high (4) in (2) the (3) sky (3) -> All under 7.\n- cold (4) air (3) makes (5) water (5) form (4) drops (5) -> All under 7.\n- rain (4) falls (5) back (4) down (4) to (2) the (3) earth (5) -> All under 7.\nSo the length was fine.\nThe ending phrase \"so it goes.\" was there.\nBut the word \"of\" was not used.\nWait, I need to generate the response based on the prompt. The prompt says \"Your response MUST satisfy ALL of the following requirements\". It doesn't say I have to fix the previous one, but the context implies I am an iterator. However, I just need to output the correct text now.\nLet's create a new, safe text.\n"
+    },
+    "worker:eea559ece5bf99e09b7e7162ddc0d616f0081353454926c8665ca61836b6b16c": {
+      "name": "worker",
+      "output": "This tool changes gene code."
+    },
+    "worker:f068f2e92845bf404f8d90766e1c5317df4b49ecc6ead577692f2556e02101c9": {
+      "name": "worker",
+      "output": "- pick a clear theme\n- list main facts\n- use short words\n- write it well so it goes."
+    },
+    "worker:f28428c1c61036e0bc1278e1f8053fcbf04f23b9891160550d19af246fbb761b": {
+      "name": "worker",
+      "output": "we found new rocks"
+    },
+    "worker:f4fe1a3c2b5713323ac94b5d4ee26af5d1cd4e1b4a272bd2a8bcd57a9e487825": {
+      "name": "worker",
+      "output": "- tips on tips\n- keep it real\n- start slow now\n- have fun out there. that is it."
+    },
+    "worker:f72845c7ac835fa0de5732ca028a0ef83d672e40519cceab9a20f538e7b47792": {
+      "name": "worker",
+      "output": "- Robotic arms lift heavy items fast.\n- Main parts are motors, arms, and code.\n- Such tools help in many key spots."
+    },
+    "worker:fb4bf10180087ab66bdee34f2d0231100eee978fbb7a521ee4e876deccf018aa": {
+      "name": "worker",
+      "output": "- we saw a beast\n- big red eyes\n- it ran off\n- we felt glad\n- we are done."
+    },
+    "worker:fb4e57d7a3d03c62e40af65cd52c0632b42d01d498f2ba267e7a175aee5c6863": {
+      "name": "worker",
+      "output": "A small atom was found. It shines."
+    },
+    "worker:fcaa9054e771160f170855d7b5b5c201233a809b7e6d0043c8b97711ef748130": {
+      "name": "worker",
+      "output": "list what to fix:\n- the response contains only three bullet points instead of exactly four.\n- the final phrase \"all is set.\" is not part of a bullet point, violating the constraint that every line must start with \"- \" (specifically, the last line does not start with \"- \")."
+    },
+    "worker:fdafe327c16fb8e54ada34dfdac4c7ea8d31bc7c164839db109e85ecb9c83e42": {
+      "name": "worker",
+      "output": "ai is a star"
+    }
+  },
+  "version": 1
+}

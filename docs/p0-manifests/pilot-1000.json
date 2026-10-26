@@ -1,0 +1,3301 @@
+{
+ "generator": {
+  "n": 120,
+  "seed": 1000
+ },
+ "levels": {
+  "calib": {
+   "0": {
+    "heldout": [
+     "p0cal-1000-0",
+     "p0cal-1000-1",
+     "p0cal-1000-2",
+     "p0cal-1000-3",
+     "p0cal-1000-4",
+     "p0cal-1000-5",
+     "p0cal-1000-6",
+     "p0cal-1000-7",
+     "p0cal-1000-8",
+     "p0cal-1000-9",
+     "p0cal-1000-10",
+     "p0cal-1000-11",
+     "p0cal-1000-12",
+     "p0cal-1000-13",
+     "p0cal-1000-14",
+     "p0cal-1000-15",
+     "p0cal-1000-16",
+     "p0cal-1000-17",
+     "p0cal-1000-18",
+     "p0cal-1000-19"
+    ],
+    "train": []
+   },
+   "1": {
+    "heldout": [
+     "p0cal-1000-20",
+     "p0cal-1000-21",
+     "p0cal-1000-22",
+     "p0cal-1000-23",
+     "p0cal-1000-24",
+     "p0cal-1000-25",
+     "p0cal-1000-26",
+     "p0cal-1000-27",
+     "p0cal-1000-28",
+     "p0cal-1000-29",
+     "p0cal-1000-30",
+     "p0cal-1000-31",
+     "p0cal-1000-32",
+     "p0cal-1000-33",
+     "p0cal-1000-34",
+     "p0cal-1000-35",
+     "p0cal-1000-36",
+     "p0cal-1000-37",
+     "p0cal-1000-38",
+     "p0cal-1000-39"
+    ],
+    "train": []
+   },
+   "2": {
+    "heldout": [
+     "p0cal-1000-40",
+     "p0cal-1000-41",
+     "p0cal-1000-42",
+     "p0cal-1000-43",
+     "p0cal-1000-44",
+     "p0cal-1000-45",
+     "p0cal-1000-46",
+     "p0cal-1000-47",
+     "p0cal-1000-48",
+     "p0cal-1000-49",
+     "p0cal-1000-50",
+     "p0cal-1000-51",
+     "p0cal-1000-52",
+     "p0cal-1000-53",
+     "p0cal-1000-54",
+     "p0cal-1000-55",
+     "p0cal-1000-56",
+     "p0cal-1000-57",
+     "p0cal-1000-58",
+     "p0cal-1000-59"
+    ],
+    "train": []
+   },
+   "3": {
+    "heldout": [
+     "p0cal-1000-60",
+     "p0cal-1000-61",
+     "p0cal-1000-62",
+     "p0cal-1000-63",
+     "p0cal-1000-64",
+     "p0cal-1000-65",
+     "p0cal-1000-66",
+     "p0cal-1000-67",
+     "p0cal-1000-68",
+     "p0cal-1000-69",
+     "p0cal-1000-70",
+     "p0cal-1000-71",
+     "p0cal-1000-72",
+     "p0cal-1000-73",
+     "p0cal-1000-74",
+     "p0cal-1000-75",
+     "p0cal-1000-76",
+     "p0cal-1000-77",
+     "p0cal-1000-78",
+     "p0cal-1000-79"
+    ],
+    "train": []
+   },
+   "4": {
+    "heldout": [
+     "p0cal-1000-80",
+     "p0cal-1000-81",
+     "p0cal-1000-82",
+     "p0cal-1000-83",
+     "p0cal-1000-84",
+     "p0cal-1000-85",
+     "p0cal-1000-86",
+     "p0cal-1000-87",
+     "p0cal-1000-88",
+     "p0cal-1000-89",
+     "p0cal-1000-90",
+     "p0cal-1000-91",
+     "p0cal-1000-92",
+     "p0cal-1000-93",
+     "p0cal-1000-94",
+     "p0cal-1000-95",
+     "p0cal-1000-96",
+     "p0cal-1000-97",
+     "p0cal-1000-98",
+     "p0cal-1000-99"
+    ],
+    "train": []
+   },
+   "5": {
+    "heldout": [
+     "p0cal-1000-100",
+     "p0cal-1000-101",
+     "p0cal-1000-102",
+     "p0cal-1000-103",
+     "p0cal-1000-104",
+     "p0cal-1000-105",
+     "p0cal-1000-106",
+     "p0cal-1000-107",
+     "p0cal-1000-108",
+     "p0cal-1000-109",
+     "p0cal-1000-110",
+     "p0cal-1000-111",
+     "p0cal-1000-112",
+     "p0cal-1000-113",
+     "p0cal-1000-114",
+     "p0cal-1000-115",
+     "p0cal-1000-116",
+     "p0cal-1000-117",
+     "p0cal-1000-118",
+     "p0cal-1000-119"
+    ],
+    "train": []
+   }
+  }
+ },
+ "sha256": "731502b0be178166d95fb8e0692c1c013ed4dd5f1b386f78c4b34d3550e15077",
+ "stats": {
+  "purpose": "Phase 0 pilot calibration, 2026-10-25 pre-registration"
+ },
+ "tasks": [
+  {
+   "id": "p0cal-1000-0",
+   "payload": {
+    "goal": "Introduce a topic to a beginner.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 15 words\n- include the word \"node\"\n- do not use any commas\n- do not use the word \"and\"\n- end your response with the exact phrase \"so it goes.\"",
+    "instruction_id_list": [
+     "exact_word_count",
+     "include_keyword",
+     "no_comma",
+     "forbidden_word",
+     "end_with"
+    ],
+    "kwargs": [
+     {
+      "n": 15
+     },
+     {
+      "keyword": "node"
+     },
+     {},
+     {
+      "word": "and"
+     },
+     {
+      "phrase": "so it goes."
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-1",
+   "payload": {
+    "goal": "Explain a scientific concept.\n\nYour response MUST satisfy ALL of the following requirements:\n- use no word longer than 6 letters\n- write your entire response in lowercase (no capital letters)\n- use exactly 20 words\n- do not use the word \"to\"\n- end your response with the exact phrase \"that is it.\"",
+    "instruction_id_list": [
+     "word_max_length",
+     "all_lowercase",
+     "exact_word_count",
+     "forbidden_word",
+     "end_with"
+    ],
+    "kwargs": [
+     {
+      "m": 6
+     },
+     {},
+     {
+      "n": 20
+     },
+     {
+      "word": "to"
+     },
+     {
+      "phrase": "that is it."
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-2",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- include the word \"atom\"\n- use exactly 20 words\n- write your entire response in lowercase (no capital letters)\n- do not use the word \"the\"\n- format as exactly 5 bullet points, each line starting \"- \"",
+    "instruction_id_list": [
+     "include_keyword",
+     "exact_word_count",
+     "all_lowercase",
+     "forbidden_word",
+     "num_bullets"
+    ],
+    "kwargs": [
+     {
+      "keyword": "atom"
+     },
+     {
+      "n": 20
+     },
+     {},
+     {
+      "word": "the"
+     },
+     {
+      "n": 5
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-3",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use any commas\n- end your response with the exact phrase \"all is set.\"\n- use exactly 20 words\n- do not use the word \"the\"\n- write your entire response in lowercase (no capital letters)",
+    "instruction_id_list": [
+     "no_comma",
+     "end_with",
+     "exact_word_count",
+     "forbidden_word",
+     "all_lowercase"
+    ],
+    "kwargs": [
+     {},
+     {
+      "phrase": "all is set."
+     },
+     {
+      "n": 20
+     },
+     {
+      "word": "the"
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-4",
+   "payload": {
+    "goal": "Describe a natural process.\n\nYour response MUST satisfy ALL of the following requirements:\n- use no word longer than 6 letters\n- do not use the word \"to\"\n- use exactly 25 words\n- end your response with the exact phrase \"we are done.\"\n- do not use any commas",
+    "instruction_id_list": [
+     "word_max_length",
+     "forbidden_word",
+     "exact_word_count",
+     "end_with",
+     "no_comma"
+    ],
+    "kwargs": [
+     {
+      "m": 6
+     },
+     {
+      "word": "to"
+     },
+     {
+      "n": 25
+     },
+     {
+      "phrase": "we are done."
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-5",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 20 words\n- write your entire response in lowercase (no capital letters)\n- format as exactly 5 bullet points, each line starting \"- \"\n- end your response with the exact phrase \"here we go.\"\n- do not use the word \"and\"",
+    "instruction_id_list": [
+     "exact_word_count",
+     "all_lowercase",
+     "num_bullets",
+     "end_with",
+     "forbidden_word"
+    ],
+    "kwargs": [
+     {
+      "n": 20
+     },
+     {},
+     {
+      "n": 5
+     },
+     {
+      "phrase": "here we go."
+     },
+     {
+      "word": "and"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-6",
+   "payload": {
+    "goal": "Explain a scientific concept.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 15 words\n- end your response with the exact phrase \"all is set.\"\n- do not use the word \"and\"\n- write your entire response in lowercase (no capital letters)",
+    "instruction_id_list": [
+     "exact_word_count",
+     "end_with",
+     "forbidden_word",
+     "all_lowercase"
+    ],
+    "kwargs": [
+     {
+      "n": 15
+     },
+     {
+      "phrase": "all is set."
+     },
+     {
+      "word": "and"
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-7",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- format as exactly 3 bullet points, each line starting \"- \"\n- do not use the word \"and\"\n- use no word longer than 6 letters\n- use exactly 15 words\n- do not use any commas",
+    "instruction_id_list": [
+     "num_bullets",
+     "forbidden_word",
+     "word_max_length",
+     "exact_word_count",
+     "no_comma"
+    ],
+    "kwargs": [
+     {
+      "n": 3
+     },
+     {
+      "word": "and"
+     },
+     {
+      "m": 6
+     },
+     {
+      "n": 15
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-8",
+   "payload": {
+    "goal": "Introduce a topic to a beginner.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 15 words\n- use no word longer than 7 letters\n- include the word \"gene\"\n- do not use the word \"and\"",
+    "instruction_id_list": [
+     "exact_word_count",
+     "word_max_length",
+     "include_keyword",
+     "forbidden_word"
+    ],
+    "kwargs": [
+     {
+      "n": 15
+     },
+     {
+      "m": 7
+     },
+     {
+      "keyword": "gene"
+     },
+     {
+      "word": "and"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-9",
+   "payload": {
+    "goal": "Describe a natural process.\n\nYour response MUST satisfy ALL of the following requirements:\n- write your entire response in lowercase (no capital letters)\n- end your response with the exact phrase \"so it goes.\"\n- use exactly 25 words\n- do not use the word \"and\"",
+    "instruction_id_list": [
+     "all_lowercase",
+     "end_with",
+     "exact_word_count",
+     "forbidden_word"
+    ],
+    "kwargs": [
+     {},
+     {
+      "phrase": "so it goes."
+     },
+     {
+      "n": 25
+     },
+     {
+      "word": "and"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-10",
+   "payload": {
+    "goal": "Introduce a topic to a beginner.\n\nYour response MUST satisfy ALL of the following requirements:\n- format as exactly 3 bullet points, each line starting \"- \"\n- write your entire response in lowercase (no capital letters)\n- use exactly 20 words\n- include the word \"star\"\n- do not use the word \"the\"",
+    "instruction_id_list": [
+     "num_bullets",
+     "all_lowercase",
+     "exact_word_count",
+     "include_keyword",
+     "forbidden_word"
+    ],
+    "kwargs": [
+     {
+      "n": 3
+     },
+     {},
+     {
+      "n": 20
+     },
+     {
+      "keyword": "star"
+     },
+     {
+      "word": "the"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-11",
+   "payload": {
+    "goal": "Introduce a topic to a beginner.\n\nYour response MUST satisfy ALL of the following requirements:\n- format as exactly 3 bullet points, each line starting \"- \"\n- use no word longer than 7 letters\n- do not use the word \"of\"\n- use exactly 25 words",
+    "instruction_id_list": [
+     "num_bullets",
+     "word_max_length",
+     "forbidden_word",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {
+      "n": 3
+     },
+     {
+      "m": 7
+     },
+     {
+      "word": "of"
+     },
+     {
+      "n": 25
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-12",
+   "payload": {
+    "goal": "Explain a scientific concept.\n\nYour response MUST satisfy ALL of the following requirements:\n- include the word \"node\"\n- do not use the word \"of\"\n- use exactly 15 words\n- do not use any commas",
+    "instruction_id_list": [
+     "include_keyword",
+     "forbidden_word",
+     "exact_word_count",
+     "no_comma"
+    ],
+    "kwargs": [
+     {
+      "keyword": "node"
+     },
+     {
+      "word": "of"
+     },
+     {
+      "n": 15
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-13",
+   "payload": {
+    "goal": "Describe a natural process.\n\nYour response MUST satisfy ALL of the following requirements:\n- include the word \"wave\"\n- use exactly 25 words\n- do not use the word \"to\"\n- format as exactly 4 bullet points, each line starting \"- \"",
+    "instruction_id_list": [
+     "include_keyword",
+     "exact_word_count",
+     "forbidden_word",
+     "num_bullets"
+    ],
+    "kwargs": [
+     {
+      "keyword": "wave"
+     },
+     {
+      "n": 25
+     },
+     {
+      "word": "to"
+     },
+     {
+      "n": 4
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-14",
+   "payload": {
+    "goal": "Describe a natural process.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 20 words\n- end your response with the exact phrase \"here we go.\"\n- use no word longer than 6 letters\n- include the word \"wave\"",
+    "instruction_id_list": [
+     "exact_word_count",
+     "end_with",
+     "word_max_length",
+     "include_keyword"
+    ],
+    "kwargs": [
+     {
+      "n": 20
+     },
+     {
+      "phrase": "here we go."
+     },
+     {
+      "m": 6
+     },
+     {
+      "keyword": "wave"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-15",
+   "payload": {
+    "goal": "Give a brief overview of a technology.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 15 words\n- do not use the word \"to\"\n- end your response with the exact phrase \"that is it.\"\n- include the word \"cell\"\n- use no word longer than 7 letters",
+    "instruction_id_list": [
+     "exact_word_count",
+     "forbidden_word",
+     "end_with",
+     "include_keyword",
+     "word_max_length"
+    ],
+    "kwargs": [
+     {
+      "n": 15
+     },
+     {
+      "word": "to"
+     },
+     {
+      "phrase": "that is it."
+     },
+     {
+      "keyword": "cell"
+     },
+     {
+      "m": 7
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-16",
+   "payload": {
+    "goal": "Introduce a topic to a beginner.\n\nYour response MUST satisfy ALL of the following requirements:\n- use no word longer than 7 letters\n- do not use the word \"to\"\n- format as exactly 5 bullet points, each line starting \"- \"\n- use exactly 25 words",
+    "instruction_id_list": [
+     "word_max_length",
+     "forbidden_word",
+     "num_bullets",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {
+      "m": 7
+     },
+     {
+      "word": "to"
+     },
+     {
+      "n": 5
+     },
+     {
+      "n": 25
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-17",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- write your entire response in lowercase (no capital letters)\n- do not use the word \"the\"\n- use exactly 15 words\n- do not use any commas",
+    "instruction_id_list": [
+     "all_lowercase",
+     "forbidden_word",
+     "exact_word_count",
+     "no_comma"
+    ],
+    "kwargs": [
+     {},
+     {
+      "word": "the"
+     },
+     {
+      "n": 15
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-18",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- end your response with the exact phrase \"here we go.\"\n- use exactly 20 words\n- use no word longer than 7 letters\n- do not use any commas",
+    "instruction_id_list": [
+     "end_with",
+     "exact_word_count",
+     "word_max_length",
+     "no_comma"
+    ],
+    "kwargs": [
+     {
+      "phrase": "here we go."
+     },
+     {
+      "n": 20
+     },
+     {
+      "m": 7
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-19",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- include the word \"wave\"\n- do not use the word \"the\"\n- format as exactly 3 bullet points, each line starting \"- \"\n- use exactly 15 words",
+    "instruction_id_list": [
+     "include_keyword",
+     "forbidden_word",
+     "num_bullets",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {
+      "keyword": "wave"
+     },
+     {
+      "word": "the"
+     },
+     {
+      "n": 3
+     },
+     {
+      "n": 15
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-20",
+   "payload": {
+    "goal": "Introduce a topic to a beginner.\n\nYour response MUST satisfy ALL of the following requirements:\n- end your response with the exact phrase \"here we go.\"\n- do not use the word \"of\"\n- use exactly 15 words\n- use no word longer than 6 letters",
+    "instruction_id_list": [
+     "end_with",
+     "forbidden_word",
+     "exact_word_count",
+     "word_max_length"
+    ],
+    "kwargs": [
+     {
+      "phrase": "here we go."
+     },
+     {
+      "word": "of"
+     },
+     {
+      "n": 15
+     },
+     {
+      "m": 6
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-21",
+   "payload": {
+    "goal": "Describe a natural process.\n\nYour response MUST satisfy ALL of the following requirements:\n- write your entire response in lowercase (no capital letters)\n- use exactly 20 words\n- do not use the word \"of\"\n- do not use any commas",
+    "instruction_id_list": [
+     "all_lowercase",
+     "exact_word_count",
+     "forbidden_word",
+     "no_comma"
+    ],
+    "kwargs": [
+     {},
+     {
+      "n": 20
+     },
+     {
+      "word": "of"
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-22",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- include the word \"code\"\n- use exactly 15 words\n- format as exactly 4 bullet points, each line starting \"- \"\n- use no word longer than 6 letters",
+    "instruction_id_list": [
+     "include_keyword",
+     "exact_word_count",
+     "num_bullets",
+     "word_max_length"
+    ],
+    "kwargs": [
+     {
+      "keyword": "code"
+     },
+     {
+      "n": 15
+     },
+     {
+      "n": 4
+     },
+     {
+      "m": 6
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-23",
+   "payload": {
+    "goal": "Explain a scientific concept.\n\nYour response MUST satisfy ALL of the following requirements:\n- write your entire response in lowercase (no capital letters)\n- use no word longer than 7 letters\n- do not use the word \"the\"\n- end your response with the exact phrase \"so it goes.\"\n- use exactly 20 words",
+    "instruction_id_list": [
+     "all_lowercase",
+     "word_max_length",
+     "forbidden_word",
+     "end_with",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {},
+     {
+      "m": 7
+     },
+     {
+      "word": "the"
+     },
+     {
+      "phrase": "so it goes."
+     },
+     {
+      "n": 20
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-24",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- write your entire response in lowercase (no capital letters)\n- use exactly 15 words\n- do not use any commas\n- use no word longer than 7 letters",
+    "instruction_id_list": [
+     "all_lowercase",
+     "exact_word_count",
+     "no_comma",
+     "word_max_length"
+    ],
+    "kwargs": [
+     {},
+     {
+      "n": 15
+     },
+     {},
+     {
+      "m": 7
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-25",
+   "payload": {
+    "goal": "Give a brief overview of a technology.\n\nYour response MUST satisfy ALL of the following requirements:\n- write your entire response in lowercase (no capital letters)\n- use no word longer than 7 letters\n- end your response with the exact phrase \"here we go.\"\n- use exactly 25 words",
+    "instruction_id_list": [
+     "all_lowercase",
+     "word_max_length",
+     "end_with",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {},
+     {
+      "m": 7
+     },
+     {
+      "phrase": "here we go."
+     },
+     {
+      "n": 25
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-26",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use any commas\n- use exactly 15 words\n- write your entire response in lowercase (no capital letters)\n- do not use the word \"of\"\n- include the word \"star\"",
+    "instruction_id_list": [
+     "no_comma",
+     "exact_word_count",
+     "all_lowercase",
+     "forbidden_word",
+     "include_keyword"
+    ],
+    "kwargs": [
+     {},
+     {
+      "n": 15
+     },
+     {},
+     {
+      "word": "of"
+     },
+     {
+      "keyword": "star"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-27",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- use no word longer than 7 letters\n- use exactly 15 words\n- end your response with the exact phrase \"that is it.\"\n- do not use the word \"and\"",
+    "instruction_id_list": [
+     "word_max_length",
+     "exact_word_count",
+     "end_with",
+     "forbidden_word"
+    ],
+    "kwargs": [
+     {
+      "m": 7
+     },
+     {
+      "n": 15
+     },
+     {
+      "phrase": "that is it."
+     },
+     {
+      "word": "and"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-28",
+   "payload": {
+    "goal": "Give a brief overview of a technology.\n\nYour response MUST satisfy ALL of the following requirements:\n- use no word longer than 7 letters\n- do not use the word \"of\"\n- use exactly 20 words\n- write your entire response in lowercase (no capital letters)",
+    "instruction_id_list": [
+     "word_max_length",
+     "forbidden_word",
+     "exact_word_count",
+     "all_lowercase"
+    ],
+    "kwargs": [
+     {
+      "m": 7
+     },
+     {
+      "word": "of"
+     },
+     {
+      "n": 20
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-29",
+   "payload": {
+    "goal": "Give a brief overview of a technology.\n\nYour response MUST satisfy ALL of the following requirements:\n- end your response with the exact phrase \"so it goes.\"\n- use no word longer than 6 letters\n- use exactly 25 words\n- include the word \"cell\"",
+    "instruction_id_list": [
+     "end_with",
+     "word_max_length",
+     "exact_word_count",
+     "include_keyword"
+    ],
+    "kwargs": [
+     {
+      "phrase": "so it goes."
+     },
+     {
+      "m": 6
+     },
+     {
+      "n": 25
+     },
+     {
+      "keyword": "cell"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-30",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- use no word longer than 7 letters\n- end your response with the exact phrase \"that is it.\"\n- do not use any commas\n- use exactly 25 words",
+    "instruction_id_list": [
+     "word_max_length",
+     "end_with",
+     "no_comma",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {
+      "m": 7
+     },
+     {
+      "phrase": "that is it."
+     },
+     {},
+     {
+      "n": 25
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-31",
+   "payload": {
+    "goal": "Describe a natural process.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use any commas\n- use no word longer than 6 letters\n- use exactly 25 words\n- write your entire response in lowercase (no capital letters)",
+    "instruction_id_list": [
+     "no_comma",
+     "word_max_length",
+     "exact_word_count",
+     "all_lowercase"
+    ],
+    "kwargs": [
+     {},
+     {
+      "m": 6
+     },
+     {
+      "n": 25
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-32",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- end your response with the exact phrase \"here we go.\"\n- use exactly 25 words\n- include the word \"cell\"\n- use no word longer than 6 letters\n- do not use the word \"the\"",
+    "instruction_id_list": [
+     "end_with",
+     "exact_word_count",
+     "include_keyword",
+     "word_max_length",
+     "forbidden_word"
+    ],
+    "kwargs": [
+     {
+      "phrase": "here we go."
+     },
+     {
+      "n": 25
+     },
+     {
+      "keyword": "cell"
+     },
+     {
+      "m": 6
+     },
+     {
+      "word": "the"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-33",
+   "payload": {
+    "goal": "Introduce a topic to a beginner.\n\nYour response MUST satisfy ALL of the following requirements:\n- write your entire response in lowercase (no capital letters)\n- include the word \"gene\"\n- use exactly 20 words\n- do not use the word \"and\"\n- use no word longer than 7 letters",
+    "instruction_id_list": [
+     "all_lowercase",
+     "include_keyword",
+     "exact_word_count",
+     "forbidden_word",
+     "word_max_length"
+    ],
+    "kwargs": [
+     {},
+     {
+      "keyword": "gene"
+     },
+     {
+      "n": 20
+     },
+     {
+      "word": "and"
+     },
+     {
+      "m": 7
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-34",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- write your entire response in lowercase (no capital letters)\n- end your response with the exact phrase \"here we go.\"\n- use no word longer than 7 letters\n- format as exactly 4 bullet points, each line starting \"- \"\n- use exactly 20 words",
+    "instruction_id_list": [
+     "all_lowercase",
+     "end_with",
+     "word_max_length",
+     "num_bullets",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {},
+     {
+      "phrase": "here we go."
+     },
+     {
+      "m": 7
+     },
+     {
+      "n": 4
+     },
+     {
+      "n": 20
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-35",
+   "payload": {
+    "goal": "Explain a scientific concept.\n\nYour response MUST satisfy ALL of the following requirements:\n- use no word longer than 6 letters\n- write your entire response in lowercase (no capital letters)\n- do not use the word \"to\"\n- use exactly 15 words",
+    "instruction_id_list": [
+     "word_max_length",
+     "all_lowercase",
+     "forbidden_word",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {
+      "m": 6
+     },
+     {},
+     {
+      "word": "to"
+     },
+     {
+      "n": 15
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-36",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use any commas\n- end your response with the exact phrase \"we are done.\"\n- use exactly 15 words\n- use no word longer than 6 letters\n- write your entire response in lowercase (no capital letters)",
+    "instruction_id_list": [
+     "no_comma",
+     "end_with",
+     "exact_word_count",
+     "word_max_length",
+     "all_lowercase"
+    ],
+    "kwargs": [
+     {},
+     {
+      "phrase": "we are done."
+     },
+     {
+      "n": 15
+     },
+     {
+      "m": 6
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-37",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- write your entire response in lowercase (no capital letters)\n- use no word longer than 7 letters\n- end your response with the exact phrase \"here we go.\"\n- do not use the word \"and\"\n- use exactly 25 words",
+    "instruction_id_list": [
+     "all_lowercase",
+     "word_max_length",
+     "end_with",
+     "forbidden_word",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {},
+     {
+      "m": 7
+     },
+     {
+      "phrase": "here we go."
+     },
+     {
+      "word": "and"
+     },
+     {
+      "n": 25
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-38",
+   "payload": {
+    "goal": "Describe a natural process.\n\nYour response MUST satisfy ALL of the following requirements:\n- use no word longer than 6 letters\n- include the word \"gene\"\n- do not use any commas\n- do not use the word \"of\"\n- use exactly 20 words",
+    "instruction_id_list": [
+     "word_max_length",
+     "include_keyword",
+     "no_comma",
+     "forbidden_word",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {
+      "m": 6
+     },
+     {
+      "keyword": "gene"
+     },
+     {},
+     {
+      "word": "of"
+     },
+     {
+      "n": 20
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-39",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- include the word \"node\"\n- use no word longer than 6 letters\n- do not use the word \"to\"\n- use exactly 20 words",
+    "instruction_id_list": [
+     "include_keyword",
+     "word_max_length",
+     "forbidden_word",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {
+      "keyword": "node"
+     },
+     {
+      "m": 6
+     },
+     {
+      "word": "to"
+     },
+     {
+      "n": 20
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-40",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 20 words\n- do not use the word \"of\"\n- include the word \"atom\"\n- end your response with the exact phrase \"all is set.\"",
+    "instruction_id_list": [
+     "exact_word_count",
+     "forbidden_word",
+     "include_keyword",
+     "end_with"
+    ],
+    "kwargs": [
+     {
+      "n": 20
+     },
+     {
+      "word": "of"
+     },
+     {
+      "keyword": "atom"
+     },
+     {
+      "phrase": "all is set."
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-41",
+   "payload": {
+    "goal": "Describe a natural process.\n\nYour response MUST satisfy ALL of the following requirements:\n- end your response with the exact phrase \"all is set.\"\n- use exactly 15 words\n- write your entire response in lowercase (no capital letters)\n- do not use the word \"and\"\n- do not use any commas",
+    "instruction_id_list": [
+     "end_with",
+     "exact_word_count",
+     "all_lowercase",
+     "forbidden_word",
+     "no_comma"
+    ],
+    "kwargs": [
+     {
+      "phrase": "all is set."
+     },
+     {
+      "n": 15
+     },
+     {},
+     {
+      "word": "and"
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-42",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- format as exactly 3 bullet points, each line starting \"- \"\n- end your response with the exact phrase \"we are done.\"\n- use no word longer than 7 letters\n- use exactly 20 words\n- include the word \"code\"",
+    "instruction_id_list": [
+     "num_bullets",
+     "end_with",
+     "word_max_length",
+     "exact_word_count",
+     "include_keyword"
+    ],
+    "kwargs": [
+     {
+      "n": 3
+     },
+     {
+      "phrase": "we are done."
+     },
+     {
+      "m": 7
+     },
+     {
+      "n": 20
+     },
+     {
+      "keyword": "code"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-43",
+   "payload": {
+    "goal": "Explain a scientific concept.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 25 words\n- include the word \"star\"\n- end your response with the exact phrase \"here we go.\"\n- format as exactly 5 bullet points, each line starting \"- \"\n- do not use the word \"the\"",
+    "instruction_id_list": [
+     "exact_word_count",
+     "include_keyword",
+     "end_with",
+     "num_bullets",
+     "forbidden_word"
+    ],
+    "kwargs": [
+     {
+      "n": 25
+     },
+     {
+      "keyword": "star"
+     },
+     {
+      "phrase": "here we go."
+     },
+     {
+      "n": 5
+     },
+     {
+      "word": "the"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-44",
+   "payload": {
+    "goal": "Give a brief overview of a technology.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 15 words\n- write your entire response in lowercase (no capital letters)\n- include the word \"atom\"\n- use no word longer than 6 letters",
+    "instruction_id_list": [
+     "exact_word_count",
+     "all_lowercase",
+     "include_keyword",
+     "word_max_length"
+    ],
+    "kwargs": [
+     {
+      "n": 15
+     },
+     {},
+     {
+      "keyword": "atom"
+     },
+     {
+      "m": 6
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-45",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- include the word \"code\"\n- use no word longer than 6 letters\n- use exactly 20 words\n- do not use any commas",
+    "instruction_id_list": [
+     "include_keyword",
+     "word_max_length",
+     "exact_word_count",
+     "no_comma"
+    ],
+    "kwargs": [
+     {
+      "keyword": "code"
+     },
+     {
+      "m": 6
+     },
+     {
+      "n": 20
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-46",
+   "payload": {
+    "goal": "Give a brief overview of a technology.\n\nYour response MUST satisfy ALL of the following requirements:\n- end your response with the exact phrase \"here we go.\"\n- write your entire response in lowercase (no capital letters)\n- use exactly 20 words\n- do not use the word \"of\"",
+    "instruction_id_list": [
+     "end_with",
+     "all_lowercase",
+     "exact_word_count",
+     "forbidden_word"
+    ],
+    "kwargs": [
+     {
+      "phrase": "here we go."
+     },
+     {},
+     {
+      "n": 20
+     },
+     {
+      "word": "of"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-47",
+   "payload": {
+    "goal": "Explain a scientific concept.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 20 words\n- do not use the word \"and\"\n- use no word longer than 7 letters\n- include the word \"star\"\n- end your response with the exact phrase \"here we go.\"",
+    "instruction_id_list": [
+     "exact_word_count",
+     "forbidden_word",
+     "word_max_length",
+     "include_keyword",
+     "end_with"
+    ],
+    "kwargs": [
+     {
+      "n": 20
+     },
+     {
+      "word": "and"
+     },
+     {
+      "m": 7
+     },
+     {
+      "keyword": "star"
+     },
+     {
+      "phrase": "here we go."
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-48",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- use no word longer than 7 letters\n- do not use the word \"and\"\n- include the word \"wave\"\n- use exactly 25 words\n- do not use any commas",
+    "instruction_id_list": [
+     "word_max_length",
+     "forbidden_word",
+     "include_keyword",
+     "exact_word_count",
+     "no_comma"
+    ],
+    "kwargs": [
+     {
+      "m": 7
+     },
+     {
+      "word": "and"
+     },
+     {
+      "keyword": "wave"
+     },
+     {
+      "n": 25
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-49",
+   "payload": {
+    "goal": "Give a brief overview of a technology.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use any commas\n- end your response with the exact phrase \"so it goes.\"\n- use exactly 15 words\n- use no word longer than 7 letters\n- do not use the word \"and\"",
+    "instruction_id_list": [
+     "no_comma",
+     "end_with",
+     "exact_word_count",
+     "word_max_length",
+     "forbidden_word"
+    ],
+    "kwargs": [
+     {},
+     {
+      "phrase": "so it goes."
+     },
+     {
+      "n": 15
+     },
+     {
+      "m": 7
+     },
+     {
+      "word": "and"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-50",
+   "payload": {
+    "goal": "Introduce a topic to a beginner.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 15 words\n- use no word longer than 7 letters\n- end your response with the exact phrase \"all is set.\"\n- do not use any commas",
+    "instruction_id_list": [
+     "exact_word_count",
+     "word_max_length",
+     "end_with",
+     "no_comma"
+    ],
+    "kwargs": [
+     {
+      "n": 15
+     },
+     {
+      "m": 7
+     },
+     {
+      "phrase": "all is set."
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-51",
+   "payload": {
+    "goal": "Explain a scientific concept.\n\nYour response MUST satisfy ALL of the following requirements:\n- format as exactly 5 bullet points, each line starting \"- \"\n- use exactly 25 words\n- end your response with the exact phrase \"here we go.\"\n- do not use the word \"of\"\n- use no word longer than 7 letters",
+    "instruction_id_list": [
+     "num_bullets",
+     "exact_word_count",
+     "end_with",
+     "forbidden_word",
+     "word_max_length"
+    ],
+    "kwargs": [
+     {
+      "n": 5
+     },
+     {
+      "n": 25
+     },
+     {
+      "phrase": "here we go."
+     },
+     {
+      "word": "of"
+     },
+     {
+      "m": 7
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-52",
+   "payload": {
+    "goal": "Explain a scientific concept.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use any commas\n- use exactly 15 words\n- write your entire response in lowercase (no capital letters)\n- use no word longer than 7 letters\n- end your response with the exact phrase \"we are done.\"",
+    "instruction_id_list": [
+     "no_comma",
+     "exact_word_count",
+     "all_lowercase",
+     "word_max_length",
+     "end_with"
+    ],
+    "kwargs": [
+     {},
+     {
+      "n": 15
+     },
+     {},
+     {
+      "m": 7
+     },
+     {
+      "phrase": "we are done."
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-53",
+   "payload": {
+    "goal": "Give a brief overview of a technology.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 25 words\n- format as exactly 5 bullet points, each line starting \"- \"\n- use no word longer than 6 letters\n- do not use any commas",
+    "instruction_id_list": [
+     "exact_word_count",
+     "num_bullets",
+     "word_max_length",
+     "no_comma"
+    ],
+    "kwargs": [
+     {
+      "n": 25
+     },
+     {
+      "n": 5
+     },
+     {
+      "m": 6
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-54",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- write your entire response in lowercase (no capital letters)\n- include the word \"star\"\n- use exactly 25 words\n- do not use the word \"to\"",
+    "instruction_id_list": [
+     "all_lowercase",
+     "include_keyword",
+     "exact_word_count",
+     "forbidden_word"
+    ],
+    "kwargs": [
+     {},
+     {
+      "keyword": "star"
+     },
+     {
+      "n": 25
+     },
+     {
+      "word": "to"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-55",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use any commas\n- use no word longer than 6 letters\n- write your entire response in lowercase (no capital letters)\n- use exactly 20 words",
+    "instruction_id_list": [
+     "no_comma",
+     "word_max_length",
+     "all_lowercase",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {},
+     {
+      "m": 6
+     },
+     {},
+     {
+      "n": 20
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-56",
+   "payload": {
+    "goal": "Introduce a topic to a beginner.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 15 words\n- include the word \"gene\"\n- do not use any commas\n- do not use the word \"the\"",
+    "instruction_id_list": [
+     "exact_word_count",
+     "include_keyword",
+     "no_comma",
+     "forbidden_word"
+    ],
+    "kwargs": [
+     {
+      "n": 15
+     },
+     {
+      "keyword": "gene"
+     },
+     {},
+     {
+      "word": "the"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-57",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- end your response with the exact phrase \"all is set.\"\n- use exactly 15 words\n- use no word longer than 6 letters\n- do not use any commas\n- do not use the word \"to\"",
+    "instruction_id_list": [
+     "end_with",
+     "exact_word_count",
+     "word_max_length",
+     "no_comma",
+     "forbidden_word"
+    ],
+    "kwargs": [
+     {
+      "phrase": "all is set."
+     },
+     {
+      "n": 15
+     },
+     {
+      "m": 6
+     },
+     {},
+     {
+      "word": "to"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-58",
+   "payload": {
+    "goal": "Describe a natural process.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use any commas\n- use no word longer than 6 letters\n- include the word \"node\"\n- use exactly 15 words\n- end your response with the exact phrase \"all is set.\"",
+    "instruction_id_list": [
+     "no_comma",
+     "word_max_length",
+     "include_keyword",
+     "exact_word_count",
+     "end_with"
+    ],
+    "kwargs": [
+     {},
+     {
+      "m": 6
+     },
+     {
+      "keyword": "node"
+     },
+     {
+      "n": 15
+     },
+     {
+      "phrase": "all is set."
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-59",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- end your response with the exact phrase \"all is set.\"\n- do not use the word \"the\"\n- use exactly 20 words\n- format as exactly 3 bullet points, each line starting \"- \"",
+    "instruction_id_list": [
+     "end_with",
+     "forbidden_word",
+     "exact_word_count",
+     "num_bullets"
+    ],
+    "kwargs": [
+     {
+      "phrase": "all is set."
+     },
+     {
+      "word": "the"
+     },
+     {
+      "n": 20
+     },
+     {
+      "n": 3
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-60",
+   "payload": {
+    "goal": "Describe a natural process.\n\nYour response MUST satisfy ALL of the following requirements:\n- use no word longer than 7 letters\n- do not use any commas\n- use exactly 20 words\n- write your entire response in lowercase (no capital letters)",
+    "instruction_id_list": [
+     "word_max_length",
+     "no_comma",
+     "exact_word_count",
+     "all_lowercase"
+    ],
+    "kwargs": [
+     {
+      "m": 7
+     },
+     {},
+     {
+      "n": 20
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-61",
+   "payload": {
+    "goal": "Explain a scientific concept.\n\nYour response MUST satisfy ALL of the following requirements:\n- use no word longer than 7 letters\n- include the word \"star\"\n- do not use any commas\n- write your entire response in lowercase (no capital letters)\n- use exactly 25 words",
+    "instruction_id_list": [
+     "word_max_length",
+     "include_keyword",
+     "no_comma",
+     "all_lowercase",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {
+      "m": 7
+     },
+     {
+      "keyword": "star"
+     },
+     {},
+     {},
+     {
+      "n": 25
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-62",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- write your entire response in lowercase (no capital letters)\n- use exactly 20 words\n- do not use the word \"the\"\n- format as exactly 5 bullet points, each line starting \"- \"",
+    "instruction_id_list": [
+     "all_lowercase",
+     "exact_word_count",
+     "forbidden_word",
+     "num_bullets"
+    ],
+    "kwargs": [
+     {},
+     {
+      "n": 20
+     },
+     {
+      "word": "the"
+     },
+     {
+      "n": 5
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-63",
+   "payload": {
+    "goal": "Explain a scientific concept.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use the word \"the\"\n- include the word \"star\"\n- use exactly 15 words\n- do not use any commas\n- use no word longer than 7 letters",
+    "instruction_id_list": [
+     "forbidden_word",
+     "include_keyword",
+     "exact_word_count",
+     "no_comma",
+     "word_max_length"
+    ],
+    "kwargs": [
+     {
+      "word": "the"
+     },
+     {
+      "keyword": "star"
+     },
+     {
+      "n": 15
+     },
+     {},
+     {
+      "m": 7
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-64",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- write your entire response in lowercase (no capital letters)\n- use no word longer than 7 letters\n- include the word \"star\"\n- use exactly 15 words\n- end your response with the exact phrase \"we are done.\"",
+    "instruction_id_list": [
+     "all_lowercase",
+     "word_max_length",
+     "include_keyword",
+     "exact_word_count",
+     "end_with"
+    ],
+    "kwargs": [
+     {},
+     {
+      "m": 7
+     },
+     {
+      "keyword": "star"
+     },
+     {
+      "n": 15
+     },
+     {
+      "phrase": "we are done."
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-65",
+   "payload": {
+    "goal": "Explain a scientific concept.\n\nYour response MUST satisfy ALL of the following requirements:\n- use no word longer than 6 letters\n- use exactly 25 words\n- end your response with the exact phrase \"all is set.\"\n- do not use the word \"and\"\n- format as exactly 4 bullet points, each line starting \"- \"",
+    "instruction_id_list": [
+     "word_max_length",
+     "exact_word_count",
+     "end_with",
+     "forbidden_word",
+     "num_bullets"
+    ],
+    "kwargs": [
+     {
+      "m": 6
+     },
+     {
+      "n": 25
+     },
+     {
+      "phrase": "all is set."
+     },
+     {
+      "word": "and"
+     },
+     {
+      "n": 4
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-66",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- write your entire response in lowercase (no capital letters)\n- use no word longer than 7 letters\n- use exactly 20 words\n- end your response with the exact phrase \"that is it.\"",
+    "instruction_id_list": [
+     "all_lowercase",
+     "word_max_length",
+     "exact_word_count",
+     "end_with"
+    ],
+    "kwargs": [
+     {},
+     {
+      "m": 7
+     },
+     {
+      "n": 20
+     },
+     {
+      "phrase": "that is it."
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-67",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 20 words\n- format as exactly 3 bullet points, each line starting \"- \"\n- do not use the word \"and\"\n- end your response with the exact phrase \"we are done.\"\n- use no word longer than 7 letters",
+    "instruction_id_list": [
+     "exact_word_count",
+     "num_bullets",
+     "forbidden_word",
+     "end_with",
+     "word_max_length"
+    ],
+    "kwargs": [
+     {
+      "n": 20
+     },
+     {
+      "n": 3
+     },
+     {
+      "word": "and"
+     },
+     {
+      "phrase": "we are done."
+     },
+     {
+      "m": 7
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-68",
+   "payload": {
+    "goal": "Describe a natural process.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 20 words\n- do not use the word \"and\"\n- use no word longer than 6 letters\n- do not use any commas\n- write your entire response in lowercase (no capital letters)",
+    "instruction_id_list": [
+     "exact_word_count",
+     "forbidden_word",
+     "word_max_length",
+     "no_comma",
+     "all_lowercase"
+    ],
+    "kwargs": [
+     {
+      "n": 20
+     },
+     {
+      "word": "and"
+     },
+     {
+      "m": 6
+     },
+     {},
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-69",
+   "payload": {
+    "goal": "Describe a natural process.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use any commas\n- use exactly 15 words\n- format as exactly 4 bullet points, each line starting \"- \"\n- include the word \"node\"\n- do not use the word \"the\"",
+    "instruction_id_list": [
+     "no_comma",
+     "exact_word_count",
+     "num_bullets",
+     "include_keyword",
+     "forbidden_word"
+    ],
+    "kwargs": [
+     {},
+     {
+      "n": 15
+     },
+     {
+      "n": 4
+     },
+     {
+      "keyword": "node"
+     },
+     {
+      "word": "the"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-70",
+   "payload": {
+    "goal": "Give a brief overview of a technology.\n\nYour response MUST satisfy ALL of the following requirements:\n- write your entire response in lowercase (no capital letters)\n- do not use any commas\n- use no word longer than 7 letters\n- use exactly 25 words\n- include the word \"star\"",
+    "instruction_id_list": [
+     "all_lowercase",
+     "no_comma",
+     "word_max_length",
+     "exact_word_count",
+     "include_keyword"
+    ],
+    "kwargs": [
+     {},
+     {},
+     {
+      "m": 7
+     },
+     {
+      "n": 25
+     },
+     {
+      "keyword": "star"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-71",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use the word \"the\"\n- use no word longer than 7 letters\n- do not use any commas\n- include the word \"flux\"\n- use exactly 20 words",
+    "instruction_id_list": [
+     "forbidden_word",
+     "word_max_length",
+     "no_comma",
+     "include_keyword",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {
+      "word": "the"
+     },
+     {
+      "m": 7
+     },
+     {},
+     {
+      "keyword": "flux"
+     },
+     {
+      "n": 20
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-72",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- include the word \"atom\"\n- do not use the word \"and\"\n- end your response with the exact phrase \"that is it.\"\n- use exactly 25 words\n- do not use any commas",
+    "instruction_id_list": [
+     "include_keyword",
+     "forbidden_word",
+     "end_with",
+     "exact_word_count",
+     "no_comma"
+    ],
+    "kwargs": [
+     {
+      "keyword": "atom"
+     },
+     {
+      "word": "and"
+     },
+     {
+      "phrase": "that is it."
+     },
+     {
+      "n": 25
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-73",
+   "payload": {
+    "goal": "Introduce a topic to a beginner.\n\nYour response MUST satisfy ALL of the following requirements:\n- write your entire response in lowercase (no capital letters)\n- include the word \"gene\"\n- do not use the word \"and\"\n- use exactly 25 words\n- do not use any commas",
+    "instruction_id_list": [
+     "all_lowercase",
+     "include_keyword",
+     "forbidden_word",
+     "exact_word_count",
+     "no_comma"
+    ],
+    "kwargs": [
+     {},
+     {
+      "keyword": "gene"
+     },
+     {
+      "word": "and"
+     },
+     {
+      "n": 25
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-74",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- include the word \"node\"\n- do not use the word \"the\"\n- format as exactly 3 bullet points, each line starting \"- \"\n- write your entire response in lowercase (no capital letters)\n- use exactly 20 words",
+    "instruction_id_list": [
+     "include_keyword",
+     "forbidden_word",
+     "num_bullets",
+     "all_lowercase",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {
+      "keyword": "node"
+     },
+     {
+      "word": "the"
+     },
+     {
+      "n": 3
+     },
+     {},
+     {
+      "n": 20
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-75",
+   "payload": {
+    "goal": "Explain a scientific concept.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use the word \"of\"\n- use exactly 15 words\n- do not use any commas\n- end your response with the exact phrase \"all is set.\"",
+    "instruction_id_list": [
+     "forbidden_word",
+     "exact_word_count",
+     "no_comma",
+     "end_with"
+    ],
+    "kwargs": [
+     {
+      "word": "of"
+     },
+     {
+      "n": 15
+     },
+     {},
+     {
+      "phrase": "all is set."
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-76",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- use no word longer than 6 letters\n- format as exactly 4 bullet points, each line starting \"- \"\n- use exactly 20 words\n- include the word \"cell\"",
+    "instruction_id_list": [
+     "word_max_length",
+     "num_bullets",
+     "exact_word_count",
+     "include_keyword"
+    ],
+    "kwargs": [
+     {
+      "m": 6
+     },
+     {
+      "n": 4
+     },
+     {
+      "n": 20
+     },
+     {
+      "keyword": "cell"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-77",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- format as exactly 4 bullet points, each line starting \"- \"\n- write your entire response in lowercase (no capital letters)\n- use no word longer than 6 letters\n- use exactly 25 words",
+    "instruction_id_list": [
+     "num_bullets",
+     "all_lowercase",
+     "word_max_length",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {
+      "n": 4
+     },
+     {},
+     {
+      "m": 6
+     },
+     {
+      "n": 25
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-78",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- end your response with the exact phrase \"we are done.\"\n- format as exactly 4 bullet points, each line starting \"- \"\n- use exactly 20 words\n- use no word longer than 7 letters\n- write your entire response in lowercase (no capital letters)",
+    "instruction_id_list": [
+     "end_with",
+     "num_bullets",
+     "exact_word_count",
+     "word_max_length",
+     "all_lowercase"
+    ],
+    "kwargs": [
+     {
+      "phrase": "we are done."
+     },
+     {
+      "n": 4
+     },
+     {
+      "n": 20
+     },
+     {
+      "m": 7
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-79",
+   "payload": {
+    "goal": "Give a brief overview of a technology.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use any commas\n- use no word longer than 6 letters\n- use exactly 15 words\n- end your response with the exact phrase \"here we go.\"",
+    "instruction_id_list": [
+     "no_comma",
+     "word_max_length",
+     "exact_word_count",
+     "end_with"
+    ],
+    "kwargs": [
+     {},
+     {
+      "m": 6
+     },
+     {
+      "n": 15
+     },
+     {
+      "phrase": "here we go."
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-80",
+   "payload": {
+    "goal": "Describe a natural process.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 20 words\n- use no word longer than 7 letters\n- do not use the word \"to\"\n- end your response with the exact phrase \"all is set.\"",
+    "instruction_id_list": [
+     "exact_word_count",
+     "word_max_length",
+     "forbidden_word",
+     "end_with"
+    ],
+    "kwargs": [
+     {
+      "n": 20
+     },
+     {
+      "m": 7
+     },
+     {
+      "word": "to"
+     },
+     {
+      "phrase": "all is set."
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-81",
+   "payload": {
+    "goal": "Give a brief overview of a technology.\n\nYour response MUST satisfy ALL of the following requirements:\n- end your response with the exact phrase \"so it goes.\"\n- do not use the word \"of\"\n- use exactly 25 words\n- use no word longer than 6 letters\n- include the word \"flux\"",
+    "instruction_id_list": [
+     "end_with",
+     "forbidden_word",
+     "exact_word_count",
+     "word_max_length",
+     "include_keyword"
+    ],
+    "kwargs": [
+     {
+      "phrase": "so it goes."
+     },
+     {
+      "word": "of"
+     },
+     {
+      "n": 25
+     },
+     {
+      "m": 6
+     },
+     {
+      "keyword": "flux"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-82",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- format as exactly 3 bullet points, each line starting \"- \"\n- do not use the word \"of\"\n- use exactly 25 words\n- include the word \"star\"",
+    "instruction_id_list": [
+     "num_bullets",
+     "forbidden_word",
+     "exact_word_count",
+     "include_keyword"
+    ],
+    "kwargs": [
+     {
+      "n": 3
+     },
+     {
+      "word": "of"
+     },
+     {
+      "n": 25
+     },
+     {
+      "keyword": "star"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-83",
+   "payload": {
+    "goal": "Introduce a topic to a beginner.\n\nYour response MUST satisfy ALL of the following requirements:\n- format as exactly 4 bullet points, each line starting \"- \"\n- do not use the word \"the\"\n- do not use any commas\n- use exactly 15 words",
+    "instruction_id_list": [
+     "num_bullets",
+     "forbidden_word",
+     "no_comma",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {
+      "n": 4
+     },
+     {
+      "word": "the"
+     },
+     {},
+     {
+      "n": 15
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-84",
+   "payload": {
+    "goal": "Describe a natural process.\n\nYour response MUST satisfy ALL of the following requirements:\n- use no word longer than 7 letters\n- use exactly 20 words\n- end your response with the exact phrase \"so it goes.\"\n- do not use the word \"and\"\n- include the word \"flux\"",
+    "instruction_id_list": [
+     "word_max_length",
+     "exact_word_count",
+     "end_with",
+     "forbidden_word",
+     "include_keyword"
+    ],
+    "kwargs": [
+     {
+      "m": 7
+     },
+     {
+      "n": 20
+     },
+     {
+      "phrase": "so it goes."
+     },
+     {
+      "word": "and"
+     },
+     {
+      "keyword": "flux"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-85",
+   "payload": {
+    "goal": "Introduce a topic to a beginner.\n\nYour response MUST satisfy ALL of the following requirements:\n- write your entire response in lowercase (no capital letters)\n- format as exactly 5 bullet points, each line starting \"- \"\n- use exactly 15 words\n- use no word longer than 7 letters",
+    "instruction_id_list": [
+     "all_lowercase",
+     "num_bullets",
+     "exact_word_count",
+     "word_max_length"
+    ],
+    "kwargs": [
+     {},
+     {
+      "n": 5
+     },
+     {
+      "n": 15
+     },
+     {
+      "m": 7
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-86",
+   "payload": {
+    "goal": "Introduce a topic to a beginner.\n\nYour response MUST satisfy ALL of the following requirements:\n- write your entire response in lowercase (no capital letters)\n- include the word \"node\"\n- use no word longer than 7 letters\n- use exactly 20 words\n- do not use the word \"to\"",
+    "instruction_id_list": [
+     "all_lowercase",
+     "include_keyword",
+     "word_max_length",
+     "exact_word_count",
+     "forbidden_word"
+    ],
+    "kwargs": [
+     {},
+     {
+      "keyword": "node"
+     },
+     {
+      "m": 7
+     },
+     {
+      "n": 20
+     },
+     {
+      "word": "to"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-87",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use any commas\n- use no word longer than 7 letters\n- format as exactly 5 bullet points, each line starting \"- \"\n- use exactly 20 words",
+    "instruction_id_list": [
+     "no_comma",
+     "word_max_length",
+     "num_bullets",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {},
+     {
+      "m": 7
+     },
+     {
+      "n": 5
+     },
+     {
+      "n": 20
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-88",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- end your response with the exact phrase \"so it goes.\"\n- format as exactly 5 bullet points, each line starting \"- \"\n- use exactly 20 words\n- use no word longer than 7 letters",
+    "instruction_id_list": [
+     "end_with",
+     "num_bullets",
+     "exact_word_count",
+     "word_max_length"
+    ],
+    "kwargs": [
+     {
+      "phrase": "so it goes."
+     },
+     {
+      "n": 5
+     },
+     {
+      "n": 20
+     },
+     {
+      "m": 7
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-89",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- include the word \"cell\"\n- write your entire response in lowercase (no capital letters)\n- use no word longer than 6 letters\n- use exactly 25 words\n- do not use the word \"to\"",
+    "instruction_id_list": [
+     "include_keyword",
+     "all_lowercase",
+     "word_max_length",
+     "exact_word_count",
+     "forbidden_word"
+    ],
+    "kwargs": [
+     {
+      "keyword": "cell"
+     },
+     {},
+     {
+      "m": 6
+     },
+     {
+      "n": 25
+     },
+     {
+      "word": "to"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-90",
+   "payload": {
+    "goal": "Describe a natural process.\n\nYour response MUST satisfy ALL of the following requirements:\n- format as exactly 4 bullet points, each line starting \"- \"\n- do not use any commas\n- use exactly 15 words\n- do not use the word \"the\"",
+    "instruction_id_list": [
+     "num_bullets",
+     "no_comma",
+     "exact_word_count",
+     "forbidden_word"
+    ],
+    "kwargs": [
+     {
+      "n": 4
+     },
+     {},
+     {
+      "n": 15
+     },
+     {
+      "word": "the"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-91",
+   "payload": {
+    "goal": "Give a brief overview of a technology.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use any commas\n- use exactly 20 words\n- include the word \"code\"\n- use no word longer than 7 letters",
+    "instruction_id_list": [
+     "no_comma",
+     "exact_word_count",
+     "include_keyword",
+     "word_max_length"
+    ],
+    "kwargs": [
+     {},
+     {
+      "n": 20
+     },
+     {
+      "keyword": "code"
+     },
+     {
+      "m": 7
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-92",
+   "payload": {
+    "goal": "Explain a scientific concept.\n\nYour response MUST satisfy ALL of the following requirements:\n- end your response with the exact phrase \"all is set.\"\n- use no word longer than 6 letters\n- do not use any commas\n- use exactly 25 words",
+    "instruction_id_list": [
+     "end_with",
+     "word_max_length",
+     "no_comma",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {
+      "phrase": "all is set."
+     },
+     {
+      "m": 6
+     },
+     {},
+     {
+      "n": 25
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-93",
+   "payload": {
+    "goal": "Explain a scientific concept.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use the word \"and\"\n- use no word longer than 6 letters\n- use exactly 20 words\n- format as exactly 4 bullet points, each line starting \"- \"",
+    "instruction_id_list": [
+     "forbidden_word",
+     "word_max_length",
+     "exact_word_count",
+     "num_bullets"
+    ],
+    "kwargs": [
+     {
+      "word": "and"
+     },
+     {
+      "m": 6
+     },
+     {
+      "n": 20
+     },
+     {
+      "n": 4
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-94",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use the word \"to\"\n- end your response with the exact phrase \"we are done.\"\n- use exactly 20 words\n- format as exactly 3 bullet points, each line starting \"- \"",
+    "instruction_id_list": [
+     "forbidden_word",
+     "end_with",
+     "exact_word_count",
+     "num_bullets"
+    ],
+    "kwargs": [
+     {
+      "word": "to"
+     },
+     {
+      "phrase": "we are done."
+     },
+     {
+      "n": 20
+     },
+     {
+      "n": 3
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-95",
+   "payload": {
+    "goal": "Describe a natural process.\n\nYour response MUST satisfy ALL of the following requirements:\n- format as exactly 4 bullet points, each line starting \"- \"\n- write your entire response in lowercase (no capital letters)\n- do not use the word \"the\"\n- use exactly 15 words",
+    "instruction_id_list": [
+     "num_bullets",
+     "all_lowercase",
+     "forbidden_word",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {
+      "n": 4
+     },
+     {},
+     {
+      "word": "the"
+     },
+     {
+      "n": 15
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-96",
+   "payload": {
+    "goal": "Explain a scientific concept.\n\nYour response MUST satisfy ALL of the following requirements:\n- end your response with the exact phrase \"so it goes.\"\n- format as exactly 3 bullet points, each line starting \"- \"\n- use no word longer than 6 letters\n- use exactly 25 words\n- do not use the word \"of\"",
+    "instruction_id_list": [
+     "end_with",
+     "num_bullets",
+     "word_max_length",
+     "exact_word_count",
+     "forbidden_word"
+    ],
+    "kwargs": [
+     {
+      "phrase": "so it goes."
+     },
+     {
+      "n": 3
+     },
+     {
+      "m": 6
+     },
+     {
+      "n": 25
+     },
+     {
+      "word": "of"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-97",
+   "payload": {
+    "goal": "Explain a scientific concept.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 20 words\n- do not use the word \"of\"\n- include the word \"flux\"\n- use no word longer than 6 letters",
+    "instruction_id_list": [
+     "exact_word_count",
+     "forbidden_word",
+     "include_keyword",
+     "word_max_length"
+    ],
+    "kwargs": [
+     {
+      "n": 20
+     },
+     {
+      "word": "of"
+     },
+     {
+      "keyword": "flux"
+     },
+     {
+      "m": 6
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-98",
+   "payload": {
+    "goal": "Explain a scientific concept.\n\nYour response MUST satisfy ALL of the following requirements:\n- write your entire response in lowercase (no capital letters)\n- use exactly 25 words\n- use no word longer than 7 letters\n- include the word \"wave\"\n- do not use the word \"to\"",
+    "instruction_id_list": [
+     "all_lowercase",
+     "exact_word_count",
+     "word_max_length",
+     "include_keyword",
+     "forbidden_word"
+    ],
+    "kwargs": [
+     {},
+     {
+      "n": 25
+     },
+     {
+      "m": 7
+     },
+     {
+      "keyword": "wave"
+     },
+     {
+      "word": "to"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-99",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- use no word longer than 7 letters\n- do not use the word \"and\"\n- format as exactly 5 bullet points, each line starting \"- \"\n- use exactly 20 words",
+    "instruction_id_list": [
+     "word_max_length",
+     "forbidden_word",
+     "num_bullets",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {
+      "m": 7
+     },
+     {
+      "word": "and"
+     },
+     {
+      "n": 5
+     },
+     {
+      "n": 20
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-100",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- include the word \"code\"\n- use exactly 25 words\n- use no word longer than 7 letters\n- do not use any commas",
+    "instruction_id_list": [
+     "include_keyword",
+     "exact_word_count",
+     "word_max_length",
+     "no_comma"
+    ],
+    "kwargs": [
+     {
+      "keyword": "code"
+     },
+     {
+      "n": 25
+     },
+     {
+      "m": 7
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-101",
+   "payload": {
+    "goal": "Describe a natural process.\n\nYour response MUST satisfy ALL of the following requirements:\n- use no word longer than 7 letters\n- include the word \"cell\"\n- use exactly 25 words\n- end your response with the exact phrase \"so it goes.\"",
+    "instruction_id_list": [
+     "word_max_length",
+     "include_keyword",
+     "exact_word_count",
+     "end_with"
+    ],
+    "kwargs": [
+     {
+      "m": 7
+     },
+     {
+      "keyword": "cell"
+     },
+     {
+      "n": 25
+     },
+     {
+      "phrase": "so it goes."
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-102",
+   "payload": {
+    "goal": "Give a brief overview of a technology.\n\nYour response MUST satisfy ALL of the following requirements:\n- include the word \"wave\"\n- write your entire response in lowercase (no capital letters)\n- do not use any commas\n- do not use the word \"to\"\n- use exactly 25 words",
+    "instruction_id_list": [
+     "include_keyword",
+     "all_lowercase",
+     "no_comma",
+     "forbidden_word",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {
+      "keyword": "wave"
+     },
+     {},
+     {},
+     {
+      "word": "to"
+     },
+     {
+      "n": 25
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-103",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use any commas\n- do not use the word \"and\"\n- format as exactly 3 bullet points, each line starting \"- \"\n- use exactly 25 words",
+    "instruction_id_list": [
+     "no_comma",
+     "forbidden_word",
+     "num_bullets",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {},
+     {
+      "word": "and"
+     },
+     {
+      "n": 3
+     },
+     {
+      "n": 25
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-104",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- include the word \"code\"\n- use no word longer than 6 letters\n- do not use any commas\n- use exactly 15 words",
+    "instruction_id_list": [
+     "include_keyword",
+     "word_max_length",
+     "no_comma",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {
+      "keyword": "code"
+     },
+     {
+      "m": 6
+     },
+     {},
+     {
+      "n": 15
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-105",
+   "payload": {
+    "goal": "Explain a scientific concept.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use any commas\n- end your response with the exact phrase \"so it goes.\"\n- do not use the word \"the\"\n- use exactly 15 words",
+    "instruction_id_list": [
+     "no_comma",
+     "end_with",
+     "forbidden_word",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {},
+     {
+      "phrase": "so it goes."
+     },
+     {
+      "word": "the"
+     },
+     {
+      "n": 15
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-106",
+   "payload": {
+    "goal": "Give a brief overview of a technology.\n\nYour response MUST satisfy ALL of the following requirements:\n- format as exactly 3 bullet points, each line starting \"- \"\n- use exactly 15 words\n- write your entire response in lowercase (no capital letters)\n- use no word longer than 7 letters\n- end your response with the exact phrase \"so it goes.\"",
+    "instruction_id_list": [
+     "num_bullets",
+     "exact_word_count",
+     "all_lowercase",
+     "word_max_length",
+     "end_with"
+    ],
+    "kwargs": [
+     {
+      "n": 3
+     },
+     {
+      "n": 15
+     },
+     {},
+     {
+      "m": 7
+     },
+     {
+      "phrase": "so it goes."
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-107",
+   "payload": {
+    "goal": "Give a brief overview of a technology.\n\nYour response MUST satisfy ALL of the following requirements:\n- include the word \"atom\"\n- use no word longer than 7 letters\n- do not use the word \"the\"\n- use exactly 20 words\n- do not use any commas",
+    "instruction_id_list": [
+     "include_keyword",
+     "word_max_length",
+     "forbidden_word",
+     "exact_word_count",
+     "no_comma"
+    ],
+    "kwargs": [
+     {
+      "keyword": "atom"
+     },
+     {
+      "m": 7
+     },
+     {
+      "word": "the"
+     },
+     {
+      "n": 20
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-108",
+   "payload": {
+    "goal": "Explain a scientific concept.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use the word \"to\"\n- use exactly 20 words\n- end your response with the exact phrase \"we are done.\"\n- include the word \"flux\"",
+    "instruction_id_list": [
+     "forbidden_word",
+     "exact_word_count",
+     "end_with",
+     "include_keyword"
+    ],
+    "kwargs": [
+     {
+      "word": "to"
+     },
+     {
+      "n": 20
+     },
+     {
+      "phrase": "we are done."
+     },
+     {
+      "keyword": "flux"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-109",
+   "payload": {
+    "goal": "Introduce a topic to a beginner.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 25 words\n- do not use any commas\n- use no word longer than 6 letters\n- do not use the word \"and\"",
+    "instruction_id_list": [
+     "exact_word_count",
+     "no_comma",
+     "word_max_length",
+     "forbidden_word"
+    ],
+    "kwargs": [
+     {
+      "n": 25
+     },
+     {},
+     {
+      "m": 6
+     },
+     {
+      "word": "and"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-110",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 20 words\n- end your response with the exact phrase \"so it goes.\"\n- write your entire response in lowercase (no capital letters)\n- do not use the word \"the\"",
+    "instruction_id_list": [
+     "exact_word_count",
+     "end_with",
+     "all_lowercase",
+     "forbidden_word"
+    ],
+    "kwargs": [
+     {
+      "n": 20
+     },
+     {
+      "phrase": "so it goes."
+     },
+     {},
+     {
+      "word": "the"
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-111",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- write your entire response in lowercase (no capital letters)\n- end your response with the exact phrase \"all is set.\"\n- format as exactly 3 bullet points, each line starting \"- \"\n- use exactly 15 words\n- use no word longer than 6 letters",
+    "instruction_id_list": [
+     "all_lowercase",
+     "end_with",
+     "num_bullets",
+     "exact_word_count",
+     "word_max_length"
+    ],
+    "kwargs": [
+     {},
+     {
+      "phrase": "all is set."
+     },
+     {
+      "n": 3
+     },
+     {
+      "n": 15
+     },
+     {
+      "m": 6
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-112",
+   "payload": {
+    "goal": "Describe a natural process.\n\nYour response MUST satisfy ALL of the following requirements:\n- use no word longer than 7 letters\n- end your response with the exact phrase \"so it goes.\"\n- do not use the word \"and\"\n- use exactly 25 words",
+    "instruction_id_list": [
+     "word_max_length",
+     "end_with",
+     "forbidden_word",
+     "exact_word_count"
+    ],
+    "kwargs": [
+     {
+      "m": 7
+     },
+     {
+      "phrase": "so it goes."
+     },
+     {
+      "word": "and"
+     },
+     {
+      "n": 25
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-113",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 15 words\n- include the word \"node\"\n- use no word longer than 7 letters\n- do not use any commas",
+    "instruction_id_list": [
+     "exact_word_count",
+     "include_keyword",
+     "word_max_length",
+     "no_comma"
+    ],
+    "kwargs": [
+     {
+      "n": 15
+     },
+     {
+      "keyword": "node"
+     },
+     {
+      "m": 7
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-114",
+   "payload": {
+    "goal": "Explain a scientific concept.\n\nYour response MUST satisfy ALL of the following requirements:\n- include the word \"flux\"\n- use no word longer than 6 letters\n- do not use the word \"of\"\n- use exactly 15 words\n- end your response with the exact phrase \"so it goes.\"",
+    "instruction_id_list": [
+     "include_keyword",
+     "word_max_length",
+     "forbidden_word",
+     "exact_word_count",
+     "end_with"
+    ],
+    "kwargs": [
+     {
+      "keyword": "flux"
+     },
+     {
+      "m": 6
+     },
+     {
+      "word": "of"
+     },
+     {
+      "n": 15
+     },
+     {
+      "phrase": "so it goes."
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-115",
+   "payload": {
+    "goal": "Introduce a topic to a beginner.\n\nYour response MUST satisfy ALL of the following requirements:\n- use no word longer than 6 letters\n- use exactly 25 words\n- do not use the word \"of\"\n- format as exactly 3 bullet points, each line starting \"- \"\n- write your entire response in lowercase (no capital letters)",
+    "instruction_id_list": [
+     "word_max_length",
+     "exact_word_count",
+     "forbidden_word",
+     "num_bullets",
+     "all_lowercase"
+    ],
+    "kwargs": [
+     {
+      "m": 6
+     },
+     {
+      "n": 25
+     },
+     {
+      "word": "of"
+     },
+     {
+      "n": 3
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-116",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- use no word longer than 6 letters\n- use exactly 25 words\n- format as exactly 5 bullet points, each line starting \"- \"\n- write your entire response in lowercase (no capital letters)",
+    "instruction_id_list": [
+     "word_max_length",
+     "exact_word_count",
+     "num_bullets",
+     "all_lowercase"
+    ],
+    "kwargs": [
+     {
+      "m": 6
+     },
+     {
+      "n": 25
+     },
+     {
+      "n": 5
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-117",
+   "payload": {
+    "goal": "Summarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- use exactly 15 words\n- include the word \"atom\"\n- do not use the word \"and\"\n- write your entire response in lowercase (no capital letters)\n- end your response with the exact phrase \"that is it.\"",
+    "instruction_id_list": [
+     "exact_word_count",
+     "include_keyword",
+     "forbidden_word",
+     "all_lowercase",
+     "end_with"
+    ],
+    "kwargs": [
+     {
+      "n": 15
+     },
+     {
+      "keyword": "atom"
+     },
+     {
+      "word": "and"
+     },
+     {},
+     {
+      "phrase": "that is it."
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-118",
+   "payload": {
+    "goal": "Introduce a topic to a beginner.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use any commas\n- format as exactly 5 bullet points, each line starting \"- \"\n- use exactly 15 words\n- write your entire response in lowercase (no capital letters)\n- use no word longer than 7 letters",
+    "instruction_id_list": [
+     "no_comma",
+     "num_bullets",
+     "exact_word_count",
+     "all_lowercase",
+     "word_max_length"
+    ],
+    "kwargs": [
+     {},
+     {
+      "n": 5
+     },
+     {
+      "n": 15
+     },
+     {},
+     {
+      "m": 7
+     }
+    ]
+   }
+  },
+  {
+   "id": "p0cal-1000-119",
+   "payload": {
+    "goal": "Write a short note about a discovery.\n\nYour response MUST satisfy ALL of the following requirements:\n- do not use any commas\n- format as exactly 3 bullet points, each line starting \"- \"\n- use exactly 15 words\n- do not use the word \"of\"",
+    "instruction_id_list": [
+     "no_comma",
+     "num_bullets",
+     "exact_word_count",
+     "forbidden_word"
+    ],
+    "kwargs": [
+     {},
+     {
+      "n": 3
+     },
+     {
+      "n": 15
+     },
+     {
+      "word": "of"
+     }
+    ]
+   }
+  }
+ ],
+ "version": 1
+}

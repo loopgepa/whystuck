@@ -874,3 +874,81 @@ def test_temperature_is_refused_for_an_arm_that_reflects():
     assert "--temperature" in err and "reflection" in err
     ok, out, _ = _run(["--arms", "A", "--seeds", "0", "--temperature", "0"])
     assert ok == 0, out
+
+
+# --- --task-set multi-hard-manifest: p0 levels built by measurement (Paper I, D9) ---------
+
+
+def _tiny_manifest(tmp_path):
+    from whystuck.eval.task_manifest import build_manifest, calibration_pool, save_manifest
+
+    tasks = calibration_pool(12, seed=1000)
+    ids = [t.id for t in tasks]
+    levels = {
+        "mid": {
+            0: {"train": ids[0:2], "heldout": ids[2:4]},
+            1: {"train": ids[4:6], "heldout": ids[6:8]},
+        }
+    }
+    m = build_manifest({"n": 12, "seed": 1000}, tasks, levels, stats={})
+    path = tmp_path / "manifest.json"
+    save_manifest(path, m)
+    return path, ids, m["sha256"]
+
+
+def test_manifest_task_set_requires_a_manifest_and_a_level(tmp_path):
+    path, _, _ = _tiny_manifest(tmp_path)
+    code, _, err = _run(["--task-set", "multi-hard-manifest", "--n-train", "2", "--n-heldout", "2"])
+    assert code == 2 and "--task-manifest" in err
+    code, _, err = _run(["--task-set", "multi-hard-manifest", "--task-manifest", str(path),
+                         "--n-train", "2", "--n-heldout", "2"])  # fmt: skip
+    assert code == 2 and "--manifest-level" in err
+
+
+def test_manifest_flags_are_refused_on_other_task_sets(tmp_path):
+    path, _, _ = _tiny_manifest(tmp_path)
+    code, _, err = _run(["--task-set", "multi-hard", "--task-manifest", str(path),
+                         "--manifest-level", "mid"])  # fmt: skip
+    assert code == 2 and "multi-hard-manifest" in err
+
+
+def test_manifest_level_must_exist_before_anything_is_priced(tmp_path):
+    path, _, _ = _tiny_manifest(tmp_path)
+    code, _, err = _run(["--task-set", "multi-hard-manifest", "--task-manifest", str(path),
+                         "--manifest-level", "nope", "--seeds", "0",
+                         "--n-train", "2", "--n-heldout", "2"])  # fmt: skip
+    assert code == 2 and "nope" in err
+
+
+def test_manifest_seeds_must_all_be_assigned(tmp_path):
+    path, _, _ = _tiny_manifest(tmp_path)
+    code, _, err = _run(["--task-set", "multi-hard-manifest", "--task-manifest", str(path),
+                         "--manifest-level", "mid", "--seeds", "0,5",
+                         "--n-train", "2", "--n-heldout", "2"])  # fmt: skip
+    assert code == 2 and "5" in err
+
+
+def test_manifest_task_set_scores_exactly_the_assigned_tasks(tmp_path, monkeypatch):
+    path, ids, _ = _tiny_manifest(tmp_path)
+    captured, _ = _wire_and_capture(
+        ["--task-set", "multi-hard-manifest", "--task-manifest", str(path),
+         "--manifest-level", "mid", "--arms", "A", "--seeds", "1",
+         "--n-train", "2", "--n-heldout", "2", "--worker-model", "openai/gpt-4.1-mini"],
+        tmp_path, monkeypatch,
+    )  # fmt: skip
+    assert [t.id for t in captured["heldout"]] == ids[6:8]
+    assert [t.id for t in captured["train"]] == ids[4:6]
+    assert captured["score_fn"].__name__ == "mc_score"
+    assert captured["verify_truth"] is not None
+
+
+def test_manifest_seeds_count_as_independent():
+    from whystuck.eval.benchmark import seeds_are_independent
+
+    assert seeds_are_independent("multi-hard-manifest")
+
+
+def test_empty_attempts_flag_defaults_to_the_historical_two():
+    cli = _load_cli()
+    assert cli._parse_args([]).empty_attempts == 2
+    assert cli._parse_args(["--empty-attempts", "6"]).empty_attempts == 6

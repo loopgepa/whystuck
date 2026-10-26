@@ -12,7 +12,9 @@ this is fully offline-testable. The production `complete` is litellm-backed
 
 from __future__ import annotations
 
+import time
 from collections.abc import Callable
+from typing import Any
 
 from whystuck.core.models import (
     LoopGenome,
@@ -375,14 +377,41 @@ def make_self_refine_run_task(
     return run_task
 
 
-def litellm_complete(model: str, *, max_tokens: int) -> Complete:
+#: Backoff schedule for provider rate limits, in seconds. Measured 2026-10-25: three parallel
+#: runs on qwen3.8 exceeded Groq's 32k output tokens/minute and two died mid-pool. A rate
+#: limit means "later", so the identical request is re-sent; the completion cannot differ
+#: from one that was never limited. About 8 minutes in total before giving up.
+RATE_LIMIT_BACKOFF = (5.0, 10.0, 20.0, 40.0, 60.0, 60.0, 60.0, 60.0, 60.0, 60.0)
+
+
+def _send(litellm: Any, **kw: Any) -> Any:
+    limited = getattr(litellm, "RateLimitError", None)
+    for wait in (*RATE_LIMIT_BACKOFF, None):
+        try:
+            return litellm.completion(**kw)
+        except Exception as exc:
+            if limited is None or not isinstance(exc, limited) or wait is None:
+                raise
+            time.sleep(wait)
+    raise AssertionError("unreachable")
+
+
+def litellm_complete(model: str, *, max_tokens: int, empty_attempts: int = 2) -> Complete:
     """Production `complete` backed by litellm (network; ships with `whystuck[eval]`).
 
     `max_tokens` is REQUIRED (no default): it caps the completion length so output
     tokens — the dominant cost — are a hard ceiling matching what the budget guard
     priced. Making it required is deliberate fail-loud design — a silent unbounded
     default would let a future caller void the budget bound with no error (the same
-    footgun the rest of this module's guards exist to prevent)."""
+    footgun the rest of this module's guards exist to prevent).
+
+    ``empty_attempts`` bounds how many times one call is made while the model keeps returning
+    empty content. The default, 2, is what every committed run used. Each empty response is
+    counted on the returned callable as ``empty_resamples``, because resampling conditions
+    the output on being non-empty and the run must be able to report how often it did."""
+    if empty_attempts < 1:
+        raise ValueError(f"empty_attempts must be >= 1 (got {empty_attempts})")
+    counter = {"empty": 0}
 
     def complete(
         prompt: str, *, temperature: float | None = None, sample: int | None = None
@@ -417,18 +446,24 @@ def litellm_complete(model: str, *, max_tokens: int) -> Complete:
         # treatment then ran with no critique at all. Nothing distinguished that from an
         # evolved gene. Raising costs at most one aborted run, and the cassette persists per
         # call, so a resumed run re-reads every completion already paid for.
-        for _attempt in range(2):
+        #
+        # A second cause, measured 2026-10-25: qwen/qwen3.8-27b returns a one-token EMPTY
+        # answer (finish_reason "stop", no reasoning) on some critique prompts, 4 times in 10
+        # identical calls. That is an ordinary draw, so `empty_attempts` is a run parameter.
+        for _attempt in range(empty_attempts):
             # Two explicit calls rather than a splatted kwargs dict, so the no-temperature
             # path is provably the original call and not a construction that merely
             # evaluates to it.
             if temperature is None:
-                resp = litellm.completion(
+                resp = _send(
+                    litellm,
                     model=model,
                     messages=[{"role": "user", "content": prompt}],
                     max_tokens=max_tokens,
                 )
             else:
-                resp = litellm.completion(
+                resp = _send(
+                    litellm,
                     model=model,
                     messages=[{"role": "user", "content": prompt}],
                     max_tokens=max_tokens,
@@ -437,10 +472,15 @@ def litellm_complete(model: str, *, max_tokens: int) -> Complete:
             content = resp.choices[0].message.content
             if content and content.strip():
                 return str(content)
+            counter["empty"] += 1
+            complete.empty_resamples = counter["empty"]  # type: ignore[attr-defined]
         raise RuntimeError(
-            f"{model} returned an empty completion twice in a row (max_tokens={max_tokens}); "
-            "a reasoning model can exhaust the allowance before emitting content, so raise "
-            "max_tokens rather than letting an empty string reach the caller"
+            f"{model} returned an empty completion {empty_attempts} times in a row "
+            f"(max_tokens={max_tokens}); a reasoning model can exhaust the allowance before "
+            "emitting content, so raise max_tokens (or --empty-attempts, for a model whose "
+            "empty answers are ordinary draws) rather than letting an empty string reach "
+            "the caller"
         )
 
+    complete.empty_resamples = 0  # type: ignore[attr-defined]
     return complete

@@ -25,14 +25,26 @@ import pathlib
 from whystuck.eval.cost import MODEL_PRICES
 
 SNAPSHOT = pathlib.Path(__file__).parent / "fixtures" / "groq-models-2026-08-08.json"
+#: Groq retires models. By 2026-10-25 both llama workers were gone, while the released runs
+#: that name them still need their prices. So a priced model must have been served on SOME
+#: dated snapshot; each snapshot remains a claim about its own date only.
+SNAPSHOTS = sorted(pathlib.Path(__file__).parent.joinpath("fixtures").glob("groq-models-*.json"))
+
+
+def _ids(path: pathlib.Path) -> set[str]:
+    return set(json.loads(path.read_text(encoding="utf-8"))["active_model_ids"])
 
 
 def _served() -> set[str]:
-    return set(json.loads(SNAPSHOT.read_text(encoding="utf-8"))["active_model_ids"])
+    return _ids(SNAPSHOT)
+
+
+def _served_ever() -> set[str]:
+    return set().union(*(_ids(p) for p in SNAPSHOTS))
 
 
 def test_every_priced_groq_model_is_one_groq_serves():
-    served = _served()
+    served = _served_ever()
     priced = {m for m in MODEL_PRICES if m.startswith("groq/")}
     assert priced, "no Groq models priced; delete this guard or restore the entries"
     unknown = sorted(m for m in priced if m.removeprefix("groq/") not in served)
@@ -56,3 +68,17 @@ def test_a_wrong_namespace_is_reported():
     served = _served()
     assert "openai/gpt-oss-120b" in served
     assert "openai-gpt-oss-120b" not in served
+
+
+def test_every_snapshot_is_a_real_list():
+    assert len(SNAPSHOTS) >= 2
+    for path in SNAPSHOTS:
+        ids = _ids(path)
+        assert 5 < len(ids) < 500, path
+        assert "openai/gpt-oss-120b" in ids, path
+
+
+def test_a_typo_is_still_reported_against_the_union():
+    # The union must not launder a namespace typo just because it is wider.
+    assert "openai-gpt-oss-120b" not in _served_ever()
+    assert "qwen3.8-27b" not in _served_ever()
