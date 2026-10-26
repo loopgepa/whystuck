@@ -226,3 +226,20 @@ Phase 3 ran all three levels. M1 failed (realized p₀ 0.30 / 0.30 / 0.38), so b
 levels are reported as not built and H1 is not a test of p₀. The full record, the regression-to-
 the-mean diagnosis and an explicitly exploratory pooled estimate are in `docs/p0target/REPORT.md`.
 No seeds were added and no further phase was bought.
+
+## Errata and review notes, 2026-10-26 (after the outcome; nothing above is edited)
+
+An adversarial review of the program found every reported number reproducible and the deviations
+committed before the runs they govern. Corrections to this file's own record:
+
+- The Phase 1 record says "about 30 000 worker calls". The six Phase 1 cassettes store 23 264
+  entries; the 30 000 figure counted the pilots and Phase 3 as well.
+- The spend estimate used a 300-token-per-call input bound that is not an upper bound for
+  Phase 3 reflection-heavy runs. An independent recompute gives $12.4 to $12.9 for the program.
+- Deviation 3 promised "the level-by-level constraint composition will be reported next to the
+  results". It was not, in the first outcome report. It is now (`docs/p0target/REPORT.md`,
+  `analysis.json` → `diagnosis.composition`): within the L2 tier four constraint types differ in
+  frequency across levels at χ² p ≤ 0.003, so the levels differ in constraint mix as well as in
+  calibrated p₀.
+- The registered hard-tier candidate (ii) never ran (its gate failed); the two-generator design of
+  deviation 3 is what produced the outcome. The outcome report now says so in its first section.

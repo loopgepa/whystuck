@@ -42,6 +42,40 @@ N_HELDOUT = 10
 VERIFY_GENE = "ensure_correct"
 
 
+def percentile_indices(n_boot: int) -> tuple[int, int]:
+    """Indices of the 2.5th and 97.5th percentiles in a sorted list of n_boot resamples."""
+    return int(math.floor(0.025 * (n_boot - 1))), int(math.ceil(0.975 * (n_boot - 1)))
+
+
+def chi2_presence_by_level(present: Sequence[int], totals: Sequence[int]) -> tuple[float, float]:
+    """Pearson chi-square for a constraint's presence across three levels (a 2x3 table), df = 2.
+
+    For df = 2 the survival function is exactly exp(-x/2), so no scipy is needed."""
+    if len(present) != 3 or len(totals) != 3:
+        raise ValueError("expects three levels")
+    absent = [t - k for k, t in zip(present, totals, strict=True)]
+    n = sum(totals)
+    stat = 0.0
+    for row in (present, absent):
+        r = sum(row)
+        for o, t in zip(row, totals, strict=True):
+            e = r * t / n
+            stat += 0.0 if e == 0 else (o - e) ** 2 / e
+    return stat, math.exp(-stat / 2)
+
+
+def beta_binomial_mom(counts: Sequence[int], k: int) -> tuple[float, float]:
+    """Method-of-moments Beta(a, b) prior from per-task success counts out of k draws."""
+    ps = [c / k for c in counts]
+    m = st.mean(ps)
+    v = st.pvariance(ps)
+    vp = (v - (m - m * m) / k) / (1 - 1 / k)
+    if vp <= 0:
+        raise ValueError("no between-task variance left after removing binomial noise")
+    ab = m * (1 - m) / vp - 1
+    return m * ab, (1 - m) * ab
+
+
 def swing(
     a: Sequence[float], b: Sequence[float], *, n_boot: int = N_BOOT, seed: int = 0
 ) -> dict[str, Any]:
@@ -54,9 +88,8 @@ def swing(
         rb = [b[rng.randrange(len(b))] for _ in b]
         boots.append(st.mean(ra) - st.mean(rb))
     boots.sort()
-    lo = boots[int(math.floor(0.025 * (n_boot - 1)))]
-    hi = boots[int(math.ceil(0.975 * (n_boot - 1)))]
-    return {"S": s, "ci": (lo, hi), "n_boot": n_boot}
+    i, j = percentile_indices(n_boot)
+    return {"S": s, "ci": (boots[i], boots[j]), "n_boot": n_boot}
 
 
 def pooled(x: Sequence[float], *, n_boot: int = N_BOOT, seed: int = 0) -> dict[str, Any]:
@@ -64,9 +97,8 @@ def pooled(x: Sequence[float], *, n_boot: int = N_BOOT, seed: int = 0) -> dict[s
     this study: it pools levels whose p0 did not separate, which the registration did not plan."""
     rng = random.Random(seed)
     boots = sorted(st.mean(x[rng.randrange(len(x))] for _ in x) for _ in range(n_boot))
-    lo = boots[int(math.floor(0.025 * (n_boot - 1)))]
-    hi = boots[int(math.ceil(0.975 * (n_boot - 1)))]
-    return {"mean": st.mean(x), "ci": (lo, hi), "n": len(x), "sd": st.stdev(x)}
+    i, j = percentile_indices(n_boot)
+    return {"mean": st.mean(x), "ci": (boots[i], boots[j]), "n": len(x), "sd": st.stdev(x)}
 
 
 def welch(a: Sequence[float], b: Sequence[float]) -> tuple[float, float]:
@@ -149,6 +181,9 @@ def _replay_level(level: str) -> dict[str, Any]:  # pragma: no cover - needs the
                     "pass_rate": passes / len(heldout),
                     "false_pass": false_pass,
                     "genes_changed": run[arm].get("genes_changed") or [],
+                    "first_pass_by_task": {
+                        t.id: ok for t, (_, ok) in zip(heldout, drafts, strict=True)
+                    },
                 }
                 if abs(row[arm]["final"] - run[arm]["opt_heldout"]) > 1e-9:
                     raise AssertionError(
@@ -156,6 +191,86 @@ def _replay_level(level: str) -> dict[str, Any]:  # pragma: no cover - needs the
                         f"!= released {run[arm]['opt_heldout']}; the replay is not the run"
                     )
             out["per_seed"].append(row)
+    return out
+
+
+def _diagnose(levels: dict[str, Any]) -> dict[str, Any]:  # pragma: no cover - needs the run
+    """Why the levels did not separate, and what else differs between them.
+
+    Composition: the registered level-by-level constraint mix, per generator tier, with a
+    per-constraint chi-square of presence against level (df = 2). Shrinkage: a method-of-moments
+    beta-binomial prior per tier from the K = 3 calibration counts, the level means it predicts,
+    and the realized first-draft pass rate of each calibration count on the runs' fresh draws."""
+    from whystuck.eval.task_manifest import load_manifest
+
+    man = load_manifest(MANIFEST)
+    cal: dict[str, Any] = {}
+    for name in ("hard", "L2"):
+        cal.update(json.loads(Path(f"docs/p0-manifests/full-1001-{name}-stats.json").read_text()))
+
+    def tier(tid: str) -> str:
+        return "l2" if "x-exact_word_count" in tid else "hard"
+
+    out: dict[str, Any] = {"composition": {}, "shrinkage": {}}
+    for tr in ("hard", "l2"):
+        totals, present = [], {}
+        for lv in LEVELS:
+            ids = [
+                i
+                for sd in man.levels[lv].values()
+                for sp in ("train", "heldout")
+                for i in sd[sp]
+                if tier(i) == tr
+            ]
+            totals.append(len(ids))
+            for i in ids:
+                for cid in man.tasks[i].payload["instruction_id_list"]:
+                    present.setdefault(cid, [0, 0, 0])[LEVELS.index(lv)] += 1
+        rows = {}
+        for cid, k in sorted(present.items()):
+            stat, pval = chi2_presence_by_level(k, totals)
+            rows[cid] = {
+                "share": [k[i] / totals[i] for i in range(3)],
+                "chi2": stat,
+                "p": pval,
+            }
+        out["composition"][tr] = {"tasks_per_level": totals, "constraints": rows}
+
+        counts = [round(v["p_first"] * 3) for t, v in cal.items() if tier(t) == tr]
+        a, b = beta_binomial_mom(counts, 3)
+        post = {
+            t: (a + round(v["p_first"] * 3)) / (a + b + 3) for t, v in cal.items() if tier(t) == tr
+        }
+        realized: dict[str, list[float]] = {}
+        by_count: dict[int, list[float]] = {}
+        for lv in LEVELS:
+            for r in levels[lv]["per_seed"]:
+                for tid, ok in r["A"]["first_pass_by_task"].items():
+                    if tier(tid) != tr:
+                        continue
+                    realized.setdefault(lv, []).append(1.0 if ok else 0.0)
+                    by_count.setdefault(round(cal[tid]["p_first"] * 3), []).append(
+                        1.0 if ok else 0.0
+                    )
+        heldout_ids = {
+            lv: [i for sd in man.levels[lv].values() for i in sd["heldout"] if tier(i) == tr]
+            for lv in LEVELS
+        }
+        out["shrinkage"][tr] = {
+            "beta_a": a,
+            "beta_b": b,
+            "levels": {
+                lv: {
+                    "calibrated": st.mean(cal[i]["p_first"] for i in heldout_ids[lv]),
+                    "posterior": st.mean(post[i] for i in heldout_ids[lv]),
+                    "realized": st.mean(realized[lv]),
+                }
+                for lv in LEVELS
+            },
+            "realized_by_calibration_count": {
+                str(c): {"n": len(v), "pass": st.mean(v)} for c, v in sorted(by_count.items())
+            },
+        }
     return out
 
 
@@ -190,7 +305,10 @@ def main() -> int:  # pragma: no cover - CLI convenience
             "H3_A_pass_rate": st.mean(r["A"]["pass_rate"] for r in rows),
             "H4_draft_term": st.mean(d["draft"] for d in dec),
             "H4_loop_term": st.mean(d["loop"] for d in dec),
+            "H3_A_false_pass_pooled": sum(r["A"]["false_pass"] for r in rows),
         }
+    if levels:
+        report["diagnosis"] = _diagnose(levels)
     if "low" in deltas and "mid" in deltas:
         s = swing(deltas["mid"], deltas["low"])
         t, df = welch(deltas["mid"], deltas["low"])

@@ -135,3 +135,11 @@ interval). They live in `docs/p0-manifests/full-1001-L2-stats.json` and `docs/p0
 which papyrustrail's config does not read, so no registry entry can hold them. Each is derived and
 pinned by `verify_paper_claims._d9_target_p0_checks`, and two of those checks were mutation-tested
 (a changed Δ and a changed realized p₀ each fail exactly one check).
+
+## Four more D9 values after the round-2 review (2026-10-26)
+
+The rewritten D9 entry compares the third-worker pool with this paper's own three-seed L2 cell:
+`-0.066` / `0.186` (that cell's t-interval, at two sites), `1.83` and `0.18` (Welch t and p between
+the two). All four are derived in `verify_paper_claims._d9_target_p0_checks` from
+`docs/validation-study-p0-L2.json` and `docs/p0target/analysis.json` with the analysis script's own
+`welch` and `welch_p`, and none is expressible in the registry, which has no Welch block.

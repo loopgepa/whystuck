@@ -7291,13 +7291,20 @@ def _replicate_decomposition() -> dict[str, list[object]]:
 
 
 def _d9_target_p0_checks() -> list[tuple[str, float, float, float]]:
-    r"""Paper I's D9 entry and sixth qualification: candidate (ii) measured on a second worker.
+    r"""Paper I's D9 entry and sixth qualification: a variant of candidate (ii), on a third worker.
 
     Every value is derived from the released target-p0 artifacts (`docs/p0-manifests/`,
-    `docs/p0target/analysis.json`), which `scripts/analyze_p0target.py` produces by strict replay of
-    the three four-arm cassettes. The pooled interval is explicitly exploratory in the paper and in
-    the pre-registration's outcome section; it is pinned like any other printed number.
+    `docs/p0target/analysis.json`, produced by `scripts/analyze_p0target.py` by strict replay) or,
+    for the comparison with this paper's own L2 cell, from `docs/validation-study-p0-L2.json`. The
+    pooled interval is explicitly exploratory in the paper and in the pre-registration's outcome
+    section; it is pinned like any other printed number.
     """
+    import math
+    from statistics import mean as _mean
+    from statistics import stdev as _stdev
+
+    from analyze_p0target import welch, welch_p
+
     p1 = _sources().paper_tex("p1-conditional-lever")
     man = Path("docs/p0-manifests")
 
@@ -7312,14 +7319,21 @@ def _d9_target_p0_checks() -> list[tuple[str, float, float, float]]:
         return sum(vals) / len(vals)
 
     an = json.loads(Path("docs/p0target/analysis.json").read_text(encoding="utf-8"))
-    real = {lv: an["levels"][lv]["M1_realized_p0"] for lv in ("low", "mid", "high")}
+    lvls = ("low", "mid", "high")
+    real = {lv: an["levels"][lv]["M1_realized_p0"] for lv in lvls}
     pooled = an["exploratory_pooled"]
-    built_vals = _scrape_all(
-        p1, r"built levels at\s+\$p_0 = ([\d.]+)\$, \$([\d.]+)\$ and \$([\d.]+)\$"
-    )
-    real_vals = _scrape_all(
-        p1, r"first drafts realized \$([\d.]+)\$, \$([\d.]+)\$ and\s+\$([\d.]+)\$"
-    )
+    pooled_x = [d for lv in lvls for d in an["levels"][lv]["delta_per_seed"]]
+    l2 = json.loads(Path(f"{DOCS}/validation-study-p0-L2.json").read_text(encoding="utf-8"))["runs"]
+    three = [r["D"]["opt_heldout"] - r["B"]["opt_heldout"] for r in l2]
+    half = 4.302652729911275 * _stdev(three) / math.sqrt(len(three))  # t(0.975, df=2)
+    t, df = welch(three, pooled_x)
+
+    def nth(pattern: str, k: int) -> float:
+        vals = _scrape_all(p1, pattern)
+        return vals[k] if len(vals) > k else float("nan")
+
+    built_pat = r"built levels at\s+\$p_0 = ([\d.]+)\$, \$([\d.]+)\$ and \$([\d.]+)\$"
+    real_pat = r"first drafts realized\s+\$([\d.]+)\$, \$([\d.]+)\$ and \$([\d.]+)\$"
     out: list[tuple[str, float, float, float]] = [
         (
             "tex: D9 hard-tier pool p0",
@@ -7329,60 +7343,69 @@ def _d9_target_p0_checks() -> list[tuple[str, float, float, float]]:
         ),
         (
             "tex: D9 L2 pool p0",
-            _scrape(p1, r"near the ceiling \(\$p_0 = ([\d.]+)\$\)"),
+            _scrape(p1, r"\$L_2\$ generator \(\$p_0 = ([\d.]+)\$\)"),
             0.0005,
             pool_p0("L2"),
         ),
     ]
-    for i, lv in enumerate(("low", "mid", "high")):
-        out.append(
-            (
-                f"tex: D9 built p0 {lv}",
-                built_vals[i] if len(built_vals) > i else float("nan"),
-                0.0005,
-                built(lv),
-            )
-        )
-        out.append(
-            (
-                f"tex: D9 realized p0 {lv}",
-                real_vals[i] if len(real_vals) > i else float("nan"),
-                0.005,
-                real[lv],
-            )
-        )
+    for k, lv in enumerate(lvls):
+        out.append((f"tex: D9 built p0 {lv}", nth(built_pat, k), 0.0005, built(lv)))
+        out.append((f"tex: D9 realized p0 {lv}", nth(real_pat, k), 0.005, real[lv]))
+    rng = r"level means of realized \$p_0\$ between\s+\$([\d.]+)\$ and \$([\d.]+)\$"
+    out.append(("tex: D9 realized range low end", nth(rng, 0), 0.005, min(real.values())))
+    out.append(("tex: D9 realized range high end", nth(rng, 1), 0.005, max(real.values())))
     for label, pattern in (
-        ("D9", r"all \$(\d+)\$ seeds sit\s+near"),
-        ("conclusion", r"second worker, \$(\d+)\$ independent seeds"),
+        ("D9", r"registered:\} the \$(\d+)\$ seeds"),
+        ("conclusion", r"exploratory pooling of \$(\d+)\$ seeds"),
     ):
         out.append(
             (f"tex: D9 pooled seed count, {label}", _scrape(p1, pattern), 0.0, float(pooled["n"]))
         )
+    ci_pat = r"\$\\dd\(D-B\) = ([+-][\d.]+)\$, 95\\% interval\s+\$\[([+-][\d.]+), ([+-][\d.]+)\]\$"
+    sites = [float(x) for m in re.findall(ci_pat, p1, re.DOTALL) for x in m]
+    if len(sites) != 6:
+        raise AssertionError(f"expected the pooled estimate at 2 sites (6 numbers), found {sites}")
+    for k, label in enumerate(("D9", "conclusion")):
+        out.append((f"tex: D9 pooled delta, {label}", sites[3 * k], 0.00005, pooled["mean"]))
+        out.append((f"tex: D9 pooled CI low, {label}", sites[3 * k + 1], 0.00005, pooled["ci"][0]))
+        out.append((f"tex: D9 pooled CI high, {label}", sites[3 * k + 2], 0.00005, pooled["ci"][1]))
+    out.append(
+        (
+            "tex: D9 three-seed mean",
+            _scrape(p1, r"Our\s+\$\+([\d.]+)\$ at \$p_0 = 0.267\$ lies outside"),
+            0.0005,
+            _mean(three),
+        )
+    )
     for label, pattern in (
-        ("D9", r"seeds sit\s+near \$p_0 = ([\d.]+)\$"),
-        ("conclusion", r"independent seeds near \$p_0 = ([\d.]+)\$"),
+        ("D9", r"own\s+interval is \$\[(-[\d.]+), \+([\d.]+)\]\$"),
+        ("conclusion", r"own interval runs from \$(-[\d.]+)\$ to \$\+([\d.]+)\$"),
     ):
+        lo_hi = _scrape_all(p1, pattern)
         out.append(
             (
-                f"tex: D9 pooled realized p0, {label}",
-                _scrape(p1, pattern),
-                0.005,
-                pooled["mean_realized_p0"],
+                f"tex: D9 three-seed CI low, {label}",
+                lo_hi[0] if lo_hi else float("nan"),
+                0.0005,
+                _mean(three) - half,
             )
         )
-    for label, pattern in (
-        ("D9", r"matched baseline and give \$\\dd\(D-B\) = ([+-][\d.]+)\$"),
-        ("conclusion", r"near \$p_0 = [\d.]+\$ give \$\\dd\(D-B\) = ([+-][\d.]+)\$"),
-    ):
         out.append(
-            (f"tex: D9 pooled delta, {label}", _scrape(p1, pattern), 0.00005, pooled["mean"])
+            (
+                f"tex: D9 three-seed CI high, {label}",
+                lo_hi[1] if len(lo_hi) > 1 else float("nan"),
+                0.0005,
+                _mean(three) + half,
+            )
         )
-    ci = _scrape_all(
-        p1, r"95\\% interval\s+\$\[([+-][\d.]+), ([+-][\d.]+)\]\$, which excludes the \$\+0.060\$"
-    )
-    out.append(("tex: D9 pooled CI low", ci[0] if ci else float("nan"), 0.00005, pooled["ci"][0]))
+    out.append(("tex: D9 Welch t", _scrape(p1, r"differ by Welch \$t = ([\d.]+)\$"), 0.005, t))
     out.append(
-        ("tex: D9 pooled CI high", ci[1] if len(ci) > 1 else float("nan"), 0.00005, pooled["ci"][1])
+        (
+            "tex: D9 Welch p",
+            _scrape(p1, r"Welch \$t = [\d.]+\$ \(\$p = ([\d.]+)\$\)"),
+            0.005,
+            welch_p(t, df),
+        )
     )
     return out
 
