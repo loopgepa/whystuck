@@ -277,7 +277,8 @@ We drive the official GEPA \citep{agrawal2025gepa} via a loop-genome adapter, ca
 \texttt{MaxCandidateProposalsStopper} that caps candidate proposals per arm. It does not cap
 reflection calls: with every gene rewritten per proposal, a two-gene arm issues up to two calls
 per proposal, and the $\mathrm{mmc}=160$ cell recorded $96$ reflection calls under a cap of $72$
-proposals. GEPA's reflection channel (offline, between
+proposals. Every released bound was priced at one call per proposal; the spend guard now prices
+one per evolvable gene under that selector. GEPA's reflection channel (offline, between
 training iterations) sees per-constraint feedback prose for the \texttt{generate} gene, identical
 across B and D. Arm~D's \texttt{ensure\_correct} gene additionally receives, on the train split
 only, the critique's own verdicts labelled by the metric as right, false passes or false alarms

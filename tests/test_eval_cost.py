@@ -243,3 +243,35 @@ def test_pricing_table_has_the_study_models():
         assert m in MODEL_PRICES
         inp, out = MODEL_PRICES[m]
         assert inp > 0 and out > 0
+
+
+def test_reflection_is_priced_per_gene_when_a_proposal_rewrites_several():
+    # Measured: the mmc160 cassette holds 96 reflection calls under a proposal cap that the
+    # guard priced as 72, because under module_selector="all" a proposal for a two-gene arm
+    # issues one reflection call per gene. The default stays one call per proposal, so every
+    # bound this repository published keeps the value it was priced at.
+    from whystuck.eval.cost import plan_study_calls
+
+    kw = dict(
+        arms=("A", "B", "C", "D"), n_train=8, n_heldout=10, max_metric_calls=28,
+        reflection_calls=6, worker_model="openai/gpt-4.1-mini",
+        reflection_model="openai/gpt-5.6-luna", n_seeds=3,
+    )  # fmt: skip
+    old = plan_study_calls(**kw)
+    assert old[1].calls == 6 * 2 * 3
+    new = plan_study_calls(**kw, reflection_genes={"B": 1, "D": 2})
+    assert new[1].calls == 6 * (1 + 2) * 3
+    assert new[0].calls == old[0].calls
+
+
+def test_reflection_genes_must_name_only_optimizing_arms():
+    import pytest
+
+    from whystuck.eval.cost import plan_study_calls
+
+    with pytest.raises(ValueError):
+        plan_study_calls(
+            arms=("B",), n_train=1, n_heldout=1, max_metric_calls=1, reflection_calls=1,
+            worker_model="openai/gpt-4.1-mini", reflection_model="openai/gpt-5.6-luna",
+            reflection_genes={"B": 1, "Q": 2},
+        )  # fmt: skip

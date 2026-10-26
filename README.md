@@ -159,7 +159,7 @@ and tested.
 | LLM worker + output→apply→verify wiring (real-repo scoring) | 🟡 v0.2-alpha |
 | Optimize + frontier MCP tools (gated on the extra) | 🟡 v0.2-alpha |
 
-**2399 tests**, all local and offline; `ruff` + `mypy --strict` (on `src/`) + docs `--strict` clean.
+**2440 tests**, all local and offline; `ruff` + `mypy --strict` (on `src/`) + docs `--strict` clean.
 
 ## Configure
 
@@ -201,7 +201,7 @@ says which paper answers which question.
 |---|---|---|
 | **I** | *Whether Optimizing the Loop Beats Optimizing the Prompt Tracks One Number* | On one worker, whether evolving a loop's verifier beats evolving its generation prompt **tracks p₀, the base rate of already-correct first drafts**: nothing measurable at p₀ = 0.067, +0.060 held-out at p₀ = 0.267, a 0.102 swing measured along p₀ rather than shown to be caused by it |
 | **II** | *What a Checker Cannot Buy Is the Repair* | At one refine round, a **perfect** checker that names the failed constraints buys nothing measurable over a near-random self-critique and scores **0.042 below** a text-statistics tool, on thirty fixed tasks. Holding it perfect, naming the constraint with a measured repair edit is worth +0.0613 over a bare verdict. Every number it measures scores a fixed genome; two optimizer contrasts are quoted from the companions |
-| **III** | *A Loop Optimizer That Was Not Optimizing Its Loop* | Pointing an optimizer at a component is not the same as optimizing it. Replayed, ten of the twelve replayable runs among our first fifteen had a critique gene **byte-identical to the seed** in every winning genome, and the other two moved it on one seed each. Print one integer per component |
+| **III** | *A Loop Optimizer That Was Not Optimizing Its Loop* | Pointing an optimizer at a component is not the same as optimizing it. Replayed, ten of the twelve replayable runs among our first fifteen had a critique gene **byte-identical to the seed** in every winning genome, and the other two moved it on one seed each; only five of the twelve could have shown a move. Print one integer per component |
 
 - **[Every experiment, and the command that produced it](docs/EXPERIMENTS.md)** — one script spends
   money and it refuses to without `--yes`; everything else is $0 and offline.

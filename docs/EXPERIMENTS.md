@@ -19,7 +19,7 @@ claim to the command that produced it.
 
 ```bash
 # 1. every machine-checkable number in all three papers, against the released artifacts
-python scripts/verify_paper_claims.py            # 1350 checks, offline, $0
+python scripts/verify_paper_claims.py            # 1381 checks, offline, $0
 
 # 2. the three-way split lost no quantity
 python scripts/verify_split_coverage.py          # 318 pre-split quantities accounted for, $0
@@ -145,7 +145,7 @@ to stop computing depth and measure it.
 
 | script | asserts |
 |---|---|
-| `verify_paper_claims.py` | 1350 checks: every machine-checkable number in the three papers against the artifacts, plus per-paper spine numbers, cross-paper agreement, and each paper's corrections count |
+| `verify_paper_claims.py` | 1381 checks: every machine-checkable number in the three papers against the artifacts, plus per-paper spine numbers, cross-paper agreement, and each paper's corrections count |
 | `verify_split_coverage.py` | all 318 quantities in the pre-split draft are carried by some paper, superseded by a verified replacement, or explicitly dropped with a reason |
 | `verify_reproducibility.py` | every corrected-harness run replays bit-for-bit; superseded runs are **skipped and reported**, never silently "verified" |
 | `verify_stdio.py` | the MCP console script speaks stdio (product, not paper) |
@@ -242,7 +242,8 @@ The single most useful field in any run JSON:
 Per component, whether the optimizer's output differs from the seed. Paper III exists because the
 first fifteen contrast runs did not print it: replayed at the pre-fix commit, ten of the twelve
 replayable runs had a critique gene byte-identical to the seed in every winning genome (the other
-two moved it on one seed each; `scripts/replay_superseded_genes.py`), ten runs reported held-out
+two moved it on one seed each, and only five of the twelve could have shown a move;
+`scripts/replay_superseded_genes.py`), ten runs reported held-out
 scores identical on every seed, and the consistency read as a tight null when it was a genome
 compared against itself. Check this field before
 interpreting any Δ. Its companion screen is as cheap — a `PASS` rate of zero means the search went

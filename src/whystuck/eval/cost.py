@@ -37,6 +37,7 @@ entry can never silently under-count (an unknown model raises).
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 
 # USD per 1M tokens: model -> (input, output). Verified July 2026.
@@ -189,6 +190,7 @@ def plan_study_calls(
     n_seeds: int = 1,
     worker_calls_per_task: int = 1,
     worker_tokens: tuple[int, int] = WORKER_TOKENS,
+    reflection_genes: Mapping[str, int] | None = None,
 ) -> list[CallGroup]:
     """Conservative per-call plan for a study configuration.
 
@@ -235,7 +237,19 @@ def plan_study_calls(
         elif arm == "C":
             worker_evals += n_heldout  # winner held-out eval (command opt is free)
 
-    reflection_per_seed = reflection_calls * sum(1 for a in arms if a in _LLM_OPTIMIZING_ARMS)
+    # `reflection_genes` maps each LLM-optimizing arm to the reflection calls ONE proposal makes:
+    # under module_selector="all" GEPA asks the reflector once per evolvable gene, so a two-gene
+    # arm makes two. Measured: the mmc160 cassette holds 96 reflection calls under a cap priced
+    # at 72. Omitted, every arm is priced at one call per proposal, which is what every bound
+    # this repository has published was computed with, so those bounds keep their values.
+    if reflection_genes is not None:
+        stray = sorted(set(reflection_genes) - set(_LLM_OPTIMIZING_ARMS))
+        if stray:
+            raise ValueError(f"reflection_genes names non-optimizing arm(s) {stray}")
+    per_proposal = {
+        a: (reflection_genes or {}).get(a, 1) for a in arms if a in _LLM_OPTIMIZING_ARMS
+    }
+    reflection_per_seed = reflection_calls * sum(per_proposal.values())
     worker_calls = worker_evals * worker_calls_per_task * n_seeds
     reflection_total = reflection_per_seed * n_seeds
 

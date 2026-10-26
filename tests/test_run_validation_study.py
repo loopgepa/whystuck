@@ -95,7 +95,9 @@ def test_seeds_flag_parses_multiple_values():
     # content after reasoning — the empty-completion defect) moves it to ≈$5.73, so the
     # guard now refuses it at the default. That refusal is correct and is covered by
     # test_four_seeds_default_cap_is_refused; it must not be what makes this test pass.
-    code, out, _ = _run(["--seeds", "0,1,2", "--max-usd", "6"])
+    # Pricing arm D's reflection at one call per gene under the default selector "all"
+    # (2026-10-26) moves it again, to ≈$7.38.
+    code, out, _ = _run(["--seeds", "0,1,2", "--max-usd", "8"])
     assert code == 0
     assert "seeds=[0, 1, 2]" in out
 
@@ -952,3 +954,41 @@ def test_empty_attempts_flag_defaults_to_the_historical_two():
     cli = _load_cli()
     assert cli._parse_args([]).empty_attempts == 2
     assert cli._parse_args(["--empty-attempts", "6"]).empty_attempts == 6
+
+
+def test_the_guard_prices_one_reflection_call_per_gene_under_select_all():
+    def reflection_calls(out: str) -> int:
+        m = re.search(r"openai/gpt-5\.6-luna\s+(\d+) calls", out)
+        assert m, out
+        return int(m.group(1))
+
+    base = ["--arms", "BD", "--seeds", "0", "--reflection-calls", "6",
+            "--reflection-model", "openai/gpt-5.6-luna", "--task-set", "multi-hard",
+            "--n-train", "8", "--n-heldout", "10", "--max-metric-calls", "28"]  # fmt: skip
+    _, rr, _ = _run([*base, "--module-selector", "round_robin"])
+    _, al, _ = _run([*base, "--module-selector", "all"])
+    assert reflection_calls(rr) == 6 * 2  # one call per proposal per arm
+    assert reflection_calls(al) == 6 * (1 + 2)  # D rewrites two genes per proposal
+
+
+def test_replay_is_not_refused_by_the_spend_ceiling_but_a_live_run_is():
+    # A replay spends nothing, so the spend ceiling has nothing to guard there. It used to refuse
+    # anyway, which turned a correction to the PRICING of reflection calls into a broken replay
+    # of a released run (study-mmc160 re-priced above the ceiling it was recorded under).
+    over = ["--seeds", "0,1,2", "--max-usd", "1"]
+    code, _, err = _run(over)
+    assert code == 2 and "REFUSED" in err
+    # Past the guard, the replay reaches the cassette, which is deliberately absent: reaching it
+    # is the proof that the ceiling did not refuse.
+    from whystuck.eval.cassette import CassetteMiss
+
+    cli = _load_cli()
+    out, err = io.StringIO(), io.StringIO()
+    with (
+        pytest.raises(CassetteMiss),
+        contextlib.redirect_stdout(out),
+        contextlib.redirect_stderr(err),
+    ):
+        cli.main([*over, "--replay", "--record", "/nonexistent/cassette.json"])
+    assert "REFUSED" not in err.getvalue()
+    assert "exceeds" in out.getvalue()  # the overrun is still reported, not hidden

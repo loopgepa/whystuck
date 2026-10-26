@@ -666,6 +666,17 @@ def main(argv: list[str] | None = None) -> int:
         args.task_set, WORKER_TOKENS
     )
 
+    # Under "all" one proposal asks the reflector once per evolvable gene, so arm D is priced
+    # at its gene count; under round_robin a proposal rewrites one gene and costs one call.
+    reflection_genes: dict[str, int] | None = None
+    if args.module_selector == "all":
+        from whystuck.eval.study import arm_evolvable
+
+        reflection_genes = {
+            a: len(arm_evolvable(a, include_plan=args.plan_gene, actuator=args.actuator))
+            for a in arms
+            if a in ("B", "D")
+        }
     groups = plan_study_calls(
         arms=arms,
         n_train=args.n_train,
@@ -677,6 +688,7 @@ def main(argv: list[str] | None = None) -> int:
         n_seeds=len(seeds),
         worker_calls_per_task=worker_calls_per_task,
         worker_tokens=worker_tokens,
+        reflection_genes=reflection_genes,
     )
 
     print(
@@ -691,8 +703,12 @@ def main(argv: list[str] | None = None) -> int:
     try:
         CostGuard(max_usd=args.max_usd).check(groups)
     except BudgetExceeded as exc:
-        print(f"REFUSED: {exc}", file=sys.stderr)
-        return 2
+        # A replay spends nothing, so the ceiling has nothing to guard. Refusing it anyway made a
+        # correction to how reflection calls are priced break the replay of a released run.
+        if not args.replay:
+            print(f"REFUSED: {exc}", file=sys.stderr)
+            return 2
+        print(f"NOTE (replay, $0): {exc}")
 
     # Pre-spend guard for the code arm: actually EXECUTE the vendored references through
     # the sandbox on THIS host (the generic dry-run never runs code). Proves numpy imports

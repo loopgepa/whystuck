@@ -1235,7 +1235,8 @@ The series' other two papers carry the entries bearing on their own claims.
   \item \textbf{Six descriptions of the harness that its code did not match.} The reflection
     output cap was stated as $1500$ throughout; it was raised to $3000$ for the clean re-run and
     every corrected run after it. The proposal stopper was called a hard cap on reflection spend;
-    it caps proposals, and a two-gene arm makes a reflection call per gene per proposal. Fix~(ii)
+    it caps proposals, and a two-gene arm makes a reflection call per gene per proposal; the spend
+    guard now prices it that way, and every released bound was priced the old way. Fix~(ii)
     said the selector defaulted to all genes; only the study CLI does. Fix~(iii) said arm~A is
     re-measured; its second scoring issues the calls its first did and replays identically, so it
     is a determinism check. Fix~(v) said an unmatched trace raises; GEPA swallowed the exception and

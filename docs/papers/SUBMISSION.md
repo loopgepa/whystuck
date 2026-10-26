@@ -21,13 +21,13 @@ endorsement domain, and the primary category selects the domain.
 
 Two structural facts decide this, and neither is about the papers' quality.
 
-**Main-text length is 34 / 21 / 17 pages** (references begin on p.35 / 22 / 18 of 49 / 33 / 27).
+**Main-text length is 34 / 21 / 18 pages** (references begin on p.35 / 22 / 19 of 49 / 33 / 28).
 **All three papers are de-anonymised by their own reproducibility apparatus**: the title block
 prints author, affiliation and repository URL, and each abstract names the repository again.
 
 | venue | window | verdict |
 |---|---|---|
-| **TMLR** | rolling | **The fit.** Its two criteria are whether the claims are supported by the evidence and whether anyone in the audience would be interested; novelty and significance are *explicitly excluded* as grounds for rejection. Variable manuscript length, so the main-text lengths above are not a problem. arXiv preprints permitted. Double-blind. **Needs a restyle:** "Submissions must be PDF files generated using the TMLR LaTeX stylefile and template" (author guide, quoted 2026-09-04), and these build on `article` at 11pt, so the page counts on this page are for the current class and will move under theirs. Accepts the artifact as supplementary material, which removes the mirror-hosting step below. **Restyle done 2026-09-10**, see below: 41 / 28 / 23 pages under `tmlr.sty`, 0 overfull, 0 undefined. |
+| **TMLR** | rolling | **The fit.** Its two criteria are whether the claims are supported by the evidence and whether anyone in the audience would be interested; novelty and significance are *explicitly excluded* as grounds for rejection. Variable manuscript length, so the main-text lengths above are not a problem. arXiv preprints permitted. Double-blind. **Needs a restyle:** "Submissions must be PDF files generated using the TMLR LaTeX stylefile and template" (author guide, quoted 2026-09-04), and these build on `article` at 11pt, so the page counts on this page are for the current class and will move under theirs. Accepts the artifact as supplementary material, which removes the mirror-hosting step below. **Restyle done 2026-09-10**, see below: 41 / 28 / 24 pages under `tmlr.sty`, 0 overfull, 0 undefined. |
 | ICLR 2027 | abstract 18 Sep, paper 25 Sep 2026 | **Ruled out for a three-paper series.** 9-page initial limit (10 camera-ready; references and appendices excluded). And: *"If you and all of your co-authors have never had a paper accepted for publication in a major machine learning conference or journal, you may submit at most one paper to ICLR 2027."* Single-author and independent ⇒ **one paper, cut threefold.** Authors on 3+ papers must review 6. Mandatory AI-use statement whose required-disclosure list covers methodology feedback, implementing methods and interpreting results. |
 | NeurIPS 2026 Evaluations & Datasets | abstract 4 May, full 6 May 2026 | **Closed.** Was the best categorical fit, the renamed Datasets & Benchmarks track, now explicitly treating evaluation as an object of study. Next window ≈ May 2027. |
 | MLRC 2026 | hard 30 Sep 2026 | **Not a fit.** Requires prior TMLR acceptance, and its scope is reproducing *others'* claims published 2025 onward. |
@@ -104,8 +104,8 @@ python scripts/make_tmlr_supplement.py --paper p1-conditional-lever
 | paper | `article` 11pt | `tmlr.sty` 10pt | supplement ZIP |
 |---|---|---|---|
 | I | 49 | **41** | 7.3MB |
-| II | 32 | **28** | 7.5MB |
-| III | 27 | **23** | 7.6MB |
+| II | 33 | **28** | 7.5MB |
+| III | 28 | **24** | 7.6MB |
 
 Zero overfull boxes, zero undefined citations or references, zero missing files on all three.
 
@@ -247,7 +247,7 @@ exists. Measured from the built PDFs and each paper's own source:
 |---|---|---|---|---|---|
 | I | `p1-conditional-lever` | 49 | 11 | 3 | 28 |
 | II | `p2-repair-not-detection` | 33 | 4 | 3 | 25 |
-| III | `p3-silent-no-op` | 27 | 4 | 1 | 19 |
+| III | `p3-silent-no-op` | 28 | 4 | 1 | 19 |
 
 Tables, figures and citations are counted from the sources by
 `tests/test_paper_docs_consistency.py`; the page count is compared against the compiled PDF by
@@ -262,14 +262,14 @@ neither stops a build, and Paper I shipped an oversized threats table until 2026
 nothing read the log.
 
 Abstract lengths against the 1920-character metadata
-field: **1917**, **1917**, **1881**. The headroom is 3, 3 and 39 characters, so any edit to any
+field: **1917**, **1917**, **1861**. The headroom is 3, 3 and 59 characters, so any edit to any
 of the three abstracts has to be re-checked by `make_arxiv_package.py` rather than assumed to fit.
 
 The three are cross-referenced as a series, so they should be posted together or in the order I, II,
 III; each abstract names its companions.
 
 These lengths are fine for arXiv and for TMLR, which sets no page limit. Against the 9-page
-main-text limit at NeurIPS, ICLR and ICML, Paper I runs 3.8x, Paper II 2.3x and Paper III 1.9x, so a
+main-text limit at NeurIPS, ICLR and ICML, Paper I runs 3.8x, Paper II 2.3x and Paper III 2.0x, so a
 conference submission would need substantial main text moved into appendices, plus that venue's style
 file. Paper I read "about four times" until 2026-08-17, which is 39/9 rather than 27/9: the sentence
 divided the total by the main-text limit. The three multiples are now checked against the main-text
