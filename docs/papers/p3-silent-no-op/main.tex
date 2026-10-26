@@ -31,25 +31,27 @@ and the one integer that flags it}
 
 \begin{abstract}
 Reflective optimizers such as GEPA \citep{agrawal2025gepa} can evolve several text components of a
-compound LLM system at once. We report a failure mode of that capability which held-out scores
-cannot reveal: \textbf{pointing an optimizer at a component is not the same as optimizing it}.
+compound LLM system at once. In a case study of our own codebase we report a failure mode of that
+capability which held-out scores cannot reveal: \textbf{pointing an optimizer at a component is not
+the same as optimizing it}.
 Thirteen of our first fifteen contrast runs made a self-refine loop's verifier evolvable alongside
 its generation prompt. Replayed at the commit that recorded them, twelve of the thirteen reproduce
 their released scores exactly, and in ten of those twelve the verifier-evolving arm's winning
 critique gene is \emph{byte-identical to the seed on every seed}; in the other two it moved on one
-seed each. Ten of the fifteen runs reported held-out scores identical on every seed, and we believed
+seed each. Only five of the twelve could have shown a move, and three of those, the flagship among
+them, show none.
+Ten of the fifteen runs reported held-out scores identical on every seed, and we believed
 them for months. Two ordinary wiring choices caused it: our adapter built the reflective dataset
-without regard to which component it describes, so the reflector never saw a verdict the critique
-had returned; and GEPA's default selector rewrites one component per proposal, so under a matched
-\emph{total} budget the two-gene arm searched the shared productive gene half as hard as the one-gene
-arm, a confound that flatters the one-gene arm exactly where an effect was being sought. Auditing the fix, the audit,
+without regard to which component it describes, and GEPA's default selector rewrites one component
+per proposal, so under a matched \emph{total} budget the two-gene arm searched the shared gene half
+as hard. Auditing the fix, the audit,
 and a replication, we found the same class of error eight more times, including a ground-truth signal
 that was silently constant and an empty completion accepted as a gene, which deletes a step of the
-loop and thereby \emph{improves} the training score. We propose a reporting minimum that costs one
-integer per component, whether the optimizer's output differs from the seed. It would have flagged
-the untouched critique gene in the first affected run, though alone it cannot tell a treatment
-that never applied from a search that found nothing worth keeping. Every claim this work withdraws
-is listed in Appendix~\ref{sec:corrections}.
+loop and thereby \emph{improves} the training score. We propose reporting one integer per
+component, whether the optimizer's output differs from the seed. It would have flagged the first
+affected run. It is necessary, not sufficient: it cannot tell a treatment that never applied from a
+search that found nothing, and it counts a step blanked by an empty completion as changed. Every
+claim this work withdraws is listed in Appendix~\ref{sec:corrections}.
 \end{abstract}
 
 \input{../shared/series}
@@ -91,9 +93,11 @@ consistency as evidence of a tight null. It was evidence of the opposite. Our co
     paper. Within the
     flagship run, whose five seeds and three evolvable arms give fifteen
     arm-runs, the optimizer changed \texttt{generate} in $5/15$ winners and
-    \texttt{ensure\_correct} in $0/15$ ($2/5$ and $0/5$ for the verifier-evolving arm alone). Almost
-    no reported difference measures the treatment, and most of them compare a genome against itself,
-    which is why they were so stable.
+    \texttt{ensure\_correct} in $0/15$ ($2/5$ and $0/5$ for the verifier-evolving arm alone). Seven
+    of the ten unchanged runs could not have moved the gene by design, so the direct evidence is
+    the five that could, three of which left it at its seed. Almost no reported difference
+    measures the treatment: for the gene that defines the contrast, most of them compare a genome
+    against itself, which is why they were so stable.
   \item \textbf{Two ordinary causes, one in our adapter and one a library default}
     (\S\ref{sec:defect}): a component-agnostic reflective dataset, which breaks GEPA's documented
     per-component contract, and its documented default one-component-per-proposal selector under a
@@ -112,7 +116,7 @@ consistency as evidence of a tight null. It was evidence of the opposite. Our co
     output differs from the seed. One integer. Plus a presentation rule for the comparison itself:
     label a difference between two optimized arms with how many seeds \emph{each} arm accepted
     on, which catches the mirror-image defect where the \emph{comparator} is the starved arm.
-    A later pre-registered run shows that flagging the zero case is not enough and the contrast
+    A later pre-registered run, the cross-provider critic run of \S\ref{sec:fix}, shows that flagging the zero case is not enough and the contrast
     has to be \emph{stratified} by that count: neither of its arms was starved, yet $74\%$ of its
     positive $\dd$ came from the two seeds where the treatment never applied.
   \item \textbf{A positive control, as a requirement rather than a nicety}
@@ -151,8 +155,8 @@ taken to its limit. Others report the seed returned whole and say so:
 artifacts sharing a hash, and call it an exact no-intervention outcome; \citet{singh2026mage} marks
 the baselines that returned the seed prompt unchanged on every seed; and with a five-iteration
 search on a ten-problem subsample, \citet{pappu2026multiagent} report that ``on GPQA Diamond and
-MATH-500, GEPA returned the original prompt essentially unchanged.'' None of these is a wiring
-fault, and an unchanged component is also what a working search returns when it finds nothing
+MATH-500, GEPA returned the original prompt essentially unchanged.'' None of these reports a
+wiring fault, and an unchanged component is also what a working search returns when it finds nothing
 worth keeping, which is why the per-component integer has to be read beside the search's own
 record. \citet{xu2026harnessrepair} come closest to this paper's method: they inject known
 evaluation defects one at a time into a pre-registered harness study and find that replication
@@ -249,9 +253,10 @@ We drive the official GEPA \citep{agrawal2025gepa} via a loop-genome adapter, ca
 \texttt{MaxCandidateProposalsStopper} to cap the number of proposals. The cap bounds proposals,
 not reflection calls: GEPA calls the reflection LM once per component a proposal rewrites, so a
 two-gene arm under the corrected selector can spend twice the cap. GEPA's reflection channel (offline, between
-training iterations) sees per-constraint feedback prose: this is the standard
-optimizer signal and is identical across B and D; it is distinct from the
-in-loop critique gate. Worker \texttt{gpt-4.1-mini} (output cap 320 tokens on the
+training iterations) sees per-constraint feedback prose. That is the standard
+optimizer signal; under the superseded wiring every component of both B and D received it, and
+the corrected harness adds, for arm~D's verify gene only, the verdict records of fix~(i)
+(\S\ref{sec:fix}). Both are distinct from the in-loop critique gate. Worker \texttt{gpt-4.1-mini} (output cap 320 tokens on the
 instruction-following runs, raised to 1024 on the five BigCodeBench ones and 512 on the earlier
 MBPP+ attempt); reflection
 \texttt{gpt-5.6-luna} on the corrected-harness runs this series' conclusions rest on, and
@@ -262,10 +267,13 @@ superseded and corrected sets, so it is one more reason not to read a superseded
 corrected one; within each set it is fixed, which is what the contrasts require.
 
 \paragraph{Verdict rule (pre-registered).}
-\textbf{SUPPORTED} iff $\dd > \sigma_B + \sigma_D$ and positive;
+As the harness implements it and every released run report prints it:
+\textbf{SUPPORTED} iff $\dd > \sigma_B + \sigma_D$ and positive, where $\sigma$ is the
+population standard deviation of an arm's per-seed held-out scores;
 \textbf{NOT SUPPORTED} iff $\mathrm{mean}(D) \le \mathrm{mean}(B)$;
-\textbf{INCONCLUSIVE} if positive-but-within-noise, fewer than two seeds, or a
-ceiling/floor flag fires (seed held-out $\ge 0.9$ or $\le 0.1$). This is a
+\textbf{INCONCLUSIVE} if positive-but-within-noise or fewer than two seeds. A ceiling or floor
+(mean seed held-out $\ge 0.9$ or $\le 0.1$) is printed as a warning beside the label and does not
+replace it. This is a
 deliberately conservative bar (the sum of two standard deviations), erring
 toward under-claiming. The rule has one blind spot: every branch of it reads
 $\dd$ and the arm variances, so a genome-against-itself contrast passes through it and returns
@@ -291,8 +299,14 @@ seed each, \textbf{$2$ of $38$} winning genomes: run~6, where arm~D's winner rew
 and scored exactly its seed score while arm~B's \texttt{generate} edit lost $0.025$, and the nano
 worker swap, where arm~D's critique-only rewrite cost it $0.016$ against its seed. Four of the
 twelve, runs~7--10, gate on the true metric, under which the verify gene cannot change the outcome,
-so identity there is no evidence either way; the earlier count of thirteen of thirteen came from
-replaying the flagship run alone and extending the result to the rest.
+so identity there is no evidence either way. Three more are uninformative by design
+(Table~\ref{tab:results}): run~1's single-constraint tasks leave the verify gene inert, run~2's
+seed already scores $0.97$, and the MBPP+ code run's seed loop solved every training task, so GEPA
+skipped every iteration and no arm changed any gene. That leaves \textbf{five} runs in which the
+critique gene had room to move. It stayed at its seed on every seed in \textbf{three} of them,
+runs~3--5 (in run~5 no arm changed any gene either), and moved on one seed in the other two. The
+earlier count of thirteen of thirteen came from replaying the flagship run alone and extending the
+result to the rest.
 Within the flagship run, five seeds by three evolvable arms, so fifteen arm-runs,
 GEPA changed
 \texttt{generate} in $5/15$ winners and \texttt{ensure\_correct} in $0/15$; for arm~D alone that
@@ -379,9 +393,10 @@ happen, and each was caught by a machine rather than by reading.
   label; training proceeds and reports normally \\
 7 & A ``strict'' replay swallowed a cassette miss, exiting $0$ with a divergent number &
   Exit code $0$ plus a plausible report is indistinguishable from success \\
-8 & The harness accepted an empty reflection completion as the critique gene & A loop with \emph{no}
-  critique beats one with a near-random critique on the training subsample, so the degenerate
-  candidate wins on merit \\
+8 & The harness accepted an empty reflection completion as a gene: the critique in the discarded
+  re-run attempt, and \texttt{generate} on one seed of run~1 & A loop with \emph{no}
+  critique beats one with a near-random critique on the training subsample, and run~1's bare task
+  beat its seed instruction, so the degenerate candidate wins on merit \\
 9 & The \emph{comparator} arm accepted nothing on $3/3$ seeds, so $\dd(D-B)$ was
   $\dd(D-\mathrm{seed})$ & Both arms report a genome and a score; a genome equal to the seed is
   indistinguishable from one the search chose to keep \\
@@ -397,7 +412,8 @@ happen, and each was caught by a machine rather than by reading.
 \caption{Eleven ways a componentized-optimization result can be confidently wrong while every
 number it prints looks reasonable. Defects 1--3 invalidated the original headline; 4--5 change
 what the intervals may be read to mean; 6--7 were caught before spending on the re-run and 8
-only after it had already corrupted one seed of a paid run; 9 was caught after spending, in a later
+only after it had already corrupted one seed of a paid run, and the replay record later showed it
+had corrupted one seed of superseded run~1 as well; 9 was caught after spending, in a later
 sweep, and is defect~1's mirror image, the same one-sided contrast with the starvation on the
 control side instead of the treatment side. 10--11 arrived while replicating on a second worker
 and are this paper's own thesis turned on its instruments: a switch reported as set that a
@@ -426,7 +442,9 @@ $n{=}3$ and leaves larger $n$ alone, and it errs toward negative effects, so an 
 brackets zero can come out looking as if it excluded zero. Run~3 is the flagship hard-multi run, listed
 with the rest of the numbering in Table~\ref{tab:results}. The actuator row's seeds partition one
 fixed BigCodeBench pool and share held-out tasks (defect~5), so even the corrected interval there
-is narrower than an interval over independent draws would be.}
+is narrower than an interval over independent draws would be. At $n{=}3$ the corrected interval is
+the range of the three seeds, which covers the true mean less often than its nominal level, so
+``still excludes zero'' in the second row says that all three seeds were positive and no more.}
 \label{tab:ciexcl}
 \end{table}
 
@@ -447,9 +465,9 @@ rewrites in the flagship run and they lost on training score, which the released
 and which an empty count cannot distinguish from a search that never proposed anything. The audit of
 that harness (defects~5--7) added three more: (v) the verify gene's truth signal now receives
 the real task, and a trace that cannot be matched to an evaluated task fails the run rather than
-being scored against a stand-in (GEPA catches an exception raised while it builds the reflective
-dataset and skips that proposal, so the adapter records the failure and the optimizer wrapper
-raises once GEPA returns); (vi) a replay that swallows a cassette miss now fails at context
+being scored against a stand-in (GEPA catches any exception raised while it builds the reflective
+dataset and skips that proposal, so the adapter records every such exception, an unmatched trace
+or a truth scorer that fails alike, and the optimizer wrapper raises once GEPA returns); (vi) a replay that swallows a cassette miss now fails at context
 exit instead of exiting $0$ with a divergent report; and (vii) every run records whether its seeds
 draw independent task sets and releases the \emph{per-task} held-out score vector behind each mean,
 which is what makes a paired task-level test possible for readers who (correctly) do not want to
@@ -532,7 +550,7 @@ seed instead of per run.
 Item~(iv) is the part we would urge on others: \textbf{a
 componentized-optimization result should report, per component and per seed, whether the
 optimizer's output differs from the seed.} Had we printed that one number, the flagship run
-would have shown an untouched critique gene on every seed, the prompt to look before fourteen
+would have shown an untouched critique gene on every seed, the prompt to look before twelve
 more runs were bought on the same wiring; and, as the stratification above shows, per component
 alone would have been enough to flag the retraction but not the cross-provider run. Because
 the corrected wiring changes every reflection prompt, it changes every cassette key, so the
@@ -680,7 +698,8 @@ same calls. An unchanged verify gene does not make the arms the same program, be
 still differ in the gene they \emph{share}: under the default one-component-per-proposal
 selector, arm~D searched \texttt{generate} about half as hard as arm~B (defect~3). So the
 non-zeros in this column are not residual treatment effects; they are the selector confound
-measured through the shared gene, plus sampling noise, which this study can now put a number on.
+measured through the shared gene, plus sampling noise, which this study can now put a number on,
+and on one seed of run~1 a blank \texttt{generate} winner (below).
 Of the
 fifteen contrast runs recorded under the pre-correction harness, ten have arms whose held-out scores are
 identical on \emph{every} seed and four have $|\dd| \ge 0.005$, the largest being the powered actuator run at
@@ -698,7 +717,13 @@ non-zeros are a different matter again, and must be read against the noise floor
 four sit under $1\sigma$, the worker swap at $-0.014$ and the cross-\emph{lineage} run at $+0.008$
 (the two runs in which arm~D's critique moved, each on one seed),
 and two do not: the powered actuator run at $\approx\!3.44\sigma$ and run~1, whose
-single-constraint tasks leave the verify gene inert, at $-0.094$, $\approx\!3.23\sigma$. The caveat
+single-constraint tasks leave the verify gene inert, at $-0.094$, $\approx\!3.23\sigma$. Two thirds
+of run~1's figure comes from one seed carrying defect~8, which the released replay record shows and which we had not reported
+before this revision. On run~1's first seed arm~B's winning \texttt{generate} gene is the empty
+string, the record's only blank winner, so its worker drafted from the bare task with no
+instruction, and that blank prompt beat its own seed by $0.125$ on held-out. Run~1's per-seed
+differences are $-0.125$ on that seed and $-0.0625$ on the other, so its $\dd$ averages a blank-gene
+win with one seed on which both arms edited \texttt{generate}. The caveat
 is that $\sigma$ was estimated on
 the hard-multi tasks while the largest of these is a code run, so its transfer is an assumption and not a
 measurement. This is the same conflation the companion paper on the conditional lever finds in the corrected re-run, one
@@ -718,9 +743,10 @@ the loop rather than of the optimizer and is untouched by the defect. Read down 
 column: it is the readout for runs 6--10. Run
 6's critic is worth one line of it: routing the critique to \texttt{gpt-5.6-luna} over a
 \texttt{gpt-4.1-mini} worker lifted the baseline $0.765 \to 0.825$, directionally consistent
-with the reliable-critic hypothesis, but \texttt{gpt-5.6} and \texttt{gpt-4.1} share a vendor
-and training lineage, so this is cross-\emph{lineage}, not the cross-\emph{provider} test
-that would rule out self-preference bias.
+with the reliable-critic hypothesis. The critic is a different model from the worker's, by the
+same vendor; whether the two share a training lineage the release cannot say, and the series calls it the
+cross-lineage critic. It is not the cross-\emph{provider} test that would rule out self-preference
+bias.
 
 \section{A \texorpdfstring{$\sigma$}{Sigma} Is Measured on One Genome}
 \label{sec:sigma}
@@ -803,9 +829,10 @@ since re-scored each of those rows five times and superseded its ratios with eac
 $\sigma$, which is better than choosing correctly between two borrowed ones. A comparison \emph{between two arms
 inside one run} carries no drift, and there the directly measured value applies: $\sigma(\dd)$
 is $0.047$ at $L_1$, $0.046$ at $L_2$ and $0.022$ at $L_3$. Two of the three exceed the
-$0.0291$ the cross-run estimate gave, because optimized arms vary more than the seed genome that
-estimate was built from; $L_3$ does not, which is the ceiling effect
-Table~\ref{tab:sigmagenome} shows directly: at $p_0 = 0.667$ both arms sit near $0.97$ and
+$0.0291$ the cross-run estimate gave, which is what one would expect if optimized arms vary more
+than the seed genome that estimate was built from, though the table does not establish it (arm~D
+at $L_2$ barely exceeds the seed cell); $L_3$ does not, which fits the ceiling reading of
+Table~\ref{tab:sigmagenome}: at $p_0 = 0.667$ both arms sit near $0.97$ and
 have little room to vary.
 On a \emph{single} draw the three $p_0$-sweep contrasts of the conditional-lever paper,
 taken in the same $L_1$, $L_2$, $L_3$ order as the denominators above, are therefore $0.89\sigma$,
@@ -850,7 +877,9 @@ degenerate: the conditional-lever paper's non-accepting verifier changes the gen
 needs its own screen, and the cheap one there is a \texttt{PASS} rate of zero. Worse, it reports
 the \emph{reassuring} answer on defect~8: an empty completion accepted as a gene \emph{does}
 differ from the seed, so the count says ``changed'' on the run where the change deleted
-a step of the loop and won on the training subsample by doing so. The blank-gene guard covers that
+a step of the loop and won on the training subsample by doing so. The replay record holds a second
+instance, arm~B's blank \texttt{generate} on run~1's first seed, which the count would have
+reported as an ordinary edit. The blank-gene guard covers that
 case and the count does not, which is why we present the two together rather than the integer
 alone. Nor does the count
 distinguish a semantically meaningful rewrite from a cosmetic one; it is a floor on evidence, not
@@ -905,7 +934,8 @@ spending, since an instrument never shown to register a signal cannot be trusted
 absence; ours rules out a dead measurement path and nothing more. Label a difference between two optimized
 arms with how many seeds \emph{each} arm accepted on, which catches the mirror-image case where the
 comparator is the starved arm. And state which genome a $\sigma$ was measured on, because the
-estimates range over $5.9\times$ across the cells of one experiment and a borrowed denominator
+estimates range over $5.9\times$ across the cells of one experiment, a spread five replicates per
+cell cannot distinguish from one common $\sigma$ at $p<0.05$, and a borrowed denominator
 decided, and in our case wrongly withdrew, a published claim.
 
 There is a broader reading for anyone building a hill-climbing loop over their own harness. Such a
@@ -932,7 +962,7 @@ This work's earlier drafts published claims it now withdraws. Reporting guidance
 work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Thirty-four} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Thirty-seven} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1026,7 +1056,10 @@ The series' other two papers carry the entries bearing on their own claims.
     them the original ten. Found on the third pre-submission read, by comparing every run's own
     \texttt{meta.generated} against the commit dates of the registrations that name it.
   \item \textbf{``Our first fifteen contrast runs measured the effect of evolving the
-    verifier.''} Correct for thirteen of them. The other two are the actuator runs, where
+    verifier.''} Correct for thirteen of them only in that arm~D could evolve the verifier there;
+    four of the thirteen gate on the true metric, where the verifier cannot change the outcome, and
+    the defect kept the effect from being measured in the rest (entry~30). The other two are the
+    actuator runs, where
     arm~\textbf{D} evolved \texttt{generate} and an \texttt{actuator} gene with the verifier
     held fixed by design, so their critique-gene identity is expected rather than diagnostic, and
     the selector confound (defect~3) rather than defect~1 is what invalidates their contrast. The
@@ -1211,6 +1244,28 @@ The series' other two papers carry the entries bearing on their own claims.
     script'', whose line for every run without an acceptance record read ``accepted nothing'', the
     misreading entry~11 withdraws; it now says the record is absent. Two of the six were code
     defects and are fixed with tests that fail on the old code; four were prose.
+  \item \textbf{Run~1's $\dd$ explained without its blank winner.} \S\ref{sec:superseded} attributed
+    run~1's $-0.094$ to an inert verify gene, the selector confound and noise, and the defect table
+    said defect~8 had corrupted one seed of one paid run. The replay record released with entry~30
+    shows a second instance it did not comment on: on run~1's first seed arm~B's winning
+    \texttt{generate} gene is the empty string, and that seed carries two thirds of the run's
+    $\dd$. Both sites now report it. Found by the second review round, from the record's own gene
+    hashes; the earlier revision built the record and read only its critique column.
+  \item \textbf{Two harness descriptions the code did not match, again.} The verdict rule listed a
+    ceiling or floor as an \textbf{INCONCLUSIVE} branch; the shipped rule prints it as a warning
+    beside the label. And the
+    reflection channel was called identical across arms~B and~D, which fix~(i) of the same paper
+    contradicts for the corrected harness. Fix~(v)'s guard was also narrower than its description:
+    it recorded an unmatched trace and no other exception, so a truth scorer that raised was still
+    swallowed. The adapter now records every exception raised while it builds the reflective
+    dataset, with a test that fails on the old code.
+  \item \textbf{Five scope words that outran the evidence.} ``Ten of twelve'' unchanged runs was
+    stated without saying that seven of the ten could not have shown a change, which leaves five
+    runs as the direct evidence. The flagship was said to have preceded fourteen more runs; it was
+    the third of fifteen, so twelve. ``None of these is a wiring fault'' attributed a cause to
+    reports whose authors give none; it now says none of them reports one. Run~6's critic was said
+    to share the worker's training lineage, which the release cannot show. And the within-run $\sigma$ section kept a causal ``because'' for a
+    pattern its own table does not establish.
 \end{enumerate}
 
 \end{document}

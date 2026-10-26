@@ -689,6 +689,10 @@ def test_every_coined_term_is_introduced_before_a_paper_uses_it() -> None:
 _INTRA_REGISTER_POINTERS = {
     ("p3-silent-no-op", r"left standing by this entry; entry~(\d+) withdraws it"): "15/15",
     ("p3-silent-no-op", r"the\s+misreading entry~(\d+) withdraws"): "accepted nothing",
+    ("p3-silent-no-op", r"kept the effect from being measured in the rest \(entry~(\d+)\)"): (
+        "15/15"
+    ),
+    ("p3-silent-no-op", r"The replay record released with entry~(\d+)"): "15/15",
     ("p1-conditional-lever", r"the depth bound of entry~(\d+)"): "depth bound",
     ("p1-conditional-lever", r"the \$1\.12\$ of entry~(\d+)"): r"1\.12",
     ("p1-conditional-lever", r"and entry~(\d+) records how unstable"): "percentages",
@@ -1115,7 +1119,7 @@ def _tabulated_runs(text: str) -> set[int]:
 _RUN_CITATIONS = {
     "p1-conditional-lever": {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
     "p2-repair-not-detection": {3, 4, 5, 7, 8, 9, 10},
-    "p3-silent-no-op": {1, 3, 6, 7, 8, 9, 10},
+    "p3-silent-no-op": {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
 }
 
 #: A sentence saying where the run numbering comes from, paired with what that sentence commits

@@ -7,14 +7,18 @@ arithmetic, no network — the guard runs *before* any live call.
 
 What is a hard bound vs. a calibrated estimate (be precise — the guard is only as
 honest as this distinction):
-- **Call counts** are hard bounds. Worker calls account for GEPA's search, both
-  held-out evals, AND `optimize_loop`'s post-search train-set re-scoring; reflection
-  calls are bounded because the live run passes `reflection_calls` to GEPA as
-  `max_candidate_proposals` (one reflection LM call per proposal). This module is
-  pure arithmetic and can't enforce those itself, so the bounds hold iff the caller
-  wires the caps through — `run_validation_study.py` does. (GEPA's own
-  `max_reflection_cost` stopper is inert for a callable reflection_lm, which the
-  cassette wrapper always supplies, so the *proposal* cap is what bounds reflection.)
+- **Worker call counts** are hard bounds. They account for GEPA's search, both
+  held-out evals, AND `optimize_loop`'s post-search train-set re-scoring. **Reflection
+  call counts are not**: the live run passes `reflection_calls` to GEPA as
+  `max_candidate_proposals`, which caps PROPOSALS, and GEPA makes one reflection LM
+  call per component a proposal rewrites. A one-gene arm therefore makes at most
+  `reflection_calls`, but a two-gene arm under the `all` selector can make twice that
+  (the mmc160 cassette holds 96 reflection calls against 72 proposals), and the
+  estimate below prices one call per proposal. This module is pure arithmetic and
+  can't enforce any of it, so the bounds hold iff the caller wires the caps through:
+  `run_validation_study.py` does. (GEPA's own `max_reflection_cost` stopper is inert
+  for a callable reflection_lm, which the cassette wrapper always supplies, so the
+  proposal cap times the genes an arm evolves is what bounds reflection.)
 - **Output tokens** are a hard bound: the live run enforces `max_tokens` on both the
   worker (`WORKER_MAX_OUTPUT_TOKENS`) and reflection (`REFLECTION_MAX_OUTPUT_TOKENS`)
   completions, so no call emits more than priced.
@@ -121,8 +125,9 @@ BCB_WORKER_MAX_OUTPUT_TOKENS = 1024
 BCB_WORKER_TOKENS = (3200, BCB_WORKER_MAX_OUTPUT_TOKENS)  # (in estimate, out hard cap)
 # Reflection output is enforced via max_tokens on the reflection LM; the input (GEPA's
 # prompt over sampled traces) is a calibrated estimate — GEPA sizes that prompt itself,
-# so it can't be hard-capped here. The proposal-count cap (max_candidate_proposals) is
-# what makes reflection spend bounded regardless; this shape just prices each proposal.
+# so it can't be hard-capped here. The proposal-count cap (max_candidate_proposals) bounds
+# reflection spend only up to the genes each proposal rewrites (one call per rewritten gene);
+# this shape prices one call per proposal, so a multi-gene arm can exceed it.
 REFLECTION_TOKENS = (4000, REFLECTION_MAX_OUTPUT_TOKENS)  # (in, out)
 
 # Which arms invoke the LLM worker / reflection model.
@@ -212,8 +217,9 @@ def plan_study_calls(
     re-scoring term stays correct if the two splits diverge. `n_seeds` scales the
     whole plan — the study runs every arm once per seed for the mean ± std, and
     the guard MUST account for all of them or it under-counts. Reflection:
-    `reflection_calls` per LLM-optimizing arm — a hard bound, because the caller
-    wires it through as `max_candidate_proposals` (see the module docstring).
+    `reflection_calls` per LLM-optimizing arm, one call per proposal. The caller wires
+    it through as `max_candidate_proposals`, which caps proposals rather than calls, so
+    this is a bound only for a one-gene arm (see the module docstring).
 
     `worker_tokens` is the per-worker-call (in, out) shape; it defaults to the IFBench
     `WORKER_TOKENS` and the caller passes `CODE_WORKER_TOKENS` for the (larger) code

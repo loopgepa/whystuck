@@ -217,8 +217,9 @@ def screen_optimizer_result(
     the flagship superseded run `generate` changed in 5/15 winning genomes and the critique gene
     in 0/15, so a whole-genome "did anything change" said yes on runs whose treatment gene had
     not moved. A gene named in `treatment_genes` that is byte-identical to the seed is reported
-    by name. Without `treatment_genes`, a genome in which some genes moved and others did not
-    reports the unmoved ones, since the caller has not said which of them the contrast is about.
+    by name, and a name the optimized genome does not have raises `ValueError`. Without
+    `treatment_genes`, a genome in which some genes moved and others did not reports the unmoved
+    ones, since the caller has not said which of them the contrast is about.
 
     The blank-gene screen catches defect 8: an empty completion accepted as a gene differs from
     the seed, so a change count says "changed" on the run where the change deleted a step of
@@ -231,6 +232,16 @@ def screen_optimizer_result(
     An unmeasured PASS rate returns a warning rather than silence, because a screen that could
     not look must not read as a screen that looked and found nothing.
     """
+    if treatment_genes is not None:
+        missing = [g for g in treatment_genes if g not in genes_after]
+        if missing:
+            # Filtering these out would return no warning for them, which reads as "the screen
+            # looked at the treatment gene and it moved". It could not look, so it refuses.
+            raise ValueError(
+                f"treatment gene(s) {', '.join(repr(g) for g in missing)} not in the optimized "
+                f"genome (genes: {', '.join(repr(g) for g in genes_after)}); the per-component "
+                "screen cannot report on a gene it was not given"
+            )
     warnings: list[str] = []
 
     changed = [k for k, v in genes_after.items() if genes_before.get(k) != v]

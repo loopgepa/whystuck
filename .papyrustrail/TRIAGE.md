@@ -143,3 +143,13 @@ The rewritten D9 entry compares the third-worker pool with this paper's own thre
 the two). All four are derived in `verify_paper_claims._d9_target_p0_checks` from
 `docs/validation-study-p0-L2.json` and `docs/p0target/analysis.json` with the analysis script's own
 `welch` and `welch_p`, and none is expressible in the registry, which has no Welch block.
+
+## The two values Paper III's round-2 review added (2026-10-26)
+
+Paper III now reports that arm B's winning `generate` gene on run 1's first seed is the empty
+string. `0.125` (that seed's held-out gain over its seed genome, 0.5625 - 0.4375) and `-0.125`
+(the same seed's D - B difference) are differences of two scores in `docs/validation-study.json`
+that no `runs` spec here declares as a quantity. Both are pinned in
+`verify_paper_claims._gene_replay_checks`, which reads them from the released replay record and
+the run JSON, and a mutation of the gain (0.125 -> 0.15) failed its check. The neighbouring
+`-0.0625` already binds.

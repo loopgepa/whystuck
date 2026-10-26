@@ -141,3 +141,16 @@ def test_a_blanked_gene_is_reported_even_though_it_counts_as_changed() -> None:
         {"generate": "a", "ensure_correct": "b"}, {"generate": "x", "ensure_correct": "  "}
     )
     assert any("ensure_correct" in w and "empty" in w for w in warnings), warnings
+
+
+@pytest.mark.parametrize("name", ["ensure_corect", "plan"])
+def test_a_treatment_gene_the_genome_does_not_have_is_refused(name: str) -> None:
+    """A typo, or a gene the genome never had, used to return no warning at all, which reads as
+    "the screen looked at the treatment gene and found it moved". A screen that could not look
+    must say so, so an unknown name is an error rather than an empty list."""
+    before = {"generate": "a", "ensure_correct": "b"}
+    after = {"generate": "x", "ensure_correct": "b"}
+    with pytest.raises(ValueError, match=name):
+        screen_optimizer_result(before, after, treatment_genes=[name])
+    with pytest.raises(ValueError, match=name):
+        screen_optimizer_result(before, before, treatment_genes=[name])

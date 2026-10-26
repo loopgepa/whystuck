@@ -328,3 +328,56 @@ def test_a_reflection_failure_the_optimizer_swallows_still_fails_the_run(tmp_pat
             verify_truth=lambda output, task: (True, "ok"),
             _optimize=fake_optimize,
         )
+
+
+def test_any_exception_while_building_the_reflective_dataset_fails_the_run(tmp_path):
+    """The unmatched-trace case above is one branch of `make_reflective_dataset`. GEPA catches
+    every exception that method raises, so a truth scorer that raises inside `_detector_records`
+    ends the same way: proposal skipped, run exits 0, verify gene back at its seed. The guard has
+    to cover the method, not one call inside it."""
+    from whystuck.core.models import LoopStepTrace
+
+    store = WhyStuckStore(tmp_path)
+    store.save_loop(
+        LoopGenome(
+            id="bugfix",
+            name="Bugfix",
+            genes=[
+                LoopGene(id="skill", type=GeneType.SKILL, name="S", content="Fix the bug."),
+                LoopGene(id="verify", type=GeneType.SKILL, name="V", content="Check it."),
+            ],
+        )
+    )
+
+    def run_task_with_critique(genome: LoopGenome, task: BenchmarkTask) -> LoopTrace:
+        trace = _run_task(genome, task)
+        trace.task_id = task.id
+        trace.steps = [
+            LoopStepTrace(
+                step_id="critique-0", role="verifier", input_summary="draft", output_summary="PASS"
+            )
+        ]
+        return trace
+
+    def exploding_truth(output, task):
+        raise ValueError("scorer exploded")
+
+    def fake_optimize(**kw):
+        adapter = kw["adapter"]
+        seed = kw["seed_candidate"]
+        batch = adapter.evaluate(kw["trainset"], seed, capture_traces=True)
+        with contextlib.suppress(Exception):
+            adapter.make_reflective_dataset(seed, batch, ["verify"])
+        return {"best_candidate": seed}
+
+    with pytest.raises(RuntimeError, match="scorer exploded"):
+        optimize_loop(
+            store,
+            "bugfix",
+            [BenchmarkTask(id="t1")],
+            run_task_with_critique,
+            reflection_lm="fake",
+            verify_gene="verify",
+            verify_truth=exploding_truth,
+            _optimize=fake_optimize,
+        )

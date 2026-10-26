@@ -38,6 +38,7 @@ gap is visible rather than implied.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import pathlib
 import re
@@ -1639,8 +1640,10 @@ def _gene_replay() -> dict[str, float]:
         doc = json.load(fh)
     census = {r.name for r in _precorrection_census()}
     replayed: list[str] = []
-    unchanged_runs = changed_runs = oracle_gated = 0
+    unchanged_runs = changed_runs = oracle_gated = by_design = 0
     d_winners = d_critique = 0
+    blank: list[tuple[str, int, str, str, float]] = []  # (run, seed, arm, gene, opt - seed)
+    run1: list[float] = []
     flagship: dict[str, float] = {}
     worst: dict[str, float] = {}
     for run in doc["runs"]:
@@ -1677,6 +1680,30 @@ def _gene_replay() -> dict[str, float]:
         else:
             unchanged_runs += 1
         oracle_gated += bool(released["meta"].get("oracle_critique"))
+        # Uninformative by design, for a reason other than the oracle gate (Paper III,
+        # sec:defect): single-constraint IFBench tasks leave the verify gene inert; a seed mean
+        # at or above report._headroom_note's 0.9 ceiling leaves no room; and the MBPP+ code run
+        # saturated its training split, so GEPA skipped every iteration and no arm changed a gene.
+        meta = released["meta"]
+        seed_mean = mean(r["A"]["seed_heldout"] for r in rows)
+        saturated_search = meta.get("task_set") == "code" and not any(
+            s[arm]["changed"] for s in run["seeds"] for arm in ("B", "C", "D")
+        )
+        if not meta.get("oracle_critique") and (
+            meta.get("dataset") == "IFBench" or seed_mean >= 0.9 or saturated_search
+        ):
+            if any(moved):
+                raise ValueError(f"{name}: called uninformative by design, yet its critique moved")
+            by_design += 1
+        empty = hashlib.sha256(b"").hexdigest()
+        for i, s in enumerate(run["seeds"]):
+            for arm in ("B", "C", "D"):
+                for gene, sha in s[arm]["winner_sha256"].items():
+                    if sha == empty:
+                        gain = rows[i][arm]["opt_heldout"] - rows[i][arm]["seed_heldout"]
+                        blank.append((name, i, arm, gene, gain))
+        if name == "validation-study":
+            run1 = [r["D"]["opt_heldout"] - r["B"]["opt_heldout"] for r in rows]
         if name == "multihard":
             for gene in ("generate", "ensure_correct"):
                 flagship[gene] = sum(
@@ -1695,6 +1722,18 @@ def _gene_replay() -> dict[str, float]:
         "unchanged_runs": float(unchanged_runs),
         "changed_runs": float(changed_runs),
         "oracle_gated": float(oracle_gated),
+        "by_design": float(by_design),
+        "not_diagnostic": float(oracle_gated + by_design),
+        "diagnostic": float(len(replayed) - oracle_gated - by_design),
+        "diagnostic_unchanged": float(len(replayed) - oracle_gated - by_design - changed_runs),
+        "blank_winners": float(len(blank)),
+        "blank_gain": blank[0][4] if len(blank) == 1 else float("nan"),
+        "blank_is_run1_seed0_B_generate": float(
+            [b[:4] for b in blank] == [("validation-study", 0, "B", "generate")]
+        ),
+        "run1 seed0": run1[0],
+        "run1 seed1": run1[1],
+        "run1 seed0 share": (run1[0] / len(run1)) / mean(run1),
         "d_winners": float(d_winners),
         "d_critique": float(d_critique),
         "run6 D": worst["crossfamily"],
@@ -5985,6 +6024,94 @@ def _gene_replay_checks() -> list[tuple[str, float, float, float]]:
     )
     for label, pattern, key in words:
         out.append((f"replay: {label}", _scrape_word(tex, pattern), 0, g[key]))
+    # Which of the unchanged runs could have shown a change at all (review round 2, N1): the
+    # headline ten folds in seven runs where identity is no evidence either way.
+    split = (
+        ("abstract diagnostic", r"Only (\w+) of the twelve could have shown a move", "diagnostic"),
+        (
+            "abstract diagnostic unchanged",
+            r"could have shown a move, and (\w+) of those, the flagship among",
+            "diagnostic_unchanged",
+        ),
+        (
+            "contribution not diagnostic",
+            r"(\w+)\s+of the ten unchanged runs could not",
+            "not_diagnostic",
+        ),
+        (
+            "contribution diagnostic",
+            r"evidence is\s+the (\w+) that could, \w+ of which",
+            "diagnostic",
+        ),
+        (
+            "contribution diagnostic unchanged",
+            r"the \w+ that could, (\w+) of which left",
+            "diagnostic_unchanged",
+        ),
+        (
+            "defect by design",
+            r"so identity there is no evidence either way\. (\w+) more are uninformative",
+            "by_design",
+        ),
+        ("defect diagnostic", r"That leaves \\textbf\{(\w+)\} runs in which the", "diagnostic"),
+        (
+            "defect diagnostic unchanged",
+            r"on every seed in \\textbf\{(\w+)\} of them",
+            "diagnostic_unchanged",
+        ),
+    )
+    for label, pattern, key in split:
+        out.append((f"replay: {label}", _scrape_word(tex, pattern), 0, g[key]))
+    # The flagship's place in the order the fifteen were recorded (review round 2, N3).
+    stamps = {}
+    for run in _precorrection_census():
+        stem = (
+            "validation-study" if run.name == "validation-study" else f"validation-study-{run.name}"
+        )
+        with open(f"{DOCS}/{stem}.json", encoding="utf-8") as fh:
+            stamps[run.name] = json.load(fh)["meta"]["generated"]
+    after_flagship = sum(t > stamps["multihard"] for t in stamps.values())
+    out.append(
+        (
+            "replay: runs bought after the flagship",
+            _scrape_word(tex, r"the prompt to look before (\w+)\s+more runs were bought"),
+            0,
+            float(after_flagship),
+        )
+    )
+    # Run 1's blank generate gene, in the released replay record (review round 2, N9).
+    out.append(("replay: exactly one blank winner", 1.0, 0, g["blank_winners"]))
+    out.append(
+        (
+            "replay: the blank winner is run 1 seed 0 arm B generate",
+            1.0,
+            0,
+            g["blank_is_run1_seed0_B_generate"],
+        )
+    )
+    out.append(
+        (
+            "replay: run 1 blank gene's held-out gain",
+            _scrape(tex, r"blank prompt beat its own seed by \$([\d.]+)\$ on held-out"),
+            0.0005,
+            g["blank_gain"],
+        )
+    )
+    r1 = _scrape_all(
+        tex, r"differences are \$(-[\d.]+)\$ on that seed and \$(-[\d.]+)\$ on the other"
+    )
+    out.append(("replay: run 1 seed 0 delta", r1[0], 0.00005, g["run1 seed0"]))
+    out.append(("replay: run 1 seed 1 delta", r1[-1], 0.00005, g["run1 seed1"]))
+    out.append(
+        (
+            "replay: run 1 share carried by the blank seed (two thirds)",
+            2 / 3
+            if re.search(r"Two thirds\s+of run~1's figure comes from one seed", tex)
+            else float("nan"),
+            0.005,
+            g["run1 seed0 share"],
+        )
+    )
     for label, pattern in (
         (
             "contribution",

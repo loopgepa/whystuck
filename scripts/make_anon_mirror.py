@@ -185,8 +185,8 @@ def main() -> None:
     print(f"{written} file(s) written to {args.dest}, {rewritten} rewritten")
     for area, pattern in (
         # No hyphen after `study`. With one, this glob excluded `docs/validation-study.json` --
-        # the flagship run, whose fifteen arm-runs carry the 15/15 statistic all three papers
-        # lead with -- so the line attesting that the reproducibility apparatus survived the
+        # run 1, the first single-constraint contrast run and the only run JSON without a
+        # suffix -- so the line attesting that the reproducibility apparatus survived the
         # rename said 42 while the mirror held 43. The file was always copied; only the
         # attestation omitted it, which is the worse direction for a number whose job is to say
         # nothing was lost.

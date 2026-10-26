@@ -155,10 +155,10 @@ class LoopGenomeAdapter:
         # BEFORE reflecting on each in turn, so "the last batch" is the wrong batch for
         # all but one of them.
         self._tasks: dict[str, BenchmarkTask] = {}
-        # Every `_task_for` failure, kept as well as raised. GEPA catches any exception from
-        # `make_reflective_dataset`, logs it and skips the proposal, so a raise alone ends as a
-        # run that exits 0 with the seed genome. `optimize_loop` reads this after the optimizer
-        # returns and raises there, the way the cassette raises a swallowed miss at exit.
+        # Every exception `make_reflective_dataset` raises, kept as well as raised. GEPA catches
+        # any exception from that method, logs it and skips the proposal, so a raise alone ends
+        # as a run that exits 0 with the seed genome. `optimize_loop` reads this after the
+        # optimizer returns and raises there, the way the cassette raises a swallowed miss at exit.
         self.reflection_failures: list[str] = []
 
     def evaluate(
@@ -193,6 +193,23 @@ class LoopGenomeAdapter:
 
     def make_reflective_dataset(
         self, candidate: dict[str, str], eval_batch: EvalBatch, components_to_update: list[str]
+    ) -> dict[str, list[dict[str, Any]]]:
+        """Build GEPA reflection records, recording any exception before re-raising it.
+
+        GEPA catches every exception this method raises and skips the proposal, so an
+        unmatched trace, a truth scorer that raises, or any other failure here would end as a
+        run that exits 0 with the seed genome. Each one is appended to `reflection_failures`
+        (which `optimize_loop` turns into a failed run) and then re-raised unchanged. Nothing
+        on the success path changes, so no prompt and no cassette key moves.
+        """
+        try:
+            return self._build_reflective_dataset(eval_batch, components_to_update)
+        except Exception as exc:
+            self.reflection_failures.append(f"{type(exc).__name__}: {exc}")
+            raise
+
+    def _build_reflective_dataset(
+        self, eval_batch: EvalBatch, components_to_update: list[str]
     ) -> dict[str, list[dict[str, Any]]]:
         """Build GEPA reflection records with the real task signal.
 
@@ -245,7 +262,6 @@ class LoopGenomeAdapter:
                 "never saw; the verify gene's reflection records cannot be scored without "
                 "the task's payload (run_task must set task_id from the task it was given)"
             )
-            self.reflection_failures.append(message)
             raise KeyError(message)
         return task
 

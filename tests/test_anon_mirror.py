@@ -86,8 +86,8 @@ def test_the_attestation_counts_every_run_json_including_the_bare_named_one() ->
     """The printed summary is the attestation that nothing was lost, so its glob has to be right.
 
     Source-level because the count lives in a `print` inside `main()`. `docs/validation-study.json`
-    is the flagship run whose fifteen arm-runs carry the 15/15 statistic all three papers lead
-    with, and `validation-study-*.json` is exactly the pattern that omits it.
+    is run 1, the first single-constraint contrast run and the only run JSON without a suffix, and
+    `validation-study-*.json` is exactly the pattern that omits it.
     """
     src = inspect.getsource(mirror)
     assert '"docs/validation-study*.json"' in src, (
