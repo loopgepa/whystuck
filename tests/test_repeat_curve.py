@@ -170,12 +170,20 @@ def test_the_curve_measures_every_row_the_paper_scales_by_sigma():
 def test_every_pair_the_checker_sigma_scales_is_aggregated():
     """The pairs, too, come from the checker's source rather than from this file's opinion."""
     src = CHECKER.read_text(encoding="utf-8")
+    # A pair handed to `_curve_extra_pair` is not sigma-scaled: the checker derives its own
+    # standard error from the same five replicate vectors. Those calls are excluded here and
+    # held to the stronger condition below instead.
     used = {
-        tuple(sorted(m.groups())) for m in re.finditer(r'\(\s*"(run\d+)",\s*"(run\d+)"\s*\)', src)
+        tuple(sorted(m.groups()))
+        for m in re.finditer(r'(?<!_curve_extra_pair)\(\s*"(run\d+)",\s*"(run\d+)"\s*\)', src)
     }
     assert used, "no curve pairs found in the checker; the pattern went stale"
     ours = {tuple(sorted((a, b))) for _, a, b in rs.CURVE_PAIRS}
     assert used <= ours, f"the paper σ-scales pairs this driver does not measure: {used - ours}"
+    extra = re.findall(r'_curve_extra_pair\(\s*"(run\d+)",\s*"(run\d+)"\s*\)', src)
+    curve_runs = {r.label for r in rs.CURVE}
+    for a, b in extra:
+        assert {a, b} <= curve_runs, f"extra pair ({a}, {b}) names a run with no replicates"
 
 
 def test_the_fragility_table_in_this_docstring_is_derived():

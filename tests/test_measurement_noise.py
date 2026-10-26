@@ -247,7 +247,7 @@ def test_the_contamination_moved_exactly_the_number_of_values_the_paper_claims()
     sites = [
         (int(a), int(b))
         for a, b in re.findall(
-            r"moves \$(\d+)\$ of this paper's (?:published\s+)?values,? (?:and )?only \$(\d+)\$",
+            r"moves \$(\d+)\$ of the series' (?:published\s+)?values,? (?:and )?only \$(\d+)\$",
             tex,
         )
     ]

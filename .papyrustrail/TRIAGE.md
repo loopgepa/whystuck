@@ -125,3 +125,13 @@ other residual columns score) and `0.064` (the seed-level p of run 10 over the t
 from a cassette replay and from the curve replicates respectively, shapes no `runs` spec here
 expresses; both are pinned in `verify_paper_claims._p2_review_r1_checks`, which mutation-tested
 red on each.
+
+## The four values Paper I's D9 entry added (2026-10-26)
+
+`bind` gained five sites carrying four values, all in Paper~I's D9 entry and its sixth
+qualification, all from the target-p₀ program: `0.718` (pool p₀ of the L2-tier calibration pool),
+`0.0027` (the exploratory pooled Δ, printed twice), and `-0.0175` / `0.0245` (its 95% bootstrap
+interval). They live in `docs/p0-manifests/full-1001-L2-stats.json` and `docs/p0target/analysis.json`,
+which papyrustrail's config does not read, so no registry entry can hold them. Each is derived and
+pinned by `verify_paper_claims._d9_target_p0_checks`, and two of those checks were mutation-tested
+(a changed Δ and a changed realized p₀ each fail exactly one check).

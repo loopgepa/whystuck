@@ -1743,6 +1743,21 @@ ends. Each entry below changes one variable.
     That is why (ii), sampling to a target $p_0$ measured per task, is the candidate that can
     specify a level at all. It says nothing for or against (i), which varies the drafting budget
     and leaves the constraint set alone.
+    \emph{Candidate (ii) measured, and it fails for a reason worth stating.} We pre-registered it
+    on 2026-10-25 and bought it on a \texttt{qwen3.8-27b} worker, Groq having retired both Llama
+    workers. On that worker the hard tier sits at the floor (pool $p_0 = 0.023$) and the $L_2$
+    generator near the ceiling ($p_0 = 0.718$), so every level drew half its tasks from each at a
+    common baseline. Selection on three calibration draws per task built levels at
+    $p_0 = 0.080$, $0.280$ and $0.500$; the runs' own first drafts realized $0.30$, $0.30$ and
+    $0.38$. The registered manipulation check failed, so the swing between those levels tests
+    nothing. The cause is regression to the generator mean: within one generator the tasks differ
+    far less than three draws suggest, and the tasks chosen for rarely passing pass about half the
+    time. On this worker $p_0$ belongs to the generator rather than to the task, and (ii) cannot
+    build a ladder at a fixed generator mix. \emph{Exploratory, not registered:} all $30$ seeds sit
+    near $p_0 = 0.33$ at a matched baseline and give $\dd(D-B) = +0.0027$, 95\% interval
+    $[-0.0175, +0.0245]$, which excludes the $+0.060$ we measured at $p_0 = 0.267$ here. A different
+    worker and a different generator mix, so it does not overturn that cell; it says the gain did
+    not appear on a second worker near that $p_0$ with ten times the seeds.
 \end{description}
 
 \paragraph{A pre-registered prediction for the corrected-harness re-run, \textbf{resolved,
@@ -1791,7 +1806,7 @@ grading its own lineage: moved to another provider entirely, it detected worse r
 searched and found nothing that generalizes} these results lean to the second, at three seeds
 per cell, which cannot exclude a modest effect of either split size or depth.
 
-Five qualifications travel with the answer. The $p_0$ axis is an operationalization rather
+Six qualifications travel with the answer. The $p_0$ axis is an operationalization rather
 than a dial: each level names a different generator, so the swing is measured along $p_0$ and not
 identified as caused by it (\S\ref{sec:threats}). At $n=3$ per level no interval is significant, since
 the sign test cannot fall below $p=0.25$, so the load-bearing evidence is the swing along the
@@ -1807,7 +1822,10 @@ drives the verifier to never accept when $p_0$ is low, that behaviour is cheap t
 whether it helps or hurts held-out score depends on $p_0$ by about $0.1$ across the range we
 bought, against a scoring noise we can now size at $\sigma(\dd) = 0.0291$ for a re-scored genome
 and $0.0468$ for a single draw of an optimized pair (\S\ref{sec:threats}, \S\ref{sec:repeat}),
-neither of which contains the optimizer's own variance.
+neither of which contains the optimizer's own variance. The sixth bounds how far the answer
+travels: on a second worker, $30$ independent seeds near $p_0 = 0.33$ give $\dd(D-B) = +0.0027$
+with an interval that excludes the gain we measured at $p_0 = 0.267$ (D9), so the conditional
+lever is a finding about this worker and generator, not yet about self-refine loops in general.
 
 One distinction is worth stating separately, because we had run two claims together and only one
 survives. \textbf{A degenerate verifier and a harmful verifier are different objects.} A critique

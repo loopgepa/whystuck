@@ -59,6 +59,16 @@ def swing(
     return {"S": s, "ci": (lo, hi), "n_boot": n_boot}
 
 
+def pooled(x: Sequence[float], *, n_boot: int = N_BOOT, seed: int = 0) -> dict[str, Any]:
+    """Mean of independent seed deltas with a percentile bootstrap over seeds. EXPLORATORY in
+    this study: it pools levels whose p0 did not separate, which the registration did not plan."""
+    rng = random.Random(seed)
+    boots = sorted(st.mean(x[rng.randrange(len(x))] for _ in x) for _ in range(n_boot))
+    lo = boots[int(math.floor(0.025 * (n_boot - 1)))]
+    hi = boots[int(math.ceil(0.975 * (n_boot - 1)))]
+    return {"mean": st.mean(x), "ci": (lo, hi), "n": len(x), "sd": st.stdev(x)}
+
+
 def welch(a: Sequence[float], b: Sequence[float]) -> tuple[float, float]:
     """Welch's t and Welch-Satterthwaite df for mean(a) − mean(b)."""
     va, vb = st.variance(a) / len(a), st.variance(b) / len(b)
@@ -190,6 +200,12 @@ def main() -> int:  # pragma: no cover - CLI convenience
         report["H2_S_high"] = swing(deltas["high"], deltas["low"])
         means = [st.mean(deltas[lv]) for lv in LEVELS if lv in deltas]
         report["H2_monotone"] = all(x <= y for x, y in zip(means, means[1:], strict=False))
+    if all(lv in deltas for lv in LEVELS):
+        allx = [x for lv in LEVELS for x in deltas[lv]]
+        report["exploratory_pooled"] = {
+            **pooled(allx),
+            "mean_realized_p0": st.mean(report["levels"][lv]["M1_realized_p0"] for lv in LEVELS),
+        }
     out = Path("docs/p0target/analysis.json")
     out.write_text(json.dumps(report, indent=1, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=1, sort_keys=True))

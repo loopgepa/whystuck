@@ -19,7 +19,7 @@ claim to the command that produced it.
 
 ```bash
 # 1. every machine-checkable number in all three papers, against the released artifacts
-python scripts/verify_paper_claims.py            # 1202 checks, offline, $0
+python scripts/verify_paper_claims.py            # 1344 checks, offline, $0
 
 # 2. the three-way split lost no quantity
 python scripts/verify_split_coverage.py          # 318 pre-split quantities accounted for, $0
@@ -138,7 +138,7 @@ to stop computing depth and measure it.
 
 | script | asserts |
 |---|---|
-| `verify_paper_claims.py` | 1202 checks: every machine-checkable number in the three papers against the artifacts, plus per-paper spine numbers, cross-paper agreement, and each paper's corrections count |
+| `verify_paper_claims.py` | 1344 checks: every machine-checkable number in the three papers against the artifacts, plus per-paper spine numbers, cross-paper agreement, and each paper's corrections count |
 | `verify_split_coverage.py` | all 318 quantities in the pre-split draft are carried by some paper, superseded by a verified replacement, or explicitly dropped with a reason |
 | `verify_reproducibility.py` | every corrected-harness run replays bit-for-bit; superseded runs are **skipped and reported**, never silently "verified" |
 | `verify_stdio.py` | the MCP console script speaks stdio (product, not paper) |
@@ -168,7 +168,7 @@ code-domain cassette key changes with it.
 |---|---|
 | `docs/validation-study-*.json` | 43 study runs, per-arm and **per-task** held-out vectors, evolved gene text, per-gene accepted-change counts, and the pre-flight cost estimate |
 | `docs/repeat/*.json` | 225 replicate scorings (135 p₀ + 90 curve) |
-| `tests/fixtures/cassettes/**` | 267 cassettes; this is what makes replay free |
+| `tests/fixtures/cassettes/**` | 282 cassettes; this is what makes replay free |
 | `docs/papers/PRE-SPLIT-SOURCE.tex` | the 46-page pre-split draft, frozen at `fe628ed`, **never built**. Provenance for the split proof |
 | `docs/actual-spend.json` | measured spend per run and per provider, from an instrumented replay. See below |
 

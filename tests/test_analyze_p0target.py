@@ -76,3 +76,13 @@ def test_decomposition_is_an_identity():
     assert d["draft"] + d["loop"] == pytest.approx(d["delta"])
     assert d["draft"] == pytest.approx(-0.05)
     assert d["loop"] == pytest.approx(0.10)
+
+
+def test_pooled_bootstrap_is_the_seed_resampled_mean():
+    m = _mod()
+    x = [0.0, 0.1, -0.1, 0.05, -0.05, 0.0]
+    p = m.pooled(x, n_boot=4000, seed=0)
+    assert p["mean"] == pytest.approx(0.0)
+    assert p["n"] == 6
+    assert p["ci"][0] < 0 < p["ci"][1]
+    assert m.pooled(x, n_boot=4000, seed=0) == p

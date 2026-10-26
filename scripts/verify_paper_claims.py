@@ -3774,6 +3774,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_replicate_sigma_scale_checks())
     out.extend(_gene_replay_checks())
     out.extend(_review_round1_p1_checks())
+    out.extend(_d9_target_p0_checks())
 
     return out
 
@@ -7287,6 +7288,103 @@ _T975_DF2 = 4.302652729911275
 def _replicate_decomposition() -> dict[str, list[object]]:
     mod = _decomp()
     return {lvl.name: mod.replicate_decompose(lvl, 5) for lvl in mod.LEVELS}
+
+
+def _d9_target_p0_checks() -> list[tuple[str, float, float, float]]:
+    r"""Paper I's D9 entry and sixth qualification: candidate (ii) measured on a second worker.
+
+    Every value is derived from the released target-p0 artifacts (`docs/p0-manifests/`,
+    `docs/p0target/analysis.json`), which `scripts/analyze_p0target.py` produces by strict replay of
+    the three four-arm cassettes. The pooled interval is explicitly exploratory in the paper and in
+    the pre-registration's outcome section; it is pinned like any other printed number.
+    """
+    p1 = _sources().paper_tex("p1-conditional-lever")
+    man = Path("docs/p0-manifests")
+
+    def pool_p0(name: str) -> float:
+        st = json.loads((man / f"full-1001-{name}-stats.json").read_text(encoding="utf-8"))
+        return sum(v["p_first"] for v in st.values()) / len(st)
+
+    achieved = json.loads((man / "study.json").read_text(encoding="utf-8"))["stats"]["achieved"]
+
+    def built(level: str) -> float:
+        vals = [achieved[level][s]["heldout"]["p0"] for s in achieved[level]]
+        return sum(vals) / len(vals)
+
+    an = json.loads(Path("docs/p0target/analysis.json").read_text(encoding="utf-8"))
+    real = {lv: an["levels"][lv]["M1_realized_p0"] for lv in ("low", "mid", "high")}
+    pooled = an["exploratory_pooled"]
+    built_vals = _scrape_all(
+        p1, r"built levels at\s+\$p_0 = ([\d.]+)\$, \$([\d.]+)\$ and \$([\d.]+)\$"
+    )
+    real_vals = _scrape_all(
+        p1, r"first drafts realized \$([\d.]+)\$, \$([\d.]+)\$ and\s+\$([\d.]+)\$"
+    )
+    out: list[tuple[str, float, float, float]] = [
+        (
+            "tex: D9 hard-tier pool p0",
+            _scrape(p1, r"floor \(pool \$p_0 = ([\d.]+)\$\)"),
+            0.0005,
+            pool_p0("hard"),
+        ),
+        (
+            "tex: D9 L2 pool p0",
+            _scrape(p1, r"near the ceiling \(\$p_0 = ([\d.]+)\$\)"),
+            0.0005,
+            pool_p0("L2"),
+        ),
+    ]
+    for i, lv in enumerate(("low", "mid", "high")):
+        out.append(
+            (
+                f"tex: D9 built p0 {lv}",
+                built_vals[i] if len(built_vals) > i else float("nan"),
+                0.0005,
+                built(lv),
+            )
+        )
+        out.append(
+            (
+                f"tex: D9 realized p0 {lv}",
+                real_vals[i] if len(real_vals) > i else float("nan"),
+                0.005,
+                real[lv],
+            )
+        )
+    for label, pattern in (
+        ("D9", r"all \$(\d+)\$ seeds sit\s+near"),
+        ("conclusion", r"second worker, \$(\d+)\$ independent seeds"),
+    ):
+        out.append(
+            (f"tex: D9 pooled seed count, {label}", _scrape(p1, pattern), 0.0, float(pooled["n"]))
+        )
+    for label, pattern in (
+        ("D9", r"seeds sit\s+near \$p_0 = ([\d.]+)\$"),
+        ("conclusion", r"independent seeds near \$p_0 = ([\d.]+)\$"),
+    ):
+        out.append(
+            (
+                f"tex: D9 pooled realized p0, {label}",
+                _scrape(p1, pattern),
+                0.005,
+                pooled["mean_realized_p0"],
+            )
+        )
+    for label, pattern in (
+        ("D9", r"matched baseline and give \$\\dd\(D-B\) = ([+-][\d.]+)\$"),
+        ("conclusion", r"near \$p_0 = [\d.]+\$ give \$\\dd\(D-B\) = ([+-][\d.]+)\$"),
+    ):
+        out.append(
+            (f"tex: D9 pooled delta, {label}", _scrape(p1, pattern), 0.00005, pooled["mean"])
+        )
+    ci = _scrape_all(
+        p1, r"95\\% interval\s+\$\[([+-][\d.]+), ([+-][\d.]+)\]\$, which excludes the \$\+0.060\$"
+    )
+    out.append(("tex: D9 pooled CI low", ci[0] if ci else float("nan"), 0.00005, pooled["ci"][0]))
+    out.append(
+        ("tex: D9 pooled CI high", ci[1] if len(ci) > 1 else float("nan"), 0.00005, pooled["ci"][1])
+    )
+    return out
 
 
 def _review_round1_p1_checks() -> list[tuple[str, float, float, float]]:

@@ -7,6 +7,10 @@ p₀ runs otherwise. Analysis: `scripts/analyze_p0target.py` → `docs/p0target/
 Spend for the whole program ≈ $13 of the $60 authorised (outputs counted exactly from the
 cassettes, inputs at a 300-token-per-call upper bound).
 
+**Reproducible at $0.** All three levels were replayed under `--replay` from their committed
+cassettes on 2026-10-26: 10 seeds × 4 arms per level, `seed_heldout`, `opt_heldout` and
+`genes_changed` identical to the released JSON in every record (0 mismatches of 120 per level).
+
 ## Registered verdict
 
 **The levels were not built.** Manipulation check M1 fails: realized p₀ on the runs' own draws is

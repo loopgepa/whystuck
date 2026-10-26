@@ -103,7 +103,7 @@ def test_a_built_mirror_carries_the_artifacts_and_leaks_nothing(tmp_path: Path) 
     tree = tmp_path / "m"
     assert written > 500, "the mirror must carry the release, not a subset of it"
     assert len(list(tree.glob("docs/repeat/*.json"))) == 225
-    assert len(list(tree.glob("tests/fixtures/cassettes/**/*.json"))) == 267
+    assert len(list(tree.glob("tests/fixtures/cassettes/**/*.json"))) == 282
     # Run JSONs were the one artifact class with no assertion here, which is how the attestation
     # line in `make_anon_mirror` kept a `validation-study-*.json` glob: the hyphen drops the
     # bare-named flagship run, so it printed 42 for a tree holding 43. Compared by NAME against
