@@ -444,6 +444,8 @@ _REGISTER_TARGETED = frozenset(
         r"held-out\s+tasks are \$(\d+)\$ distinct payloads",
         r"\$0.05\$ \(\$p = ([\d.]+)\$\), and the oracle-under-tool",
         r"behind the original subtitle has \$p = ([\d.]+)\$",
+        # Review-r2: entry 2 now carries the task-draw p of the claim it reinstates.
+        r"and at\s+\$p = ([\d.]+)\$ with the task draw as the unit",
     }
 )
 
@@ -4535,11 +4537,11 @@ def _conclusion_replicated_magnitude_checks() -> list[tuple[str, float, float, f
 def _borrowed_figure_checks() -> list[tuple[str, float, float, float]]:
     """Paper II's claim about its own independence: exactly two of its numbers come from a search.
 
-    It says so twice, in the abstract ("except two figures quoted from the companion papers") and
-    in the body ("Those two are the only optimizer-derived figures in this paper"), and nothing
-    checked either. That claim is what lets Paper II stand alone: every other number it prints
-    scores a fixed, hand-written genome, so a reader needs no companion to audit it. A third
-    borrowed figure would falsify both sentences silently.
+    It says so twice, in the abstract ("two optimizer contrasts are quoted from the companion
+    papers") and in the body ("Those two are the only optimizer-derived figures in this paper"),
+    and nothing checked either. That claim is what lets Paper II stand alone: every other number
+    it prints scores a fixed, hand-written genome, so a reader needs no companion to audit it. A
+    third borrowed figure would falsify both sentences silently.
 
     Derived here from the runs the two come from rather than from Paper II's own text, since a
     figure quoted from a companion is exactly the number no reader of this paper can recompute.
@@ -4559,7 +4561,7 @@ def _borrowed_figure_checks() -> list[tuple[str, float, float, float]]:
     # The stated count, at both sites, against the number of borrowed figures above.
     for i, pattern in enumerate(
         (
-            r"except two figures quoted from the companion",
+            r"two optimizer contrasts are quoted from the\s+companion",
             r"Those two are the only optimizer-derived figures",
         )
     ):
@@ -6781,8 +6783,25 @@ def _p2_review_r1_checks() -> list[tuple[str, float, float, float]]:
         ),
         (
             "seed-level p oracle-under-tool, abstract",
-            r"gap to the tool has \$p = ([\d.]+)\$\)",
+            r"gap to the tool has \$p = ([\d.]+)\$,",
             "oracle under tool",
+        ),
+        # Run 10 over the tool, at three refine rounds against the tool's one: every site that
+        # states the gain carries its task-draw p (round-2 register: "That configuration beats").
+        (
+            "seed-level p run 10 over tool, abstract",
+            r"the gain over it \$p = ([\d.]+)\$\)",
+            "run 10 over tool",
+        ),
+        (
+            "seed-level p run 10 over tool, conclusion",
+            r"thirty tasks and \$p = ([\d.]+)\$ with the task draw as the unit",
+            "run 10 over tool",
+        ),
+        (
+            "seed-level p run 10 over tool, register entry 2",
+            r"and at\s+\$p = ([\d.]+)\$ with the task draw as the unit",
+            "run 10 over tool",
         ),
         (
             "seed-level p actionability, register",
@@ -7122,6 +7141,32 @@ def _p2_review_r1_checks() -> list[tuple[str, float, float, float]]:
         "cross-lineage seeds, contrast", r"the only one of the \$(\d+)\$ where the two", 0, len(cf)
     )
     out.append(("cross-lineage contrast sits on one seed", 1, 0, float(differing)))
+    # On that seed the loop-level arm scores what the unoptimized control scores and the prompt-only
+    # arm drops, so the +0.008 is B's regression rather than a gain from the evolved critique.
+    seed = next(r for r in cf if abs(r["D"]["opt_heldout"] - r["B"]["opt_heldout"]) > 1e-9)
+    site(
+        "cross-lineage seed, loop-level arm",
+        r"arm scores \$([\d.]+)\$, exactly what",
+        0.005,
+        seed["D"]["opt_heldout"],
+    )
+    site(
+        "cross-lineage seed, prompt-only arm",
+        r"prompt-only arm falls to\s+\$([\d.]+)\$",
+        0.0005,
+        seed["B"]["opt_heldout"],
+    )
+    out.append(
+        (
+            "cross-lineage seed: D equals the control C and B sits below it",
+            1,
+            0,
+            float(
+                abs(seed["D"]["opt_heldout"] - seed["C"]["opt_heldout"]) < 1e-9
+                and seed["B"]["opt_heldout"] < seed["C"]["opt_heldout"]
+            ),
+        )
+    )
 
     # --- the subtitle's register entry ---------------------------------------------------------
     for label, pattern, key in (

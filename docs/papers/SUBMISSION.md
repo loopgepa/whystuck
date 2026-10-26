@@ -21,7 +21,7 @@ endorsement domain, and the primary category selects the domain.
 
 Two structural facts decide this, and neither is about the papers' quality.
 
-**Main-text length is 34 / 21 / 17 pages** (references begin on p.35 / 22 / 18 of 49 / 32 / 27).
+**Main-text length is 34 / 21 / 17 pages** (references begin on p.35 / 22 / 18 of 49 / 33 / 27).
 **All three papers are de-anonymised by their own reproducibility apparatus**: the title block
 prints author, affiliation and repository URL, and each abstract names the repository again.
 
@@ -46,8 +46,9 @@ behind the second.
 submitted paper and any paper which has been published, accepted for publication, or submitted in
 parallel at another archival, peer-reviewed venue." Three papers to TMLR at once is not that case,
 and nothing in the policy addresses companion papers or a series. The sharing is real and worth
-stating anyway: `shared/loop.tex` and `shared/series.tex` are `\input` by all three, which is 828
-words, or 3.8% of Paper~I, 6.3% of Paper~II and 7.3% of Paper~III. Re-measure with
+stating anyway: `shared/loop.tex` and `shared/series.tex` are `\input` by all three, which is 1192
+words, or 4.5% of Paper~I, 6.9% of Paper~II and 8.5% of Paper~III, measured on 2026-10-26 with each
+paper's `main.tex` as the denominator. Re-measure with
 
     wc -w docs/papers/shared/loop.tex docs/papers/shared/series.tex
 
@@ -66,13 +67,13 @@ before submitting anything.
 
 The three are interdependent by design, and the dependency is asymmetric. Counting both the
 `Paper~N` form and the descriptive one ("the companion paper on the silent no-op"), measured
-2026-09-10 and pinned by `tests/test_submission_doc.py` so it cannot rot again:
+2026-10-26 and pinned by `tests/test_submission_doc.py` so it cannot rot again:
 
 | | -> Paper I | -> Paper II | -> Paper III | outbound |
 |---|---|---|---|---|
 | Paper I | | 23 | 42 | **65** |
-| Paper II | 8 | | 10 | 18 |
-| Paper III | 10 | 6 | | 16 |
+| Paper II | 10 | | 13 | 23 |
+| Paper III | 11 | 6 | | 17 |
 
 Paper I leans on the other two roughly three times as hard as either leans on it. These figures
 read nineteen / twenty-one / six / three until 2026-09-10; they were prose in this file, guarded
@@ -176,9 +177,11 @@ promising a reviewer an anonymous artifact:
 
 Standing one up publishes content under a new identity and is a decision for the author, not
 something the packaging script should do on its own. The script writes a verified tree and stops
-there. Rebuilt for this review it produced 793 files, 43 run JSONs, 225 replicate scorings and 267
+there. Rebuilt for an earlier review pass, before the fifteen target-p₀ cassettes and the later claim
+checks existed, it produced 793 files, 43 run JSONs, 225 replicate scorings and 267
 cassettes, with no identifying token surviving a byte scan and a standalone install of that tree
-re-deriving 1086/1086 claims after the rename. It lands in `dist/`, which is gitignored, so
+re-deriving 1086/1086 claims after the rename. The release now carries 282 cassettes and the checker
+more claims, so those counts describe that rebuild and not the current tree. It lands in `dist/`, which is gitignored, so
 **rebuild it at the commit you submit**: a snapshot kept from an earlier commit publishes
 superseded papers, which is what happened to this one inside a single review pass.
 
@@ -243,7 +246,7 @@ exists. Measured from the built PDFs and each paper's own source:
 | | paper | pages | tables | figures | distinct citations |
 |---|---|---|---|---|---|
 | I | `p1-conditional-lever` | 49 | 11 | 3 | 28 |
-| II | `p2-repair-not-detection` | 32 | 4 | 3 | 25 |
+| II | `p2-repair-not-detection` | 33 | 4 | 3 | 25 |
 | III | `p3-silent-no-op` | 27 | 4 | 1 | 19 |
 
 Tables, figures and citations are counted from the sources by

@@ -159,7 +159,7 @@ and tested.
 | LLM worker + output→apply→verify wiring (real-repo scoring) | 🟡 v0.2-alpha |
 | Optimize + frontier MCP tools (gated on the extra) | 🟡 v0.2-alpha |
 
-**2393 tests**, all local and offline; `ruff` + `mypy --strict` (on `src/`) + docs `--strict` clean.
+**2399 tests**, all local and offline; `ruff` + `mypy --strict` (on `src/`) + docs `--strict` clean.
 
 ## Configure
 
@@ -199,8 +199,8 @@ says which paper answers which question.
 
 | | paper | in one line |
 |---|---|---|
-| **I** | *Whether Optimizing the Loop Beats Optimizing the Prompt Tracks One Number* | Evolving a loop's verifier beats evolving its generation prompt **only when enough first drafts are already correct**: +0.060 held-out at p₀ = 0.267, nothing measurable at p₀ = 0.067, a 0.102 swing across the axis |
-| **II** | *What a Checker Cannot Buy Is the Repair* | A **perfect** inference-time checker scores **0.042 below** a mere text-statistics tool and is indistinguishable from a near-random one; concrete measured repair instructions are worth +0.0613. No optimizer anywhere in the design |
+| **I** | *Whether Optimizing the Loop Beats Optimizing the Prompt Tracks One Number* | On one worker, whether evolving a loop's verifier beats evolving its generation prompt **tracks p₀, the base rate of already-correct first drafts**: nothing measurable at p₀ = 0.067, +0.060 held-out at p₀ = 0.267, a 0.102 swing measured along p₀ rather than shown to be caused by it |
+| **II** | *What a Checker Cannot Buy Is the Repair* | At one refine round, a **perfect** checker that names the failed constraints buys nothing measurable over a near-random self-critique and scores **0.042 below** a text-statistics tool, on thirty fixed tasks. Holding it perfect, naming the constraint with a measured repair edit is worth +0.0613 over a bare verdict. Every number it measures scores a fixed genome; two optimizer contrasts are quoted from the companions |
 | **III** | *A Loop Optimizer That Was Not Optimizing Its Loop* | Pointing an optimizer at a component is not the same as optimizing it. Replayed, ten of the twelve replayable runs among our first fifteen had a critique gene **byte-identical to the seed** in every winning genome, and the other two moved it on one seed each. Print one integer per component |
 
 - **[Every experiment, and the command that produced it](docs/EXPERIMENTS.md)** — one script spends

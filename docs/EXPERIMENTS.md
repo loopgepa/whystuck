@@ -19,7 +19,7 @@ claim to the command that produced it.
 
 ```bash
 # 1. every machine-checkable number in all three papers, against the released artifacts
-python scripts/verify_paper_claims.py            # 1344 checks, offline, $0
+python scripts/verify_paper_claims.py            # 1350 checks, offline, $0
 
 # 2. the three-way split lost no quantity
 python scripts/verify_split_coverage.py          # 318 pre-split quantities accounted for, $0
@@ -54,12 +54,12 @@ python scripts/run_validation_study.py --task-set multi-hard --arms ABCD --seeds
 python scripts/run_validation_study.py ... --yes --record tests/fixtures/cassettes/x.json
 
 # REPLAY a recorded run for free, no API key needed
-python scripts/run_validation_study.py ... --replay tests/fixtures/cassettes/x.json
+python scripts/run_validation_study.py ... --record tests/fixtures/cassettes/x.json --replay
 ```
 
 | flag | what it controls |
 |---|---|
-| `--arms` | which of A/B/C/D to run. `A` scores a fixed genome and runs **no optimizer** — this is how every Paper II measurement was taken |
+| `--arms` | which of A/B/C/D to run. `A` scores a fixed genome that no optimizer can reach. Paper II's own cells ran `--arms A`; its curve reads arm A out of four-arm runs, where search ran on B and D only |
 | `--seeds` | one genome pair per seed; the inferential unit |
 | `--n-train` / `--n-heldout` | split sizes. Train and held-out never share a task id |
 | `--max-metric-calls` | GEPA's budget. A configuration that cannot fund one accept cycle is **refused** at the dry-run step, because such a run bills in full and reports a flat Δ with `genes_changed=[]` |
@@ -70,6 +70,10 @@ python scripts/run_validation_study.py ... --replay tests/fixtures/cassettes/x.j
 | `--feedback-level` | `lo` / `mid` / `hi` repair text. The Paper II actionability lever |
 | `--loop-max-retries` | refine budget *R*. Cost per eval is `1 + 2R` calls |
 | `--sample k` | replicate index. **Enters the cassette key**, so record-mode dedup cannot serve K replicates one cached draw |
+| `--task-set multi-hard-manifest` | reads tasks from a frozen manifest instead of the generator; needs `--task-manifest` and `--manifest-level`. Used by the target-p₀ study on the third worker |
+| `--task-manifest PATH` | the manifest JSON (`whystuck.eval.task_manifest`): the tasks, and per level, seed and split which of them are scored. Re-verified against the generator on load, so an edited task is refused |
+| `--manifest-level NAME` | which manifest level one run scores (`calib`, or a level such as `low` / `mid` / `high`) |
+| `--empty-attempts N` | calls per request while the model keeps returning empty content. Default 2, what every run before the target-p₀ study used; that study ran at 6. Each resample is counted into the run's metadata (`empty_resamples`) |
 
 The `--sample` note is not a detail. Without the salt, repeated scorings of one genome are
 byte-identical calls, the cache returns the same draw K times, and the measured variance is
@@ -128,6 +132,9 @@ Each reads released JSON and cassettes and derives one family of claims.
 | `analyze_search_depth.py` | the search depth each run **actually** reached, by counting GEPA iterations in the cassette | I `tab:budgetresult` |
 | `analyze_c1.py` | task-level paired analysis of the hand-written verify gene | I appendix |
 | `measure_p0.py` | p₀ per exclusion level, from any recorded cassette | I §p0 |
+| `p0_task_stats.py` | per-task first-draft pass share (`p_first`) and mean final score from arm-A calibration cassettes of a manifest level; strict replay | target-p₀ study |
+| `build_p0_levels.py` | builds the study manifest's `low` / `mid` / `high` levels from those stats with `task_manifest.select_levels`, under the pre-registered matching rule | target-p₀ study |
+| `analyze_p0target.py` | the pre-registered analysis of the three four-arm runs, written to `docs/p0target/analysis.json` | target-p₀ study, I D9 |
 
 `analyze_search_depth.py` deserves a note: the pre-registration *computed* depth from a formula
 that charged every proposal a full valset re-evaluation, which only an accepted proposal pays. The
@@ -138,7 +145,7 @@ to stop computing depth and measure it.
 
 | script | asserts |
 |---|---|
-| `verify_paper_claims.py` | 1344 checks: every machine-checkable number in the three papers against the artifacts, plus per-paper spine numbers, cross-paper agreement, and each paper's corrections count |
+| `verify_paper_claims.py` | 1350 checks: every machine-checkable number in the three papers against the artifacts, plus per-paper spine numbers, cross-paper agreement, and each paper's corrections count |
 | `verify_split_coverage.py` | all 318 quantities in the pre-split draft are carried by some paper, superseded by a verified replacement, or explicitly dropped with a reason |
 | `verify_reproducibility.py` | every corrected-harness run replays bit-for-bit; superseded runs are **skipped and reported**, never silently "verified" |
 | `verify_stdio.py` | the MCP console script speaks stdio (product, not paper) |
@@ -171,6 +178,8 @@ code-domain cassette key changes with it.
 | `tests/fixtures/cassettes/**` | 282 cassettes; this is what makes replay free |
 | `docs/papers/PRE-SPLIT-SOURCE.tex` | the 46-page pre-split draft, frozen at `fe628ed`, **never built**. Provenance for the split proof |
 | `docs/actual-spend.json` | measured spend per run and per provider, from an instrumented replay. See below |
+| `docs/p0-manifests/` | the target-p₀ study's task manifests and per-task calibration stats (`pilot-1000*`, `full-1001-*`), the calibration runs (`calib/`), and the study manifest `study.json`. Outside the 43-run count |
+| `docs/p0target/` | the study's three four-arm runs (`validation-study-p0target-{low,mid,high}`), `analysis.json` and `REPORT.md`. Third worker `groq/qwen/qwen3.8-27b`, reflection `groq/openai/gpt-oss-120b`; pre-registration `docs/superpowers/specs/2026-10-25-target-p0-preregistration.md` |
 
 38 of the 43 runs also carry a generated `docs/validation-study-*.md` report. The five without one
 are the bought rows of the pre-registered budget sweep (D4), where the suffix is the

@@ -696,7 +696,7 @@ _INTRA_REGISTER_POINTERS = {
     ("p1-conditional-lever", r"so entry~(\d+)'s ``bounds are labelled"): "Cost figures",
     ("p1-conditional-lever", r"still too wide \(entry~(\d+)\)"): "bought before the",
     ("p2-repair-not-detection", r"the borrowed denominator entry~(\d+) retired"): "borrowed",
-    ("p2-repair-not-detection", r"why entry~(\d+) needed reinstating"): "beats the tool-fed loop",
+    ("p2-repair-not-detection", r"six rows; entry~(\d+) withdraws that"): "Every row is quieter",
     ("p2-repair-not-detection", r"the equivalence overclaim entry~(\d+) withdraws"): (
         "statistically indistinguishable"
     ),
@@ -708,6 +708,11 @@ _INTRA_REGISTER_POINTERS = {
     ("p2-repair-not-detection", r"independent task draws'' \(entry~(\d+) above\)"): (
         r"\$62\$ distinct"
     ),
+    # Review round 2: entry 25 now names the entry that supersedes it, and entries 47-48 point back.
+    ("p2-repair-not-detection", r"Superseded by entry~(\d+)\}"): "was itself wrong",
+    ("p2-repair-not-detection", r"levels are nested \(entry~(\d+)\)"): "was itself wrong",
+    ("p2-repair-not-detection", r"genome'', which entry~(\d+) withdraws"): "Every row is quieter",
+    ("p2-repair-not-detection", r"and entry~(\d+) still called the borrowed"): "Six curve ratios",
 }
 
 

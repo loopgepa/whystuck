@@ -6,7 +6,7 @@ questions, rest on different experiments, and are useful to different readers.
 | | paper | asks | uses the optimizer? | pages |
 |---|---|---|---|---|
 | **I** | [`p1-conditional-lever/`](p1-conditional-lever/), *Whether Optimizing the Loop Beats Optimizing the Prompt Tracks One Number* | Does evolving a self-refine loop's verifier beat evolving its generation prompt? | yes, it is the subject | 49 |
-| **II** | [`p2-repair-not-detection/`](p2-repair-not-detection/), *What a Checker Cannot Buy Is the Repair* | Where is the loop's own ceiling: detection or repair? | **no**, every measurement is arm A, which declares no evolvable genes | 32 |
+| **II** | [`p2-repair-not-detection/`](p2-repair-not-detection/), *What a Checker Cannot Buy Is the Repair* | Where is the loop's own ceiling: detection or repair? | **no**, every measurement is arm A, which declares no evolvable genes | 33 |
 | **III** | [`p3-silent-no-op/`](p3-silent-no-op/), *A Loop Optimizer That Was Not Optimizing Its Loop* | How can a componentized treatment silently not apply, and what catches it? | yes, as the thing that failed | 27 |
 
 ## Which paper answers your question
@@ -76,7 +76,7 @@ does not, something regressed.
 ## Verifying
 
 ```bash
-python scripts/verify_paper_claims.py     # 1344 checks against the released artifacts, $0
+python scripts/verify_paper_claims.py     # 1350 checks against the released artifacts, $0
 python scripts/verify_split_coverage.py   # the split lost no quantity, $0
 python -m pytest tests/test_split_coverage.py tests/test_paper_prose_coverage.py \
     tests/test_paper_table_coverage.py tests/test_paper_sigma_coverage.py tests/test_figures.py
@@ -128,10 +128,11 @@ derived from the replay.
 - **One artifact release.** 43 study runs, 225 replicate scorings, 282 cassettes. Fifteen of the
   cassettes, added 2026-10-25/26, belong to the target-p₀ program (`docs/p0target/REPORT.md`): its
   calibration passes and three four-arm runs keep their results under `docs/p0-manifests/` and
-  `docs/p0target/`, outside the 43-run count, and Paper I reports them in D9. Four workers,
+  `docs/p0target/`, outside the 43-run count, and Paper I reports them in D9. They ran on a third
+  worker, `groq/qwen/qwen3.8-27b`, and are not counted below. Four workers,
   and the split is the thing to know before reading any of them: **33** runs are on
   `openai/gpt-4.1-mini`, the worker every released curve is measured on; **1** is the
-  `openai/gpt-4.1-nano` worker swap (Paper I's run 11); **8** are on
+  `openai/gpt-4.1-nano` worker swap (what Papers I and III call "the worker swap"); **8** are on
   `groq/llama-3.3-70b-versatile` and **1** on `groq/llama-3.1-8b-instant`. Those last **9** are a
   second-worker replication line bought on a Groq credential (`validation-study-groq-*`,
   `validation-study-splice-*`). A different worker is a different baseline, so **none of that

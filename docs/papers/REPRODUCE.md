@@ -252,6 +252,63 @@ Two things will bite anyone who varies `--n-train` without reading that section:
   at 32 it leaves 64, and because pool size seeds the shuffle the held-out set silently moves.
   A test pins the cliff.
 
+### The target-p₀ study on a third worker (Paper I, D9)
+
+Pre-registered in `docs/superpowers/specs/2026-10-25-target-p0-preregistration.md`, with its
+deviations and outcome recorded there; results in `docs/p0target/REPORT.md`. Worker
+`groq/qwen/qwen3.8-27b`, the series' third (the second-worker line is `llama-3.3-70b`), reflection
+`groq/openai/gpt-oss-120b`. Instead of the stock generator, the runs read their tasks from a frozen
+manifest, built in three steps:
+
+1. **Calibration** (paid, already recorded): arm-A runs over a manifest's `calib` level, one per
+   `--sample` salt, under `--task-set multi-hard-manifest --task-manifest M --manifest-level calib`.
+   Their results are under `docs/p0-manifests/calib/`.
+2. **Per-task statistics** (offline, $0): `scripts/p0_task_stats.py` replays those cassettes and
+   writes, per task, the share of first drafts that pass every constraint (`p_first`) and the mean
+   final score (`final`). Replay is strict, so a missing call raises.
+3. **Levels** (offline, $0): `scripts/build_p0_levels.py` passes both pools' stats to
+   `task_manifest.select_levels` under the registered matching rule and writes `study.json`.
+
+Steps 2 and 3 reproduce the committed files byte for byte (checked 2026-10-26; the L2 pool's
+calibration ran forty 50-task seeds, the hard pool's twenty):
+
+```bash
+M=docs/p0-manifests C=tests/fixtures/cassettes
+scratchpad/evalvenv/bin/python scripts/p0_task_stats.py --manifest $M/full-1001-hard.json \
+  --seeds 0-19 --n-heldout 50 --out /tmp/hard-stats.json \
+  --run $C/study-p0target-full-hard-s0.json:0 --run $C/study-p0target-full-hard-s1.json:1 \
+  --run $C/study-p0target-full-hard-s2.json:2
+scratchpad/evalvenv/bin/python scripts/p0_task_stats.py --manifest $M/full-1001-L2.json \
+  --seeds 0-39 --n-heldout 50 --out /tmp/L2-stats.json \
+  --run $C/study-p0target-full-L2-s0.json:0 --run $C/study-p0target-full-L2-s1.json:1 \
+  --run $C/study-p0target-full-L2-s2.json:2
+scratchpad/evalvenv/bin/python scripts/build_p0_levels.py \
+  --pool $M/full-1001-hard.json:/tmp/hard-stats.json:0 \
+  --pool $M/full-1001-L2.json:/tmp/L2-stats.json:1 --out /tmp/study.json
+```
+
+Each four-arm run replays offline from its cassette. The flags are the ones each run's `meta`
+records; `--max-usd 10` is needed because the pre-flight bound ($9.83) is checked under
+`--replay` too. Replayed on 2026-10-26, level `low` matched the released JSON on all 120
+`seed_heldout` / `opt_heldout` / `genes_changed` records:
+
+```bash
+L=low   # or mid, high
+scratchpad/evalvenv/bin/python scripts/run_validation_study.py \
+  --task-set multi-hard-manifest --task-manifest docs/p0-manifests/study.json --manifest-level $L \
+  --arms ABCD --seeds 0,1,2,3,4,5,6,7,8,9 --n-train 8 --n-heldout 10 \
+  --max-metric-calls 28 --reflection-calls 6 --module-selector all --loop-max-retries 1 \
+  --empty-attempts 6 --max-usd 10 \
+  --worker-model groq/qwen/qwen3.8-27b --reflection-model groq/openai/gpt-oss-120b \
+  --record tests/fixtures/cassettes/study-p0target-$L.json --replay --out /tmp/p0target-$L.json
+```
+
+`--empty-attempts` sets how many calls one request may make while the model keeps returning empty
+content. Every run before this study used the default, 2; this study ran at 6, and each resample is
+counted into the run's metadata as `empty_resamples`. The pre-registered analysis is
+`scripts/analyze_p0target.py` (no arguments), which replays the three runs and rewrites
+`docs/p0target/analysis.json`; on 2026-10-26 the rewrite was byte-identical to the committed file.
+
 ## Layout
 
 | path | what it holds |
