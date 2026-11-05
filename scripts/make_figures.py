@@ -159,6 +159,9 @@ class FigureData:
     swing_per_draw_sigma: float
     curve: list[CurveRow]
     curve_gaps: dict[str, tuple[float, float]]
+    #: The same two gaps re-scored five times: (mean paired gap, t on 4 df). The points the figure
+    #: plots are single draws, and the replicates are what the paper's claims rest on.
+    curve_gaps_k5: dict[str, tuple[float, float]]
     depth: list[DepthCell]
     depth_sigma_within: float
     #: Paper III's fifteen pre-correction contrast runs, read three ways. The census lives in the
@@ -249,11 +252,12 @@ _RESIDUAL_CONDITIONS = (
     ("run10", "perfect detector, measured repair edits"),
 )
 
-#: The second-worker line, paired against the intrinsic baseline. Two detector substitutions, then
-#: three repair signals over a perfect detector: the contrast the figure exists to draw.
+#: The second-worker line, paired against the intrinsic baseline. One detector substitution, then
+#: three repair signals over a perfect detector: the contrast the figure exists to draw. The
+#: qwen3.6-27b cell is NOT here: its critic hit the 320-token cap inside a reasoning block on all
+#: 200 critiques and returned no verdict, so it measured no detector (Paper II register).
 _WORKER_ROWS = (
     ("smaller critic (8B)", "detector swapped", "det-8b"),
-    ("another lineage (qwen3.6-27b)", "detector swapped", "det-qwen"),
     ("perfect verdict only", "repair signal varied", "det-oracle-lo"),
     ("perfect verdict + which constraint", "repair signal varied", "det-oracle"),
     ("perfect verdict + measured edits", "repair signal varied", "det-oracle-hi"),
@@ -357,6 +361,14 @@ def figure_data() -> FigureData:
         "tool_vs_oracle": vpc._curve_gap("run7", "run4"),
         "intrinsic_vs_oracle": vpc._curve_gap("run7", "run3"),
     }
+    _csig, pairs = vpc._curve_replicates()
+    curve_gaps_k5 = {
+        key: (pairs[pair].delta, pairs[pair].t_stat())
+        for key, pair in (
+            ("tool_vs_oracle", ("run4", "run7")),
+            ("intrinsic_vs_oracle", ("run3", "run7")),
+        )
+    }
 
     depth: list[DepthCell] = []
     for mmc, cap in vpc.BUDGET_SWEEP:
@@ -386,6 +398,7 @@ def figure_data() -> FigureData:
         ** 0.5,
         curve=curve,
         curve_gaps=curve_gaps,
+        curve_gaps_k5=curve_gaps_k5,
         depth=depth,
         depth_sigma_within=repeat["L1"].sd_between_replicates,
         precorrection=vpc._precorrection_census(),
@@ -702,6 +715,8 @@ def fig_detector(data: FigureData, out: Path) -> Path:
 
     gap_tool, sig_tool = data.curve_gaps["tool_vs_oracle"]
     gap_intr, sig_intr = data.curve_gaps["intrinsic_vs_oracle"]
+    k5_tool, t_tool = data.curve_gaps_k5["tool_vs_oracle"]
+    k5_intr, t_intr = data.curve_gaps_k5["intrinsic_vs_oracle"]
     y_intr, y_orc = ypos[0], ypos[2]
 
     # The two gaps the paper separates: one carries the claim, the other explicitly does not. Both
@@ -715,8 +730,8 @@ def fig_detector(data: FigureData, out: Path) -> Path:
     ax.text(
         x_lo + 0.052,
         y_orc + 0.52,
-        f"{gap_tool:.3f} $= {sig_tool:.2f}\\sigma$: the perfect detector scores BELOW a "
-        f"measurement tool",
+        f"below the tool: one draw {abs(gap_tool):.3f} $= {sig_tool:.2f}\\sigma$, "
+        f"five re-scorings {abs(k5_tool):.3f} ($t = {abs(t_tool):.2f}$)",
         ha="left",
         va="top",
         fontsize=7.6,
@@ -731,7 +746,8 @@ def fig_detector(data: FigureData, out: Path) -> Path:
     ax.text(
         det[0].score + 0.008,
         y_intr - 0.34,
-        f"{gap_intr:.3f} $= {sig_intr:.2f}\\sigma$: indistinguishable, not claimed",
+        f"one draw {abs(gap_intr):.3f}, five re-scorings {abs(k5_intr):.3f} "
+        f"($t = {abs(t_intr):.2f}$)",
         ha="left",
         va="center",
         fontsize=7.6,

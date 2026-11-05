@@ -59,3 +59,33 @@ def test_tool_fed_f1_beats_intrinsic_f1():
         collect_events(f"{_C}/study-feedback.json", [0, 1, 2], loop_kw={"stats_fn": text_stats})
     )
     assert tool_fed["f1"] > intrinsic["f1"] + 0.3
+
+
+def test_final_line_rule_accepts_a_verdict_the_prefix_rule_misses():
+    """The loop reads PASS only at the start of a critique; a critique can end on it instead.
+
+    Paper II states its detector tables under both readings, so the second reading must exist
+    as a named rule rather than as a referee's scratch script.
+    """
+    from analyze_critique_detector import final_line_pass, prefix_pass
+
+    assert prefix_pass("PASS") and final_line_pass("PASS")
+    ended = "- word count: 20\n- no commas\n\nFinal verdict: PASS"
+    assert not prefix_pass(ended)
+    assert final_line_pass(ended)
+    assert final_line_pass("checked everything\n\nReply: **PASS**.")
+    # A PASS buried inside the reasoning is not a verdict under either rule.
+    assert not final_line_pass("<think>\nword one passes the length rule PASS? check")
+    assert not final_line_pass("fix: add two words")
+    assert not final_line_pass("")
+
+
+def test_final_line_rule_moves_the_tool_fed_critique_off_precision_one():
+    ev = collect_events(
+        f"{_C}/study-feedback.json",
+        [0, 1, 2],
+        loop_kw={"stats_fn": text_stats},
+        verdict_rule="final-line",
+    )
+    s = detector_stats(ev)
+    assert (s["tp"], s["fp"], s["fn"], s["tn"]) == (7, 7, 0, 16)

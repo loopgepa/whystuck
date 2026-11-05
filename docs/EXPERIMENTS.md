@@ -17,21 +17,27 @@ claim to the command that produced it.
 
 ## Quick start: reproduce the papers without spending anything
 
+Run every step from the repository root, with **both** virtual environments built as
+[REPRODUCE.md](papers/REPRODUCE.md#setup) describes: the main `.venv` (no gepa) and the eval venv
+`scratchpad/evalvenv` (with the `eval` extra). Several scripts below replay cassettes by spawning
+`scratchpad/evalvenv/bin/python` through that relative path, so a different working directory or a
+missing eval venv fails with a "broken environment" error rather than a wrong number.
+
 ```bash
 # 1. every machine-checkable number in all three papers, against the released artifacts
-python scripts/verify_paper_claims.py            # 1381 checks, offline, $0
+.venv/bin/python scripts/verify_paper_claims.py            # 1456 checks, offline, $0, about a minute
 
 # 2. the three-way split lost no quantity
-python scripts/verify_split_coverage.py          # 318 pre-split quantities accounted for, $0
+.venv/bin/python scripts/verify_split_coverage.py          # 318 pre-split quantities accounted for, $0
 
 # 3. every corrected-harness paid run replays bit-for-bit from its cassette
-#    (needs the eval extra: pip install -e '.[eval]')
-python scripts/verify_reproducibility.py         # 25 verified, 13 skipped as superseded, $0
+#    (runs in the eval venv; do not install the eval extra into .venv, which must stay gepa-free)
+scratchpad/evalvenv/bin/python scripts/verify_reproducibility.py   # 25 verified, 13 skipped as superseded, $0
 
 # 4. the figures, redrawn from the artifacts
 #    (needs matplotlib, in the `figures` dependency group, not an extra:
-#     uv pip install -p .venv --group figures)
-python scripts/make_figures.py                   # writes docs/papers/shared/figures/*.pdf, $0
+#     uv pip install -p .venv --group figures; it also spawns the eval venv)
+.venv/bin/python scripts/make_figures.py                   # writes docs/papers/shared/figures/*.pdf, $0
 
 # 5. build the papers (needs pdflatex and bibtex; TeX Live 2023 or newer)
 cd docs/papers/p1-conditional-lever && pdflatex main && bibtex main && pdflatex main && pdflatex main
@@ -47,14 +53,14 @@ The four-arm GEPA study. Everything paid in this project is one invocation of th
 
 ```bash
 # DRY RUN (default): prints the priced upper bound and exits without spending
-python scripts/run_validation_study.py --task-set multi-hard --arms ABCD --seeds 0,1,2 \
+scratchpad/evalvenv/bin/python scripts/run_validation_study.py --task-set multi-hard --arms ABCD --seeds 0,1,2 \
     --n-train 8 --n-heldout 10 --max-metric-calls 28 --out docs/validation-study-x.json
 
 # SPEND: add --yes. Never do this without reading the dry run's estimate first.
-python scripts/run_validation_study.py ... --yes --record tests/fixtures/cassettes/x.json
+scratchpad/evalvenv/bin/python scripts/run_validation_study.py ... --yes --record tests/fixtures/cassettes/x.json
 
 # REPLAY a recorded run for free, no API key needed
-python scripts/run_validation_study.py ... --record tests/fixtures/cassettes/x.json --replay
+scratchpad/evalvenv/bin/python scripts/run_validation_study.py ... --record tests/fixtures/cassettes/x.json --replay
 ```
 
 | flag | what it controls |
@@ -73,7 +79,7 @@ python scripts/run_validation_study.py ... --record tests/fixtures/cassettes/x.j
 | `--task-set multi-hard-manifest` | reads tasks from a frozen manifest instead of the generator; needs `--task-manifest` and `--manifest-level`. Used by the target-p₀ study on the third worker |
 | `--task-manifest PATH` | the manifest JSON (`whystuck.eval.task_manifest`): the tasks, and per level, seed and split which of them are scored. Re-verified against the generator on load, so an edited task is refused |
 | `--manifest-level NAME` | which manifest level one run scores (`calib`, or a level such as `low` / `mid` / `high`) |
-| `--empty-attempts N` | calls per request while the model keeps returning empty content. Default 2, what every run before the target-p₀ study used; that study ran at 6. Each resample is counted into the run's metadata (`empty_resamples`) |
+| `--empty-attempts N` | calls per request while the model keeps returning empty content. Default 2, what every run before the target-p₀ study used; that study ran at 6. Each resample is counted into the run's metadata (`empty_resamples`); a `--replay` records 0 there, because the cassette serves the final non-empty completion, so read the count from the released JSON |
 
 The `--sample` note is not a detail. Without the salt, repeated scorings of one genome are
 byte-identical calls, the cache returns the same draw K times, and the measured variance is
@@ -87,10 +93,11 @@ Re-scores already-released genomes K times to put a sampling interval on Δ. No 
 this is the ordinary scoring path on a fixed genome.
 
 ```bash
-python scripts/repeat_scores.py            # p0 family: dry run, prints the priced bound
-python scripts/repeat_scores.py --curve    # detector-curve family: dry run
-python scripts/repeat_scores.py --yes      # spend
-python scripts/repeat_scores.py --verify   # replay every bought replicate, $0
+scratchpad/evalvenv/bin/python scripts/repeat_scores.py            # p0 family: dry run, prints the priced bound
+scratchpad/evalvenv/bin/python scripts/repeat_scores.py --curve    # detector-curve family: dry run
+scratchpad/evalvenv/bin/python scripts/repeat_scores.py --yes      # spend
+scratchpad/evalvenv/bin/python scripts/repeat_scores.py --verify   # replay the 135 p0-family replicates, $0
+scratchpad/evalvenv/bin/python scripts/repeat_scores.py --curve --verify   # replay the 90 curve replicates, $0
 ```
 
 Two families, both fully bought and released:
@@ -100,7 +107,8 @@ Two families, both fully bought and released:
 | p0 levels | 135 (3 levels × {B, D, seed} × 3 seeds × 5 reps) | — | Paper I `tab:repeat`, Paper III `tab:sigmagenome` |
 | detector curve | 90 (6 rows × 3 seeds × 5 reps) | `$2.98` | Paper II `tab:curvesigma`, `tab:curvepairs` |
 
-All 225 replay offline at `$0`. The curve family exists because every ratio in Paper II had been
+All 225 replay offline at `$0`: `--verify` checks the 135 of the p0 family and
+`--curve --verify` the 90 of the curve family, so both commands are needed to cover all of them. The curve family exists because every ratio in Paper II had been
 divided by a σ measured on a *different* genome family, and three of six had less margin against
 the 2σ line than the known spread in σ.
 
@@ -110,7 +118,7 @@ Builds a landscape where evolving the verify gene is the **only** path to a pass
 runs the real four-arm study through real GEPA on it. No network, no spend.
 
 ```bash
-python scripts/positive_control.py      # expects A/B/C = 0.000, D = 1.000
+scratchpad/evalvenv/bin/python scripts/positive_control.py      # expects A/B/C = 0.000, D = 1.000
 ```
 
 It rules out a dead measurement path and nothing more: run against the pre-fix source tree it
@@ -147,7 +155,7 @@ to stop computing depth and measure it.
 
 | script | asserts |
 |---|---|
-| `verify_paper_claims.py` | 1381 checks: every machine-checkable number in the three papers against the artifacts, plus per-paper spine numbers, cross-paper agreement, and each paper's corrections count |
+| `verify_paper_claims.py` | 1456 checks: every machine-checkable number in the three papers against the artifacts, plus per-paper spine numbers, cross-paper agreement, and each paper's corrections count |
 | `verify_split_coverage.py` | all 318 quantities in the pre-split draft are carried by some paper, superseded by a verified replacement, or explicitly dropped with a reason |
 | `verify_reproducibility.py` | every corrected-harness run replays bit-for-bit; superseded runs are **skipped and reported**, never silently "verified" |
 | `verify_stdio.py` | the MCP console script speaks stdio (product, not paper) |
@@ -202,8 +210,14 @@ corrections register.
 ### What it actually cost, and why the bounds are ~10× high
 
 ```bash
-python scripts/measure_actual_spend.py   # ~40 min, offline, $0; writes docs/actual-spend.json
+scratchpad/evalvenv/bin/python scripts/measure_actual_spend.py   # offline, $0; writes docs/actual-spend.json
 ```
+
+Run it from the repository root in the eval venv: it replays through gepa and counts tokens with
+`tiktoken`, which the eval extra brings in (through litellm) and the main `.venv` lacks. It took
+16 s on 2026-10-26 and about 90 s on another machine the same day, and its output was byte-identical
+to the committed `docs/actual-spend.json` both times. It covers the 43-run release and the replicate
+loop; the target-p₀ program's spend is not in it (see `docs/p0target/REPORT.md`).
 
 Prompts are stored as hashes, so a cassette cannot price its own input tokens — but a replay
 reconstructs every prompt byte-for-byte, which is what makes replay match at all. The script
@@ -217,7 +231,7 @@ replay fires 1124.
 | measured, both sides | 25 | **$4.97** |
 | estimated, outputs measured and inputs modelled from the measured per-surface ratio | 18 | **$4.73** |
 | the replicate loop, same basis | 225 scorings | **$1.39** |
-| **floor for the whole study** | | **$11.08** |
+| **floor for the whole study** (the 43-run release; the target-p₀ program is not in it) | | **$11.08** |
 | sum of the pre-flight bounds, all 43 runs | | $114.61 |
 
 Of that, **$0.73** is the borrowed Groq credential, against $400 authorised.

@@ -720,6 +720,22 @@ _INTRA_REGISTER_POINTERS = {
     ("p2-repair-not-detection", r"levels are nested \(entry~(\d+)\)"): "was itself wrong",
     ("p2-repair-not-detection", r"genome'', which entry~(\d+) withdraws"): "Every row is quieter",
     ("p2-repair-not-detection", r"and entry~(\d+) still called the borrowed"): "Six curve ratios",
+    # Review round 3: entries 36 and 42 point forward to the entry that replaces their pointer to
+    # the conditional-lever paper, and two of the new entries point back.
+    ("p2-repair-not-detection", r"\(entry~(\d+) replaces this entry's pointer"): "finds a gate",
+    ("p2-repair-not-detection", r"one cell at \$p_0 = 0\.267\$ \(entry~(\d+)\)"): "finds a gate",
+    ("p2-repair-not-detection", r"which entry~(\d+) already says of the one-round null"): (
+        "statistically indistinguishable"
+    ),
+    ("p2-repair-not-detection", r"the conclusion and entry~(\d+), with no test"): (
+        "depends on the worker"
+    ),
+    ("p2-repair-not-detection", r"``indistinguishable'', the word entry~(\d+)"): (
+        "statistically indistinguishable"
+    ),
+    ("p2-repair-not-detection", r"The first, which entry~(\d+) withdrew, survived"): (
+        "necessary and not sufficient"
+    ),
 }
 
 

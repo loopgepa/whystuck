@@ -6,20 +6,21 @@ questions, rest on different experiments, and are useful to different readers.
 | | paper | asks | uses the optimizer? | pages |
 |---|---|---|---|---|
 | **I** | [`p1-conditional-lever/`](p1-conditional-lever/), *Whether Optimizing the Loop Beats Optimizing the Prompt Tracks One Number* | Does evolving a self-refine loop's verifier beat evolving its generation prompt? | yes, it is the subject | 49 |
-| **II** | [`p2-repair-not-detection/`](p2-repair-not-detection/), *What a Checker Cannot Buy Is the Repair* | Where is the loop's own ceiling: detection or repair? | **no**, every measurement is arm A, which declares no evolvable genes | 33 |
+| **II** | [`p2-repair-not-detection/`](p2-repair-not-detection/), *What a Checker Cannot Buy Is the Repair* | Where is the loop's own ceiling: detection or repair? | **no**, every measurement is arm A, which declares no evolvable genes | 35 |
 | **III** | [`p3-silent-no-op/`](p3-silent-no-op/), *A Loop Optimizer That Was Not Optimizing Its Loop* | How can a componentized treatment silently not apply, and what flags it? | yes, as the thing that failed | 28 |
 
 ## Which paper answers your question
 
-**"Should I point my prompt optimizer at my critique prompt?"** → **I**. The answer is conditional
-on p₀, the base rate of first drafts that already satisfy every requirement: at p₀ = 0.267 it gains
-0.060 held-out, at p₀ = 0.067 it does not measurably help, and the 0.102 swing between them is what
-carries the result rather than either endpoint.
+**"Should I point my prompt optimizer at my critique prompt?"** → **I**. At p₀ = 0.067, where p₀ is
+the base rate of first drafts that already satisfy every requirement, it does not measurably help.
+Paper I reports a single cell at p₀ = 0.267 (+0.060 held-out, three seeds) and does not establish
+that the gain depends on p₀; its p₀ claim is being withdrawn.
 
 **"Should I buy a better verifier for my self-refine loop?"** → **II**. Not first, when first
-drafts rarely pass. At one refine round a *perfect* inference-time checker that names the failed
-constraints buys nothing measurable over the loop's near-random self-critique (−0.0027, *t* = 0.33)
-and scores 0.042 *below* a deterministic text-statistics tool, on one fixed set of thirty tasks.
+drafts rarely pass. At p₀ = 0.067 and one refine round a *perfect* inference-time checker that names
+the failed constraints buys nothing measurable over the loop's near-random self-critique (−0.0027,
+*t* = 0.33, 95% interval −0.0252 to +0.0199) and scores 0.042 *below* a deterministic
+text-statistics tool, on one fixed set of thirty tasks. No oracle cell ran above p₀ = 0.095.
 What pays is the repair instruction: naming which constraint failed is worth −0.0080 on one worker
 and +0.0327 on another, and adding a concrete measured edit is worth +0.0613.
 
@@ -77,9 +78,9 @@ does not, something regressed.
 ## Verifying
 
 ```bash
-python scripts/verify_paper_claims.py     # 1381 checks against the released artifacts, $0
-python scripts/verify_split_coverage.py   # the split lost no quantity, $0
-python -m pytest tests/test_split_coverage.py tests/test_paper_prose_coverage.py \
+.venv/bin/python scripts/verify_paper_claims.py     # 1456 checks against the released artifacts, $0
+.venv/bin/python scripts/verify_split_coverage.py   # the split lost no quantity, $0
+.venv/bin/python -m pytest tests/test_split_coverage.py tests/test_paper_prose_coverage.py \
     tests/test_paper_table_coverage.py tests/test_paper_sigma_coverage.py tests/test_figures.py
 ```
 
@@ -139,7 +140,9 @@ derived from the replay.
   `validation-study-splice-*`). A different worker is a different baseline, so **none of that
   line's numbers extends a released curve**: it corroborates rather than continues. All three
   papers draw on it, and each says which part it is entitled to: Paper II
-  builds its cross-worker section on the six detector cells, Paper I cites the collapse of the
+  builds its cross-worker section on five of the six detector cells and reports the sixth
+  (`qwen3.6-27b`, whose critic was cut off by the output cap before any verdict) as an instrument
+  failure, Paper I cites the collapse of the
   `p₀` ladder on that worker as evidence for an open design problem and explicitly declines to
   carry its own lever there, and Paper III takes defects 10–11 from the instruments that broke
   while it was being bought.

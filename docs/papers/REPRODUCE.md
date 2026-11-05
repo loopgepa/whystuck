@@ -42,7 +42,7 @@ python -m venv scratchpad/evalvenv && scratchpad/evalvenv/bin/pip install -e '.[
 
 ## The checks
 
-### 1. Every number in all three papers matches the artifacts ($0, ~30s)
+### 1. Every number in all three papers matches the artifacts ($0, about a minute)
 
 ```bash
 .venv/bin/python scripts/verify_paper_claims.py
@@ -149,7 +149,8 @@ scratchpad/evalvenv/bin/python scripts/run_validation_study.py \
 
 Without `--yes` this prints a priced estimate and spends nothing. The estimate is a genuine
 **ceiling** on output tokens (they are hard-capped via `max_tokens`) and a conservative
-estimate on input tokens; measured realization has been 20–25% of the bound. Add `--yes` to
+estimate on input tokens. Measured spend has been $4.97 against $37.60 of bounds on the 25 runs
+that replay, 13% overall and 7% to 32% per run (`scripts/measure_actual_spend.py`). Add `--yes` to
 spend. The cassette persists after every call, so an interrupted run loses nothing and a
 re-invocation resumes from what was already paid for.
 
@@ -288,9 +289,12 @@ scratchpad/evalvenv/bin/python scripts/build_p0_levels.py \
 ```
 
 Each four-arm run replays offline from its cassette. The flags are the ones each run's `meta`
-records; `--max-usd 10` is needed because the pre-flight bound ($9.83) is checked under
-`--replay` too. Replayed on 2026-10-26, level `low` matched the released JSON on all 120
-`seed_heldout` / `opt_heldout` / `genes_changed` records:
+records. A replay needs no ceiling flag: since commit `3f52a9c` a `--replay` whose pre-flight bound
+exceeds `--max-usd` prints `NOTE (replay, $0): ...` and proceeds, because it spends nothing. The
+bound it prints is $9.9744 per level under the current reflection pricing, where the released JSONs
+record `estimated_usd` $9.8304 (and the registration $9.83), priced before that commit. Replayed on
+2026-10-26, level `low` matched the released JSON on all 120 `seed_heldout` / `opt_heldout` /
+`genes_changed` records:
 
 ```bash
 L=low   # or mid, high
@@ -298,14 +302,17 @@ scratchpad/evalvenv/bin/python scripts/run_validation_study.py \
   --task-set multi-hard-manifest --task-manifest docs/p0-manifests/study.json --manifest-level $L \
   --arms ABCD --seeds 0,1,2,3,4,5,6,7,8,9 --n-train 8 --n-heldout 10 \
   --max-metric-calls 28 --reflection-calls 6 --module-selector all --loop-max-retries 1 \
-  --empty-attempts 6 --max-usd 10 \
+  --empty-attempts 6 \
   --worker-model groq/qwen/qwen3.8-27b --reflection-model groq/openai/gpt-oss-120b \
   --record tests/fixtures/cassettes/study-p0target-$L.json --replay --out /tmp/p0target-$L.json
 ```
 
 `--empty-attempts` sets how many calls one request may make while the model keeps returning empty
 content. Every run before this study used the default, 2; this study ran at 6, and each resample is
-counted into the run's metadata as `empty_resamples`. The pre-registered analysis is
+counted into the run's metadata as `empty_resamples`. Two metadata fields are not replay-stable:
+a replay records `empty_resamples` as 0, because the cassette serves the final non-empty completion
+(the released runs record 18, 15 and 20 worker resamples at `low`, `mid` and `high`), and
+`variant_id` is a fresh `uuid4` on every run. Read both from the released JSON. The pre-registered analysis is
 `scripts/analyze_p0target.py` (no arguments), which replays the three runs and rewrites
 `docs/p0target/analysis.json`; on 2026-10-26 the rewrite was byte-identical to the committed file.
 

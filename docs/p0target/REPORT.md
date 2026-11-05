@@ -10,7 +10,9 @@ or in the calibration stats it reads.
 
 Spend for the whole program ≈ $13 of the $60 authorised. That is an estimate: outputs are counted
 from the cassettes, inputs are reconstructed, and an independent recompute in review gave
-$12.4 to $12.9.
+$12.4 to $12.9. No script in this repository derives it: `scripts/measure_actual_spend.py` covers
+the 43-run release and its replicates and leaves this program out, so the figure cannot be
+re-derived at $0 from the release and should be quoted as an estimate.
 
 **Reproducible at $0.** All three levels were replayed under `--replay` from their committed
 cassettes on 2026-10-26: 10 seeds × 4 arms per level, `seed_heldout`, `opt_heldout` and

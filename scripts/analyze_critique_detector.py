@@ -15,6 +15,7 @@ spend), pairing every critique's PASS/FAIL verdict with the ground-truth
 from __future__ import annotations
 
 import math
+import re
 
 from whystuck.eval.cassette import Cassette, CassetteMiss
 from whystuck.eval.llm_worker import make_self_refine_run_task
@@ -23,6 +24,37 @@ from whystuck.eval.study import seed_genome
 from whystuck.eval.text_stats import text_stats
 
 CASSETTE_DIR = "tests/fixtures/cassettes"
+
+
+def prefix_pass(text: str) -> bool:
+    """The loop's own verdict rule (`llm_worker`): the critique text begins with PASS."""
+    return (text or "").strip().upper().startswith("PASS")
+
+
+#: A final line that is nothing but a verdict, optionally after a short label ("Reply:",
+#: "Final verdict:") and markdown emphasis or closing punctuation.
+_FINAL_LINE_VERDICT = re.compile(r"(?:[\w\s]{0,40}:\s*)?\**PASS\**[.!]?", re.IGNORECASE)
+
+
+def final_line_pass(text: str) -> bool:
+    """A wider reading: PASS at the start, OR a final line that states PASS as the verdict.
+
+    The loop never applies this rule. It exists because a critique that reasons first and ends on
+    ``Final verdict: PASS`` reads as a failed verdict to the loop, so a detector table built on the
+    loop's rule describes the loop's behaviour and not only the critic's judgement. Paper II
+    reports its detector tables under both rules for that reason. A PASS that sits inside the
+    reasoning, on no line of its own, counts under neither.
+    """
+    text = (text or "").strip()
+    if not text:
+        return False
+    if prefix_pass(text):
+        return True
+    lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+    return bool(_FINAL_LINE_VERDICT.fullmatch(lines[-1]))
+
+
+VERDICT_RULES = {"prefix": prefix_pass, "final-line": final_line_pass}
 _N_HELDOUT = 10
 
 
@@ -35,6 +67,7 @@ def collect_events(
     gene_overrides: dict[str, str] | None = None,
     exclude: frozenset[str] = frozenset(),
     separate_critic: bool = False,
+    verdict_rule: str = "prefix",
 ) -> list[tuple[bool, bool]]:
     """Return (verdict_pass, actual_pass) for every first-critique event.
 
@@ -63,7 +96,12 @@ def collect_events(
     surface misses every critique call --- one per held-out task, which on a `CassetteMiss` is
     SKIPPED rather than raised, and the function then returns a short list that looks like a
     smaller sample instead of a broken replay. The cross-provider run of 2026-08-06 is the first
-    to need it: 80 of its 80 first-critique events went missing this way."""
+    to need it: 80 of its 80 first-critique events went missing this way.
+
+    `verdict_rule` names how a critique's text becomes a verdict: ``"prefix"`` is the loop's own
+    rule and the default; ``"final-line"`` also accepts a closing verdict line (`final_line_pass`).
+    Only the reading of the recorded text changes, so the replay and its cassette keys do not."""
+    is_pass = VERDICT_RULES[verdict_rule]
     include_plan = "plan_gene" in loop_kw
     # Same rule run_validation_study uses, derived rather than duplicated as a constant so
     # the two cannot drift apart and silently generate a different task pool.
@@ -109,7 +147,7 @@ def collect_events(
                 crit0 = next((s for s in trace.steps if s.step_id == "critique-0"), None)
                 if gen0 is None or crit0 is None:
                     continue
-                verdict_pass = (crit0.output_summary or "").strip().upper().startswith("PASS")
+                verdict_pass = is_pass(crit0.output_summary or "")
                 actual_pass = mc_pass(gen0.output_summary or "", task)
                 events.append((verdict_pass, actual_pass))
     if skipped:

@@ -88,6 +88,8 @@ def _plotted() -> list[tuple[str, float]]:
     out += [(f"curve {r.run}", r.score) for r in d.curve]
     for k, (gap, sig) in d.curve_gaps.items():
         out += [(f"gap {k}", gap), (f"gap {k} in sigma", sig)]
+    for k, (gap, t) in d.curve_gaps_k5.items():
+        out += [(f"gap {k} five re-scorings", gap), (f"gap {k} five re-scorings t", t)]
     for c in d.depth:
         out += [
             (f"mmc{c.mmc} delta", c.delta),

@@ -563,6 +563,8 @@ _WORD_NUM = {
     "forty-five": 45,
     "forty-six": 46,
     "forty-eight": 48,
+    "fifty-five": 55,
+    "fifty-six": 56,
     "two hundred": 200,
 }
 
@@ -3402,7 +3404,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
         ),
         (
             "tex: conclusion oracle sigma",
-            r"moves held-out by\s+\$([\d.]+)\\sigma\$, i\.e\.\\ not at all",
+            r"moves held-out by\s+\$([\d.]+)\\sigma\$, nothing measurable",
             ("run3", "run7"),
         ),
     ):
@@ -3820,6 +3822,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_review_round2_p1_checks())
     out.extend(_d9_target_p0_checks())
     out.extend(_truncated_critic_checks())
+    out.extend(_p2_review_round3_checks())
 
     return out
 
@@ -5219,11 +5222,6 @@ def _groq_second_worker_checks() -> list[tuple[str, float, float, float]]:
             r"smaller critic \(8B\) & ([\d.]+) & \$-([\d.]+)\$ & ([\d.]+) & \$-([\d.]+)\$",
         ),
         (
-            "qwen",
-            "det-qwen",
-            r"\\texttt\{qwen3\.6-27b\}\) & ([\d.]+) & \$\+([\d.]+)\$ & ([\d.]+) & \$\+([\d.]+)\$",
-        ),
-        (
             "oracle-lo",
             "det-oracle-lo",
             r"\\texttt\{lo\} prose \(verdict only\) & ([\d.]+) & \$\+([\d.]+)\$ & ([\d.]+) & "
@@ -5268,7 +5266,7 @@ def _groq_second_worker_checks() -> list[tuple[str, float, float, float]]:
     out.append(
         (
             "tex: second-worker verdict contribution",
-            _scrape(p2, r"the perfect verdict contributes \$\+([\d.]+)\$"),
+            _scrape(p2, r"the perfect verdict\s+contributes \$\+([\d.]+)\$"),
             0.00005,
             verdict_only,
         )
@@ -5289,9 +5287,15 @@ def _groq_second_worker_checks() -> list[tuple[str, float, float, float]]:
             mid_prose_t,
         )
     )
-    shares = _scrape_all(p2, r"a \$(\d+)/(\d+)\$ split")
-    out.append(("tex: second-worker verdict share", shares[0], 0.5, 100 * verdict_only / mid_total))
-    out.append(("tex: second-worker prose share", shares[1], 0.5, 100 * mid_prose / mid_total))
+    out.append(
+        (
+            "tex: second-worker mid total decomposed",
+            _scrape(p2, r"that is the cell to decompose: of its \$\+([\d.]+)\$"),
+            0.00005,
+            mid_total,
+        )
+    )
+    out.extend(_groq_split_identification_checks(p2))
     out.append(
         (
             "tex: second-worker hi prose rung",
@@ -5496,9 +5500,8 @@ def _groq_detector_degeneracy_checks() -> list[tuple[str, float, float, float]]:
     for label, slug, tp_expected in (("8b", "det-8b", 0.0), ("qwen", "det-qwen", 0.0)):
         stats = acd.detector_stats(_events(slug, frozenset(), True))
         out.append((f"tex: {label} critic true positives", tp_expected, 0.0, stats["tp"]))
-    # "the 8B critic emits PASS once and qwen never" -- both stated as words, both derived.
+    # "the 8B critic emits PASS once" -- stated as a word, derived.
     eight = acd.detector_stats(_events("det-8b", frozenset(), True))
-    qwen = acd.detector_stats(_events("det-qwen", frozenset(), True))
     out.append(
         (
             "tex: 8b critic passes (word 'once')",
@@ -5507,30 +5510,21 @@ def _groq_detector_degeneracy_checks() -> list[tuple[str, float, float, float]]:
             eight["tp"] + eight["fp"],
         )
     )
-    out.append(
-        (
-            "tex: qwen critic passes (word 'never')",
-            0.0 if re.search(r"\\texttt\{qwen3\.6-27b\} never", p2) else -1.0,
-            0.0,
-            qwen["tp"] + qwen["fp"],
-        )
-    )
+    out.extend(_qwen_instrument_failure_checks(p2))
     # The two substituted cells' already-correct counts. They differ (24 and 20) and differ from
     # L1's 19, because these runs were recorded at the provider's default temperature and so do
     # not share a draft set. Stating one number for all three would have been the tidier
     # sentence and a false one, so both are printed and both are pinned.
-    printed_correct = _scrape_all(
-        p2, r"against \$(\d+)\$ and \$(\d+)\$ already-correct first drafts"
-    )
-    for i, slug in enumerate(("det-8b", "det-qwen")):
-        out.append(
-            (
-                f"tex: already-correct first drafts, {slug}",
-                printed_correct[i],
-                0.0,
-                float(sum(1 for _v, true in _events(slug, frozenset(), True) if true)),
-            )
+    # Round 3 withdrew the qwen cell as a detector (it returned no verdict), so only the 8B
+    # count is still printed as a detector fact.
+    out.append(
+        (
+            "tex: already-correct first drafts, det-8b",
+            _scrape(p2, r"\$\\mathrm\{tp\}=0\$ against \$(\d+)\$ already-correct first drafts"),
+            0.0,
+            float(sum(1 for _v, true in _events("det-8b", frozenset(), True) if true)),
         )
+    )
 
     # Paper I closes D3's Remaining item on the same measurement, so it restates two of these
     # numbers. Both are re-derived here against Paper I's own text rather than compared with
@@ -5554,6 +5548,387 @@ def _groq_detector_degeneracy_checks() -> list[tuple[str, float, float, float]]:
         )
     )
     return out
+
+
+def _t_two_sided_p(t: float, df: float) -> float:
+    """Two-sided Student-t p, through the integrator `analyze_p0target` already ships (no scipy)."""
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import analyze_p0target as ap
+
+    return ap.welch_p(t, df)
+
+
+def _t_critical_95(df: float) -> float:
+    """The two-sided 95% critical value of Student's t, by bisection on `_t_two_sided_p`.
+
+    Derived rather than typed so a seed count that changes moves the interval with it. At df = 19
+    it is 2.093 to the printed precision; the K=5 tests keep their tabulated 2.776.
+    """
+    lo, hi = 1.0, 20.0
+    for _ in range(60):
+        mid = (lo + hi) / 2
+        if _t_two_sided_p(mid, df) > 0.05:
+            lo = mid
+        else:
+            hi = mid
+    return (lo + hi) / 2
+
+
+def _groq_split_identification_checks(p2: str) -> list[tuple[str, float, float, float]]:
+    """The second-worker verdict/text decomposition, as an interval rather than a share.
+
+    Round 3 withdrew the 25/75 split: the verdict term is +0.0110 with a t-interval that crosses
+    zero, so its share of the mid cell's total is not identified. What the paper now prints is that
+    interval, the share range it implies, and the direct test of text against verdict on each rung.
+    Each is derived from the twenty paired seeds, so the withdrawal cannot drift from the data.
+    """
+    lo_cell = _groq_cell("det-oracle-lo")
+    base = _groq_cell("p0cal-L1")
+    n = len(base)
+    verdict, se, _t = _groq_paired("p0cal-L1", "det-oracle-lo")
+    mid_total = _groq_paired("p0cal-L1", "det-oracle")[0]
+    crit = _t_critical_95(n - 1)
+    ci = (verdict - crit * se, verdict + crit * se)
+    out: list[tuple[str, float, float, float]] = []
+    printed = _scrape_all(
+        p2,
+        r"with a \$95\\%\$ interval from \$-([\d.]+)\$ to \$\+([\d.]+)\$ over the twenty seeds",
+    )
+    out.append(("tex: second-worker verdict CI lo", -printed[0], 0.00005, ci[0]))
+    out.append(("tex: second-worker verdict CI hi", printed[1], 0.00005, ci[1]))
+    shares = _scrape_all(p2, r"anywhere from \$-(\d+)\\%\$ to\s+\$\+(\d+)\\%\$")
+    out.append(
+        ("tex: second-worker verdict share lo (%)", -shares[0], 0.5, 100 * ci[0] / mid_total)
+    )
+    out.append(("tex: second-worker verdict share hi (%)", shares[1], 0.5, 100 * ci[1] / mid_total))
+    for rung, slug, t_pat, p_pat, p_tol in (
+        (
+            "mid",
+            "det-oracle",
+            r"exceeds the verdict by a margin with \$t = ([\d.]+)\$",
+            r"by a margin with \$t = [\d.]+\$ \(\$p = ([\d.]+)\$\)",
+            0.005,
+        ),
+        (
+            "hi",
+            "det-oracle-hi",
+            r"does exceed the\s+verdict \(\$t = ([\d.]+)\$",
+            r"does exceed the\s+verdict \(\$t = [\d.]+\$, \$p = ([\d.]+)\$\)",
+            0.00005,
+        ),
+    ):
+        top = _groq_cell(slug)
+        # (text term) - (verdict term) per seed: (top - lo) - (lo - base).
+        diffs = [(c - b) - (b - a) for a, b, c in zip(base, lo_cell, top, strict=True)]
+        t = mean(diffs) / (stdev(diffs) / n**0.5)
+        out.append(
+            (f"tex: second-worker text minus verdict t ({rung})", _scrape(p2, t_pat), 0.005, t)
+        )
+        out.append(
+            (
+                f"tex: second-worker text minus verdict p ({rung})",
+                _scrape(p2, p_pat),
+                p_tol,
+                _t_two_sided_p(t, n - 1),
+            )
+        )
+    return out
+
+
+def _qwen_instrument_failure_checks(p2: str) -> list[tuple[str, float, float, float]]:
+    """The qwen3.6-27b critic cell, withdrawn as an instrument failure, pinned to its cassette.
+
+    Every critic completion in the cell opens a `<think>` block and none closes it: the 320-token
+    cap cut each one off before a verdict. The paper used to read the cell as a cross-lineage
+    critic that never passes; the counts below are what it now says instead, read from the raw
+    text rather than from a verdict parse, since a verdict parse is exactly what could not see the
+    failure (it scored 0 PASS of 200 and reported that as a fact about the critic).
+    """
+    doc = json.loads(Path("tests/fixtures/cassettes/study-groq-det-qwen.json").read_text())
+    critic = [v["output"] for k, v in doc["entries"].items() if k.startswith("critic:")]
+    opened = sum(1 for t in critic if t.lstrip().startswith("<think>"))
+    closed = sum(1 for t in critic if "</think>" in t)
+    cap = _meta_of("validation-study-groq-det-qwen.json")["worker_max_output_tokens"]
+    printed = _scrape_all(
+        p2,
+        r"all \$(\d+)\$ of its first critiques open a \\texttt\{<think>\}\s+reasoning block and "
+        r"\$(\d+)\$ close it",
+    )
+    out = [
+        ("tex: qwen critiques opening <think>", printed[0], 0.0, float(opened)),
+        ("tex: qwen critiques closing </think>", printed[1], 0.0, float(closed)),
+        ("tex: qwen critiques, all of them", printed[0], 0.0, float(len(critic))),
+        (
+            "tex: qwen critic cap",
+            _scrape(p2, r"inherits the \$(\d+)\$-token output cap"),
+            0.0,
+            float(cap),
+        ),
+    ]
+    held = _scrape_all(
+        p2,
+        r"\(held-out \$([\d.]+)\$, \$\+([\d.]+)\$ against the intrinsic loop at \$t = ([\d.]+)\$\)",
+    )
+    delta, _se, t = _groq_paired("p0cal-L1", "det-qwen")
+    out.append(("tex: qwen cell held-out", held[0], 0.00005, mean(_groq_cell("det-qwen"))))
+    out.append(("tex: qwen cell delta", held[1], 0.00005, delta))
+    out.append(("tex: qwen cell t", held[2], 0.005, t))
+    return out
+
+
+@cache
+def _rule_stats(
+    cassette: str,
+    seeds: tuple[int, ...],
+    rule: str,
+    separate: bool = False,
+    stats_tool: bool = False,
+    exclude: frozenset[str] = frozenset(),
+) -> dict[str, float]:
+    """Detector confusion counts for one critique under a named verdict rule."""
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import analyze_critique_detector as acd
+
+    from whystuck.eval.text_stats import text_stats
+
+    loop_kw: dict = {"stats_fn": text_stats} if stats_tool else {}
+    events = acd.collect_events(
+        f"tests/fixtures/cassettes/{cassette}",
+        list(seeds),
+        loop_kw=loop_kw,
+        n_heldout=10,
+        exclude=exclude,
+        separate_critic=separate,
+        verdict_rule=rule,
+    )
+    if not events:
+        raise ValueError(f"{cassette}: replay produced no critique events under {rule}")
+    return acd.detector_stats(events)
+
+
+def _verdict_rule_checks(p2: str) -> list[tuple[str, float, float, float]]:
+    """Paper II's detectors under the loop's verdict rule and under a wider one.
+
+    The loop reads PASS only at the start of a critique. A referee recounted with a closing verdict
+    line accepted as well and found the tool-fed critique's precision falling from 1.00 to 0.50.
+    The paper now prints both rules; every cell of that table, and each prose figure drawn from the
+    wider rule, is derived here from the replay so the two rules cannot be confused in print.
+    """
+    import math
+
+    out: list[tuple[str, float, float, float]] = []
+    header = r"critique & $n$ & \texttt{PASS} & tp & F$_1$ & \texttt{PASS} & tp & F$_1$"
+    rows = (
+        ("intrinsic self-critique (run~3)", "study-multihard.json", tuple(range(5)), False, False),
+        ("tool-fed critique (run~4)", "study-feedback.json", (0, 1, 2), False, True),
+        (r"\texttt{gpt-5.6-luna} critic", "study-crossfamily.json", (0, 1, 2), True, False),
+        (r"\texttt{llama-3.3-70b} critic", "study-xprovider.json", tuple(range(8)), True, False),
+        (
+            "second worker, its own critique",
+            "study-groq-p0cal-L1.json",
+            tuple(range(20)),
+            False,
+            False,
+        ),
+        ("second worker, 8B critic", "study-groq-det-8b.json", tuple(range(20)), True, False),
+    )
+    for label, cassette, seeds, sep, tool in rows:
+        cells = _table_row(p2, header, label)
+        prefix = _rule_stats(cassette, seeds, "prefix", sep, tool)
+        wide = _rule_stats(cassette, seeds, "final-line", sep, tool)
+        out.append((f"tab:verdictrule {cassette} n", cells[1][0], 0.0, prefix["n"]))
+        for offset, stats, tag in ((2, prefix, "prefix"), (5, wide, "final-line")):
+            out.append(
+                (
+                    f"tab:verdictrule {cassette} {tag} PASS",
+                    cells[offset][0],
+                    0.0,
+                    stats["tp"] + stats["fp"],
+                )
+            )
+            out.append(
+                (f"tab:verdictrule {cassette} {tag} tp", cells[offset + 1][0], 0.0, stats["tp"])
+            )
+            f1_cell = cells[offset + 2]
+            if math.isnan(stats["f1"]):
+                # Printed as an em-rule: F1 is undefined with no true positive. Assert the cell
+                # carries no number rather than skipping it.
+                out.append(
+                    (
+                        f"tab:verdictrule {cassette} {tag} F1 undefined",
+                        0.0,
+                        0.0,
+                        float(len(f1_cell)),
+                    )
+                )
+            else:
+                out.append((f"tab:verdictrule {cassette} {tag} F1", f1_cell[0], 0.005, stats["f1"]))
+
+    tool_wide = _rule_stats("study-feedback.json", (0, 1, 2), "final-line", False, True)
+    out.append(
+        (
+            "tex: tool-fed precision under the wider rule",
+            _scrape(p2, r"Its precision of \$1\.00\$ does not, and falls to \$([\d.]+)\$"),
+            0.005,
+            tool_wide["precision"],
+        )
+    )
+    m = re.search(r"because (\w+) of its\s+(\w+) passes under the wider rule", p2)
+    fp_word, pass_word = (m.group(1), m.group(2)) if m else ("", "")
+    out.append(
+        (
+            "tex: tool-fed wider-rule false passes",
+            float(_WORD_NUM.get(fp_word, -1)),
+            0.0,
+            tool_wide["fp"],
+        )
+    )
+    out.append(
+        (
+            "tex: tool-fed wider-rule passes",
+            float(_WORD_NUM.get(pass_word, -1)),
+            0.0,
+            tool_wide["tp"] + tool_wide["fp"],
+        )
+    )
+    eight_wide = _rule_stats("study-groq-det-8b.json", tuple(range(20)), "final-line", True)
+    m = re.search(r"the 8B critic then\s+accepts (\w+) already-correct drafts", p2)
+    out.append(
+        (
+            "tex: 8B critic wider-rule correct passes",
+            float(_WORD_NUM.get(m.group(1), -1)) if m else -1.0,
+            0.0,
+            eight_wide["tp"],
+        )
+    )
+    m = re.search(
+        r"Under the wider rule of\s+\\S\\ref\{sec:detector\} it passes (\w+) and (\w+) of", p2
+    )
+    out.append(
+        (
+            "tex: 8B wider-rule passes (second-worker section)",
+            float(_WORD_NUM.get(m.group(1), -1)) if m else -1.0,
+            0.0,
+            eight_wide["tp"] + eight_wide["fp"],
+        )
+    )
+    out.append(
+        (
+            "tex: 8B wider-rule correct passes (second-worker section)",
+            float(_WORD_NUM.get(m.group(2), -1)) if m else -1.0,
+            0.0,
+            eight_wide["tp"],
+        )
+    )
+    # The calibration levels under the wider rule: F1 still rises, J still does not.
+    printed_f1 = _scrape_all(
+        p2,
+        r"\$\\mathrm\{F\}_1 = ([\d.]+)\$, \$([\d.]+)\$ and \$([\d.]+)\$ under the wider rule",
+    )
+    printed_j = _scrape_all(
+        p2, r"Youden's \$J\$ at \$\+([\d.]+)\$,\s+\$-([\d.]+)\$ and \$\+([\d.]+)\$"
+    )
+    for i, (label, cassette, exclude, _pinned) in enumerate(_P0_DETECTOR):
+        st = _rule_stats(cassette, (0, 1, 2), "final-line", exclude=exclude)
+        sens = st["tp"] / (st["tp"] + st["fn"])
+        spec = st["tn"] / (st["tn"] + st["fp"])
+        sign = -1.0 if i == 1 else 1.0
+        out.append((f"tex: wider-rule F1 {label}", printed_f1[i], 0.0005, st["f1"]))
+        out.append(
+            (f"tex: wider-rule Youden J {label}", sign * printed_j[i], 0.0005, sens + spec - 1)
+        )
+    # The second worker's own critique under the wider rule, at both calibration levels it reports.
+    l1_wide = _rule_stats("study-groq-p0cal-L1.json", tuple(range(20)), "final-line")
+    l2_wide = _rule_stats(
+        "study-groq-p0cal-L2.json",
+        tuple(range(20)),
+        "final-line",
+        exclude=frozenset({"exact_word_count"}),
+    )
+    printed = _scrape_all(
+        p2,
+        r"wider verdict rule it passes \$(\d+)\$ of \$200\$ at the first level and demands a fix "
+        r"on \$(\d+)\$ of the\s+\$(\d+)\$ correct drafts",
+    )
+    out.append(
+        ("tex: second worker L1 wider-rule passes", printed[0], 0.0, l1_wide["tp"] + l1_wide["fp"])
+    )
+    out.append(("tex: second worker L2 wider-rule false alarms", printed[1], 0.0, l2_wide["fn"]))
+    out.append(
+        ("tex: second worker L2 already correct", printed[2], 0.0, l2_wide["tp"] + l2_wide["fn"])
+    )
+    return out
+
+
+def _oracle_scope_checks(p2: str) -> list[tuple[str, float, float, float]]:
+    """The base rate every oracle cell ran at, and the interval of the perfect-checker null.
+
+    Round 3's referee found the perfect-checker claim tested only at p0 = 0.067 (and 0.095 on the
+    second worker), and the null's interval wide enough to hold the gain that base rate allows.
+    The paper now states both. The run count and the 'unmodified hard tier' premise are read from
+    every released run's metadata, so a future oracle cell at a relaxed tier fails here until the
+    scope sentences are rewritten.
+    """
+    oracle = []
+    for f in sorted(Path(DOCS).glob("validation-study*.json")):
+        meta = json.loads(f.read_text())["meta"]
+        if meta.get("oracle_critique"):
+            oracle.append(meta)
+    relaxed = [m for m in oracle if m.get("exclude_constraint")]
+    out: list[tuple[str, float, float, float]] = [
+        (
+            "tex: oracle-gated runs in the release",
+            _scrape_word(p2, r"all\s+\\textbf\{(\w+)\} oracle-gated runs in it"),
+            0.0,
+            float(len(oracle)),
+        ),
+        (
+            "tex: oracle-gated runs (threats)",
+            _scrape_word(p2, r"All (\w+) oracle-gated runs use the unmodified hard"),
+            0.0,
+            float(len(oracle)),
+        ),
+        ("oracle-gated runs on a relaxed tier", 0.0, 0.0, float(len(relaxed))),
+    ]
+    _csig, pairs = _curve_replicates()
+    null = pairs[("run3", "run7")]
+    crit = _repeat().T_CRIT_05[4]
+    lo = null.delta - crit * null.standard_error
+    hi = null.delta + crit * null.standard_error
+    for site, pattern in (
+        ("abstract", r"\$95\\%\$ interval \$-([\d.]+)\$ to \$\+([\d.]+)\$\), and it scores"),
+        ("fixside", r"\$95\\%\$ interval from\s+\$-([\d.]+)\$ to \$\+([\d.]+)\$, so it rules out"),
+    ):
+        printed = _scrape_all(p2, pattern)
+        out.append((f"tex: oracle null CI lo ({site})", -printed[0], 0.00005, lo))
+        out.append((f"tex: oracle null CI hi ({site})", printed[1], 0.00005, hi))
+    out.append(
+        (
+            "tex: oracle null CI hi (threats)",
+            _scrape(p2, r"its interval reaches \$\+([\d.]+)\$, and no cell"),
+            0.00005,
+            hi,
+        )
+    )
+    l1 = _detector_metrics(0)["p0"]
+    out.append(
+        (
+            "tex: abstract base rate where few first drafts pass",
+            _scrape(p2, r"Where few first drafts pass \(\$p_0 = ([\d.]+)\$\)"),
+            0.0005,
+            l1,
+        )
+    )
+    return out
+
+
+def _p2_review_round3_checks() -> list[tuple[str, float, float, float]]:
+    p2 = _sources().paper_tex("p2-repair-not-detection")
+    return _verdict_rule_checks(p2) + _oracle_scope_checks(p2)
 
 
 def _xprovider_checks() -> list[tuple[str, float, float, float]]:
@@ -5833,7 +6208,7 @@ def _xprovider_checks() -> list[tuple[str, float, float, float]]:
     out.append(
         (
             "tex: cross-provider missed positives",
-            _scrape_word(p2, r"missing all (\w+) already-correct drafts"),
+            _scrape_word(p2, r"missing all (\w+)\s+already-correct drafts"),
             0.0,
             xp["fn"],
         )
@@ -5957,7 +6332,7 @@ def _reconciliation_checks() -> list[tuple[str, float, float, float]]:
         ),
         (
             "tex: p2 reconciliation, high p0",
-            _scrape(p2, r"That paper raises \$p_0\$ to \$([\d.]+)\$"),
+            _scrape(p2, r"it reports one cell at \$p_0 = ([\d.]+)\$, where evolving"),
             0.0005,
             high,
         ),
@@ -7322,8 +7697,10 @@ def _p2_review_r1_checks() -> list[tuple[str, float, float, float]]:
 
     # --- the conclusion's restatement of the shrinkage range (register: smaller misstatements)
     shrink = _scrape(p2, r"shrank three magnitudes by \$(\d+)\$ to \$52\\%\$")
-    intro = _scrape(p2, r"three shrinking by \$(\d+)\$ to \$52\\%\$")
-    out.append(("tex: conclusion shrinkage low agrees with the introduction", shrink, 0, intro))
+    # Against tab:curvepairs' caption since round 3, when the contribution list that used to
+    # restate the range dropped its process narration and the range with it.
+    caption = _scrape(p2, r"three shrink by \$(\d+)\$ to \$52\\%\$")
+    out.append(("tex: conclusion shrinkage low agrees with the caption", shrink, 0, caption))
     return out
 
 
