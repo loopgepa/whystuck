@@ -170,6 +170,9 @@ class FigureData:
     precorrection_moved: dict[str, int] = field(default_factory=dict)
     #: Every instruction-following effect in Paper I, in units of sigma, for `fig-effects`.
     effects: tuple[EffectRow, ...] = ()
+    #: (slug, mean Delta) for each of the nine corrected-harness runs at L1, which `fig-p0` draws
+    #: beside the L2 cell so a within-level spread cannot read as a difference between levels.
+    l1_cells: tuple[tuple[str, float], ...] = ()
     sesoi_in_sigma: float = 0.0
     #: Paper II's per-constraint residual and its second-worker line.
     residual: tuple[ResidualBar, ...] = ()
@@ -191,7 +194,7 @@ def _pass_counts(level: int, arm: str) -> tuple[int, int]:
 
 
 def _effect_rows(
-    levels: list[Level], depth: list[DepthCell], sigma: float, swing_in_sigma: float
+    levels: list[Level], depth: list[DepthCell], sigma: float
 ) -> tuple[EffectRow, ...]:
     """Every instruction-following effect Paper I reports, divided by the study's own sigma.
 
@@ -200,9 +203,9 @@ def _effect_rows(
     measurement, so putting the actuator run on this axis would import that assumption into a figure
     whose whole subject is what the noise permits.
 
-    The swing is the one row whose denominator carries sigma twice, since it is a difference of
-    two independent deltas. It arrives already scaled rather than recomputed here, so the figure and
-    `fig-p0`'s annotation cannot disagree about the study's load-bearing quantity.
+    The L2-minus-L1 swing is not a row. It was until review round 3, plotted at 2.47 sigma, a
+    multiple the paper replaces with 1.55 per-draw sigma, and the paper has since withdrawn the
+    claim the swing carried.
     """
     rows = [
         EffectRow(
@@ -234,14 +237,6 @@ def _effect_rows(
                 replicated=False,
             )
         )
-    rows.append(
-        EffectRow(
-            label="the swing, $L_2 - L_1$",
-            group="difference of two draws",
-            in_sigma=swing_in_sigma,
-            replicated=False,
-        )
-    )
     return tuple(rows)
 
 
@@ -403,7 +398,8 @@ def figure_data() -> FigureData:
         depth_sigma_within=repeat["L1"].sd_between_replicates,
         precorrection=vpc._precorrection_census(),
         precorrection_moved=vpc._precorrection_acceptance(),
-        effects=_effect_rows(levels, depth, noise.sigma_delta_mean, swing_sigma),
+        effects=_effect_rows(levels, depth, noise.sigma_delta_mean),
+        l1_cells=tuple(vpc._l1_cells().items()),
         sesoi_in_sigma=SESOI / noise.sigma_delta_mean,
         residual=_residual_bars(),
         worker=_worker_rows(),
@@ -468,7 +464,13 @@ def _fmt(x: float, places: int = 3) -> str:
 
 
 def fig_p0(data: FigureData, out: Path) -> Path:
-    """The headline: the sign of Delta depends on $p_0$, and the mechanism moves with it."""
+    """The three $p_0$ levels, the nine optimizer runs at the lowest, and what the critique does.
+
+    Until review round 3 this figure joined the three single draws with a line and annotated the
+    L2-minus-L1 swing, which drew a curve through $p_0$ that the release does not support. The
+    line is gone, and the eight other L1 runs now sit beside the L1 level, so the reader sees that
+    the L2 cell lies inside the L1 spread.
+    """
     import matplotlib.pyplot as plt
 
     fig, (ax, bx) = plt.subplots(
@@ -500,7 +502,21 @@ def fig_p0(data: FigureData, out: Path) -> Path:
             )
 
     singles = [lv.delta_single for lv in data.levels]
-    ax.plot(xs, singles, color="0.35", lw=0.9, ls=":", zorder=2)
+    # The other eight corrected-harness runs at L1, beside the level they share. The four-arm
+    # re-run is the L1 square itself, so it is not drawn twice.
+    others = [delta for slug, delta in data.l1_cells if slug != "c2b"]
+    ax.plot(
+        [xs[0] - 0.047] * len(others),
+        others,
+        marker="D",
+        ms=3.4,
+        mfc="0.60",
+        mec="0.35",
+        mew=0.6,
+        ls="none",
+        zorder=3,
+        label="other optimizer runs at $L_1$ (split, budget)",
+    )
     ax.plot(
         xs,
         singles,

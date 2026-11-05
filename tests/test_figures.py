@@ -85,6 +85,7 @@ def _plotted() -> list[tuple[str, float]]:
             out.append((f"{lv.name} saturated baseline", lv.saturated_baseline))
     out += [("sigma", d.sigma), ("swing", d.swing), ("swing in sigma", d.swing_in_sigma)]
     out.append(("swing in per-draw sigma", d.swing_per_draw_sigma))
+    out += [(f"L1 cell {slug}", delta) for slug, delta in d.l1_cells]
     out += [(f"curve {r.run}", r.score) for r in d.curve]
     for k, (gap, sig) in d.curve_gaps.items():
         out += [(f"gap {k}", gap), (f"gap {k} in sigma", sig)]
@@ -159,7 +160,9 @@ def test_headline_quantities_equal_the_text():
     d = mf.figure_data()
     checks = [
         ("sigma", d.sigma, r"\\sigma\(\\dd\) \\;=\\; 0.1591/\\sqrt\{30\} \\;=\\; ([\d.]+)", 5e-5),
-        ("swing", d.swing, r"between them\s+is \$([\d.]+)\$, and it is what carries", 5e-4),
+        # fig:p0's arrow. Anchored on the conclusion's sentence until review round 3 withdrew the
+        # claim that sentence made; the sweep paragraph that still states the swing is the anchor.
+        ("swing", d.swing, r"So the sweep yields a swing of \$([\d.]+)\$ in \$\\dd\$", 5e-4),
         (
             "swing in per-draw sigma",
             d.swing_per_draw_sigma,
@@ -215,6 +218,39 @@ def test_the_swing_uses_the_root_two_denominator():
         "swing_in_sigma looks like it divided by a single sigma"
     )
     assert math.isclose(d.swing_in_sigma, d.swing / (d.sigma * 2**0.5), rel_tol=1e-9)
+
+
+def test_the_effects_figure_draws_no_swing() -> None:
+    """Review round 3: `fig:effects` plotted the L2-minus-L1 swing at 2.47 sigma.
+
+    That multiple divides by the cross-run sigma of one re-scored genome, which Paper I's own text
+    says understates the noise on two optimized cells and replaces with 1.55 per-draw sigma. The
+    swing is also no longer a finding: the paper withdrew the claim it carried. A figure row that
+    shows it at the larger multiple keeps the withdrawn reading in the one place no checker reads.
+    """
+    d = mf.figure_data()
+    swing_rows = [e.label for e in d.effects if "swing" in e.label.lower()]
+    assert not swing_rows, f"fig:effects still draws the swing: {swing_rows}"
+    assert all(e.group != "difference of two draws" for e in d.effects)
+
+
+def test_the_p0_figure_draws_every_low_p0_cell() -> None:
+    """The one positive cell at L2 has to be read against the nine optimizer runs at L1.
+
+    Review round 3 found the figure showing only the lowest of those nine (the four-arm re-run)
+    beside the L2 cell, which made a within-level spread look like a difference between levels.
+    The nine come from the checker's own list, so the figure cannot drop the inconvenient ones.
+    """
+    d = mf.figure_data()
+    want = vpc._l1_cells()
+    assert len(want) == 9, f"expected nine corrected-harness cells at L1, found {sorted(want)}"
+    got = dict(d.l1_cells)
+    assert set(got) == set(want), f"figure cells {sorted(got)} differ from {sorted(want)}"
+    for slug, delta in want.items():
+        assert math.isclose(got[slug], delta, abs_tol=1e-12), f"{slug}: {got[slug]} vs {delta}"
+    assert math.isclose(got["c2b"], d.levels[0].delta_single, abs_tol=1e-12), (
+        "the L1 level's single draw is the four-arm re-run, which must be one of the nine"
+    )
 
 
 def test_cap_bound_is_read_off_the_measured_depth():

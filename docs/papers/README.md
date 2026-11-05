@@ -5,16 +5,18 @@ questions, rest on different experiments, and are useful to different readers.
 
 | | paper | asks | uses the optimizer? | pages |
 |---|---|---|---|---|
-| **I** | [`p1-conditional-lever/`](p1-conditional-lever/), *Whether Optimizing the Loop Beats Optimizing the Prompt Tracks One Number* | Does evolving a self-refine loop's verifier beat evolving its generation prompt? | yes, it is the subject | 49 |
+| **I** | [`p1-conditional-lever/`](p1-conditional-lever/), *Evolving a Self-Refine Verifier: It Stops Accepting at a Low Base Rate, and Whether That Pays Remains Open* | Does evolving a self-refine loop's verifier beat evolving its generation prompt? | yes, it is the subject | 49 |
 | **II** | [`p2-repair-not-detection/`](p2-repair-not-detection/), *What a Checker Cannot Buy Is the Repair* | Where is the loop's own ceiling: detection or repair? | **no**, every measurement is arm A, which declares no evolvable genes | 35 |
 | **III** | [`p3-silent-no-op/`](p3-silent-no-op/), *A Loop Optimizer That Was Not Optimizing Its Loop* | How can a componentized treatment silently not apply, and what flags it? | yes, as the thing that failed | 28 |
 
 ## Which paper answers your question
 
 **"Should I point my prompt optimizer at my critique prompt?"** → **I**. At p₀ = 0.067, where p₀ is
-the base rate of first drafts that already satisfy every requirement, it does not measurably help.
-Paper I reports a single cell at p₀ = 0.267 (+0.060 held-out, three seeds) and does not establish
-that the gain depends on p₀; its p₀ claim is being withdrawn.
+the base rate of first drafts that already satisfy every requirement, it does not measurably help:
+the search stops the verifier accepting, and nine optimizer runs at that level average +0.006.
+Paper I reports a single cell at p₀ = 0.267 (+0.060 held-out, three seeds) inside the spread of
+those nine, and has withdrawn its claim that the answer tracks p₀. Two follow-up tests on a third
+worker found no gain.
 
 **"Should I buy a better verifier for my self-refine loop?"** → **II**. Not first, when first
 drafts rarely pass. At p₀ = 0.067 and one refine round a *perfect* inference-time checker that names

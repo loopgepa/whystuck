@@ -702,6 +702,18 @@ _INTRA_REGISTER_POINTERS = {
     ("p1-conditional-lever", r"narrowed to \\emph\{re-measures\} by entry~(\d+)"): "re-measure",
     ("p1-conditional-lever", r"so entry~(\d+)'s ``bounds are labelled"): "Cost figures",
     ("p1-conditional-lever", r"still too wide \(entry~(\d+)\)"): "bought before the",
+    # Review round 3: the p0 headline's withdrawal (entry 49) and the pointers that now lead to it.
+    (
+        "p1-conditional-lever",
+        r"tracks \$p_0\$ \(Appendix~\\ref\{sec:corrections\}, entry~(\d+)\)",
+    ): ("tracks one number"),
+    ("p1-conditional-lever", r"which entry~(\d+) withdraws in turn"): "tracks one number",
+    ("p1-conditional-lever", r"a claim entry~(\d+) withdraws"): "tracks one number",
+    ("p1-conditional-lever", r"which entry~(\d+) withdraws as well"): "tracks one number",
+    (
+        "p1-conditional-lever",
+        r"implied the cost entry~(\d+) withdraws",
+    ): "cost of evolving the verifier",
     ("p2-repair-not-detection", r"the borrowed denominator entry~(\d+) retired"): "borrowed",
     ("p2-repair-not-detection", r"six rows; entry~(\d+) withdraws that"): "Every row is quieter",
     ("p2-repair-not-detection", r"the equivalence overclaim entry~(\d+) withdraws"): (
