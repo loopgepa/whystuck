@@ -514,6 +514,7 @@ _DEFECT_IDENTITY = {
     9: "arm accepted nothing",
     10: "reached only the",
     11: "pooled-$\\sigma$ estimator",
+    12: "reasoning critic capped",
 }
 
 
@@ -693,6 +694,8 @@ _INTRA_REGISTER_POINTERS = {
         "15/15"
     ),
     ("p3-silent-no-op", r"The replay record released with entry~(\d+)"): "15/15",
+    # Review round 3: the defect-11 counterfactual's history moved from the body to the register.
+    ("p3-silent-no-op", r"entry~(\d+), records its history"): "restated as the checker grew",
     ("p1-conditional-lever", r"the depth bound of entry~(\d+)"): "depth bound",
     ("p1-conditional-lever", r"the \$1\.12\$ of entry~(\d+)"): r"1\.12",
     ("p1-conditional-lever", r"and entry~(\d+) records how unstable"): "percentages",

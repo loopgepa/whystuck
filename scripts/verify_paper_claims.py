@@ -558,6 +558,7 @@ _WORD_NUM = {
     "thirty-five": 35,
     "thirty-seven": 37,
     "thirty-eight": 38,
+    "thirty-nine": 39,
     "forty-three": 43,
     "forty-five": 45,
     "forty-six": 46,
@@ -2719,7 +2720,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
             out.append(
                 (
                     "tex: sigma genome range factor",
-                    _scrape(tex, r"a factor of \$([\d.]+)\$\. One mechanism"),
+                    _scrape(tex, r"a factor of \$([\d.]+)\$\. Each cell rests"),
                     0.05,
                     hi / lo,
                 )
@@ -3818,6 +3819,7 @@ def _checks() -> list[tuple[str, float, float, float]]:
     out.extend(_review_round1_p1_checks())
     out.extend(_review_round2_p1_checks())
     out.extend(_d9_target_p0_checks())
+    out.extend(_truncated_critic_checks())
 
     return out
 
@@ -3918,7 +3920,7 @@ _SPINE: tuple[tuple[str, str, str, float, float], ...] = (
     (
         "p3-silent-no-op",
         "P3 sigma spread factor",
-        r"a factor of \$([\d.]+)\$\. One mechanism",
+        r"a factor of \$([\d.]+)\$\. Each cell rests",
         5.9,
         0.05,
     ),
@@ -3972,7 +3974,7 @@ _SHARED_ALIASED: tuple[tuple[str, dict[str, str]], ...] = (
         "sigma genome spread (5.9x)",
         {
             "p2-repair-not-detection": r"genome across that family it spans \$([\d.]+)\\times\$",
-            "p3-silent-no-op": r"a factor of \$([\d.]+)\$\. One mechanism",
+            "p3-silent-no-op": r"a factor of \$([\d.]+)\$\. Each cell rests",
         },
     ),
     (
@@ -5628,7 +5630,9 @@ def _xprovider_checks() -> list[tuple[str, float, float, float]]:
             if not r["D"].get("genes_changed") and r["B"].get("genes_changed")
         ),
     )
-    printed_damage = _scrape_all(tex, r"losing \$([\d.]+)\$ and \$([\d.]+)\$ against its own seed")
+    printed_damage = _scrape_all(
+        tex, r"scored below its seed genome\}, by \$([\d.]+)\$ and \$([\d.]+)\$ on"
+    )
     for i, value in enumerate(sorted(printed_damage, reverse=True)):
         out.append((f"tex: D3 comparator damage {i}", value, 0.0005, abs(damage[i])))
 
@@ -7418,6 +7422,48 @@ def _defect_class_count_checks() -> list[tuple[str, float, float, float]]:
     ):
         out.append((f"p3 defect count, {site}", _scrape_word(tex, pattern), 0.0, expected))
     return out
+
+
+def _truncated_critic_checks() -> list[tuple[str, float, float, float]]:
+    """Paper III's defect 12: a reasoning critic cut off by the worker's cap before any verdict.
+
+    The qwen3.6-27b critic cell of the second-worker line routed its critique through the worker's
+    output cap. Every recorded critic completion opens a `<think>` block and none closes it, so no
+    completion carries a verdict, and the harness's prefix parse reads each one as a refusal. Each
+    figure the paper prints is counted here from the cassette and the run's own meta, so a recount
+    that disagrees fails the check instead of leaving a remembered number in the prose.
+    """
+    tex = _sources().paper_tex("p3-silent-no-op")
+    with open("tests/fixtures/cassettes/study-groq-det-qwen.json", encoding="utf-8") as fh:
+        entries = json.load(fh)["entries"]
+    critic = [v["output"] for k, v in entries.items() if k.startswith("critic:")]
+    if not critic:
+        raise ValueError("the qwen critic cassette holds no critic entries; the namespace moved")
+    opened = sum(1 for c in critic if c.lstrip().startswith("<think>"))
+    closed = sum(1 for c in critic if "</think>" in c)
+    passes = sum(1 for c in critic if c.strip().upper().startswith("PASS"))
+    empty = sum(1 for c in critic if not c.strip())
+    cap = float(_meta_of("validation-study-groq-det-qwen.json")["worker_max_output_tokens"])
+    body_cap, body_n = _scrape_all(
+        tex,
+        r"under the worker's output cap of \$(\d+)\$ tokens\. Every one of the cell's \$(\d+)\$\s+"
+        r"critique completions opens",
+    )
+    row_cap, row_k, row_n = _scrape_all(
+        tex, r"capped at the worker's \$(\d+)\$ tokens returned a truncated.*?\$(\d+)/(\d+)\$ calls"
+    )
+    return [
+        ("p3 defect 12: critic cap, body", body_cap, 0.0, cap),
+        ("p3 defect 12: critic cap, table", row_cap, 0.0, cap),
+        ("p3 defect 12: critic completions, body", body_n, 0.0, float(len(critic))),
+        ("p3 defect 12: critic completions, table", row_n, 0.0, float(len(critic))),
+        # "Every one ... opens a <think> block": the printed count is the total, so it must equal
+        # the number that open one. "none closes it", "before any verdict", "non-empty": zeros.
+        ("p3 defect 12: completions opening <think>", row_k, 0.0, float(opened)),
+        ("p3 defect 12: completions closing </think> (paper: none)", 0.0, 0.0, float(closed)),
+        ("p3 defect 12: completions starting PASS (paper: none)", 0.0, 0.0, float(passes)),
+        ("p3 defect 12: empty completions (paper: non-empty)", 0.0, 0.0, float(empty)),
+    ]
 
 
 def _swing_permutation_p() -> float:
