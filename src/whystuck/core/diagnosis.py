@@ -141,7 +141,8 @@ _P0_LOW_CEILING = 0.15
 _P0_HIGH_FLOOR = 0.50
 
 #: Paper II, decomposing a perfect oracle's +0.0437: the verdict contributes +0.0110 (t = 1.37,
-#: which is nothing) and the repair text +0.0327 (t = 4.94). The advice does not change with p0.
+#: not distinguishable from zero) and the repair text +0.0327 (t = 4.94). The advice does not
+#: change with p0.
 _FIX_SIDE_ADVICE = (
     "Spend on the repair text before the detector. Holding the checker perfect and varying only "
     "the repair prose moves held-out score +0.0613 (t = 8.08), the best-supported effect in the "
@@ -167,10 +168,13 @@ def p0_base_rate(traces: list[LoopTrace]) -> float | None:
 def loop_lever_verdict(p0: float | None) -> dict[str, object]:
     """Whether optimizing the loop is indicated at this base rate, and what to do instead.
 
-    Paper I's answer is conditional, and the condition is p0. At p0 = 0.067 the reflective search
-    converged on a verifier that never accepts anything, on 11 of 12 evolved genes, and evolving
-    it bought nothing measurable; at p0 = 0.267 the contrast turned. Reporting a recommendation
-    without this number is reporting the coin flip.
+    What Paper I measured, and no more. At p0 = 0.067 the reflective search converged on a
+    verifier that never accepts anything (11 of 12 evolved genes, under the loop's own PASS rule),
+    and evolving it bought nothing measurable: nine cells at that base rate average +0.006. Above
+    it the release holds one positive cell (+0.060 at p0 = 0.267, three seeds) that the nine-cell
+    spread cannot tell from noise and that did not reproduce on a third worker, so Paper I
+    withdrew the claim that the answer depends on p0. The verdict therefore says "not indicated"
+    at a low base rate and declines to recommend either way above it.
     """
     if p0 is None:
         return {
@@ -187,19 +191,20 @@ def loop_lever_verdict(p0: float | None) -> dict[str, object]:
             "regime": LOOP_LEVER_LOW,
             "loop_optimization_indicated": False,
             "evidence": "At p0 = 0.067 the search converged on a verifier that never accepts, "
-            "and the loop-level contrast was negative. Unconditional refinement is near-free "
-            "when almost no first draft is already correct, so evolving the verifier is "
-            "Goodhart's law operating inside the loop.",
+            "and loop-level optimization bought no measurable gain over prompt-only (nine runs "
+            "average +0.006). Unconditional refinement is near-free when almost no first draft "
+            "is already correct, so the verifier has little to protect at this base rate.",
             "advice": _FIX_SIDE_ADVICE,
         }
     regime = LOOP_LEVER_MID if p0 < _P0_HIGH_FLOOR else LOOP_LEVER_HIGH
     return {
         "p0": p0,
         "regime": regime,
-        "loop_optimization_indicated": True,
-        "evidence": "At p0 = 0.267 the evolved critique began emitting PASS (four of thirty) and "
-        "the loop-level arm stopped losing; at p0 = 0.667 it emitted six. The measured swing "
-        "across the axis is 0.102.",
+        "loop_optimization_indicated": None,
+        "evidence": "A gain from loop-level optimization above the low regime is not "
+        "established: the release holds one positive cell (+0.060 at p0 = 0.267, three seeds), "
+        "within the spread of nine runs at p0 = 0.067, and a ten-seed test on a third worker "
+        "found no difference. Measure on your own loop before spending on it.",
         "advice": _FIX_SIDE_ADVICE,
     }
 

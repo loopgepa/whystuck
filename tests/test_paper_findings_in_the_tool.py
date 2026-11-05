@@ -3,10 +3,11 @@ r"""The three findings from the papers, as things the tool actually reports.
 Each is a result the series paid for and the served tool did not expose. They were knowledge in
 `src/whystuck/eval/` (the research harness) and absent from the surface a user meets.
 
-1. **p0, the base rate of already-correct first drafts.** Paper I's whole answer is conditional
-   on it: at p0 = 0.067 the search converged on a verifier that never accepts and loop-level
-   optimization bought nothing measurable; at 0.267 the contrast turned. Recommending loop-level
-   optimization without measuring p0 is recommending the coin flip.
+1. **p0, the base rate of already-correct first drafts.** At p0 = 0.067 Paper I's search
+   converged on a verifier that never accepts and loop-level optimization bought nothing
+   measurable. Its one positive cell at 0.267 is not distinguishable from the spread of nine cells
+   at 0.067 and did not reproduce on a third worker, so Paper I withdrew the claim that the answer
+   depends on p0, and the tool must not recommend loop-level optimization on that ground.
 2. **The degenerate-verifier screen.** That failure is visible as a PASS rate of zero on the
    optimizer's output, which costs nothing to check and is the cheapest result in the series.
 3. **The silent no-op.** Paper III: in the flagship superseded run the critique gene was
@@ -20,6 +21,7 @@ from __future__ import annotations
 import pytest
 
 from whystuck.core.diagnosis import (
+    LOOP_LEVER_HIGH,
     LOOP_LEVER_LOW,
     LOOP_LEVER_MID,
     loop_lever_verdict,
@@ -61,10 +63,31 @@ def test_a_low_base_rate_advises_against_loop_level_optimization() -> None:
     assert "0.067" in verdict["evidence"]
 
 
-def test_a_mid_base_rate_stops_advising_against_it() -> None:
-    verdict = loop_lever_verdict(0.267)
-    assert verdict["regime"] == LOOP_LEVER_MID
-    assert verdict["loop_optimization_indicated"] is True
+def test_the_low_regime_evidence_carries_no_withdrawn_claim() -> None:
+    """Paper I withdrew the low-p0 cost and its Goodhart reading: the nine cells at p0 = 0.067
+    average +0.006, so the evidence may say 'no measurable gain', never 'negative' or 'Goodhart'."""
+    evidence = str(loop_lever_verdict(0.067)["evidence"]).lower()
+    assert "goodhart" not in evidence
+    assert "negative" not in evidence
+    assert "no measurable" in evidence
+
+
+@pytest.mark.parametrize("p0", [0.267, 0.30, 0.667, 0.9])
+def test_a_higher_base_rate_does_not_claim_the_withdrawn_gain(p0: float) -> None:
+    """Above the low regime the release holds one positive cell, not an established gain: the
+    tool reports the regime and declines to recommend either way."""
+    verdict = loop_lever_verdict(p0)
+    assert verdict["regime"] in (LOOP_LEVER_MID, LOOP_LEVER_HIGH)
+    assert verdict["loop_optimization_indicated"] is None
+    evidence = str(verdict["evidence"]).lower()
+    assert "swing" not in evidence and "stopped losing" not in evidence
+    assert "not established" in evidence
+
+
+def test_the_regime_boundaries_still_sit_between_the_measured_levels() -> None:
+    assert loop_lever_verdict(0.149)["regime"] == LOOP_LEVER_LOW
+    assert loop_lever_verdict(0.15)["regime"] == LOOP_LEVER_MID
+    assert loop_lever_verdict(0.50)["regime"] == LOOP_LEVER_HIGH
 
 
 def test_an_unmeasured_base_rate_refuses_to_advise_either_way() -> None:
