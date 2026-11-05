@@ -126,7 +126,7 @@ derived from the replay.
 
 ## Shared across all three
 
-- **One artifact release.** 43 study runs, 225 replicate scorings, 282 cassettes. Fifteen of the
+- **One artifact release.** 43 study runs, 225 replicate scorings, 284 cassettes. Fifteen of the
   cassettes, added 2026-10-25/26, belong to the target-p₀ program (`docs/p0target/REPORT.md`): its
   calibration passes and three four-arm runs keep their results under `docs/p0-manifests/` and
   `docs/p0target/`, outside the 43-run count, and Paper I reports them in D9. They ran on a third

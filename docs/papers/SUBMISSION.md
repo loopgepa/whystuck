@@ -169,7 +169,7 @@ promising a reviewer an anonymous artifact:
 2. **The distribution is named for the org.** `pyproject.toml` sets both `Homepage` and
    `Repository` to the GitHub URL, and `dist/` carries wheels named `loopgepa-*`.
 3. **The reproducibility apparatus is the point of the release**, so it cannot simply be dropped:
-   43 run JSONs, 225 replicate scorings and 282 cassettes have to stay reachable and replayable.
+   43 run JSONs, 225 replicate scorings and 284 cassettes have to stay reachable and replayable.
 4. **This file, and the anonymiser's own token list, name the author.** Neither ships in a paper
    tarball. The package contains only `main.tex`, `main.bbl`, `references.bib` and the figures that
    paper includes, which is why the byte scan passes, and both are in the tree a full mirror would
@@ -180,7 +180,7 @@ something the packaging script should do on its own. The script writes a verifie
 there. Rebuilt for an earlier review pass, before the fifteen target-p₀ cassettes and the later claim
 checks existed, it produced 793 files, 43 run JSONs, 225 replicate scorings and 267
 cassettes, with no identifying token surviving a byte scan and a standalone install of that tree
-re-deriving 1086/1086 claims after the rename. The release now carries 282 cassettes and the checker
+re-deriving 1086/1086 claims after the rename. The release now carries 284 cassettes and the checker
 more claims, so those counts describe that rebuild and not the current tree. It lands in `dist/`, which is gitignored, so
 **rebuild it at the commit you submit**: a snapshot kept from an earlier commit publishes
 superseded papers, which is what happened to this one inside a single review pass.

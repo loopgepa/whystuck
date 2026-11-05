@@ -1,0 +1,43 @@
+{
+ "L1": {
+  "bound_usd": 9.9744,
+  "cassette_entries": 1629,
+  "distinct_calls_served": 1629,
+  "fields_compared": 200,
+  "mismatches": [],
+  "surfaces": {
+   "reflection": {
+    "calls": 96,
+    "tin": 76332,
+    "tout": 114418
+   },
+   "worker": {
+    "calls": 1533,
+    "tin": 1099258,
+    "tout": 82410
+   }
+  },
+  "usd_floor": 1.2891469999999998
+ },
+ "L2": {
+  "bound_usd": 9.9744,
+  "cassette_entries": 1222,
+  "distinct_calls_served": 1222,
+  "fields_compared": 200,
+  "mismatches": [],
+  "surfaces": {
+   "reflection": {
+    "calls": 69,
+    "tin": 55324,
+    "tout": 88944
+   },
+   "worker": {
+    "calls": 1153,
+    "tin": 817430,
+    "tout": 55740
+   }
+  },
+  "usd_floor": 0.938569
+ },
+ "usd_floor_total": 2.227716
+}

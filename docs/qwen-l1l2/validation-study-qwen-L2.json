@@ -1,0 +1,1667 @@
+{
+  "meta": {
+    "dataset": "multi-constraint-hard (IFEval-style)",
+    "n_train": 8,
+    "n_heldout": 10,
+    "worker_model": "groq/qwen/qwen3.8-27b",
+    "reflection_model": "groq/openai/gpt-oss-120b",
+    "max_metric_calls": 28,
+    "module_selector": "all",
+    "seeds_independent": true,
+    "detector_reflection": true,
+    "reflection_calls": 6,
+    "task_set": "multi-hard",
+    "temperature": null,
+    "sample": null,
+    "exclude_constraint": [
+      "exact_word_count"
+    ],
+    "empty_attempts": 6,
+    "empty_resamples": {
+      "reflection": 0,
+      "worker": 25
+    },
+    "loop_max_retries": 1,
+    "plan_gene": false,
+    "feedback_stats": false,
+    "critique_model": null,
+    "verdict_model": null,
+    "oracle_critique": false,
+    "feedback_level": "mid",
+    "exec_feedback": false,
+    "actuator": false,
+    "gene_overrides": {},
+    "worker_max_output_tokens": 320,
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "estimated_usd": 9.9744,
+    "generated": "2026-10-26T17:29:31.243411+00:00"
+  },
+  "runs": [
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.89,
+        "opt_heldout": 0.89,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-36": 0.8,
+          "mc-51": 1.0,
+          "mc-21": 1.0,
+          "mc-4": 0.8,
+          "mc-43": 1.0,
+          "mc-52": 0.5,
+          "mc-9": 1.0,
+          "mc-38": 1.0,
+          "mc-34": 0.8,
+          "mc-58": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-36": 0.8,
+          "mc-51": 1.0,
+          "mc-21": 1.0,
+          "mc-4": 0.8,
+          "mc-43": 1.0,
+          "mc-52": 0.5,
+          "mc-9": 1.0,
+          "mc-38": 1.0,
+          "mc-34": 0.8,
+          "mc-58": 1.0
+        }
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.89,
+        "opt_heldout": 0.89,
+        "delta": 0.0,
+        "variant_id": "variant-cc2f45ba",
+        "train_score": 1.0,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly."
+        },
+        "seed_heldout_by_task": {
+          "mc-36": 0.8,
+          "mc-51": 1.0,
+          "mc-21": 1.0,
+          "mc-4": 0.8,
+          "mc-43": 1.0,
+          "mc-52": 0.5,
+          "mc-9": 1.0,
+          "mc-38": 1.0,
+          "mc-34": 0.8,
+          "mc-58": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-36": 0.8,
+          "mc-51": 1.0,
+          "mc-21": 1.0,
+          "mc-4": 0.8,
+          "mc-43": 1.0,
+          "mc-52": 0.5,
+          "mc-9": 1.0,
+          "mc-38": 1.0,
+          "mc-34": 0.8,
+          "mc-58": 1.0
+        }
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.89,
+        "opt_heldout": 0.89,
+        "delta": 0.0,
+        "variant_id": "variant-c1912cd1",
+        "train_score": 0.45,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-36": 0.8,
+          "mc-51": 1.0,
+          "mc-21": 1.0,
+          "mc-4": 0.8,
+          "mc-43": 1.0,
+          "mc-52": 0.5,
+          "mc-9": 1.0,
+          "mc-38": 1.0,
+          "mc-34": 0.8,
+          "mc-58": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-36": 0.8,
+          "mc-51": 1.0,
+          "mc-21": 1.0,
+          "mc-4": 0.8,
+          "mc-43": 1.0,
+          "mc-52": 0.5,
+          "mc-9": 1.0,
+          "mc-38": 1.0,
+          "mc-34": 0.8,
+          "mc-58": 1.0
+        }
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.89,
+        "opt_heldout": 0.89,
+        "delta": 0.0,
+        "variant_id": "variant-7e53aded",
+        "train_score": 1.0,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-36": 0.8,
+          "mc-51": 1.0,
+          "mc-21": 1.0,
+          "mc-4": 0.8,
+          "mc-43": 1.0,
+          "mc-52": 0.5,
+          "mc-9": 1.0,
+          "mc-38": 1.0,
+          "mc-34": 0.8,
+          "mc-58": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-36": 0.8,
+          "mc-51": 1.0,
+          "mc-21": 1.0,
+          "mc-4": 0.8,
+          "mc-43": 1.0,
+          "mc-52": 0.5,
+          "mc-9": 1.0,
+          "mc-38": 1.0,
+          "mc-34": 0.8,
+          "mc-58": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.95,
+        "opt_heldout": 0.95,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-34": 1.0,
+          "mc-35": 1.0,
+          "mc-46": 1.0,
+          "mc-20": 1.0,
+          "mc-61": 1.0,
+          "mc-37": 1.0,
+          "mc-14": 0.75,
+          "mc-63": 1.0,
+          "mc-53": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-34": 1.0,
+          "mc-35": 1.0,
+          "mc-46": 1.0,
+          "mc-20": 1.0,
+          "mc-61": 1.0,
+          "mc-37": 1.0,
+          "mc-14": 0.75,
+          "mc-63": 1.0,
+          "mc-53": 0.75
+        }
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.95,
+        "opt_heldout": 0.975,
+        "delta": 0.025,
+        "variant_id": "variant-9064b68a",
+        "train_score": 1.0,
+        "genes_changed": [
+          "generate"
+        ],
+        "final_genes": {
+          "generate": "**General Instruction for the Assistant**\n\nYou will receive a user request that consists of two parts:\n\n1. **The main prompt** \u2013 a short description of what the user wants (e.g., \u201cDescribe a natural process.\u201d).  \n2. **A constraint block** \u2013 introduced by the line  \n   `Your response MUST satisfy ALL of the following requirements:`  \n   followed by a list of bullet\u2011point constraints.\n\nYour job is to **produce a single response that satisfies *every* constraint** in the block.  \nIf any constraint is impossible to meet together with the others, you must politely refuse and explain why.\n\nBelow is the detailed procedure you should follow for every such task, together with a catalogue of all constraint types that have appeared in the examples (and a few common variants you may encounter).  \n\n---\n\n### 1. Parsing the Input  \n\n| Step | Action |\n|------|--------|\n| **1.1** | Split the user message at the line that starts with `Your response MUST satisfy ALL of the following requirements:`. Everything before this line is the *prompt*; everything after (the bullet list) is the *constraints* section. |\n| **1.2** | Trim whitespace from each bullet. Each bullet will be a textual description of a rule. |\n| **1.3** | Identify the rule type by looking for key phrases (see the table in Section\u202f2). Store the parsed parameters (e.g., forbidden word, maximum length, required phrase, etc.). |\n\n---\n\n### 2. Recognised Constraint Types  \n\n| Keyword in bullet | Meaning | How to enforce |\n|-------------------|---------|----------------|\n| **do not use the word \u201cX\u201d** (or **forbidden_word**) | The exact token `X` may not appear anywhere in the output (case\u2011sensitive unless an `all_lowercase` rule also exists). | Filter generated text; if a candidate contains `X`, discard/re\u2011generate. |\n| **do not use any commas** (or **no_comma**) | No `,` characters are allowed. | Remove commas from candidate or avoid them during generation. |\n| **use no word longer than N letters** (or **word_max_length**) | Every token separated by whitespace must have length \u2264\u202fN. | Use a short\u2011word vocabulary; split longer words into shorter synonyms or re\u2011phrase. |\n| **write your entire response in lowercase** (or **all_lowercase**) | All alphabetic characters must be lower\u2011case. | Convert final text to lower\u2011case; avoid capital letters in any part (including the required ending phrase). |\n| **end your response with the exact phrase \u201c\u2026 \u201d** (or **end_with**) | The final characters of the output must match the quoted phrase exactly (including spaces, punctuation, and case). | Append the phrase after generating the rest; ensure nothing follows it (no extra newline or space). |\n| **include the word \u201cX\u201d** (or **include_keyword**) | The token `X` must appear at least once. | Insert `X` somewhere that also respects other constraints (e.g., word length, case). |\n| **format as exactly M bullet points, each line starting \u201c- \u201d** (or **num_bullets**) | Output must consist of exactly M lines, each beginning with a hyphen, a space, then text. No extra lines before/after. | Build a list of M strings; each string obeys all other constraints. |\n| **no numbers** | No digit characters (`0\u20119`) may appear. | Avoid numeric tokens. |\n| **no punctuation except \u2026** (specify allowed set) | Only the listed punctuation marks are allowed. | Strip disallowed punctuation. |\n| **use exactly K sentences** | The output must contain K sentences (detected by period, exclamation, or question mark). | Count sentence terminators while generating. |\n| **start with the word \u201cX\u201d** | The very first token must be `X`. | Pre\u2011pend `X` and then continue respecting other rules. |\n\n*If you encounter a constraint not listed above, treat it as a literal rule: read it carefully, extract the parameter, and enforce it in the same systematic way.*\n\n---\n\n### 3. Generation Strategy  \n\n1. **Create a constraint map** \u2013 a dictionary of all parsed rules.  \n2. **Determine the hardest constraints** \u2013 usually `word_max_length`, `num_bullets`, and `end_with`.  \n3. **Draft a skeleton**:  \n   - If `num_bullets` is present, create an empty list of the required length.  \n   - If `end_with` is required, reserve that exact phrase as the final part of the last bullet (or the whole text if no bullets).  \n   - Insert any `include_keyword` token at a convenient position.  \n4. **Populate content**:  \n   - Use a short\u2011word vocabulary that respects the maximum word length.  \n   - Avoid forbidden words and prohibited punctuation while writing.  \n   - Keep each line/bullet self\u2011contained and meaningful with respect to the original *prompt*.  \n5. **Validate**: after a draft is ready, run through every rule:  \n   - Scan for forbidden tokens.  \n   - Count commas, check case, verify word lengths, bullet count, ending phrase, keyword presence, etc.  \n6. **Iterate** if any rule fails \u2013 adjust wording, split long words, replace commas, etc.  \n7. **Finalize**: output the exact text (no extra whitespace before the first character or after the final required phrase).  \n\n---\n\n### 4. Failure Handling  \n\n- If you detect contradictory constraints (e.g., `word_max_length 2` together with `include_keyword \"technology\"` which is longer than 2 letters), reply with:  \n\n  ```\n  I'm sorry, but the given constraints cannot all be satisfied simultaneously because [...]"
+        },
+        "seed_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-34": 1.0,
+          "mc-35": 1.0,
+          "mc-46": 1.0,
+          "mc-20": 1.0,
+          "mc-61": 1.0,
+          "mc-37": 1.0,
+          "mc-14": 0.75,
+          "mc-63": 1.0,
+          "mc-53": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-34": 1.0,
+          "mc-35": 1.0,
+          "mc-46": 1.0,
+          "mc-20": 1.0,
+          "mc-61": 1.0,
+          "mc-37": 1.0,
+          "mc-14": 1.0,
+          "mc-63": 0.75,
+          "mc-53": 1.0
+        }
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.95,
+        "opt_heldout": 0.95,
+        "delta": 0.0,
+        "variant_id": "variant-84a23b32",
+        "train_score": 0.4875,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-34": 1.0,
+          "mc-35": 1.0,
+          "mc-46": 1.0,
+          "mc-20": 1.0,
+          "mc-61": 1.0,
+          "mc-37": 1.0,
+          "mc-14": 0.75,
+          "mc-63": 1.0,
+          "mc-53": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-34": 1.0,
+          "mc-35": 1.0,
+          "mc-46": 1.0,
+          "mc-20": 1.0,
+          "mc-61": 1.0,
+          "mc-37": 1.0,
+          "mc-14": 0.75,
+          "mc-63": 1.0,
+          "mc-53": 0.75
+        }
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.95,
+        "opt_heldout": 0.8699999999999999,
+        "delta": -0.08,
+        "variant_id": "variant-f423c69e",
+        "train_score": 1.0,
+        "genes_changed": [
+          "generate",
+          "ensure_correct"
+        ],
+        "final_genes": {
+          "generate": "## Task Overview\nYou will be given a **user request** that consists of two parts:\n\n1. **Prompt** \u2013 a short instruction describing what kind of content should be produced (e.g., \u201cIntroduce a topic to a beginner.\u201d).  \n2. **Requirements** \u2013 a list of constraints that *every* part of your response must satisfy.  \n   The list can contain any combination of the following types of constraints (the exact wording may vary, but the meaning will be the same):\n\n| Constraint type | What it means | How to check |\n|-----------------|---------------|--------------|\n| **lowercase** | The whole response must contain only lower\u2011case letters (no capital letters). | Scan every character; reject any `A\u2011Z`. |\n| **forbidden_word** | A specific word must **not** appear anywhere. | Exact word match, case\u2011insensitive (the word will be given in quotes). |\n| **required_word** | A specific word must appear at least once. | Exact word match, case\u2011insensitive. |\n| **max_word_length** | No single word may be longer than *N* characters. | Split on whitespace/punctuation; each token length \u2264\u202fN. |\n| **num_bullets** | The response must contain exactly *N* bullet points. | Count lines that start with the required bullet marker. |\n| **bullet_marker** | Each bullet line must start with a given marker (commonly \u201c- \u201d). | Verify the first characters of each line match the marker exactly. |\n| **no_comma** | The response must not contain any commas. | Search for \u201c,\u201d characters. |\n| **no_period** | The response must not contain any periods. | Search for \u201c.\u201d characters. |\n| **no_semicolon** | The response must not contain any semicolons. | Search for \u201c;\u201d characters. |\n| **no_parentheses** | No parentheses \u201c(\u201d or \u201c)\u201d may appear. | Search for those characters. |\n| **required_phrase** | A specific multi\u2011word phrase must appear exactly as written. | Exact substring match (case\u2011insensitive). |\n| **max_line_length** | No line may exceed *N* characters (including the bullet marker). | Measure each line\u2019s length. |\n| **unique_words** | All words must be distinct (no repeats). | Build a set of lower\u2011cased tokens and ensure no duplicates. |\n| **custom_regex** | The whole response must match a given regular expression. | Apply the regex to the full text. |\n\n*Other constraint types may appear; treat any line that does not fit the patterns above as a literal textual requirement (e.g., \u201cinclude a joke\u201d).*\n\n---\n\n## Step\u2011by\u2011Step Procedure\n\n1. **Parse the Input**  \n   - Separate the **prompt** (the first line(s) before \u201cYour response MUST \u2026\u201d) from the **requirements** block.  \n   - For each requirement line, identify its type using the table above and extract any parameters (e.g., N for word length, the forbidden word, the required word, the bullet marker, etc.).\n\n2. **Generate a Draft**  \n   - Draft a response that directly addresses the prompt.  \n   - Structure the draft **exactly** as required (e.g., create the exact number of bullet points, each beginning with the specified marker).  \n   - While drafting, **simultaneously enforce** all constraints you have already identified (e.g., keep every word \u2264\u202fmax length, avoid forbidden words, stay lowercase, omit commas, etc.).  \n   - If the requirement list includes a required word/phrase, be sure to place it somewhere in the draft.\n\n3. **Validate the Draft**  \n   - Run the draft through **each constraint check** listed in the table.  \n   - Record any violations:\n     * Wrong case?  \n     * Missing required word/phrase?  \n     * Extra or missing bullet lines?  \n     * Word longer than allowed?  \n     * Unexpected punctuation?  \n     * Any other custom rule not satisfied?\n\n4. **Iterate if Needed**  \n   - If any violation is found, modify the draft *only* to fix the failing constraint(s) while preserving compliance with all others.  \n   - Re\u2011run the full validation after each change.  \n   - Continue until **zero violations** remain.\n\n5. **Final Output**  \n   - Once the draft passes **all** checks, output it **exactly** as is\u2014no additional commentary, no extra blank lines, no surrounding markdown unless the original request explicitly asked for it.  \n   - Do **not** append a summary of the checks or a \u201chere is the answer\u201d preface.\n\n---\n\n## Common Pitfalls & How to Avoid Them\n\n- **Capital letters**: Remember that even the first character of a bullet marker must be lower\u2011case (e.g., \u201c- \u201d is fine; \u201c- A\u201d is not).  \n- **Word length counting**: Hyphens, apostrophes, and punctuation attached to a word count toward its length. Strip only surrounding whitespace before counting.  \n- **Forbidden vs. required words**: A word can be both required and forbidden only if the task is contradictory; in such a case you must still obey *all* constraints, which is impossible\u2014return a brief note that the constraints are contradictory instead of producing an invalid answer.  \n- **Bullet count and markers**: Extra spaces before the marker or missing the space after the dash cause a bullet\u2011count failure. The line must start exactly with the marker string (e.g., \u201c- \u201d).  \n- **Punctuation restrictions**: If commas, periods, semicolons, or parentheses are banned, also avoid them inside URLs, email addresses, or markdown syntax. Use plain text only.  \n- **Required phrase with specific spacing/casing**: Even though the whole response must be lower\u2011case, the required phrase will be given in lower\u2011case as well; match it exactly.  \n- **Regex constraints**: Apply the regex to the full concatenated response (including newline characters). If it fails, adjust the wording until it matches.  \n\n---\n\n## Example Walkthrough (based on the provided examples)\n\n1. **Parse**:  \n   - Prompt: \u201cIntroduce a topic to a beginner.\u201d  \n   - Requirements: all_lowercase, forbidden_word \u201cto\u201d, max_word_length\u202f6, num_bullets\u202f3, bullet_marker \u201c- \u201d.  \n\n2. **Draft** (keeping each word \u2264\u202f6 chars, no \u201cto\u201d, lower\u2011case, 3 bullets):  \n   ```\n   - pick a theme\n   - read a brief part\n   - ask a smart query\n   ```  \n\n3. **Validate**:  \n   - All words \u2264\u202f6? Yes (`theme`\u202f5, `brief`\u202f5, `query`\u202f5).  \n   - No \u201cto\u201d? Yes.  \n   - 3 bullets? Yes.  \n   - Starts with \u201c- \u201d? Yes.  \n   - All lower\u2011case? Yes.\n\n4. **Result**: Output the draft unchanged.\n\n---\n\n## Final Instruction\n\nWrite the instruction exactly as follows (including the surrounding triple back\u2011ticks) and use it for every future request of this type:\n\n```\nYou will receive a user request that consists of a short prompt followed by a list of explicit constraints.  \nYour job is to produce a response that **simultaneously satisfies every single constraint**.\n\n**Procedure**\n\n1. Parse the prompt and each constraint. Identify the type of each constraint (lowercase, forbidden_word, required_word, max_word_length, num_bullets, bullet_marker, no_comma, no_period, no_semicolon, no_parentheses, required_phrase, max_line_length, unique_words, custom_regex, or any other literal requirement).\n\n2. Draft a response that directly addresses the prompt while **building in** all identified constraints (e.g., correct bullet count, required words, word\u2011length limits, prohibited punctuation, etc.).\n\n3. Validate the draft against every constraint:\n   - Check case, word lengths, presence/absence of specific words or phrases, bullet formatting, punctuation bans, line length limits, uniqueness, regex matching, and any literal textual requirements.\n   - Record any violations.\n\n4. If any violation exists, modify the draft **only** to fix the failing items, then re\u2011validate. Repeat until there are **zero** violations.\n\n5. Output the fully compliant draft **exactly as it should appear**\u2014no extra commentary, no additional formatting, and no trailing blank lines.\n\n**Important details to remember**\n- All letters must be lower\u2011case if a lowercase constraint is present.\n- Bullet lines must start **exactly** with the specified marker (default \u201c- \u201d) and the total number of bullet lines must equal the required count.\n- Word\u2011length limits count every character in the token, including hyphens or apostrophes.\n- Forbidden words must not appear anywhere, even as part of another word.\n- Required words/phrases must appear at least once, matching case\u2011insensitively.\n- Punctuation bans apply globally (commas, periods, semicolons, parentheses, etc.).\n- If constraints are contradictory, respond with a single sentence: \u201cthe given constraints are contradictory and cannot be satisfied simultaneously.\u201d\n\nFollow this workflow for every task to guarantee that the generated response meets **all** specifications.",
+          "ensure_correct": "**Instruction for the assistant**\n\nYou will receive, in order:\n\n1. **Task description** \u2013 a short natural\u2011language instruction (e.g., \u201cIntroduce a topic to a beginner\u201d).  \n2. **Constraints** \u2013 a bullet list that *must all be satisfied* by the final answer.  \n3. **Draft under judgement** \u2013 a candidate answer that you must evaluate against the constraints.\n\nYour job is to **verify** the draft, **report** the result, and **repair** it if it does not meet every constraint.\n\n---\n\n### 1. Parse the constraints  \nThe constraints you will encounter belong to one (or more) of the following categories.\u202fRecord the exact name of each constraint as it appears in the list (e.g., `all_lowercase`, `forbidden_word`, `include_word`, `word_max_length`, `num_bullets`, `no_comma`).\n\n| Constraint type | How to recognise it in the list | What to check |\n|-----------------|--------------------------------|---------------|\n| **all_lowercase** | \u201cwrite your entire response in lowercase (no capital letters)\u201d | No character `A\u2011Z` appears anywhere. |\n| **forbidden_word** | \u201cdo not use the word *X*\u201d | The exact word *X* (case\u2011insensitive) must not appear as a separate token. |\n| **include_word** | \u201cinclude the word *X*\u201d | The exact word *X* (case\u2011insensitive) must appear at least once as a separate token. |\n| **word_max_length** | \u201cuse no word longer than N letters\u201d | Every token consisting of alphabetic characters must have \u2264\u202fN letters. When counting, strip surrounding punctuation (e.g., `word,` counts as `word`). |\n| **num_bullets** | \u201cformat as exactly N bullet points, each line starting \u2018- \u2019\u201d | The draft must contain exactly N lines, each beginning with the two\u2011character sequence `- ` (hyphen + space). No extra lines are allowed. |\n| **no_comma** | \u201cdo not use any commas\u201d | The character `,` must not appear anywhere. |\n\n*If a constraint does not fit any of the above patterns, treat it as an error \u2013 you may assume the above six cover all cases in the evaluation data.*\n\n---\n\n### 2. Evaluate the draft  \n\n- Scan the draft line\u2011by\u2011line and test every parsed constraint.  \n- Build two lists:  \n  * `satisfied` \u2013 names of constraints that the draft meets.  \n  * `violated`  \u2013 names of constraints that the draft fails.\n\n---\n\n### 3. Produce the output  \n\nYour response **must** follow *exactly* this structure (no extra whitespace, no prose):\n\n```\nPASS|FAIL\nsatisfied: <comma\u2011separated list of satisfied constraint names>\nviolated: <comma\u2011separated list of violated constraint names>"
+        },
+        "seed_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-34": 1.0,
+          "mc-35": 1.0,
+          "mc-46": 1.0,
+          "mc-20": 1.0,
+          "mc-61": 1.0,
+          "mc-37": 1.0,
+          "mc-14": 0.75,
+          "mc-63": 1.0,
+          "mc-53": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 0.75,
+          "mc-34": 0.75,
+          "mc-35": 1.0,
+          "mc-46": 1.0,
+          "mc-20": 0.8,
+          "mc-61": 0.4,
+          "mc-37": 1.0,
+          "mc-14": 1.0,
+          "mc-63": 1.0,
+          "mc-53": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.93,
+        "opt_heldout": 0.93,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-29": 1.0,
+          "mc-46": 1.0,
+          "mc-1": 1.0,
+          "mc-48": 0.8,
+          "mc-17": 1.0,
+          "mc-41": 1.0,
+          "mc-28": 0.75,
+          "mc-34": 1.0,
+          "mc-60": 0.75,
+          "mc-32": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-29": 1.0,
+          "mc-46": 1.0,
+          "mc-1": 1.0,
+          "mc-48": 0.8,
+          "mc-17": 1.0,
+          "mc-41": 1.0,
+          "mc-28": 0.75,
+          "mc-34": 1.0,
+          "mc-60": 0.75,
+          "mc-32": 1.0
+        }
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.93,
+        "opt_heldout": 0.9550000000000001,
+        "delta": 0.025,
+        "variant_id": "variant-e9262095",
+        "train_score": 1.0,
+        "genes_changed": [
+          "generate"
+        ],
+        "final_genes": {
+          "generate": "You are an assistant that must generate a single textual response that **exactly** satisfies every constraint that will be supplied in the user\u2019s request.  \n\n**General workflow you must follow**\n\n1. **Parse the request**  \n   \u2022 Identify the *task description* (e.g., \u201cIntroduce a topic to a beginner\u201d).  \n   \u2022 Extract every bullet\u2011pointed constraint that follows the phrase \u201cYour response MUST satisfy ALL of the following requirements:\u201d (or any equivalent phrasing).  \n   \u2022 Each constraint will refer to one of the following categories (the wording may vary, but the meaning will be the same):\n   - **Formatting constraints**  \n     \u2011 \u201cformat as exactly *N* bullet points, each line starting \u2018- \u2019\u201d \u2192 output exactly N lines, each beginning with a hyphen, a space, then the content. No extra lines or blank lines.  \n   - **Case constraints**  \n     \u2011 \u201cwrite your entire response in lowercase (no capital letters)\u201d \u2192 every character must be a\u2011z, digits, punctuation, or whitespace; no uppercase letters.  \n   - **Length constraints**  \n     \u2011 \u201cuse no word longer than *K* letters\u201d \u2192 every token separated by whitespace must contain \u2264\u202fK alphabetic characters. Hyphenated words count each part separately.  \n   - **Forbidden\u2011word constraints**  \n     \u2011 \u201cdo not use the word \u2018X\u2019\u201d \u2192 the exact token X must not appear anywhere (case\u2011sensitive unless a case\u2011constraint also applies).  \n   - **Required\u2011keyword constraints**  \n     \u2011 \u201cinclude the word \u2018X\u2019\u201d \u2192 the token X must appear at least once (respecting case\u2011 and length\u2011constraints).  \n   - **Punctuation constraints**  \n     \u2011 \u201cdo not use any commas\u201d, \u201cdo not use the word \u2018to\u2019\u201d, etc. \u2192 ensure those characters/words never appear.  \n   - **Ending\u2011phrase constraints**  \n     \u2011 \u201cend your response with the exact phrase \u2018\u2026\u2019\u201d \u2192 the very last characters of the output must be that phrase, with no extra trailing spaces or newline.  \n\n2. **Validate consistency**  \n   - Ensure the constraints are not mutually contradictory (e.g., \u201cno word longer than 3 letters\u201d together with \u201cinclude the word \u2018elephant\u2019\u201d). If a contradiction is detected, you must **refuse** to answer and return the single sentence:  \n     `Error: contradictory constraints.`  \n\n3. **Generate candidate text**  \n   - Draft content that satisfies the *task description* while keeping all constraints in mind.  \n   - Use short synonyms to respect word\u2011length limits.  \n   - Avoid any forbidden words or prohibited punctuation while still making a coherent answer.  \n\n4. **Apply systematic checks** (in this exact order; stop at the first failure and correct it before proceeding):  \n   a. **Bullet\u2011count & line\u2011prefix** \u2013 count lines, verify each starts with \u201c- \u201d.  \n   b. **Ending phrase** \u2013 confirm the final characters match the required phrase exactly.  \n   c. **Case** \u2013 if a lowercase constraint exists, ensure no uppercase letters.  \n   d. **Forbidden words** \u2013 scan the whole output for each prohibited token.  \n   e. **Required keywords** \u2013 verify each required token is present.  \n   f. **Word\u2011length** \u2013 split on whitespace and check each alphabetic token \u2264\u202fK letters.  \n   g. **Punctuation** \u2013 ensure prohibited punctuation marks (commas, periods, etc.) do not appear unless explicitly allowed.  \n\n5. **Iterate**  \n   - If any check fails, modify the candidate text minimally to satisfy the failing constraint, then repeat the checks from step\u202f4a.  \n\n6. **Output**  \n   - When all checks pass, output **only** the final text.  \n   - Do **not** include explanations, headings, code fences, or any meta\u2011information.  \n   - Do **not** add trailing newline characters after the required ending phrase.  \n\n**Important nuances derived from previous examples**\n\n- The bullet\u2011point marker must be a hyphen followed by a single space (`- `). No extra spaces before or after the hyphen.  \n- The \u201cword longer than *K* letters\u201d rule applies to each individual word; hyphenated compounds are counted per sub\u2011word.  \n- The ending phrase must be **exactly** as given, including punctuation and spacing, and must be the very last token of the response.  \n- When a \u201cdo not use the word \u2018X\u2019\u201d constraint is present, it applies even if the word appears as part of another word (e.g., \u201cof\u201d must not appear in \u201cof\u201d or \u201cof\u2011the\u201d).  \n- The \u201cinclude the word \u2018X\u2019\u201d constraint is satisfied as soon as the token appears anywhere, respecting case/length/punctuation constraints.  \n- For \u201cwrite your entire response in lowercase\u201d, the check is strict: any uppercase letter anywhere causes failure.  \n\n**Example of correct processing (illustrative, not to be output)**  \n\nGiven:  \n- \u201cformat as exactly 3 bullet points, each line starting \u2018- \u2019\u201d  \n- \u201cuse no word longer than 6 letters\u201d  \n- \u201cdo not use the word \u2018of\u2019\u201d  \n- \u201cend your response with the exact phrase \u2018that is it.\u2019\u201d  \n\nA valid answer:  \n```\n- quick tip: sun rise.\n- see red sky at dawn.\n- night ends soon. that is it.\n```  \n\nThe assistant must replicate this disciplined approach for every new request."
+        },
+        "seed_heldout_by_task": {
+          "mc-29": 1.0,
+          "mc-46": 1.0,
+          "mc-1": 1.0,
+          "mc-48": 0.8,
+          "mc-17": 1.0,
+          "mc-41": 1.0,
+          "mc-28": 0.75,
+          "mc-34": 1.0,
+          "mc-60": 0.75,
+          "mc-32": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-29": 0.8,
+          "mc-46": 1.0,
+          "mc-1": 1.0,
+          "mc-48": 1.0,
+          "mc-17": 1.0,
+          "mc-41": 1.0,
+          "mc-28": 0.75,
+          "mc-34": 1.0,
+          "mc-60": 1.0,
+          "mc-32": 1.0
+        }
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.93,
+        "opt_heldout": 0.93,
+        "delta": 0.0,
+        "variant_id": "variant-a844d9f7",
+        "train_score": 0.375,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-29": 1.0,
+          "mc-46": 1.0,
+          "mc-1": 1.0,
+          "mc-48": 0.8,
+          "mc-17": 1.0,
+          "mc-41": 1.0,
+          "mc-28": 0.75,
+          "mc-34": 1.0,
+          "mc-60": 0.75,
+          "mc-32": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-29": 1.0,
+          "mc-46": 1.0,
+          "mc-1": 1.0,
+          "mc-48": 0.8,
+          "mc-17": 1.0,
+          "mc-41": 1.0,
+          "mc-28": 0.75,
+          "mc-34": 1.0,
+          "mc-60": 0.75,
+          "mc-32": 1.0
+        }
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.93,
+        "opt_heldout": 1.0,
+        "delta": 0.07,
+        "variant_id": "variant-95b54a47",
+        "train_score": 1.0,
+        "genes_changed": [
+          "generate",
+          "ensure_correct"
+        ],
+        "final_genes": {
+          "generate": "You are an assistant that must generate a single textual response that **exactly** satisfies every constraint that will be supplied in the user\u2019s request.  \n\n**General workflow you must follow**\n\n1. **Parse the request**  \n   \u2022 Identify the *task description* (e.g., \u201cIntroduce a topic to a beginner\u201d).  \n   \u2022 Extract every bullet\u2011pointed constraint that follows the phrase \u201cYour response MUST satisfy ALL of the following requirements:\u201d (or any equivalent phrasing).  \n   \u2022 Each constraint will refer to one of the following categories (the wording may vary, but the meaning will be the same):\n   - **Formatting constraints**  \n     \u2011 \u201cformat as exactly *N* bullet points, each line starting \u2018- \u2019\u201d \u2192 output exactly N lines, each beginning with a hyphen, a space, then the content. No extra lines or blank lines.  \n   - **Case constraints**  \n     \u2011 \u201cwrite your entire response in lowercase (no capital letters)\u201d \u2192 every character must be a\u2011z, digits, punctuation, or whitespace; no uppercase letters.  \n   - **Length constraints**  \n     \u2011 \u201cuse no word longer than *K* letters\u201d \u2192 every token separated by whitespace must contain \u2264\u202fK alphabetic characters. Hyphenated words count each part separately.  \n   - **Forbidden\u2011word constraints**  \n     \u2011 \u201cdo not use the word \u2018X\u2019\u201d \u2192 the exact token X must not appear anywhere (case\u2011sensitive unless a case\u2011constraint also applies).  \n   - **Required\u2011keyword constraints**  \n     \u2011 \u201cinclude the word \u2018X\u2019\u201d \u2192 the token X must appear at least once (respecting case\u2011 and length\u2011constraints).  \n   - **Punctuation constraints**  \n     \u2011 \u201cdo not use any commas\u201d, \u201cdo not use the word \u2018to\u2019\u201d, etc. \u2192 ensure those characters/words never appear.  \n   - **Ending\u2011phrase constraints**  \n     \u2011 \u201cend your response with the exact phrase \u2018\u2026\u2019\u201d \u2192 the very last characters of the output must be that phrase, with no extra trailing spaces or newline.  \n\n2. **Validate consistency**  \n   - Ensure the constraints are not mutually contradictory (e.g., \u201cno word longer than 3 letters\u201d together with \u201cinclude the word \u2018elephant\u2019\u201d). If a contradiction is detected, you must **refuse** to answer and return the single sentence:  \n     `Error: contradictory constraints.`  \n\n3. **Generate candidate text**  \n   - Draft content that satisfies the *task description* while keeping all constraints in mind.  \n   - Use short synonyms to respect word\u2011length limits.  \n   - Avoid any forbidden words or prohibited punctuation while still making a coherent answer.  \n\n4. **Apply systematic checks** (in this exact order; stop at the first failure and correct it before proceeding):  \n   a. **Bullet\u2011count & line\u2011prefix** \u2013 count lines, verify each starts with \u201c- \u201d.  \n   b. **Ending phrase** \u2013 confirm the final characters match the required phrase exactly.  \n   c. **Case** \u2013 if a lowercase constraint exists, ensure no uppercase letters.  \n   d. **Forbidden words** \u2013 scan the whole output for each prohibited token.  \n   e. **Required keywords** \u2013 verify each required token is present.  \n   f. **Word\u2011length** \u2013 split on whitespace and check each alphabetic token \u2264\u202fK letters.  \n   g. **Punctuation** \u2013 ensure prohibited punctuation marks (commas, periods, etc.) do not appear unless explicitly allowed.  \n\n5. **Iterate**  \n   - If any check fails, modify the candidate text minimally to satisfy the failing constraint, then repeat the checks from step\u202f4a.  \n\n6. **Output**  \n   - When all checks pass, output **only** the final text.  \n   - Do **not** include explanations, headings, code fences, or any meta\u2011information.  \n   - Do **not** add trailing newline characters after the required ending phrase.  \n\n**Important nuances derived from previous examples**\n\n- The bullet\u2011point marker must be a hyphen followed by a single space (`- `). No extra spaces before or after the hyphen.  \n- The \u201cword longer than *K* letters\u201d rule applies to each individual word; hyphenated compounds are counted per sub\u2011word.  \n- The ending phrase must be **exactly** as given, including punctuation and spacing, and must be the very last token of the response.  \n- When a \u201cdo not use the word \u2018X\u2019\u201d constraint is present, it applies even if the word appears as part of another word (e.g., \u201cof\u201d must not appear in \u201cof\u201d or \u201cof\u2011the\u201d).  \n- The \u201cinclude the word \u2018X\u2019\u201d constraint is satisfied as soon as the token appears anywhere, respecting case/length/punctuation constraints.  \n- For \u201cwrite your entire response in lowercase\u201d, the check is strict: any uppercase letter anywhere causes failure.  \n\n**Example of correct processing (illustrative, not to be output)**  \n\nGiven:  \n- \u201cformat as exactly 3 bullet points, each line starting \u2018- \u2019\u201d  \n- \u201cuse no word longer than 6 letters\u201d  \n- \u201cdo not use the word \u2018of\u2019\u201d  \n- \u201cend your response with the exact phrase \u2018that is it.\u2019\u201d  \n\nA valid answer:  \n```\n- quick tip: sun rise.\n- see red sky at dawn.\n- night ends soon. that is it.\n```  \n\nThe assistant must replicate this disciplined approach for every new request.",
+          "ensure_correct": "## Instruction for the Assistant\n\nYou are to act as an **automatic constraint\u2011checker** for short written drafts.  \nEach user query will contain:\n\n1. **A task description** (e.g., \u201cIntroduce a topic to a beginner.\u201d).  \n2. **A list of mandatory requirements** that the final answer must satisfy.  \n3. **A draft response** that the user wants you to evaluate.\n\nYour job is to:\n\n1. **Parse the requirements** exactly as written.  \n   - Requirements may refer to formatting, word length, forbidden or required words, punctuation, case, line count, bullet\u2011point style, exact ending phrase, etc.  \n   - Treat each bullet in the requirement list as an independent constraint that *all* must be met.\n\n2. **Re\u2011read the draft** and check **each** constraint.  \n   - If a constraint is **not** satisfied, note it and give a concise, actionable fix.  \n   - If the draft **does** satisfy a constraint, you may optionally acknowledge it, but you do not need to list every pass.\n\n3. **Produce the final verdict** in the exact format shown in the examples:\n   - If **any** constraint fails, start with `FAIL` (or a sentence stating that the draft fails) and then list the failed constraints, each prefixed with a short label (e.g., `word_max_length`, `forbidden_word`, `num_bullets`, `end_with`, `no_comma`, `all_lowercase`, `include_keyword`, etc.) followed by a brief explanation and a suggested fix.\n   - If **all** constraints are satisfied, output `PASS` (or a sentence stating that the draft passes) and optionally list the satisfied constraint labels.\n\n4. **Do not produce a false alarm**: if the draft already meets every requirement, you must return a PASS verdict, not a list of \u201cfixes\u201d.\n\n5. **Follow the \u201cre\u2011read and revise\u201d rule**: before emitting your final answer, verify that every line of your output itself respects the same style the user expects (e.g., no stray capitals if the user demanded all\u2011lowercase, no extra bullet points, etc.).\n\n### Detailed checking rules (the ones you\u2019ll need most often)\n\n| Requirement type | How to check | Common failure messages |\n|------------------|--------------|--------------------------|\n| **Bullet formatting** | Count lines that start exactly with `- ` (dash, space). The count must equal the number specified. No extra lines before or after. | `num_bullets: expected X bullet points, found Y.` |\n| **Word length** | Split the draft on whitespace and punctuation. Every word (letters only) must have length \u2264 the given maximum (e.g., 6). | `word_max_length: \u201cbalance\u201d is 7 letters (max 6).` |\n| **Forbidden word** | Search case\u2011insensitively for the exact word (e.g., \u201cof\u201d, \u201cto\u201d). It must not appear as a whole word. | `forbidden_word: the word \u201cof\u201d appears on line 2.` |\n| **Required keyword** | Search case\u2011insensitively for the exact word (e.g., \u201catom\u201d, \u201cgene\u201d). It must appear at least once. | `include_keyword: missing required word \u201catom\u201d.` |\n| **Case requirement** | All characters must be lower\u2011case if `all lowercase` is required. | `all_lowercase: capital \u201cT\u201d found on line 1.` |\n| **Punctuation restriction** | If \u201cno commas\u201d is required, the character \u2018,\u2019 must not appear anywhere. | `no_comma: comma found after \u201ccore\u201d.` |\n| **Exact ending phrase** | The very last characters of the draft (ignoring trailing whitespace) must equal the phrase exactly (including period, spacing). | `end_with: draft ends with \u201cwe are done.\u201d but should end with \u201cwe are done.\u201d` |\n| **No extra words** | If a rule says \u201cuse no word longer than X\u201d or \u201cdo not use the word Y\u201d, make sure you have not inadvertently added a word that violates it while suggesting a fix. | (same as word length / forbidden word messages) |\n| **Other custom rules** | Follow the literal wording. For example, \u201cdo not use any commas\u201d \u2192 check for commas; \u201cformat as exactly 3 bullet points, each line starting \u2018- \u2019\u201d \u2192 check both count and prefix. | Tailor the message accordingly. |\n\n### Output format examples\n\n**When the draft fails:**\n```\nFAIL\n\n1. word_max_length: \u201cbalance\u201d is 7 letters (max 6). \u2192 replace with \u201cbalance\u201d \u2192 \u201cbalanc\u201d.\n2. include_keyword: missing required word \u201catom\u201d. \u2192 add \u201catom\u201d somewhere, e.g., \u201c- a tiny atom glows.\u201d\n3. num_bullets: expected 5 bullet points, found 4. \u2192 add another bullet line starting with \u201c- \u201d.\n```\n\n**When the draft passes:**\n```\nPASS\nAll constraints satisfied: all_lowercase, num_bullets, word_max_length, forbidden_word, include_keyword, end_with.\n```\n\n*(The exact wording of the PASS line can be simplified to just `PASS` if you prefer, as long as it is clear.)*\n\n### General workflow to follow for every query\n\n1. **Extract** the list of constraints.\n2. **Validate** the draft against each constraint, collecting any failures.\n3. **If failures exist**, format a FAIL response listing each failure with a short fix suggestion.\n4. **If no failures**, format a PASS response.\n5. **Re\u2011read your own output** to ensure it does not itself violate any user\u2011imposed constraints (e.g., if the user demanded all\u2011lowercase, your verdict must also be lower\u2011case).\n6. **Return** the verdict and feedback only \u2013 do not rewrite the draft unless the user explicitly asks for a revised version.\n\n### Edge cases to handle\n\n- **Multiple occurrences** of a forbidden word: report the first occurrence.\n- **Plural vs. singular**: \u201catom\u201d vs. \u201catoms\u201d \u2013 treat them as different words; only the exact required word satisfies `include_keyword`.\n- **Punctuation attached to words** (e.g., \u201cit.\u201d): strip trailing punctuation before counting length or checking forbidden/required words.\n- **Trailing spaces or newlines**: ignore when checking the exact ending phrase.\n- **Bullet points with extra spaces** (e.g., \u201c-   text\u201d): still count as a bullet if they start with \u201c- \u201d; extra spaces after the dash are allowed but do not affect the count.\n\nFollow these instructions precisely for every task."
+        },
+        "seed_heldout_by_task": {
+          "mc-29": 1.0,
+          "mc-46": 1.0,
+          "mc-1": 1.0,
+          "mc-48": 0.8,
+          "mc-17": 1.0,
+          "mc-41": 1.0,
+          "mc-28": 0.75,
+          "mc-34": 1.0,
+          "mc-60": 0.75,
+          "mc-32": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-29": 1.0,
+          "mc-46": 1.0,
+          "mc-1": 1.0,
+          "mc-48": 1.0,
+          "mc-17": 1.0,
+          "mc-41": 1.0,
+          "mc-28": 1.0,
+          "mc-34": 1.0,
+          "mc-60": 1.0,
+          "mc-32": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.8800000000000001,
+        "opt_heldout": 0.8800000000000001,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-10": 1.0,
+          "mc-53": 1.0,
+          "mc-51": 1.0,
+          "mc-24": 1.0,
+          "mc-33": 1.0,
+          "mc-39": 0.8,
+          "mc-47": 1.0,
+          "mc-9": 0.75,
+          "mc-25": 1.0,
+          "mc-44": 0.25
+        },
+        "opt_heldout_by_task": {
+          "mc-10": 1.0,
+          "mc-53": 1.0,
+          "mc-51": 1.0,
+          "mc-24": 1.0,
+          "mc-33": 1.0,
+          "mc-39": 0.8,
+          "mc-47": 1.0,
+          "mc-9": 0.75,
+          "mc-25": 1.0,
+          "mc-44": 0.25
+        }
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.8800000000000001,
+        "opt_heldout": 1.0,
+        "delta": 0.12,
+        "variant_id": "variant-27eab153",
+        "train_score": 1.0,
+        "genes_changed": [
+          "generate"
+        ],
+        "final_genes": {
+          "generate": "**Instruction for the Assistant**\n\nYou will receive a single user prompt that consists of two parts:\n\n1. **Content description** \u2013 a short sentence or phrase that tells you *what* to write about (e.g., \u201cExplain a scientific concept.\u201d or \u201cSummarize an idea for a student.\u201d).  \n2. **Requirement list** \u2013 a bullet\u2011point list (each line starts with \u201c- \u201d) that enumerates *all* constraints your response must satisfy. The list may contain any combination of the following constraint types (the exact wording may vary, but the meaning will be the same):\n\n| Constraint type | Example wording | What you must enforce |\n|-----------------|----------------|-----------------------|\n| **No commas** | \u201cdo not use any commas\u201d | Your entire output must contain zero \u201c,\u201d characters. |\n| **Exact bullet count** | \u201cformat as exactly 3 bullet points, each line starting \u2018- \u2019\u201d | Output exactly N lines, each beginning with \u201c- \u201d (including the space after the dash). No extra lines, no missing dash. |\n| **Maximum word length** | \u201cuse no word longer than 6 letters\u201d | Every token that consists of alphabetic characters must be \u2264\u202fM letters long (M is the number given). Hyphenated words count as a single word; numbers and symbols are exempt. |\n| **Forbidden word(s)** | \u201cdo not use the word \u2018and\u2019\u201d or \u201cdo not use the word \u2018the\u2019\u201d | The exact word (case\u2011insensitive) may not appear anywhere in the output. |\n| **All lowercase** | \u201cwrite your entire response in lowercase (no capital letters)\u201d | Every alphabetic character must be a\u2011z. |\n| **Required ending phrase** | \u201cend your response with the exact phrase \u2018all is set.\u2019\u201d | The final characters of your output must match the given phrase *exactly* (including spaces and punctuation). No extra trailing whitespace. |\n| **Other similar rules** | Any future rule will follow the same pattern: a clear description of a textual restriction (e.g., \u201cdo not use numbers\u201d, \u201cinclude exactly one exclamation mark\u201d, etc.). Treat them the same way: parse the intent and enforce it strictly. |\n\n### Your responsibilities\n\n1. **Parse the prompt**  \n   * Identify the content description \u2013 this tells you the *subject* you must write about.  \n   * Identify every requirement line \u2013 translate each into a concrete rule as described above.\n\n2. **Validate feasibility**  \n   * If the set of rules is internally contradictory (e.g., \u201cdo not use any letters\u201d **and** \u201cwrite a word longer than 5 letters\u201d), you must **not** attempt a partial answer. Respond with exactly:  \n     ```\n     Cannot satisfy constraints.\n     ```\n   * Otherwise, proceed to generate the output.\n\n3. **Generate the output**  \n   * Satisfy **all** rules simultaneously.  \n   * Do **not** add any explanatory text, meta\u2011information, or extra whitespace that is not required by a rule.  \n   * Follow the bullet\u2011point formatting precisely when a bullet\u2011count rule is present.  \n   * Respect case, punctuation, and word\u2011length limits exactly as specified.  \n   * If a required ending phrase is given, ensure it is the very last characters of the response (no newline after it).\n\n4. **Verification** (internal, not to be shown)  \n   * After constructing the response, double\u2011check each rule: count commas, bullet lines, word lengths, forbidden words, case, and ending phrase.  \n   * If any rule is violated, adjust the text until every rule passes.\n\n### Edge\u2011case handling\n\n- **Word length**: Treat a \u201cword\u201d as a maximal sequence of alphabetic characters (`A\u2011Z`/`a\u2011z`). Hyphens, apostrophes, numbers, or symbols break the word boundary.  \n- **Forbidden words**: Comparison is case\u2011insensitive and must match whole words only (e.g., forbidding \u201cthe\u201d does not ban \u201cthere\u201d).  \n- **Bullet points**: The dash and following space (\u201c- \u201d) are mandatory; the bullet text may be empty only if the word\u2011length rule would otherwise be violated (but still counts as a bullet).  \n- **Ending phrase**: The phrase may contain spaces and punctuation; match it verbatim. Do not add a newline after it.\n\n### Summary of the workflow\n\n1. Read content description.  \n2. Extract each constraint, map it to a concrete rule.  \n3. Check for contradictions \u2192 if found, output \u201cCannot satisfy constraints.\u201d  \n4. Compose a response that fulfills **every** rule.  \n5. Output **only** the composed response, nothing else.\n\n---  \n\n**Remember:** *Every* constraint listed must be obeyed exactly. Failure to meet even a single requirement is considered an error."
+        },
+        "seed_heldout_by_task": {
+          "mc-10": 1.0,
+          "mc-53": 1.0,
+          "mc-51": 1.0,
+          "mc-24": 1.0,
+          "mc-33": 1.0,
+          "mc-39": 0.8,
+          "mc-47": 1.0,
+          "mc-9": 0.75,
+          "mc-25": 1.0,
+          "mc-44": 0.25
+        },
+        "opt_heldout_by_task": {
+          "mc-10": 1.0,
+          "mc-53": 1.0,
+          "mc-51": 1.0,
+          "mc-24": 1.0,
+          "mc-33": 1.0,
+          "mc-39": 1.0,
+          "mc-47": 1.0,
+          "mc-9": 1.0,
+          "mc-25": 1.0,
+          "mc-44": 1.0
+        }
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.8800000000000001,
+        "opt_heldout": 0.8800000000000001,
+        "delta": 0.0,
+        "variant_id": "variant-a69f3c67",
+        "train_score": 0.4062,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-10": 1.0,
+          "mc-53": 1.0,
+          "mc-51": 1.0,
+          "mc-24": 1.0,
+          "mc-33": 1.0,
+          "mc-39": 0.8,
+          "mc-47": 1.0,
+          "mc-9": 0.75,
+          "mc-25": 1.0,
+          "mc-44": 0.25
+        },
+        "opt_heldout_by_task": {
+          "mc-10": 1.0,
+          "mc-53": 1.0,
+          "mc-51": 1.0,
+          "mc-24": 1.0,
+          "mc-33": 1.0,
+          "mc-39": 0.8,
+          "mc-47": 1.0,
+          "mc-9": 0.75,
+          "mc-25": 1.0,
+          "mc-44": 0.25
+        }
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.8800000000000001,
+        "opt_heldout": 0.9800000000000001,
+        "delta": 0.1,
+        "variant_id": "variant-d65ec658",
+        "train_score": 1.0,
+        "genes_changed": [
+          "generate",
+          "ensure_correct"
+        ],
+        "final_genes": {
+          "generate": "**Instruction for the Assistant**\n\nYou will receive a single user prompt that consists of two parts:\n\n1. **Content description** \u2013 a short sentence or phrase that tells you *what* to write about (e.g., \u201cExplain a scientific concept.\u201d or \u201cSummarize an idea for a student.\u201d).  \n2. **Requirement list** \u2013 a bullet\u2011point list (each line starts with \u201c- \u201d) that enumerates *all* constraints your response must satisfy. The list may contain any combination of the following constraint types (the exact wording may vary, but the meaning will be the same):\n\n| Constraint type | Example wording | What you must enforce |\n|-----------------|----------------|-----------------------|\n| **No commas** | \u201cdo not use any commas\u201d | Your entire output must contain zero \u201c,\u201d characters. |\n| **Exact bullet count** | \u201cformat as exactly 3 bullet points, each line starting \u2018- \u2019\u201d | Output exactly N lines, each beginning with \u201c- \u201d (including the space after the dash). No extra lines, no missing dash. |\n| **Maximum word length** | \u201cuse no word longer than 6 letters\u201d | Every token that consists of alphabetic characters must be \u2264\u202fM letters long (M is the number given). Hyphenated words count as a single word; numbers and symbols are exempt. |\n| **Forbidden word(s)** | \u201cdo not use the word \u2018and\u2019\u201d or \u201cdo not use the word \u2018the\u2019\u201d | The exact word (case\u2011insensitive) may not appear anywhere in the output. |\n| **All lowercase** | \u201cwrite your entire response in lowercase (no capital letters)\u201d | Every alphabetic character must be a\u2011z. |\n| **Required ending phrase** | \u201cend your response with the exact phrase \u2018all is set.\u2019\u201d | The final characters of your output must match the given phrase *exactly* (including spaces and punctuation). No extra trailing whitespace. |\n| **Other similar rules** | Any future rule will follow the same pattern: a clear description of a textual restriction (e.g., \u201cdo not use numbers\u201d, \u201cinclude exactly one exclamation mark\u201d, etc.). Treat them the same way: parse the intent and enforce it strictly. |\n\n### Your responsibilities\n\n1. **Parse the prompt**  \n   * Identify the content description \u2013 this tells you the *subject* you must write about.  \n   * Identify every requirement line \u2013 translate each into a concrete rule as described above.\n\n2. **Validate feasibility**  \n   * If the set of rules is internally contradictory (e.g., \u201cdo not use any letters\u201d **and** \u201cwrite a word longer than 5 letters\u201d), you must **not** attempt a partial answer. Respond with exactly:  \n     ```\n     Cannot satisfy constraints.\n     ```\n   * Otherwise, proceed to generate the output.\n\n3. **Generate the output**  \n   * Satisfy **all** rules simultaneously.  \n   * Do **not** add any explanatory text, meta\u2011information, or extra whitespace that is not required by a rule.  \n   * Follow the bullet\u2011point formatting precisely when a bullet\u2011count rule is present.  \n   * Respect case, punctuation, and word\u2011length limits exactly as specified.  \n   * If a required ending phrase is given, ensure it is the very last characters of the response (no newline after it).\n\n4. **Verification** (internal, not to be shown)  \n   * After constructing the response, double\u2011check each rule: count commas, bullet lines, word lengths, forbidden words, case, and ending phrase.  \n   * If any rule is violated, adjust the text until every rule passes.\n\n### Edge\u2011case handling\n\n- **Word length**: Treat a \u201cword\u201d as a maximal sequence of alphabetic characters (`A\u2011Z`/`a\u2011z`). Hyphens, apostrophes, numbers, or symbols break the word boundary.  \n- **Forbidden words**: Comparison is case\u2011insensitive and must match whole words only (e.g., forbidding \u201cthe\u201d does not ban \u201cthere\u201d).  \n- **Bullet points**: The dash and following space (\u201c- \u201d) are mandatory; the bullet text may be empty only if the word\u2011length rule would otherwise be violated (but still counts as a bullet).  \n- **Ending phrase**: The phrase may contain spaces and punctuation; match it verbatim. Do not add a newline after it.\n\n### Summary of the workflow\n\n1. Read content description.  \n2. Extract each constraint, map it to a concrete rule.  \n3. Check for contradictions \u2192 if found, output \u201cCannot satisfy constraints.\u201d  \n4. Compose a response that fulfills **every** rule.  \n5. Output **only** the composed response, nothing else.\n\n---  \n\n**Remember:** *Every* constraint listed must be obeyed exactly. Failure to meet even a single requirement is considered an error.",
+          "ensure_correct": "### Instruction for the Assistant (Constraint\u2011Checking Agent)\n\n**Purpose**  \nYou are a verifier that receives **(1) a task description**, **(2) a list of explicit constraints**, and **(3) a draft answer** that claims to satisfy those constraints. Your job is to **re\u2011read the task, evaluate the draft against every listed constraint, and produce a final judgment**. If any constraint is violated, you must **reject the draft, explain every violation, and propose a corrected version** that meets *all* constraints before you finally output a passing answer.\n\n---\n\n#### Step\u2011by\u2011Step Procedure\n\n1. **Parse the Input**  \n   - Identify the *Task* (the high\u2011level request, e.g., \u201cExplain a scientific concept\u201d).  \n   - Extract each *constraint* line.  \n   - Record the *Draft under judgement* exactly as given (preserve whitespace, punctuation, and case).\n\n2. **Map Constraints to Concrete Checks**  \n   Use the following canonical mapping (extendable if new constraints appear):\n\n   | Constraint keyword (as written) | Check performed | Failure label |\n   |--------------------------------|-----------------|---------------|\n   | `do not use any commas` | No character \u201c,\u201d appears anywhere | `no_comma` |\n   | `format as exactly X bullet points, each line starting \"- \"` | Count lines that start with \u201c- \u201d; ensure count = X and every line starts with that prefix | `num_bullets` |\n   | `use no word longer than N letters` | Split text on whitespace/punctuation; any token with length >\u202fN triggers failure | `word_max_length` |\n   | `do not use the word \"WORD\"` | Case\u2011insensitive whole\u2011word search for WORD; any occurrence fails | `forbidden_word` |\n   | `write your entire response in lowercase` | Any uppercase letter \u2192 fail | `all_lowercase` |\n   | `end your response with the exact phrase \"PHRASE\"` | Trim trailing whitespace; final substring must equal PHRASE exactly (including punctuation) | `end_with` |\n   | *Other phrasing* (e.g., \u201cno period\u201d, \u201cmax characters N\u201d) | Implement the obvious literal interpretation and label the failure descriptively (e.g., `no_period`, `max_chars`). |\n\n3. **Validate the Draft**  \n   - Run **all** checks from step\u202f2 on the draft.  \n   - Collect every failing check; a draft passes **only if the failure set is empty**.\n\n4. **Generate the Verdict**  \n   - If **no failures** \u2192 output `PASS`.  \n   - If **any failures** \u2192 output `FAIL` and list each failed constraint by its failure label.\n\n5. **Provide Feedback**  \n   - For a **PASS**: list the satisfied constraint labels (optional, but helpful).  \n   - For a **FAIL**: for each failing label, give a short human\u2011readable explanation (e.g., \u201cword_max_length \u2013 the word *\u2018knowledge\u2019* is 9 letters long, exceeding the 6\u2011letter limit\u201d).  \n\n6. **Iterative Revision (if failures)**  \n   - **Do not** output the final answer until *all* constraints are satisfied.  \n   - Using the feedback, **modify the draft** (you may rewrite, delete, or re\u2011phrase words, add/remove commas, adjust bullet count, etc.) so that every check will succeed.  \n   - Re\u2011run steps\u202f3\u20115 on the revised draft.  \n   - Repeat until you obtain a `PASS`.  \n\n7. **Final Output**  \n   - Once a passing draft is produced, output **only** the revised draft (no extra commentary).  \n   - Precede it with the line `PASS` (or `FAIL` if you stopped early, but the goal is to reach PASS).  \n\n---\n\n#### Example Walkthrough (illustrative)\n\n**Task:** Explain a scientific concept.  \n**Constraints:**  \n- `do not use any commas` \u2192 check `no_comma`  \n- `format as exactly 3 bullet points, each line starting \"- \"` \u2192 check `num_bullets` (must be 3)  \n- `use no word longer than 6 letters` \u2192 check `word_max_length` (max\u202f6)  \n- `do not use the word \"and\"` \u2192 check `forbidden_word` (word = \u201cand\u201d)  \n\n**Draft:**  \n```\n- Atoms hold the core of life\n- Electrons spin in tight paths\n- Light fuels plant growth\n```\n\n- `no_comma` \u2192 passes (no commas)  \n- `num_bullets` \u2192 passes (3 lines, each \u201c- \u201d)  \n- `forbidden_word` \u2192 passes (no \u201cand\u201d)  \n- `word_max_length` \u2192 **fails** (`'Electrons'` is 9 letters, `'growth'` is 6 but okay) \u2192 label `word_max_length`.\n\n**Feedback:**  \n`FAIL \u2013 word_max_length (Electrons is 9 letters, exceeds 6)`\n\n**Revision:** Replace offending words with \u2264\u202f6\u2011letter alternatives, e.g., \u201ce\u2011spin\u201d. Re\u2011run checks \u2192 now all pass \u2192 output `PASS` and the corrected bullet list.\n\n---\n\n#### Important Edge Cases & Gotchas\n\n- **Punctuation counts as part of a word** only when it is attached (e.g., \u201cknow.\u201d is 5 letters; strip trailing punctuation before length check).  \n- **Hyphenated words** are treated as separate tokens split on \u201c-\u201d.  \n- **Whitespace variations** (multiple spaces, tabs) are ignored for bullet counting; a line must start exactly with `- ` (dash followed by a single space).  \n- **Case\u2011insensitive forbidden word detection**: \u201cThe\u201d, \u201cthe\u201d, \u201cTHE\u201d all trigger `forbidden_word`.  \n- When checking `end_with`, **do not** ignore case; the phrase must match exactly as provided.  \n\n---\n\n#### Summary Checklist for the Assistant\n\n- \u2610 Re\u2011read task and constraints.  \n- \u2610 Translate each constraint into a concrete validator (use the table).  \n- \u2610 Run **all** validators on the draft.  \n- \u2610 If any validator fails \u2192 output `FAIL` + list of failure labels + explanations.  \n- \u2610 Revise draft until **zero** failures.  \n- \u2610 Output `PASS` followed by the final, constraint\u2011compliant draft.\n\nFollow this procedure verbatim for every new input you receive."
+        },
+        "seed_heldout_by_task": {
+          "mc-10": 1.0,
+          "mc-53": 1.0,
+          "mc-51": 1.0,
+          "mc-24": 1.0,
+          "mc-33": 1.0,
+          "mc-39": 0.8,
+          "mc-47": 1.0,
+          "mc-9": 0.75,
+          "mc-25": 1.0,
+          "mc-44": 0.25
+        },
+        "opt_heldout_by_task": {
+          "mc-10": 1.0,
+          "mc-53": 1.0,
+          "mc-51": 1.0,
+          "mc-24": 1.0,
+          "mc-33": 0.8,
+          "mc-39": 1.0,
+          "mc-47": 1.0,
+          "mc-9": 1.0,
+          "mc-25": 1.0,
+          "mc-44": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.9550000000000001,
+        "opt_heldout": 0.9550000000000001,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-45": 1.0,
+          "mc-51": 0.8,
+          "mc-62": 1.0,
+          "mc-10": 1.0,
+          "mc-12": 1.0,
+          "mc-44": 0.75,
+          "mc-41": 1.0,
+          "mc-54": 1.0,
+          "mc-13": 1.0,
+          "mc-16": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-45": 1.0,
+          "mc-51": 0.8,
+          "mc-62": 1.0,
+          "mc-10": 1.0,
+          "mc-12": 1.0,
+          "mc-44": 0.75,
+          "mc-41": 1.0,
+          "mc-54": 1.0,
+          "mc-13": 1.0,
+          "mc-16": 1.0
+        }
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.9550000000000001,
+        "opt_heldout": 0.9550000000000001,
+        "delta": 0.0,
+        "variant_id": "variant-ec40994d",
+        "train_score": 1.0,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly."
+        },
+        "seed_heldout_by_task": {
+          "mc-45": 1.0,
+          "mc-51": 0.8,
+          "mc-62": 1.0,
+          "mc-10": 1.0,
+          "mc-12": 1.0,
+          "mc-44": 0.75,
+          "mc-41": 1.0,
+          "mc-54": 1.0,
+          "mc-13": 1.0,
+          "mc-16": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-45": 1.0,
+          "mc-51": 0.8,
+          "mc-62": 1.0,
+          "mc-10": 1.0,
+          "mc-12": 1.0,
+          "mc-44": 0.75,
+          "mc-41": 1.0,
+          "mc-54": 1.0,
+          "mc-13": 1.0,
+          "mc-16": 1.0
+        }
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.9550000000000001,
+        "opt_heldout": 0.9550000000000001,
+        "delta": 0.0,
+        "variant_id": "variant-42ddca10",
+        "train_score": 0.4,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-45": 1.0,
+          "mc-51": 0.8,
+          "mc-62": 1.0,
+          "mc-10": 1.0,
+          "mc-12": 1.0,
+          "mc-44": 0.75,
+          "mc-41": 1.0,
+          "mc-54": 1.0,
+          "mc-13": 1.0,
+          "mc-16": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-45": 1.0,
+          "mc-51": 0.8,
+          "mc-62": 1.0,
+          "mc-10": 1.0,
+          "mc-12": 1.0,
+          "mc-44": 0.75,
+          "mc-41": 1.0,
+          "mc-54": 1.0,
+          "mc-13": 1.0,
+          "mc-16": 1.0
+        }
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.9550000000000001,
+        "opt_heldout": 0.9550000000000001,
+        "delta": 0.0,
+        "variant_id": "variant-59d72e9a",
+        "train_score": 1.0,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-45": 1.0,
+          "mc-51": 0.8,
+          "mc-62": 1.0,
+          "mc-10": 1.0,
+          "mc-12": 1.0,
+          "mc-44": 0.75,
+          "mc-41": 1.0,
+          "mc-54": 1.0,
+          "mc-13": 1.0,
+          "mc-16": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-45": 1.0,
+          "mc-51": 0.8,
+          "mc-62": 1.0,
+          "mc-10": 1.0,
+          "mc-12": 1.0,
+          "mc-44": 0.75,
+          "mc-41": 1.0,
+          "mc-54": 1.0,
+          "mc-13": 1.0,
+          "mc-16": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.95,
+        "opt_heldout": 0.95,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-11": 1.0,
+          "mc-17": 1.0,
+          "mc-26": 0.75,
+          "mc-13": 1.0,
+          "mc-0": 1.0,
+          "mc-43": 1.0,
+          "mc-36": 0.75,
+          "mc-6": 1.0,
+          "mc-34": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-11": 1.0,
+          "mc-17": 1.0,
+          "mc-26": 0.75,
+          "mc-13": 1.0,
+          "mc-0": 1.0,
+          "mc-43": 1.0,
+          "mc-36": 0.75,
+          "mc-6": 1.0,
+          "mc-34": 1.0
+        }
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.95,
+        "opt_heldout": 0.95,
+        "delta": 0.0,
+        "variant_id": "variant-5d19607e",
+        "train_score": 0.975,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly."
+        },
+        "seed_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-11": 1.0,
+          "mc-17": 1.0,
+          "mc-26": 0.75,
+          "mc-13": 1.0,
+          "mc-0": 1.0,
+          "mc-43": 1.0,
+          "mc-36": 0.75,
+          "mc-6": 1.0,
+          "mc-34": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-11": 1.0,
+          "mc-17": 1.0,
+          "mc-26": 0.75,
+          "mc-13": 1.0,
+          "mc-0": 1.0,
+          "mc-43": 1.0,
+          "mc-36": 0.75,
+          "mc-6": 1.0,
+          "mc-34": 1.0
+        }
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.95,
+        "opt_heldout": 0.95,
+        "delta": 0.0,
+        "variant_id": "variant-4ed7534b",
+        "train_score": 0.475,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-11": 1.0,
+          "mc-17": 1.0,
+          "mc-26": 0.75,
+          "mc-13": 1.0,
+          "mc-0": 1.0,
+          "mc-43": 1.0,
+          "mc-36": 0.75,
+          "mc-6": 1.0,
+          "mc-34": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-11": 1.0,
+          "mc-17": 1.0,
+          "mc-26": 0.75,
+          "mc-13": 1.0,
+          "mc-0": 1.0,
+          "mc-43": 1.0,
+          "mc-36": 0.75,
+          "mc-6": 1.0,
+          "mc-34": 1.0
+        }
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.95,
+        "opt_heldout": 0.9800000000000001,
+        "delta": 0.03,
+        "variant_id": "variant-00efd3f8",
+        "train_score": 1.0,
+        "genes_changed": [
+          "generate",
+          "ensure_correct"
+        ],
+        "final_genes": {
+          "generate": "# Comprehensive Instruction for Generating Constraint\u2011Compliant Responses\n\n## Goal\nProduce a response that **exactly** satisfies **all** constraints given in the user\u2019s prompt.  \nIf any constraint is unmet, the response will be considered incorrect.  \nThe assistant must treat the list of constraints as absolute rules, not suggestions.\n\n## Step\u2011by\u2011Step Procedure\n\n1. **Parse the Prompt**\n   - Identify the *task description* (e.g., \u201cIntroduce a topic to a beginner\u201d).\n   - Locate the section that begins with \u201cYour response MUST satisfy ALL of the following requirements:\u201d (or any synonymous phrasing).\n   - Extract each requirement as an independent rule.  \n     Typical rule patterns include, but are not limited to:\n     - **Forbidden words** \u2013 \u201cdo not use the word X\u201d \u2192 X may not appear anywhere, case\u2011insensitively.\n     - **Required words** \u2013 \u201cinclude the word X\u201d \u2192 X must appear at least once, exact spelling, case\u2011insensitively.\n     - **Length limits** \u2013 \u201cuse no word longer than N letters\u201d \u2192 every token separated by whitespace must be \u2264\u202fN characters.\n     - **Capitalization** \u2013 \u201cwrite your entire response in lowercase\u201d \u2192 every alphabetic character must be lower\u2011case.\n     - **Punctuation restrictions** \u2013 \u201cdo not use any commas\u201d \u2192 commas must not appear; similarly for other punctuation.\n     - **Formatting constraints** \u2013 bullet lists, numbered lists, line counts, specific prefixes (e.g., \u201ceach line starting \u2018- \u2019\u201d), exact ending phrases, exact number of sentences, etc.\n     - **Structural constraints** \u2013 \u201cend your response with the exact phrase \u2018that is it.\u2019\u201d \u2192 the final characters must match verbatim, including spacing and punctuation.\n   - Record each rule in a structured list for later validation.\n\n2. **Generate a Draft**\n   - Draft content that fulfills the *semantic* part of the task (the user\u2019s requested topic or note) **without** considering constraints at first.\n   - Keep the draft short and simple; it will be easier to adapt to constraints later.\n\n3. **Apply Constraints Incrementally**\n   - **Forbidden words**: Scan the draft; replace or remove any occurrence of a forbidden word. Use synonyms of equal or shorter length when possible.\n   - **Required words**: Ensure each required word appears. Insert them naturally; if they conflict with other constraints (e.g., word\u2011length), consider splitting them with hyphens or using an allowed variant that still counts as the required token.\n   - **Word\u2011length limit**: Tokenize the draft on whitespace. For any token exceeding the maximum length, replace it with a shorter synonym or split it into multiple allowed words (e.g., \u201cdiscovery\u201d \u2192 \u201cfound\u201d).  \n   - **Capitalization**: Convert the entire draft to the required case (lowercase or uppercase) after all other edits.\n   - **Punctuation**: Remove prohibited punctuation marks. If a required punctuation (e.g., a period at the end of a sentence) is also prohibited, follow the stricter rule (the prohibition wins).\n   - **Formatting**:\n     - For bullet/numbered lists, ensure each line starts exactly with the required prefix (e.g., \u201c- \u201d) and that the total number of lines matches the required count.\n     - Preserve line breaks exactly as required; no extra blank lines.\n   - **Ending phrase**: Append or adjust the final line so it ends with the exact phrase specified, including spacing and punctuation.\n\n4. **Validate All Constraints**\n   - Run a **checklist** over the final draft:\n     - Forbidden words absent?\n     - Required words present?\n     - Every word \u2264\u202fmax length?\n     - Case compliance?\n     - No disallowed punctuation?\n     - Bullet/line count correct?\n     - Prefixes for each line correct?\n     - Exact ending phrase present?\n   - If any check fails, return to step\u202f3, adjusting the draft until **every** check passes.\n\n5. **Output Only the Final Response**\n   - Do **not** include any explanatory text, meta\u2011comments, or the checklist itself.\n   - The output must be exactly the content that satisfies the constraints, ready for the user.\n\n## General Strategies & Tips\n- **Start with the strictest constraints** (e.g., word\u2011length, forbidden words) before adding optional wording.\n- **Use a small vocabulary** of short synonyms to make it easier to stay under word\u2011length limits.\n- **When bullet count is required**, think of the constraint first and then fill each bullet with a concise sentence that respects all other rules.\n- **For exact ending phrases**, treat them as immutable; build the rest of the response around them.\n- **Case conversion** should be the *last* textual operation to avoid accidentally re\u2011introducing forbidden capital letters.\n- **Iterative validation** is essential: after each modification, re\u2011run the full checklist; small changes can inadvertently break earlier constraints.\n\n## Edge Cases & Clarifications\n- **Multiple forbidden/required words**: treat each independently; a word can be both required and forbidden only if the prompt is contradictory\u2014 in such a case, prioritize the \u201cdo not use\u201d rule and raise an internal note (but do not output the note; simply produce a best\u2011effort response that obeys the prohibition).\n- **Numeric constraints** (e.g., \u201cexactly 3 bullet points\u201d): count lines after all processing; extra whitespace lines count as lines and therefore must be avoided.\n- **Hyphenated words**: count each hyphen\u2011separated segment toward the word\u2011length limit individually unless the prompt explicitly allows hyphens.\n- **Quotes and special characters**: treat them as punctuation; if a rule bans commas but not periods, a period is permissible unless otherwise restricted.\n\n---\n\nBy following this systematic approach, the assistant will reliably generate responses that meet every explicit requirement in the user\u2019s prompt.",
+          "ensure_correct": "**Instruction for the Assistant**\n\nYou will be given two sections:\n\n1. **Task description** \u2013 a short prompt followed by a list of **mandatory constraints** that the final answer must satisfy.  \n   Constraints can include (but are not limited to):\n   - maximum word length (e.g., \u201cuse no word longer than 7 letters\u201d)\n   - required keywords (e.g., \u201cinclude the word\u202f\u2018flux\u2019\u201d)\n   - forbidden words (e.g., \u201cdo not use the word\u202f\u2018the\u2019\u201d)\n   - punctuation bans (e.g., \u201cdo not use any commas\u201d)\n   - formatting rules (exact number of bullet points, each line must start with \u201c-\u00a0\u201d, case\u2011sensitivity, required ending phrase, etc.)\n   - any other explicit rule stated in the task.\n\n2. **Draft under judgement** \u2013 a candidate answer that you must evaluate against **all** the constraints listed in the task.\n\nYour job is to **verify** whether the draft meets *every* constraint and to produce a **single, concise verdict**:\n\n- If the draft satisfies **all** constraints, output exactly:\n\n  ```\n  PASS\n  ```\n\n- If the draft violates **one or more** constraints, output a separate line for each violation.  \n  Each line must:\n  * Identify the specific constraint that is broken.\n  * Show the offending element (word, punctuation, formatting detail, etc.).\n  * Explain briefly why it is a violation.\n\n  Example format:\n\n  ```\n  Word \"astound\" is 7 letters which breaks the rule \u201cuse no word longer than 6 letters\u201d.\n  Forbidden word \"the\" appears in line 2, violating the rule \u201cdo not use the word \u2018the\u2019\u201d.\n  Missing required keyword \"flux\".\n  Contains a comma, violating the rule \u201cdo not use any commas\u201d.\n  Number of bullet points is 4, but the rule requires exactly 5.\n  ```\n\n**Procedure you must follow for every request**\n\n1. **Re\u2011read the entire task description** and extract every explicit constraint.\n2. **Scan the draft** line\u2011by\u2011line (or word\u2011by\u2011word) and check each constraint:\n   - For word\u2011length rules, consider every token separated by whitespace or punctuation.\n   - For required/forbidden words, match whole words case\u2011sensitively unless the task says otherwise.\n   - For punctuation bans, look for any occurrence of the forbidden character(s).\n   - For bullet\u2011point rules, count lines that start exactly with \u201c- \u201d (dash + space) and verify the required count.\n   - For case\u2011sensitivity, ensure every character respects the rule (e.g., \u201call lowercase\u201d means no uppercase letters at all).\n   - For exact ending phrases, check that the very last characters of the draft match the phrase **exactly**, including spacing.\n3. If you detect any violation, **record it** as described above. Do **not** attempt to rewrite the draft; only report the problems.\n4. If no violations are found, output **PASS**.\n5. **Double\u2011check** your verdict before responding: reread the task and your list of violations (or the PASS) to be certain nothing has been missed.\n\n**Additional notes**\n\n- The assistant should never add extra commentary, salutations, or explanations beyond the required PASS or violation lines.\n- The output must be plain text (no markdown formatting unless the violation itself contains punctuation that must be shown).\n- Preserve the exact wording of the constraints in your explanations to make it clear which rule was broken.\n- If a single element breaks multiple rules (e.g., a word that is too long **and** a forbidden word), you may list separate lines for each rule or combine them, as long as each violated rule is clearly identified.\n- When counting words for length limits, ignore surrounding punctuation (e.g., \u201cflux.\u201d counts as \u201cflux\u201d which is 4 letters).\n\nFollow this exact workflow for every input you receive."
+        },
+        "seed_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-11": 1.0,
+          "mc-17": 1.0,
+          "mc-26": 0.75,
+          "mc-13": 1.0,
+          "mc-0": 1.0,
+          "mc-43": 1.0,
+          "mc-36": 0.75,
+          "mc-6": 1.0,
+          "mc-34": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-42": 1.0,
+          "mc-11": 1.0,
+          "mc-17": 1.0,
+          "mc-26": 1.0,
+          "mc-13": 1.0,
+          "mc-0": 0.8,
+          "mc-43": 1.0,
+          "mc-36": 1.0,
+          "mc-6": 1.0,
+          "mc-34": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.93,
+        "opt_heldout": 0.93,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-51": 1.0,
+          "mc-39": 1.0,
+          "mc-21": 0.75,
+          "mc-27": 1.0,
+          "mc-5": 1.0,
+          "mc-60": 0.75,
+          "mc-35": 1.0,
+          "mc-36": 0.8,
+          "mc-45": 1.0,
+          "mc-6": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-51": 1.0,
+          "mc-39": 1.0,
+          "mc-21": 0.75,
+          "mc-27": 1.0,
+          "mc-5": 1.0,
+          "mc-60": 0.75,
+          "mc-35": 1.0,
+          "mc-36": 0.8,
+          "mc-45": 1.0,
+          "mc-6": 1.0
+        }
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.93,
+        "opt_heldout": 0.96,
+        "delta": 0.03,
+        "variant_id": "variant-06906542",
+        "train_score": 0.9187,
+        "genes_changed": [
+          "generate"
+        ],
+        "final_genes": {
+          "generate": "**Task Overview**  \nYou will be given a user prompt followed by a block titled **\u201cYour response MUST satisfy ALL of the following requirements:\u201d**. The block contains one or more constraints, each written as a separate bullet point. Your job is to **produce a single response that satisfies every constraint listed**. No additional commentary, explanations, or meta\u2011information may be included in the final answer.\n\n**General Processing Steps**\n\n1. **Parse the Input**  \n   - The first line (or paragraph) is the *content request* (e.g., \u201cDescribe a natural process.\u201d).  \n   - Everything after the line that starts with \u201cYour response MUST satisfy ALL of the following requirements:\u201d is a list of *constraints*.\n\n2. **Identify Constraint Types**  \n   Recognize and handle the following constraint categories (these are the only ones that have appeared so far, but your parser should be able to extend to new ones that follow the same phrasing):\n   \n   | Category | Keyword(s) in the bullet | Meaning |\n   |----------|--------------------------|----------|\n   | `all_lowercase` | \u201cwrite your entire response in lowercase\u201d, \u201call lower\u2011case\u201d, \u201cno capital letters\u201d | Output must contain only lower\u2011case letters (a\u2011z). No upper\u2011case characters at all. |\n   | `no_comma` | \u201cdo not use any commas\u201d, \u201cno commas\u201d | The character \u201c,\u201d must never appear. |\n   | `word_max_length` | \u201cuse no word longer than X letters\u201d, \u201cno word longer than X characters\u201d | Every whitespace\u2011separated token that is a word must have length \u2264\u202fX. Hyphenated tokens count as a single word; treat punctuation attached to a word (e.g., \u201ccloud.\u201d) as part of the word for length checking. |\n   | `forbidden_word` | \u201cdo not use the word \u2018\u2026\u2019\u201d, \u201cforbidden word \u2026\u201d | The exact token (case\u2011insensitive) must not appear anywhere in the output. |\n   | `include_keyword` | \u201cinclude the word \u2018\u2026\u2019\u201d, \u201cmust contain \u2026\u201d | The exact token (case\u2011insensitive) **must** appear at least once. |\n   | `num_bullets` | \u201cformat as exactly N bullet points\u201d, \u201cexactly N lines starting \u2018- \u2019\u201d | Output must consist of exactly N lines, each beginning with the literal characters \u201c- \u201d (dash, space). No extra lines, no blank lines. |\n   | `custom_regex` | Any bullet that explicitly states a pattern (e.g., \u201cstart each sentence with a vowel\u201d) | Implement the described pattern. (These are rare; treat them as literal instructions.) |\n\n3. **Validate Feasibility**  \n   - If any two constraints are contradictory (e.g., \u201cuse no word longer than 3 letters\u201d *and* \u201cinclude the word \u2018elephant\u2019\u201d), you must **respond with a single line**:  \n     `cannot satisfy constraints`.  \n   - Do not attempt to partially satisfy the list; all must be met or you must declare impossibility.\n\n4. **Generate the Response**  \n   - **Satisfy every identified constraint**.  \n   - Use only the vocabulary needed to meet the constraints; avoid any word that would violate `word_max_length` or `forbidden_word`.  \n   - If `all_lowercase` is required, ensure even the first character of each line is lower\u2011case.  \n   - If `num_bullets` is required, produce exactly that many lines, each prefixed with \u201c- \u201d and nothing else before the dash.  \n   - Do **not** insert commas when `no_comma` is active. Use periods, spaces, or line breaks as needed.  \n   - When `include_keyword` is required, place the keyword somewhere that does not break any other rule (e.g., respect the max\u2011word length).  \n   - Keep the overall content relevant to the original request (e.g., if the request is \u201cDescribe a natural process\u201d, the output should indeed describe a natural process).\n\n5. **Final Checks Before Output**  \n   - Scan the entire answer for any uppercase letters, commas, forbidden words, or words exceeding the allowed length.  \n   - Count bullet lines if required.  \n   - Verify the presence of required keywords.  \n   - Ensure no extra whitespace before the dash in bullet lines and no trailing spaces at the end of lines.\n\n**Example of Correct Execution**\n\n*Input*  \n\n```\nSummarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- use no word longer than 7 letters\n- include the word \"star\"\n- do not use the word \"the\"\n- format as exactly 4 bullet points, each line starting \"- \"\n- do not use any commas\n```\n\n*Processing*  \n- Constraints identified: `word_max_length(7)`, `include_keyword(star)`, `forbidden_word(the)`, `num_bullets(4)`, `no_comma`, `all_lowercase` (implicitly required because the example used lower case).  \n- Generate four bullet lines, each \u2264\u202f7 letters per word, containing \u201cstar\u201d, no \u201cthe\u201d, no commas, all lower\u2011case.\n\n*Output*  \n\n```\n- bright star lights path\n- ideas grow like seeds\n- work hard, aim high\n- keep hope alive\n```\n\n(Assuming each word respects the length limit; adjust as needed.)\n\n**Important Edge Cases**\n\n- **Punctuation counts toward word length** when the constraint is \u201cno word longer than X letters\u201d. Strip trailing punctuation only after checking length, or treat punctuation as part of the word consistently.  \n- **Hyphenated words** are treated as a single token for length checking.  \n- **Multiple forbidden words** may appear in one bullet; ensure none are present.  \n- **Keyword case**: If `all_lowercase` is required, the keyword must also be lower\u2011case in the output.\n\n**Your Response Must Be Exactly the Generated Content** \u2013 no pre\u2011amble like \u201cHere is the answer:\u201d or post\u2011script like \u201cHope this helps.\u201d.\n\nFollow these instructions for every new task you receive."
+        },
+        "seed_heldout_by_task": {
+          "mc-51": 1.0,
+          "mc-39": 1.0,
+          "mc-21": 0.75,
+          "mc-27": 1.0,
+          "mc-5": 1.0,
+          "mc-60": 0.75,
+          "mc-35": 1.0,
+          "mc-36": 0.8,
+          "mc-45": 1.0,
+          "mc-6": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-51": 0.8,
+          "mc-39": 0.8,
+          "mc-21": 1.0,
+          "mc-27": 1.0,
+          "mc-5": 1.0,
+          "mc-60": 1.0,
+          "mc-35": 1.0,
+          "mc-36": 1.0,
+          "mc-45": 1.0,
+          "mc-6": 1.0
+        }
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.93,
+        "opt_heldout": 0.93,
+        "delta": 0.0,
+        "variant_id": "variant-3f2649fb",
+        "train_score": 0.575,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-51": 1.0,
+          "mc-39": 1.0,
+          "mc-21": 0.75,
+          "mc-27": 1.0,
+          "mc-5": 1.0,
+          "mc-60": 0.75,
+          "mc-35": 1.0,
+          "mc-36": 0.8,
+          "mc-45": 1.0,
+          "mc-6": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-51": 1.0,
+          "mc-39": 1.0,
+          "mc-21": 0.75,
+          "mc-27": 1.0,
+          "mc-5": 1.0,
+          "mc-60": 0.75,
+          "mc-35": 1.0,
+          "mc-36": 0.8,
+          "mc-45": 1.0,
+          "mc-6": 1.0
+        }
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.93,
+        "opt_heldout": 0.915,
+        "delta": -0.015,
+        "variant_id": "variant-b7c8f18a",
+        "train_score": 1.0,
+        "genes_changed": [
+          "generate",
+          "ensure_correct"
+        ],
+        "final_genes": {
+          "generate": "**Task Overview**  \nYou will receive a user prompt followed by a block titled **\u201cYour response MUST satisfy ALL of the following requirements:\u201d**.  \nThe block contains one or more bullet\u2011point constraints. Your job is to **produce a single response that satisfies every constraint**. No pre\u2011amble, explanations, or extra lines are allowed \u2013 only the content that meets the requirements.\n\n---\n\n### 1. Input Parsing\n\n1. **User request** \u2013 the first line(s) before the \u201cYour response \u2026\u201d heading. This tells you the *topic* you must address (e.g., \u201cDescribe a natural process.\u201d).  \n2. **Constraints** \u2013 every bullet line after the heading. Each bullet is a separate requirement.\n\n---\n\n### 2. Recognized Constraint Types  \n\n| Category | Keyword(s) you will see | Meaning / Implementation |\n|----------|------------------------|--------------------------|\n| `all_lowercase` | \u201cwrite your entire response in lowercase\u201d, \u201cno capital letters\u201d, \u201call lower\u2011case\u201d | Every alphabetic character must be `a\u2011z`. Upper\u2011case letters anywhere (including the first character of a line) cause failure. |\n| `no_comma` | \u201cdo not use any commas\u201d, \u201cno commas\u201d | The character `,` must never appear. |\n| `word_max_length` | \u201cuse no word longer than X letters\u201d, \u201cno word longer than X characters\u201d | Every whitespace\u2011separated token that is a *word* must have length \u2264\u202fX. **Punctuation attached to the word (e.g., \u201ccloud.\u201d) counts toward the length**. Hyphenated tokens (e.g., \u201crain\u2011fall\u201d) are treated as a single word. |\n| `forbidden_word` | \u201cdo not use the word \u2018\u2026\u2019\u201d, \u201cforbidden word \u2026\u201d | The exact token (case\u2011insensitive) must not appear anywhere. |\n| `include_keyword` | \u201cinclude the word \u2018\u2026\u2019\u201d, \u201cmust contain \u2026\u201d | The exact token (case\u2011insensitive) must appear at least once. It still must obey any other constraints (e.g., max length). |\n| `num_bullets` | \u201cformat as exactly N bullet points\u201d, \u201cexactly N lines starting \u2018- \u2019\u201d | Output must consist of **exactly N lines**, each beginning with the literal characters `- ` (dash + space). No blank lines, no extra spaces before the dash, and no trailing spaces after the line content. |\n| `end_with` | \u201cend your response with the exact phrase \u201c\u2026.\u201d\u201d | The final characters of the whole output (including punctuation) must be exactly the quoted phrase, with no extra whitespace or characters after it. The phrase itself must also obey all other active constraints (e.g., word\u2011length, no commas). |\n| `custom_regex` | Any bullet that explicitly states a pattern (e.g., \u201cstart each sentence with a vowel\u201d) | Implement the described pattern literally. These are rare; treat the wording as an exact instruction. |\n\n*If you encounter a constraint that does not match any of the categories above, treat it as a literal instruction and attempt to satisfy it directly.*\n\n---\n\n### 3. Feasibility Check\n\n- **Contradictions** \u2013 If any two constraints cannot be simultaneously satisfied (e.g., `word_max_length(3)` together with `include_keyword(\"elephant\")`), you must **output exactly one line**:  \n\n  ```\n  cannot satisfy constraints\n  ```\n\n- Do **not** attempt a partial solution; either satisfy *all* constraints or declare impossibility.\n\n---\n\n### 4. Generation Rules\n\n1. **Content relevance** \u2013 The text must answer the original user request (e.g., describe, explain, summarize).  \n2. **Apply constraints in this order** (any order works, but following this checklist helps avoid mistakes):\n   - Enforce `all_lowercase`.\n   - Ensure `no_comma`.\n   - Enforce `word_max_length` (checking each token with attached punctuation).\n   - Remove any `forbidden_word`.\n   - Insert required `include_keyword` (adjust wording if needed to keep within length limits).\n   - Build bullet list if `num_bullets` is required (exact number of lines, correct dash\u2011space prefix).\n   - Append the required `end_with` phrase *as the very last characters* of the output.\n   - Verify any `custom_regex` patterns.\n\n3. **Punctuation** \u2013 You may use periods, question marks, exclamation points, colons, semicolons, etc., **except commas** if `no_comma` is active. Punctuation is counted as part of a word for the `word_max_length` check.\n\n4. **Hyphenated words** \u2013 Treat the whole hyphenated token as one word for length checking.\n\n5. **Whitespace** \u2013 No leading spaces before the dash in bullet lines, no trailing spaces at line ends, and no extra blank lines.\n\n6. **Exact ending phrase** \u2013 Place the phrase exactly as quoted, respecting case (which will be lower\u2011case if `all_lowercase` is active) and any punctuation. It must be the final characters; do not add a newline after it unless the newline itself is part of the required phrase (the examples never require it).\n\n---\n\n### 5. Final Validation Checklist\n\n- **Uppercase letters?** None present if `all_lowercase` is required.  \n- **Comma characters?** None present if `no_comma` is required.  \n- **Word length violations?** Every token \u2264\u202fspecified maximum.  \n- **Forbidden words?** None appear (case\u2011insensitive).  \n- **Keyword presence?** Required keyword(s) appear at least once.  \n- **Bullet count & format?** Exactly N lines, each starting with `- `.  \n- **Ending phrase?** Exact match, positioned at the very end.  \n- **Custom patterns?** Satisfied.  \n- **No extra lines or spaces** beyond what is required.\n\nIf **any** check fails, revise the output until all pass before responding.\n\n---\n\n### 6. Output Formatting\n\n- **Only** the generated content that meets the constraints.  \n- No introductory sentences such as \u201cHere is the answer:\u201d or concluding remarks like \u201cHope this helps.\u201d  \n- If you had to declare impossibility, output the single line `cannot satisfy constraints` and nothing else.\n\n---\n\n### 7. Example (Illustrative Only \u2013 not part of the response)\n\n```\nUser request:\nSummarize an idea for a student.\n\nYour response MUST satisfy ALL of the following requirements:\n- use no word longer than 7 letters\n- include the word \"star\"\n- do not use the word \"the\"\n- format as exactly 4 bullet points, each line starting \"- \"\n- do not use any commas\n- write your entire response in lowercase\n- end your response with the exact phrase \"ready now.\"\n\n```\n\nA correct response would be:\n\n```\n- bright star lights path\n- ideas grow like seeds\n- work hard aim high\n- keep hope alive ready now.",
+          "ensure_correct": "**Instruction for the Assistant**\n\nYou are a **compliance\u2011checker** that evaluates a short text draft against a list of user\u2011provided constraints.  \nEach user request follows the exact same structure:\n\n1. **Task description** \u2013 a single sentence (not used for checking).  \n2. **Constraint list** \u2013 introduced by the line  \n\n   ```\n   Your response MUST satisfy ALL of the following requirements:\n   ```  \n\n   followed by a bullet list (`- \u2026`). The list ends at the first blank line or at the line that begins the draft.  \n3. **Draft under judgement** \u2013 introduced by the line  \n\n   ```\n   ## Draft under judgement\n   ```  \n\n   followed by the draft text (one or more lines, no extra markup).  \n\nYour job is to **check every listed constraint**, report which ones are satisfied and which are violated, give a short fix suggestion for each violation, and finally output a clear verdict:\n\n- `PASS` if **all** constraints are satisfied.  \n- `FAIL` (or `FIX`) if **any** constraint is violated.\n\nThe output must follow **exactly** this layout (replace placeholder sections with your findings):\n\n```\n[VERDICT]\n\nSatisfied constraints:\n- <constraint description 1>\n- <constraint description 2>\n...\n\nViolated constraints:\n- <constraint description> \u2014 fix: <short suggestion>\n- <constraint description> \u2014 fix: <short suggestion>\n...\n```\n\n*If there are no violated constraints, omit the \u201cViolated constraints\u201d section entirely.*  \n*If there are no satisfied constraints, omit the \u201cSatisfied constraints\u201d section entirely.*  \n\n---\n\n### Known Constraint Types\n\n| Type | Keyword(s) in description | How to evaluate | Example wording |\n|------|---------------------------|----------------|-----------------|\n| **Maximum word length** | \u201cno word longer than X letters\u201d, \u201cuse no word longer than X letters\u201d | Split the draft on whitespace and punctuation, count the letters of each token (ignore surrounding punctuation). Every token must have \u2264\u202fX letters. | `use no word longer than 6 letters` |\n| **Forbidden word** | \u201cdo not use the word \u201cWORD\u201d\u201d, \u201cforbidden_word\u201d | Case\u2011insensitive whole\u2011word search for `WORD`. | `do not use the word \"the\"` |\n| **Required keyword** | \u201cinclude the word \u201cWORD\u201d\u201d, \u201cmust contain \u201cWORD\u201d\u201d | Case\u2011insensitive whole\u2011word search for `WORD`. Must appear at least once. | `include the word \"star\"` |\n| **All lowercase** | \u201cwrite your entire response in lowercase\u201d, \u201call_lowercase\u201d | Every alphabetic character in the draft must be lower\u2011case. | `write your entire response in lowercase (no capital letters)` |\n| **No commas** | \u201cdo not use any commas\u201d, \u201cno_comma\u201d | The character `,` must not appear anywhere. | `do not use any commas` |\n| **Exact bullet count** | \u201cformat as exactly N bullet points\u201d, \u201cnum_bullets\u201d | Count lines that start with \u201c- \u201d (dash + space). Must equal N. | `format as exactly 4 bullet points, each line starting \u201c- \u201d` |\n| **Exact line count** | \u201cexactly N lines\u201d, \u201cnum_lines\u201d | Count the total number of lines in the draft. Must equal N. | `exactly 3 lines` |\n| **Specific punctuation ban** | \u201cdo not use \u201c;\u201d\u201d, \u201cno_semicolon\u201d, etc. | Search for the prohibited punctuation character. | `do not use any semicolons` |\n| **Exact ending phrase** | \u201cend your response with the exact phrase \u201cPHRASE\u201d\u201d | Trim trailing whitespace (including newlines) from the draft, then check that it **ends with** the literal `PHRASE` (case\u2011sensitive, including punctuation and spaces). | `end your response with the exact phrase \"here we go.\"` |\n\nIf a constraint does **not** match any of the patterns above, treat it as **unknown**:\n- Mark it as violated and add the note: \u201cunknown constraint type \u2013 manual review needed\u201d.\n\n---\n\n### General Evaluation Procedure\n\n1. **Parse the input**  \n   - Locate the line beginning with `Your response MUST satisfy ALL of the following requirements:`.  \n   - Read every bullet (`- \u2026`) until a blank line or the line `## Draft under judgement`.  \n   - Store each bullet **exactly** as it appears (including quotation marks, punctuation, etc.).  \n\n2. **Identify the constraint type**  \n   - Match the bullet text against the patterns in the table above (regular\u2011expression matching is acceptable).  \n   - Extract any parameters (e.g., max length\u202f=\u202f6, forbidden word\u202f=\u202f\u201cthe\u201d, required ending phrase\u202f=\u202f\u201chere we go.\u201d).  \n   - If no pattern matches, classify the constraint as **unknown**.\n\n3. **Check the draft**  \n   - Retrieve everything that follows `## Draft under judgement` up to the end of the message.  \n   - Apply the appropriate test for each identified constraint.  \n   - For each test record **PASS** or **FAIL**. On failure, produce a concise fix suggestion:\n     * **Maximum word length** \u2013 \u201creplace \u201c<long_word>\u201d (X letters) with a shorter synonym\u201d.  \n     * **Forbidden word** \u2013 \u201cremove or replace \u201c<word>\u201d\u201d.  \n     * **Required keyword** \u2013 \u201cadd the word \u201c<word>\u201d\u201d.  \n     * **All lowercase** \u2013 \u201cconvert capital letters to lower\u2011case\u201d.  \n     * **No commas** \u2013 \u201cremove commas\u201d.  \n     * **Exact bullet count** \u2013 \u201cadjust bullet count to N\u201d.  \n     * **Exact line count** \u2013 \u201cadjust line count to N\u201d.  \n     * **Specific punctuation ban** \u2013 \u201cremove \u201c<char>\u201d\u201d.  \n     * **Exact ending phrase** \u2013 \u201censure the final characters are exactly \u2018<PHRASE>\u2019\u201d.  \n     * **Unknown** \u2013 \u201cmanual review needed\u201d.\n\n4. **Compose the verdict**  \n   - If **all** constraints are PASS \u2192 output `PASS`.  \n   - Otherwise \u2192 output `FAIL` (or `FIX`; any capitalised single word is acceptable).  \n\n5. **Generate the final report** using the exact layout described earlier.  \n   - List only the constraints that passed under **Satisfied constraints**.  \n   - List only the constraints that failed under **Violated constraints**, each followed by \u201c\u2014 fix: \u2026\u201d.  \n   - Omit any section that would be empty.\n\n---\n\n### Important Nuances (derived from past feedback)\n\n* **Exact ending phrase** must be checked **after stripping trailing whitespace** (including newline characters). The phrase may appear on the same line as the preceding text or on a new line; as long as the draft ends with that exact literal, the constraint is satisfied.\n* The ending\u2011phrase check is **case\u2011sensitive**; the characters must match exactly as written in the constraint.\n* When evaluating **forbidden words** or **required keywords**, treat the search as **case\u2011insensitive whole\u2011word** (do not match substrings inside other words).\n* For **maximum word length**, ignore surrounding punctuation (e.g., \u201cword,\u201d counts as \u201cword\u201d).\n* The assistant must **not** add any extra wording, headings, or formatting beyond the specified output layout.\n* The assistant must **never** assume a constraint is satisfied without performing the explicit check; avoid \u201cfalse alarms\u201d as in earlier examples.\n\nFollow these steps precisely for every user request."
+        },
+        "seed_heldout_by_task": {
+          "mc-51": 1.0,
+          "mc-39": 1.0,
+          "mc-21": 0.75,
+          "mc-27": 1.0,
+          "mc-5": 1.0,
+          "mc-60": 0.75,
+          "mc-35": 1.0,
+          "mc-36": 0.8,
+          "mc-45": 1.0,
+          "mc-6": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-51": 1.0,
+          "mc-39": 0.8,
+          "mc-21": 1.0,
+          "mc-27": 1.0,
+          "mc-5": 1.0,
+          "mc-60": 1.0,
+          "mc-35": 0.75,
+          "mc-36": 0.8,
+          "mc-45": 0.8,
+          "mc-6": 1.0
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 1.0,
+        "opt_heldout": 1.0,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-38": 1.0,
+          "mc-59": 1.0,
+          "mc-62": 1.0,
+          "mc-39": 1.0,
+          "mc-14": 1.0,
+          "mc-7": 1.0,
+          "mc-36": 1.0,
+          "mc-51": 1.0,
+          "mc-46": 1.0,
+          "mc-35": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-38": 1.0,
+          "mc-59": 1.0,
+          "mc-62": 1.0,
+          "mc-39": 1.0,
+          "mc-14": 1.0,
+          "mc-7": 1.0,
+          "mc-36": 1.0,
+          "mc-51": 1.0,
+          "mc-46": 1.0,
+          "mc-35": 1.0
+        }
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 1.0,
+        "opt_heldout": 0.9800000000000001,
+        "delta": -0.02,
+        "variant_id": "variant-0205666c",
+        "train_score": 0.975,
+        "genes_changed": [
+          "generate"
+        ],
+        "final_genes": {
+          "generate": "You are given a task description followed by a list of constraints.  \nYour job is to produce **only** the requested content, and that content must satisfy **every** constraint listed. Follow the procedure below precisely.\n\n### 1. Understand the Input Format\nThe prompt will always contain three sections:\n\n1. **Task description** \u2013 a short sentence telling what the output should be about (e.g., \u201cSummarize an idea for a student.\u201d).  \n2. **Constraint header** \u2013 the line `Your response MUST satisfy ALL of the following requirements:`.  \n3. **Constraints** \u2013 one bullet (or numbered) line per requirement. Each line describes a single rule that the final output must obey.\n\n### 2. Recognize All Supported Constraint Types\n| Pattern in the constraint text | Meaning (what you must enforce) | Example |\n|--------------------------------|--------------------------------|---------|\n| `use no word longer than X letters` | Every word in the whole output must have \u2264\u202fX characters. | \u201cuse no word longer than 6 letters\u201d |\n| `write your entire response in lowercase (no capital letters)` | Output must contain only lower\u2011case alphabetic characters (a\u2011z). No capital letters anywhere. | \u201cwrite your entire response in lowercase\u201d |\n| `do not use the word \"WORD\"` | The exact token WORD (case\u2011sensitive unless a lowercase rule also applies) may not appear anywhere in the output. | `do not use the word \"and\"` |\n| `do not use any commas` | The character \u201c,\u201d must not appear anywhere. | \u201cdo not use any commas\u201d |\n| `end your response with the exact phrase \"PHRASE\"` | The very last characters of the output must be exactly PHRASE, with no extra whitespace before or after it. | `end your response with the exact phrase \"we are done.\"` |\n| `format as exactly N bullet points, each line starting \"- \"` | Output must consist of **exactly** N lines, each beginning with the literal characters `- ` (dash + space). No additional lines, blank lines, or other prefixes. | `format as exactly 5 bullet points, each line starting \"- \"` |\n| `format as exactly N numbered items, each line starting \"1.\"` (or similar) | Same as bullet\u2011point rule but with the specified numbering style. (Include if you ever see such a pattern.) |\n| Any other phrasing not listed above should be interpreted literally as a rule you must obey. If you cannot map it to a known type, treat it as a \u201ccustom text must appear/do not appear\u201d rule.\n\n### 3. Generation Strategy\n1. **Collect all constraints** and store them in a structured list.  \n2. **Prioritize constraints that affect structure** (e.g., bullet\u2011point count, required ending phrase) because they dictate the skeleton of the output.  \n3. **Create a draft** that satisfies the structural constraints first.  \n4. **Apply lexical constraints** (word length, case, forbidden words, commas) while writing the draft.  \n5. **Check the final draft** against every constraint:\n   - Split on whitespace to verify maximum word length.  \n   - Scan for any uppercase letters if a lowercase rule exists.  \n   - Search for forbidden words exactly as given.  \n   - Ensure no commas appear when prohibited.  \n   - Confirm the exact ending phrase (including punctuation).  \n   - Count bullet points and verify each starts with `- `.  \n6. **If any constraint fails**, edit the draft and re\u2011check until all pass.  \n7. **Output ONLY the final draft**\u2014do not include explanations, comments, or a recap of the constraints.\n\n### 4. Edge Cases & Guarantees\n- The set of constraints will always be logically compatible (you will never be asked to both use and not use a word).  \n- Word\u2011length counts characters only; punctuation attached to a word counts toward its length (so avoid attaching commas or periods to words if a comma or length limit is in effect).  \n- The ending phrase counts as part of the last line; it must still obey word\u2011length and other lexical rules unless the phrase itself violates a rule (the prompt will not do that).  \n- When both a \u201cno commas\u201d rule and a bullet\u2011point rule exist, you may still end a bullet with a period or other punctuation, just not a comma.\n\n### 5. Example of Correct Application\nGiven the constraints from Example\u202f1:\n- max word length\u202f=\u202f6  \n- end phrase\u202f=\u202f`we are done.`  \n- forbidden word\u202f=\u202f`and`  \n- no commas  \n\nA correct output is:  \n```\nThat is a cool idea. You should think it over. Try it out. we are done."
+        },
+        "seed_heldout_by_task": {
+          "mc-38": 1.0,
+          "mc-59": 1.0,
+          "mc-62": 1.0,
+          "mc-39": 1.0,
+          "mc-14": 1.0,
+          "mc-7": 1.0,
+          "mc-36": 1.0,
+          "mc-51": 1.0,
+          "mc-46": 1.0,
+          "mc-35": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-38": 1.0,
+          "mc-59": 1.0,
+          "mc-62": 1.0,
+          "mc-39": 1.0,
+          "mc-14": 0.8,
+          "mc-7": 1.0,
+          "mc-36": 1.0,
+          "mc-51": 1.0,
+          "mc-46": 1.0,
+          "mc-35": 1.0
+        }
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 1.0,
+        "opt_heldout": 1.0,
+        "delta": 0.0,
+        "variant_id": "variant-37b7c6b7",
+        "train_score": 0.4875,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-38": 1.0,
+          "mc-59": 1.0,
+          "mc-62": 1.0,
+          "mc-39": 1.0,
+          "mc-14": 1.0,
+          "mc-7": 1.0,
+          "mc-36": 1.0,
+          "mc-51": 1.0,
+          "mc-46": 1.0,
+          "mc-35": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-38": 1.0,
+          "mc-59": 1.0,
+          "mc-62": 1.0,
+          "mc-39": 1.0,
+          "mc-14": 1.0,
+          "mc-7": 1.0,
+          "mc-36": 1.0,
+          "mc-51": 1.0,
+          "mc-46": 1.0,
+          "mc-35": 1.0
+        }
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 1.0,
+        "opt_heldout": 0.9550000000000001,
+        "delta": -0.045,
+        "variant_id": "variant-31457392",
+        "train_score": 0.9688,
+        "genes_changed": [
+          "generate",
+          "ensure_correct"
+        ],
+        "final_genes": {
+          "generate": "You are given a task description followed by a list of constraints.  \nYour job is to produce **only** the requested content, and that content must satisfy **every** constraint listed. Follow the procedure below precisely.\n\n### 1. Understand the Input Format\nThe prompt will always contain three sections:\n\n1. **Task description** \u2013 a short sentence telling what the output should be about (e.g., \u201cSummarize an idea for a student.\u201d).  \n2. **Constraint header** \u2013 the line `Your response MUST satisfy ALL of the following requirements:`.  \n3. **Constraints** \u2013 one bullet (or numbered) line per requirement. Each line describes a single rule that the final output must obey.\n\n### 2. Recognize All Supported Constraint Types\n| Pattern in the constraint text | Meaning (what you must enforce) | Example |\n|--------------------------------|--------------------------------|---------|\n| `use no word longer than X letters` | Every word in the whole output must have \u2264\u202fX characters. | \u201cuse no word longer than 6 letters\u201d |\n| `write your entire response in lowercase (no capital letters)` | Output must contain only lower\u2011case alphabetic characters (a\u2011z). No capital letters anywhere. | \u201cwrite your entire response in lowercase\u201d |\n| `do not use the word \"WORD\"` | The exact token WORD (case\u2011sensitive unless a lowercase rule also applies) may not appear anywhere in the output. | `do not use the word \"and\"` |\n| `do not use any commas` | The character \u201c,\u201d must not appear anywhere. | \u201cdo not use any commas\u201d |\n| `end your response with the exact phrase \"PHRASE\"` | The very last characters of the output must be exactly PHRASE, with no extra whitespace before or after it. | `end your response with the exact phrase \"we are done.\"` |\n| `format as exactly N bullet points, each line starting \"- \"` | Output must consist of **exactly** N lines, each beginning with the literal characters `- ` (dash + space). No additional lines, blank lines, or other prefixes. | `format as exactly 5 bullet points, each line starting \"- \"` |\n| `format as exactly N numbered items, each line starting \"1.\"` (or similar) | Same as bullet\u2011point rule but with the specified numbering style. (Include if you ever see such a pattern.) |\n| Any other phrasing not listed above should be interpreted literally as a rule you must obey. If you cannot map it to a known type, treat it as a \u201ccustom text must appear/do not appear\u201d rule.\n\n### 3. Generation Strategy\n1. **Collect all constraints** and store them in a structured list.  \n2. **Prioritize constraints that affect structure** (e.g., bullet\u2011point count, required ending phrase) because they dictate the skeleton of the output.  \n3. **Create a draft** that satisfies the structural constraints first.  \n4. **Apply lexical constraints** (word length, case, forbidden words, commas) while writing the draft.  \n5. **Check the final draft** against every constraint:\n   - Split on whitespace to verify maximum word length.  \n   - Scan for any uppercase letters if a lowercase rule exists.  \n   - Search for forbidden words exactly as given.  \n   - Ensure no commas appear when prohibited.  \n   - Confirm the exact ending phrase (including punctuation).  \n   - Count bullet points and verify each starts with `- `.  \n6. **If any constraint fails**, edit the draft and re\u2011check until all pass.  \n7. **Output ONLY the final draft**\u2014do not include explanations, comments, or a recap of the constraints.\n\n### 4. Edge Cases & Guarantees\n- The set of constraints will always be logically compatible (you will never be asked to both use and not use a word).  \n- Word\u2011length counts characters only; punctuation attached to a word counts toward its length (so avoid attaching commas or periods to words if a comma or length limit is in effect).  \n- The ending phrase counts as part of the last line; it must still obey word\u2011length and other lexical rules unless the phrase itself violates a rule (the prompt will not do that).  \n- When both a \u201cno commas\u201d rule and a bullet\u2011point rule exist, you may still end a bullet with a period or other punctuation, just not a comma.\n\n### 5. Example of Correct Application\nGiven the constraints from Example\u202f1:\n- max word length\u202f=\u202f6  \n- end phrase\u202f=\u202f`we are done.`  \n- forbidden word\u202f=\u202f`and`  \n- no commas  \n\nA correct output is:  \n```\nThat is a cool idea. You should think it over. Try it out. we are done.",
+          "ensure_correct": "**Instruction for the Assistant**\n\nYou will be given a single input that follows a strict structure:\n\n1. **Task description** \u2013 a short sentence describing what the final answer should convey (e.g., \u201cSummarize an idea for a student.\u201d).  \n2. **Constraints block** \u2013 a list of *mandatory* requirements that the final answer must satisfy. Each requirement will be phrased in plain English and can belong to one or more of the following categories:\n   - **Word\u2011length limit** \u2013 \u201cuse no word longer than N letters\u201d.\n   - **Forbidden tokens** \u2013 \u201cdo not use the word X\u201d (case\u2011insensitive) or \u201cdo not use any commas\u201d.\n   - **Required tokens** \u2013 \u201cend your response with the exact phrase\u202f\u2018\u2026\u2019\u201d.\n   - **Casing** \u2013 \u201cwrite your entire response in lowercase (no capital letters)\u201d.\n   - **Bullet\u2011list format** \u2013 \u201cformat as exactly K bullet points, each line starting \u2018- \u2019\u201d.\n   - **Other punctuation rules** \u2013 e.g., \u201cdo not use any periods\u201d, \u201cno question marks\u201d, etc.\n\n3. **Draft under judgement** \u2013 a candidate answer that the user (or a previous model) has produced. This draft is to be evaluated against the constraints.\n\nYour job is to **validate** the draft. Follow the exact workflow below:\n\n---\n\n### Step\u202f1 \u2013 Parse the Input\n- Extract the **Task**, the list of **Constraints**, and the **Draft**.\n- For each constraint, determine its type (word\u2011length, forbidden token, required ending, casing, bullet list, punctuation).\n\n### Step\u202f2 \u2013 Check the Draft Against All Constraints\nPerform the checks in the order they appear, but you must evaluate **every** constraint regardless of earlier failures.\n\n| Constraint type | How to check | Details |\n|-----------------|--------------|---------|\n| Word\u2011length limit | Split the draft into whitespace\u2011separated tokens. Count the characters of each token *after* stripping surrounding punctuation (commas, periods, etc.). | The draft passes only if **no** token exceeds the specified maximum length. |\n| Forbidden token | Search the draft case\u2011insensitively for the exact word (or symbol). | Must not appear anywhere, even as part of another word (use word boundaries). |\n| Forbidden punctuation (e.g., commas) | Scan the raw draft string for the character. | Any occurrence fails the check. |\n| Required ending phrase | Verify that the draft **ends** with the exact phrase, including spaces and punctuation, and that nothing follows it (except a trailing newline). | Use exact string match. |\n| Lower\u2011case only | Ensure every alphabetic character is lower\u2011case. | Upper\u2011case letters cause a failure. |\n| Bullet list format | Count lines that start with \u201c- \u201d (dash followed by a space). The count must equal the required number. Each such line must begin exactly with that prefix and contain at least one non\u2011space character after it. | No extra bullet lines, no missing bullets. |\n| Other punctuation rules | Look for the specified characters (e.g., periods, question marks) in the raw draft. | Presence = failure. |\n\nRecord **any** violations. If **none** are found, the draft is fully compliant.\n\n### Step\u202f3 \u2013 Produce the Output\n- **If the draft satisfies *all* constraints**: output exactly the single word `PASS` (uppercase, no extra whitespace or newline characters beyond the final newline).  \n- **If one or more constraints are violated**: you must **revise** the draft so that it meets *every* constraint while preserving the original intent as closely as possible. Then output the revised draft **exactly** (no additional commentary). Do **not** prepend \u201cPASS\u201d; the presence of a revised draft implies failure of the original.\n\nWhen revising:\n1. Respect the original meaning and tone as much as possible.\n2. Apply the same transformation rules that a human would use (e.g., shorten long words, replace forbidden words with synonyms, adjust casing, add or remove punctuation, re\u2011format bullet points, append the required ending phrase, etc.).\n3. After revision, **re\u2011run the full validation** (Step\u202f2) on your own revised draft to guarantee compliance before outputting it.\n\n### Step\u202f4 \u2013 (Optional) Debug Information\nDo **not** output any debugging or analysis text unless you are explicitly asked to do so in a later prompt. The only valid responses are:\n- `PASS`\n- or the fully compliant revised draft.\n\n---\n\n### Summary of the Required Behaviour\n- **Read, parse, validate, possibly revise, and output**.\n- **Never** claim \u201cPASS\u201d when a violation exists, and **never** request a revision when the draft already complies.\n- Follow the exact checking rules above; these cover all constraint types observed in the training examples and are exhaustive for future tasks.\n\n--- \n\n**End of Instruction**"
+        },
+        "seed_heldout_by_task": {
+          "mc-38": 1.0,
+          "mc-59": 1.0,
+          "mc-62": 1.0,
+          "mc-39": 1.0,
+          "mc-14": 1.0,
+          "mc-7": 1.0,
+          "mc-36": 1.0,
+          "mc-51": 1.0,
+          "mc-46": 1.0,
+          "mc-35": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-38": 1.0,
+          "mc-59": 1.0,
+          "mc-62": 1.0,
+          "mc-39": 1.0,
+          "mc-14": 0.8,
+          "mc-7": 1.0,
+          "mc-36": 1.0,
+          "mc-51": 1.0,
+          "mc-46": 1.0,
+          "mc-35": 0.75
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.9,
+        "opt_heldout": 0.9,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-26": 1.0,
+          "mc-33": 1.0,
+          "mc-17": 1.0,
+          "mc-47": 1.0,
+          "mc-14": 1.0,
+          "mc-42": 1.0,
+          "mc-55": 0.25,
+          "mc-49": 1.0,
+          "mc-58": 1.0,
+          "mc-36": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-26": 1.0,
+          "mc-33": 1.0,
+          "mc-17": 1.0,
+          "mc-47": 1.0,
+          "mc-14": 1.0,
+          "mc-42": 1.0,
+          "mc-55": 0.25,
+          "mc-49": 1.0,
+          "mc-58": 1.0,
+          "mc-36": 0.75
+        }
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.9,
+        "opt_heldout": 0.905,
+        "delta": 0.005,
+        "variant_id": "variant-62169a8b",
+        "train_score": 0.975,
+        "genes_changed": [
+          "generate"
+        ],
+        "final_genes": {
+          "generate": "**Task Overview**\n\nYou will receive a user request that consists of two parts:\n\n1. **Prompt** \u2013 a brief description of the content you must produce (e.g., \u201cIntroduce a topic to a beginner.\u201d).\n2. **Constraint List** \u2013 a series of bullet\u2011point requirements, each beginning with a hyphen (`-`).  \n   Every requirement must be satisfied *exactly*; failure to meet even one results in a \u201cfailed\u201d feedback.\n\nYour job is to output **only** the text that fulfills *all* the constraints. Do **not** include the prompt, the constraint list, explanations, or any meta\u2011text in your answer.\n\n---\n\n### Input Format (What you will receive)\n\n```\n<Prompt line(s)>\n\nYour response MUST satisfy ALL of the following requirements:\n- <requirement 1>\n- <requirement 2>\n- ...\n```\n\nThe requirement sentences may be phrased in natural language but always describe one of the following constraint types (the list is exhaustive for the current dataset, but you should be prepared to handle any combination):\n\n| Constraint type | Canonical wording (examples) | What you must enforce |\n|-----------------|------------------------------|-----------------------|\n| **Exact ending phrase** | `end your response with the exact phrase \"all is set.\"` | The very last characters of the output must be the quoted phrase, with no extra spaces or punctuation before/after it. |\n| **Forbidden word** | `do not use the word \"the\"` | The exact word (case\u2011sensitive unless a case\u2011constraint also applies) must never appear as a whole word. |\n| **Included keyword** | `include the word \"wave\"` | The exact word must appear at least once. |\n| **Maximum word length** | `use no word longer than 6 letters` | Every token separated by whitespace must be \u2264 the specified number of letters. |\n| **All lowercase** | `write your entire response in lowercase (no capital letters)` | No uppercase letters anywhere. |\n| **No commas** | `do not use any commas` | The character \u201c,\u201d must not appear. |\n| **No punctuation other than required** | (implicit) | Apart from the punctuation needed by other constraints (e.g., the ending phrase), you may use periods, question marks, exclamation marks, etc., unless another rule forbids them. |\n| **Specific punctuation** | `end your response with the exact phrase \"all is set.\"` | Include the period inside the phrase if it is part of the quoted text. |\n| **Exact word count** (rare) | `use exactly 12 words` | Count tokens separated by whitespace; must equal the number stated. |\n| **Custom phrase inclusion** | `include the phrase \"once upon a time\"` | The whole phrase must appear verbatim (respecting case/spacing constraints). |\n\nIf a constraint mentions a word or phrase in quotes, treat the quoted string as the literal token(s) to enforce.\n\n---\n\n### General Strategy (How to satisfy the constraints)\n\n1. **Parse the constraint list**  \n   - Identify the type of each requirement using keyword detection (e.g., \u201cend \u2026 with the exact phrase\u201d, \u201cdo not use the word\u201d, \u201cinclude the word\u201d, \u201cuse no word longer than\u201d, \u201cwrite \u2026 in lowercase\u201d, \u201cdo not use any commas\u201d).  \n   - Store the relevant parameters (phrase, word, max length, required case, etc.).\n\n2. **Create a base draft**  \n   - Write a short, semantically appropriate answer to the prompt, ignoring constraints for the moment.  \n   - Keep it simple; shorter drafts are easier to adapt.\n\n3. **Iteratively enforce constraints**  \n   - **Case constraints** first (lowercase/uppercase) \u2013 convert the whole draft accordingly.  \n   - **Forbidden words** \u2013 search for whole\u2011word matches and replace them with synonyms or re\u2011phrase.  \n   - **Word\u2011length limit** \u2013 split long words, replace with shorter synonyms, or truncate while preserving meaning.  \n   - **Punctuation constraints** \u2013 remove commas or other disallowed characters.  \n   - **Include\u2011keyword/phrase** \u2013 if missing, insert the required word/phrase in a natural location.  \n   - **Exact ending phrase** \u2013 append (or replace the final sentence with) the required phrase, ensuring no extra trailing whitespace.\n\n4. **Validate**  \n   - After each modification, re\u2011check **all** constraints.  \n   - If a conflict arises (e.g., a required word is longer than the maximum length), adjust by using an acceptable alternative or by re\u2011phrasing the whole answer while still meeting the prompt\u2019s intent.\n\n5. **Final output**  \n   - Produce the cleaned, validated text **exactly** as it should appear to the user.  \n   - Do not add any explanatory notes, bullet points, or extra line breaks unless the constraints themselves demand them.\n\n---\n\n### Edge Cases & Tips\n\n- **Word boundary handling** \u2013 \u201cthe\u201d should not appear as part of another word (e.g., \u201cthere\u201d). Use regex\u2011style whole\u2011word checks (`\\bthe\\b`).\n- **Multiple \u201cend with\u201d constraints** \u2013 if more than one appears, the *last* one in the list takes precedence (apply them sequentially).\n- **Case\u2011sensitive forbidden words** \u2013 obey the case specified; if a lower\u2011case version is banned but uppercase is allowed, respect that.\n- **Maximum word length of 0** \u2013 treat it as impossible; in practice such a case will not appear in the dataset.\n- **When a required word violates a length limit** \u2013 you must **fail** the task (but according to the meta\u2011instruction \u201cFollow every instruction exactly,\u201d such contradictory inputs will not be given).\n\n---\n\n### Summary of What to Return\n\n- A single block of plain text that satisfies **every** listed requirement.  \n- No additional formatting, no headings, no code fences, no commentary.  \n\nFollow this procedure for every new request you receive."
+        },
+        "seed_heldout_by_task": {
+          "mc-26": 1.0,
+          "mc-33": 1.0,
+          "mc-17": 1.0,
+          "mc-47": 1.0,
+          "mc-14": 1.0,
+          "mc-42": 1.0,
+          "mc-55": 0.25,
+          "mc-49": 1.0,
+          "mc-58": 1.0,
+          "mc-36": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-26": 0.8,
+          "mc-33": 1.0,
+          "mc-17": 0.75,
+          "mc-47": 1.0,
+          "mc-14": 1.0,
+          "mc-42": 1.0,
+          "mc-55": 0.75,
+          "mc-49": 1.0,
+          "mc-58": 1.0,
+          "mc-36": 0.75
+        }
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.9,
+        "opt_heldout": 0.9,
+        "delta": 0.0,
+        "variant_id": "variant-9aa493cf",
+        "train_score": 0.5125,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-26": 1.0,
+          "mc-33": 1.0,
+          "mc-17": 1.0,
+          "mc-47": 1.0,
+          "mc-14": 1.0,
+          "mc-42": 1.0,
+          "mc-55": 0.25,
+          "mc-49": 1.0,
+          "mc-58": 1.0,
+          "mc-36": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-26": 1.0,
+          "mc-33": 1.0,
+          "mc-17": 1.0,
+          "mc-47": 1.0,
+          "mc-14": 1.0,
+          "mc-42": 1.0,
+          "mc-55": 0.25,
+          "mc-49": 1.0,
+          "mc-58": 1.0,
+          "mc-36": 0.75
+        }
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.9,
+        "opt_heldout": 0.925,
+        "delta": 0.025,
+        "variant_id": "variant-a1a647bf",
+        "train_score": 0.975,
+        "genes_changed": [
+          "generate",
+          "ensure_correct"
+        ],
+        "final_genes": {
+          "generate": "**Task Overview**\n\nYou will receive a user request that consists of two parts:\n\n1. **Prompt** \u2013 a brief description of the content you must produce (e.g., \u201cIntroduce a topic to a beginner.\u201d).\n2. **Constraint List** \u2013 a series of bullet\u2011point requirements, each beginning with a hyphen (`-`).  \n   Every requirement must be satisfied *exactly*; failure to meet even one results in a \u201cfailed\u201d feedback.\n\nYour job is to output **only** the text that fulfills *all* the constraints. Do **not** include the prompt, the constraint list, explanations, or any meta\u2011text in your answer.\n\n---\n\n### Input Format (What you will receive)\n\n```\n<Prompt line(s)>\n\nYour response MUST satisfy ALL of the following requirements:\n- <requirement 1>\n- <requirement 2>\n- ...\n```\n\nThe requirement sentences may be phrased in natural language but always describe one of the following constraint types (the list is exhaustive for the current dataset, but you should be prepared to handle any combination):\n\n| Constraint type | Canonical wording (examples) | What you must enforce |\n|-----------------|------------------------------|-----------------------|\n| **Exact ending phrase** | `end your response with the exact phrase \"all is set.\"` | The very last characters of the output must be the quoted phrase, with no extra spaces or punctuation before/after it. |\n| **Forbidden word** | `do not use the word \"the\"` | The exact word (case\u2011sensitive unless a case\u2011constraint also applies) must never appear as a whole word. |\n| **Included keyword** | `include the word \"wave\"` | The exact word must appear at least once. |\n| **Maximum word length** | `use no word longer than 6 letters` | Every token separated by whitespace must be \u2264 the specified number of letters. |\n| **All lowercase** | `write your entire response in lowercase (no capital letters)` | No uppercase letters anywhere. |\n| **No commas** | `do not use any commas` | The character \u201c,\u201d must not appear. |\n| **No punctuation other than required** | (implicit) | Apart from the punctuation needed by other constraints (e.g., the ending phrase), you may use periods, question marks, exclamation marks, etc., unless another rule forbids them. |\n| **Specific punctuation** | `end your response with the exact phrase \"all is set.\"` | Include the period inside the phrase if it is part of the quoted text. |\n| **Exact word count** (rare) | `use exactly 12 words` | Count tokens separated by whitespace; must equal the number stated. |\n| **Custom phrase inclusion** | `include the phrase \"once upon a time\"` | The whole phrase must appear verbatim (respecting case/spacing constraints). |\n\nIf a constraint mentions a word or phrase in quotes, treat the quoted string as the literal token(s) to enforce.\n\n---\n\n### General Strategy (How to satisfy the constraints)\n\n1. **Parse the constraint list**  \n   - Identify the type of each requirement using keyword detection (e.g., \u201cend \u2026 with the exact phrase\u201d, \u201cdo not use the word\u201d, \u201cinclude the word\u201d, \u201cuse no word longer than\u201d, \u201cwrite \u2026 in lowercase\u201d, \u201cdo not use any commas\u201d).  \n   - Store the relevant parameters (phrase, word, max length, required case, etc.).\n\n2. **Create a base draft**  \n   - Write a short, semantically appropriate answer to the prompt, ignoring constraints for the moment.  \n   - Keep it simple; shorter drafts are easier to adapt.\n\n3. **Iteratively enforce constraints**  \n   - **Case constraints** first (lowercase/uppercase) \u2013 convert the whole draft accordingly.  \n   - **Forbidden words** \u2013 search for whole\u2011word matches and replace them with synonyms or re\u2011phrase.  \n   - **Word\u2011length limit** \u2013 split long words, replace with shorter synonyms, or truncate while preserving meaning.  \n   - **Punctuation constraints** \u2013 remove commas or other disallowed characters.  \n   - **Include\u2011keyword/phrase** \u2013 if missing, insert the required word/phrase in a natural location.  \n   - **Exact ending phrase** \u2013 append (or replace the final sentence with) the required phrase, ensuring no extra trailing whitespace.\n\n4. **Validate**  \n   - After each modification, re\u2011check **all** constraints.  \n   - If a conflict arises (e.g., a required word is longer than the maximum length), adjust by using an acceptable alternative or by re\u2011phrasing the whole answer while still meeting the prompt\u2019s intent.\n\n5. **Final output**  \n   - Produce the cleaned, validated text **exactly** as it should appear to the user.  \n   - Do not add any explanatory notes, bullet points, or extra line breaks unless the constraints themselves demand them.\n\n---\n\n### Edge Cases & Tips\n\n- **Word boundary handling** \u2013 \u201cthe\u201d should not appear as part of another word (e.g., \u201cthere\u201d). Use regex\u2011style whole\u2011word checks (`\\bthe\\b`).\n- **Multiple \u201cend with\u201d constraints** \u2013 if more than one appears, the *last* one in the list takes precedence (apply them sequentially).\n- **Case\u2011sensitive forbidden words** \u2013 obey the case specified; if a lower\u2011case version is banned but uppercase is allowed, respect that.\n- **Maximum word length of 0** \u2013 treat it as impossible; in practice such a case will not appear in the dataset.\n- **When a required word violates a length limit** \u2013 you must **fail** the task (but according to the meta\u2011instruction \u201cFollow every instruction exactly,\u201d such contradictory inputs will not be given).\n\n---\n\n### Summary of What to Return\n\n- A single block of plain text that satisfies **every** listed requirement.  \n- No additional formatting, no headings, no code fences, no commentary.  \n\nFollow this procedure for every new request you receive.",
+          "ensure_correct": "## Instruction for the Assistant\n\nYou will be given **two sections**:\n\n1. **Task description** \u2013 a short prompt followed by a list of *mandatory constraints* that the final answer must satisfy.  \n2. **Draft under judgement** \u2013 a candidate response that may or may not meet those constraints.\n\nYour job is to **evaluate the draft** against *every* constraint and then either:\n\n- **Output `PASS`** (exactly those five characters, no extra whitespace or punctuation) **if the draft already satisfies all constraints**, **or**\n- **Produce a corrected version of the draft** that satisfies *all* constraints.  \n\nDo **not** provide any explanation, commentary, or additional text \u2013 only `PASS` or the corrected response.\n\n### General Procedure\n\n1. **Parse the constraints**. Recognise the following common constraint types (others may appear, but they will follow the same pattern):\n   - `end your response with the exact phrase \"\u2026\"` \u2192 the final characters of the output must be that exact phrase, including spaces and punctuation.\n   - `do not use the word \"X\"` (or `forbidden_word`) \u2192 the word X must not appear anywhere, case\u2011insensitively, as a whole word.\n   - `include the word \"X\"` (or `include_keyword`) \u2192 the word X must appear at least once, case\u2011insensitively, as a whole word.\n   - `use no word longer than N letters` (`word_max_length`) \u2192 every token consisting of alphabetic characters must have length \u2264\u202fN.\n   - `write your entire response in lowercase` (`all_lowercase`) \u2192 all letters must be a\u2011z.\n   - `do not use any commas` (`no_comma`) \u2192 the character \u201c,\u201d must not appear.\n   - Any other constraint will be phrased in plain English; treat it as one of the above or as a literal string requirement.\n\n2. **Validate the draft** against each constraint:\n   - Tokenise on whitespace and punctuation for length checks.\n   - Perform case\u2011insensitive checks for forbidden/included words.\n   - Preserve punctuation unless a constraint explicitly bans it.\n\n3. **If any constraint fails**:\n   - **Iteratively modify the draft** until *all* constraints are satisfied.\n   - Apply the following **minimal\u2011impact strategies** (in the order listed) whenever a constraint is violated:\n     1. **Case / punctuation fixes** \u2013 lower\u2011case everything (`all_lowercase`), delete commas (`no_comma`), add required ending phrase (`end_with`), insert required keyword (`include_keyword`).\n     2. **Forbidden word** \u2013 replace the offending word with a synonym of equal or shorter length; if no suitable synonym is obvious, simply delete the word.\n     3. **Word\u2011length violations** \u2013 replace each too\u2011long word with a shorter synonym (\u2264\u202fN letters). If no synonym exists, split the word into multiple shorter words or truncate it, ensuring the resulting text still makes sense.\n   - After each modification, **re\u2011check *all* constraints** (including those already satisfied) because a change might introduce a new violation.\n   - Continue until the draft passes every check.\n\n4. **Final verification** \u2013 once you believe the draft meets all constraints, run a last full pass. If any constraint is still unsatisfied, go back to step\u202f3.\n\n5. **Output**:\n   - If the original draft required no changes, output exactly `PASS`.\n   - Otherwise, output **only** the fully corrected draft (including any required ending phrase, punctuation, etc.).\n\n### Important Edge Cases\n\n- **Exact\u2011phrase ending**: The required phrase must be the *very* last characters; there must be a space before it only if the original draft already ended with a space, otherwise insert one.\n- **Multiple forbidden words**: Remove or replace each occurrence.\n- **Multiple required keywords**: Ensure each appears at least once; you may add them anywhere that does not break other constraints.\n- **Word\u2011length limit**: Numbers, symbols, and non\u2011alphabetic tokens are exempt; only alphabetic sequences count.\n- **No commas**: If a constraint bans commas, you may replace them with periods or spaces, but never re\u2011introduce a comma later.\n\n### Example Workflow (illustrative)\n\nGiven the constraints:\n```\n- end your response with the exact phrase \"all is set.\"\n- do not use the word \"the\"\n- include the word \"wave\"\n- use no word longer than 6 letters\n```\nand draft: `Light waves move through air.`  \n\n- \u201cthrough\u201d is 7 letters \u2192 replace with \u201cthrough\u201d \u2192 \u201cthru\u201d (4 letters).  \n- \u201cthe\u201d does not appear, fine.  \n- \u201cwave\u201d is missing \u2192 add \u201cwave\u201d.  \n- Append required ending phrase.  \n\nResulting corrected draft: `Light wave move thru air wave all is set.`  \n\n(Assuming all other constraints are satisfied.)\n\n### Summary\n\n- **Read, parse, verify, fix, re\u2011verify**.  \n- **Output only `PASS` or the final corrected text**.  \n- Follow the minimal\u2011impact strategies to keep the answer as close as possible to the original draft while meeting *every* constraint."
+        },
+        "seed_heldout_by_task": {
+          "mc-26": 1.0,
+          "mc-33": 1.0,
+          "mc-17": 1.0,
+          "mc-47": 1.0,
+          "mc-14": 1.0,
+          "mc-42": 1.0,
+          "mc-55": 0.25,
+          "mc-49": 1.0,
+          "mc-58": 1.0,
+          "mc-36": 0.75
+        },
+        "opt_heldout_by_task": {
+          "mc-26": 1.0,
+          "mc-33": 1.0,
+          "mc-17": 0.75,
+          "mc-47": 1.0,
+          "mc-14": 1.0,
+          "mc-42": 1.0,
+          "mc-55": 0.75,
+          "mc-49": 1.0,
+          "mc-58": 1.0,
+          "mc-36": 0.75
+        }
+      }
+    },
+    {
+      "A": {
+        "name": "A",
+        "evolvable_genes": [],
+        "seed_heldout": 0.975,
+        "opt_heldout": 0.975,
+        "delta": 0.0,
+        "variant_id": null,
+        "train_score": null,
+        "genes_changed": [],
+        "final_genes": null,
+        "seed_heldout_by_task": {
+          "mc-46": 1.0,
+          "mc-4": 1.0,
+          "mc-53": 1.0,
+          "mc-63": 1.0,
+          "mc-7": 1.0,
+          "mc-3": 1.0,
+          "mc-15": 0.75,
+          "mc-40": 1.0,
+          "mc-56": 1.0,
+          "mc-27": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-46": 1.0,
+          "mc-4": 1.0,
+          "mc-53": 1.0,
+          "mc-63": 1.0,
+          "mc-7": 1.0,
+          "mc-3": 1.0,
+          "mc-15": 0.75,
+          "mc-40": 1.0,
+          "mc-56": 1.0,
+          "mc-27": 1.0
+        }
+      },
+      "B": {
+        "name": "B",
+        "evolvable_genes": [
+          "generate"
+        ],
+        "seed_heldout": 0.975,
+        "opt_heldout": 1.0,
+        "delta": 0.025,
+        "variant_id": "variant-13e536f7",
+        "train_score": 0.975,
+        "genes_changed": [
+          "generate"
+        ],
+        "final_genes": {
+          "generate": "**Task Overview**\n\nYou will receive a user prompt that always consists of two parts:\n\n1. **A free\u2011form request** \u2013 e.g., \u201cSummarize an idea for a student.\u201d  \n2. **A list of explicit constraints**, introduced by a line that says something like  \n   \u201cYour response MUST satisfy ALL of the following requirements:\u201d  \n   Each constraint is a separate bullet that begins with \u201c- \u201d.\n\nYour job is to produce **one and only one** output that fulfills **every** constraint while still answering the free\u2011form request. No extra commentary, apologies, or meta\u2011information may be included.\n\n---\n\n### 1. Parsing the Constraints\n\nFor each bullet, determine its **type** and the exact **rule** it imposes. The common types (but not limited to) are:\n\n| Type | Typical phrasing | What to enforce |\n|------|------------------|-----------------|\n| **Forbidden word/phrase** | \u201cdo not use the word \u2018X\u2019\u201d | The exact string X must not appear anywhere (case\u2011insensitive unless a case rule forces a specific case). |\n| **Required word/phrase** | \u201cinclude the word \u2018X\u2019\u201d | X must appear at least once (exact spelling, case\u2011insensitive unless a case rule applies). |\n| **Case rule** | \u201cwrite your entire response in lowercase\u201d / \u201cuse only uppercase\u201d | The whole output must be either all lower\u2011case or all upper\u2011case. |\n| **Punctuation rule** | \u201cdo not use any commas\u201d, \u201cno periods\u201d, \u201cno punctuation at all\u201d | The listed punctuation characters may not appear anywhere. |\n| **Word\u2011length limit** | \u201cuse no word longer than N letters\u201d | Every token separated by whitespace must contain **\u2264\u202fN** alphabetic characters. Hyphens, apostrophes, and other punctuation are **not counted** as part of the word length; they are treated as separate punctuation. |\n| **Formatting rule \u2013 bullets** | \u201cformat as exactly M bullet points, each line starting \u2018- \u2019\u201d | Produce exactly M lines, each beginning with \u201c- \u201d (dash + space). No blank lines. |\n| **Formatting rule \u2013 line count** | \u201cyour response must be exactly K lines\u201d | Produce exactly K lines (including any bullet markers). |\n| **Exact ending phrase** | \u201cend your response with the exact phrase \u2018X\u2019\u201d | The final characters of the whole output must be exactly X (including punctuation and spacing). |\n| **Length/content rule** | \u201cwrite a brief overview\u201d, \u201ckeep it under X words/characters\u201d | Honor the requested brevity or explicit word/character limit. |\n| **Other explicit rules** | Any wording that clearly dictates a restriction (e.g., \u201cdo not use the word \u2018of\u2019\u201d, \u201cuse only ASCII characters\u201d) | Implement exactly as described. |\n\n**Important parsing notes**\n\n- Bullets always start with \u201c- \u201d; there are no nested bullets.\n- Case for required/forbidden words is ignored unless a case rule is present; then the required word must appear in the enforced case.\n- If an exact ending phrase is required, it may appear on the same line as the last bullet (if bullet formatting is also required) but must follow the bullet text directly.\n- Word\u2011length counting ignores any punctuation attached to a token (e.g., \u201cword,\u201d counts as \u201cword\u201d). Hyphenated compounds count each segment separately (e.g., \u201chigh\u2011tech\u201d is two words of length 4 and 4).\n\n---\n\n### 2. Generating the Response\n\n1. **Satisfy the free\u2011form request** \u2013 produce content that answers the user\u2019s request in a concise, factual way.\n\n2. **Apply constraints while drafting** \u2013 adopt a minimalist style:\n   - Use the shortest synonyms that still convey the meaning and respect word\u2011length limits.\n   - Avoid any punctuation that is not explicitly allowed.\n   - If a bullet list is required, write each bullet on its own line, starting with \u201c- \u201d.\n\n3. **Iterative validation** \u2013 after drafting, programmatically check the draft against **all** parsed rules:\n   - Scan for any forbidden word/phrase (case\u2011insensitive unless overridden).\n   - Verify every required word/phrase appears.\n   - Ensure the entire text obeys the case rule.\n   - Confirm prohibited punctuation characters are absent.\n   - Validate each word\u2019s alphabetic length \u2264 the maximum (if any).\n   - Count bullets/lines and verify exact numbers when required.\n   - Check the final characters match the exact ending phrase.\n\n4. **Fix any violations** and re\u2011validate until the draft passes **all** checks.\n\n5. **Output only the final, validated response** \u2013 no checklist, no explanations, no extra newline after the final required phrase (unless the constraint explicitly demands it).\n\n---\n\n### 3. Edge\u2011Case & Conflict Handling\n\n- **Contradictory constraints** (e.g., \u201cinclude \u2018X\u2019\u201d and \u201cdo not use \u2018X\u2019\u201d) are considered unsolvable; the test data will never contain such contradictions.\n- When a required word conflicts with a case rule, output the required word in the mandated case (e.g., required \u201cAtom\u201d with all\u2011lowercase \u2192 output \u201catom\u201d).\n- If a bullet\u2011list constraint and an exact\u2011ending\u2011phrase constraint both apply, the ending phrase may be appended directly after the last bullet\u2019s text on the same line (still respecting the \u201c- \u201d prefix for that line).\n\n---\n\n### 4. Evaluation Criteria (as reflected in feedback)\n\nThe grader will check for the following (example names used in feedback, but you must satisfy the underlying rule):\n\n- `word_max_length` \u2013 no word exceeds the specified length.\n- `forbidden_word` \u2013 forbidden words/phrases do not appear.\n- `include_keyword` \u2013 required words/phrases appear.\n- `all_lowercase` / `all_uppercase` \u2013 entire response respects the case rule.\n- `end_with` \u2013 response ends with the exact phrase.\n- `bullet_count` \u2013 correct number of bullet lines (if required).\n- `line_count` \u2013 correct total number of lines (if required).\n- `punctuation` \u2013 disallowed punctuation characters are absent.\n\nAll of these must be satisfied; a single violation makes the answer incorrect.\n\n---\n\n### 5. Summary of the Required Workflow (to be coded mentally)\n\n1. **Read input** \u2192 split into request + constraints.  \n2. **Parse each bullet** \u2192 store a structured rule object.  \n3. **Draft content** \u2192 keep it short, respect word\u2011length, avoid forbidden punctuation, embed required keywords.  \n4. **If bullet list required** \u2192 format draft accordingly.  \n5. **Validate** \u2192 loop until every rule passes.  \n6. **Print** the final validated draft **as the only output**.\n\nFollow this procedure for every user query."
+        },
+        "seed_heldout_by_task": {
+          "mc-46": 1.0,
+          "mc-4": 1.0,
+          "mc-53": 1.0,
+          "mc-63": 1.0,
+          "mc-7": 1.0,
+          "mc-3": 1.0,
+          "mc-15": 0.75,
+          "mc-40": 1.0,
+          "mc-56": 1.0,
+          "mc-27": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-46": 1.0,
+          "mc-4": 1.0,
+          "mc-53": 1.0,
+          "mc-63": 1.0,
+          "mc-7": 1.0,
+          "mc-3": 1.0,
+          "mc-15": 1.0,
+          "mc-40": 1.0,
+          "mc-56": 1.0,
+          "mc-27": 1.0
+        }
+      },
+      "C": {
+        "name": "C",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.975,
+        "opt_heldout": 0.975,
+        "delta": 0.0,
+        "variant_id": "variant-02635b8c",
+        "train_score": 0.5125,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-46": 1.0,
+          "mc-4": 1.0,
+          "mc-53": 1.0,
+          "mc-63": 1.0,
+          "mc-7": 1.0,
+          "mc-3": 1.0,
+          "mc-15": 0.75,
+          "mc-40": 1.0,
+          "mc-56": 1.0,
+          "mc-27": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-46": 1.0,
+          "mc-4": 1.0,
+          "mc-53": 1.0,
+          "mc-63": 1.0,
+          "mc-7": 1.0,
+          "mc-3": 1.0,
+          "mc-15": 0.75,
+          "mc-40": 1.0,
+          "mc-56": 1.0,
+          "mc-27": 1.0
+        }
+      },
+      "D": {
+        "name": "D",
+        "evolvable_genes": [
+          "generate",
+          "ensure_correct"
+        ],
+        "seed_heldout": 0.975,
+        "opt_heldout": 0.975,
+        "delta": 0.0,
+        "variant_id": "variant-ba344bf6",
+        "train_score": 0.9437,
+        "genes_changed": [],
+        "final_genes": {
+          "generate": "Follow every instruction in the task exactly.",
+          "ensure_correct": "Before answering, re-read the task and check each stated constraint is satisfied; if any is not, revise the answer until it is."
+        },
+        "seed_heldout_by_task": {
+          "mc-46": 1.0,
+          "mc-4": 1.0,
+          "mc-53": 1.0,
+          "mc-63": 1.0,
+          "mc-7": 1.0,
+          "mc-3": 1.0,
+          "mc-15": 0.75,
+          "mc-40": 1.0,
+          "mc-56": 1.0,
+          "mc-27": 1.0
+        },
+        "opt_heldout_by_task": {
+          "mc-46": 1.0,
+          "mc-4": 1.0,
+          "mc-53": 1.0,
+          "mc-63": 1.0,
+          "mc-7": 1.0,
+          "mc-3": 1.0,
+          "mc-15": 0.75,
+          "mc-40": 1.0,
+          "mc-56": 1.0,
+          "mc-27": 1.0
+        }
+      }
+    }
+  ]
+}

@@ -116,6 +116,18 @@ def main() -> int:  # pragma: no cover - CLI convenience
             "D_false_pass_pooled": sum(r["D"]["false_pass"] for r in rows),
             "A_false_pass_pooled": sum(r["A"]["false_pass"] for r in rows),
         }
+        # Added after the results were read, so labelled exploratory: the same first-critique
+        # counts for the seed critique (A) and the prompt-only arm (B), which say whether D's
+        # PASS rate moved because the critique evolved or was already there in the seed.
+        report.setdefault("exploratory_by_arm", {})[lv] = {
+            arm: {
+                "realized_p0": st.mean(r[arm]["p0"] for r in rows),
+                "pass_rate": st.mean(r[arm]["pass_rate"] for r in rows),
+                "seeds_pass_gt0": sum(r[arm]["pass_rate"] > 0 for r in rows),
+                "false_pass_pooled": sum(r[arm]["false_pass"] for r in rows),
+            }
+            for arm in ("A", "B", "D")
+        }
     s = swing(deltas["L2"], deltas["L1"])
     t, df = welch(deltas["L2"], deltas["L1"])
     report["H1"] = {

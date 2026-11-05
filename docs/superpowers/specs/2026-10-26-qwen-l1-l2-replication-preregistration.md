@@ -52,3 +52,20 @@ Per level and seed, Δ = D.opt_heldout − B.opt_heldout. Primary: **S = mean Δ
 
 No seeds are added after looking. If cumulative Groq spend reaches $55, everything stops and what
 was bought is reported as bought. Deviations are appended below, dated, never edited in place.
+
+## Execution, 2026-10-26 (appended after the runs; nothing above is edited)
+
+Both levels ran with the design above. L2 lost three attempts to provider timeouts
+(`litellm.Timeout: Connection timed out after 600.0 seconds`); each attempt resumed from the
+cassette, no result was read between attempts, and the fourth attempt finished. This changes no
+design parameter. Calls in flight when an attempt died were bought and left no cassette entry.
+
+## Outcome, 2026-11-04
+
+M1, M2 and M3 pass at both levels (realized p₀ 0.04 and 0.76; arm A held-out 0.721 and 0.936;
+`ensure_correct` changed on 8 and 7 of 10 seeds). H1 is INCONCLUSIVE: S = −0.0100, 95 % CI
+[−0.0575, +0.0355], Welch t = −0.40 (df 15.2, p = 0.70). The interval excludes a swing above +0.036,
+but arm B scores 0.957 at L2, which caps any gain there at 0.043, so the run could not show an L2
+gain of Paper I's size. Both levels replay at $0 with 0 mismatches. Spend floor $2.23. No seeds were
+added. The full record, including exploratory per-arm PASS counts labelled as such, is in
+`docs/qwen-l1l2/REPORT.md`.

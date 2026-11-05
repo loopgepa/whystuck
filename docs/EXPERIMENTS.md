@@ -135,6 +135,8 @@ Each reads released JSON and cassettes and derives one family of claims.
 | `p0_task_stats.py` | per-task first-draft pass share (`p_first`) and mean final score from arm-A calibration cassettes of a manifest level; strict replay | target-p₀ study |
 | `build_p0_levels.py` | builds the study manifest's `low` / `mid` / `high` levels from those stats with `task_manifest.select_levels`, under the pre-registered matching rule | target-p₀ study |
 | `analyze_p0target.py` | the pre-registered analysis of the three four-arm runs, written to `docs/p0target/analysis.json` | target-p₀ study, I D9 |
+| `analyze_qwen_l1l2.py` | the pre-registered analysis of Paper I's L1/L2 design on the third worker, written to `docs/qwen-l1l2/analysis.json` | third-worker L1/L2 test, I |
+| `replay_qwen_l1l2.py` | strict end-to-end replay of that test's two runs against the release, and its measured spend floor, written to `docs/qwen-l1l2/replay.json` | third-worker L1/L2 test |
 
 `analyze_search_depth.py` deserves a note: the pre-registration *computed* depth from a formula
 that charged every proposal a full valset re-evaluation, which only an accepted proposal pays. The
@@ -175,11 +177,12 @@ code-domain cassette key changes with it.
 |---|---|
 | `docs/validation-study-*.json` | 43 study runs, per-arm and **per-task** held-out vectors, evolved gene text, per-gene accepted-change counts, and the pre-flight cost estimate |
 | `docs/repeat/*.json` | 225 replicate scorings (135 p₀ + 90 curve) |
-| `tests/fixtures/cassettes/**` | 282 cassettes; this is what makes replay free |
+| `tests/fixtures/cassettes/**` | 284 cassettes; this is what makes replay free |
 | `docs/papers/PRE-SPLIT-SOURCE.tex` | the 46-page pre-split draft, frozen at `fe628ed`, **never built**. Provenance for the split proof |
 | `docs/actual-spend.json` | measured spend per run and per provider, from an instrumented replay. See below |
 | `docs/p0-manifests/` | the target-p₀ study's task manifests and per-task calibration stats (`pilot-1000*`, `full-1001-*`), the calibration runs (`calib/`), and the study manifest `study.json`. Outside the 43-run count |
 | `docs/p0target/` | the study's three four-arm runs (`validation-study-p0target-{low,mid,high}`), `analysis.json` and `REPORT.md`. Third worker `groq/qwen/qwen3.8-27b`, reflection `groq/openai/gpt-oss-120b`; pre-registration `docs/superpowers/specs/2026-10-25-target-p0-preregistration.md` |
+| `docs/qwen-l1l2/` | the third-worker L1/L2 test: two four-arm runs (`validation-study-qwen-{L1,L2}`), `analysis.json`, `replay.json` and `REPORT.md`. Same worker and reflector as the target-p₀ study; pre-registration `docs/superpowers/specs/2026-10-26-qwen-l1-l2-replication-preregistration.md`. Outside the 43-run count |
 
 38 of the 43 runs also carry a generated `docs/validation-study-*.md` report. The five without one
 are the bought rows of the pre-registered budget sweep (D4), where the suffix is the

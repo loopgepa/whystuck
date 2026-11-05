@@ -1,0 +1,127 @@
+{
+ "H1": {
+  "M1_ordered": true,
+  "S": -0.009999999999999986,
+  "ci": [
+   -0.05749999999999999,
+   0.03549999999999999
+  ],
+  "n_boot": 10000,
+  "verdict": "INCONCLUSIVE",
+  "welch_df": 15.211677173616023,
+  "welch_p": 0.6980587078377098,
+  "welch_t": -0.3953705177266646
+ },
+ "exploratory_by_arm": {
+  "L1": {
+   "A": {
+    "false_pass_pooled": 18,
+    "pass_rate": 0.18,
+    "realized_p0": 0.04,
+    "seeds_pass_gt0": 8
+   },
+   "B": {
+    "false_pass_pooled": 19,
+    "pass_rate": 0.19,
+    "realized_p0": 0.05,
+    "seeds_pass_gt0": 9
+   },
+   "D": {
+    "false_pass_pooled": 9,
+    "pass_rate": 0.09,
+    "realized_p0": 0.060000000000000005,
+    "seeds_pass_gt0": 5
+   }
+  },
+  "L2": {
+   "A": {
+    "false_pass_pooled": 11,
+    "pass_rate": 0.49,
+    "realized_p0": 0.76,
+    "seeds_pass_gt0": 10
+   },
+   "B": {
+    "false_pass_pooled": 7,
+    "pass_rate": 0.51,
+    "realized_p0": 0.78,
+    "seeds_pass_gt0": 10
+   },
+   "D": {
+    "false_pass_pooled": 10,
+    "pass_rate": 0.44,
+    "realized_p0": 0.8,
+    "seeds_pass_gt0": 10
+   }
+  }
+ },
+ "levels": {
+  "L1": {
+   "A_false_pass_pooled": 18,
+   "B_mean": 0.726,
+   "D_false_pass_pooled": 9,
+   "D_mean": 0.7235,
+   "D_pass_rate": 0.09,
+   "D_seeds_pass_gt0": 5,
+   "M1_realized_p0": 0.04,
+   "M2_armA_heldout": 0.721,
+   "M2_saturated": false,
+   "M3_seeds_D_changed_verify": 8,
+   "delta": {
+    "ci": [
+     -0.04099999999999997,
+     0.03849999999999999
+    ],
+    "mean": -0.0025000000000000022,
+    "n": 10,
+    "sd": 0.0675873919866387
+   },
+   "delta_per_seed": [
+    -0.010000000000000009,
+    0.03499999999999992,
+    -0.06499999999999995,
+    -0.07000000000000006,
+    0.10499999999999998,
+    -0.08499999999999996,
+    -0.02499999999999991,
+    0.09999999999999998,
+    0.02499999999999991,
+    -0.03499999999999992
+   ],
+   "n_seeds": 10
+  },
+  "L2": {
+   "A_false_pass_pooled": 11,
+   "B_mean": 0.957,
+   "D_false_pass_pooled": 10,
+   "D_mean": 0.9445,
+   "D_pass_rate": 0.44,
+   "D_seeds_pass_gt0": 10,
+   "M1_realized_p0": 0.76,
+   "M2_armA_heldout": 0.9359999999999999,
+   "M2_saturated": false,
+   "M3_seeds_D_changed_verify": 7,
+   "delta": {
+    "ci": [
+     -0.03849999999999999,
+     0.01100000000000001
+    ],
+    "mean": -0.012499999999999989,
+    "n": 10,
+    "sd": 0.04276875806785447
+   },
+   "delta_per_seed": [
+    0.0,
+    -0.10499999999999998,
+    0.04500000000000004,
+    -0.020000000000000018,
+    0.0,
+    0.030000000000000027,
+    -0.04499999999999993,
+    -0.025000000000000022,
+    0.020000000000000018,
+    -0.025000000000000022
+   ],
+   "n_seeds": 10
+  }
+ }
+}
