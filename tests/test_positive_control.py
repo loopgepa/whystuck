@@ -18,18 +18,26 @@ the landscape itself, which needs no optimizer and therefore runs wherever gepa 
 
 from __future__ import annotations
 
+import importlib.util
 import pathlib
 import sys
 
 import pytest
 
-pytest.importorskip("gepa", reason="the positive control drives real GEPA; eval venv only")
+# A per-test mark, not a module-level `importorskip`: skipping the whole module removed its two
+# tests from collection in the main venv only, so the main venv and CI (which installs the eval
+# extra) collected different totals and the README's test count could match only one of them.
+requires_gepa = pytest.mark.skipif(
+    importlib.util.find_spec("gepa") is None,
+    reason="the positive control drives real GEPA; eval venv only",
+)
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
 
 from positive_control import MIN_GAP, SENTINEL, _reflection, _worker  # noqa: E402
 
 
+@requires_gepa
 def test_landscape_makes_the_verify_gene_the_only_lever():
     # Guard the control itself: if the landscape stopped being rigged, the control would
     # pass or fail for reasons unrelated to the harness.
@@ -41,6 +49,7 @@ def test_landscape_makes_the_verify_gene_the_only_lever():
     assert SENTINEL in _reflection("anything"), "the proposal must carry the sentinel"
 
 
+@requires_gepa
 def test_the_harness_detects_an_advantage_that_exists():
     from positive_control import main
 
