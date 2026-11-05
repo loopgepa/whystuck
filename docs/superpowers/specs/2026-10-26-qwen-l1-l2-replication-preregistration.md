@@ -69,3 +69,11 @@ but arm B scores 0.957 at L2, which caps any gain there at 0.043, so the run cou
 gain of Paper I's size. Both levels replay at $0 with 0 mismatches. Spend floor $2.23. No seeds were
 added. The full record, including exploratory per-arm PASS counts labelled as such, is in
 `docs/qwen-l1l2/REPORT.md`.
+
+## Errata, 2026-11-04 (nothing above is edited)
+
+- The "Execution" heading carries the date of the runs; the section itself was written on
+  2026-11-04, with the outcome.
+- The outcome's "excludes a swing above +0.036" is the registered percentile bootstrap. A Welch t
+  interval for S is [−0.064, +0.044]. Given the L2 ceiling, the design could hardly have returned
+  SUPPORTED; the report says so.

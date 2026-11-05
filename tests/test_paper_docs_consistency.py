@@ -1423,6 +1423,7 @@ def test_the_date_on_the_title_page_is_not_older_than_the_paper() -> None:
 _COMPANION_DISAMBIGUATORS = (
     r"Paper~(?:I|II|III)\b",
     r"conditional[- ]lever",
+    r"evolved[- ]verifier",
     r"ceiling paper",
     r"loop's ceiling",
     r"silent no-op",

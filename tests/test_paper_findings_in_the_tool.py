@@ -6,8 +6,9 @@ Each is a result the series paid for and the served tool did not expose. They we
 1. **p0, the base rate of already-correct first drafts.** At p0 = 0.067 Paper I's search
    converged on a verifier that never accepts and loop-level optimization bought nothing
    measurable. Its one positive cell at 0.267 is not distinguishable from the spread of nine cells
-   at 0.067 and did not reproduce on a third worker, so Paper I withdrew the claim that the answer
-   depends on p0, and the tool must not recommend loop-level optimization on that ground.
+   at 0.067 and was not reproduced on a third worker (whose test was inconclusive), so Paper I
+   withdrew the claim that the answer depends on p0, and the tool must not recommend loop-level
+   optimization on that ground.
 2. **The degenerate-verifier screen.** That failure is visible as a PASS rate of zero on the
    optimizer's output, which costs nothing to check and is the cheapest result in the series.
 3. **The silent no-op.** Paper III: in the flagship superseded run the critique gene was
@@ -94,6 +95,7 @@ def test_an_unmeasured_base_rate_refuses_to_advise_either_way() -> None:
     verdict = loop_lever_verdict(None)
     assert verdict["loop_optimization_indicated"] is None
     assert "not measured" in verdict["evidence"].lower()
+    assert "invert" not in verdict["evidence"].lower(), "Paper I withdrew the p0 dependence"
 
 
 def test_every_regime_points_at_the_fix_side() -> None:

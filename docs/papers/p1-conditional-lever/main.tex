@@ -44,7 +44,7 @@ this level average $\dd(D-B) = +0.006$. At $p_0 = 0.267$ one cell gains $+0.060$
 $+0.055$ over five re-scorings ($p = 0.054$ against scoring noise), but it sits inside the spread
 of the nine low-$p_0$ runs, one of which shows the same gain (Welch $p = 0.20$). We withdraw our
 earlier headline that the answer tracks $p_0$. On a third worker a target-$p_0$ study failed to
-build its levels, and a powered test of the same two levels found no difference, though a ceiling
+build its levels, and a ten-seed test of the same two levels was inconclusive, and a ceiling
 kept it from showing a gain of the first worker's size. Two pre-registered sweeps, over split
 size and a measured six-fold depth range, find no trend at three seeds per cell. A \texttt{PASS}
 rate of zero screens the optimizer's output for the degenerate verifier, $\dd$ splits exactly
@@ -143,10 +143,11 @@ contributions:
     budgets and splits GEPA was published with (\S\ref{sec:threats}).
   \item \textbf{Two tests on a third worker} (\S\ref{sec:directions}, D9). A target-$p_0$ study
     failed its registered manipulation check, so its levels test nothing about $p_0$. A registered
-    run of the same two levels at ten seeds each found no difference between them, but at the
+    run of the same two levels at ten seeds each was inconclusive, and at the
     higher level the prompt-only arm already scored $0.957$, which left room for a gain of at most
-    $0.043$. On that worker the evolved critique still accepted half as often as the seed critique at
-    the low level, and held-out score did not show it.
+    $0.043$. On that worker the evolved critique accepted half as often as the seed critique at
+    the low level, an exploratory difference that is not significant, and held-out score did not
+    show it.
   \item \textbf{A positive control} (\S\ref{sec:posctrl}), because every headline here is a
     null: on a landscape where the critique gene is the only path to a passing answer, the
     same harness and GEPA search loop return $\dd(D-B) = +1.000$, with a reflection model
@@ -206,9 +207,9 @@ member of this ``plateau/degrade'' family, isolated under controlled conditions,
 to it is a mechanism we can see in the evolved text: at a low base rate of correct first drafts
 the search collapses the verifier to a constant policy. Whether a higher base rate turns the null
 into a gain, our data do not settle. The nearest optimizer study of a self-refine pipeline,
-\citet{zhou2026streamlined}, evolves its stage instructions and depth by reflective search, but its
-stages run in a fixed sequence on every input, so no evolved component decides whether a draft is
-accepted and the corner we report cannot arise there.
+\citet{zhou2026streamlined}, evolves its stage instructions by reflective search and its depth by
+calibration, but its stages run in a fixed sequence on every input, so no evolved component decides
+whether a draft is accepted and the corner we report does not arise by construction.
 
 \paragraph{Self-refine and the limits of self-correction.}
 Self-Refine \citep{madaan2023selfrefine} popularized generate--critique--refine
@@ -558,8 +559,8 @@ $L_3$ & $+$ \texttt{word\_max\_length} & 0.832 & 0.667 & $0.942 \to 0.972$ & $0.
 \end{tabular}
 \caption{The $p_0$ sweep. $L_1$ \emph{is} the four-arm re-run of \S\ref{sec:rerun}, so it cost
 nothing to include. The treatment reached \texttt{ensure\_correct} on $3/3$ seeds at every
-level. $\dd(D-B)$ reads $-0.042$ where almost no first draft is correct and $+0.060$ where a
-quarter of them are, with all three seeds positive at $L_2$. The $L_1$ cell is the lowest of nine
+level. $\dd(D-B)$ is $-0.042$ at $L_1$ and $+0.060$ at $L_2$, with all three seeds positive
+at $L_2$. The $L_1$ cell is the lowest of nine
 optimizer runs at that level, which average $+0.006$, so the difference between the rows is not
 a finding (\S\ref{sec:p0}), and we no longer report the $L_1$ cell as a loss
 (\S\ref{sec:splitresult}). At $n=3$ each $95\%$ CI is the range of the three seeds
@@ -707,11 +708,11 @@ changed nothing else (D9). Both levels were built, at realized $p_0$ of $0.04$ a
 treatment reached \texttt{ensure\_correct} on $8$ and $7$ of $10$ seeds. $\dd(D-B)$ reads
 $-0.0025$ at $L_1$ and $-0.0125$ at $L_2$, and the registered contrast between the levels is
 $S = -0.0100$, 95\% interval $[-0.0575, +0.0355]$: inconclusive by the registered rule. The
-interval excludes a swing as large as ours, and part of that is a ceiling: arm~B scores $0.957$ at
+interval excludes a swing as large as ours, and the ceiling makes most of that automatic: arm~B scores $0.957$ at
 $L_2$ on that worker, so arm~D could beat it there by at most $0.043$, less than the $+0.060$ we
 measured. The run could not show a gain of our $L_2$ size, and it found none.
 
-\subsection{How much of \texorpdfstring{$\dd$}{Delta} is the shared gene?}
+\subsection{How much of \texorpdfstring{$\dd$}{Delta} is the draft term?}
 \label{sec:decomp}
 
 Every $\dd(D-B)$ above is a \emph{whole-system} contrast, and the arms do not differ in one
@@ -747,7 +748,7 @@ $L_2$ & $+0.060$ & $+0.000$ & $\mathbf{+0.060}$ & $+0.055$ & $+0.024$ & $\mathbf
 $L_3$ & $-0.002$ & $+0.005$ & $-0.007$ & $+0.019$ & $+0.003$ & $+0.016$ \\
 \bottomrule
 \end{tabular}
-\caption{$\dd$ split into the gene both arms evolve and the gene only arm~D evolves, on the
+\caption{$\dd$ split into a draft term and a loop term, neither identified as the treatment, on the
 single draw each level was published from and as the mean over the five re-scorings of
 \S\ref{sec:repeat}, which record each first draft too and so repeat the split. The two columns
 disagree because each term carries per-draw noise as large as itself: across the re-scorings the
@@ -762,14 +763,14 @@ term is negative at $L_1$, and the loop term is positive at $L_2$.}
 
 On the single draws the loop term runs $-0.017 \to +0.060 \to -0.007$, a sign flip; on the
 replicate means it runs $-0.004 \to +0.032 \to +0.016$, so the flip does not survive
-re-measurement. What remains is a loop term positive at $L_2$ and $L_3$ and indistinguishable
+re-measurement. What remains is a loop term positive at $L_2$, smaller at $L_3$, and indistinguishable
 from zero at $L_1$, with the three levels indistinguishable from one another, since each term's
 spread across re-scorings is as large as the term (Table~\ref{tab:decomp}). We report the
 aggregate $\dd$ because it is the pre-registered quantity, and a componentized-optimization result
 should print both: knowing that the optimizer \emph{changed} a component does not tell you that
 the component is what moved the score.
 
-\paragraph{Where the loss sits, and the mechanism it does not support.} The always-\emph{fix}
+\paragraph{Where the $L_1$ contrast sits, and the mechanism it does not support.} The always-\emph{fix}
 account says the cost of never accepting is borne by drafts that needed no repair, a stratum
 whose weight is $p_0$. That is directly checkable. Partition held-out tasks by whether the
 \emph{seed} genome's first draft was already correct, a pre-treatment covariate, identical
@@ -876,7 +877,7 @@ held-out score where more first drafts are correct, the release does not show. A
 optimizer's output flags the policy whatever it costs, and \citet{skalse2022reward}, who find
 that unhackable proxies are almost never available, give the general reason to screen the output
 rather than hope for a better training signal; a \texttt{PASS} rate of zero is such a screen.
-\citet{wahi2026judge} reached the same conclusion from production prompt-optimization loops, where
+\citet{wahi2026judge} reached a related conclusion from production prompt-optimization loops, where
 a judge prompt stripped of its rubric collapsed to a constant score through a parser fallback and
 won selection, and they gate every change with deterministic checks the judge cannot override. The same
 convergence has been reported independently, with the same optimizer and
@@ -917,9 +918,11 @@ the loop-level null which does not involve the optimizer at all, and it is evide
 proof: one hand-written point does not establish that no prose adds discrimination, which is what
 made the re-run above worth its price (registered in \S\ref{sec:directions}).
 Appendix~\ref{sec:handgene} reports the experiment, its detector table and the decomposition of
-the $-0.033$. \citet{fox2026omission} report the same for an LLM judge of clinical notes: wording
+the $-0.033$. \citet{fox2026omission} report a related result for an LLM judge of clinical notes: wording
 changes, voting and GEPA prompt optimisation moved its operating point without creating usable
-detection.
+detection. They also report the rival case: a GEPA-evolved prompt that performs their per-fact
+decomposition in one call did detect more, so prose search can add discrimination when it changes
+what the judge does rather than how strictly it judges.
 
 \paragraph{Intrinsic self-correction has a low ceiling, and optimizing on top of it
 costs.} Consistent with \citet{huang2023cannot}, run~4 shows the loop improving when given an
@@ -1575,7 +1578,7 @@ model:} results may be model-dependent \citep{huang2023cannot}. Two runs left
 \texttt{gpt-4.1-mini}, both on a third worker, \texttt{qwen3.8-27b}, with \texttt{gpt-oss-120b}
 reflecting, and both are reported under D9 (\S\ref{sec:directions}). The target-$p_0$ study failed
 its registered manipulation check, so its levels do not test the lever. The repeat of this paper's
-$L_1$/$L_2$ design built its levels and found no difference between them, at a ceiling that kept
+$L_1$/$L_2$ design built its levels and was inconclusive, at a ceiling that kept
 it from showing a gain of our size. \textbf{Cross-lineage, not
 cross-provider:} run 6's critic shares a vendor with the worker, and the release cannot say
 whether it shares a training lineage, so it
@@ -1689,7 +1692,7 @@ Single worker/reflection model & Partly, by spend & Worker swap done pre-audit
   ($\dd=-0.014$); needs redoing post-fix. A second worker on another provider corroborates
   Paper~II's detection-versus-repair \emph{ordering} at $20$ seeds, not its magnitudes or the
   ranking of its cells, and its $p_0$ ladder collapses (D9). On a third, \texttt{qwen3.8-27b}, the target-$p_0$ levels
-  failed their check and the $L_1$/$L_2$ design found no difference, at a ceiling \\
+  failed their check and the $L_1$/$L_2$ design was inconclusive, at a ceiling \\
 \textbf{Small train split} ($8$) & \textbf{Tested}, no trend (\S\ref{sec:splitresult}) & Bought:
   $n_{\mathrm{train}} \in \{4,8,16,24\}$ at constant epochs, held-out and seeds fixed. The
   degenerate verifier survives every size ($11/12$ genes); $\dd(D-B)$ does not, and the
@@ -1894,11 +1897,11 @@ series tests. Each entry below changes one variable.
     $8$ and $7$ of $10$ seeds. The registered contrast is $S = -0.0100$, 95\% interval
     $[-0.0575, +0.0355]$, inconclusive, and it comes with a ceiling: arm~B scores $0.957$ at $L_2$,
     which caps any gain there at $0.043$, so this run could not show a gain the size of our
-    $+0.060$, and its exclusion of our swing is partly that ceiling. \emph{Exploratory:} at $L_1$
+    $+0.060$, and most of its exclusion of our swing is that ceiling. \emph{Exploratory:} at $L_1$
     the evolved critique's \texttt{PASS} rate is $0.09$ against $0.18$ and $0.19$ for the seed
     and prompt-only critiques, and every $L_1$ \texttt{PASS} from every arm is false. The verifier
-    drifts toward rejecting at the low level on this worker too, though less far, and held-out
-    score does not show it.
+    moves in the direction we report, less far, and the difference is not significant on $100$
+    tasks clustered in ten seeds; held-out score does not show it.
 \end{description}
 
 \paragraph{A pre-registered prediction for the corrected-harness re-run, \textbf{resolved,
@@ -1930,16 +1933,16 @@ $1.55\sigma$ of the per-draw spread at those levels, and $p = 0.20$ with seeds a
 formed the $p_0$ hypothesis after the low-level run and chose the pair of levels after the
 registered monotone prediction failed, so we withdraw the claim that the answer tracks $p_0$.
 
-\textbf{What the search does to the verifier is the robust finding.} At $p_0 = 0.067$ GEPA drives
+\textbf{What the search does to the verifier is the consistent finding.} At $p_0 = 0.067$ GEPA drives
 the verifier to stop accepting: under the loop's verdict rule $11$ of $12$ evolved genes across
 four split sizes emit no \texttt{PASS}, and $20$ of $24$ across both sweeps; if a closing verdict
 line also counts, $7$ of $12$ and $14$ of $24$. Where almost every draft is wrong, refining every
 draft is close to the right policy, so the convergence costs nothing measurable, and a
-\texttt{PASS} rate of zero screens the optimizer's output for it. As $p_0$ rises the evolved gene
-starts to accept: under the loop's rule the evolved critique emits zero \texttt{PASS} of thirty at
+\texttt{PASS} rate of zero screens the optimizer's output for it. Across our three levels the
+evolved gene accepts more as $p_0$ rises: under the loop's rule the evolved critique emits zero \texttt{PASS} of thirty at
 $p_0 = 0.067$, four at $0.267$ and six at $0.667$, none of them false. On
-the third worker it accepted half as often as the seed critique at the low level, and held-out
-score did not show the change.
+the third worker it accepted half as often as the seed critique at the low level, an exploratory
+difference that is not significant, and held-out score did not show the change.
 
 \textbf{Does GEPA lift the regime the study started in?} No, at the budgets tested, and those
 budgets are small: at most $12$ proposals on at most $24$ training tasks that double as the
@@ -1969,7 +1972,7 @@ variance, and the one accidental search-path triplicate adds no spread the relea
 And on a third worker, in an exploratory pooling of $30$ seeds at a matched baseline, the gain
 did not reappear ($\dd(D-B) = +0.0027$, 95\% interval $[-0.0175, +0.0245]$; D9), though that run
 cannot contradict a three-seed estimate whose own interval runs from $-0.066$ to $+0.186$; a
-registered repeat of our two levels there found no difference between them, at a ceiling that
+registered repeat of our two levels there was inconclusive, at a ceiling that
 capped any gain at the higher level at $0.043$.
 
 One distinction is worth stating separately, because we had run two claims together and only one
@@ -2375,9 +2378,9 @@ The series' other two papers carry the entries bearing on their own claims.
     not, sits at the low-$p_0$ end of the axis.''} Entries~27 and~45 scoped this sentence to the
     runs bought before the sweep and recorded it as repaired. It was still false: replayed, run~1's
     single-constraint first drafts and run~2's easy-tier ones pass more often than at either level
-    the swing compares, and run~2's tier saturates. The sentence, in \S\ref{sec:p0} and in the
-    conclusion, now names the hard tier, where it holds, and \S\ref{sec:p0} states where runs~1
-    and~2 sit.
+    the swing compares, and run~2's tier saturates. The sentence, in \S\ref{sec:p0}, now names
+    the hard tier, where it holds, and states where runs~1 and~2 sit; the rewritten conclusion no
+    longer carries it.
   \item \textbf{``A swing of $0.102$ in $\dd$ that scoring noise alone does not account for.''}
     Only the re-measured standard errors support that, and they hold genomes and tasks fixed. The
     single-draw ratio, the ratio on the split cells and the permutation test with the seed as the

@@ -1,11 +1,11 @@
 """The series' six figures, with every plotted number derived from a released artifact.
 
 WHY THIS EXISTS. Nineteen tables carry the three papers, and several of their central claims are
-*shapes* a table cannot show: the sign of $\\dd$ changing across $p_0$, detector quality failing to
-order held-out performance, $\\dd$ failing to order along search depth, every effect in the study
-against the noise it sits in, a missing diagnostic field standing where a measured zero is assumed,
-and a repair signal moving a second worker where two detector substitutions do not. A reader had to
-reconstruct each shape mentally from rows of numbers.
+*shapes* a table cannot show: $\\dd$ at each $p_0$ level beside the spread of the low-$p_0$ runs,
+detector quality failing to order held-out performance, $\\dd$ failing to order along search depth,
+every effect in the study against the noise it sits in, a missing diagnostic field standing where a
+measured zero is assumed, and a repair signal moving a second worker where two detector
+substitutions do not. A reader had to reconstruct each shape mentally from rows of numbers.
 
 THE DISCIPLINE, which is the point of the split in this module. `figure_data()` is pure: it
 derives every value through the same helpers `verify_paper_claims.py` uses, imports no plotting

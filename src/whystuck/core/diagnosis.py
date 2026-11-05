@@ -35,9 +35,9 @@ class TraceSummary(BaseModel):
     common_failed_steps: list[str] = Field(default_factory=list)
     avg_retry_count: float = 0.0
     avg_latency_seconds: float | None = None
-    #: The base rate of already-correct first drafts, and what it implies. Paper I's answer to
-    #: "should I optimize the loop or the prompt" is conditional on this number and inverts
-    #: across it, so a diagnosis that omits it cannot support the recommendation that follows.
+    #: The base rate of already-correct first drafts, and what it implies. Paper I measured a
+    #: verdict only at a low base rate (loop-level optimization bought nothing there) and withdrew
+    #: the claim that the answer depends on it, so above that regime the verdict declines.
     p0_base_rate: float | None = None
     loop_lever: dict[str, Any] = Field(default_factory=dict)
 
@@ -172,7 +172,8 @@ def loop_lever_verdict(p0: float | None) -> dict[str, object]:
     verifier that never accepts anything (11 of 12 evolved genes, under the loop's own PASS rule),
     and evolving it bought nothing measurable: nine cells at that base rate average +0.006. Above
     it the release holds one positive cell (+0.060 at p0 = 0.267, three seeds) that the nine-cell
-    spread cannot tell from noise and that did not reproduce on a third worker, so Paper I
+    spread cannot tell from noise and that a third worker did not reproduce (its test was
+    inconclusive and capped by a ceiling), so Paper I
     withdrew the claim that the answer depends on p0. The verdict therefore says "not indicated"
     at a low base rate and declines to recommend either way above it.
     """
@@ -181,8 +182,8 @@ def loop_lever_verdict(p0: float | None) -> dict[str, object]:
             "p0": None,
             "regime": None,
             "loop_optimization_indicated": None,
-            "evidence": "p0 not measured: record traces first, since the recommendation inverts "
-            "across it and an unmeasured base rate is not a low one.",
+            "evidence": "p0 not measured: record traces first. The one regime with a verdict is a "
+            "low base rate, and an unmeasured base rate is not a low one.",
             "advice": _FIX_SIDE_ADVICE,
         }
     if p0 < _P0_LOW_CEILING:

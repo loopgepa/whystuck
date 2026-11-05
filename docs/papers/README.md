@@ -16,7 +16,8 @@ the base rate of first drafts that already satisfy every requirement, it does no
 the search stops the verifier accepting, and nine optimizer runs at that level average +0.006.
 Paper I reports a single cell at p₀ = 0.267 (+0.060 held-out, three seeds) inside the spread of
 those nine, and has withdrawn its claim that the answer tracks p₀. Two follow-up tests on a third
-worker found no gain.
+worker did not reproduce it: one could not build its levels, and the other was inconclusive, with
+a ceiling at the higher level that kept a gain of that size out of reach.
 
 **"Should I buy a better verifier for my self-refine loop?"** → **II**. Not first, when first
 drafts rarely pass. At p₀ = 0.067 and one refine round a *perfect* inference-time checker that names

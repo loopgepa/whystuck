@@ -118,7 +118,7 @@ consistency as evidence of a tight null. It was evidence of the opposite. Our co
     draws.
   \item \textbf{A reporting minimum} (\S\ref{sec:fix}): per component, whether the optimizer's
     output differs from the seed. One integer, the per-component form of a run-level check that
-    \citet{li2026teb} already require. Plus a presentation rule for the comparison itself:
+    \citet{li2026teb} make visible. Plus a presentation rule for the comparison itself:
     label a difference between two optimized arms with how many seeds \emph{each} arm accepted
     on, which catches the mirror-image defect where the \emph{comparator} is the starved arm.
     A later pre-registered run, the cross-provider critic run of \S\ref{sec:fix}, shows that flagging the zero case is not enough and the contrast
@@ -164,7 +164,8 @@ search on a ten-problem subsample, \citet{pappu2026multiagent} report that ``on 
 MATH-500, GEPA returned the original prompt essentially unchanged.'' Two GEPA studies publish
 the per-component record outright: \citet{so2026maskederosion} cycle a round-robin selector over
 four text components of an agent harness and report that all three final harnesses kept the
-credential rules verbatim, and \citet{lumer2026deepresearch} release a lineage in which each
+credential rules verbatim (their headline, that two of the three still misused credentials under a
+weaker model, shows an unchanged component beside changed behaviour, and is outside our scope), and \citet{lumer2026deepresearch} release a lineage in which each
 candidate mutates exactly one of two system prompts. None of these reports a
 wiring fault, and an unchanged component is also what a working search returns when it finds nothing
 worth keeping, which is why the per-component integer has to be read beside the search's own
@@ -172,7 +173,7 @@ record. \citet{xu2026harnessrepair} come closest to this paper's method: they in
 evaluation defects one at a time into a pre-registered harness study, and in the first version of
 their preprint replication through the same pipeline reproduced the defect's distortion in six of
 fifteen evaluable pairs instead of exposing it. Its later versions, under the same arXiv
-identifier, add a second study and count nine of twenty evaluable cases, seven of them fixed by an
+identifier \citep{xu2026harnessrepairv3}, add a second study and count nine of twenty evaluable cases, seven of them fixed by an
 identity of the design, so in most of those cases replication could not have exposed the defect. OPRO \citep{yang2023opro} and EvoPrompt \citep{guo2024evoprompt} likewise use an
 LLM as the optimizer, and OPRO's authors quantify the over-fitting risk directly: their
 ``training accuracies are often 5\%--20\% higher than our test accuracies''.
@@ -220,7 +221,7 @@ itself worth screening. Structurally this is reward gaming in the sense of
 \citet{skalse2022reward}: the training score is a proxy, and a component can be collapsed to a
 constant policy the proxy cannot punish. \citet{pappu2026multiagent} report GEPA converging on
 \emph{extreme-deference} instructions telling non-expert agents to treat the expert's answer as
-correct by default; the companion paper on the conditional lever reports it converging on a verifier that,
+correct by default; the companion paper on the evolved verifier reports it converging on a verifier that,
 under the harness's parse (\S\ref{sec:threats}), never accepts anything. Refusing to accept and deferring unconditionally are the same move, which
 suggests the corner is a property of reflective search under a weak signal rather than of one task
 family. Skalse et al.'s result that unhackable proxies are essentially unavailable is worth stating
@@ -602,7 +603,7 @@ alone would have been enough to flag the retraction but not the cross-provider r
 the corrected wiring changes every reflection prompt, it changes every cassette key, so the
 released cassettes cannot replay under it; they are retained and labelled superseded. The
 first runs recorded under the corrected harness are two hand-written-gene conditions reported in
-the companion paper on the conditional lever; they replay bit-for-bit, so \texttt{verify\_reproducibility.py}
+the companion paper on the evolved verifier; they replay bit-for-bit, so \texttt{verify\_reproducibility.py}
 verifies twenty-five runs rather than reporting that nothing has been proven, those two
 conditions, the four-arm re-run, the two new levels of that paper's $p_0$
 axis and the two calibration passes behind
@@ -699,7 +700,7 @@ Run & Regime & Seeds & Seed & B (prompt-only) & D (loop-level) & \dd \\
 invalidated. \textbf{The \dd\ column is not a measurement} and no claim in this series
 rests on it: the loop-level gene changed on one seed, of run~6, and on no other, so the column
 does not measure the treatment (\S\ref{sec:defect}), and where it is non-zero the arms differ
-mainly in the gene they share; the companion paper on the conditional lever measures this contrast on a corrected harness.
+mainly in the gene they share; the companion paper on the evolved verifier measures this contrast on a corrected harness.
 Rows 4--10 elide a repeated ``hard multi'' prefix: each is run 3's regime plus the listed lever. The \textbf{Seed} column is live throughout, and is the intended readout for runs 6--10.
 Runs 1--2 are uninformative by design (the verify gene is inert on single-constraint
 tasks; the seed saturates at $0.97$ on easy multi). Runs 8--10 share the oracle $R{=}3$
@@ -772,7 +773,7 @@ differences are $-0.125$ on that seed and $-0.0625$ on the other, so its $\dd$ a
 win with one seed on which both arms edited \texttt{generate}. The caveat
 is that $\sigma$ was estimated on
 the hard-multi tasks while the largest of these is a code run, so its transfer is an assumption and not a
-measurement. This is the same conflation the companion paper on the conditional lever finds in the corrected re-run, one
+measurement. This is the same conflation the companion paper on the evolved verifier finds in the corrected re-run, one
 harness generation earlier: \dd\ is a whole-system contrast, so it moves when the shared gene
 moves, whether or not the treatment ever applied.
 
@@ -832,7 +833,7 @@ magnitude, and that order of magnitude is the same as the effects being reported
 
 \paragraph{Then we measured it directly, and it was not one number.}
 We bought the direct version: every released genome of the $p_0$ sweep re-scored $K=5$ times
-on its own held-out tasks, three $p_0$ levels ($L_1$ to $L_3$, the conditional-lever paper's
+on its own held-out tasks, three $p_0$ levels ($L_1$ to $L_3$, the evolved-verifier paper's
 constraint-exclusion ladder from $p_0 = 0.067$ to $0.667$) $\times$ \{prompt-only, loop-level,
 unoptimized\}
 $\times$ three seeds $\times$ five replicates, $135$ runs. No re-optimization is involved, so
@@ -882,7 +883,7 @@ than the seed genome that estimate was built from, though the table does not est
 at $L_2$ barely exceeds the seed cell); $L_3$ does not, which fits the ceiling reading of
 Table~\ref{tab:sigmagenome}: at $p_0 = 0.667$ both arms sit near $0.97$ and
 have little room to vary.
-On a \emph{single} draw the three $p_0$-sweep contrasts of the conditional-lever paper,
+On a \emph{single} draw the three $p_0$-sweep contrasts of the evolved-verifier paper,
 taken in the same $L_1$, $L_2$, $L_3$ order as the denominators above, are therefore $0.89\sigma$,
 $1.31\sigma$ and $0.08\sigma$: weaker against the within-run denominator for two of them,
 and marginally stronger for the third, which is a null either way.
@@ -922,7 +923,7 @@ run outside this codebase, so its record as a screen is hindsight on our own run
 
 \textbf{The diagnostic is necessary, not sufficient.} A per-component change count catches a
 treatment that never applied. It does not catch a treatment that applied and did something
-degenerate: the conditional-lever paper's non-accepting verifier changes the gene on every seed. That
+degenerate: the evolved-verifier paper's non-accepting verifier changes the gene on every seed. That
 needs its own screen, and the cheap one there is a \texttt{PASS} rate of zero. The screen
 assumes the harness's parse, which counts a critique as a pass only if it begins with
 \texttt{PASS}, as the critique prompt asks. A critique that reasons first and ends on
@@ -1035,7 +1036,7 @@ The series' other two papers carry the entries bearing on their own claims.
   \item \textbf{``No measurable advantage for loop-level optimization.''} The original headline,
     across the original ten runs. Withdrawn: the treatment never reached the gene, so those
     runs compared a genome against itself (\S\ref{sec:defect}). What replaces it is one
-    configuration in which the treatment demonstrably ran, reported in the companion paper on the conditional lever.
+    configuration in which the treatment demonstrably ran, reported in the companion paper on the evolved verifier.
   \item \textbf{``The null is tight rather than merely underpowered.''} It rested on four
     intervals of exactly $[0,0]$. An interval of $[0,0]$ arises when the two arms produce
     byte-identical genomes and the cassette therefore serves identical completions, which is the
@@ -1246,7 +1247,7 @@ The series' other two papers carry the entries bearing on their own claims.
     beside its sibling genes in the shared harness note.
   \item \textbf{One component, three prose names, and nothing declaring them.} The
     \texttt{ensure\_correct} gene is written as the critique gene in some passages of this
-    paper and as the verify gene in others, and the companion on the conditional lever adds a
+    paper and as the verify gene in others, and the companion on the evolved verifier adds a
     third, the verifier gene. Each resolves compositionally once a gene is defined, so no
     reader is stranded, but nothing tied any of the three to the identifier or to each other,
     and the defect table above names the component one way where that companion names it
@@ -1364,7 +1365,7 @@ The series' other two papers carry the entries bearing on their own claims.
     version only; the later versions count nine of twenty evaluable cases, seven of them fixed by
     the design. The citation is now pinned to the first version and the sentence gives both
     figures. Contribution~4 offered the reporting minimum with no precedent; Trace Evolution Bench
-    already requires its run-level form, and contribution~4 and the related work
+    makes its run-level form visible, and contribution~4 and the related work
     now say so.
 \end{enumerate}
 

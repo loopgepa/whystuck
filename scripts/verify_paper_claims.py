@@ -9636,7 +9636,7 @@ def _qwen_l1l2_checks() -> list[tuple[str, float, float, float]]:
     for label, pattern in (
         ("sec:p0", r"reflecting and (\w+) seeds a level"),
         ("D9", r"same third worker at (\w+) seeds each"),
-        ("contribution", r"same two levels at (\w+) seeds each found"),
+        ("contribution", r"same two levels at (\w+) seeds each was"),
     ):
         out.append(
             (

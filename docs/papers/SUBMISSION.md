@@ -247,7 +247,7 @@ exists. Measured from the built PDFs and each paper's own source:
 |---|---|---|---|---|---|
 | I | `p1-conditional-lever` | 54 | 11 | 3 | 36 |
 | II | `p2-repair-not-detection` | 37 | 4 | 3 | 31 |
-| III | `p3-silent-no-op` | 32 | 4 | 1 | 28 |
+| III | `p3-silent-no-op` | 32 | 4 | 1 | 29 |
 
 Tables, figures and citations are counted from the sources by
 `tests/test_paper_docs_consistency.py`; the page count is compared against the compiled PDF by
@@ -262,7 +262,7 @@ neither stops a build, and Paper I shipped an oversized threats table until 2026
 nothing read the log.
 
 Abstract lengths against the 1920-character metadata
-field: **1813**, **1914**, **1865**. The headroom is 107, 6 and 55 characters, so any edit to any
+field: **1808**, **1913**, **1865**. The headroom is 112, 7 and 55 characters, so any edit to any
 of the three abstracts has to be re-checked by `make_arxiv_package.py` rather than assumed to fit.
 
 The three are cross-referenced as a series, so they should be posted together or in the order I, II,

@@ -26,14 +26,16 @@ corresponded with is a better ask than a stranger. Send it to one person at a ti
 > closed to me. Posting in cs.LG needs an endorsement, and I am asking whether you would consider
 > giving one.
 >
-> The paper asks whether optimizing a self-refine loop's verifier beats optimizing its prompt. The
-> answer turns on the base rate of already-correct first drafts, and the contrast across that base
-> rate swings by 0.102.
+> The paper asks whether optimizing a self-refine loop's verifier beats optimizing its prompt.
+> Where almost no first draft is already correct, it does not measurably help, and the search drives
+> the verifier to stop accepting anything. One positive cell at a higher base rate sits inside the
+> spread of the low-rate runs, so I withdrew the headline I had built on it.
 >
-> Start with the corrections appendix. The study invalidated its own headline twice. An earlier
-> version reported that evolving the verifier cost 0.042 held-out; that is withdrawn, because the
-> loop-level gene was byte-identical to the seed in 15 of 15 runs, so the treatment never reached
-> the gene it was meant to change. Twenty-one corrections are listed with the reason for each.
+> Start with the corrections appendix. The study has withdrawn its own headline three times. An
+> earlier version reported that evolving the verifier cost 0.042 held-out; I withdrew it because in
+> the flagship run the verifier prompt was byte-identical to the seed in all 15 winning genomes, so
+> the treatment never reached the gene it was meant to change. Fifty-three corrections are listed
+> with the reason for each.
 > Every released run replays bit-for-bit from a committed cassette, so you can check any number
 > without an API key.
 >

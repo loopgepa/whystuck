@@ -51,7 +51,7 @@ F$_1$ misleads: over a $10\times$ difficulty range the same critique's
 F$_1$ nearly triples while Youden's $J$ and Matthews' correlation do not improve. The residual is
 exact word counting, which the generator puts in every hard task: $0.16 \to 0.33 \to 0.50$
 across fix regimes. At low $p_0$, spend on a more actionable fixer before a better detector; we
-never crossed the two, and the conditional-lever paper's one cell at $p_0 = 0.267$ does not show
+never crossed the two, and the evolved-verifier paper's one cell at $p_0 = 0.267$ does not show
 that a gate's value depends on $p_0$. Withdrawn claims are in Appendix~\ref{sec:corrections}.
 \end{abstract}
 
@@ -112,7 +112,7 @@ connects an optimizer to a component. Our contributions:
     as well as repair.
 \end{enumerate}
 
-The companion paper on the conditional lever asks whether a reflective optimizer can
+The companion paper on the evolved verifier asks whether a reflective optimizer can
 \emph{discover} any of this by evolving
 the critique. At this family's low $p_0$ it does not. That paper reads its optimizer as moving the
 detector's threshold, which connects to the result here: where almost no first draft is already
@@ -210,11 +210,12 @@ Four 2026 results point the same way, and one anticipates the fix-side reading.
 \citet{yang2026asymmetric} vary the model size of each stage of a generate--critique--revise
 pipeline on five benchmarks and find performance highly insensitive to the critic's size, although
 any critic beats none; their larger critic gave more complete feedback that the refiner turned into
-only modestly better revisions, which matches our \emph{mid} level: it names the failed
+only modestly better revisions, which resembles our \emph{mid} level: it names the failed
 constraint and bought nothing measurable on this worker. \citet{iscan2026falsification} decompose a self-repair feedback packet
 for small frozen code models in a preregistered, placebo-controlled design: executed facts added to
 the code beat bare code and a shape-matched placebo, an instruction-only effect was not
-distinguishable, and code plus facts tied blind resampling at a matched generation budget. That
+distinguishable, and code plus facts tied blind resampling at a matched generation budget (a tie,
+not shown equivalent). That
 design is the closest neighbour of our lo/mid/hi ladder and anticipates its reading in code repair;
 its resampling arm is one this paper lacks (\S\ref{sec:threats}). In natural-language-to-regex
 synthesis, \citet{badrinarayan2026counterexamples} find that a deterministic oracle's error-only
@@ -420,7 +421,7 @@ calls it the cross-lineage critic, and we keep that name as a label only. Moving
 produces a critic that \textbf{never emits \texttt{PASS} at all}, missing all nine
 already-correct drafts in $80$ events.
 That is not a better verifier but a degenerate one, behaviourally identical to \emph{always
-refine}, and it is the same degeneracy the companion paper on the conditional lever reports the
+refine}, and it is the same degeneracy the companion paper on the evolved verifier reports the
 optimizer converging to. Two caveats hold the reading down: the perfect row rests on $30$ events
 with four positives, and every row scores the \emph{seed} rubric, so this measures the model
 behind the critique and not an evolved one. The three base rates are comparable: the
@@ -638,7 +639,7 @@ hundredths. No cell anywhere crosses a perfect gate with a higher $p_0$. We expe
 its keep in proportion to the drafts it can spare from an unnecessary rewrite, and at
 $p_0 = 0.067$ there are two such drafts in thirty. That would make $p_0$ the condition under which
 detection becomes binding, and this release does not test the expectation. The companion paper
-on the conditional lever does not test it either: it reports one cell at $p_0 = 0.267$, where evolving the verifier gained $0.060$ held-out over three seeds, and
+on the evolved verifier does not test it either: it reports one cell at $p_0 = 0.267$, where evolving the verifier gained $0.060$ held-out over three seeds, and
 it does not establish that the gain depends on $p_0$. Detection is not the binding constraint
 \emph{here}, at $p_0 = 0.067$ and one refine round.
 
@@ -791,7 +792,7 @@ never see.}
 Nothing above is interpretable without a noise floor, and this study did not plan one: the worker
 runs at the provider's default temperature with one sample per task, so nothing was measured twice
 on purpose. It was nonetheless measured by accident. Ten released runs of the companion paper on
-the conditional lever
+the evolved verifier
 evaluate the \emph{same} unoptimized seed genome on the \emph{same} thirty held-out tasks, so they
 are ten independent draws of one fixed number; from their paired differences $\sigma$ for one task
 under one draw is $0.1125$, a $\dd$ compares two independent draws so $\sigma(\dd)$ on one task is
@@ -1126,7 +1127,7 @@ the ordering of the cells themselves does not. A reader who wants the ranking to
 treat that as unsupported. The two workers also do not face the same difficulty. Under
 identical task generation this worker's first-draft pass rate is $p_0 = 0.095$ against
 \texttt{gpt-4.1-mini}'s $0.067$, but relaxing one constraint takes it to $0.905$ where the other
-reaches $0.267$, so the two stacks are not matched on the axis the conditional-lever paper studies. We claim a replication of the detection-versus-repair ordering, not of any magnitude.
+reaches $0.267$, so the two stacks are not matched on the axis the evolved-verifier paper studies. We claim a replication of the detection-versus-repair ordering, not of any magnitude.
 
 \section{Threats to Validity}
 \label{sec:threats}
@@ -1179,7 +1180,7 @@ all seven rows; \S\ref{sec:fixside} separates the levers, and we print the $R$ c
 \textbf{No matched-budget resampling arm and no placebo repair text.} Every refine round here
 rewrites from the critique's text: no cell spends the same generation budget on fresh drafts with
 no feedback, and no cell feeds repair text of matched length that carries no content.
-\citet{iscan2026falsification} found that fact-bearing feedback tied blind resampling at a matched
+\citet{iscan2026falsification} found that fact-bearing feedback tied (without shown equivalence) blind resampling at a matched
 budget on small code models, so part of the gain from more refine rounds could come from the extra
 draws, and how the oracle loop compares with a resampling loop is unmeasured. The lo/mid/hi ladder
 holds the round count fixed, so its gaps are not a resampling effect, but \emph{hi} also carries
@@ -1259,7 +1260,7 @@ here, and measured diagnostics bought more. The prescription that follows, a mor
 detector, is scoped to where we measured it: first drafts that rarely pass, so a gate has little to
 protect. We never crossed a better detector with actionable repair text, DeCRIM's oracle critic
 pays over a deeper budget \citep{ferraz2024decrim}, every oracle cell in this release ran at
-$p_0 \le 0.095$, and the conditional-lever paper's single cell at $p_0 = 0.267$ does not establish
+$p_0 \le 0.095$, and the evolved-verifier paper's single cell at $p_0 = 0.267$ does not establish
 that a gate's value depends on $p_0$.
 
 Two methodological points travel with this. First, \textbf{F$_1$ is the wrong statistic for an
@@ -1552,11 +1553,11 @@ register across all three, with the superseded values themselves, is in the rele
     seeds). The caption now gives both.
   \item \textbf{``Every run on this ladder is multi-hard, where $p_0 = 0.067$.''} That is the
     family's calibration run. The ladder runs' own first drafts pass on $1$ to $7$ of thirty, and
-    run~4 draws the most, seven (entry~53 replaces this entry's pointer to the conditional-lever
+    run~4 draws the most, seven (entry~53 replaces this entry's pointer to the evolved-verifier
     paper).
   \item \textbf{``The measured drift ($0.007$) is well under the gaps.''} No released artifact
     measures drift. The figure traces to an earlier draft's mean signed difference between noise
-    replicates, which the companion paper on the conditional lever says is confounded with drift
+    replicates, which the companion paper on the evolved verifier says is confounded with drift
     and cannot be separated from it. The sentence now says drift is unmeasured.
   \item \textbf{``The one intervention that helped on instruction-following transfers to code.''}
     The code runs use no oracle: the LLM critique still gates and writes the repair prose, and
@@ -1584,7 +1585,7 @@ register across all three, with the superseded values themselves, is in the rele
     ``cannot'' discover the lever.} Both were stated without the scope the body gave them: first
     drafts that rarely pass, one refine round for the null, and no cell crossing a better
     detector with actionable repair text. DeCRIM reports an oracle critic paying over a deeper
-    budget, and the conditional-lever paper reports one cell at $p_0 = 0.267$ (entry~53). Both sentences now
+    budget, and the evolved-verifier paper reports one cell at $p_0 = 0.267$ (entry~53). Both sentences now
     carry the scope, and the related work cites the results on the other side.
   \item \textbf{``Our runs were pre-registered and executed around and before these posts
     appeared.''} Every run postdates the June 2026 posts. The sentence now says so and claims

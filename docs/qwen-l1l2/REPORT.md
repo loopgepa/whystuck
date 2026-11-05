@@ -14,7 +14,9 @@ L1 JSON with one `opt_heldout` moved by 0.005 fails the same check, naming the f
 
 **Spend.** A floor of $1.29 (L1) and $0.94 (L2), $2.23 in all, against a pre-flight bound of $9.97
 per level. The floor prices one call per distinct prompt, with the caveats in the script's
-docstring. With the target-p₀ program (≈ $13), the Groq authorisation has spent about $15 of $60.
+docstring. With the target-p₀ program (≈ $13, an estimate), the Groq authorisation has spent at
+least $15 of $60: the floor leaves out the resampled empty completions and the calls lost in the
+three timed-out L2 attempts.
 
 ## What ran
 
@@ -44,8 +46,10 @@ contrast is a test of the design.
   headroom note below: the rule passes, and the ceiling still binds.
 - M3: arm D changed `ensure_correct` on 8 and 7 of 10 seeds. The treatment was applied.
 
-**What the interval rules out.** At 95 %, a swing above +0.036 on this worker. Paper I's swing was
-+0.102 (−0.042 at L1, +0.060 at L2, gpt-4.1-mini, three seeds a level). Part of that exclusion is a
+**What the interval rules out.** At 95 %, a swing above +0.036 on this worker by the registered
+percentile bootstrap; a Welch t interval, [−0.064, +0.044] (scipy, computed in the final review,
+not by the registered script), rules out only a swing above +0.044. Paper I's swing was
++0.102 (−0.042 at L1, +0.060 at L2, gpt-4.1-mini, three seeds a level). Most of that exclusion is a
 ceiling, not evidence: arm B scores 0.957 at L2, so arm D could beat it by at most 0.043 there, and a
 gain of Paper I's L2 size (+0.060) was out of reach at this level on this worker. The registered M2
 rule watches arm A and did not fire; the headroom that matters for Δ is arm B's.
@@ -81,7 +85,8 @@ At L1 every PASS from every arm is false: the critique never recognises one of t
 first drafts. Evolution halved the PASS rate there (0.18 and 0.19 for the fixed critiques, 0.09 for
 the evolved one) and left half the seeds' evolved critiques with no PASS at all. That is the
 direction Paper I reports for its evolved verifier at low p₀ (11 of 12 genes silent), in a weaker
-form. At L2 evolution barely moved the rate. On this worker the change in the verifier did not show
+form, and it is not significant: 9 against 18 and 19 PASSes in 100 gives Fisher p = 0.097 and
+0.065 (scipy, final review), before allowing for the tasks clustering in ten seeds. At L2 evolution barely moved the rate. On this worker the change in the verifier did not show
 up as a difference in held-out score at either level.
 
 ## What a reader should take from it
@@ -90,5 +95,5 @@ up as a difference in held-out score at either level.
    and no detectable difference between them.
 2. The run cannot test a gain as large as Paper I's at L2, because this worker's baseline leaves
    0.043 of headroom there.
-3. The evolved critique still drifts toward rejecting at the low level. The drift costs nothing
-   measurable and buys nothing measurable.
+3. The evolved critique accepts less often at the low level, an exploratory and not significant
+   difference. It costs nothing measurable and buys nothing measurable.

@@ -103,12 +103,12 @@ which is the mechanism behind the loop-level arm's loss.
 
 `analyze_delta_decomposition.py` is the one to run second, because it qualifies the headline.
 Both arms evolve `generate`, so Δ(D−B) is a whole-system contrast; the script splits it into a
-draft term (the shared gene) and a loop term (the treatment) and prints four blocks:
+draft term and a loop term (Paper I identifies neither as the treatment) and prints four blocks:
 
 | block | what it answers |
 |---|---|
-| the split | 60% of L1's −0.042 is the shared gene; 100% of L2's +0.060 is the treatment |
-| strata on the seed genome's first draft | the L1 loss is **not** on already-correct drafts (+0.002) |
+| the split | each single draw's Δ as draft term plus loop term; Paper I withdrew the shares of these (register entry 37), since each term's spread across re-scorings is as large as the term |
+| strata on the seed genome's first draft | the L1 contrast is **not** on already-correct drafts (+0.002) |
 | refine productivity | refine is net-positive at every level, so no destructive-repair story |
 | answer length by arm | the do-nothing floor is not being exploited (D is not shorter) |
 
@@ -159,9 +159,10 @@ Note `--reflection-model openai/gpt-5.6-luna` above. It is not the CLI default
 only two runs that did. Any run meant to compare against C2b must pin it, or the reflection
 model becomes an uncontrolled difference.
 
-### The p₀ sweep (§"The p₀ sweep: when loop-level optimization pays") — RUN
+### The p₀ sweep (§"The p₀ sweep: one positive cell") — RUN
 
-The experiment that turned the paper's null into a conditional result. `exact_word_count` is
+The experiment Paper I first read as a conditional result and has since withdrawn as one (its
+register entry 49): the L2 cell sits inside the spread of nine runs at L1. `exact_word_count` is
 satisfied on 0.16 of held-out final drafts and the generator forces it into *every* hard task,
 so the tier's first-draft pass rate p₀ is pinned below 0.16. Excluding it raises p₀ while
 keeping a brutal anchor in every task.
@@ -174,7 +175,7 @@ Measured p₀ and outcome (treatment reached `ensure_correct` on 3/3 seeds at ev
 | L2 | `exact_word_count` | 0.267 | **+0.060** | [+0.005, +0.105] | 0.25 |
 | L3 | + `word_max_length` | 0.667 | −0.002 | [−0.045, +0.040] | 1.00 |
 
-The sign flips between L1 and L2. Two caveats the paper states and this file repeats because
+The sign differs between L1 and L2. Two caveats the paper states and this file repeats because
 they are easy to drop: at n=3 with three same-signed deltas the exact interval **must** exclude
 zero, so L2's interval is equivalent to sign-unanimity and the sign test is at its floor; and
 **L3 is saturated** (baseline 0.942, both arms → ~0.97), which falsified our registered
