@@ -245,7 +245,7 @@ exists. Measured from the built PDFs and each paper's own source:
 
 | | paper | pages | tables | figures | distinct citations |
 |---|---|---|---|---|---|
-| I | `p1-conditional-lever` | 49 | 11 | 3 | 28 |
+| I | `p1-conditional-lever` | 49 | 11 | 3 | 36 |
 | II | `p2-repair-not-detection` | 35 | 4 | 3 | 31 |
 | III | `p3-silent-no-op` | 28 | 4 | 1 | 28 |
 

@@ -87,7 +87,9 @@ The answer we can give is narrower than the question. Write $p_0$ for the base r
 drafts that already satisfy every constraint. A verifier that never accepts sends every draft to a
 rewrite, which costs only on drafts that needed none, and the weight of that stratum is exactly
 $p_0$. So the laziest available verifier is nearly free where $p_0$ is small, and a search that
-optimizes a training signal should find it there. It does. We cannot tell from the release
+optimizes a training signal should find it there. It does. The arithmetic is not ours: two formal
+models of refine loops anticipate it (\S\ref{sec:related}), and what this paper adds is the
+observation that a reflective search finds that corner by itself. We cannot tell from the release
 whether evolving the verifier pays where $p_0$ is higher. We formed the $p_0$ hypothesis after
 reading the first corrected run, at $p_0 = 0.067$, and registered it before buying two higher
 levels (Appendix~\ref{sec:corrections}); one of those levels gave a positive cell that we cannot
@@ -203,7 +205,10 @@ LLM as the optimizer, and OPRO's authors quantify the over-fitting risk directly
 member of this ``plateau/degrade'' family, isolated under controlled conditions, and what we add
 to it is a mechanism we can see in the evolved text: at a low base rate of correct first drafts
 the search collapses the verifier to a constant policy. Whether a higher base rate turns the null
-into a gain, our data do not settle.
+into a gain, our data do not settle. The nearest optimizer study of a self-refine pipeline,
+\citet{zhou2026streamlined}, evolves its stage instructions and depth by reflective search, but its
+stages run in a fixed sequence on every input, so no evolved component decides whether a draft is
+accepted and the corner we report cannot arise there.
 
 \paragraph{Self-refine and the limits of self-correction.}
 Self-Refine \citep{madaan2023selfrefine} popularized generate--critique--refine
@@ -236,7 +241,14 @@ and three domains, and find moderate, benchmark-dependent gains that do not grow
 difficulty. \citet{zhang2026revisions} treat intrinsic self-correction as a revision policy:
 revisions fix errors and also overturn correct answers, and always accepting the revision beats a
 learned gate in some settings and loses to it in others, which is the trade our $p_0$ argument
-rests on, studied without an optimizer. We adopt the same posture for the narrower loop-level
+rests on, studied without an optimizer. Two formal models anticipate the mechanism we report.
+\citet{liu2026feedbackcontrol} show that one more refine round has zero net benefit exactly when
+the ratio of error-correction to error-introduction rates equals $\mathrm{Acc}/(1-\mathrm{Acc})$, so
+where few drafts are already correct the break-even ratio is small and refining every draft is
+close to free. \citet{wu2026vrrstop} separate a verifier's false acceptance and false rejection from
+the repairer's damage, and show repair damaging already-correct plans while reported acceptance
+keeps rising. Our $p_0$ argument is a special case of the first; what we add is that a reflective
+optimizer left to evolve the verifier finds the never-accept corner on its own. We adopt the same posture for the narrower loop-level
 vs.\ prompt-only question and contribute a registered answer with controls.
 
 \section{Method}
@@ -840,7 +852,13 @@ its text begins with it). Pooled, the $127$-character seed rubric produces one t
 the ${\sim}3000$-character evolved rubrics produce none. Counting a closing verdict line too, the
 evolved rubric on seed~2 accepts once, on a correct draft, and the seed rubric accepts
 $14$ times, $2$ of them on correct drafts, so the wider rule makes the seed rubric looser and
-leaves the evolved one close to silent. Given a large budget of prose and a reflector that could finally see
+leaves the evolved one close to silent. A rival reading is that the search deleted the verdict
+protocol, which \citet{zhang2026cdfs} document for prompt optimizers that edit the formatting and
+termination instructions a pipeline parses. The harness rules deletion out: it appends the
+instruction to reply exactly \texttt{PASS} after the gene text, so no evolved gene can remove it. A
+gene can add a competing instruction, and all three of these do, in their own words (return
+``WRONG'', call the verdict ``FIX'', or mark each requirement ``PASS or FAIL''), which is why we
+report the count under both rules. Given a large budget of prose and a reflector that could finally see
 its own verdicts, the optimizer converged on the same degenerate corner the hand-written gene
 slid toward: never accept. This is the strongest form of the C1 finding, the hand-written
 verify-gene ablation of Appendix~\ref{sec:handgene}, because it now holds
@@ -848,20 +866,30 @@ for the \emph{search} and not merely for one author. A critique that never passe
 draft to a refine round, including drafts that were already correct: on seed~2 two compliant
 drafts were rejected. Where almost every first draft is wrong, refining every draft is close to
 the right policy on held-out score as well as on the training signal, and the sweeps find no
-measurable cost (\S\ref{sec:splitresult}). So the search did not trade the true objective for its
+measurable cost (\S\ref{sec:splitresult}). That near-zero cost belongs to what a rejection
+triggers here, a refine round: in a harness search where a sufficiency gate held the answer
+instead, the gate held answers in every development episode and lost ten points
+\citep{parashar2026vestrum}. So the search did not trade the true objective for its
 proxy here. It found a constant policy that neither punishes much at this base rate and that is
 far easier to write in prose than a rubric that discriminates. Whether the same convergence costs
 held-out score where more first drafts are correct, the release does not show. A screen on the
 optimizer's output flags the policy whatever it costs, and \citet{skalse2022reward}, who find
 that unhackable proxies are almost never available, give the general reason to screen the output
-rather than hope for a better training signal; a \texttt{PASS} rate of zero is such a screen. The same
+rather than hope for a better training signal; a \texttt{PASS} rate of zero is such a screen.
+\citet{wahi2026judge} reached the same conclusion from production prompt-optimization loops, where
+a judge prompt stripped of its rubric collapsed to a constant score through a parser fallback and
+won selection, and they gate every change with deterministic checks the judge cannot override. The same
 convergence has been reported independently, with the same optimizer and
 a different degenerate corner: on the tasks where GEPA did change their prompt,
 \citet{pappu2026multiagent} report it converging on \emph{extreme-deference} instructions telling
 non-expert agents to treat the expert's answer as correct by default. Refusing to accept and
 deferring unconditionally are the same move: collapse the component to a constant policy that
 the training signal cannot punish, which suggests the corner belongs to reflective search under a
-weak signal rather than to our task family.
+weak signal rather than to our task family. A third instance, with the same optimizer, puts the
+corner in an answer instead of a verdict: \citet{xu2026harnessrepairv3} report two GEPA-selected
+harnesses that gave one label on almost every parsed answer of a prediction task, were not
+detectably above the strongest constant label, and still showed a large gain over their
+thinking-off baseline.
 
 One step of that account does not survive measurement, and \S\ref{sec:decomp} is where we
 check it. The natural next sentence, that refining an already-correct draft breaks it and
@@ -889,7 +917,9 @@ the loop-level null which does not involve the optimizer at all, and it is evide
 proof: one hand-written point does not establish that no prose adds discrimination, which is what
 made the re-run above worth its price (registered in \S\ref{sec:directions}).
 Appendix~\ref{sec:handgene} reports the experiment, its detector table and the decomposition of
-the $-0.033$.
+the $-0.033$. \citet{fox2026omission} report the same for an LLM judge of clinical notes: wording
+changes, voting and GEPA prompt optimisation moved its operating point without creating usable
+detection.
 
 \paragraph{Intrinsic self-correction has a low ceiling, and optimizing on top of it
 costs.} Consistent with \citet{huang2023cannot}, run~4 shows the loop improving when given an
