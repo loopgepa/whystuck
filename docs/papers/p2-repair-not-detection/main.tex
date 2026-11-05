@@ -205,6 +205,32 @@ feedback refine to near-perfect scores where unguided self-refinement barely mov
 \citep{jiang2025feedbackfriction}. What this paper adds is a controlled magnitude: repair text
 varied while the verdict is held perfect, on one task family.
 
+\paragraph{Contemporaneous results in other domains.}
+Four 2026 results point the same way, and one anticipates the fix-side reading.
+\citet{yang2026asymmetric} vary the model size of each stage of a generate--critique--revise
+pipeline on five benchmarks and find performance highly insensitive to the critic's size, although
+any critic beats none; their larger critic gave more complete feedback that the refiner turned into
+only modestly better revisions, which matches our \emph{mid} level: it names the failed
+constraint and bought nothing measurable on this worker. \citet{iscan2026falsification} decompose a self-repair feedback packet
+for small frozen code models in a preregistered, placebo-controlled design: executed facts added to
+the code beat bare code and a shape-matched placebo, an instruction-only effect was not
+distinguishable, and code plus facts tied blind resampling at a matched generation budget. That
+design is the closest neighbour of our lo/mid/hi ladder and anticipates its reading in code repair;
+its resampling arm is one this paper lacks (\S\ref{sec:threats}). In natural-language-to-regex
+synthesis, \citet{badrinarayan2026counterexamples} find that a deterministic oracle's error-only
+feedback did no better than generic self-correction while concrete counterexample witnesses solved
+most tasks, on one model and thirty tasks. In agent harnesses, \citet{parashar2026vestrum} find that
+verification grounded in evidence helped while critics asked to rebuild finished answers broke more
+than they repaired, and their search record sums up a gate that held every answer as
+``verification rejects, it cannot identify''. Two formal models describe the mechanism.
+\citet{wu2026vrrstop} separate a noisy loop's verifier false acceptance and false rejection from its
+repairer's damage and find stopping reliability governed by verifier discrimination and the decision
+margin, the detector-versus-fixer split measured here, and their measure of discrimination is the
+Youden's $J$ we read in place of F$_1$. \citet{liu2026feedbackcontrol} show that one more refine
+round has zero net benefit exactly when the ratio of error-correction to error-introduction rates
+equals $\mathrm{Acc}/(1-\mathrm{Acc})$; where few drafts are already correct that break-even is low,
+which is the formal version of our reading that at low $p_0$ a gate has little to protect.
+
 \section{Method}
 \label{sec:method}
 
@@ -1149,6 +1175,15 @@ its interval reaches $+0.0199$, and no cell measures a perfect gate where more d
 \textbf{Runs 7--10 vary retries and feedback shape as well as checker quality.} The
 detector-quality column of Table~\ref{tab:curve} is therefore not a single-variable axis across
 all seven rows; \S\ref{sec:fixside} separates the levers, and we print the $R$ column so that no row is read against a row at a different budget by accident.
+
+\textbf{No matched-budget resampling arm and no placebo repair text.} Every refine round here
+rewrites from the critique's text: no cell spends the same generation budget on fresh drafts with
+no feedback, and no cell feeds repair text of matched length that carries no content.
+\citet{iscan2026falsification} found that fact-bearing feedback tied blind resampling at a matched
+budget on small code models, so part of the gain from more refine rounds could come from the extra
+draws, and how the oracle loop compares with a resampling loop is unmeasured. The lo/mid/hi ladder
+holds the round count fixed, so its gaps are not a resampling effect, but \emph{hi} also carries
+more text than \emph{lo}, and no arm separates its content from its length.
 
 \textbf{Between-run comparisons carry provider drift.} The gaps in Table~\ref{tab:curve} compare
 runs recorded on different dates, so they carry the same drift confound as the cross-run $\sigma$

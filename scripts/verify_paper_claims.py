@@ -559,6 +559,7 @@ _WORD_NUM = {
     "thirty-seven": 37,
     "thirty-eight": 38,
     "thirty-nine": 39,
+    "forty": 40,
     "forty-three": 43,
     "forty-five": 45,
     "forty-six": 46,

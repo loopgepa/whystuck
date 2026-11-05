@@ -588,13 +588,16 @@
                and Evaluation Defects},
   author    = {Xu, Bowen and Chen, Boyu},
   year      = {2026},
-  eprint    = {2610.05533},
+  eprint    = {2610.05533v1},
   archivePrefix = {arXiv},
-  url       = {https://arxiv.org/abs/2610.05533},
-  note      = {v1, read 2026-10-25. Abstract: six evaluation defects injected one at a time into a
-               preregistered study with a GEPA search arm; ``In 6 of 15 evaluable defect-model
-               pairs, replication through the same pipeline reproduced the defect's distortion
-               instead of revealing it''}
+  url       = {https://arxiv.org/abs/2610.05533v1},
+  note      = {Pinned to v1, read 2026-10-25 and re-read 2026-11-04. Abstract: six evaluation
+               defects injected one at a time into a preregistered study with a GEPA search arm;
+               ``In 6 of 15 evaluable defect-model pairs, replication through the same pipeline
+               reproduced the defect's distortion instead of revealing it''. v2 (24 Oct 2026) and
+               v3 (30 Oct 2026, retitled ``Three Preregistered Studies Around a Longevity-Tuned
+               Language Model'') report instead that replication reproduced an injected defect's
+               distortion ``in 9 of 20 evaluable cases (7 fixed by design)''}
 }
 
 @misc{leins2026orchestration,
@@ -623,4 +626,215 @@
   note      = {Read at the abstract page (submitted 2026-09-23): 29 open-weight models on BoolQ,
                GSM8K and Corr2Cause; revisions overturn correct answers as well as fixing wrong
                ones; keep, always-accept and learned-gate policies each win somewhere.}
+}
+
+% Round-9 related-work additions (2026-11-04). Every entry below was read at its arXiv abstract
+% page and, where the note quotes a section, in the PDF of the version named.
+@misc{yang2026asymmetric,
+  title     = {Asymmetric Capacity Allocation in Self-Refinement Pipelines},
+  author    = {Yang, Zhuoyi and Harris, Ian G. and Hashemitaheri, Salar and Huang, Cassie and
+               Li, Yuangang and Oh, Hyunwoo and Dourish, Paul and Givargis, Tony and Imani, Mohsen
+               and Zhang, Li},
+  year      = {2026},
+  eprint    = {2608.21345},
+  archivePrefix = {arXiv},
+  url       = {https://arxiv.org/abs/2608.21345},
+  note      = {v1, read 2026-11-04. Abstract: ``performance is highly insensitive to the size of the
+               critic, although including even a small critic consistently outperforms omitting
+               critique altogether''. Section 5: the larger critic ``often provides more complete
+               feedback'', yet ``the refiner does not always translate the additional critique
+               information into better revisions''}
+}
+
+@misc{iscan2026falsification,
+  title     = {Falsification, Not Exposure: An Internally Preregistered Placebo-Controlled
+               Decomposition of Self-Repair Feedback in Frozen Small Code Models},
+  author    = {Iscan, Mehmet},
+  year      = {2026},
+  eprint    = {2606.31511},
+  archivePrefix = {arXiv},
+  url       = {https://arxiv.org/abs/2606.31511},
+  note      = {v1, read 2026-11-04. Abstract: the feedback packet is decomposed ``against a
+               blind-resampling baseline at matched output-generation budget and against
+               content-free, shape-matched placebos''; code-plus-facts beat bare code and a
+               generic-bullet placebo, an instruction-only effect ``was not distinguishable'', and
+               ``Code-plus-facts and blind resampling tied at 26 unlocks each (not equivalence)''}
+}
+
+@misc{wu2026vrrstop,
+  title     = {Verify, Repair, Repeat, or Stop? Robust Stopping for Noisy Verify-Repair Loops in
+               {LLM} Agents},
+  author    = {Wu, Yitao and Shen, Si and Yang, Rui and Peng, Hong and Hu, Bin},
+  year      = {2026},
+  eprint    = {2607.17641},
+  archivePrefix = {arXiv},
+  url       = {https://arxiv.org/abs/2607.17641},
+  note      = {v1, read 2026-11-04. Abstract: ``A four-parameter noise model separates verifier
+               false acceptance and false rejection from the repair and damage behavior of the
+               repairer'', and ``stopping reliability is governed jointly by verifier
+               discrimination and the decision margin''; the body measures discrimination as
+               Youden's $J$}
+}
+
+@misc{badrinarayan2026counterexamples,
+  title     = {Counterexamples as Feedback for Agent Self-Correction},
+  author    = {Badrinarayan, Sidhesh and Parthasarathy, Adithya},
+  year      = {2026},
+  eprint    = {2609.02892},
+  archivePrefix = {arXiv},
+  url       = {https://arxiv.org/abs/2609.02892},
+  note      = {v1, read 2026-11-04 (abstract page dated 1 Jul 2026 although the identifier reads
+               September). Abstract: on 30 NL-RX-Turk tasks, diagnostic counterexample feedback
+               solves 90\% within four turns, against 17\% zero-shot, 27\% for generic
+               self-correction and 23\% for error-only feedback from the deterministic oracle}
+}
+
+@misc{parashar2026vestrum,
+  title     = {Vestrum: Improving Agent Harnesses by Adapting Their Verification, Structure and
+               Memory},
+  author    = {Parashar, Jayant and Douglass, Eugene F. and Bastian, William C. and Bhandarkar,
+               Suchendra M.},
+  year      = {2026},
+  eprint    = {2609.33822},
+  archivePrefix = {arXiv},
+  url       = {https://arxiv.org/abs/2609.33822},
+  note      = {v1, read 2026-11-04. Abstract: ``verification grounded in evidence helped both
+               intermediate steps and final answers ... while critics asked to rebuild finished
+               answers broke more than they repaired''. Appendix N quotes the search record's
+               summary of a gate that held every answer: ``verification rejects, it cannot
+               identify''}
+}
+
+@misc{liu2026feedbackcontrol,
+  title     = {Self-Correction as Feedback Control: Error Dynamics, Stability Thresholds, and Prompt
+               Interventions in {LLMs}},
+  author    = {Liu, Aofan and Meng, Jingxiang},
+  year      = {2026},
+  eprint    = {2604.22273},
+  archivePrefix = {arXiv},
+  url       = {https://arxiv.org/abs/2604.22273},
+  note      = {Read 2026-11-04 (v2 of 4 May 2026). A two-state Markov model of refinement with
+               error-introduction and error-correction rates; Theorem 1: the net benefit of one more
+               round is zero if and only if ECR/EIR = Acc/(1 - Acc), so ``iterate only when ECR/EIR
+               > Acc/(1-Acc)'' (abstract)}
+}
+
+@misc{wahi2026judge,
+  title     = {{LLM}-as-a-Judge Is Not an Oracle: Why Self-Improving Agents Need Deterministic
+               Guardrails},
+  author    = {Wahi, Vansh},
+  year      = {2026},
+  eprint    = {2609.02246},
+  archivePrefix = {arXiv},
+  url       = {https://arxiv.org/abs/2609.02246},
+  note      = {v1, read 2026-11-04. Eleven field-observed failures of the evaluation signal in
+               production prompt-optimization loops. Section 3.2, B1: a mutated judge prompt lost its
+               rubric, the parser ``silently substituted a default score of 3 for every dimension'',
+               and ``the automated selection gate promoted the gutted prompt as the winning
+               candidate''. Abstract: ``canary cases engineered so that a perfect score is itself
+               evidence of cheating''}
+}
+
+@misc{li2026teb,
+  title     = {Trace Evolution Bench: Measuring Whether Agents Improve from Their Own Environment
+               Traces},
+  author    = {Li, Fangfei and Zhao, Chenyang and Wang, Long and Tian, Feng and Guo, Lv},
+  year      = {2026},
+  eprint    = {2610.15055},
+  archivePrefix = {arXiv},
+  url       = {https://arxiv.org/abs/2610.15055},
+  note      = {v1, read 2026-11-04. Abstract: endpoint Gain ``can credit a frozen rescore as
+               evolution''. Section 3: ``A version label M0, M1, ... names the accepted artifact, and
+               no evolve keeps version M0 while the score still moves''}
+}
+
+@misc{zhang2026cdfs,
+  title     = {Control-Data Flow Separation: Stable Prompt Optimization in Multi-Agent {LLMs}},
+  author    = {Zhang, Wentao and Murtaza, Syed Shariyar and Bhatti, Junaid Ahmad and Soni, Utkarsh
+               and Nie, Yifan and Wen, Eugene and Deng, Yuntian},
+  year      = {2026},
+  eprint    = {2609.00621},
+  archivePrefix = {arXiv},
+  url       = {https://arxiv.org/abs/2609.00621},
+  note      = {v1, read 2026-11-04. Abstract: ``a prompt edit intended to improve content generation
+               can inadvertently corrupt the protocol'' (routing, output formatting, termination
+               signals) ``and cause the entire agent pipeline to fail''}
+}
+
+@misc{melcer2025textualgradients,
+  title     = {Textual Gradients are a Flawed Metaphor for Automatic Prompt Optimization},
+  author    = {Melcer, Daniel and Chen, Qi and Chiang, Wen-Hao and Garg, Shweta and Garg, Pranav
+               and Bock, Christian},
+  year      = {2025},
+  eprint    = {2512.13598},
+  archivePrefix = {arXiv},
+  url       = {https://arxiv.org/abs/2512.13598},
+  note      = {v1, read 2026-11-04. Section 4: ``We do not find any significant decrease in accuracy
+               when training using incorrect evaluation labels''}
+}
+
+@misc{zhou2026reflector,
+  title     = {What Should the Reflector See? {A}n Empirical Study of Evidence in Reflective Prompt
+               Optimization},
+  author    = {Zhou, Xiaofan and Cheng, Lu},
+  year      = {2026},
+  eprint    = {2609.32452},
+  archivePrefix = {arXiv},
+  url       = {https://arxiv.org/abs/2609.32452},
+  note      = {v1, read 2026-11-04. Section 2: ``Reflective optimizers such as GEPA and TextGrad
+               revise each module from evidence gathered on that module''; the study itself is
+               single-prompt}
+}
+
+@misc{yuan2026forge,
+  title     = {Failure-Guided Co-Evolution of Prompts and Training Data},
+  author    = {Yuan, Tianyu and Qian, Zhuzhong},
+  year      = {2026},
+  eprint    = {2609.15209},
+  archivePrefix = {arXiv},
+  url       = {https://arxiv.org/abs/2609.15209},
+  note      = {v1, read 2026-11-04. Appendix A.5: ``Under the default round-robin policy, step t
+               selects one program module, and the reflector receives that module's current system
+               prompt'' with ``the trace entries belonging to that module''; ``If this block is
+               absent or empty, the module retains its original prompt''}
+}
+
+@misc{so2026maskederosion,
+  title     = {Masked Erosion: How Acceptance Gates Lose Redundant Safeguards in Self-Improving
+               Agents},
+  author    = {So, Hau-Sing and Liu, Daixian and Long, Weicai},
+  year      = {2026},
+  eprint    = {2610.38392},
+  archivePrefix = {arXiv},
+  url       = {https://arxiv.org/abs/2610.38392},
+  note      = {v1, read 2026-11-04. Appendix H: GEPA 0.1.4 with a round-robin module selector over
+               four plain-text harness components; ``Proposals cycled evenly over the four
+               components (44, 49, 45 and 43)''; ``All three finals kept the credential rules
+               verbatim''}
+}
+
+@misc{lumer2026deepresearch,
+  title     = {Reflective Prompt Optimization of a Deep-Research Agent: A Topic-Disjoint,
+               Multi-Seed Protocol for Measuring Transferable Gains and Prompt-Level Overfitting},
+  author    = {Lumer, Elias and Sen, Sahil and Subbiah, Vamse Kumar and Paul, Kevin},
+  year      = {2026},
+  eprint    = {2610.12601},
+  archivePrefix = {arXiv},
+  url       = {https://arxiv.org/abs/2610.12601},
+  note      = {v1, read 2026-11-04. GEPA over the two system prompts of a deep-research agent.
+               Table 3 caption: ``Each candidate mutates exactly one component of its parent'';
+               the abstract releases the ``lineage diffs''}
+}
+
+@misc{han2026requirements,
+  title     = {Do Prompt Optimizers Break Requirements They Are Not Scored On? {A} Preregistered
+               Study},
+  author    = {Han, Sangdo and Kim, Moonsoo},
+  year      = {2026},
+  eprint    = {2610.13287},
+  archivePrefix = {arXiv},
+  url       = {https://arxiv.org/abs/2610.13287},
+  note      = {v1, read 2026-11-04. Abstract: GEPA, MIPROv2 and TextGrad prompts ``elicit reasoning
+               before the required JSON object, and under the 200-token output cap used
+               throughout, 13.9\% to 47.0\% of responses end before any answer appears''}
 }

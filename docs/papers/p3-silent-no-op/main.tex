@@ -117,7 +117,8 @@ consistency as evidence of a tight null. It was evidence of the opposite. Our co
     variance estimator screened every dimension of its regime except which model produced the
     draws.
   \item \textbf{A reporting minimum} (\S\ref{sec:fix}): per component, whether the optimizer's
-    output differs from the seed. One integer. Plus a presentation rule for the comparison itself:
+    output differs from the seed. One integer, the per-component form of a run-level check that
+    \citet{li2026teb} already require. Plus a presentation rule for the comparison itself:
     label a difference between two optimized arms with how many seeds \emph{each} arm accepted
     on, which catches the mirror-image defect where the \emph{comparator} is the starved arm.
     A later pre-registered run, the cross-provider critic run of \S\ref{sec:fix}, shows that flagging the zero case is not enough and the contrast
@@ -160,13 +161,19 @@ taken to its limit. Others report the seed returned whole and say so:
 artifacts sharing a hash, and call it an exact no-intervention outcome; \citet{singh2026mage} marks
 the baselines that returned the seed prompt unchanged on every seed; and with a five-iteration
 search on a ten-problem subsample, \citet{pappu2026multiagent} report that ``on GPQA Diamond and
-MATH-500, GEPA returned the original prompt essentially unchanged.'' None of these reports a
+MATH-500, GEPA returned the original prompt essentially unchanged.'' Two GEPA studies publish
+the per-component record outright: \citet{so2026maskederosion} cycle a round-robin selector over
+four text components of an agent harness and report that all three final harnesses kept the
+credential rules verbatim, and \citet{lumer2026deepresearch} release a lineage in which each
+candidate mutates exactly one of two system prompts. None of these reports a
 wiring fault, and an unchanged component is also what a working search returns when it finds nothing
 worth keeping, which is why the per-component integer has to be read beside the search's own
 record. \citet{xu2026harnessrepair} come closest to this paper's method: they inject known
-evaluation defects one at a time into a pre-registered harness study and find that replication
-through the same pipeline reproduced the defect's distortion in six of fifteen evaluable pairs
-instead of exposing it. OPRO \citep{yang2023opro} and EvoPrompt \citep{guo2024evoprompt} likewise use an
+evaluation defects one at a time into a pre-registered harness study, and in the first version of
+their preprint replication through the same pipeline reproduced the defect's distortion in six of
+fifteen evaluable pairs instead of exposing it. Its later versions, under the same arXiv
+identifier, add a second study and count nine of twenty evaluable cases, seven of them fixed by an
+identity of the design, so in most of those cases replication could not have exposed the defect. OPRO \citep{yang2023opro} and EvoPrompt \citep{guo2024evoprompt} likewise use an
 LLM as the optimizer, and OPRO's authors quantify the over-fitting risk directly: their
 ``training accuracies are often 5\%--20\% higher than our test accuracies''.
 
@@ -186,6 +193,13 @@ failure is a loss of \emph{specificity} where ours is a loss of \emph{relevance}
 Table~\ref{tab:defects}, where the reflector read the generator's records while editing the
 critique. Both carry the same lesson for a reflective optimizer: what it reads has to be evidence
 about the component it is editing, and no score reveals when it is not.
+\citet{zhou2026reflector} state the same contract, that reflective optimizers such as GEPA revise
+each module from evidence gathered on that module, and study it on a single prompt;
+\citet{yuan2026forge} spell out the per-module bundle under the round-robin default and add that a
+module whose block is absent or empty keeps its original prompt, a silent-retention path of the
+kind \S\ref{sec:defect} traces. And \citet{melcer2025textualgradients} found no significant drop in
+accuracy when a textual-gradient optimizer trained on deliberately incorrect evaluation labels, so
+there too a held-out score did not reveal that the optimizer read wrong evidence.
 
 \paragraph{Loop engineering, and why this is a hazard for the practice.}
 During June 2026 industry practice converged on a name for designing the machinery
@@ -221,6 +235,16 @@ paper's experience adds a specific argument for it: two of our withdrawn claims 
 wrong but were \emph{restatements of the defect}, ``the null is tight rather than merely
 underpowered'' rested on four intervals of exactly $[0,0]$, which is the sharpest available evidence
 that an experiment did not run.
+
+Two contemporaneous papers come close to this paper's rules. \citet{wahi2026judge} catalogue eleven
+ways the evaluation signal failed in production prompt-optimization loops, the nearest published
+relative of Table~\ref{tab:defects}. One of them has the signature of our defect~8, a defect that
+raised the training score: a judge prompt stripped of its rubric won selection because a silent
+parser fallback improved the metric. Their canary cases, engineered so that a perfect score is
+itself evidence of cheating, are the mirror image of our positive control. Trace Evolution Bench
+\citep{li2026teb} requires a frozen no-evolve arm beside every reported gain and a version label on
+every accepted artifact, so an arm that keeps its first version while the score moves is visible.
+That is the run-level form of our reporting minimum, which asks the same question per component.
 
 \section{The Study, and What It Was Measuring}
 \label{sec:method}
@@ -383,6 +407,9 @@ The completions are not empty, so the blank-completion guard passes them; the cr
 and not a gene, so the per-component integer never looks at it; and the screen we recommend for a
 degenerate verifier, a \texttt{PASS} rate of zero, fires on it with the wrong diagnosis. The cell
 measured a refine step fed a truncated reasoning trace, and it printed a plausible held-out score.
+\citet{han2026requirements} report the same artifact in a preregistered study of GEPA, MIPROv2 and
+TextGrad: the optimized prompts elicited reasoning before the required answer, and under their
+output cap a share of responses ended before any answer appeared.
 
 \begin{table}[h]
 \centering
@@ -902,7 +929,10 @@ assumes the harness's parse, which counts a critique as a pass only if it begins
 \texttt{PASS}, as the critique prompt asks. A critique that reasons first and ends on
 \texttt{PASS} counts as a refusal, so under a parse that also accepts a verdict on the final line
 fewer of that paper's evolved verifiers read as never accepting; a zero describes the gene and the
-parse together, and has to be reported with the parse. It also fires on a critic that returned no
+parse together, and has to be reported with the parse. \citet{zhang2026cdfs} show the rival reading
+in general: a prompt optimizer's edits can corrupt the formatting and termination instructions a
+pipeline parses. Our harness appends the verdict instruction after the gene text, so an evolved
+gene cannot delete it, but it can add a competing one. The screen also fires on a critic that returned no
 verdict at all (defect~12), so a zero starts an inspection, as the integer's does. Worse, the integer reports
 the \emph{reassuring} answer on defect~8: an empty completion accepted as a gene \emph{does}
 differ from the seed, so the count says ``changed'' on the run where the change deleted
@@ -995,7 +1025,7 @@ This work's earlier drafts published claims it now withdraws. Reporting guidance
 work asks that deviations be disclosed in
 one systematic place rather than left for a reader to reconstruct by comparing documents
 \citep{willroth2024bestlaid}, so every such change affecting \emph{this} paper's claims is
-collected here and the body text states only the surviving claim. \textbf{Thirty-nine} entries follow.
+collected here and the body text states only the surviving claim. \textbf{Forty} entries follow.
 Substantive withdrawals give the claim as
 published and what replaces it; arithmetic corrections are grouped by cause, because the useful
 information is the mechanism that produced a class of wrong digits rather than each digit, and the
@@ -1328,6 +1358,14 @@ The series' other two papers carry the entries bearing on their own claims.
     so; both now name it. The same round added defect~12, a critic whose completions were cut off
     before any verdict, so the table has twelve rows and the audit's increment is nine. The cell
     belongs to the companion ceiling paper, and its reading of the cell is that paper's to correct.
+  \item \textbf{Two novelty sentences a later literature check qualified.} The related work cited
+    Xu and Chen's harness-repair preprint for replication reproducing an injected defect's distortion in six
+    of fifteen evaluable pairs, with no version on the preprint. That figure is in its first
+    version only; the later versions count nine of twenty evaluable cases, seven of them fixed by
+    the design. The citation is now pinned to the first version and the sentence gives both
+    figures. Contribution~4 offered the reporting minimum with no precedent; Trace Evolution Bench
+    already requires its run-level form, and contribution~4 and the related work
+    now say so.
 \end{enumerate}
 
 \end{document}
