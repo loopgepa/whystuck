@@ -25,7 +25,7 @@ missing eval venv fails with a "broken environment" error rather than a wrong nu
 
 ```bash
 # 1. every machine-checkable number in all three papers, against the released artifacts
-.venv/bin/python scripts/verify_paper_claims.py            # 1456 checks, offline, $0, about a minute
+.venv/bin/python scripts/verify_paper_claims.py            # 1685 checks, offline, $0, about a minute
 
 # 2. the three-way split lost no quantity
 .venv/bin/python scripts/verify_split_coverage.py          # 318 pre-split quantities accounted for, $0
@@ -155,7 +155,7 @@ to stop computing depth and measure it.
 
 | script | asserts |
 |---|---|
-| `verify_paper_claims.py` | 1456 checks: every machine-checkable number in the three papers against the artifacts, plus per-paper spine numbers, cross-paper agreement, and each paper's corrections count |
+| `verify_paper_claims.py` | 1685 checks: every machine-checkable number in the three papers against the artifacts, plus per-paper spine numbers, cross-paper agreement, and each paper's corrections count |
 | `verify_split_coverage.py` | all 318 quantities in the pre-split draft are carried by some paper, superseded by a verified replacement, or explicitly dropped with a reason |
 | `verify_reproducibility.py` | every corrected-harness run replays bit-for-bit; superseded runs are **skipped and reported**, never silently "verified" |
 | `verify_stdio.py` | the MCP console script speaks stdio (product, not paper) |

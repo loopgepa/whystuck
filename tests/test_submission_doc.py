@@ -74,8 +74,8 @@ def test_paper_one_is_still_the_most_dependent_which_is_why_it_ships_first() -> 
 
 
 def test_the_advertised_tmlr_page_counts_are_the_ones_the_build_produces() -> None:
-    """41/30/24 are printed in the document; a restyle that moved them must move the text."""
+    """45/31/26 are printed in the document (re-measured 2026-11-04); a restyle must move them."""
     doc = DOC.read_text(encoding="utf-8")
-    assert re.search(r"\|\s*I\s*\|\s*49\s*\|\s*\*\*41\*\*", doc), "Paper I's TMLR row is missing"
-    assert re.search(r"\|\s*II\s*\|\s*35\s*\|\s*\*\*30\*\*", doc), "Paper II's TMLR row is missing"
-    assert re.search(r"\|\s*III\s*\|\s*28\s*\|\s*\*\*24\*\*", doc), "Paper III's TMLR row missing"
+    assert re.search(r"\|\s*I\s*\|\s*54\s*\|\s*\*\*45\*\*", doc), "Paper I's TMLR row is missing"
+    assert re.search(r"\|\s*II\s*\|\s*37\s*\|\s*\*\*31\*\*", doc), "Paper II's TMLR row is missing"
+    assert re.search(r"\|\s*III\s*\|\s*32\s*\|\s*\*\*26\*\*", doc), "Paper III's TMLR row missing"

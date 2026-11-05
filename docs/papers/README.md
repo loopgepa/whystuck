@@ -5,9 +5,9 @@ questions, rest on different experiments, and are useful to different readers.
 
 | | paper | asks | uses the optimizer? | pages |
 |---|---|---|---|---|
-| **I** | [`p1-conditional-lever/`](p1-conditional-lever/), *Evolving a Self-Refine Verifier: It Stops Accepting at a Low Base Rate, and Whether That Pays Remains Open* | Does evolving a self-refine loop's verifier beat evolving its generation prompt? | yes, it is the subject | 49 |
-| **II** | [`p2-repair-not-detection/`](p2-repair-not-detection/), *What a Checker Cannot Buy Is the Repair* | Where is the loop's own ceiling: detection or repair? | **no**, every measurement is arm A, which declares no evolvable genes | 35 |
-| **III** | [`p3-silent-no-op/`](p3-silent-no-op/), *A Loop Optimizer That Was Not Optimizing Its Loop* | How can a componentized treatment silently not apply, and what flags it? | yes, as the thing that failed | 28 |
+| **I** | [`p1-conditional-lever/`](p1-conditional-lever/), *Evolving a Self-Refine Verifier: It Stops Accepting at a Low Base Rate, and Whether That Pays Remains Open* | Does evolving a self-refine loop's verifier beat evolving its generation prompt? | yes, it is the subject | 54 |
+| **II** | [`p2-repair-not-detection/`](p2-repair-not-detection/), *What a Checker Cannot Buy Is the Repair* | Where is the loop's own ceiling: detection or repair? | **no**, every measurement is arm A, which declares no evolvable genes | 37 |
+| **III** | [`p3-silent-no-op/`](p3-silent-no-op/), *A Loop Optimizer That Was Not Optimizing Its Loop* | How can a componentized treatment silently not apply, and what flags it? | yes, as the thing that failed | 32 |
 
 ## Which paper answers your question
 
@@ -80,7 +80,7 @@ does not, something regressed.
 ## Verifying
 
 ```bash
-.venv/bin/python scripts/verify_paper_claims.py     # 1456 checks against the released artifacts, $0
+.venv/bin/python scripts/verify_paper_claims.py     # 1685 checks against the released artifacts, $0
 .venv/bin/python scripts/verify_split_coverage.py   # the split lost no quantity, $0
 .venv/bin/python -m pytest tests/test_split_coverage.py tests/test_paper_prose_coverage.py \
     tests/test_paper_table_coverage.py tests/test_paper_sigma_coverage.py tests/test_figures.py
